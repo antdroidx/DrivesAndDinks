@@ -1,4 +1,4 @@
-import {CHARACTERS,PADDLES,JERSEYS,PADDLE_DESIGNS,normalizeSelection,selectionStats,createLineup} from './roster.js?v=15';
+import {CHARACTERS,PADDLES,JERSEYS,PADDLE_DESIGNS,normalizeSelection,selectionStats,createLineup} from './roster.js?v=17';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 
