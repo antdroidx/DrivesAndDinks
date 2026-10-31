@@ -27,3 +27,65 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
   .game{width:100%;margin:auto}
   footer{padding-bottom:max(0px,env(safe-area-inset-bottom))}
 }
+
+/* Touch layout: shot buttons sit in the green court aprons inside the playfield. */
+@media (pointer:coarse){
+  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{height:100dvh}
+  main{
+    width:100%;max-width:none;height:100vh;height:100dvh;margin:0 auto;
+    padding:max(4px,env(safe-area-inset-top)) 4px max(4px,env(safe-area-inset-bottom));
+    display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);
+    gap:4px;overflow:hidden
+  }
+  header{grid-column:1;grid-row:1;min-width:0;gap:4px 8px}
+  header small{display:none}
+  header h1{font-size:clamp(15px,2.4vw,26px);margin:0;letter-spacing:1px;text-shadow:2px 2px #b45538}
+  .header-actions{gap:4px;justify-content:flex-end;min-width:0}
+  .header-actions button{min-height:34px;padding:6px 8px;font-size:clamp(8px,1.1vw,11px);white-space:nowrap}
+  .playfield{
+    grid-column:1;grid-row:2;position:relative;justify-self:center;align-self:center;
+    min-width:0;min-height:0;max-width:100%;display:grid
+  }
+  .game{width:100%;height:100%;border-width:3px;box-shadow:0 3px #81553c;overflow:hidden}
+  .game canvas{width:100%;height:100%}
+  .controls{position:absolute;inset:0;z-index:4;display:block;padding:0;margin:0;pointer-events:none;min-width:0}
+  .controls>div:first-child{display:contents}
+  .controls>.tip,.controls strong,footer{display:none}
+  #shots{
+    width:100%;height:100%;max-width:none;display:grid;
+    grid-template-columns:28% 44% 28%;grid-template-rows:auto repeat(3,auto);
+    gap:clamp(4px,1dvh,8px) 6px;align-content:center;pointer-events:none
+  }
+  #shots::before,#shots::after{
+    color:#b7d3c7;font-size:clamp(7px,1.1vw,10px);letter-spacing:1px;line-height:1;
+    text-align:center;align-self:end;text-shadow:1px 1px #102822
+  }
+  #shots::before{content:'PLACEMENT';grid-column:1;grid-row:1}
+  #shots::after{content:'ATTACK';grid-column:3;grid-row:2}
+  #shots button{
+    pointer-events:auto;width:min(82%,128px);height:clamp(44px,7dvh,58px);min-height:0;
+    align-self:center;justify-self:center;padding:4px;font-size:clamp(9px,1.25vw,12px);
+    line-height:1.05;overflow:hidden
+  }
+  #shots [data-shot="drop"]{grid-column:1;grid-row:2}
+  #shots [data-shot="dink"]{grid-column:1;grid-row:3}
+  #shots [data-shot="lob"]{grid-column:1;grid-row:4}
+  #shots [data-shot="drive"]{grid-column:3;grid-row:3}
+  #shots [data-shot="slice"]{grid-column:3;grid-row:4}
+  #overlay{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;display:block;background:none}
+}
+@media (pointer:coarse) and (orientation:landscape){
+  .playfield{height:100%;width:auto;aspect-ratio:8/5;max-width:100%}
+}
+@media (pointer:coarse) and (orientation:portrait){
+  .playfield{width:100%;height:auto;aspect-ratio:8/5;max-height:100%}
+}
+@media (pointer:coarse) and (max-width:600px){
+  header{flex-wrap:wrap;align-items:flex-start;gap:4px}
+  header h1{font-size:18px}
+  .header-actions{width:100%;margin-left:0;justify-content:flex-end}
+  .header-actions button{min-height:34px;padding:6px;font-size:8px}
+  #shots{grid-template-columns:29% 42% 29%;gap:4px}
+  #shots button{width:88%;height:44px;font-size:9px}
+}
