@@ -58,7 +58,7 @@ test('low contact quality weakens the trajectory and marks a mishit',()=>{const 
 
 test('easy difficulty queues swings for longer than normal without changing the rules',()=>{
  const bufferFor=(difficulty)=>{const g=new Game();g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=0;Object.assign(g.ball,{x:19,y:5,z:5,vx:0,vy:0,vz:0});g.swing();return g.hitBuffer};
- assert.equal(bufferFor('normal'),.32);assert.equal(bufferFor('easy'),.55)
+ assert.equal(bufferFor('normal'),.32);assert.equal(bufferFor('easy'),.7)
  const g=new Game();g.setDifficulty('easy');g.reset();assert.equal(g.difficulty,'easy')
 });
 
@@ -67,4 +67,9 @@ test('easy difficulty is more forgiving at the edge of the hit window',()=>{
  const normal=contactQuality(p,ball,'drive',false,.35,'normal');
  const easy=contactQuality(p,ball,'drive',false,.35,'easy');
  assert.equal(normal.mishit,true);assert.equal(easy.mishit,false);assert.ok(easy.quality>normal.quality)
+});
+test('easy difficulty accepts a slightly late swing while normal does not',()=>{
+ const setup=(difficulty)=>{const g=new Game();g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:38.8,z:1,vx:0,vy:-3,vz:0});g.clock=.2;g.lastHumanContactAt=0;g.swing();return g};
+ const normal=setup('normal');assert.equal(normal.last,1);assert.equal(normal.hitBuffer,.32)
+ const easy=setup('easy');assert.equal(easy.last,0);assert.equal(easy.hitBuffer,0);assert.ok(easy.events.some(event=>event.type==='hit'))
 });
