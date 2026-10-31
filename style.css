@@ -31,8 +31,13 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
 
 /* Touch layout: shot buttons sit in the green court aprons inside the playfield. */
 @media (pointer:coarse){
-  html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-  body{height:100dvh}
+  html{height:100%;overflow:hidden;overscroll-behavior:none}
+  body{
+    position:fixed;inset:0;width:100%;height:100%;height:100dvh;overflow:hidden;
+    overscroll-behavior:none;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none
+  }
+  main,button,.game,.playfield,.controls{ touch-action:none }
+  dialog{touch-action:pan-y}
   main{
     width:100%;max-width:none;height:100vh;height:100dvh;margin:0 auto;
     padding:max(4px,env(safe-area-inset-top)) 4px max(4px,env(safe-area-inset-bottom));
@@ -44,6 +49,7 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
   header h1{font-size:clamp(15px,2.4vw,26px);margin:0;letter-spacing:1px;text-shadow:2px 2px #b45538}
   .header-actions{gap:4px;justify-content:flex-end;min-width:0}
   .header-actions button{min-height:34px;padding:6px 8px;font-size:clamp(8px,1.1vw,11px);white-space:nowrap}
+  #pause-button{background:#274b55}
   .build-label{font-size:clamp(7px,.9vw,9px);padding:1px 4px}
   .playfield{
     grid-column:1;grid-row:2;position:relative;justify-self:center;align-self:center;
