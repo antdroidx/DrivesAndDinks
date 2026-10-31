@@ -51,7 +51,7 @@ function tintPixel(d,i,target,baseTotal){
 function equipmentFrame(p,row,col){
  const appearance=p.appearance,key=[atlasKey(p),row,col,appearance.hair,appearance.skin,appearance.shirtColor,appearance.bottomColor,appearance.paddleColor].join(':');if(frameCache.has(key))return frameCache.get(key);
  const sheet=atlases[atlasKey(p)];if(!sheet)return null;
- const cellW=sheet.naturalWidth/8,cellH=sheet.naturalHeight/8,c=document.createElement('canvas');c.width=160;c.height=160;
+ const cellW=sheet.naturalWidth/8,cellH=sheet.naturalHeight/8,c=document.createElement('canvas');c.width=96;c.height=96;
  const insetX=cellW*.015,insetTop=cellH*.005,insetBottom=cellH*.012;
  const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(sheet,col*cellW+insetX,row*cellH+insetTop,cellW-insetX*2,cellH-insetTop-insetBottom,0,0,c.width,c.height);
  const image=x.getImageData(0,0,c.width,c.height),d=image.data;
@@ -81,7 +81,7 @@ function equipmentFrame(p,row,col){
   for(const index of pixels){const r=d[index*4],g=d[index*4+1],b=d[index*4+2];if(Math.max(r,g,b)-Math.min(r,g,b)>45)saturated++}
   components.push({pixels,minY:Math.min(...pixels.map(index=>Math.floor(index/width))),maxY:Math.max(...pixels.map(index=>Math.floor(index/width))),saturated:pixels.length?saturated/pixels.length:0});
  }
- const largest=Math.max(0,...components.map(component=>component.pixels.length)),minimum=Math.max(30,largest*.028);
+ const largest=Math.max(0,...components.map(component=>component.pixels.length)),minimum=Math.max(18,largest*.028);
  for(const component of components){
   const topBleed=component.maxY<height*.34&&component.pixels.length<largest*.35&&component.saturated<.22;
   const stray=component.pixels.length<minimum||topBleed;
@@ -92,18 +92,18 @@ function equipmentFrame(p,row,col){
 function drawLoadoutPreview(selection){
  const c=document.querySelector('#player-preview');if(!c)return;const x=c.getContext('2d'),profile={appearance:{body:CHARACTERS.find(character=>character.id===selection.character).gender,outfit:selection.outfit,hair:selection.hair,skin:selection.skin,shirtColor:selection.shirtColor,bottomColor:selection.bottomColor,paddleColor:selection.paddleColor}};
  x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);x.fillStyle='#355e60';x.fillRect(0,160,c.width,40);x.fillStyle='#eff3cf66';x.fillRect(0,175,c.width,2);
- const frame=equipmentFrame(profile,0,0);if(frame){x.imageSmoothingEnabled=true;x.drawImage(frame,10,5,160,170)}
+ const frame=equipmentFrame(profile,0,0);if(frame){x.imageSmoothingEnabled=false;x.drawImage(frame,10,5,160,170)}
 }
 function drawSprite(p,q){
  const scale=.8+p.y/100,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const back=p.team===0,swinging=(p.windup>0||p.swing>0);
- const progress=p.swing/(p.swingDuration||.36);const gait=Math.floor((p.stride||0)/1.1),strokeAnimation=swinging?sampleStrokeAnimation(p,1-progress):null,kind=strokeAnimation?.kind;
+ const progress=p.swing/(p.swingDuration||.36),contactFrame=p.id===game.lastHitter&&game.contact?.time>0;const gait=Math.floor((p.stride||0)/1.1),strokeAnimation=swinging?sampleStrokeAnimation(p,contactFrame?.52:1-progress):null,kind=strokeAnimation?.kind;
  const strokeRow=kind==='backhand'?(back?3:2):kind==='overhead'?(back?5:4):(back?1:0),row=swinging?strokeRow:(back?7:6),col=swinging?strokeAnimation.frameColumn:(moving?gait%8:0);
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.scale(scale,scale);
  ctx.fillStyle='#101f1a80';ctx.beginPath();ctx.ellipse(0,0,18,6,0,0,Math.PI*2);ctx.fill();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke()}
  if(p.swing>0&&progress>.7&&p.contactPoint){const point=project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z);ctx.translate(Math.max(-7,Math.min(7,(point.x-q.x)/scale-(p.swingSide||1)*23)),Math.max(-6,Math.min(6,(point.y-q.y)/scale+35)))}if(strokeAnimation){ctx.translate(0,strokeAnimation.offsetY);ctx.rotate(strokeAnimation.rotation);ctx.scale(1,strokeAnimation.scaleY);if(strokeAnimation.mirror)ctx.scale(-1,1)}ctx.imageSmoothingEnabled=false;
- const frame=equipmentFrame(p,row,col);ctx.imageSmoothingEnabled=true;if(frame)ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
+ const frame=equipmentFrame(p,row,col);ctx.imageSmoothingEnabled=false;if(frame)ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
 }
 function drawSupportHand(animation){
  const x=animation.supportHandX,y=animation.supportHandY;
