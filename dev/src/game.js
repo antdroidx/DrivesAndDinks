@@ -1,12 +1,12 @@
-import {planIncoming,formationTarget,separatePartners} from './tactics.js?v=18';
-import {createLineup} from './roster.js?v=18';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,contactAvailable,contactQuality,selectShot,aimStep,serveTarget} from './core.js?v=18';
+import {planIncoming,formationTarget,separatePartners} from './tactics.js?v=19';
+import {createLineup} from './roster.js?v=19';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,contactAvailable,contactQuality,selectShot,aimStep,serveTarget} from './core.js?v=19';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection){this.lineup=createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=difficulty==='easy'?'easy':'normal';return this.difficulty}
  timingWindow(){return this.difficulty==='easy'?{early:.7,late:.3}:{early:.32,late:0}}
  paddleFor(player){const paddle=player.paddle??{},abilities=player.abilities??{};return {...paddle,power:(paddle.power??1)*(abilities.power??1),spin:(paddle.spin??1)*(abilities.spin??1)}}
- reset(){this.teamPlan=null;this.tacticalStats={poachAttempts:0,poachHits:0,coverSwaps:0,offBallDistance:0,mishitHits:0};this.events=[];this.trail=[];this.clock=0;this.score=new Score();this.players=[0,1,2,3].map((id)=>({...(this.lineup?structuredClone(this.lineup[id]):playerProfile()),id,team:id<2?0:1,x:id%2?15:5,y:id<2?39:5,vx:0,vy:0,swing:0}));if(!this.lineup)for(const p of this.players)p.appearance.jersey=p.id;this.aim=10;this.shot='attack';this.hitBuffer=0;this.feedbackTime=0;this.message='GET READY';this.pause=1;this.paused=false;this.serveSetup()}
+ reset(){this.teamPlan=null;this.tacticalStats={poachAttempts:0,poachHits:0,coverSwaps:0,offBallDistance:0,mishitHits:0};this.events=[];this.trail=[];this.clock=0;this.score=new Score();this.players=[0,1,2,3].map((id)=>({...(this.lineup?structuredClone(this.lineup[id]):playerProfile()),id,team:id<2?0:1,x:id%2?15:5,y:id<2?39:5,vx:0,vy:0,swing:0}));this.aim=10;this.shot='attack';this.hitBuffer=0;this.feedbackTime=0;this.message='GET READY';this.pause=1;this.paused=false;this.serveSetup()}
  setPaused(paused){if(this.phase==='over'){this.paused=false;return false}this.paused=Boolean(paused);if(this.paused){this.hitBuffer=0;if(this.players[0])this.players[0].windup=0}return this.paused}
  togglePaused(){return this.setPaused(!this.paused)}
  nudgeAim(direction,fine=false){this.aim=Math.max(1,Math.min(19,this.aim+Math.sign(direction)*aimStep(this.players[0],fine)))}

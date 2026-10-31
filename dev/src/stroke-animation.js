@@ -1,9 +1,9 @@
 export const STROKE_CLIPS = Object.freeze({
- overhead:{sheet:'vertical',frames:[0,1,1,2,3,3,1],lift:[0,-3,-9,-12,-7,3,-2],tilt:[0,-.04,-.1,-.14,-.08,.12,.02],scaleY:[1,1.02,1.07,1.08,1.02,.92,1]},
- forehand:{sheet:'body',frames:[0,1,2,3],lift:[0,0,-1,-1,0],tilt:[0,-.015,-.035,-.02,0],scaleY:[1,1,1.01,1,1]},
- backhand:{sheet:'body',frames:[0,3,2,1],lift:[0,-1,0,-1,0],tilt:[0,.02,.04,.025,0],scaleY:[1,.99,1,.99,1],supportHandX:[1,13,14,-10,-2],supportHandY:[-38,-39,-40,-41,-39]},
- atp:{sheet:'body',frames:[0,3,2,3,1],lift:[0,-1,-2,-1,0],tilt:[0,.04,.08,.05,0],scaleY:[1,1,1.03,1.02,1]},
- erne:{sheet:'vertical',frames:[0,1,1,2,3],lift:[0,-3,-8,-7,-2],tilt:[0,-.04,-.09,-.06,-.02],scaleY:[1,1.03,1.06,1.04,1]}
+ overhead:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-1,-4,-9,-12,-11,-4,2],tilt:[0,-.03,-.07,-.12,-.15,-.1,.04,.11],scaleY:[1,1.01,1.04,1.07,1.09,1.05,.98,.94]},
+ forehand:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,0,-1,-1,-2,-1,-1,0],tilt:[0,-.01,-.025,-.04,-.035,-.02,-.01,0],scaleY:[1,1.01,1.02,1.03,1.02,1.01,1,1]},
+ backhand:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-1,-1,0,-1,-1,0,0],tilt:[0,.015,.03,.045,.04,.025,.01,0],scaleY:[1,1,.99,1,1.01,1,.99,1]},
+ atp:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-1,-2,-3,-2,-1,0,0],tilt:[0,.025,.055,.08,.07,.04,.01,0],scaleY:[1,1.01,1.03,1.04,1.03,1.02,1,1]},
+ erne:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-2,-5,-8,-7,-4,-1,0],tilt:[0,-.03,-.06,-.1,-.08,-.05,-.02,0],scaleY:[1,1.02,1.04,1.07,1.05,1.03,1.01,1]}
 });
 
 function clipFor(player){
@@ -23,14 +23,14 @@ export function sampleStrokeAnimation(player,progress=0){
  return {
   kind,
   frameColumn:clip.frames[index],
-  useSwingSheet:clip.sheet==='vertical',
-  artRowOffset:clip.sheet==='vertical'?0:2,
+  useSwingSheet:false,
+  artRowOffset:0,
   offsetY:clip.lift[index],
   rotation:clip.tilt[index],
   scaleY:clip.scaleY[index],
   mirror,
   twoHanded,
-  supportHandX:twoHanded?clip.supportHandX[index]:0,
-  supportHandY:twoHanded?clip.supportHandY[index]:0
+  supportHandX:0,
+  supportHandY:0
  };
 }

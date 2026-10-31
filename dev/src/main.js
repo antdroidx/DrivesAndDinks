@@ -1,9 +1,9 @@
-import {setupSelection} from './selection.js?v=18';
-import {PADDLE_DESIGNS,CHARACTERS} from './roster.js?v=18';
-import {Game} from './game.js?v=18';
-import {selectShot,serveAim} from './core.js?v=18';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=18';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=18';
+import {setupSelection} from './selection.js?v=19';
+import {HAIR_COLORS,SKIN_TONES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,CHARACTERS} from './roster.js?v=19';
+import {Game} from './game.js?v=19';
+import {selectShot,serveAim} from './core.js?v=19';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=19';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=19';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -28,64 +28,59 @@ function playEffect(event){if(!['hit','bounce','net'].includes(event.type))retur
 const project=(x,y,z=0)=>({x:480+(x-10)*(13+y*.21),y:204+y*8.5-z*14});
 function poly(points,fill,stroke='#f8edc7',width=2){ctx.beginPath();points.forEach(([x,y],i)=>{const p=project(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}}
 function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
-// Original generated sprite sheet; recolor only the yellow jersey pixels per player.
-let spriteVariants=[],swingVariants=[],femaleSpriteVariants=[];spriteVariants=Array.from({length:4},()=>null);swingVariants=Array.from({length:4},()=>null);femaleSpriteVariants=Array.from({length:4},()=>null);
-const spritePaths=['./assets/player-sprites-v1.png','./assets/vertical-swings-v1.png','./assets/female-player-skirt-v2.png'];
-const spriteTargets=[spriteVariants,swingVariants,femaleSpriteVariants];
-function loadSpriteVariants(i){
- const path=spritePaths[i],variants=spriteTargets[i],sheet=new Image();
- sheet.onload=()=>{
-  const colors=[[238,182,43],[226,102,79],[83,155,221],[164,126,205]];
-  for(let colorIndex=0;colorIndex<4;colorIndex++){
-   const canvas=document.createElement('canvas'),color=colors[colorIndex];
-   canvas.width=sheet.width;canvas.height=sheet.height;
-   const x=canvas.getContext('2d',{willReadFrequently:true});
-   x.drawImage(sheet,0,0);
-   const image=x.getImageData(0,0,canvas.width,canvas.height),d=image.data;
-   for(let pixel=0;pixel<d.length;pixel+=4){
-    const r=d[pixel],g=d[pixel+1],b=d[pixel+2];
-    if(d[pixel+3]&&r>135&&g>85&&g>r*.48&&b<r*.35&&b<g*.52&&(g-b)/(r-b)>.5){
-     const light=Math.min(1.25,(r+g)/(2*190));
-     d[pixel]=Math.min(255,color[0]*light);
-     d[pixel+1]=Math.min(255,color[1]*light);
-     d[pixel+2]=Math.min(255,color[2]*light);
-    }
-   }
-   x.putImageData(image,0,0);
-   variants[colorIndex]=canvas;
-  }
-  selectionUI?.refreshPreview();
- };
- sheet.onerror=()=>console.warn('Sprite load failed',path);
- sheet.src=path;
+// New eight-frame animation atlases. Solid chroma pixels are removed and marker colors
+// are remapped in memory so every appearance shares one consistent athletic base.
+const atlasPaths={
+ 'male-tee':'./assets/male-tshirt-atlas-v3.png',
+ 'male-polo':'./assets/male-polo-atlas-v3.png',
+ 'female-tee':'./assets/female-tshirt-atlas-v3.png',
+ 'female-dress':'./assets/female-dress-atlas-v3.png'
+};
+const atlases={};
+for(const [key,path] of Object.entries(atlasPaths)){
+ const sheet=new Image();sheet.onload=()=>{atlases[key]=sheet;selectionUI?.refreshPreview()};sheet.onerror=()=>console.warn('Character atlas load failed',path);sheet.src=path;
 }
-function spriteAvailable(p){return (p.appearance.body==='female'?femaleSpriteVariants.every(Boolean):spriteVariants.every(Boolean)&&swingVariants.every(Boolean))}
-function artFor(p){return p.appearance.body==='female'?[femaleSpriteVariants,null]:[spriteVariants,swingVariants]}
+const colorRgb=(items,id,fallback)=>items.find(item=>item.id===id)?.rgb??items.find(item=>item.id===fallback)?.rgb??[255,255,255];
+function atlasKey(p){return `${p.appearance.body}-${p.appearance.outfit}`}
+function spriteAvailable(p){return Boolean(atlases[atlasKey(p)]?.complete)}
 const frameCache=new Map();
-function equipmentFrame(variants,jersey,row,col,sw,sh,design,swinging,body='male'){
- const key=[body,swinging,jersey,row,col,design].join(':');if(frameCache.has(key))return frameCache.get(key);
- const c=document.createElement('canvas');c.width=96;c.height=Math.round(96*sh/sw);const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(variants[jersey],col*sw,row*sh,sw,sh,0,0,c.width,c.height);
- const face=PADDLE_DESIGNS.find(d=>d.id===design)||PADDLE_DESIGNS[0];
- const frontMasks=[[.36,.24,.67,.53],[.15,.32,.37,.83],[.32,.2,.68,.54],[.15,.32,.37,.83]],backMasks=[[.68,.22,.9,.67],[.74,.3,.98,.78],[.02,.08,.35,.55],[.68,.3,.98,.78]];
- const swingFront=[[.35,.28,.7,.7],[0,.02,.33,.4],[.7,.2,1,.58],[.65,0,1,.35]],swingBack=[[0,0,0,0],[.6,0,.98,.35],[.7,.2,1,.58],[0,0,.35,.4]];
- const reference=document.createElement('canvas');reference.width=c.width;reference.height=c.height;const rx=reference.getContext('2d',{willReadFrequently:true});rx.imageSmoothingEnabled=false;rx.drawImage(variants[0],col*sw,row*sh,sw,sh,0,0,c.width,c.height);const referencePixels=rx.getImageData(0,0,c.width,c.height).data;
-
- const box=(swinging?(row?swingBack:swingFront):(row%2?backMasks:frontMasks))[col];const image=x.getImageData(0,0,c.width,c.height),d=image.data;
- for(let y=Math.floor(box[1]*c.height);y<box[3]*c.height;y++)for(let xx=Math.floor(box[0]*c.width);xx<box[2]*c.width;xx++){const i=(y*c.width+xx)*4,r=referencePixels[i],g=referencePixels[i+1],b=referencePixels[i+2];if(d[i+3]>0&&b>r*1.4&&b>g*1.05){const shade=Math.max(.3,Math.min(1.15,(r+g+b)/210));d[i]=face.rgb[0]*shade;d[i+1]=face.rgb[1]*shade;d[i+2]=face.rgb[2]*shade}}
+function tintPixel(d,i,target,baseTotal){
+ const sourceTotal=d[i]+d[i+1]+d[i+2],light=Math.max(.42,Math.min(1.24,sourceTotal/baseTotal));
+ d[i]=Math.min(255,target[0]*light);d[i+1]=Math.min(255,target[1]*light);d[i+2]=Math.min(255,target[2]*light);
+}
+function equipmentFrame(p,row,col){
+ const appearance=p.appearance,key=[atlasKey(p),row,col,appearance.hair,appearance.skin,appearance.shirtColor,appearance.bottomColor,appearance.paddleColor].join(':');if(frameCache.has(key))return frameCache.get(key);
+ const sheet=atlases[atlasKey(p)];if(!sheet)return null;
+ const cellW=sheet.naturalWidth/8,cellH=sheet.naturalHeight/8,c=document.createElement('canvas');c.width=160;c.height=160;
+ const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(sheet,col*cellW,row*cellH,cellW,cellH,0,0,c.width,c.height);
+ const image=x.getImageData(0,0,c.width,c.height),d=image.data;
+ const hair=colorRgb(HAIR_COLORS,appearance.hair,'brown'),skin=colorRgb(SKIN_TONES,appearance.skin,'medium'),shirt=colorRgb(CLOTHING_COLORS,appearance.shirtColor,'green'),bottom=colorRgb(CLOTHING_COLORS,appearance.bottomColor,'black'),paddle=colorRgb(PADDLE_COLORS,appearance.paddleColor,'mint');
+ for(let i=0;i<d.length;i+=4){
+  const r=d[i],g=d[i+1],b=d[i+2];
+  if(g>185&&b>185&&r<75){d[i+3]=0;continue}
+  if(r>125&&b>65&&r>g*1.45&&b>g*1.15)tintPixel(d,i,hair,285);
+  else if(g>95&&g>r*1.22&&g>b*1.45)tintPixel(d,i,shirt,205);
+  else if(b>100&&b>g*1.15&&b>r*1.4)tintPixel(d,i,bottom,220);
+  else if(r>165&&g>115&&b<85)tintPixel(d,i,paddle,390);
+  else if(r>145&&b>62&&r>g*1.12&&g>b*.88)tintPixel(d,i,skin,420);
+ }
  x.putImageData(image,0,0);frameCache.set(key,c);return c;
 }
-function drawLoadoutPreview(selection){const c=document.querySelector('#player-preview');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);x.fillStyle='#355e60';x.fillRect(0,160,c.width,40);x.fillStyle='#eff3cf66';x.fillRect(0,175,c.width,2);const selectedBody=CHARACTERS.find(c=>c.id===selection.character).gender,baseline=selectedBody==='female'?femaleSpriteVariants:spriteVariants;if(baseline[selection.jersey]){x.imageSmoothingEnabled=false;const frame=equipmentFrame(baseline,selection.jersey,0,0,350.5,280.5,selection.design,false,selectedBody);x.drawImage(frame,12,12,156,170)}const face=PADDLE_DESIGNS.find(d=>d.id===selection.design);x.fillStyle=face.color;x.fillRect(145,130,18,25);x.fillStyle='#d8d0b7';x.fillRect(151,155,6,12)}
+function drawLoadoutPreview(selection){
+ const c=document.querySelector('#player-preview');if(!c)return;const x=c.getContext('2d'),profile={appearance:{body:CHARACTERS.find(character=>character.id===selection.character).gender,outfit:selection.outfit,hair:selection.hair,skin:selection.skin,shirtColor:selection.shirtColor,bottomColor:selection.bottomColor,paddleColor:selection.paddleColor}};
+ x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);x.fillStyle='#355e60';x.fillRect(0,160,c.width,40);x.fillStyle='#eff3cf66';x.fillRect(0,175,c.width,2);
+ const frame=equipmentFrame(profile,0,0);if(frame){x.imageSmoothingEnabled=false;x.drawImage(frame,10,5,160,170)}
+}
 function drawSprite(p,q){
  const scale=.8+p.y/100,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const back=p.team===0,swinging=(p.windup>0||p.swing>0);
- const progress=p.swing/(p.swingDuration||.36);const gait=Math.floor((p.stride||0)/1.1);const row=back?1:0,strokeAnimation=swinging?sampleStrokeAnimation(p,1-progress):null,col=swinging?strokeAnimation.frameColumn:(moving?(p.motion==='shuffle'?(gait%2?1:3):1+gait%3):0);
- const female=p.appearance.body==='female',useSwingSheet=swinging&&!female&&strokeAnimation.useSwingSheet;
- const sw=useSwingSheet?384:350.5,sh=useSwingSheet?512:280.5,artRow=swinging&&!useSwingSheet?row+strokeAnimation.artRowOffset:row;
+ const progress=p.swing/(p.swingDuration||.36);const gait=Math.floor((p.stride||0)/1.1),strokeAnimation=swinging?sampleStrokeAnimation(p,1-progress):null,kind=strokeAnimation?.kind;
+ const strokeRow=kind==='backhand'?(back?3:2):kind==='overhead'?(back?5:4):(back?1:0),row=swinging?strokeRow:(back?7:6),col=swinging?strokeAnimation.frameColumn:(moving?gait%8:0);
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.scale(scale,scale);
  ctx.fillStyle='#101f1a80';ctx.beginPath();ctx.ellipse(0,0,18,6,0,0,Math.PI*2);ctx.fill();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke()}
  if(p.swing>0&&progress>.7&&p.contactPoint){const point=project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z);ctx.translate(Math.max(-7,Math.min(7,(point.x-q.x)/scale-(p.swingSide||1)*23)),Math.max(-6,Math.min(6,(point.y-q.y)/scale+35)))}if(strokeAnimation){ctx.translate(0,strokeAnimation.offsetY);ctx.rotate(strokeAnimation.rotation);ctx.scale(1,strokeAnimation.scaleY);if(strokeAnimation.mirror)ctx.scale(-1,1)}ctx.imageSmoothingEnabled=false;
- const [baseVariants,swingSet]=artFor(p),frame=equipmentFrame(useSwingSheet?swingSet:baseVariants,p.appearance.jersey%4,artRow,col,sw,sh,p.appearance.paddleDesign||'ocean',useSwingSheet,p.appearance.body);if(useSwingSheet)ctx.drawImage(frame,-29,-78,58,91);else ctx.drawImage(frame,-35,-77,70,80);if(strokeAnimation?.twoHanded)drawSupportHand(strokeAnimation);ctx.restore();
+ const frame=equipmentFrame(p,row,col);if(frame)ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
 }
 function drawSupportHand(animation){
  const x=animation.supportHandX,y=animation.supportHandY;
@@ -125,9 +120,8 @@ function drawPlayer(p,q){
  ctx.restore();
 }
 
-Promise.all(spritePaths.map((_,i)=>new Promise(resolve=>setTimeout(resolve,i*80)).then(()=>loadSpriteVariants(i))));
 const courtSpeckles=Array.from({length:160},(_,i)=>({x:((i*137)%1000)/1000*24-2,y:((i*269)%1000)/1000*48-2}));
-function render(){ctx.fillStyle='#163b3b';ctx.fillRect(0,0,960,600);ctx.fillStyle='#254d43';for(let i=0;i<960;i+=40)ctx.fillRect(i,110,20,490);poly([[-3.6,-2.4],[23.6,-2.4],[23.6,47.1],[-3.6,47.1]],'#122a29',null);poly([[-3.4,-2.4],[23.4,-2.4],[23.4,46.4],[-3.4,46.4]],'#263d3a',null);poly([[-3,-2],[23,-2],[23,46],[-3,46]],'#507b70',null);poly([[0,0],[20,0],[20,44],[0,44]],'#357282');poly([[0,15],[20,15],[20,29],[0,29]],'#bc755e',null);ctx.fillStyle='#ffffff0b';for(const speck of courtSpeckles){const q=project(speck.x,speck.y);ctx.fillRect(q.x,q.y,2,1)}poly([[0,0],[20,0],[20,44],[0,44]],'transparent','#e9eee0',3);line([0,15],[20,15]);line([0,29],[20,29]);line([10,0],[10,15]);line([10,29],[10,44]);if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):previewShot==='dink'?14:previewShot==='drop'?12:previewShot==='slice'?6:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
+function render(){const palette=COURT_PALETTES.find(item=>item.id===game.players[0]?.appearance?.court)??COURT_PALETTES[0];ctx.fillStyle=palette.background;ctx.fillRect(0,0,960,600);ctx.fillStyle=palette.stripe;for(let i=0;i<960;i+=40)ctx.fillRect(i,110,20,490);poly([[-3.6,-2.4],[23.6,-2.4],[23.6,47.1],[-3.6,47.1]],palette.outer,null);poly([[-3.4,-2.4],[23.4,-2.4],[23.4,46.4],[-3.4,46.4]],palette.outerLight,null);poly([[-3,-2],[23,-2],[23,46],[-3,46]],palette.apron,null);poly([[0,0],[20,0],[20,44],[0,44]],palette.court,palette.line);poly([[0,15],[20,15],[20,29],[0,29]],palette.kitchen,null,palette.line);ctx.fillStyle='#ffffff0b';for(const speck of courtSpeckles){const q=project(speck.x,speck.y);ctx.fillRect(q.x,q.y,2,1)}poly([[0,0],[20,0],[20,44],[0,44]],'transparent',palette.line,3);line([0,15],[20,15],palette.line);line([0,29],[20,29],palette.line);line([10,0],[10,15],palette.line);line([10,29],[10,44],palette.line);if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):previewShot==='dink'?14:previewShot==='drop'?12:previewShot==='slice'?6:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
  const netL=project(-.5,22),netR=project(20.5,22);ctx.fillStyle='#25323c';ctx.fillRect(netL.x,netL.y-30,netR.x-netL.x,30);ctx.strokeStyle='#94a79e';ctx.lineWidth=1;for(let x=netL.x;x<netR.x;x+=10){ctx.beginPath();ctx.moveTo(x,netL.y-30);ctx.lineTo(x,netL.y);ctx.stroke()}for(let y=netL.y-24;y<netL.y;y+=7){ctx.beginPath();ctx.moveTo(netL.x,y);ctx.lineTo(netR.x,y);ctx.stroke()}ctx.fillStyle='#f9e6bd';ctx.fillRect(netL.x,netL.y-32,netR.x-netL.x,5);ctx.fillStyle='#bdc8bf';ctx.fillRect(netL.x-3,netL.y-36,5,39);ctx.fillRect(netR.x-2,netR.y-36,5,39);
  if(game.phase==='rally'){ctx.fillStyle='#fff1a744';for(let i=0;i<game.trail.length;i+=2){const t=game.trail[i],q=project(t.x,t.y,t.z);ctx.fillRect(q.x-2,q.y-2,4,4)}}if(game.bounceMark?.time>0){const q=project(game.bounceMark.x,game.bounceMark.y);ctx.strokeStyle='#fff5ab';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,10+(1-game.bounceMark.time/.35)*8,4,0,0,Math.PI*2);ctx.stroke()}
  const entities=[...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z);ctx.fillStyle='#f9f36c';ctx.fillRect(b.x-4,b.y-4,8,8);continue}if(spriteAvailable(p))drawSprite(p,q);else drawPlayer(p,q)}
