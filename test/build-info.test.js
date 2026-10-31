@@ -19,7 +19,7 @@ test('deployments expose a sequential build number in the visible header',()=>{
   assert.match(workflow,/mkdir -p _site\/dev/);
   assert.match(workflow,/cp index\.html style\.css _site\/dev\//);
   assert.match(workflow,/_site\/dev\/build-info\.js/);
-  assert.match(workflow,/url=\.\.\//);
+  assert.doesNotMatch(workflow,/_site\/friends/);
   assert.match(html,/src="src\/update-check\.js"/);
  assert.match(main,/BUILD \$\{buildNumber\}/);
 });

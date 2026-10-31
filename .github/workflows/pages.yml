@@ -40,9 +40,6 @@ jobs:
           cp -R src assets _site/dev/
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
 
-          mkdir -p _site/friends
-          printf '<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=../"><link rel="canonical" href="../"><title>Drives & Dinks</title><a href="../">Open Drives & Dinks</a>\n' > _site/friends/index.html
-
           touch _site/.nojekyll
 
       - name: Publish gh-pages branch
