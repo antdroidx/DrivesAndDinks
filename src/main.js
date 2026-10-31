@@ -52,7 +52,8 @@ function equipmentFrame(p,row,col){
  const appearance=p.appearance,key=[atlasKey(p),row,col,appearance.hair,appearance.skin,appearance.shirtColor,appearance.bottomColor,appearance.paddleColor].join(':');if(frameCache.has(key))return frameCache.get(key);
  const sheet=atlases[atlasKey(p)];if(!sheet)return null;
  const cellW=sheet.naturalWidth/8,cellH=sheet.naturalHeight/8,c=document.createElement('canvas');c.width=160;c.height=160;
- const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(sheet,col*cellW,row*cellH,cellW,cellH,0,0,c.width,c.height);
+ const insetX=cellW*.015,insetTop=cellH*.045,insetBottom=cellH*.02;
+ const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(sheet,col*cellW+insetX,row*cellH+insetTop,cellW-insetX*2,cellH-insetTop-insetBottom,0,0,c.width,c.height);
  const image=x.getImageData(0,0,c.width,c.height),d=image.data;
  const hair=colorRgb(HAIR_COLORS,appearance.hair,'brown'),skin=colorRgb(SKIN_TONES,appearance.skin,'medium'),shirt=colorRgb(CLOTHING_COLORS,appearance.shirtColor,'green'),bottom=colorRgb(CLOTHING_COLORS,appearance.bottomColor,'black'),paddle=colorRgb(PADDLE_COLORS,appearance.paddleColor,'mint');
  for(let i=0;i<d.length;i+=4){
