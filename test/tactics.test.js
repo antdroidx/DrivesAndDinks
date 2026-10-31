@@ -18,3 +18,12 @@ test('poaching contacts remain legal on the opposite court end',()=>{const playe
 test('high balls can auto-select an overhead and wide sideline contacts choose ATP or Erne',()=>{const p=playerProfile();p.x=p.y=10;p.team=0;const high={x:10,y:10,z:3.35};assert.equal(selectShot(p,high,'drive'),'overhead');assert.equal(selectShot(p,{...high,z:3.35},'drive'),'overhead');const sideline={x:.6,y:10,z:1};p.x=.7;assert.equal(selectShot(p,sideline,'drive'),'atp');p.y=29;const highSideline={...sideline,z:3.4};assert.equal(selectShot(p,highSideline,'drive'),'erne')});
 test('quick lateral movement creates a short slide',()=>{const p=playerProfile();p.x=p.y=10;p.team=0;p.vx=6.2;p.vy=1;move(p,12,10,C.dt);assert.equal(p.motion,'slide');assert.ok(p.slideTimer>0)});
 test('slide does not linger indefinitely',()=>{const p=playerProfile();p.x=p.y=10;p.team=0;p.vx=6.2;p.vy=1;p.slideTimer=.1;for(let i=0;i<30;i++)move(p,14,10,C.dt);assert.ok(p.slideTimer<=0);assert.notEqual(p.motion,'slide')});
+
+test('attack and soft controls choose the right shot from ball height and court position',()=>{
+ const p=playerProfile();p.x=10;p.team=0;p.y=40;
+ assert.equal(selectShot(p,{x:10,y:35,z:1},'attack'),'drive');
+ assert.equal(selectShot(p,{x:10,y:35,z:3.4},'attack'),'overhead');
+ assert.equal(selectShot(p,{x:10,y:30,z:1},'soft'),'drop');
+ p.y=28;assert.equal(selectShot(p,{x:10,y:30,z:1},'soft'),'dink');
+ assert.equal(selectShot(p,{x:.5,y:30,z:3.4},'lob'),'lob')
+});

@@ -18,7 +18,7 @@ Open `http://127.0.0.1:8768/?test=animations` for a visual QA mode that loops ov
 
 ## Controls
 
-Choose drive, drop, dink, lob, or slice with 1–5 or the on-screen shot buttons. Selecting a shot type immediately swings. Move the cyan target left or right on the opposite court with the mouse, arrow keys, or a touch on the court. The target indicates direction rather than the exact landing spot for every shot. Press Space or 1–5 to swing; clicking the court also swings. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. On a touchscreen, drag or tap the court to aim, then tap a shot button to swing. Placement shots run down the left green court apron and attack shots run down the right apron, keeping the controls inside the playfield and visible without page scrolling.
+Choose ATTACK, SOFT, or LOB with 1–3 or the on-screen shot buttons. Selecting an action immediately swings. ATTACK becomes a drive or overhead based on ball height; SOFT becomes a drop or dink based on the player court position; LOB always produces a lob. Move the cyan target left or right on the opposite court with the mouse, arrow keys, the left-side touch pad, or a touch on the court. The target indicates direction rather than the exact landing spot for every shot. Press Space or 1–3 to swing; clicking the court also swings. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. On a touchscreen, use the BALL CONTROL pad on the left to aim, then tap one of the three shot buttons on the right to swing. All controls remain inside the playfield and visible without page scrolling.
 
 Choose EASY or NORMAL from the setup screen or the DIFFICULTY button. NORMAL keeps the standard 0.32-second swing buffer; EASY opens a wider timing window: about 0.70 seconds early and 0.30 seconds late around contact, and it softens mishit penalties on buffered contacts. The rules, movement, and shot selection remain the same.
 
@@ -34,7 +34,7 @@ This is an early playable experiment, not a rules-certified simulation. AI posit
 
 ## Contextual plays, special shots and movement
 
-Pressing Swing chooses the best available shot from the circumstance. A high reachable ball can become an automatic overhead. A very wide sideline contact can become an ATP. The same sideline contact, with height and the player near the kitchen, can become an Erne. These are not separate buttons; the player only chooses aim and stroke. Normal shot selection remains drive, drop, dink, lob and slice.
+Pressing Swing chooses the best available shot from the circumstance. A high reachable ball can become an automatic overhead. A very wide sideline contact can become an ATP. The same sideline contact, with height and the player near the kitchen, can become an Erne. These are not separate buttons; the player only chooses aim and stroke. Manual shot selection is reduced to attack, soft, and lob; the game resolves those actions into drive or overhead, drop or dink, and lob based on the current situation.
 
 Players also get a short slide during fast lateral recovery. Speed, reach, control and paddle properties still influence contact quality and mishit chance.
 

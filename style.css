@@ -17,6 +17,7 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
 #animation-test{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:14px 0;padding:14px;border:2px solid #62d6e7;background:#183443}#animation-test h2{margin:3px 0 6px;font-size:20px}#animation-test p{margin:0;color:#f6cc59}.animation-test-actions{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.animation-test-actions>div{display:flex;gap:5px;align-items:center}.animation-test-actions strong{font-size:11px;color:#a6cbc3}.animation-test-actions button{padding:8px}.animation-test-actions a{color:#9edce3;font-weight:bold}@media(max-width:760px){#animation-test{align-items:flex-start;flex-direction:column}.animation-test-actions>div{align-items:flex-start;flex-direction:column}}
 
 [hidden]{display:none!important}
+#aim-pad{display:none}
 
 /* Keep the full court inside short landscape viewports such as iPad mini. */
 @media (orientation:landscape) and (min-height:551px) and (max-height:850px){
@@ -61,18 +62,27 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
     color:#b7d3c7;font-size:clamp(7px,1.1vw,10px);letter-spacing:1px;line-height:1;
     text-align:center;align-self:end;text-shadow:1px 1px #102822
   }
-  #shots::before{content:'PLACEMENT';grid-column:1;grid-row:1}
-  #shots::after{content:'ATTACK';grid-column:3;grid-row:1}
+  #shots::before{content:'SHOTS';grid-column:3;grid-row:1}
+  #shots::after{display:none}
+  #shots button small{display:block;margin-top:2px;font-size:clamp(6px,.9vw,9px);line-height:1.05;letter-spacing:.3px}
+  #aim-pad{
+    display:grid;place-items:center;position:absolute;left:5%;top:50%;transform:translateY(-50%);
+    width:min(24%,130px);aspect-ratio:1;padding:9px;pointer-events:auto;touch-action:none;
+    border:2px solid #61bdc4;border-radius:18%;background:#163b3bd9;box-shadow:0 4px 0 #0c2422;
+    color:#f8f3da;text-align:center;z-index:5
+  }
+  #aim-pad strong{display:block;color:#b7d3c7;font-size:clamp(7px,1vw,10px);letter-spacing:1px;line-height:1.1}
+  #aim-pad small{color:#9cb1a9;font-size:clamp(6px,.9vw,9px);line-height:1.1}
+  .aim-pad-track{position:relative;width:82%;height:22px;margin:3px 0;border:2px solid #93afa3;border-radius:999px;background:#314c5a}
+  .aim-pad-thumb{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);border:2px solid #fff3d8;border-radius:50%;background:#39d9f5;box-shadow:0 2px 0 #0c2422}
   #shots button{
     pointer-events:auto;width:min(82%,128px);height:clamp(44px,7dvh,58px);min-height:0;
     align-self:center;justify-self:center;padding:4px;font-size:clamp(9px,1.25vw,12px);
     line-height:1.05;overflow:hidden
   }
-  #shots [data-shot="drop"]{grid-column:1;grid-row:2}
-  #shots [data-shot="dink"]{grid-column:1;grid-row:3}
-  #shots [data-shot="lob"]{grid-column:1;grid-row:4}
-  #shots [data-shot="drive"]{grid-column:3;grid-row:2}
-  #shots [data-shot="slice"]{grid-column:3;grid-row:4}
+  #shots [data-shot="attack"]{grid-column:3;grid-row:2}
+  #shots [data-shot="soft"]{grid-column:3;grid-row:3}
+  #shots [data-shot="lob"]{grid-column:3;grid-row:4}
   #overlay{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;display:block;background:none}
 }
 @media (pointer:coarse) and (orientation:landscape){
