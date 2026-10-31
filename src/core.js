@@ -50,9 +50,13 @@ export function selectShot(p,b,desired,random=Math.random()){
  const nearSideline=p.x<=1.25||p.x>=18.75
  const wideBall=b.x<=.75||b.x>=19.25
  const kitchenSide=p.team===0?p.y<=31:p.y>=13
- if(nearSideline&&wideBall&&b.z>=3.2)return 'erne'
- if(nearSideline&&wideBall)return 'atp'
- if(b.z>=3.2&&kitchenSide)return 'overhead'
+ if(desired==='soft')return kitchenSide?'dink':'drop'
+ if(desired==='lob')return 'lob'
+ if(desired==='attack'||desired==='drive'){
+  if(nearSideline&&wideBall&&b.z>=3.2)return 'erne'
+  if(nearSideline&&wideBall)return 'atp'
+  return b.z>=3.2?'overhead':'drive'
+ }
  return desired
 }
 export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, random=Math.random()}){
