@@ -81,10 +81,11 @@ function equipmentFrame(p,row,col){
   for(const index of pixels){const r=d[index*4],g=d[index*4+1],b=d[index*4+2];if(Math.max(r,g,b)-Math.min(r,g,b)>45)saturated++}
   components.push({pixels,minY:Math.min(...pixels.map(index=>Math.floor(index/width))),maxY:Math.max(...pixels.map(index=>Math.floor(index/width))),saturated:pixels.length?saturated/pixels.length:0});
  }
- const largest=Math.max(0,...components.map(component=>component.pixels.length)),minimum=Math.max(18,largest*.028);
+ const largest=Math.max(0,...components.map(component=>component.pixels.length)),minimum=Math.max(18,largest*.028),main=components.find(component=>component.pixels.length===largest);
  for(const component of components){
   const topBleed=component.maxY<height*.34&&component.pixels.length<largest*.35&&component.saturated<.22;
-  const stray=component.pixels.length<minimum||topBleed;
+  const aboveHead=component!==main&&component.maxY<main.minY+1;
+  const stray=component.pixels.length<minimum||topBleed||aboveHead;
   if(stray)for(const index of component.pixels)d[index*4+3]=0;
  }
  x.putImageData(image,0,0);frameCache.set(key,c);return c;
