@@ -26,9 +26,14 @@ export function setupSelection({game,onStart,drawPreview}){
     if(!choices.some(choice=>choice.id===draft.outfit))draft=normalizeSelection({...draft,outfit:choices[0].id});
     dialog.querySelector('#outfit-choices').innerHTML=swatches(choices,'outfit');
   }
+  function appearanceSummary(selectionValue){
+    const label=(items,id)=>items.find(item=>item.id===id)?.name??id;
+    return `${label(HAIR_COLORS,selectionValue.hair)} hair · ${label(SKIN_TONES,selectionValue.skin)} skin · ${label(CLOTHING_COLORS,selectionValue.shirtColor)} / ${label(CLOTHING_COLORS,selectionValue.bottomColor)} · ${label(PADDLE_COLORS,selectionValue.paddleColor)} paddle`;
+  }
   function render(){
     renderOutfits();
     for(const [key,value] of Object.entries(draft))selected(key,value);
+    dialog.querySelector('#appearance-summary').textContent=appearanceSummary(draft);
     const stats=selectionStats(draft);dialog.querySelector('#loadout-stats').innerHTML=Object.entries(stats).map(([key,value])=>{const rating=statRating(value);return `<div class="stat-row" data-stat="${key}"><span>${STAT_LABELS[key]}</span><div class="stat-meter" role="img" aria-label="${STAT_LABELS[key]} ${rating} out of 100"><i style="width:${rating}%"></i></div><strong>${rating}</strong></div>`}).join('');
     const lineup=createLineup(draft);dialog.querySelector('#team-preview').textContent=`You: ${lineup[0].name} · Partner: ${lineup[1].name} · Opponents: ${lineup[2].name} & ${lineup[3].name}`;drawPreview(draft);
   }

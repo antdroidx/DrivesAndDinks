@@ -115,3 +115,12 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
   #shots{grid-template-columns:29% 42% 29%;gap:8px}
   #shots button{width:88%;height:44px;font-size:9px}
 }
+
+.outfit-row{margin-bottom:12px}.outfit-row fieldset{margin:0}
+.appearance-panel{margin:0 0 14px;border:2px solid #536e70;background:#19333c}
+.appearance-panel summary{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:46px;padding:10px 12px;color:#f4ca6a;font-size:13px;font-weight:bold;cursor:pointer;list-style:none}
+.appearance-panel summary::-webkit-details-marker{display:none}.appearance-panel summary::before{content:'+';display:grid;place-items:center;width:22px;height:22px;flex:none;border:1px solid #708887;background:#10272e;color:#fff2bd}
+.appearance-panel[open] summary::before{content:'-'}.appearance-panel summary small{min-width:0;margin-left:auto;color:#a9c4bc;font-size:10px;font-weight:normal;letter-spacing:0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.appearance-panel summary span{white-space:nowrap}.appearance-panel .appearance-grid{padding:14px;border-top:1px solid #536e70}.appearance-panel .appearance-grid fieldset:last-child,.appearance-panel .appearance-grid fieldset:nth-last-child(2){margin-bottom:0}
+@media(max-width:650px){.appearance-panel summary{align-items:flex-start}.appearance-panel summary span{font-size:12px}.appearance-panel summary small{white-space:normal;line-height:1.4}.appearance-panel .appearance-grid{padding:12px}}
+.appearance-panel summary:focus-visible{outline:2px solid #62d6e7;outline-offset:-3px}

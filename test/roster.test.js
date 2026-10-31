@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {CHARACTERS,PADDLES,HAIR_COLORS,SKIN_TONES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
 import {statRating} from '../src/selection.js';
+import {appearancePalette} from '../src/pixel-character.js';
 import {Game} from '../src/game.js';
 
 test('every requested appearance option is available',()=>{
@@ -29,3 +30,9 @@ test('cosmetic changes do not affect abilities or paddle performance',()=>{const
 test('configured lineup contains four characters and survives match resets',()=>{const config={character:'morgan',paddle:'control',hair:'red',skin:'dark',outfit:'polo',shirtColor:'blue',bottomColor:'gray',paddleColor:'orange',court:'green-orange'};const lineup=createLineup(config);assert.equal(new Set(lineup.map(p=>p.characterId)).size,4);const g=new Game();g.configure(config);assert.equal(g.players[0].name,'Morgan Reed');assert.equal(g.players[0].paddle.id,'control');g.players[0].abilities.control=0;g.reset();assert.equal(g.players[0].abilities.control,1.04);assert.equal(g.players[0].appearance.hair,'red');assert.equal(g.players[0].appearance.court,'green-orange')});
 test('female selections receive a male partner and male selections receive a female partner',()=>{for(const player of CHARACTERS){const lineup=createLineup({character:player.id});for(const team of [lineup.slice(0,2),lineup.slice(2,4)])assert.deepEqual(new Set(team.map(p=>p.gender)),new Set(['male','female']))}});
 test('player power and spin modify effective equipment and stat bars are bounded',()=>{const g=new Game();g.configure({character:'jordan',paddle:'balanced'});const p=g.players[0],effective=g.paddleFor(p);assert.ok(effective.power>p.paddle.power);assert.ok(effective.spin<p.paddle.spin);assert.equal(Object.keys(selectionStats({character:'jordan'}))[0],'serve');for(const value of [.4,.8,1,1.2,1.5])assert.ok(statRating(value)>=0&&statRating(value)<=100)});
+
+test('pixel sprite palettes follow every appearance color choice',()=>{
+ const first=appearancePalette({hair:'black',skin:'light',shirtColor:'blue',bottomColor:'white',paddleColor:'coral'});
+ const second=appearancePalette({hair:'blonde',skin:'dark',shirtColor:'red',bottomColor:'purple',paddleColor:'yellow'});
+ assert.notEqual(first.hair,second.hair);assert.notEqual(first.skin,second.skin);assert.notEqual(first.shirt,second.shirt);assert.notEqual(first.bottom,second.bottom);assert.notEqual(first.paddle,second.paddle);
+});
