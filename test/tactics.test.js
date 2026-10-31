@@ -1,7 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {planIncoming,formationTarget,separatePartners} from '../src/tactics.js';
-import {playerProfile,launch,legalVolley,C} from '../src/core.js';
+import {playerProfile,launch,legalVolley,move,C} from '../src/core.js';
+import {selectShot} from '../src/core.js';
 import {Game} from '../src/game.js';
 function pair(team=0){return [0,1].map((id)=>({...playerProfile(),id,team,x:id?13:5,y:id?30:40,lane:id?15:5,coverLane:id?15:5,vx:0,vy:0,reactionWait:0}))}
 function incoming(){const b={x:9,y:12,z:2};launch(b,9,36,'drive');return b}
@@ -13,3 +14,7 @@ test('support gives room to the hitter when partners converge',()=>{const player
 test('planned receiver remains stable through successive physics ticks',()=>{const g=new Game();g.mode='watch';g.phase='rally';g.last=1;g.shots=4;g.bounces=0;g.ball=incoming();Object.assign(g.players[0],{x:5,y:40,coverLane:5});Object.assign(g.players[1],{x:13,y:30,coverLane:15});g.update(C.dt);const plan=g.teamPlan;assert.equal(plan.poach,true);for(let i=0;i<8;i++)g.update(C.dt);assert.equal(g.teamPlan,plan);assert.equal(g.players[0].coverLane,15);assert.equal(g.players[1].coverLane,5);assert.equal(g.score.rightPlayer[0],1)});
 
 test('poaching contacts remain legal on the opposite court end',()=>{const players=pair(1);players[0].y=4;players[1].y=14;const ball=incoming();ball.y=44-ball.y;ball.vy=-ball.vy;const plan=planIncoming({players,team:1,ball,shots:4,bounces:0});assert.equal(plan.poach,true);assert.equal(plan.receiverId,1);assert.equal(legalVolley(1,plan.point.y,0,4),null)});
+
+test('high balls can auto-select an overhead and wide sideline contacts choose ATP or Erne',()=>{const p=playerProfile();p.x=p.y=10;p.team=0;const high={x:10,y:10,z:3.35};assert.equal(selectShot(p,high,'drive'),'overhead');assert.equal(selectShot(p,{...high,z:3.35},'drive'),'overhead');const sideline={x:.6,y:10,z:1};p.x=.7;assert.equal(selectShot(p,sideline,'drive'),'atp');p.y=29;const highSideline={...sideline,z:3.4};assert.equal(selectShot(p,highSideline,'drive'),'erne')});
+test('quick lateral movement creates a short slide',()=>{const p=playerProfile();p.x=p.y=10;p.team=0;p.vx=6.2;p.vy=1;move(p,12,10,C.dt);assert.equal(p.motion,'slide');assert.ok(p.slideTimer>0)});
+test('slide does not linger indefinitely',()=>{const p=playerProfile();p.x=p.y=10;p.team=0;p.vx=6.2;p.vy=1;p.slideTimer=.1;for(let i=0;i<30;i++)move(p,14,10,C.dt);assert.ok(p.slideTimer<=0);assert.notEqual(p.motion,'slide')});

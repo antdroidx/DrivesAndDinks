@@ -21,12 +21,12 @@ export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z;b.x+=b.vx*dt;b.y+=b.
  if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'}
  if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;if(b.shot==='slice'){b.vz*=.82;b.vx*=.94;b.vy*=.94}return 'bounce'}return null}
 export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1){
- const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0],slice:[1.18,-1.8]};
+ const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0],slice:[1.18,-1.8],overhead:[.95,1],atp:[1.05,1],erne:[1.05,1]};
  let [t,spin]=specs[shot]||specs.drive;
  const slow=1/(.72+.28*quality);t*=slow
- if(shot==='drive')t=Math.max(.42,Math.hypot(x-b.x,y-b.y)/(48*paddle.power));
+ if(['drive','overhead','atp','erne'].includes(shot))t=Math.max(.42,Math.hypot(x-b.x,y-b.y)/(48*paddle.power*(shot==='overhead'?1.12:1)));
  // Solve the ballistic arc at the net rather than giving short and long shots the same arc.
- const f=(22-b.y)/(y-b.y);let clearance=shot==='drive'?Math.max(3.25,3.65/paddle.power):shot==='drop'?3.7:3.4;if(quality<.8)clearance*=1+(0.8-quality)*.35;
+ const f=(22-b.y)/(y-b.y);let clearance=['drive','overhead','atp','erne'].includes(shot)?Math.max(3.25,(shot==='overhead'?3.35:3.65)/paddle.power):shot==='drop'?3.7:3.4;if(quality<.8)clearance*=1+(0.8-quality)*.35;
  if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
  b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin*paddle.spin;b.shot=shot;
 }
@@ -38,12 +38,21 @@ export class Score {
  get player(){return this.serverPlayer}
  get call(){return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
-export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);const maxSpeed=p.abilities?.speed??C.speed;const planted=p.swing>Math.max(.12,(p.swingDuration||.36)*.55);if(planted){p.vx*=Math.exp(-18*dt);p.vy*=Math.exp(-18*dt)}const speed=Math.min(maxSpeed*(planted?.12:1),d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const a=Math.min(1,(p.abilities?.acceleration??C.accel)*dt/maxSpeed);p.vx+=(vx-p.vx)*a;p.vy+=(vy-p.vy)*a;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;p.motion=planted?'planted':Math.hypot(p.vx,p.vy)<1?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';p.x=Math.max(0,Math.min(20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
+export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);const maxSpeed=p.abilities?.speed??C.speed;const planted=p.swing>Math.max(.12,(p.swingDuration||.36)*.55);if(planted){p.vx*=Math.exp(-18*dt);p.vy*=Math.exp(-18*dt)}const speed=Math.min(maxSpeed*(planted?.12:1),d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const a=Math.min(1,(p.abilities?.acceleration??C.accel)*dt/maxSpeed);p.vx+=(vx-p.vx)*a;p.vy+=(vy-p.vy)*a;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;if(!planted&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.2&&Math.abs(p.vx)>=5.5)p.slideTimer=.24;p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=p.slideTimer>0?'slide':planted?'planted':Math.hypot(p.vx,p.vy)<1?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';p.x=Math.max(0,Math.min(20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
 export function receiver(players,team,x,y){return players.filter(p=>p.team===team).reduce((a,b)=>Math.hypot(a.x-x,a.y-y)<Math.hypot(b.x-x,b.y-y)?a:b)}
 
 
 
 // Tactical approximation: deep returns, third-shot transition, and kitchen exchanges.
+export function selectShot(p,b,desired,random=Math.random()){
+ const nearSideline=p.x<=1.25||p.x>=18.75
+ const wideBall=b.x<=.75||b.x>=19.25
+ const kitchenSide=p.team===0?p.y<=31:p.y>=13
+ if(nearSideline&&wideBall&&b.z>=3.2)return 'erne'
+ if(nearSideline&&wideBall)return 'atp'
+ if(b.z>=3.2&&kitchenSide)return 'overhead'
+ return desired
+}
 export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;
  if(shots===1)return 'drive';

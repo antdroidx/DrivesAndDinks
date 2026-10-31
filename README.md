@@ -26,6 +26,12 @@ Sound unlocks on your first click or keypress; the SOUND button toggles synthesi
 
 This is an early playable experiment, not a rules-certified simulation. AI positioning and shot selection are basic and need playtesting and tuning; movement and reaction settings are configurable per player. Shot timing is a reach window rather than a graded timing meter, and spin is a simplified drag effect. Kitchen faults only check the hitter's location at contact, not momentum or later contact with the zone. Service-line edge cases, partner positioning, and service rotation need continued playtesting. There is no player collision or serve motion validation. Rendering and mobile interaction need testing on real devices. Desktop browser and a phone-sized landscape viewport have been checked; physical Android touch and performance have not been tested. Gameplay and rules should be reviewed before calling this v0.1 complete.
 
+## Contextual plays, special shots and movement
+
+Pressing Swing chooses the best available shot from the circumstance. A high reachable ball can become an automatic overhead. A very wide sideline contact can become an ATP. The same sideline contact, with height and the player near the kitchen, can become an Erne. These are not separate buttons; the player only chooses aim and stroke. Normal shot selection remains drive, drop, dink, lob and slice.
+
+Players also get a short slide during fast lateral recovery. Speed, reach, control and paddle properties still influence contact quality and mishit chance.
+
 ## Professional doubles inspiration
 
 The CPU uses deep returns, third-shot drops or drives, transition toward the kitchen, and dinks or attacks based on ball height. The serving team stays back for the return bounce. These are simplified tactical heuristics inspired by [USA Pickleball's third-shot guidance](https://usapickleball.org/pickleball-skills/level-four/third-shot-drive-fifth-shot-drop-and-driving-slice-return/) and [drop placement guidance](https://usapickleball.org/pickleball-skills/level-three/where-to-hit-your-drops/). They are not calibrated from PPA tracking data or individual professional players. Shot flight, error rates, reactions, and movement remain approximations requiring playtesting.
