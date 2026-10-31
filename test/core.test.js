@@ -21,3 +21,6 @@ test('service on kitchen line is a fault',()=>{const g=new Game();g.serve();Obje
 
 
 test('serve formation keeps serving team back and receiving partner at kitchen',()=>{const g=new Game();for(const team of [0,1]){g.score.team=team;g.serveSetup();const serving=g.players.filter(p=>p.team===team),receiving=g.players.filter(p=>p.team!==team);for(const p of serving)assert.ok(team===0?p.y>=43:p.y<=1);const partner=receiving.find(p=>p!==g.serveReceiver);assert.equal(g.serveReceiver.y,team===0?2:42);assert.equal(partner.y,team===0?14:30);assert.notEqual(g.serveReceiver.x<10,g.server.x<10)}});
+
+
+test('receiving partner holds their assigned side during the serve',()=>{for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();const partner=g.players.find(p=>p.team!==team&&p!==g.serveReceiver);const startX=partner.x;g.serve();for(let i=0;i<30&&g.phase==='rally';i++)g.update(C.dt);assert.equal(partner.x<10,startX<10);assert.ok(Math.abs(partner.x-startX)<1)}});
