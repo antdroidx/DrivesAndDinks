@@ -13,3 +13,7 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
 @media(max-width:650px){dialog{padding:12px;width:97vw}dialog h2{font-size:20px}.setup-top{grid-template-columns:1fr}.player-preview{display:none}.character-grid{grid-template-columns:1fr 1fr}.paddle-grid{grid-template-columns:1fr}.appearance-grid{grid-template-columns:1fr;gap:0}.setup-footer{flex-wrap:wrap}.setup-footer label{flex-wrap:wrap}.start-match{width:100%}.header-actions{flex-wrap:wrap}.choice-card{padding:10px 8px 10px 30px}.choice-description{font-size:11px}}
 
 #shots{display:flex;flex-wrap:wrap;gap:4px;max-width:470px}.controls>div:first-child{min-width:0}@media(max-width:700px){.controls>div:first-child{flex:1}}
+
+#animation-test{display:flex;align-items:center;justify-content:space-between;gap:18px;margin:14px 0;padding:14px;border:2px solid #62d6e7;background:#183443}#animation-test h2{margin:3px 0 6px;font-size:20px}#animation-test p{margin:0;color:#f6cc59}.animation-test-actions{display:flex;align-items:end;gap:10px;flex-wrap:wrap}.animation-test-actions>div{display:flex;gap:5px;align-items:center}.animation-test-actions strong{font-size:11px;color:#a6cbc3}.animation-test-actions button{padding:8px}.animation-test-actions a{color:#9edce3;font-weight:bold}@media(max-width:760px){#animation-test{align-items:flex-start;flex-direction:column}.animation-test-actions>div{align-items:flex-start;flex-direction:column}}
+
+[hidden]{display:none!important}

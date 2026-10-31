@@ -12,6 +12,10 @@ test('configured lineup contains four characters and survives match resets',()=>
 
 
 
-test('female players have distinct originals and same-gender doubles partners',()=>{const women=CHARACTERS.filter(c=>c.gender==='female');assert.equal(women.length,4);const lineup=createLineup({character:'quinn',paddle:'control'});assert.equal(lineup[0].characterId,'quinn');assert.equal(lineup[0].paddle.id,'control');assert.ok(lineup[1].gender==='female');assert.ok(lineup.slice(2).every(p=>p.gender==='male'));assert.ok(lineup[1].characterId!=='quinn')});
-test('male selections receive a same-gender partner and female opponents',()=>{const lineup=createLineup({character:'avery'});assert.equal(lineup[0].gender,'male');assert.equal(lineup[1].gender,'male');assert.ok(lineup.slice(2).every(p=>p.gender==='female'))});
+test('female selections receive a male partner in mixed doubles',()=>{const women=CHARACTERS.filter(c=>c.gender==='female');assert.equal(women.length,4);const lineup=createLineup({character:'quinn',paddle:'control'});assert.equal(lineup[0].characterId,'quinn');assert.equal(lineup[0].paddle.id,'control');assert.equal(lineup[1].gender,'male');assert.ok(lineup.slice(2).every(p=>p.gender==='female'||p.gender==='male'));assert.ok(lineup[1].characterId!=='quinn')});
+test('male selections receive a female partner in mixed doubles',()=>{const lineup=createLineup({character:'avery'});assert.equal(lineup[0].gender,'male');assert.equal(lineup[1].gender,'female')});
+test('every default matchup is mixed doubles',()=>{for(const player of CHARACTERS){const lineup=createLineup({character:player.id});for(const team of [lineup.slice(0,2),lineup.slice(2,4)])assert.deepEqual(new Set(team.map(p=>p.gender)),new Set(['male','female']))}});
 
+
+
+test('legacy skin and hair selections are ignored for both character types',()=>{for(const character of ['avery','selena']){const selection=normalizeSelection({character,skin:'deep',hair:'blonde'});assert.equal('skin' in selection,false);assert.equal('hair' in selection,false);assert.deepEqual(buildProfile(selection).appearance,{jersey:0,body:character==='avery'?'male':'female',paddleDesign:'ocean'})}});

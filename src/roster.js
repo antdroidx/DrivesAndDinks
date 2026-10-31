@@ -9,7 +9,8 @@ export const CHARACTERS = Object.freeze([
   {id:'harper',name:'Harper Brooks',gender:'female',style:'Court runner',description:'Explosive lateral coverage; slightly wider shot spread.',abilities:{speed:13.4,acceleration:52,reach:.96,control:.99,reaction:.078}},
   {id:'quinn',name:'Quinn Vásquez',gender:'female',style:'Kitchen specialist',description:'Fast reactions and precise soft play; slower recovery.',abilities:{speed:11,acceleration:44,reach:1.03,control:1.09,reaction:.081}},
   {id:'lena',name:'Lena Park',gender:'female',style:'Reach & pressure',description:'Extended reach for interceptions; slower reactions.',abilities:{speed:11.6,acceleration:41,reach:1.11,control:.98,reaction:.105}}
-]);export const PADDLES = Object.freeze([
+]);
+export const PADDLES = Object.freeze([
   {id:'balanced',name:'Allcourt',style:'Balanced',description:'Even power, precision and spin.',power:1,control:1,spin:1},
   {id:'power',name:'Ignite',style:'Power',description:'Faster eligible drives; less control and spin.',power:1.12,control:.95,spin:.96},
   {id:'control',name:'Touch',style:'Control',description:'Tighter placement and more spin; slower drives.',power:.94,control:1.08,spin:1.1}
@@ -22,8 +23,9 @@ export const PADDLE_DESIGNS = Object.freeze([
 ]);
 export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',jersey:0,design:'ocean'});
 export function normalizeSelection(input={}){
+  const character=CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character;
   return {
-    character:CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character,
+    character,
     paddle:PADDLES.some(p=>p.id===input?.paddle)?input.paddle:DEFAULT_SELECTION.paddle,
     jersey:Number.isInteger(input?.jersey)&&input.jersey>=0&&input.jersey<JERSEYS.length?input.jersey:0,
     design:PADDLE_DESIGNS.some(d=>d.id===input?.design)?input.design:'ocean'
@@ -35,8 +37,7 @@ export function buildProfile(input){
 }
 export function createLineup(input){
   const selected=normalizeSelection(input),profile=CHARACTERS.find(c=>c.id===selected.character),same=CHARACTERS.filter(c=>c.gender===profile.gender&&c.id!==selected.character),other=CHARACTERS.filter(c=>c.gender!==profile.gender);
-  const order=[selected.character,same[(CHARACTERS.indexOf(profile)+1)%same.length].id,other[0].id,other[1].id],designs=['mint','ocean','ember'];
+  const order=[selected.character,other[0].id,other[1].id,same[(CHARACTERS.indexOf(profile)+1)%same.length].id],designs=['mint','ocean','ember'];
   return order.map((id,index)=>buildProfile({character:id,paddle:index===0?selected.paddle:'balanced',jersey:(selected.jersey+index)%4,design:index===0?selected.design:designs[index%3]}));
 }
 export function selectionStats(input){const p=buildProfile(input);return {speed:p.abilities.speed/12,reach:p.abilities.reach,reactions:.09/p.abilities.reaction,placement:p.abilities.control*p.paddle.control,power:p.paddle.power,spin:p.paddle.spin}}
-

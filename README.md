@@ -8,9 +8,13 @@ Run `node scripts/serve.js` and visit `http://127.0.0.1:8768`. The local server 
 
 ## Choose a player and paddle
 
-The game opens with match setup. Choose from eight originals: Avery Lane, Remy Cruz, Morgan Reed, and Jordan Vale, plus female players Selena Ortiz, Harper Brooks, Quinn Vásquez, and Lena Park. Selecting a female player currently pairs with another female player and uses male opponents; selecting a male player does the reverse. Pick Allcourt (balanced), Ignite (power at a control cost), or Touch (placement and spin at a power cost). The comparison panel shows their combined effects relative to Avery + Allcourt. Jersey colors and Ocean/Ember/Mint paddle finishes affect appearance only, including the in-game sprites. The four male and four female players currently use separate original sprite sheets.
+The game opens with match setup. Choose from eight originals: Avery Lane, Remy Cruz, Morgan Reed, and Jordan Vale, plus female players Selena Ortiz, Harper Brooks, Quinn Vásquez, and Lena Park. Every match uses mixed doubles: each team has one male and one female player, regardless of the selected player. Pick Allcourt (balanced), Ignite (power at a control cost), or Touch (placement and spin at a power cost). The comparison panel shows their combined effects relative to Avery + Allcourt. Jersey colors and Ocean/Ember/Mint paddle finishes affect appearance only, including the in-game sprites. Skin and hair retain the original sprite artwork. The four male and four female players currently use separate original sprite sheets.
 
 Start a playable doubles match or a CPU demonstration. The remaining three characters fill the other positions. PLAYER & PADDLE or NEW GAME opens setup again and pauses the match; BACK TO MATCH resumes, while START NEW MATCH applies the choices and resets the score. Last-used selections are remembered locally in the browser, but character progression is not implemented.
+
+## Force special-shot animations
+
+Open `http://127.0.0.1:8768/?test=animations` for a visual QA mode that loops overhead, forehand, backhand, ATP and Erne swings. Use the SHOT and CHARACTER buttons to compare the clips on a male and female player. Female backhands use a two-handed grip; male backhands are one-handed. The URL also accepts `shot=overhead|forehand|backhand|atp|erne` and `character=avery|selena`. Run `node --test` to verify every forced clip for both character sets.
 
 ## Controls
 
@@ -49,7 +53,7 @@ Each player now owns separate `abilities`, `appearance`, and `paddle` settings. 
 
 The selection screen now exposes original character identities, jersey and paddle colors, and equipment tradeoffs. Future development should add distinct character artwork, broader appearance options, progression, and persistent career saves. Keep appearance independent of abilities; store equipment separately from earned player development. New paddle art and dedicated volley/serve sprite sheets can build on the current stroke classification and timing.
 
-Contact is evaluated by distance, current movement, ball height, shot difficulty, control and buffered timing. Higher control makes mishits less likely. A mishit is still a contact, but it travels slower, more slowly recovers its arc, and can be off-target; the display labels it MISHIT. The current animation uses distance-based footwork and a short planted contact stance. Forehand/backhand contact chooses the mirrored orientation; volleys have a shorter follow-through, and serves have a separate timing duration. They still share artwork. These are game-feel approximations, not motion-captured stroke mechanics.
+Contact is evaluated by distance, current movement, ball height, shot difficulty, control and buffered timing. Higher control makes mishits less likely. A mishit is still a contact, but it travels slower, more slowly recovers its arc, and can be off-target; the display labels it MISHIT. The current animation uses distance-based footwork and a short planted contact stance. Overheads use a raised vertical-strike sequence, forehands use the side-swing sequence, and backhands reverse that sequence with opposite body orientation. Female backhands add a second arm reaching to the grip. ATP and Erne have their own clips. These are assembled from the existing sprite frames and body transforms, not motion-captured stroke mechanics.
 
 ## Player/paddle balance smoke test
 
