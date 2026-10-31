@@ -1,10 +1,10 @@
-import {setupSelection} from './selection.js?v=26';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=26';
-import {drawPixelCharacter} from './pixel-character.js?v=26';
-import {Game} from './game.js?v=26';
-import {selectShot,serveAim} from './core.js?v=26';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=26';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=26';
+import {setupSelection} from './selection.js?v=27';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=27';
+import {drawPixelCharacter} from './pixel-character.js?v=27';
+import {Game} from './game.js?v=27';
+import {selectShot,serveAim} from './core.js?v=27';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=27';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=27';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -35,28 +35,38 @@ function drawLoadoutPreview(selection){
  const c=document.querySelector('#player-preview');if(!c)return;
  const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:character.gender,outfit:selection.outfit,hair:selection.hair,skin:selection.skin,shirtColor:selection.shirtColor,bottomColor:selection.bottomColor,paddleColor:selection.paddleColor};
  x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
- x.fillStyle='#355e60';x.fillRect(0,157,c.width,43);x.fillStyle='#eff3cf66';x.fillRect(0,177,c.width,2);
- for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,157,10,43)}
- drawPixelCharacter(x,{appearance,mode:'idle',frame:0,x:18,y:8,width:144,height:180,view:'front'});
+ x.fillStyle='#355e60';x.fillRect(0,178,c.width,42);x.fillStyle='#eff3cf66';x.fillRect(0,195,c.width,2);
+ for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
+ drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:Math.floor(performance.now()/280)%4,x:9,y:-2,width:162,height:216,view:'front'});
 }
 function drawSprite(p,q){
- const scale=.82+p.y/115,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
+ const scale=.9+p.y/125,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const back=p.team===0,progress=p.swing/(p.swingDuration||.36),contactFrame=p.id===game.lastHitter&&game.contact?.time>0,strokePhase=contactFrame?.52:p.swing>0?1-progress:0;
  const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,contactFrame?.52:1-progress):null;
- const gait=Math.floor((p.stride||0)/1.1),mode=strokeAnimation?.kind??(moving?'run':'idle'),frame=strokeAnimation?.frameColumn??(moving?gait%8:0);
- const width=80*scale,height=96*scale;
+ const gait=Math.floor((p.stride||0)/1.1),locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?gait%8:(Math.floor(game.clock*5)+p.id)%8);
+ const width=84*scale,height=112*scale,spriteY=Math.round(q.y-height*111/128+2);
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){
   ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke();ctx.restore();
  }
- drawPixelCharacter(ctx,{appearance:p.appearance,mode,frame,phase:strokePhase,moving,view:back?'back':'front',mirror:strokeAnimation?.mirror??(p.swingSide||1)<0,x:Math.round(q.x-width/2),y:Math.round(q.y-height+5),width,height});
+ const mirrored=strokeAnimation?.mirror??(p.swingSide||1)<0;let contactTarget=null;if(strokeAnimation&&p.contactPoint){const point=project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z),spriteX=Math.round(q.x-width/2),targetX=(point.x-spriteX)/width*96;contactTarget=[mirrored?96-targetX:targetX,(point.y-spriteY)/height*128]}
+ drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,view:strokeAnimation?'front':back?'back':'front',mirror:mirrored,contactTarget,x:Math.round(q.x-width/2),y:spriteY,width,height});
+}
+function drawPixelBall(x,y,radius){
+ const r=Math.max(3,Math.round(radius));
+ for(let dy=-r;dy<=r;dy++){
+  const span=Math.floor(Math.sqrt(Math.max(0,r*r-dy*dy)));
+  ctx.fillStyle=dy<-r*.45?'#fff08a':dy>r*.4?'#d2bf45':'#f7e86a';ctx.fillRect(Math.round(x-span),Math.round(y+dy),span*2+1,1);
+ }
+ ctx.fillStyle='#f9ffd0';ctx.fillRect(Math.round(x-r*.4),Math.round(y-r*.45),Math.max(1,Math.round(r*.45)),1);
+ ctx.fillStyle='#75672c';ctx.fillRect(Math.round(x-r*.15),Math.round(y-r),1,Math.max(2,Math.round(r*.5)));ctx.fillRect(Math.round(x+r*.55),Math.round(y-r*.2),1,Math.max(2,Math.round(r*.7)));
 }
 const courtSpeckles=Array.from({length:160},(_,i)=>({x:((i*137)%1000)/1000*24-2,y:((i*269)%1000)/1000*48-2}));
 function render(){const palette=COURT_PALETTES.find(item=>item.id===game.players[0]?.appearance?.court)??COURT_PALETTES[0];ctx.fillStyle=palette.background;ctx.fillRect(0,0,960,600);ctx.fillStyle=palette.stripe;for(let i=0;i<960;i+=40)ctx.fillRect(i,110,20,490);poly([[-3.6,-2.4],[23.6,-2.4],[23.6,47.1],[-3.6,47.1]],palette.outer,null);poly([[-3.4,-2.4],[23.4,-2.4],[23.4,46.4],[-3.4,46.4]],palette.outerLight,null);poly([[-3,-2],[23,-2],[23,46],[-3,46]],palette.apron,null);poly([[0,0],[20,0],[20,44],[0,44]],palette.court,palette.line);poly([[0,15],[20,15],[20,29],[0,29]],palette.kitchen,null,palette.line);ctx.fillStyle='#ffffff0b';for(const speck of courtSpeckles){const q=project(speck.x,speck.y);ctx.fillRect(q.x,q.y,2,1)}poly([[0,0],[20,0],[20,44],[0,44]],'transparent',palette.line,3);line([0,15],[20,15],palette.line);line([0,29],[20,29],palette.line);line([10,0],[10,15],palette.line);line([10,29],[10,44],palette.line);if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):previewShot==='dink'?14:previewShot==='drop'?12:previewShot==='slice'?6:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
  const netL=project(-.5,22),netR=project(20.5,22);ctx.fillStyle='#25323c';ctx.fillRect(netL.x,netL.y-30,netR.x-netL.x,30);ctx.strokeStyle='#94a79e';ctx.lineWidth=1;for(let x=netL.x;x<netR.x;x+=10){ctx.beginPath();ctx.moveTo(x,netL.y-30);ctx.lineTo(x,netL.y);ctx.stroke()}for(let y=netL.y-24;y<netL.y;y+=7){ctx.beginPath();ctx.moveTo(netL.x,y);ctx.lineTo(netR.x,y);ctx.stroke()}ctx.fillStyle='#f9e6bd';ctx.fillRect(netL.x,netL.y-32,netR.x-netL.x,5);ctx.fillStyle='#bdc8bf';ctx.fillRect(netL.x-3,netL.y-36,5,39);ctx.fillRect(netR.x-2,netR.y-36,5,39);
  if(game.phase==='rally'){ctx.fillStyle='#fff1a744';for(let i=0;i<game.trail.length;i+=2){const t=game.trail[i],q=project(t.x,t.y,t.z);ctx.fillRect(q.x-2,q.y-2,4,4)}}if(game.bounceMark?.time>0){const q=project(game.bounceMark.x,game.bounceMark.y);ctx.strokeStyle='#fff5ab';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,10+(1-game.bounceMark.time/.35)*8,4,0,0,Math.PI*2);ctx.stroke()}
- const entities=[...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z);ctx.fillStyle='#f9f36c';ctx.fillRect(b.x-4,b.y-4,8,8);continue}drawSprite(p,q)}
- if(game.contact&&game.contact.time>0){const c=project(game.contact.x,game.contact.y,game.contact.z);ctx.fillStyle='#fff9c9';ctx.fillRect(c.x-10,c.y-2,20,4);ctx.fillRect(c.x-2,c.y-10,4,20)}
+ const entities=[...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z);drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22));continue}drawSprite(p,q)}
+ if(game.contact&&game.contact.time>0){const c=project(game.contact.x,game.contact.y,game.contact.z),age=1-game.contact.time/.12,spread=7+Math.round(age*8);ctx.fillStyle='#fff9c9';ctx.fillRect(c.x-spread,c.y-1,spread*2,2);ctx.fillRect(c.x-1,c.y-spread,2,spread*2);ctx.fillStyle='#f9d46a';for(const [dx,dy] of [[-spread,-spread],[spread,-spread],[-spread,spread],[spread,spread]])ctx.fillRect(c.x+dx,c.y+dy,2,2)}
  ctx.fillStyle='#1b2939';ctx.fillRect(20,15,500,85);ctx.fillStyle='#f9d46a';ctx.font='bold 17px monospace';ctx.fillText('DRIVES & DINKS  /  '+(game.mode==='play'?'PLAY':'WATCH')+' · '+game.difficulty.toUpperCase(),32,38);ctx.fillStyle='#fff8df';ctx.font='bold 20px monospace';ctx.fillText(`YOU ${game.score.points[0]}`,32,64);ctx.fillText(`CPU ${game.score.points[1]}`,270,64);ctx.font='bold 11px monospace';ctx.fillText(game.players.slice(0,2).map((p,i)=>p.name||`Player ${i+1}`).join(' / '),32,85,225);ctx.fillText(game.players.slice(2).map((p,i)=>p.name||`Player ${i+3}`).join(' / '),270,85,238);ctx.font='bold 16px monospace';ctx.fillStyle='#fff6d9';ctx.fillText(`SERVE ${game.score.team===0?'YOU':'CPU'}  ${game.score.call}`,560,35);ctx.fillStyle='#f9d46a';ctx.fillText(game.phase==='over'?(game.score.winner===0?'YOU WIN!':'CPU WINS!'):(game.canHumanHit()?'HIT NOW!':game.message),560,62);if(game.paused){ctx.fillStyle='#1b2939';ctx.fillRect(235,260,490,75);ctx.textAlign='center';ctx.fillStyle='#fff6d9';ctx.font='bold 19px monospace';ctx.fillText('MATCH PAUSED',480,288);ctx.fillStyle='#f9d46a';ctx.fillText('TAP RESUME TO CONTINUE',480,316);ctx.textAlign='start'}else if(game.phase==='pause'||game.phase==='over'){ctx.fillStyle='#1b2939';ctx.fillRect(235,260,490,75);ctx.textAlign='center';ctx.fillStyle='#fff6d9';ctx.font='bold 19px monospace';ctx.fillText(game.result,480,288);ctx.fillStyle='#f9d46a';ctx.fillText(game.outcome,480,316);ctx.textAlign='start'};ctx.fillStyle='#fff';ctx.font='13px monospace';ctx.fillText((game.phase==='serve'?'SERVE AIM: ':'TARGET: ')+(game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'),560,83)}
 let previousStatus='';function frame(t){if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120);acc-=1/120}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 const aimPad=document.querySelector('#aim-pad'),aimThumb=document.querySelector('#aim-pad .aim-pad-thumb');
