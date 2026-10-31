@@ -60,7 +60,3 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
  if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';return height>2.7||(height>.65&&random<.28)?'drive':'dink'}
  return height>3.2&&random<.45?'drive':'drop';
 }
-
-
-
-

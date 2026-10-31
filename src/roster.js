@@ -41,4 +41,3 @@ export function createLineup(input){
   return order.map((id,index)=>buildProfile({character:id,paddle:index===0?selected.paddle:'balanced',jersey:(selected.jersey+index)%4,design:index===0?selected.design:designs[index%3]}));
 }
 export function selectionStats(input){const p=buildProfile(input);return {speed:p.abilities.speed/12,reach:p.abilities.reach,reactions:.09/p.abilities.reaction,placement:p.abilities.control*p.paddle.control,power:p.paddle.power,spin:p.paddle.spin}}
-
