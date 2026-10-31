@@ -2,9 +2,13 @@ export const C={width:20,length:44,net:22,kitchen:7,gravity:32,bounce:.72,dt:1/1
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{jersey:0}}}
+export function serveAim(player,aim){
+ const value=Math.max(1,Math.min(19,Number(aim)||10));
+ return player.x<10?Math.max(10.8,value):Math.min(9.2,value)
+}
 export function serveTarget(player,aim,type='hard',random=Math.random()){
- const spread=(type==='soft'?1.35:2.3)/Math.max(.55,(player.abilities?.serve??1)*(player.paddle?.control??1));
- return Math.max(1,Math.min(19,aim+(random-.5)*spread))
+ const spread=(type==='soft'?.95:1.65)/Math.max(.55,(player.abilities?.serve??1)*(player.paddle?.control??1));
+ return serveAim(player,(Number(aim)||10)+(random-.5)*spread)
 }
 export function aimStep(player,fine=false){const placement=(player.abilities?.control??1)*(player.paddle?.control??1);return Math.max(1.5,Math.min(3.5,2.5/placement))*(fine?.25:1)}
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
