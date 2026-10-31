@@ -1,9 +1,9 @@
-import {setupSelection} from './selection.js?v=17';
-import {PADDLE_DESIGNS,CHARACTERS} from './roster.js?v=17';
-import {Game} from './game.js?v=17';
-import {selectShot,serveAim} from './core.js?v=17';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=17';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=17';
+import {setupSelection} from './selection.js?v=18';
+import {PADDLE_DESIGNS,CHARACTERS} from './roster.js?v=18';
+import {Game} from './game.js?v=18';
+import {selectShot,serveAim} from './core.js?v=18';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=18';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=18';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
