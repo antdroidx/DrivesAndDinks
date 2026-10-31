@@ -62,7 +62,7 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
     text-align:center;align-self:end;text-shadow:1px 1px #102822
   }
   #shots::before{content:'PLACEMENT';grid-column:1;grid-row:1}
-  #shots::after{content:'ATTACK';grid-column:3;grid-row:2}
+  #shots::after{content:'ATTACK';grid-column:3;grid-row:1}
   #shots button{
     pointer-events:auto;width:min(82%,128px);height:clamp(44px,7dvh,58px);min-height:0;
     align-self:center;justify-self:center;padding:4px;font-size:clamp(9px,1.25vw,12px);
@@ -71,7 +71,7 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
   #shots [data-shot="drop"]{grid-column:1;grid-row:2}
   #shots [data-shot="dink"]{grid-column:1;grid-row:3}
   #shots [data-shot="lob"]{grid-column:1;grid-row:4}
-  #shots [data-shot="drive"]{grid-column:3;grid-row:3}
+  #shots [data-shot="drive"]{grid-column:3;grid-row:2}
   #shots [data-shot="slice"]{grid-column:3;grid-row:4}
   #overlay{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;display:block;background:none}
 }

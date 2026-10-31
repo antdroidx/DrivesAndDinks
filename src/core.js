@@ -4,17 +4,19 @@ export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{jersey:0}}}
 export function aimStep(player,fine=false){const placement=(player.abilities?.control??1)*(player.paddle?.control??1);return Math.max(1.5,Math.min(3.5,2.5/placement))*(fine?.25:1)}
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
-export function contactQuality(p,b,shot,buffered=false,random=Math.random()){
+export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
  const reach=p.abilities?.reach??1
  const radial=Math.sqrt(((b.x-p.x)/(1.6*reach))**2+((b.y-p.y)/(1.9*reach))**2)
  const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed)
- const difficulty={serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
+ const shotDifficulty={serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
+ const easy=difficulty==='easy'
  let chance=.012+.09*radial**2+.05*radial**4+.05*motion**2+.04*Math.max(0,.9-(b.z??1))/.9+.03*Math.max(0,(b.z??1)-2.8)/.7
- chance*=difficulty
- chance*=(buffered?.84:1)
+ chance*=shotDifficulty
+ if(easy)chance*=.62
+ if(buffered)chance*=easy?.52:.84
  chance/=Math.max(.55,((p.abilities?.control??1)*(p.paddle?.control??1))**.8)
- chance=Math.min(.42,Math.max(0,chance))
- return {quality:Math.max(.42,1-chance),mishit:random<chance}
+ chance=Math.min(easy?.3:.42,Math.max(0,chance))
+ return {quality:Math.max(easy?.65:.42,1-chance),mishit:random<chance}
 }
 export const side=y=>y>22?0:1;
 export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=C.gravity*dt; b.vx*=1-(b.spin||0)*dt*.015;b.vy*=1-(b.spin||0)*dt*.015;

@@ -54,3 +54,17 @@ test('new serve preserves appearance and equipment while clearing old animation'
 test('mishit chance is low on clean contact and high at the edge',()=>{const clean=playerProfile(),edge=playerProfile();clean.x=edge.x=10;clean.y=edge.y=35;clean.vx=edge.vx=clean.vy=edge.vy=0;const ball={x:10.5,y:35.5,z:1.4};assert.ok(contactQuality(clean,ball,'drive',false,.99).quality>.9);assert.equal(contactQuality(clean,ball,'drive',false,.99).mishit,false);const out=contactQuality(edge,{x:11.6,y:37.3,z:.2},'drive',false,0);assert.equal(out.mishit,true);assert.ok(out.quality<.65)});
 
 test('low contact quality weakens the trajectory and marks a mishit',()=>{const clean={x:10,y:44,z:2},weak={...clean};launch(clean,10,4,'drive',{power:1,control:1,spin:1},1);launch(weak,10,4,'drive',{power:1,control:1,spin:1},.55);assert.ok(Math.abs(weak.vy)<Math.abs(clean.vy));const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];p.x=10;p.y=35;Object.assign(g.ball,{x:10.5,y:35.5,z:1});g.hit(p,'drive',15,.55);assert.equal(p.mishit,true);assert.match(g.message,/MISHIT/)});
+
+
+test('easy difficulty queues swings for longer than normal without changing the rules',()=>{
+ const bufferFor=(difficulty)=>{const g=new Game();g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=0;Object.assign(g.ball,{x:19,y:5,z:5,vx:0,vy:0,vz:0});g.swing();return g.hitBuffer};
+ assert.equal(bufferFor('normal'),.32);assert.equal(bufferFor('easy'),.55)
+ const g=new Game();g.setDifficulty('easy');g.reset();assert.equal(g.difficulty,'easy')
+});
+
+test('easy difficulty is more forgiving at the edge of the hit window',()=>{
+ const p=playerProfile();Object.assign(p,{x:10,y:35,vx:0,vy:0});const ball={x:11.6,y:37.3,z:.2};
+ const normal=contactQuality(p,ball,'drive',false,.35,'normal');
+ const easy=contactQuality(p,ball,'drive',false,.35,'easy');
+ assert.equal(normal.mishit,true);assert.equal(easy.mishit,false);assert.ok(easy.quality>normal.quality)
+});

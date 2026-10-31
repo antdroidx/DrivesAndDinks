@@ -20,6 +20,8 @@ Open `http://127.0.0.1:8768/?test=animations` for a visual QA mode that loops ov
 
 Choose drive, drop, dink, lob, or slice with 1–5 or the on-screen shot buttons. Selecting a shot type immediately swings. Move the cyan target left or right on the opposite court with the mouse, arrow keys, or a touch on the court. The target indicates direction rather than the exact landing spot for every shot. Press Space or 1–5 to swing; clicking the court also swings. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. On a touchscreen, drag or tap the court to aim, then tap a shot button to swing. Placement shots run down the left green court apron and attack shots run down the right apron, keeping the controls inside the playfield and visible without page scrolling.
 
+Choose EASY or NORMAL from the setup screen or the DIFFICULTY button. NORMAL keeps the standard 0.32-second swing buffer; EASY extends it to 0.55 seconds and softens mishit penalties on buffered contacts. The rules, movement, and shot selection remain the same.
+
 Sound unlocks on your first click or keypress; the SOUND button toggles synthesized paddle, bounce, and net effects. Ball trails, bounce rings, and contact flashes help show the ball trajectory.
 
 ## Architecture
