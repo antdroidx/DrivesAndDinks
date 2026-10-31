@@ -1,0 +1,103 @@
+{
+  "balanceFlags": [],
+  "method": "CPU-only candidate plus standard partner vs two standard opponents; candidate tested on both court sides for each seed. Smoke test, not proof of competitive balance.",
+  "pairedSeeds": 12,
+  "results": [
+    {
+      "player": "Avery Lane",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 12,
+      "completed": 24,
+      "pointDifference": 0
+    },
+    {
+      "player": "Avery Lane",
+      "paddle": "Ignite",
+      "games": 24,
+      "wins": 18,
+      "completed": 24,
+      "pointDifference": 85
+    },
+    {
+      "player": "Avery Lane",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 12,
+      "completed": 24,
+      "pointDifference": 19
+    },
+    {
+      "player": "Remy Cruz",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 13,
+      "completed": 24,
+      "pointDifference": -8
+    },
+    {
+      "player": "Remy Cruz",
+      "paddle": "Ignite",
+      "games": 24,
+      "wins": 17,
+      "completed": 24,
+      "pointDifference": 74
+    },
+    {
+      "player": "Remy Cruz",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 13,
+      "completed": 24,
+      "pointDifference": 22
+    },
+    {
+      "player": "Morgan Reed",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 17,
+      "completed": 24,
+      "pointDifference": 54
+    },
+    {
+      "player": "Morgan Reed",
+      "paddle": "Ignite",
+      "games": 24,
+      "wins": 18,
+      "completed": 24,
+      "pointDifference": 76
+    },
+    {
+      "player": "Morgan Reed",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 13,
+      "completed": 24,
+      "pointDifference": 31
+    },
+    {
+      "player": "Jordan Vale",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 12,
+      "completed": 24,
+      "pointDifference": 1
+    },
+    {
+      "player": "Jordan Vale",
+      "paddle": "Ignite",
+      "games": 24,
+      "wins": 13,
+      "completed": 24,
+      "pointDifference": 30
+    },
+    {
+      "player": "Jordan Vale",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 12,
+      "completed": 24,
+      "pointDifference": -16
+    }
+  ]
+}
