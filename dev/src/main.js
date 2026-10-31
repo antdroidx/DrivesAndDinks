@@ -1,9 +1,9 @@
-import {setupSelection} from './selection.js?v=23';
-import {HAIR_COLORS,SKIN_TONES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,CHARACTERS} from './roster.js?v=23';
-import {Game} from './game.js?v=23';
-import {selectShot,serveAim} from './core.js?v=23';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=23';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=23';
+import {setupSelection} from './selection.js?v=24';
+import {HAIR_COLORS,SKIN_TONES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,CHARACTERS} from './roster.js?v=24';
+import {Game} from './game.js?v=24';
+import {selectShot,serveAim} from './core.js?v=24';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=24';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=24';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -51,14 +51,15 @@ function tintPixel(d,i,target,baseTotal){
 function equipmentFrame(p,row,col){
  const appearance=p.appearance,key=[atlasKey(p),row,col,appearance.hair,appearance.skin,appearance.shirtColor,appearance.bottomColor,appearance.paddleColor].join(':');if(frameCache.has(key))return frameCache.get(key);
  const sheet=atlases[atlasKey(p)];if(!sheet)return null;
- const cellW=sheet.naturalWidth/8,cellH=sheet.naturalHeight/8,c=document.createElement('canvas');c.width=160;c.height=160;
- const insetX=cellW*.015,insetTop=cellH*(row===0?.01:.19),insetBottom=cellH*.015;
+ const cellW=sheet.naturalWidth/8,cellH=sheet.naturalHeight/8,c=document.createElement('canvas');c.width=96;c.height=96;
+ const insetX=cellW*.015,insetTop=cellH*.005,insetBottom=cellH*.012;
  const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(sheet,col*cellW+insetX,row*cellH+insetTop,cellW-insetX*2,cellH-insetTop-insetBottom,0,0,c.width,c.height);
  const image=x.getImageData(0,0,c.width,c.height),d=image.data;
  const hair=colorRgb(HAIR_COLORS,appearance.hair,'brown'),skin=colorRgb(SKIN_TONES,appearance.skin,'medium'),shirt=colorRgb(CLOTHING_COLORS,appearance.shirtColor,'green'),bottom=colorRgb(CLOTHING_COLORS,appearance.bottomColor,'black'),paddle=colorRgb(PADDLE_COLORS,appearance.paddleColor,'mint');
  for(let i=0;i<d.length;i+=4){
   const r=d[i],g=d[i+1],b=d[i+2];
-  if(g>185&&b>185&&r<75){d[i+3]=0;continue}
+  const cyanInfluence=Math.min(g,b)-r;
+  if(d[i+3]&&cyanInfluence>12&&Math.abs(g-b)<85&&Math.max(g,b)>70){d[i+3]=0;continue}
   if(r>125&&b>65&&r>g*1.45&&b>g*1.15)tintPixel(d,i,hair,285);
   else if(g>95&&g>r*1.22&&g>b*1.45)tintPixel(d,i,shirt,205);
   else if(b>100&&b>g*1.15&&b>r*1.4)tintPixel(d,i,bottom,220);
@@ -76,11 +77,14 @@ function equipmentFrame(p,row,col){
     visited[next]=1;queue.push(next);
    }
   }
-  components.push({pixels,minY:Math.min(...pixels.map(index=>Math.floor(index/width))),maxY:Math.max(...pixels.map(index=>Math.floor(index/width)))});
+  let saturated=0;
+  for(const index of pixels){const r=d[index*4],g=d[index*4+1],b=d[index*4+2];if(Math.max(r,g,b)-Math.min(r,g,b)>45)saturated++}
+  components.push({pixels,minY:Math.min(...pixels.map(index=>Math.floor(index/width))),maxY:Math.max(...pixels.map(index=>Math.floor(index/width))),saturated:pixels.length?saturated/pixels.length:0});
  }
- const largest=Math.max(0,...components.map(component=>component.pixels.length)),minimum=Math.max(30,largest*.028);
+ const largest=Math.max(0,...components.map(component=>component.pixels.length)),minimum=Math.max(18,largest*.028);
  for(const component of components){
-  const stray=component.pixels.length<minimum||(component.maxY<height*.34&&component.pixels.length<largest*.18);
+  const topBleed=component.maxY<height*.34&&component.pixels.length<largest*.35&&component.saturated<.22;
+  const stray=component.pixels.length<minimum||topBleed;
   if(stray)for(const index of component.pixels)d[index*4+3]=0;
  }
  x.putImageData(image,0,0);frameCache.set(key,c);return c;
@@ -93,13 +97,13 @@ function drawLoadoutPreview(selection){
 function drawSprite(p,q){
  const scale=.8+p.y/100,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const back=p.team===0,swinging=(p.windup>0||p.swing>0);
- const progress=p.swing/(p.swingDuration||.36);const gait=Math.floor((p.stride||0)/1.1),strokeAnimation=swinging?sampleStrokeAnimation(p,1-progress):null,kind=strokeAnimation?.kind;
+ const progress=p.swing/(p.swingDuration||.36),contactFrame=p.id===game.lastHitter&&game.contact?.time>0;const gait=Math.floor((p.stride||0)/1.1),strokeAnimation=swinging?sampleStrokeAnimation(p,contactFrame?.52:1-progress):null,kind=strokeAnimation?.kind;
  const strokeRow=kind==='backhand'?(back?3:2):kind==='overhead'?(back?5:4):(back?1:0),row=swinging?strokeRow:(back?7:6),col=swinging?strokeAnimation.frameColumn:(moving?gait%8:0);
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.scale(scale,scale);
  ctx.fillStyle='#101f1a80';ctx.beginPath();ctx.ellipse(0,0,18,6,0,0,Math.PI*2);ctx.fill();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke()}
  if(p.swing>0&&progress>.7&&p.contactPoint){const point=project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z);ctx.translate(Math.max(-7,Math.min(7,(point.x-q.x)/scale-(p.swingSide||1)*23)),Math.max(-6,Math.min(6,(point.y-q.y)/scale+35)))}if(strokeAnimation){ctx.translate(0,strokeAnimation.offsetY);ctx.rotate(strokeAnimation.rotation);ctx.scale(1,strokeAnimation.scaleY);if(strokeAnimation.mirror)ctx.scale(-1,1)}ctx.imageSmoothingEnabled=false;
- const frame=equipmentFrame(p,row,col);if(frame)ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
+ const frame=equipmentFrame(p,row,col);ctx.imageSmoothingEnabled=false;if(frame)ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
 }
 function drawSupportHand(animation){
  const x=animation.supportHandX,y=animation.supportHandY;
