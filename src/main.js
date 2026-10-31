@@ -5,6 +5,7 @@ import {selectShot,serveAim} from './core.js';
 import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js';
 import {sampleStrokeAnimation} from './stroke-animation.js';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
+const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1',difficultyButton=document.querySelector('#difficulty');
 function syncDifficultyButton(){const label=game.difficulty.toUpperCase();difficultyButton.textContent=`DIFFICULTY: ${label}`;difficultyButton.setAttribute('aria-label',`Difficulty: ${label}`)}
 function setDifficulty(value,persist=true){game.setDifficulty(value);syncDifficultyButton();if(persist)try{localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}}

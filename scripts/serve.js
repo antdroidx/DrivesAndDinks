@@ -3,7 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const allowed=new Map([
-  ['/', ['index.html','text/html']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],
+  ['/', ['index.html','text/html']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],['/build-info.js',['build-info.js','text/javascript']],
   ...['animation-test','stroke-animation','core','game','main','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
   ...['player-sprites-v1','vertical-swings-v1','female-player-skirt-v2'].map(name=>[`/assets/${name}.png`,[`assets/${name}.png`,'image/png']])
 ]);

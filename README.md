@@ -4,7 +4,7 @@ An early browser-based doubles pickleball prototype. Four players move automatic
 
 ## Run
 
-Run `node scripts/serve.js` and visit `http://127.0.0.1:8768`. The local server serves only the game files. You can also use another static HTTP server. No runtime packages are required. Run the automated checks with `node --test` (Node.js 18 or newer).
+The header shows a sequential `BUILD` number on GitHub Pages, generated from the GitHub Actions run number; local runs show `BUILD dev`. Run `node scripts/serve.js` and visit `http://127.0.0.1:8768`. The local server serves only the game files. You can also use another static HTTP server. No runtime packages are required. Run the automated checks with `node --test` (Node.js 18 or newer).
 
 ## Choose a player and paddle
 
