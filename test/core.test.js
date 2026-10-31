@@ -8,7 +8,7 @@ test('game serve, fault and reset transitions',()=>{let g=new Game();assert.equa
 
 
 test('servers start behind their baseline on both sides',()=>{const g=new Game();assert.ok(g.server.y>44);g.score.team=1;g.serveSetup();assert.ok(g.server.y<0)});
-test('early swing is buffered until a legal ball is in reach',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:38.4,z:1,vx:0,vy:-3,vz:0});g.swing();assert.ok(g.hitBuffer>0);for(let i=0;i<20&&g.last===1;i++)g.update(C.dt);assert.equal(g.last,0);assert.equal(g.hitBuffer,0)});
+test('early swing is buffered until a legal ball is in reach',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:37.3,z:1,vx:0,vy:-3,vz:0});g.swing();assert.ok(g.hitBuffer>0);for(let i=0;i<35&&g.last===1;i++)g.update(C.dt);assert.equal(g.last,0);assert.equal(g.hitBuffer,0)});
 
 
 test('a second bounce outside awards the rally to the hitter',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;Object.assign(g.ball,{x:21,y:40,z:.001,vx:0,vy:0,vz:-1});g.update(C.dt);assert.equal(g.message,'DOUBLE BOUNCE');assert.equal(g.phase,'pause');assert.equal(g.score.team,1)});
@@ -37,5 +37,8 @@ test('serve returner stays near baseline before the serve bounces',()=>{for(cons
 
 
 test('CPU can use a defensive lob against a pair at the kitchen',()=>{assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:true,random:.99}),'lob');assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:false,random:.99}),'dink')});
-test('missed timing feedback appears when an early swing expires',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=0;Object.assign(g.ball,{x:19,y:5,z:5,vx:0,vy:0,vz:0});g.swing();for(let i=0;i<31;i++)g.update(C.dt);assert.equal(g.message,'MISSED TIMING')});
+test('missed timing feedback appears when an early swing expires',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=0;Object.assign(g.ball,{x:19,y:5,z:5,vx:0,vy:0,vz:0});g.swing();for(let i=0;i<45;i++)g.update(C.dt);assert.equal(g.message,'MISSED TIMING')});
 test('side out retains the correct player positions across points',()=>{const s=new Score();s.point(1);const server=s.player;s.point(1);s.point(1);assert.equal(s.player,server);s.point(0);assert.notEqual(s.player,server);s.point(0);assert.equal(s.team,0);assert.equal(s.player,s.rightPlayer[0])});
+
+
+test('human contact requires ball inside visible reach and height',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35});Object.assign(g.ball,{x:12.5,y:35,z:1});assert.equal(g.canHumanHit(),false);Object.assign(g.ball,{x:11,y:35,z:4});assert.equal(g.canHumanHit(),false);g.ball.z=2;assert.equal(g.canHumanHit(),true)});
