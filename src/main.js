@@ -4,19 +4,20 @@ const project=(x,y,z=0)=>({x:480+(x-10)*(13+y*.21),y:145+y*8.5-z*14});
 function poly(points,fill,stroke='#f8edc7',width=2){ctx.beginPath();points.forEach(([x,y],i)=>{const p=project(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}}
 function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
 // Original generated sprite sheet; recolor only the yellow jersey pixels per player.
-const spriteSheet=new Image(),spriteVariants=[];
-spriteSheet.onload=()=>{const colors=[[238,182,43],[226,102,79],[83,155,221],[164,126,205]];for(const color of colors){const c=document.createElement('canvas');c.width=spriteSheet.width;c.height=spriteSheet.height;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(spriteSheet,0,0);const image=x.getImageData(0,0,c.width,c.height),d=image.data;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];if(d[i+3]&&r>135&&g>85&&g>r*.48&&b<r*.35&&b<g*.52){const light=Math.min(1.25,(r+g)/(2*190));d[i]=Math.min(255,color[0]*light);d[i+1]=Math.min(255,color[1]*light);d[i+2]=Math.min(255,color[2]*light)}}x.putImageData(image,0,0);spriteVariants.push(c)}};
-spriteSheet.src='./assets/player-sprites-v1.png';
+const spriteVariants=[],swingVariants=[];
+function loadSpriteVariants(path,variants){const sheet=new Image();sheet.onload=()=>{const colors=[[238,182,43],[226,102,79],[83,155,221],[164,126,205]];for(const color of colors){const c=document.createElement('canvas');c.width=sheet.width;c.height=sheet.height;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(sheet,0,0);const image=x.getImageData(0,0,c.width,c.height),d=image.data;for(let i=0;i<d.length;i+=4){const r=d[i],g=d[i+1],b=d[i+2];if(d[i+3]&&r>135&&g>85&&g>r*.48&&b<r*.35&&b<g*.52){const light=Math.min(1.25,(r+g)/(2*190));d[i]=Math.min(255,color[0]*light);d[i+1]=Math.min(255,color[1]*light);d[i+2]=Math.min(255,color[2]*light)}}x.putImageData(image,0,0);variants.push(c)}};sheet.src=path}
+loadSpriteVariants('./assets/player-sprites-v1.png',spriteVariants);
+loadSpriteVariants('./assets/vertical-swings-v1.png',swingVariants);
 function drawSprite(p,q){
  const scale=.8+p.y/100,moving=Math.hypot(p.vx,p.vy)>1.2;
- const back=p.team===0;let row=back?1:0,col=moving?1+Math.floor(performance.now()/130+p.id)%3:0;
- if(p.windup>0||p.swing>0){row=back?3:2;col=p.windup>0||p.swing>.24?1:p.swing>.11?3:4}
- const sw=row<2?350.5:280.4,sh=280.5,sx=col*sw,sy=row*sh;
+ const back=p.team===0,swinging=(p.windup>0||p.swing>0)&&swingVariants.length===4;
+ const row=back?1:0,col=swinging?(p.windup>0?1:p.swing>.24?2:p.swing>.11?3:0):(moving?1+Math.floor(performance.now()/130+p.id)%3:0);
+ const sw=swinging?384:350.5,sh=swinging?512:280.5,sx=col*sw,sy=row*sh;
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.scale(scale,scale);
  ctx.fillStyle='#101f1a80';ctx.beginPath();ctx.ellipse(0,0,18,6,0,0,Math.PI*2);ctx.fill();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke()}
  if(p.swing>0&&(p.swingSide||1)<0)ctx.scale(-1,1);ctx.imageSmoothingEnabled=false;
- ctx.drawImage(spriteVariants[p.id],sx,sy,sw,sh,-35,-77,70,80);ctx.restore();
+ if(swinging)ctx.drawImage(swingVariants[p.id],sx,sy,sw,sh,-29,-78,58,91);else ctx.drawImage(spriteVariants[p.id],sx,sy,sw,sh,-35,-77,70,80);ctx.restore();
 }
 // Each player is assembled from a small pixel grid; only the pose frames change.
 function drawPlayer(p,q){
