@@ -6,7 +6,7 @@ const useRoster=process.argv.includes('--roster');
 const games=Number(process.argv[2]||20);
 if(!Number.isInteger(games)||games<1||games>1000)throw new Error('Match count must be an integer from 1 to 1000');
 const originalRandom=Math.random;
-const summary={games,roster:useRoster,completed:0,rallies:0,shots:0,maxRally:0,humanHits:0,results:{},shotTypes:{},elapsedMs:0};
+const summary={games,roster:useRoster,completed:0,rallies:0,shots:0,maxRally:0,humanHits:0,results:{},shotTypes:{},tactics:{poachAttempts:0,poachHits:0,coverSwaps:0,offBallDistance:0},elapsedMs:0};
 const lengths=[];const start=performance.now();
 try{
  for(let seed=1;seed<=games;seed++){
@@ -22,6 +22,7 @@ try{
    }
    game.update(C.dt);
   }
+  for(const key of Object.keys(summary.tactics))summary.tactics[key]+=game.tacticalStats[key];
   if(game.phase==='over'&&Math.max(...game.score.points)>=11&&Math.abs(game.score.points[0]-game.score.points[1])>=2)summary.completed++;
  }
 }finally{Math.random=originalRandom}
@@ -29,3 +30,5 @@ lengths.sort((a,b)=>a-b);summary.averageRally=Number((lengths.reduce((a,b)=>a+b,
 summary.elapsedMs=Math.round(performance.now()-start);
 console.log(JSON.stringify(summary,null,2));
 if(summary.completed!==games||!summary.humanHits)process.exitCode=1;
+
+if(games>=20&&summary.tactics.poachHits===0)process.exitCode=1;

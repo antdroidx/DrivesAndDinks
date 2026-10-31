@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const allowed=new Map([
   ['/', ['index.html','text/html']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],
-  ...['core','game','main','roster','selection'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
+  ...['core','game','main','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
   ...['player-sprites-v1','vertical-swings-v1'].map(name=>[`/assets/${name}.png`,[`assets/${name}.png`,'image/png']])
 ]);
 const port=Number(process.argv[2]||8768);

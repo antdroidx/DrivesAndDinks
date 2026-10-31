@@ -48,3 +48,9 @@ The current animation uses distance-based footwork and a short planted contact s
 ## Player/paddle balance smoke test
 
 Run `node scripts/balance.js 12` for 288 deterministic CPU matches covering all twelve combinations, with the candidate tested on both court sides alongside a standard partner against standard opponents. The test requires every match to finish; at twelve or more paired seeds, it flags win rates outside a broad 20–80% band. Results are a balance warning system, not evidence of competitive parity or human performance. The sample `balance-results.json` records the latest check. Run `node scripts/simulate.js 24 --roster` to additionally exercise every combination in watch mode and with simulated human input.
+
+## Doubles movement and poaching
+
+Players shade laterally with the ball, protect the middle when a partner is pulled wide, pinch after drives, and retreat to cover lobs. A short trajectory forecast selects one incoming-ball owner. A kitchen player can poach a reachable middle volley when it offers an interception advantage; the partner covers the vacated lane. Rally coverage may switch temporarily, while scoring/service positions reset correctly for the next serve. Service receivers and the two-bounce opening remain protected. Soft spacing makes the supporting player give room to the hitter.
+
+`src/tactics.js` contains these decisions. The match runner reports poach attempts, actual poach hits, coverage swaps and off-ball travel; runs of twenty or more games fail if no poach contacts occur. The positioning is still heuristic and should be tuned through human playtests.
