@@ -21,3 +21,10 @@ This is an early playable experiment, not a rules-certified simulation. AI posit
 ## Professional doubles inspiration
 
 The CPU uses deep returns, third-shot drops or drives, transition toward the kitchen, and dinks or attacks based on ball height. The serving team stays back for the return bounce. These are simplified tactical heuristics inspired by [USA Pickleball's third-shot guidance](https://usapickleball.org/pickleball-skills/level-four/third-shot-drive-fifth-shot-drop-and-driving-slice-return/) and [drop placement guidance](https://usapickleball.org/pickleball-skills/level-three/where-to-hit-your-drops/). They are not calibrated from PPA tracking data or individual professional players. Shot flight, error rates, reactions, and movement remain approximations requiring playtesting.
+
+## Repeatable match checks
+
+Run `node --test` for rules, movement, contact, and state checks. Run `node scripts/simulate.js 20` to play 20 deterministic matches (alternating watch mode and simulated human input). The runner reports completed games, rally outcomes, shot distribution, maximum rally length, simulated human hits, and execution time; it exits unsuccessfully if a match fails to finish or the human-side bot never hits. The match count can be 1–1000. These checks exercise game logic, not browser rendering or real touch latency.
+
+A realistic playtest should also cover keyboard and mouse on desktop, plus serving, aiming, shot selection, rallies, and landscape layout on an actual Android device. A mobile-sized browser viewport is only a layout check. The simulation is a tuning aid, not proof of professional realism: very long dink exchanges and an over-reliance on out calls remain possible.
+

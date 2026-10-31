@@ -18,11 +18,12 @@ export function receiver(players,team,x,y){return players.filter(p=>p.team===tea
 
 
 // Tactical approximation: deep returns, third-shot transition, and kitchen exchanges.
-export function chooseCpuShot({shots, team, y, height, random=Math.random()}){
+export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;
  if(shots===1)return 'drive';
  if(shots===2)return height>3.3&&random<.35?'drive':'drop';
- if(nearKitchen)return height>2.7?'drive':'dink';
+ if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';return height>2.7||(height>1.2&&random<.18)?'drive':'dink'}
  return height>3.2&&random<.45?'drive':'drop';
 }
+
 

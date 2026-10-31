@@ -1,1 +1,10 @@
-{"name":"drives-and-dinks","version":"0.1.0","type":"module","scripts":{"test":"node --test","start":"npx --yes serve ."}}
+{
+  "name": "drives-and-dinks",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "start": "npx --yes serve .",
+    "simulate": "node scripts/simulate.js"
+  }
+}
