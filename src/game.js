@@ -9,13 +9,14 @@ export class Game{constructor(){this.mode='play';this.reset()}
  swing(){if(this.phase==='serve'&&this.server.id===0&&this.mode==='play'){this.serve();return}if(this.phase!=='rally'||this.mode!=='play')return;if(!this.tryHumanHit()){this.hitBuffer=.25;this.message='SWING QUEUED'}}
  serve(){this.serveX=this.server.x;const x=this.serveX<10?15:5;launch(this.ball,x,this.server.team===0?8:36,'serve');this.last=this.server.team;this.shots=1;this.bounces=0;this.phase='rally';this.message='SERVE'}
  update(dt){for(const p of this.players)p.swing=Math.max(0,p.swing-dt);this.hitBuffer=Math.max(0,this.hitBuffer-dt);if(this.phase==='over')return;if(this.phase==='pause'){this.pause-=dt;if(this.pause<=0)this.serveSetup();return}if(this.phase==='serve'){this.timer+=dt;if((this.mode==='watch'||this.server.id!==0)&&this.timer>1.2)this.serve();return}
- const b=this.ball,event=stepBall(b,dt);if(event==='net'){this.fault(this.last,'Net fault');return}if(event==='bounce'){const team=side(b.y);if(!inBounds(b.x,b.y)){this.fault(this.last,'Out');return}if(team===this.last){this.fault(this.last,'Wrong side');return}this.bounces++;if(this.shots===1){const legalX=this.serveX<10?b.x>=10:b.x<=10;const legalY=team===0?b.y>=29:b.y<=15;if(!legalX||!legalY){this.fault(this.last,'Service fault');return}}if(this.bounces>=2){this.fault(team,'Double bounce');return}}
+ const b=this.ball,event=stepBall(b,dt);if(event==='net'){this.fault(this.last,'Net fault');return}if(event==='bounce'){const team=side(b.y);if(this.bounces>0){this.fault(1-this.last,'Double bounce');return}if(!inBounds(b.x,b.y)){this.fault(this.last,'Out');return}if(team===this.last){this.fault(this.last,'Wrong side');return}this.bounces++;if(this.shots===1){const legalX=this.serveX<10?b.x>=10:b.x<=10;const legalY=team===0?b.y>=29:b.y<=15;if(!legalX||!legalY){this.fault(this.last,'Service fault');return}}if(this.bounces>=2){this.fault(team,'Double bounce');return}}
  const incoming=1-this.last;let t=Math.max(0,Math.min(.8,(b.vz+Math.sqrt(Math.max(0,b.vz*b.vz+2*C.gravity*b.z)))/C.gravity));let predictX=Math.max(1,Math.min(19,b.x+b.vx*t)),predictY=Math.max(incoming===0?23:1,Math.min(incoming===0?43:21,b.y+b.vy*t));const r=receiver(this.players,incoming,predictX,predictY);
  for(const p of this.players){let tx=p.id%2?15:5,ty=p.team===0?31:13;if(p.team===incoming&&p===r){tx=predictX;ty=predictY}else if(p.team===incoming){tx=p===this.players[p.team*2]?4:16;ty=p.team===0?31:13}move(p,tx,ty,dt)}
  if(this.hitBuffer>0&&this.tryHumanHit())return;
  if(side(b.y)===incoming&&Math.hypot(r.x-b.x,r.y-b.y)<C.reach&&b.z<4.3&&(this.shots>2||this.bounces>0)){if(r.id!==0||this.mode==='watch'){const landingTime=(b.vz+Math.sqrt(Math.max(0,b.vz*b.vz+2*C.gravity*b.z)))/C.gravity;if(this.bounces===0&&(b.x+b.vx*landingTime<0||b.x+b.vx*landingTime>20))return;if(legalVolley(r.team,r.y,this.bounces,this.shots))return;const shot=b.z>2.4?'drive':Math.abs(b.y-22)<10?'dink':Math.random()<.25?'lob':'drop';this.hit(r,shot,Math.random()<.12?(Math.random()<.5?-2:22):3+Math.random()*14)}}
- if(b.y< -5||b.y>49||b.x< -8||b.x>28)this.fault(this.last,'Out')}
+ if(b.y< -5||b.y>49||b.x< -8||b.x>28)this.fault(this.bounces>0?1-this.last:this.last,this.bounces>0?'Unreturned':'Out')}
 }
+
 
 
 
