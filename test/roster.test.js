@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {CHARACTERS,PADDLES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
+import {CHARACTERS,CHARACTER_LOOKS,PADDLES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
 import {Game} from '../src/game.js';
 
 test('invalid saved selections safely normalize',()=>{assert.deepEqual(normalizeSelection(null),{character:'avery',paddle:'balanced',jersey:0,design:'ocean'});assert.deepEqual(normalizeSelection({character:'nope',paddle:'nope',jersey:-1,design:'nope'}),normalizeSelection())});
@@ -15,3 +15,5 @@ test('configured lineup contains four characters and survives match resets',()=>
 test('female players have distinct originals and same-gender doubles partners',()=>{const women=CHARACTERS.filter(c=>c.gender==='female');assert.equal(women.length,4);const lineup=createLineup({character:'quinn',paddle:'control'});assert.equal(lineup[0].characterId,'quinn');assert.equal(lineup[0].paddle.id,'control');assert.ok(lineup[1].gender==='female');assert.ok(lineup.slice(2).every(p=>p.gender==='male'));assert.ok(lineup[1].characterId!=='quinn')});
 test('male selections receive a same-gender partner and female opponents',()=>{const lineup=createLineup({character:'avery'});assert.equal(lineup[0].gender,'male');assert.equal(lineup[1].gender,'male');assert.ok(lineup.slice(2).every(p=>p.gender==='female'))});
 
+
+test('each character has a distinct trial skin and hair palette',()=>{const palettes=CHARACTERS.map(c=>CHARACTER_LOOKS[c.id]);assert.ok(palettes.every(Boolean));assert.equal(new Set(palettes.map(p=>[...p.skin,...p.hair].join(','))).size,CHARACTERS.length)});

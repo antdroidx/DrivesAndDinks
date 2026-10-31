@@ -9,7 +9,18 @@ export const CHARACTERS = Object.freeze([
   {id:'harper',name:'Harper Brooks',gender:'female',style:'Court runner',description:'Explosive lateral coverage; slightly wider shot spread.',abilities:{speed:13.4,acceleration:52,reach:.96,control:.99,reaction:.078}},
   {id:'quinn',name:'Quinn Vásquez',gender:'female',style:'Kitchen specialist',description:'Fast reactions and precise soft play; slower recovery.',abilities:{speed:11,acceleration:44,reach:1.03,control:1.09,reaction:.081}},
   {id:'lena',name:'Lena Park',gender:'female',style:'Reach & pressure',description:'Extended reach for interceptions; slower reactions.',abilities:{speed:11.6,acceleration:41,reach:1.11,control:.98,reaction:.105}}
-]);export const PADDLES = Object.freeze([
+]);
+export const CHARACTER_LOOKS = Object.freeze({
+  avery:{skin:[1.04,.94,.82],hair:[.42,.25,.13]},
+  remy:{skin:[.72,.55,.43],hair:[.12,.10,.09]},
+  morgan:{skin:[1.16,.99,.84],hair:[.78,.55,.25]},
+  jordan:{skin:[.91,.71,.56],hair:[.25,.16,.10]},
+  selena:{skin:[1.08,.84,.70],hair:[.09,.10,.12]},
+  harper:{skin:[.78,.60,.46],hair:[.22,.12,.07]},
+  quinn:{skin:[1.21,1.05,.93],hair:[.56,.18,.08]},
+  lena:{skin:[.93,.75,.59],hair:[.14,.11,.08]}
+});
+export const PADDLES = Object.freeze([
   {id:'balanced',name:'Allcourt',style:'Balanced',description:'Even power, precision and spin.',power:1,control:1,spin:1},
   {id:'power',name:'Ignite',style:'Power',description:'Faster eligible drives; less control and spin.',power:1.12,control:.95,spin:.96},
   {id:'control',name:'Touch',style:'Control',description:'Tighter placement and more spin; slower drives.',power:.94,control:1.08,spin:1.1}
