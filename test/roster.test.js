@@ -6,7 +6,7 @@ import {Game} from '../src/game.js';
 test('invalid saved selections safely normalize',()=>{assert.deepEqual(normalizeSelection(null),{character:'avery',paddle:'balanced',jersey:0,design:'ocean'});assert.deepEqual(normalizeSelection({character:'nope',paddle:'nope',jersey:-1,design:'nope'}),normalizeSelection())});
 test('every player and paddle combination produces an independent playable profile',()=>{for(const c of CHARACTERS)for(const p of PADDLES){const config={character:c.id,paddle:p.id,jersey:3,design:'mint'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.appearance.jersey,3);assert.equal(profile.appearance.paddleDesign,'mint');profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}});
 test('each character has a meaningful strength and a tradeoff',()=>{const standard=selectionStats({});for(const c of CHARACTERS.filter(c=>c.id!=='avery')){const stats=selectionStats({character:c.id});assert.ok(Object.keys(stats).some(k=>stats[k]>standard[k]));assert.ok(Object.keys(stats).some(k=>stats[k]<standard[k]))}});
-test('players carry distinct serve skill into the lineup',()=>{for(const character of CHARACTERS)assert.ok(buildProfile({character:character.id}).abilities.serve>0);assert.ok(selectionStats({character:'lena'}).serve>selectionStats({character:'harper'}).serve)});
+test('players carry distinct serve, power, and spin skills into the lineup',()=>{for(const character of CHARACTERS)assert.ok(buildProfile({character:character.id}).abilities.serve>0);assert.ok(selectionStats({character:'lena'}).serve>selectionStats({character:'harper'}).serve);const stats=CHARACTERS.map(character=>selectionStats({character:character.id}));assert.ok(new Set(stats.map(stat=>stat.power)).size>=6);assert.ok(new Set(stats.map(stat=>stat.spin)).size>=6)});
 
 test('power and control paddles trade capabilities rather than increasing all stats',()=>{const power=selectionStats({paddle:'power'}),control=selectionStats({paddle:'control'});assert.ok(power.power>control.power);assert.ok(power.placement<control.placement);assert.ok(power.spin<control.spin)});
 test('cosmetic changes do not affect abilities or paddle performance',()=>{const a=buildProfile({jersey:0,design:'ocean'}),b=buildProfile({jersey:2,design:'ember'});assert.deepEqual(a.abilities,b.abilities);assert.deepEqual(a.paddle,b.paddle);assert.notDeepEqual(a.appearance,b.appearance)});
@@ -21,3 +21,8 @@ test('every default matchup is mixed doubles',()=>{for(const player of CHARACTER
 
 
 test('legacy skin and hair selections are ignored for both character types',()=>{for(const character of ['avery','selena']){const selection=normalizeSelection({character,skin:'deep',hair:'blonde'});assert.equal('skin' in selection,false);assert.equal('hair' in selection,false);assert.deepEqual(buildProfile(selection).appearance,{jersey:0,body:character==='avery'?'male':'female',paddleDesign:'ocean'})}});
+
+test('player power and spin modify the effective game equipment',()=>{
+ const g=new Game();g.configure({character:'jordan',paddle:'balanced'});const p=g.players[0],effective=g.paddleFor(p);
+ assert.ok(effective.power>p.paddle.power);assert.ok(effective.spin<p.paddle.spin);assert.equal(Object.keys(selectionStats({character:'jordan'}))[0],'serve')
+});

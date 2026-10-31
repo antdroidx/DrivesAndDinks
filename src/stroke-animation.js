@@ -1,5 +1,5 @@
 export const STROKE_CLIPS = Object.freeze({
- overhead:{sheet:'vertical',frames:[0,1,2,2,3],lift:[0,-2,-7,-8,-3],tilt:[0,-.025,-.075,-.06,-.015],scaleY:[1,1.02,1.05,1.04,1]},
+ overhead:{sheet:'vertical',frames:[0,1,1,2,3,3,1],lift:[0,-3,-9,-12,-7,3,-2],tilt:[0,-.04,-.1,-.14,-.08,.12,.02],scaleY:[1,1.02,1.07,1.08,1.02,.92,1]},
  forehand:{sheet:'body',frames:[0,1,2,3],lift:[0,0,-1,-1,0],tilt:[0,-.015,-.035,-.02,0],scaleY:[1,1,1.01,1,1]},
  backhand:{sheet:'body',frames:[0,3,2,1],lift:[0,-1,0,-1,0],tilt:[0,.02,.04,.025,0],scaleY:[1,.99,1,.99,1],supportHandX:[1,13,14,-10,-2],supportHandY:[-38,-39,-40,-41,-39]},
  atp:{sheet:'body',frames:[0,3,2,3,1],lift:[0,-1,-2,-1,0],tilt:[0,.04,.08,.05,0],scaleY:[1,1,1.03,1.02,1]},

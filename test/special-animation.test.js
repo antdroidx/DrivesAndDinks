@@ -76,3 +76,13 @@ test('female backhands add a two-handed grip while male backhands remain one-han
   assert.ok(Number.isFinite(femaleSample.supportHandY));
  }
 });
+
+test('overhead clip has a clear wind-up, apex, slam, and follow-through',()=>{
+ const player={stroke:'forehand',animationShot:'overhead',swingSide:1};
+ const samples=[0,.15,.3,.45,.6,.75,.92].map(progress=>sampleStrokeAnimation(player,progress));
+ assert.ok(Math.min(...samples.map(sample=>sample.offsetY))<-10);
+ assert.ok(Math.max(...samples.map(sample=>sample.offsetY))>2);
+ assert.ok(Math.min(...samples.map(sample=>sample.rotation))<-.12);
+ assert.ok(Math.max(...samples.map(sample=>sample.rotation))>.1);
+ assert.deepEqual([...new Set(samples.map(sample=>sample.frameColumn))].sort(),[0,1,2,3])
+});
