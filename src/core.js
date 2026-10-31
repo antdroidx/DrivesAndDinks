@@ -2,19 +2,20 @@ export const C={width:20,length:44,net:22,kitchen:7,gravity:32,bounce:.72,dt:1/1
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{jersey:0}}}
+export function aimStep(player,fine=false){const placement=(player.abilities?.control??1)*(player.paddle?.control??1);return Math.max(1.5,Math.min(3.5,2.5/placement))*(fine?.25:1)}
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
 export const side=y=>y>22?0:1;
 export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=C.gravity*dt; b.vx*=1-(b.spin||0)*dt*.015;b.vy*=1-(b.spin||0)*dt*.015;
  if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'}
- if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;return 'bounce'}return null}
+ if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;if(b.shot==='slice'){b.vz*=.82;b.vx*=.94;b.vy*=.94}return 'bounce'}return null}
 export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE){
- const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0]};
+ const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0],slice:[1.18,-1.8]};
  let [t,spin]=specs[shot]||specs.drive;
  if(shot==='drive')t=Math.max(.42,Math.hypot(x-b.x,y-b.y)/(48*paddle.power));
  // Solve the ballistic arc at the net rather than giving short and long shots the same arc.
  const f=(22-b.y)/(y-b.y),clearance=shot==='drive'?Math.max(3.25,3.65/paddle.power):shot==='drop'?3.7:3.4;
  if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
- b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin*paddle.spin;
+ b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin*paddle.spin;b.shot=shot;
 }
 export function inBounds(x,y){return x>=0&&x<=20&&y>=0&&y<=44}
 export function legalVolley(team,y,bounces,shotCount){if(shotCount<=2&&bounces===0)return 'Two-bounce fault';if(bounces===0&&(team===0?y<=29:y>=15))return 'Kitchen volley fault';return null}

@@ -14,7 +14,7 @@ Start a playable doubles match or a CPU demonstration. The remaining three chara
 
 ## Controls
 
-Choose drive, drop, dink, or lob with 1–4 or the on-screen buttons. Move the cyan target left or right on the opposite court with the mouse, arrow keys, or a touch on the court. The target indicates direction rather than the exact landing spot for every shot. Press Space, click the court, or use HIT when the ball is within reach. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. On a touchscreen, drag or tap the court to aim, then tap HIT to swing.
+Choose drive, drop, dink, lob, or slice with 1–5 or the on-screen buttons. Move the cyan target left or right on the opposite court with the mouse, arrow keys, or a touch on the court. The target indicates direction rather than the exact landing spot for every shot. Press Space, click the court, or use HIT when the ball is within reach. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. On a touchscreen, drag or tap the court to aim, then tap HIT to swing.
 
 Sound unlocks on your first click or keypress; the SOUND button toggles synthesized paddle, bounce, and net effects. Ball trails, bounce rings, and contact flashes help show the ball trajectory.
 
@@ -54,3 +54,5 @@ Run `node scripts/balance.js 12` for 288 deterministic CPU matches covering all 
 Players shade laterally with the ball, protect the middle when a partner is pulled wide, pinch after drives, and retreat to cover lobs. A short trajectory forecast selects one incoming-ball owner. A kitchen player can poach a reachable middle volley when it offers an interception advantage; the partner covers the vacated lane. Rally coverage may switch temporarily, while scoring/service positions reset correctly for the next serve. Service receivers and the two-bounce opening remain protected. Soft spacing makes the supporting player give room to the hitter.
 
 `src/tactics.js` contains these decisions. The match runner reports poach attempts, actual poach hits, coverage swaps and off-ball travel; runs of twenty or more games fail if no poach contacts occur. The positioning is still heuristic and should be tuned through human playtests.
+
+Keyboard aim now moves about 2.5 court feet per arrow press, adjusted by combined player/paddle control: higher control gives slightly smaller, more precise steps. Shift + arrow uses quarter-size fine adjustments; mouse and touch aim remain continuous. Slice (5) is a deep backspin shot with a lower rebound and modest speed loss on the bounce. Spin behavior remains a simplified game model.
