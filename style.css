@@ -51,13 +51,13 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
   }
   .game{width:100%;height:100%;border-width:3px;box-shadow:0 3px #81553c;overflow:hidden}
   .game canvas{width:100%;height:100%}
-  .controls{position:absolute;inset:0;z-index:4;display:block;padding:0;margin:0;pointer-events:none;min-width:0}
+  .controls{position:absolute;inset:0;z-index:4;display:block;padding:0;margin:0;pointer-events:none;touch-action:none;min-width:0}
   .controls>div:first-child{display:contents}
   .controls>.tip,.controls strong,footer{display:none}
   #shots{
     width:100%;height:100%;max-width:none;display:grid;
     grid-template-columns:28% 44% 28%;grid-template-rows:auto repeat(3,auto);
-    gap:clamp(9px,1.8dvh,14px) 6px;align-content:center;pointer-events:none
+    gap:clamp(9px,1.8dvh,14px) 6px;align-content:center;pointer-events:none;touch-action:none
   }
   #shots::before,#shots::after{
     color:#b7d3c7;font-size:clamp(7px,1.1vw,10px);letter-spacing:1px;line-height:1;
@@ -78,7 +78,7 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
   .aim-pad-track{position:relative;width:82%;height:22px;margin:3px 0;border:2px solid #93afa3;border-radius:999px;background:#314c5a}
   .aim-pad-thumb{position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);border:2px solid #fff3d8;border-radius:50%;background:#39d9f5;box-shadow:0 2px 0 #0c2422}
   #shots button{
-    pointer-events:auto;width:min(82%,128px);height:clamp(44px,7dvh,58px);min-height:0;
+    pointer-events:auto;touch-action:none;width:min(82%,128px);height:clamp(44px,7dvh,58px);min-height:0;
     align-self:center;justify-self:center;padding:4px;font-size:clamp(9px,1.25vw,12px);
     line-height:1.05;overflow:hidden
   }
