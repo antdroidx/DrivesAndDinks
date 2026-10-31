@@ -6,3 +6,6 @@ test('first server exception, score, rotations and win by two',()=>{let s=new Sc
 test('movement and receiver selection',()=>{let a={team:0,x:2,y:40,vx:0,vy:0},b={team:0,x:18,y:40,vx:0,vy:0};assert.equal(receiver([a,b],0,3,35),a);move(a,5,35,.1);assert.ok(a.x>2&&a.y<40)});
 test('game serve, fault and reset transitions',()=>{let g=new Game();assert.equal(g.phase,'serve');g.serve();assert.equal(g.phase,'rally');g.fault(0,'test');assert.equal(g.phase,'pause');g.update(2);assert.equal(g.phase,'serve');assert.equal(g.score.team,1);g.reset();assert.deepEqual(g.score.points,[0,0])});
 
+
+test('servers start behind their baseline on both sides',()=>{const g=new Game();assert.ok(g.server.y>44);g.score.team=1;g.serveSetup();assert.ok(g.server.y<0)});
+test('early swing is buffered until a legal ball is in reach',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:38.4,z:1,vx:0,vy:-3,vz:0});g.swing();assert.ok(g.hitBuffer>0);for(let i=0;i<20&&g.last===1;i++)g.update(C.dt);assert.equal(g.last,0);assert.equal(g.hitBuffer,0)});

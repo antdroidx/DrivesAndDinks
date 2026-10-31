@@ -1,6 +1,6 @@
 # Drives & Dinks Pickleball
 
-An early browser-based doubles pickleball prototype. Four players move automatically; control the near-side player marked with a yellow indicator or switch to watch mode.
+An early browser-based doubles pickleball prototype. Four players move automatically; control the near-side player marked with a cyan ring or switch to watch mode.
 
 ## Run
 
@@ -8,7 +8,7 @@ Serve this directory with a local HTTP server, for example `python -m http.serve
 
 ## Controls
 
-Choose drive, drop, dink, or lob with 1–4 or the on-screen buttons. Aim left/right with the mouse, arrow keys, or a touch on the court. Press Space, click/tap the court, or use HIT when the ball is within reach. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. Touching the court both aims and swings.
+Choose drive, drop, dink, or lob with 1–4 or the on-screen buttons. Aim left/right with the mouse, arrow keys, or a touch on the court. Press Space, click/tap the court, or use HIT when the ball is within reach. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. Touching the court both aims and swings.
 
 ## Architecture
 
