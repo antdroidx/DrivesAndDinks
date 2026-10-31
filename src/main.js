@@ -13,9 +13,9 @@ const project=(x,y,z=0)=>({x:480+(x-10)*(13+y*.21),y:145+y*8.5-z*14});
 function poly(points,fill,stroke='#f8edc7',width=2){ctx.beginPath();points.forEach(([x,y],i)=>{const p=project(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}}
 function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
 // Original generated sprite sheet; recolor only the yellow jersey pixels per player.
-let spriteVariants=[],swingVariants=[],femaleSpriteVariants=[],femaleSwingVariants=[];spriteVariants=Array.from({length:4},()=>null);swingVariants=Array.from({length:4},()=>null);femaleSpriteVariants=Array.from({length:4},()=>null);femaleSwingVariants=Array.from({length:4},()=>null);
-const spritePaths=['./assets/player-sprites-v1.png','./assets/vertical-swings-v1.png','./assets/female-player-sprites-v1.png','./assets/female-vertical-swings-v1.png'];
-const spriteTargets=[spriteVariants,swingVariants,femaleSpriteVariants,femaleSwingVariants];
+let spriteVariants=[],swingVariants=[],femaleSpriteVariants=[];spriteVariants=Array.from({length:4},()=>null);swingVariants=Array.from({length:4},()=>null);femaleSpriteVariants=Array.from({length:4},()=>null);
+const spritePaths=['./assets/player-sprites-v1.png','./assets/vertical-swings-v1.png','./assets/female-player-skirt-v2.png'];
+const spriteTargets=[spriteVariants,swingVariants,femaleSpriteVariants];
 function loadSpriteVariants(i){
  const path=spritePaths[i],variants=spriteTargets[i],sheet=new Image();
  sheet.onload=()=>{
@@ -38,13 +38,13 @@ function loadSpriteVariants(i){
    x.putImageData(image,0,0);
    variants[colorIndex]=canvas;
   }
-  if(++spriteLoadCount===4)selectionUI?.refreshPreview();
+  selectionUI?.refreshPreview();
  };
  sheet.onerror=()=>console.warn('Sprite load failed',path);
  sheet.src=path;
 }
-function spriteAvailable(p){return (p.appearance.body==='female'?femaleSpriteVariants.every(Boolean)&&femaleSwingVariants.every(Boolean):spriteVariants.every(Boolean)&&swingVariants.every(Boolean))}
-function artFor(p){return p.appearance.body==='female'?[femaleSpriteVariants,femaleSwingVariants]:[spriteVariants,swingVariants]}
+function spriteAvailable(p){return (p.appearance.body==='female'?femaleSpriteVariants.every(Boolean):spriteVariants.every(Boolean)&&swingVariants.every(Boolean))}
+function artFor(p){return p.appearance.body==='female'?[femaleSpriteVariants,null]:[spriteVariants,swingVariants]}
 const frameCache=new Map();
 function equipmentFrame(variants,jersey,row,col,sw,sh,design,swinging,body='male'){
  const key=[body,swinging,jersey,row,col,design].join(':');if(frameCache.has(key))return frameCache.get(key);
@@ -53,21 +53,22 @@ function equipmentFrame(variants,jersey,row,col,sw,sh,design,swinging,body='male
  const frontMasks=[[.36,.24,.67,.53],[.15,.32,.37,.83],[.32,.2,.68,.54],[.15,.32,.37,.83]],backMasks=[[.68,.22,.9,.67],[.74,.3,.98,.78],[.02,.08,.35,.55],[.68,.3,.98,.78]];
  const swingFront=[[.35,.28,.7,.7],[0,.02,.33,.4],[.7,.2,1,.58],[.65,0,1,.35]],swingBack=[[0,0,0,0],[.6,0,.98,.35],[.7,.2,1,.58],[0,0,.35,.4]];
  const reference=document.createElement('canvas');reference.width=c.width;reference.height=c.height;const rx=reference.getContext('2d',{willReadFrequently:true});rx.imageSmoothingEnabled=false;rx.drawImage(variants[0],col*sw,row*sh,sw,sh,0,0,c.width,c.height);const referencePixels=rx.getImageData(0,0,c.width,c.height).data;
- const box=(swinging?(row?swingBack:swingFront):(row?backMasks:frontMasks))[col];const image=x.getImageData(0,0,c.width,c.height),d=image.data;
+ const box=(swinging?(row?swingBack:swingFront):(row%2?backMasks:frontMasks))[col];const image=x.getImageData(0,0,c.width,c.height),d=image.data;
  for(let y=Math.floor(box[1]*c.height);y<box[3]*c.height;y++)for(let xx=Math.floor(box[0]*c.width);xx<box[2]*c.width;xx++){const i=(y*c.width+xx)*4,r=referencePixels[i],g=referencePixels[i+1],b=referencePixels[i+2];if(d[i+3]>0&&b>r*1.4&&b>g*1.05){const shade=Math.max(.3,Math.min(1.15,(r+g+b)/210));d[i]=face.rgb[0]*shade;d[i+1]=face.rgb[1]*shade;d[i+2]=face.rgb[2]*shade}}
  x.putImageData(image,0,0);frameCache.set(key,c);return c;
 }
-function drawLoadoutPreview(selection){const c=document.querySelector('#player-preview');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);x.fillStyle='#355e60';x.fillRect(0,160,c.width,40);x.fillStyle='#eff3cf66';x.fillRect(0,175,c.width,2);const selectedBody=CHARACTERS.find(c=>c.id===selection.character).gender,baseline=selectedBody==='female'?femaleSpriteVariants:spriteVariants;if(baseline.length===4){x.imageSmoothingEnabled=false;const frame=equipmentFrame(baseline,selection.jersey,0,0,350.5,280.5,selection.design,false,selectedBody);x.drawImage(frame,12,12,156,170)}const face=PADDLE_DESIGNS.find(d=>d.id===selection.design);x.fillStyle=face.color;x.fillRect(145,130,18,25);x.fillStyle='#d8d0b7';x.fillRect(151,155,6,12)}
+function drawLoadoutPreview(selection){const c=document.querySelector('#player-preview');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);x.fillStyle='#355e60';x.fillRect(0,160,c.width,40);x.fillStyle='#eff3cf66';x.fillRect(0,175,c.width,2);const selectedBody=CHARACTERS.find(c=>c.id===selection.character).gender,baseline=selectedBody==='female'?femaleSpriteVariants:spriteVariants;if(baseline[selection.jersey]){x.imageSmoothingEnabled=false;const frame=equipmentFrame(baseline,selection.jersey,0,0,350.5,280.5,selection.design,false,selectedBody);x.drawImage(frame,12,12,156,170)}const face=PADDLE_DESIGNS.find(d=>d.id===selection.design);x.fillStyle=face.color;x.fillRect(145,130,18,25);x.fillStyle='#d8d0b7';x.fillRect(151,155,6,12)}
 function drawSprite(p,q){
  const scale=.8+p.y/100,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const back=p.team===0,swinging=(p.windup>0||p.swing>0);
  const progress=p.swing/(p.swingDuration||.36);const gait=Math.floor((p.stride||0)/1.1);const row=back?1:0,col=swinging?(p.windup>0?1:progress>.7?2:progress>.3?3:0):(moving?(p.motion==='shuffle'?(gait%2?1:3):1+gait%3):0);
- const sw=swinging?384:350.5,sh=swinging?512:280.5,sx=col*sw,sy=row*sh;
+ const female=p.appearance.body==='female',useSwingSheet=swinging&&!female;
+ const sw=useSwingSheet?384:350.5,sh=useSwingSheet?512:280.5,artRow=female&&swinging?row+2:row;
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.scale(scale,scale);
  ctx.fillStyle='#101f1a80';ctx.beginPath();ctx.ellipse(0,0,18,6,0,0,Math.PI*2);ctx.fill();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke()}
  if(p.swing>0&&progress>.7&&p.contactPoint){const point=project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z);ctx.translate(Math.max(-7,Math.min(7,(point.x-q.x)/scale-(p.swingSide||1)*23)),Math.max(-6,Math.min(6,(point.y-q.y)/scale+35)))}if(p.swing>0&&(p.swingSide||1)<0)ctx.scale(-1,1);if(p.stroke==='volley'&&swinging)ctx.scale(1,.96);ctx.imageSmoothingEnabled=false;
- const [baseVariants,swingSet]=artFor(p),frame=equipmentFrame(swinging?swingSet:baseVariants,p.appearance.jersey%4,row,col,sw,sh,p.appearance.paddleDesign||'ocean',swinging,p.appearance.body);if(swinging)ctx.drawImage(frame,-29,-78,58,91);else ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
+ const [baseVariants,swingSet]=artFor(p),frame=equipmentFrame(useSwingSheet?swingSet:baseVariants,p.appearance.jersey%4,artRow,col,sw,sh,p.appearance.paddleDesign||'ocean',useSwingSheet,p.appearance.body);if(useSwingSheet)ctx.drawImage(frame,-29,-78,58,91);else ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
 }
 // Each player is assembled from a small pixel grid; only the pose frames change.
 function drawPlayer(p,q){
