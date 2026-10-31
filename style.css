@@ -4,3 +4,7 @@
 @media (max-height:550px) and (orientation:landscape){main{padding:4px;max-width:1000px}header h1{font-size:20px;margin:0}header small,.tip,footer{display:none}.game{max-height:70vh;text-align:center}canvas{width:auto;height:calc(70vh - 10px);max-width:100%;margin:auto}.controls{padding:4px 0;gap:8px}.controls button{min-height:40px;padding:6px}.controls strong{display:none}}
 
 .game{position:relative}#overlay{position:absolute;top:4px;left:4px;right:4px;display:none;background:#1b2939;color:#fff6d9;padding:5px;font-weight:bold;text-align:center;font-size:12px;pointer-events:none}@media (max-height:550px) and (orientation:landscape){#overlay{display:block}.controls button{min-height:44px}}
+
+.header-actions{display:flex;gap:6px}@media(max-width:700px){.header-actions button{padding:7px;font-size:10px}}
+
+@media(max-width:550px){header{flex-wrap:wrap;gap:4px}.header-actions{margin-left:auto}}

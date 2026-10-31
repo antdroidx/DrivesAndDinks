@@ -1,9 +1,21 @@
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32,bounce:.72,dt:1/120,speed:12,accel:45,reach:2.6};
+export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09});
+export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
+export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{jersey:0}}}
+export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
 export const side=y=>y>22?0:1;
 export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=C.gravity*dt; b.vx*=1-(b.spin||0)*dt*.015;b.vy*=1-(b.spin||0)*dt*.015;
  if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'}
  if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;return 'bounce'}return null}
-export function launch(b,x,y,shot='drive'){const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0]};const [t,spin]=specs[shot]||specs.drive;b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin}
+export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE){
+ const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0]};
+ let [t,spin]=specs[shot]||specs.drive;
+ if(shot==='drive')t=Math.max(.42,Math.hypot(x-b.x,y-b.y)/(48*paddle.power));
+ // Solve the ballistic arc at the net rather than giving short and long shots the same arc.
+ const f=(22-b.y)/(y-b.y),clearance=shot==='drive'?3.65:shot==='drop'?3.7:3.4;
+ if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
+ b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin*paddle.spin;
+}
 export function inBounds(x,y){return x>=0&&x<=20&&y>=0&&y<=44}
 export function legalVolley(team,y,bounces,shotCount){if(shotCount<=2&&bounces===0)return 'Two-bounce fault';if(bounces===0&&(team===0?y<=29:y>=15))return 'Kitchen volley fault';return null}
 export class Score {
@@ -12,7 +24,7 @@ export class Score {
  get player(){return this.serverPlayer}
  get call(){return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
-export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);const speed=Math.min(C.speed,d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const a=Math.min(1,C.accel*dt/C.speed);p.vx+=(vx-p.vx)*a;p.vy+=(vy-p.vy)*a;p.x+=p.vx*dt;p.y+=p.vy*dt;p.x=Math.max(0,Math.min(20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
+export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy);const maxSpeed=p.abilities?.speed??C.speed;const planted=p.swing>Math.max(.12,(p.swingDuration||.36)*.55);if(planted){p.vx*=Math.exp(-18*dt);p.vy*=Math.exp(-18*dt)}const speed=Math.min(maxSpeed*(planted?.12:1),d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const a=Math.min(1,(p.abilities?.acceleration??C.accel)*dt/maxSpeed);p.vx+=(vx-p.vx)*a;p.vy+=(vy-p.vy)*a;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;p.motion=planted?'planted':Math.hypot(p.vx,p.vy)<1?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';p.x=Math.max(0,Math.min(20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
 export function receiver(players,team,x,y){return players.filter(p=>p.team===team).reduce((a,b)=>Math.hypot(a.x-x,a.y-y)<Math.hypot(b.x-x,b.y-y)?a:b)}
 
 
@@ -22,8 +34,9 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
  const nearKitchen=team===0?y<33:y>11;
  if(shots===1)return 'drive';
  if(shots===2)return height>3.3&&random<.35?'drive':'drop';
- if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';return height>2.7||(height>1.2&&random<.18)?'drive':'dink'}
+ if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';return height>2.7||(height>.65&&random<.28)?'drive':'dink'}
  return height>3.2&&random<.45?'drive':'drop';
 }
+
 
 

@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot} from '../src/core.js';import {Game} from '../src/game.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable} from '../src/core.js';import {Game} from '../src/game.js';
 test('ball arcs and bounces',()=>{let b={x:5,y:40,z:1};launch(b,15,5,'lob');let high=0,event;for(let i=0;i<300&&!event;i++){event=stepBall(b);high=Math.max(high,b.z)}assert.equal(event,'bounce');assert.ok(high>5);assert.ok(b.vz>0);assert.ok(Math.abs(b.x-15)<1)});
 test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.equal(stepBall(b,.02),'net');assert.ok(inBounds(0,44));assert.ok(!inBounds(-.1,4))});
 test('two bounce and kitchen volleys',()=>{assert.match(legalVolley(0,35,0,1),/Two-bounce/);assert.match(legalVolley(0,35,0,2),/Two-bounce/);assert.match(legalVolley(0,28,0,3),/Kitchen/);assert.equal(legalVolley(0,28,1,3),null);assert.equal(legalVolley(0,35,0,3),null)});
@@ -26,7 +26,7 @@ test('serve formation keeps serving team back and receiving partner at kitchen',
 test('receiving partner holds their assigned side during the serve',()=>{for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();const partner=g.players.find(p=>p.team!==team&&p!==g.serveReceiver);const startX=partner.x;g.serve();for(let i=0;i<30&&g.phase==='rally';i++)g.update(C.dt);assert.equal(partner.x<10,startX<10);assert.ok(Math.abs(partner.x-startX)<1)}});
 
 
-test('CPU selects a deep return, a third-shot drop and kitchen dinks',()=>{assert.equal(chooseCpuShot({shots:1,team:0,y:40,height:1,random:0}), 'drive');assert.equal(chooseCpuShot({shots:2,team:0,y:40,height:1,random:0}), 'drop');assert.equal(chooseCpuShot({shots:4,team:1,y:14,height:1,random:0}), 'dink');assert.equal(chooseCpuShot({shots:4,team:1,y:14,height:3,random:0}), 'drive')});
+test('CPU selects a deep return, a third-shot drop and kitchen dinks',()=>{assert.equal(chooseCpuShot({shots:1,team:0,y:40,height:1,random:0}), 'drive');assert.equal(chooseCpuShot({shots:2,team:0,y:40,height:1,random:0}), 'drop');assert.equal(chooseCpuShot({shots:4,team:1,y:14,height:1,random:.5}), 'dink');assert.equal(chooseCpuShot({shots:4,team:1,y:14,height:3,random:0}), 'drive')});
 test('serving team stays back while awaiting the return',()=>{const g=new Game();g.serve();const mate=g.players.find(p=>p.team===g.score.team&&p!==g.server);for(let i=0;i<30&&g.phase==='rally';i++)g.update(C.dt);assert.ok(mate.y>38)});
 
 
@@ -42,3 +42,10 @@ test('side out retains the correct player positions across points',()=>{const s=
 
 
 test('human contact requires ball inside visible reach and height',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35});Object.assign(g.ball,{x:12.5,y:35,z:1});assert.equal(g.canHumanHit(),false);Object.assign(g.ball,{x:11,y:35,z:4});assert.equal(g.canHumanHit(),false);g.ball.z=2;assert.equal(g.canHumanHit(),true)});
+
+
+
+test('abilities are isolated per player and affect speed and reach',()=>{const a={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0},b={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0};a.abilities.speed=6;for(let n=0;n<60;n++){move(a,19,35,C.dt);move(b,19,35,C.dt)}assert.ok(b.x>a.x);assert.equal(b.abilities.speed,12);const ball={x:12,y:35,z:2};a.x=b.x=10;assert.equal(contactAvailable(a,ball),false);a.abilities.reach=1.5;assert.equal(contactAvailable(a,ball),true)});
+test('paddle power and spin change flight independently',()=>{const a={x:10,y:44,z:4},b={...a};launch(a,10,0,'drive',{power:1,spin:1});launch(b,10,0,'drive',{power:1.5,spin:1.4});assert.ok(Math.abs(b.vy)>Math.abs(a.vy));assert.ok(b.spin>a.spin)});
+test('contact plants a player, classifies the stroke, and emits one sound event',()=>{const g=new Game();g.phase='rally';g.shots=3;g.last=1;g.bounces=0;const p=g.players[0];p.x=10;p.y=35;Object.assign(g.ball,{x:11,y:35,z:2});g.hit(p,'drive',15);assert.equal(p.stroke,'volley');assert.equal(g.events.filter(e=>e.type==='hit').length,1);assert.deepEqual(p.contactPoint,{x:11,y:35,z:2});move(p,19,35,C.dt);assert.equal(p.motion,'planted')});
+test('new serve preserves appearance and equipment while clearing old animation',()=>{const g=new Game();const p=g.players[0];p.appearance.jersey=3;p.paddle.power=1.2;p.contactPoint={x:1,y:1,z:1};g.serveSetup();assert.equal(p.appearance.jersey,3);assert.equal(p.paddle.power,1.2);assert.equal(p.contactPoint,null)});
