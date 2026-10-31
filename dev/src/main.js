@@ -1,9 +1,9 @@
-import {setupSelection} from './selection.js?v=21';
-import {HAIR_COLORS,SKIN_TONES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,CHARACTERS} from './roster.js?v=21';
-import {Game} from './game.js?v=21';
-import {selectShot,serveAim} from './core.js?v=21';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=21';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=21';
+import {setupSelection} from './selection.js?v=22';
+import {HAIR_COLORS,SKIN_TONES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,CHARACTERS} from './roster.js?v=22';
+import {Game} from './game.js?v=22';
+import {selectShot,serveAim} from './core.js?v=22';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=22';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=22';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -52,7 +52,7 @@ function equipmentFrame(p,row,col){
  const appearance=p.appearance,key=[atlasKey(p),row,col,appearance.hair,appearance.skin,appearance.shirtColor,appearance.bottomColor,appearance.paddleColor].join(':');if(frameCache.has(key))return frameCache.get(key);
  const sheet=atlases[atlasKey(p)];if(!sheet)return null;
  const cellW=sheet.naturalWidth/8,cellH=sheet.naturalHeight/8,c=document.createElement('canvas');c.width=160;c.height=160;
- const insetX=cellW*.015,insetTop=cellH*.045,insetBottom=cellH*.02;
+ const insetX=cellW*.015,insetTop=cellH*(row===0?.01:.19),insetBottom=cellH*.015;
  const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(sheet,col*cellW+insetX,row*cellH+insetTop,cellW-insetX*2,cellH-insetTop-insetBottom,0,0,c.width,c.height);
  const image=x.getImageData(0,0,c.width,c.height),d=image.data;
  const hair=colorRgb(HAIR_COLORS,appearance.hair,'brown'),skin=colorRgb(SKIN_TONES,appearance.skin,'medium'),shirt=colorRgb(CLOTHING_COLORS,appearance.shirtColor,'green'),bottom=colorRgb(CLOTHING_COLORS,appearance.bottomColor,'black'),paddle=colorRgb(PADDLE_COLORS,appearance.paddleColor,'mint');
