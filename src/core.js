@@ -12,7 +12,7 @@ export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE){
  let [t,spin]=specs[shot]||specs.drive;
  if(shot==='drive')t=Math.max(.42,Math.hypot(x-b.x,y-b.y)/(48*paddle.power));
  // Solve the ballistic arc at the net rather than giving short and long shots the same arc.
- const f=(22-b.y)/(y-b.y),clearance=shot==='drive'?3.65:shot==='drop'?3.7:3.4;
+ const f=(22-b.y)/(y-b.y),clearance=shot==='drive'?Math.max(3.25,3.65/paddle.power):shot==='drop'?3.7:3.4;
  if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
  b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin*paddle.spin;
 }

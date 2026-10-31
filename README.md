@@ -4,7 +4,13 @@ An early browser-based doubles pickleball prototype. Four players move automatic
 
 ## Run
 
-Serve this directory with a local HTTP server, for example `python -m http.server 8000`, then visit `http://localhost:8000`. No runtime packages are required. Run the automated checks with `node --test` (Node.js 18 or newer).
+Run `node scripts/serve.js` and visit `http://127.0.0.1:8768`. The local server serves only the game files. You can also use another static HTTP server. No runtime packages are required. Run the automated checks with `node --test` (Node.js 18 or newer).
+
+## Choose a player and paddle
+
+The game opens with match setup. Choose Avery Lane (all-rounder), Remy Cruz (court runner), Morgan Reed (kitchen specialist), or Jordan Vale (reach and pressure). Pick Allcourt (balanced), Ignite (power at a control cost), or Touch (placement and spin at a power cost). The comparison panel shows their combined effects relative to Avery + Allcourt. Jersey colors and Ocean/Ember/Mint paddle finishes affect appearance only, including the in-game sprites. All players currently share the same base artwork.
+
+Start a playable doubles match or a CPU demonstration. The remaining three characters fill the other positions. PLAYER & PADDLE or NEW GAME opens setup again and pauses the match; BACK TO MATCH resumes, while START NEW MATCH applies the choices and resets the score. Last-used selections are remembered locally in the browser, but character progression is not implemented.
 
 ## Controls
 
@@ -33,8 +39,12 @@ A realistic playtest should also cover keyboard and mouse on desktop, plus servi
 
 ## Abilities, appearance, and equipment foundation
 
-Each player now owns separate `abilities`, `appearance`, and `paddle` settings. Speed, acceleration, reach, reaction delay, and control affect movement and contact. Paddle power affects drive flight time; spin and control affect spin and placement. `appearance.jersey` selects one of the four existing jersey palettes. Defaults are equal for all players. Settings survive between rallies, but there is no progression screen or saved career yet.
+Each player now owns separate `abilities`, `appearance`, and `paddle` settings. Speed, acceleration, reach, reaction delay, and control affect movement and contact. Paddle power affects drive flight time; spin and control affect spin and placement. `appearance.jersey` selects one of the four existing jersey palettes. Defaults are equal for all players. Settings survive between rallies, but there is no character progression or saved career yet.
 
-Future development should add original character identities, appearance choices and paddle artwork, balanced equipment tradeoffs, then progression and persistent saves. Keep appearance independent of abilities; store equipment separately from earned player development. New paddle art and dedicated volley/serve sprite sheets can build on the current stroke classification and timing.
+The selection screen now exposes original character identities, jersey and paddle colors, and equipment tradeoffs. Future development should add distinct character artwork, broader appearance options, progression, and persistent career saves. Keep appearance independent of abilities; store equipment separately from earned player development. New paddle art and dedicated volley/serve sprite sheets can build on the current stroke classification and timing.
 
 The current animation uses distance-based footwork and a short planted contact stance. Forehand/backhand contact chooses the mirrored orientation; volleys have a shorter follow-through, and serves have a separate timing duration. They still share artwork. These are game-feel approximations, not motion-captured stroke mechanics.
+
+## Player/paddle balance smoke test
+
+Run `node scripts/balance.js 12` for 288 deterministic CPU matches covering all twelve combinations, with the candidate tested on both court sides alongside a standard partner against standard opponents. The test requires every match to finish; at twelve or more paired seeds, it flags win rates outside a broad 20–80% band. Results are a balance warning system, not evidence of competitive parity or human performance. The sample `balance-results.json` records the latest check. Run `node scripts/simulate.js 24 --roster` to additionally exercise every combination in watch mode and with simulated human input.

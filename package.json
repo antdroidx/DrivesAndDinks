@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test",
-    "start": "npx --yes serve .",
-    "simulate": "node scripts/simulate.js"
+    "start": "node scripts/serve.js",
+    "simulate": "node scripts/simulate.js",
+    "balance": "node scripts/balance.js"
   }
 }

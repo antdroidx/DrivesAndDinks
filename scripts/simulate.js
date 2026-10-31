@@ -1,15 +1,17 @@
 import {Game} from '../src/game.js';
 import {C} from '../src/core.js';
+import {CHARACTERS,PADDLES} from '../src/roster.js';
+const useRoster=process.argv.includes('--roster');
 
 const games=Number(process.argv[2]||20);
 if(!Number.isInteger(games)||games<1||games>1000)throw new Error('Match count must be an integer from 1 to 1000');
 const originalRandom=Math.random;
-const summary={games,completed:0,rallies:0,shots:0,maxRally:0,humanHits:0,results:{},shotTypes:{},elapsedMs:0};
+const summary={games,roster:useRoster,completed:0,rallies:0,shots:0,maxRally:0,humanHits:0,results:{},shotTypes:{},elapsedMs:0};
 const lengths=[];const start=performance.now();
 try{
  for(let seed=1;seed<=games;seed++){
   let state=seed;Math.random=()=>{state=(1664525*state+1013904223)>>>0;return state/4294967296};
-  const game=new Game();game.mode=seed%2?'watch':'play';
+  const game=new Game();if(useRoster){game.configure({character:CHARACTERS[(seed-1)%4].id,paddle:PADDLES[Math.floor((seed-1)/4)%3].id,jersey:(seed-1)%4});game.mode=Math.floor((seed-1)/12)%2?'play':'watch'}else game.mode=seed%2?'watch':'play';
   const hit=game.hit.bind(game),fault=game.fault.bind(game);
   game.hit=(player,shot,aim)=>{summary.shots++;summary.shotTypes[shot]=(summary.shotTypes[shot]||0)+1;if(game.mode==='play'&&player.id===0)summary.humanHits++;return hit(player,shot,aim)};
   game.fault=(team,reason)=>{if(game.phase!=='pause'&&game.phase!=='over'){summary.rallies++;lengths.push(game.shots);summary.maxRally=Math.max(summary.maxRally,game.shots);summary.results[reason]=(summary.results[reason]||0)+1}return fault(team,reason)};
