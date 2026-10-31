@@ -14,8 +14,12 @@ test('deployments expose a sequential build number in the visible header',()=>{
  assert.match(workflow,/scripts\/version-build\.js/);
   assert.match(workflow,/friends-build-15/);
   assert.match(workflow,/path: _friends/);
-  assert.match(workflow,/FRIENDS 15/);
-  assert.match(workflow,/_site\/friends/);
+  assert.match(workflow,/cp _friends\/index\.html _friends\/style\.css _site\//);
+  assert.match(workflow,/DRIVES_DINKS_BUILD = "15"/);
+  assert.match(workflow,/mkdir -p _site\/dev/);
+  assert.match(workflow,/cp index\.html style\.css _site\/dev\//);
+  assert.match(workflow,/_site\/dev\/build-info\.js/);
+  assert.match(workflow,/url=\.\.\//);
   assert.match(html,/src="src\/update-check\.js"/);
  assert.match(main,/BUILD \$\{buildNumber\}/);
 });
