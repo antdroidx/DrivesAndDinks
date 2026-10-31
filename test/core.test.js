@@ -18,3 +18,6 @@ test('server keeps serving after scoring and partners change ends',()=>{const s=
 test('service receivers stand diagonally opposite the server through rotation',()=>{const g=new Game();for(let n=0;n<12;n++){g.serveSetup();assert.notEqual(g.serveReceiver.x<10,g.server.x<10);assert.notEqual(g.serveReceiver.team,g.server.team);g.score.point(n%3===0?g.score.team:1-g.score.team)}});
 test('kitchen lines forbid volleys',()=>{assert.match(legalVolley(0,29,0,3),/Kitchen/);assert.match(legalVolley(1,15,0,3),/Kitchen/)});
 test('service on kitchen line is a fault',()=>{const g=new Game();g.serve();Object.assign(g.ball,{x:g.serveX<10?15:5,y:15,z:.001,vx:0,vy:0,vz:-1});g.update(C.dt);assert.equal(g.message,'SERVICE FAULT')});
+
+
+test('serve formation keeps serving team back and receiving partner at kitchen',()=>{const g=new Game();for(const team of [0,1]){g.score.team=team;g.serveSetup();const serving=g.players.filter(p=>p.team===team),receiving=g.players.filter(p=>p.team!==team);for(const p of serving)assert.ok(team===0?p.y>=43:p.y<=1);const partner=receiving.find(p=>p!==g.serveReceiver);assert.equal(g.serveReceiver.y,team===0?2:42);assert.equal(partner.y,team===0?14:30);assert.notEqual(g.serveReceiver.x<10,g.server.x<10)}});
