@@ -3,33 +3,34 @@ const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=n
 const project=(x,y,z=0)=>({x:480+(x-10)*(13+y*.21),y:145+y*8.5-z*14});
 function poly(points,fill,stroke='#f8edc7',width=2){ctx.beginPath();points.forEach(([x,y],i)=>{const p=project(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}}
 function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
-// Original pixel-inspired sprites: limbs and paddle move independently of the body.
+// Each player is assembled from a small pixel grid; only the pose frames change.
 function drawPlayer(p,q){
- const scale=.75+p.y/100, pace=Math.min(1,Math.hypot(p.vx,p.vy)/8);
- const stride=Math.sin(performance.now()/110+p.id*4)*5*pace;
- const skin=['#dca482','#c58a67','#e6b594','#a96f52'][p.id];
- const shirt=['#e3af3d','#df6e54','#5f9bd4','#9d80c5'][p.id];
- ctx.save();ctx.translate(q.x,q.y);ctx.scale(scale,scale);
- ctx.fillStyle='#101d1a66';ctx.beginPath();ctx.ellipse(0,1,17,5,0,0,Math.PI*2);ctx.fill();
- if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,1,19,7,0,0,Math.PI*2);ctx.stroke()}
- // Bent knees, socks, and shoes create a readable athletic stance.
- ctx.strokeStyle=skin;ctx.lineCap='round';ctx.lineWidth=6;
- ctx.beginPath();ctx.moveTo(-5,-15);ctx.lineTo(-7+stride,-5);ctx.moveTo(5,-15);ctx.lineTo(7-stride,-5);ctx.stroke();
- ctx.strokeStyle='#e8ede5';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-7+stride,-5);ctx.lineTo(-8+stride,-2);ctx.moveTo(7-stride,-5);ctx.lineTo(8-stride,-2);ctx.stroke();
- ctx.fillStyle='#23313c';ctx.fillRect(-13+stride,-3,9,4);ctx.fillRect(4-stride,-3,9,4);
- ctx.fillStyle='#263747';ctx.fillRect(-10,-23,20,10);ctx.fillStyle='#1a2936';ctx.fillRect(-1,-21,2,7);
- // A tapered jersey, shoulders, neck and face give each figure depth.
- ctx.fillStyle=shirt;ctx.beginPath();ctx.moveTo(-8,-39);ctx.lineTo(8,-39);ctx.lineTo(12,-33);ctx.lineTo(9,-22);ctx.lineTo(-9,-22);ctx.lineTo(-12,-33);ctx.closePath();ctx.fill();
- ctx.fillStyle='#ffffff55';ctx.fillRect(-7,-37,14,2);ctx.fillStyle='#152e3a55';ctx.fillRect(5,-34,3,10);
- ctx.strokeStyle=skin;ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-10,-34);ctx.lineTo(-15,-23);ctx.moveTo(10,-34);ctx.lineTo(15,-25-(p.swing?5:0));ctx.stroke();
- ctx.fillStyle=skin;ctx.fillRect(-3,-42,6,5);ctx.fillRect(-7,-52,14,11);
- ctx.fillStyle=['#3d302b','#493026','#bd956a','#2c2526'][p.id];ctx.fillRect(-8,-54,16,5);ctx.fillRect(-8,-50,3,4);
- ctx.fillStyle='#f3e8ca';ctx.fillRect(-8,-51,16,2); // headband
- if(p.team===1){ctx.fillStyle='#372d2b';ctx.fillRect(-4,-46,2,2);ctx.fillRect(3,-46,2,2)}
- ctx.save();ctx.translate(15,-25-(p.swing?5:0));ctx.rotate(p.swing?-.65:.35);ctx.fillStyle='#624936';ctx.fillRect(0,0,3,8);ctx.fillStyle='#e7dbc0';ctx.fillRect(-4,-11,11,13);ctx.fillStyle='#385c68';ctx.fillRect(-2,-9,7,9);ctx.restore();ctx.restore();
+ const scale=.8+p.y/100, moving=Math.hypot(p.vx,p.vy)>1.2;
+ const frame=moving?Math.floor(performance.now()/125+p.id)%2:0;
+ const skin=['#e4a87e','#c7835e','#edbb91','#b47855'][p.id];
+ const shade=['#a9674e','#92583f','#bd815f','#805039'][p.id];
+ const shirt=['#f2bd43','#e76f53','#65a7e2','#af8bd6'][p.id];
+ const dark=['#a67626','#a63f38','#3b689f','#715391'][p.id];
+ const hair=['#4a3029','#362b27','#b18a61','#29272b'][p.id];
+ ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.scale(scale,scale);
+ ctx.fillStyle='#101f1a80';ctx.fillRect(-17,-3,34,5);ctx.fillRect(-12,-5,24,9);
+ if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke()}
+ const px=(x,y,w,h,color)=>{ctx.fillStyle=color;ctx.fillRect(x*2,y*2,w*2,h*2)};
+ // Shoes and legs form separate alternating run frames.
+ if(frame===0){px(-5,-5,4,4,skin);px(1,-5,4,4,skin);px(-6,-2,5,2,'#eef1db');px(1,-2,5,2,'#eef1db');px(-7,0,6,2,'#263642');px(1,0,6,2,'#263642')}
+ else{px(-6,-5,4,4,skin);px(2,-6,4,4,skin);px(-7,-2,5,2,'#eef1db');px(2,-3,5,2,'#eef1db');px(-8,0,6,2,'#263642');px(2,-1,6,2,'#263642')}
+ px(-6,-9,12,5,'#253846');px(-1,-8,2,4,'#162a36');px(-6,-14,12,6,shirt);px(-7,-13,14,3,shirt);px(-5,-14,10,1,'#fff2bd');px(4,-12,2,4,dark);
+ // Forearms, neck, hair, face and headband are intentionally pixel-stepped.
+ px(-8,-12,2,5,skin);px(-9,-8,2,2,shade);px(6,-12,2,4,skin);px(7,-9,2,2,shade);
+ px(-2,-16,4,2,skin);px(-5,-22,10,7,skin);px(-6,-21,1,4,shade);px(5,-21,1,4,shade);px(-5,-23,10,2,hair);px(-6,-22,2,2,hair);px(-5,-22,10,1,'#f4ead4');
+ if(p.team===1){px(-3,-19,1,1,'#332f30');px(2,-19,1,1,'#332f30');px(-1,-17,2,1,shade)}else{px(-5,-21,10,1,hair);px(-4,-18,8,2,shade)}
+ // Paddle and arm use separate impact and ready poses.
+ if(p.swing>0){px(7,-13,4,2,skin);px(10,-16,2,4,'#6d4934');px(9,-21,6,6,'#f2ead5');px(10,-20,4,4,'#315c6f')}
+ else{px(8,-9,2,3,'#6d4934');px(7,-15,6,6,'#f2ead5');px(8,-14,4,4,'#315c6f')}
+ ctx.restore();
 }
 const courtSpeckles=Array.from({length:160},(_,i)=>({x:((i*137)%1000)/1000*24-2,y:((i*269)%1000)/1000*48-2}));
-function render(){ctx.fillStyle='#163b3b';ctx.fillRect(0,0,960,600);ctx.fillStyle='#254d43';for(let i=0;i<960;i+=40)ctx.fillRect(i,110,20,490);poly([[-3.4,-2.4],[23.4,-2.4],[23.4,46.4],[-3.4,46.4]],'#182e2d',null);poly([[-3,-2],[23,-2],[23,46],[-3,46]],'#507b70',null);poly([[0,0],[20,0],[20,44],[0,44]],'#357282');poly([[0,15],[20,15],[20,29],[0,29]],'#bc755e',null);ctx.fillStyle='#ffffff0b';for(const speck of courtSpeckles){const q=project(speck.x,speck.y);ctx.fillRect(q.x,q.y,2,1)}poly([[0,0],[20,0],[20,44],[0,44]],'transparent','#e9eee0',3);line([0,15],[20,15]);line([0,29],[20,29]);line([10,0],[10,15]);line([10,29],[10,44]);if(game.mode==='play'&&game.phase!=='serve'){const target=project(game.aim,game.shot==='dink'?14:game.shot==='drop'?12:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
+function render(){ctx.fillStyle='#163b3b';ctx.fillRect(0,0,960,600);ctx.fillStyle='#254d43';for(let i=0;i<960;i+=40)ctx.fillRect(i,110,20,490);poly([[-3.6,-2.4],[23.6,-2.4],[23.6,47.1],[-3.6,47.1]],'#122a29',null);poly([[-3.4,-2.4],[23.4,-2.4],[23.4,46.4],[-3.4,46.4]],'#263d3a',null);poly([[-3,-2],[23,-2],[23,46],[-3,46]],'#507b70',null);poly([[0,0],[20,0],[20,44],[0,44]],'#357282');poly([[0,15],[20,15],[20,29],[0,29]],'#bc755e',null);ctx.fillStyle='#ffffff0b';for(const speck of courtSpeckles){const q=project(speck.x,speck.y);ctx.fillRect(q.x,q.y,2,1)}poly([[0,0],[20,0],[20,44],[0,44]],'transparent','#e9eee0',3);line([0,15],[20,15]);line([0,29],[20,29]);line([10,0],[10,15]);line([10,29],[10,44]);if(game.mode==='play'&&game.phase!=='serve'){const target=project(game.aim,game.shot==='dink'?14:game.shot==='drop'?12:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
  const netL=project(-.5,22),netR=project(20.5,22);ctx.fillStyle='#25323c';ctx.fillRect(netL.x,netL.y-30,netR.x-netL.x,30);ctx.strokeStyle='#94a79e';ctx.lineWidth=1;for(let x=netL.x;x<netR.x;x+=10){ctx.beginPath();ctx.moveTo(x,netL.y-30);ctx.lineTo(x,netL.y);ctx.stroke()}for(let y=netL.y-24;y<netL.y;y+=7){ctx.beginPath();ctx.moveTo(netL.x,y);ctx.lineTo(netR.x,y);ctx.stroke()}ctx.fillStyle='#f9e6bd';ctx.fillRect(netL.x,netL.y-32,netR.x-netL.x,5);ctx.fillStyle='#bdc8bf';ctx.fillRect(netL.x-3,netL.y-36,5,39);ctx.fillRect(netR.x-2,netR.y-36,5,39);
  const entities=[...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,8,4,0,0,7);ctx.fill();const b=project(p.x,p.y,p.z);ctx.fillStyle='#f9f36c';ctx.fillRect(b.x-4,b.y-4,8,8);continue}drawPlayer(p,q)}
  ctx.fillStyle='#1b2939';ctx.fillRect(20,15,365,77);ctx.fillStyle='#f9d46a';ctx.font='bold 17px monospace';ctx.fillText('DRIVES & DINKS  /  '+(game.mode==='play'?'PLAY':'WATCH'),32,38);ctx.fillStyle='#fff8df';ctx.font='bold 23px monospace';ctx.fillText(`YOU ${game.score.points[0]}   :   ${game.score.points[1]} CPU`,32,68);ctx.font='bold 16px monospace';ctx.fillStyle='#fff6d9';ctx.fillText(`SERVE ${game.score.team===0?'YOU':'CPU'}  ${game.score.call}`,560,35);ctx.fillStyle='#f9d46a';ctx.fillText(game.phase==='over'?(game.score.winner===0?'YOU WIN!':'CPU WINS!'):(game.canHumanHit()?'HIT NOW!':game.message),560,62);if(game.phase==='pause'||game.phase==='over'){ctx.fillStyle='#1b2939';ctx.fillRect(235,260,490,75);ctx.textAlign='center';ctx.fillStyle='#fff6d9';ctx.font='bold 19px monospace';ctx.fillText(game.result,480,288);ctx.fillStyle='#f9d46a';ctx.fillText(game.outcome,480,316);ctx.textAlign='start'};ctx.fillStyle='#fff';ctx.font='13px monospace';ctx.fillText(game.phase==='serve'?'SERVE: AUTO AIM':'TARGET: '+(game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'),560,83)}
