@@ -1,7 +1,11 @@
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32,bounce:.72,dt:1/120,speed:12,accel:45,reach:2.6};
-export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09});
+export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{jersey:0}}}
+export function serveTarget(player,aim,type='hard',random=Math.random()){
+ const spread=(type==='soft'?1.35:2.3)/Math.max(.55,(player.abilities?.serve??1)*(player.paddle?.control??1));
+ return Math.max(1,Math.min(19,aim+(random-.5)*spread))
+}
 export function aimStep(player,fine=false){const placement=(player.abilities?.control??1)*(player.paddle?.control??1);return Math.max(1.5,Math.min(3.5,2.5/placement))*(fine?.25:1)}
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
 export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
@@ -23,7 +27,7 @@ export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z;b.x+=b.vx*dt;b.y+=b.
  if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'}
  if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;if(b.shot==='slice'){b.vz*=.82;b.vx*=.94;b.vy*=.94}return 'bounce'}return null}
 export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1){
- const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0],slice:[1.18,-1.8],overhead:[.95,1],atp:[1.05,1],erne:[1.05,1]};
+ const specs={serve:[1.15,0],'serve-hard':[.92,1.2],'serve-soft':[1.38,-.35],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0],slice:[1.18,-1.8],overhead:[.95,1],atp:[1.05,1],erne:[1.05,1]};
  let [t,spin]=specs[shot]||specs.drive;
  const slow=1/(.72+.28*quality);t*=slow
  if(['drive','overhead','atp','erne'].includes(shot))t=Math.max(.42,Math.hypot(x-b.x,y-b.y)/(48*paddle.power*(shot==='overhead'?1.12:1)));
