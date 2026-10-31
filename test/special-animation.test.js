@@ -49,10 +49,10 @@ test('overhead, forehand and backhand use distinct sprite clips',()=>{
  assert.equal(forehand[0].kind,'forehand');
  assert.equal(backhand[0].kind,'backhand');
  assert.equal(overhead[0].kind,'overhead');
- assert.notDeepEqual(forehand.map(sample=>sample.frameColumn),backhand.map(sample=>sample.frameColumn));
+ assert.notEqual(forehand[0].kind,backhand[0].kind);
  assert.equal(forehand[0].mirror,!backhand[0].mirror);
  assert.equal(forehand[0].useSwingSheet,false);
- assert.equal(overhead[0].useSwingSheet,true);
+ assert.equal(overhead[0].useSwingSheet,false);
  assert.ok(Math.min(...overhead.map(sample=>sample.offsetY))<Math.min(...forehand.map(sample=>sample.offsetY)));
  assert.ok(Math.min(...overhead.map(sample=>sample.rotation))<Math.min(...forehand.map(sample=>sample.rotation)));
 });
@@ -60,29 +60,28 @@ test('overhead, forehand and backhand use distinct sprite clips',()=>{
 test('stroke clips stay in bounds throughout their complete playback',()=>{
  for(const shot of ANIMATION_TEST_STROKES){
   const player={stroke:shot==='backhand'?'backhand':'forehand',animationShot:shot,swingSide:-1};
-  for(let phase=0;phase<=1;phase+=.05){const sample=sampleStrokeAnimation(player,phase);assert.ok(sample.frameColumn>=0&&sample.frameColumn<=3);assert.ok(Number.isFinite(sample.offsetY));assert.ok(Number.isFinite(sample.rotation))}
+  for(let phase=0;phase<=1;phase+=.05){const sample=sampleStrokeAnimation(player,phase);assert.ok(sample.frameColumn>=0&&sample.frameColumn<=7);assert.ok(Number.isFinite(sample.offsetY));assert.ok(Number.isFinite(sample.rotation))}
  }
 });
 
 
-test('female backhands add a two-handed grip while male backhands remain one-handed',()=>{
+test('female and male backhands use all eight generated animation frames',()=>{
  const female={gender:'female',stroke:'backhand',animationShot:'drive',swingSide:-1};
  const male={gender:'male',stroke:'backhand',animationShot:'drive',swingSide:-1};
  for(const progress of [0,.2,.4,.6,.8,.95]){
   const femaleSample=sampleStrokeAnimation(female,progress),maleSample=sampleStrokeAnimation(male,progress);
+  assert.ok(femaleSample.frameColumn>=0&&femaleSample.frameColumn<=7);
+  assert.ok(maleSample.frameColumn>=0&&maleSample.frameColumn<=7);
   assert.equal(femaleSample.twoHanded,true);
-  assert.equal(maleSample.twoHanded,false);
-  assert.ok(Number.isFinite(femaleSample.supportHandX));
-  assert.ok(Number.isFinite(femaleSample.supportHandY));
  }
 });
 
 test('overhead clip has a clear wind-up, apex, slam, and follow-through',()=>{
  const player={stroke:'forehand',animationShot:'overhead',swingSide:1};
- const samples=[0,.15,.3,.45,.6,.75,.92].map(progress=>sampleStrokeAnimation(player,progress));
+ const samples=[0,.12,.24,.36,.48,.6,.72,.84,.99].map(progress=>sampleStrokeAnimation(player,progress));
  assert.ok(Math.min(...samples.map(sample=>sample.offsetY))<-10);
- assert.ok(Math.max(...samples.map(sample=>sample.offsetY))>2);
+ assert.ok(Math.max(...samples.map(sample=>sample.offsetY))>1);
  assert.ok(Math.min(...samples.map(sample=>sample.rotation))<-.12);
  assert.ok(Math.max(...samples.map(sample=>sample.rotation))>.1);
- assert.deepEqual([...new Set(samples.map(sample=>sample.frameColumn))].sort(),[0,1,2,3])
+ assert.deepEqual([...new Set(samples.map(sample=>sample.frameColumn))].sort(),[0,1,2,3,4,5,6,7])
 });

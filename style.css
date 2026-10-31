@@ -19,6 +19,14 @@ dialog{width:min(1000px,95vw);max-height:94dvh;padding:22px;border:3px solid #e9
 [hidden]{display:none!important}
 #aim-pad{display:none}
 
+.loadout-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 18px;border-top:1px solid #536e70;padding-top:12px;font-size:12px}
+.stat-row{display:grid;grid-template-columns:78px minmax(60px,1fr) 28px;align-items:center;gap:7px;background:#233f46;padding:6px 8px;border:1px solid #456166}
+.stat-row>span{color:#dce7dc}.stat-row>strong{color:#fff2bd;text-align:right;font-size:11px}
+.stat-row[data-stat="serve"]{border-color:#f2c665}.stat-row[data-stat="power"] i{background:#ef9667}.stat-row[data-stat="spin"] i{background:#bd8be9}
+.stat-meter{height:9px;padding:1.5px;background:#142b31;border:1px solid #5d7778;border-radius:999px;overflow:hidden}.stat-meter i{display:block;height:100%;min-width:2px;background:#66c5aa;border-radius:999px}
+.color-swatch{position:relative;min-width:98px}.color-swatch:before,.court-swatch:before{content:'';width:14px;height:14px;border:1px solid #ffffff99;flex:none}.court-swatch:before{width:20px;background:linear-gradient(90deg,var(--swatch) 0 58%,var(--court-kitchen) 58%)}
+@media(max-width:650px){.loadout-stats{grid-template-columns:1fr}.color-swatch{min-width:calc(50% - 3px)}}
+
 /* Keep the full court inside short landscape viewports such as iPad mini. */
 @media (orientation:landscape) and (min-height:551px) and (max-height:850px){
   main{width:100%;max-width:min(1100px,calc((100vh - 205px) * 1.6 + 10px));min-height:100vh;padding:max(6px,env(safe-area-inset-top)) 10px max(6px,env(safe-area-inset-bottom));max-width:min(1100px,calc((100dvh - 205px) * 1.6 + 10px));min-height:100dvh}

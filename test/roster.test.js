@@ -1,28 +1,31 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {CHARACTERS,PADDLES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
+import {CHARACTERS,PADDLES,HAIR_COLORS,SKIN_TONES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
+import {statRating} from '../src/selection.js';
 import {Game} from '../src/game.js';
 
-test('invalid saved selections safely normalize',()=>{assert.deepEqual(normalizeSelection(null),{character:'avery',paddle:'balanced',jersey:0,design:'ocean'});assert.deepEqual(normalizeSelection({character:'nope',paddle:'nope',jersey:-1,design:'nope'}),normalizeSelection())});
-test('every player and paddle combination produces an independent playable profile',()=>{for(const c of CHARACTERS)for(const p of PADDLES){const config={character:c.id,paddle:p.id,jersey:3,design:'mint'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.appearance.jersey,3);assert.equal(profile.appearance.paddleDesign,'mint');profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}});
+test('every requested appearance option is available',()=>{
+ assert.deepEqual(HAIR_COLORS.map(item=>item.name),['Black','Brown','Blonde','Red','Gray']);
+ assert.deepEqual(SKIN_TONES.map(item=>item.name),['Light','Medium','Dark']);
+ assert.deepEqual(CLOTHING_COLORS.map(item=>item.name),['Black','Gray','White','Blue','Yellow','Red','Green','Purple','Pink','Orange']);
+ assert.equal(PADDLE_COLORS.length,10);
+ assert.equal(COURT_PALETTES.length,3);
+});
+test('invalid and legacy selections safely normalize',()=>{
+ const fallback=normalizeSelection(null);
+ assert.equal(fallback.hair,'brown');assert.equal(fallback.skin,'medium');assert.equal(fallback.outfit,'tee');
+ const invalid=normalizeSelection({character:'nope',paddle:'nope',hair:'nope',skin:'nope',outfit:'dress',shirtColor:'nope',bottomColor:'nope',paddleColor:'nope',court:'nope'});
+ assert.equal(invalid.character,'avery');assert.equal(invalid.outfit,'tee');assert.equal(invalid.court,'blue-gray');
+ assert.equal(normalizeSelection({character:'selena',outfit:'polo'}).outfit,'tee');
+ assert.equal(normalizeSelection({character:'avery',outfit:'dress'}).outfit,'tee');
+});
+test('every player and paddle combination produces an independent playable profile',()=>{
+ for(const c of CHARACTERS)for(const p of PADDLES){const config={character:c.id,paddle:p.id,hair:'gray',skin:'dark',outfit:c.gender==='female'?'dress':'polo',shirtColor:'orange',bottomColor:'purple',paddleColor:'yellow',court:'pink-black'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.appearance.hair,'gray');assert.equal(profile.appearance.skin,'dark');assert.equal(profile.appearance.outfit,config.outfit);profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}
+});
 test('each character has a meaningful strength and a tradeoff',()=>{const standard=selectionStats({});for(const c of CHARACTERS.filter(c=>c.id!=='avery')){const stats=selectionStats({character:c.id});assert.ok(Object.keys(stats).some(k=>stats[k]>standard[k]));assert.ok(Object.keys(stats).some(k=>stats[k]<standard[k]))}});
 test('players carry distinct serve, power, and spin skills into the lineup',()=>{for(const character of CHARACTERS)assert.ok(buildProfile({character:character.id}).abilities.serve>0);assert.ok(selectionStats({character:'lena'}).serve>selectionStats({character:'harper'}).serve);const stats=CHARACTERS.map(character=>selectionStats({character:character.id}));assert.ok(new Set(stats.map(stat=>stat.power)).size>=6);assert.ok(new Set(stats.map(stat=>stat.spin)).size>=6)});
-
 test('power and control paddles trade capabilities rather than increasing all stats',()=>{const power=selectionStats({paddle:'power'}),control=selectionStats({paddle:'control'});assert.ok(power.power>control.power);assert.ok(power.placement<control.placement);assert.ok(power.spin<control.spin)});
-test('cosmetic changes do not affect abilities or paddle performance',()=>{const a=buildProfile({jersey:0,design:'ocean'}),b=buildProfile({jersey:2,design:'ember'});assert.deepEqual(a.abilities,b.abilities);assert.deepEqual(a.paddle,b.paddle);assert.notDeepEqual(a.appearance,b.appearance)});
-test('configured lineup contains four characters and survives match resets',()=>{const config={character:'morgan',paddle:'control',jersey:2,design:'ember'};assert.equal(new Set(createLineup(config).map(p=>p.characterId)).size,4);const g=new Game();g.configure(config);assert.equal(g.players[0].name,'Morgan Reed');assert.equal(g.players[0].paddle.id,'control');g.players[0].abilities.control=0;g.reset();assert.equal(g.players[0].abilities.control,1.04);assert.deepEqual(g.players[0].appearance,{jersey:2,body:'male',paddleDesign:'ember'})});
-
-
-
-test('female selections receive a male partner in mixed doubles',()=>{const women=CHARACTERS.filter(c=>c.gender==='female');assert.equal(women.length,4);const lineup=createLineup({character:'quinn',paddle:'control'});assert.equal(lineup[0].characterId,'quinn');assert.equal(lineup[0].paddle.id,'control');assert.equal(lineup[1].gender,'male');assert.ok(lineup.slice(2).every(p=>p.gender==='female'||p.gender==='male'));assert.ok(lineup[1].characterId!=='quinn')});
-test('male selections receive a female partner in mixed doubles',()=>{const lineup=createLineup({character:'avery'});assert.equal(lineup[0].gender,'male');assert.equal(lineup[1].gender,'female')});
-test('every default matchup is mixed doubles',()=>{for(const player of CHARACTERS){const lineup=createLineup({character:player.id});for(const team of [lineup.slice(0,2),lineup.slice(2,4)])assert.deepEqual(new Set(team.map(p=>p.gender)),new Set(['male','female']))}});
-
-
-
-test('legacy skin and hair selections are ignored for both character types',()=>{for(const character of ['avery','selena']){const selection=normalizeSelection({character,skin:'deep',hair:'blonde'});assert.equal('skin' in selection,false);assert.equal('hair' in selection,false);assert.deepEqual(buildProfile(selection).appearance,{jersey:0,body:character==='avery'?'male':'female',paddleDesign:'ocean'})}});
-
-test('player power and spin modify the effective game equipment',()=>{
- const g=new Game();g.configure({character:'jordan',paddle:'balanced'});const p=g.players[0],effective=g.paddleFor(p);
- assert.ok(effective.power>p.paddle.power);assert.ok(effective.spin<p.paddle.spin);assert.equal(Object.keys(selectionStats({character:'jordan'}))[0],'serve')
-});
+test('cosmetic changes do not affect abilities or paddle performance',()=>{const a=buildProfile({shirtColor:'black',paddleColor:'mint'}),b=buildProfile({shirtColor:'pink',paddleColor:'red'});assert.deepEqual(a.abilities,b.abilities);assert.deepEqual(a.paddle,b.paddle);assert.notDeepEqual(a.appearance,b.appearance)});
+test('configured lineup contains four characters and survives match resets',()=>{const config={character:'morgan',paddle:'control',hair:'red',skin:'dark',outfit:'polo',shirtColor:'blue',bottomColor:'gray',paddleColor:'orange',court:'green-orange'};const lineup=createLineup(config);assert.equal(new Set(lineup.map(p=>p.characterId)).size,4);const g=new Game();g.configure(config);assert.equal(g.players[0].name,'Morgan Reed');assert.equal(g.players[0].paddle.id,'control');g.players[0].abilities.control=0;g.reset();assert.equal(g.players[0].abilities.control,1.04);assert.equal(g.players[0].appearance.hair,'red');assert.equal(g.players[0].appearance.court,'green-orange')});
+test('female selections receive a male partner and male selections receive a female partner',()=>{for(const player of CHARACTERS){const lineup=createLineup({character:player.id});for(const team of [lineup.slice(0,2),lineup.slice(2,4)])assert.deepEqual(new Set(team.map(p=>p.gender)),new Set(['male','female']))}});
+test('player power and spin modify effective equipment and stat bars are bounded',()=>{const g=new Game();g.configure({character:'jordan',paddle:'balanced'});const p=g.players[0],effective=g.paddleFor(p);assert.ok(effective.power>p.paddle.power);assert.ok(effective.spin<p.paddle.spin);assert.equal(Object.keys(selectionStats({character:'jordan'}))[0],'serve');for(const value of [.4,.8,1,1.2,1.5])assert.ok(statRating(value)>=0&&statRating(value)<=100)});
