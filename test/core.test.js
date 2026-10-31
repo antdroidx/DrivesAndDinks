@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,contactQuality} from '../src/core.js';import {Game} from '../src/game.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,contactQuality,serveTarget} from '../src/core.js';import {Game} from '../src/game.js';
 test('ball arcs and bounces',()=>{let b={x:5,y:40,z:1};launch(b,15,5,'lob');let high=0,event;for(let i=0;i<300&&!event;i++){event=stepBall(b);high=Math.max(high,b.z)}assert.equal(event,'bounce');assert.ok(high>5);assert.ok(b.vz>0);assert.ok(Math.abs(b.x-15)<1)});
 test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.equal(stepBall(b,.02),'net');assert.ok(inBounds(0,44));assert.ok(!inBounds(-.1,4))});
 test('two bounce and kitchen volleys',()=>{assert.match(legalVolley(0,35,0,1),/Two-bounce/);assert.match(legalVolley(0,35,0,2),/Two-bounce/);assert.match(legalVolley(0,28,0,3),/Kitchen/);assert.equal(legalVolley(0,28,1,3),null);assert.equal(legalVolley(0,35,0,3),null)});
@@ -72,4 +72,16 @@ test('easy difficulty accepts a slightly late swing while normal does not',()=>{
  const setup=(difficulty)=>{const g=new Game();g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:38.8,z:1,vx:0,vy:-3,vz:0});g.clock=.2;g.lastHumanContactAt=0;g.swing();return g};
  const normal=setup('normal');assert.equal(normal.last,1);assert.equal(normal.hitBuffer,.32)
  const easy=setup('easy');assert.equal(easy.last,0);assert.equal(easy.hitBuffer,0);assert.ok(easy.events.some(event=>event.type==='hit'))
+});
+test('serve skill improves placement and hard and soft serves use distinct trajectories',()=>{
+ const weak=playerProfile(),strong=playerProfile();weak.abilities.serve=.7;strong.abilities.serve=1.3;
+ const weakTarget=serveTarget(weak,10,'hard',0),strongTarget=serveTarget(strong,10,'hard',0);
+ assert.ok(Math.abs(10-strongTarget)<Math.abs(10-weakTarget));
+ const hard={x:15,y:45.5,z:1},soft={x:15,y:45.5,z:1};launch(hard,8,8,'serve-hard',{power:1,spin:1});launch(soft,8,8,'serve-soft',{power:1,spin:1});
+ assert.ok(Math.abs(hard.vy)>Math.abs(soft.vy));assert.equal(hard.shot,'serve-hard');assert.equal(soft.shot,'serve-soft')
+});
+
+test('human serves use the selected aim and serve button type',()=>{
+ const g=new Game();g.aim=17;g.shot='soft';g.serve();assert.equal(g.ball.shot,'serve-soft');assert.match(g.message,/SOFT SERVE/);assert.ok(g.ball.vx>0);
+ g.reset();g.aim=7;g.shot='attack';g.serve();assert.equal(g.ball.shot,'serve-hard');assert.match(g.message,/HARD SERVE/);assert.ok(g.ball.vx<0)
 });
