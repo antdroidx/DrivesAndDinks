@@ -8,7 +8,7 @@ Serve this directory with a local HTTP server, for example `python -m http.serve
 
 ## Controls
 
-Choose drive, drop, dink, or lob with 1–4 or the on-screen buttons. Aim left/right with the mouse, arrow keys, or a touch on the court. Press Space, click/tap the court, or use HIT when the ball is within reach. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. Touching the court both aims and swings.
+Choose drive, drop, dink, or lob with 1–4 or the on-screen buttons. Aim left/right with the mouse, arrow keys, or a touch on the court. Press Space, click the court, or use HIT when the ball is within reach. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. On a touchscreen, drag or tap the court to aim, then tap HIT to swing.
 
 ## Architecture
 
@@ -16,4 +16,4 @@ Choose drive, drop, dink, or lob with 1–4 or the on-screen buttons. Aim left/r
 
 ## Prototype limitations
 
-This is an early playable experiment, not a rules-certified simulation. AI positioning and shot selection are basic and need playtesting and tuning; reaction time and acceleration are not independently configurable. Shot timing is a reach window rather than a graded timing meter, and spin is a simplified drag effect. Kitchen faults only check the hitter's location at contact, not momentum or later contact with the zone. Service-line edge cases, partner positioning, and service rotation require more coverage. There is no player collision or serve motion validation. Rendering and mobile interaction need testing on real devices. A browser playtest was not completed in this development environment. Gameplay and rules should be reviewed before calling this v0.1 complete.
+This is an early playable experiment, not a rules-certified simulation. AI positioning and shot selection are basic and need playtesting and tuning; reaction time and acceleration are not independently configurable. Shot timing is a reach window rather than a graded timing meter, and spin is a simplified drag effect. Kitchen faults only check the hitter's location at contact, not momentum or later contact with the zone. Service-line edge cases, partner positioning, and service rotation need continued playtesting. There is no player collision or serve motion validation. Rendering and mobile interaction need testing on real devices. Desktop browser and a phone-sized landscape viewport have been checked; physical Android touch and performance have not been tested. Gameplay and rules should be reviewed before calling this v0.1 complete.
