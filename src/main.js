@@ -1,5 +1,5 @@
 import {setupSelection} from './selection.js';
-import {PADDLE_DESIGNS,CHARACTERS,CHARACTER_LOOKS} from './roster.js';
+import {PADDLE_DESIGNS,CHARACTERS,SKIN_TONES,HAIR_COLORS} from './roster.js';
 import {Game} from './game.js';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 // Short synthesized effects; audio is unlocked by the first user gesture.
@@ -46,8 +46,8 @@ function loadSpriteVariants(i){
 function spriteAvailable(p){return (p.appearance.body==='female'?femaleSpriteVariants.every(Boolean):spriteVariants.every(Boolean)&&swingVariants.every(Boolean))}
 function artFor(p){return p.appearance.body==='female'?[femaleSpriteVariants,null]:[spriteVariants,swingVariants]}
 const frameCache=new Map();
-function equipmentFrame(variants,jersey,row,col,sw,sh,design,swinging,body='male',characterId='avery'){
- const key=[body,swinging,jersey,row,col,design,characterId].join(':');if(frameCache.has(key))return frameCache.get(key);
+function equipmentFrame(variants,jersey,row,col,sw,sh,design,swinging,body='male',skin='warm',hair='brown'){
+ const key=[body,swinging,jersey,row,col,design,skin,hair].join(':');if(frameCache.has(key))return frameCache.get(key);
  const c=document.createElement('canvas');c.width=96;c.height=Math.round(96*sh/sw);const x=c.getContext('2d',{willReadFrequently:true});x.imageSmoothingEnabled=false;x.drawImage(variants[jersey],col*sw,row*sh,sw,sh,0,0,c.width,c.height);
  const face=PADDLE_DESIGNS.find(d=>d.id===design)||PADDLE_DESIGNS[0];
  const frontMasks=[[.36,.24,.67,.53],[.15,.32,.37,.83],[.32,.2,.68,.54],[.15,.32,.37,.83]],backMasks=[[.68,.22,.9,.67],[.74,.3,.98,.78],[.02,.08,.35,.55],[.68,.3,.98,.78]];
@@ -55,18 +55,19 @@ function equipmentFrame(variants,jersey,row,col,sw,sh,design,swinging,body='male
  const reference=document.createElement('canvas');reference.width=c.width;reference.height=c.height;const rx=reference.getContext('2d',{willReadFrequently:true});rx.imageSmoothingEnabled=false;rx.drawImage(variants[0],col*sw,row*sh,sw,sh,0,0,c.width,c.height);const referencePixels=rx.getImageData(0,0,c.width,c.height).data;
 
  const box=(swinging?(row?swingBack:swingFront):(row%2?backMasks:frontMasks))[col];const image=x.getImageData(0,0,c.width,c.height),d=image.data;
- const look=CHARACTER_LOOKS[characterId]||CHARACTER_LOOKS.avery;
+ const skinTone=SKIN_TONES.find(t=>t.id===skin)||SKIN_TONES[1],hairColor=HAIR_COLORS.find(h=>h.id===hair)||HAIR_COLORS[0];
  for(let y=0;y<c.height;y++)for(let xx=0;xx<c.width;xx++){
   const i=(y*c.width+xx)*4;if(!d[i+3])continue;
-  const r=d[i],g=d[i+1],b=d[i+2],lum=(r+g+b)/3;const hair=y<c.height*.42&&lum<190&&b<g*.58&&r>b*1.25;
-  if(hair){const shade=.55+lum/255*.65;d[i]=look.hair[0]*255*shade;d[i+1]=look.hair[1]*255*shade;d[i+2]=look.hair[2]*255*shade}
-  else if(r>75&&r>g*1.12&&b>g*.42&&b<r*.9){d[i]=r*look.skin[0];d[i+1]=g*look.skin[1];d[i+2]=b*look.skin[2]}
+  const r=d[i],g=d[i+1],b=d[i+2],lum=(r+g+b)/3,face=row%2===0&&y>c.height*.12&&y<c.height*.33&&xx>c.width*.4&&xx<c.width*.64;
+  const isHair=!face&&y<c.height*.38&&lum<125&&b<g*.9&&g<r*.84&&r>15;
+  if(isHair){const shade=.75+lum/180;d[i]=hairColor.rgb[0]*shade;d[i+1]=hairColor.rgb[1]*shade;d[i+2]=hairColor.rgb[2]*shade}
+  else if(r>80&&g>r*.5&&r>g*1.08&&b>g*.42&&b<r*.92){d[i]=r*skinTone.factor[0];d[i+1]=g*skinTone.factor[1];d[i+2]=b*skinTone.factor[2]}
  }
 
  for(let y=Math.floor(box[1]*c.height);y<box[3]*c.height;y++)for(let xx=Math.floor(box[0]*c.width);xx<box[2]*c.width;xx++){const i=(y*c.width+xx)*4,r=referencePixels[i],g=referencePixels[i+1],b=referencePixels[i+2];if(d[i+3]>0&&b>r*1.4&&b>g*1.05){const shade=Math.max(.3,Math.min(1.15,(r+g+b)/210));d[i]=face.rgb[0]*shade;d[i+1]=face.rgb[1]*shade;d[i+2]=face.rgb[2]*shade}}
  x.putImageData(image,0,0);frameCache.set(key,c);return c;
 }
-function drawLoadoutPreview(selection){const c=document.querySelector('#player-preview');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);x.fillStyle='#355e60';x.fillRect(0,160,c.width,40);x.fillStyle='#eff3cf66';x.fillRect(0,175,c.width,2);const selectedBody=CHARACTERS.find(c=>c.id===selection.character).gender,baseline=selectedBody==='female'?femaleSpriteVariants:spriteVariants;if(baseline[selection.jersey]){x.imageSmoothingEnabled=false;const frame=equipmentFrame(baseline,selection.jersey,0,0,350.5,280.5,selection.design,false,selectedBody,selection.character);x.drawImage(frame,12,12,156,170)}const face=PADDLE_DESIGNS.find(d=>d.id===selection.design);x.fillStyle=face.color;x.fillRect(145,130,18,25);x.fillStyle='#d8d0b7';x.fillRect(151,155,6,12)}
+function drawLoadoutPreview(selection){const c=document.querySelector('#player-preview');if(!c)return;const x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);x.fillStyle='#355e60';x.fillRect(0,160,c.width,40);x.fillStyle='#eff3cf66';x.fillRect(0,175,c.width,2);const selectedBody=CHARACTERS.find(c=>c.id===selection.character).gender,baseline=selectedBody==='female'?femaleSpriteVariants:spriteVariants;if(baseline[selection.jersey]){x.imageSmoothingEnabled=false;const frame=equipmentFrame(baseline,selection.jersey,0,0,350.5,280.5,selection.design,false,selectedBody,selection.skin,selection.hair);x.drawImage(frame,12,12,156,170)}const face=PADDLE_DESIGNS.find(d=>d.id===selection.design);x.fillStyle=face.color;x.fillRect(145,130,18,25);x.fillStyle='#d8d0b7';x.fillRect(151,155,6,12)}
 function drawSprite(p,q){
  const scale=.8+p.y/100,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const back=p.team===0,swinging=(p.windup>0||p.swing>0);
@@ -77,7 +78,7 @@ function drawSprite(p,q){
  ctx.fillStyle='#101f1a80';ctx.beginPath();ctx.ellipse(0,0,18,6,0,0,Math.PI*2);ctx.fill();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke()}
  if(p.swing>0&&progress>.7&&p.contactPoint){const point=project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z);ctx.translate(Math.max(-7,Math.min(7,(point.x-q.x)/scale-(p.swingSide||1)*23)),Math.max(-6,Math.min(6,(point.y-q.y)/scale+35)))}if(p.swing>0&&(p.swingSide||1)<0)ctx.scale(-1,1);if(p.stroke==='volley'&&swinging)ctx.scale(1,.96);ctx.imageSmoothingEnabled=false;
- const [baseVariants,swingSet]=artFor(p),frame=equipmentFrame(useSwingSheet?swingSet:baseVariants,p.appearance.jersey%4,artRow,col,sw,sh,p.appearance.paddleDesign||'ocean',useSwingSheet,p.appearance.body,p.characterId);if(useSwingSheet)ctx.drawImage(frame,-29,-78,58,91);else ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
+ const [baseVariants,swingSet]=artFor(p),frame=equipmentFrame(useSwingSheet?swingSet:baseVariants,p.appearance.jersey%4,artRow,col,sw,sh,p.appearance.paddleDesign||'ocean',useSwingSheet,p.appearance.body,p.appearance.skin||'warm',p.appearance.hair||'brown');if(useSwingSheet)ctx.drawImage(frame,-29,-78,58,91);else ctx.drawImage(frame,-35,-77,70,80);ctx.restore();
 }
 // Each player is assembled from a small pixel grid; only the pose frames change.
 function drawPlayer(p,q){

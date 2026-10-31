@@ -10,15 +10,23 @@ export const CHARACTERS = Object.freeze([
   {id:'quinn',name:'Quinn Vásquez',gender:'female',style:'Kitchen specialist',description:'Fast reactions and precise soft play; slower recovery.',abilities:{speed:11,acceleration:44,reach:1.03,control:1.09,reaction:.081}},
   {id:'lena',name:'Lena Park',gender:'female',style:'Reach & pressure',description:'Extended reach for interceptions; slower reactions.',abilities:{speed:11.6,acceleration:41,reach:1.11,control:.98,reaction:.105}}
 ]);
+export const SKIN_TONES = Object.freeze([
+  {id:'light',name:'Light',color:'#efc3a2',factor:[1.16,1.06,.96]},
+  {id:'warm',name:'Warm',color:'#d9a078',factor:[1.04,.90,.78]},
+  {id:'tan',name:'Tan',color:'#b87b59',factor:[.88,.70,.56]},
+  {id:'deep',name:'Deep',color:'#80513d',factor:[.65,.49,.38]}
+]);
+export const HAIR_COLORS = Object.freeze([
+  {id:'brown',name:'Brown',color:'#6e462b',rgb:[112,70,42]},
+  {id:'black',name:'Black',color:'#252326',rgb:[35,33,35]},
+  {id:'blonde',name:'Blonde',color:'#d8ad5e',rgb:[215,170,85]},
+  {id:'auburn',name:'Auburn',color:'#8e3825',rgb:[142,56,37]}
+]);
 export const CHARACTER_LOOKS = Object.freeze({
-  avery:{skin:[1.04,.94,.82],hair:[.42,.25,.13]},
-  remy:{skin:[.72,.55,.43],hair:[.12,.10,.09]},
-  morgan:{skin:[1.16,.99,.84],hair:[.78,.55,.25]},
-  jordan:{skin:[.91,.71,.56],hair:[.25,.16,.10]},
-  selena:{skin:[1.08,.84,.70],hair:[.09,.10,.12]},
-  harper:{skin:[.78,.60,.46],hair:[.22,.12,.07]},
-  quinn:{skin:[1.21,1.05,.93],hair:[.56,.18,.08]},
-  lena:{skin:[.93,.75,.59],hair:[.14,.11,.08]}
+  avery:{skin:'warm',hair:'brown'},remy:{skin:'deep',hair:'black'},
+  morgan:{skin:'light',hair:'blonde'},jordan:{skin:'tan',hair:'black'},
+  selena:{skin:'tan',hair:'brown'},harper:{skin:'deep',hair:'auburn'},
+  quinn:{skin:'light',hair:'auburn'},lena:{skin:'warm',hair:'black'}
 });
 export const PADDLES = Object.freeze([
   {id:'balanced',name:'Allcourt',style:'Balanced',description:'Even power, precision and spin.',power:1,control:1,spin:1},
@@ -31,18 +39,21 @@ export const PADDLE_DESIGNS = Object.freeze([
   {id:'ember',name:'Ember',color:'#ed7750',rgb:[237,119,80]},
   {id:'mint',name:'Mint',color:'#66c5aa',rgb:[102,197,170]}
 ]);
-export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',jersey:0,design:'ocean'});
+export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',jersey:0,design:'ocean',skin:'warm',hair:'brown'});
 export function normalizeSelection(input={}){
+  const character=CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character,look=CHARACTER_LOOKS[character];
   return {
-    character:CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character,
+    character,
     paddle:PADDLES.some(p=>p.id===input?.paddle)?input.paddle:DEFAULT_SELECTION.paddle,
     jersey:Number.isInteger(input?.jersey)&&input.jersey>=0&&input.jersey<JERSEYS.length?input.jersey:0,
-    design:PADDLE_DESIGNS.some(d=>d.id===input?.design)?input.design:'ocean'
+    design:PADDLE_DESIGNS.some(d=>d.id===input?.design)?input.design:'ocean',
+    skin:SKIN_TONES.some(t=>t.id===input?.skin)?input.skin:look.skin,
+    hair:HAIR_COLORS.some(h=>h.id===input?.hair)?input.hair:look.hair
   };
 }
 export function buildProfile(input){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle);
-  return {...playerProfile(),characterId:character.id,name:character.name,gender:character.gender,abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin},appearance:{jersey:selection.jersey,body:character.gender,paddleDesign:selection.design}};
+  return {...playerProfile(),characterId:character.id,name:character.name,gender:character.gender,abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin},appearance:{jersey:selection.jersey,body:character.gender,paddleDesign:selection.design,skin:selection.skin,hair:selection.hair}};
 }
 export function createLineup(input){
   const selected=normalizeSelection(input),profile=CHARACTERS.find(c=>c.id===selected.character),same=CHARACTERS.filter(c=>c.gender===profile.gender&&c.id!==selected.character),other=CHARACTERS.filter(c=>c.gender!==profile.gender);
