@@ -1,0 +1,1 @@
+globalThis.DRIVES_DINKS_BUILD = "FRIENDS 15";

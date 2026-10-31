@@ -1,6 +1,6 @@
-import {planIncoming,formationTarget,separatePartners} from './tactics.js?v=15';
-import {createLineup} from './roster.js?v=15';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,contactAvailable,contactQuality,selectShot,aimStep,serveTarget} from './core.js?v=15';
+import {planIncoming,formationTarget,separatePartners} from './tactics.js?v=16';
+import {createLineup} from './roster.js?v=16';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,contactAvailable,contactQuality,selectShot,aimStep,serveTarget} from './core.js?v=16';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection){this.lineup=createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=difficulty==='easy'?'easy':'normal';return this.difficulty}
