@@ -76,10 +76,13 @@ function equipmentFrame(p,row,col){
     visited[next]=1;queue.push(next);
    }
   }
-  components.push(pixels);
+  components.push({pixels,minY:Math.min(...pixels.map(index=>Math.floor(index/width))),maxY:Math.max(...pixels.map(index=>Math.floor(index/width)))});
  }
- const largest=Math.max(0,...components.map(component=>component.length)),minimum=Math.max(30,largest*.028);
- for(const component of components)if(component.length<minimum)for(const index of component)d[index*4+3]=0;
+ const largest=Math.max(0,...components.map(component=>component.pixels.length)),minimum=Math.max(30,largest*.028);
+ for(const component of components){
+  const stray=component.pixels.length<minimum||(component.maxY<height*.34&&component.pixels.length<largest*.18);
+  if(stray)for(const index of component.pixels)d[index*4+3]=0;
+ }
  x.putImageData(image,0,0);frameCache.set(key,c);return c;
 }
 function drawLoadoutPreview(selection){
