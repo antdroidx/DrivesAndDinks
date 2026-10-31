@@ -1,9 +1,9 @@
-import {setupSelection} from './selection.js';
-import {PADDLE_DESIGNS,CHARACTERS} from './roster.js';
-import {Game} from './game.js';
-import {selectShot,serveAim} from './core.js';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js';
-import {sampleStrokeAnimation} from './stroke-animation.js';
+import {setupSelection} from './selection.js?v=14';
+import {PADDLE_DESIGNS,CHARACTERS} from './roster.js?v=14';
+import {Game} from './game.js?v=14';
+import {selectShot,serveAim} from './core.js?v=14';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=14';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=14';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1',difficultyButton=document.querySelector('#difficulty');
