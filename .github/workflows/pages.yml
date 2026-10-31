@@ -26,6 +26,7 @@ jobs:
           cp index.html style.css build-info.js _site/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
           cp -R src assets _site/
+          node scripts/version-build.js "${{ github.run_number }}"
           touch _site/.nojekyll
 
       - name: Publish gh-pages branch
