@@ -1,4 +1,4 @@
-export const C={width:20,length:44,net:22,kitchen:7,gravity:32,bounce:.72,dt:1/120,speed:12,accel:45,reach:2.6};
+export const C={width:20,length:44,net:22,kitchen:7,gravity:32,bounce:.72,airDrag:.018,spinLift:.055,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',outfit:'tee',hair:'brown',skin:'medium',shirtColor:'green',bottomColor:'black',paddleColor:'mint',court:'blue-gray'}}}
@@ -27,9 +27,7 @@ export function contactQuality(p,b,shot,buffered=false,random=Math.random(),diff
  return {quality:Math.max(easy?.65:.42,1-chance),mishit:random<chance}
 }
 export const side=y=>y>22?0:1;
-export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=C.gravity*dt; b.vx*=1-(b.spin||0)*dt*.015;b.vy*=1-(b.spin||0)*dt*.015;
- if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'}
- if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;if(b.shot==='slice'){b.vz*=.82;b.vx*=.94;b.vy*=.94}return 'bounce'}return null}
+export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z,spin=b.spin||0,drag=Math.max(.94,1-(C.airDrag+Math.abs(spin)*.002)*dt);b.vx*=drag;b.vy*=drag;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=C.gravity*dt+spin*C.spinLift*dt; if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'} if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;const surface=.89+(spin<0?.015:-.012);b.vx*=surface;b.vy*=surface;if(b.shot==='slice'){b.vz*=.82;b.vx*=.94;b.vy*=.94}return 'bounce'}return null}
 export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1){
  const specs={serve:[1.15,0],'serve-hard':[.92,1.2],'serve-soft':[1.38,-.35],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0],slice:[1.18,-1.8],overhead:[.95,1],atp:[1.05,1],erne:[1.05,1]};
  let [t,spin]=specs[shot]||specs.drive;
