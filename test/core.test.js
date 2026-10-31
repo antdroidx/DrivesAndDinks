@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver} from '../src/core.js';import {Game} from '../src/game.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot} from '../src/core.js';import {Game} from '../src/game.js';
 test('ball arcs and bounces',()=>{let b={x:5,y:40,z:1};launch(b,15,5,'lob');let high=0,event;for(let i=0;i<300&&!event;i++){event=stepBall(b);high=Math.max(high,b.z)}assert.equal(event,'bounce');assert.ok(high>5);assert.ok(b.vz>0);assert.ok(Math.abs(b.x-15)<1)});
 test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.equal(stepBall(b,.02),'net');assert.ok(inBounds(0,44));assert.ok(!inBounds(-.1,4))});
 test('two bounce and kitchen volleys',()=>{assert.match(legalVolley(0,35,0,1),/Two-bounce/);assert.match(legalVolley(0,35,0,2),/Two-bounce/);assert.match(legalVolley(0,28,0,3),/Kitchen/);assert.equal(legalVolley(0,28,1,3),null);assert.equal(legalVolley(0,35,0,3),null)});
@@ -24,3 +24,10 @@ test('serve formation keeps serving team back and receiving partner at kitchen',
 
 
 test('receiving partner holds their assigned side during the serve',()=>{for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();const partner=g.players.find(p=>p.team!==team&&p!==g.serveReceiver);const startX=partner.x;g.serve();for(let i=0;i<30&&g.phase==='rally';i++)g.update(C.dt);assert.equal(partner.x<10,startX<10);assert.ok(Math.abs(partner.x-startX)<1)}});
+
+
+test('CPU selects a deep return, a third-shot drop and kitchen dinks',()=>{assert.equal(chooseCpuShot({shots:1,team:0,y:40,height:1,random:0}), 'drive');assert.equal(chooseCpuShot({shots:2,team:0,y:40,height:1,random:0}), 'drop');assert.equal(chooseCpuShot({shots:4,team:1,y:14,height:1,random:0}), 'dink');assert.equal(chooseCpuShot({shots:4,team:1,y:14,height:3,random:0}), 'drive')});
+test('serving team stays back while awaiting the return',()=>{const g=new Game();g.serve();const mate=g.players.find(p=>p.team===g.score.team&&p!==g.server);for(let i=0;i<30&&g.phase==='rally';i++)g.update(C.dt);assert.ok(mate.y>38)});
+
+
+test('seeded watch match reaches a legal winning score',()=>{const original=Math.random;let seed=123456;Math.random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};try{const g=new Game();g.mode='watch';let maxShots=0;for(let i=0;i<120*1200&&g.phase!=='over';i++){g.update(C.dt);maxShots=Math.max(maxShots,g.shots)}assert.equal(g.phase,'over');assert.ok(maxShots>=3);const [a,b]=g.score.points;assert.ok(Math.max(a,b)>=11&&Math.abs(a-b)>=2)}finally{Math.random=original}});
