@@ -64,6 +64,21 @@ function equipmentFrame(p,row,col){
   else if(r>165&&g>115&&b<85)tintPixel(d,i,paddle,390);
   else if(r>145&&b>62&&r>g*1.12&&g>b*.88)tintPixel(d,i,skin,420);
  }
+ const width=c.width,height=c.height,visited=new Uint8Array(width*height),components=[];
+ for(let start=0;start<visited.length;start++){
+  if(visited[start]||d[start*4+3]===0)continue;const queue=[start],pixels=[];visited[start]=1;
+  for(let at=0;at<queue.length;at++){
+   const index=queue[at],px=index%width,py=Math.floor(index/width);pixels.push(index);
+   for(const next of [index-1,index+1,index-width,index+width]){
+    if(next<0||next>=visited.length||visited[next]||d[next*4+3]===0)continue;
+    if((next===index-1||next===index+1)&&Math.floor(next/width)!==py)continue;
+    visited[next]=1;queue.push(next);
+   }
+  }
+  components.push(pixels);
+ }
+ const largest=Math.max(0,...components.map(component=>component.length)),minimum=Math.max(30,largest*.028);
+ for(const component of components)if(component.length<minimum)for(const index of component)d[index*4+3]=0;
  x.putImageData(image,0,0);frameCache.set(key,c);return c;
 }
 function drawLoadoutPreview(selection){
