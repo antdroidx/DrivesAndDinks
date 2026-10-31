@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable} from '../src/core.js';import {Game} from '../src/game.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,contactQuality} from '../src/core.js';import {Game} from '../src/game.js';
 test('ball arcs and bounces',()=>{let b={x:5,y:40,z:1};launch(b,15,5,'lob');let high=0,event;for(let i=0;i<300&&!event;i++){event=stepBall(b);high=Math.max(high,b.z)}assert.equal(event,'bounce');assert.ok(high>5);assert.ok(b.vz>0);assert.ok(Math.abs(b.x-15)<1)});
 test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.equal(stepBall(b,.02),'net');assert.ok(inBounds(0,44));assert.ok(!inBounds(-.1,4))});
 test('two bounce and kitchen volleys',()=>{assert.match(legalVolley(0,35,0,1),/Two-bounce/);assert.match(legalVolley(0,35,0,2),/Two-bounce/);assert.match(legalVolley(0,28,0,3),/Kitchen/);assert.equal(legalVolley(0,28,1,3),null);assert.equal(legalVolley(0,35,0,3),null)});
@@ -49,3 +49,10 @@ test('abilities are isolated per player and affect speed and reach',()=>{const a
 test('paddle power and spin change flight independently',()=>{const a={x:10,y:44,z:4},b={...a};launch(a,10,0,'drive',{power:1,spin:1});launch(b,10,0,'drive',{power:1.5,spin:1.4});assert.ok(Math.abs(b.vy)>Math.abs(a.vy));assert.ok(b.spin>a.spin)});
 test('contact plants a player, classifies the stroke, and emits one sound event',()=>{const g=new Game();g.phase='rally';g.shots=3;g.last=1;g.bounces=0;const p=g.players[0];p.x=10;p.y=35;Object.assign(g.ball,{x:11,y:35,z:2});g.hit(p,'drive',15);assert.equal(p.stroke,'volley');assert.equal(g.events.filter(e=>e.type==='hit').length,1);assert.deepEqual(p.contactPoint,{x:11,y:35,z:2});move(p,19,35,C.dt);assert.equal(p.motion,'planted')});
 test('new serve preserves appearance and equipment while clearing old animation',()=>{const g=new Game();const p=g.players[0];p.appearance.jersey=3;p.paddle.power=1.2;p.contactPoint={x:1,y:1,z:1};g.serveSetup();assert.equal(p.appearance.jersey,3);assert.equal(p.paddle.power,1.2);assert.equal(p.contactPoint,null)});
+
+
+test('mishit chance is low on clean contact and high at the edge',()=>{const clean=playerProfile(),edge=playerProfile();clean.x=edge.x=10;clean.y=edge.y=35;clean.vx=edge.vx=clean.vy=edge.vy=0;const ball={x:10.5,y:35.5,z:1.4};assert.ok(contactQuality(clean,ball,'drive',false,.99).quality>.9);assert.equal(contactQuality(clean,ball,'drive',false,.99).mishit,false);const out=contactQuality(edge,{x:11.6,y:37.3,z:.2},'drive',false,0);assert.equal(out.mishit,true);assert.ok(out.quality<.65)});
+
+test('low contact quality weakens the trajectory and marks a mishit',()=>{const clean={x:10,y:44,z:2},weak={...clean};launch(clean,10,4,'drive',{power:1,control:1,spin:1},1);launch(weak,10,4,'drive',{power:1,control:1,spin:1},.55);assert.ok(Math.abs(weak.vy)<Math.abs(clean.vy));const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];p.x=10;p.y=35;Object.assign(g.ball,{x:10.5,y:35.5,z:1});g.hit(p,'drive',15,.55);assert.equal(p.mishit,true);assert.match(g.message,/MISHIT/)});
+
+

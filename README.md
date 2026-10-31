@@ -8,7 +8,7 @@ Run `node scripts/serve.js` and visit `http://127.0.0.1:8768`. The local server 
 
 ## Choose a player and paddle
 
-The game opens with match setup. Choose Avery Lane (all-rounder), Remy Cruz (court runner), Morgan Reed (kitchen specialist), or Jordan Vale (reach and pressure). Pick Allcourt (balanced), Ignite (power at a control cost), or Touch (placement and spin at a power cost). The comparison panel shows their combined effects relative to Avery + Allcourt. Jersey colors and Ocean/Ember/Mint paddle finishes affect appearance only, including the in-game sprites. All players currently share the same base artwork.
+The game opens with match setup. Choose from eight originals: Avery Lane, Remy Cruz, Morgan Reed, and Jordan Vale, plus female players Selena Ortiz, Harper Brooks, Quinn Vásquez, and Lena Park. Selecting a female player currently pairs with another female player and uses male opponents; selecting a male player does the reverse. Pick Allcourt (balanced), Ignite (power at a control cost), or Touch (placement and spin at a power cost). The comparison panel shows their combined effects relative to Avery + Allcourt. Jersey colors and Ocean/Ember/Mint paddle finishes affect appearance only, including the in-game sprites. The four male and four female players currently use separate original sprite sheets.
 
 Start a playable doubles match or a CPU demonstration. The remaining three characters fill the other positions. PLAYER & PADDLE or NEW GAME opens setup again and pauses the match; BACK TO MATCH resumes, while START NEW MATCH applies the choices and resets the score. Last-used selections are remembered locally in the browser, but character progression is not implemented.
 
@@ -39,15 +39,15 @@ A realistic playtest should also cover keyboard and mouse on desktop, plus servi
 
 ## Abilities, appearance, and equipment foundation
 
-Each player now owns separate `abilities`, `appearance`, and `paddle` settings. Speed, acceleration, reach, reaction delay, and control affect movement and contact. Paddle power affects drive flight time; spin and control affect spin and placement. `appearance.jersey` selects one of the four existing jersey palettes. Defaults are equal for all players. Settings survive between rallies, but there is no character progression or saved career yet.
+Each player now owns separate `abilities`, `appearance`, and `paddle` settings. Speed, acceleration, reach, reaction delay, and control affect movement, contact, and mishit chance. Paddle power affects drive flight time; spin and control affect spin, placement, and mishit resistance. `appearance.jersey` selects one of the four existing jersey palettes. Defaults are equal for all players. Settings survive between rallies, but there is no character progression or saved career yet.
 
 The selection screen now exposes original character identities, jersey and paddle colors, and equipment tradeoffs. Future development should add distinct character artwork, broader appearance options, progression, and persistent career saves. Keep appearance independent of abilities; store equipment separately from earned player development. New paddle art and dedicated volley/serve sprite sheets can build on the current stroke classification and timing.
 
-The current animation uses distance-based footwork and a short planted contact stance. Forehand/backhand contact chooses the mirrored orientation; volleys have a shorter follow-through, and serves have a separate timing duration. They still share artwork. These are game-feel approximations, not motion-captured stroke mechanics.
+Contact is evaluated by distance, current movement, ball height, shot difficulty, control and buffered timing. Higher control makes mishits less likely. A mishit is still a contact, but it travels slower, more slowly recovers its arc, and can be off-target; the display labels it MISHIT. The current animation uses distance-based footwork and a short planted contact stance. Forehand/backhand contact chooses the mirrored orientation; volleys have a shorter follow-through, and serves have a separate timing duration. They still share artwork. These are game-feel approximations, not motion-captured stroke mechanics.
 
 ## Player/paddle balance smoke test
 
-Run `node scripts/balance.js 12` for 288 deterministic CPU matches covering all twelve combinations, with the candidate tested on both court sides alongside a standard partner against standard opponents. The test requires every match to finish; at twelve or more paired seeds, it flags win rates outside a broad 20–80% band. Results are a balance warning system, not evidence of competitive parity or human performance. The sample `balance-results.json` records the latest check. Run `node scripts/simulate.js 24 --roster` to additionally exercise every combination in watch mode and with simulated human input.
+Run `node scripts/balance.js 12` for 288 deterministic CPU matches covering all twelve combinations, with the candidate tested on both court sides alongside a standard partner against standard opponents. The test requires every match to finish; at twelve or more paired seeds, it flags win rates outside a broad 20–80% band. Results are a balance warning system, not evidence of competitive parity or human performance. The sample `balance-results.json` records the latest check. Run `node scripts/simulate.js 24 --roster` to additionally exercise the roster in watch mode and with simulated human input; the runner reports mishits.
 
 ## Doubles movement and poaching
 

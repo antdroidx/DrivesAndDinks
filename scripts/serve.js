@@ -5,7 +5,7 @@ const root=new URL('../',import.meta.url);
 const allowed=new Map([
   ['/', ['index.html','text/html']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],
   ...['core','game','main','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
-  ...['player-sprites-v1','vertical-swings-v1'].map(name=>[`/assets/${name}.png`,[`assets/${name}.png`,'image/png']])
+  ...['player-sprites-v1','vertical-swings-v1','female-player-sprites-v1','female-vertical-swings-v1'].map(name=>[`/assets/${name}.png`,[`assets/${name}.png`,'image/png']])
 ]);
 const port=Number(process.argv[2]||8768);
 if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('Choose a port from 1024 to 65535');

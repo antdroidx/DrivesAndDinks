@@ -4,16 +4,29 @@ export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{jersey:0}}}
 export function aimStep(player,fine=false){const placement=(player.abilities?.control??1)*(player.paddle?.control??1);return Math.max(1.5,Math.min(3.5,2.5/placement))*(fine?.25:1)}
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
+export function contactQuality(p,b,shot,buffered=false,random=Math.random()){
+ const reach=p.abilities?.reach??1
+ const radial=Math.sqrt(((b.x-p.x)/(1.6*reach))**2+((b.y-p.y)/(1.9*reach))**2)
+ const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed)
+ const difficulty={serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
+ let chance=.012+.09*radial**2+.05*radial**4+.05*motion**2+.04*Math.max(0,.9-(b.z??1))/.9+.03*Math.max(0,(b.z??1)-2.8)/.7
+ chance*=difficulty
+ chance*=(buffered?.84:1)
+ chance/=Math.max(.55,((p.abilities?.control??1)*(p.paddle?.control??1))**.8)
+ chance=Math.min(.42,Math.max(0,chance))
+ return {quality:Math.max(.42,1-chance),mishit:random<chance}
+}
 export const side=y=>y>22?0:1;
 export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=C.gravity*dt; b.vx*=1-(b.spin||0)*dt*.015;b.vy*=1-(b.spin||0)*dt*.015;
  if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'}
  if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;if(b.shot==='slice'){b.vz*=.82;b.vx*=.94;b.vy*=.94}return 'bounce'}return null}
-export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE){
+export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1){
  const specs={serve:[1.15,0],drive:[1.05,1],drop:[1.1,-1],dink:[.8,-1],lob:[1.4,0],slice:[1.18,-1.8]};
  let [t,spin]=specs[shot]||specs.drive;
+ const slow=1/(.72+.28*quality);t*=slow
  if(shot==='drive')t=Math.max(.42,Math.hypot(x-b.x,y-b.y)/(48*paddle.power));
  // Solve the ballistic arc at the net rather than giving short and long shots the same arc.
- const f=(22-b.y)/(y-b.y),clearance=shot==='drive'?Math.max(3.25,3.65/paddle.power):shot==='drop'?3.7:3.4;
+ const f=(22-b.y)/(y-b.y);let clearance=shot==='drive'?Math.max(3.25,3.65/paddle.power):shot==='drop'?3.7:3.4;if(quality<.8)clearance*=1+(0.8-quality)*.35;
  if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
  b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin*paddle.spin;b.shot=shot;
 }
@@ -38,6 +51,7 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
  if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';return height>2.7||(height>.65&&random<.28)?'drive':'dink'}
  return height>3.2&&random<.45?'drive':'drop';
 }
+
 
 
 
