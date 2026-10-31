@@ -36,6 +36,7 @@ export function versionSite(root,version){
 
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const version=process.argv[2];
-  if(!version)throw new Error('Usage: node scripts/version-build.js <build-number>');
-  versionSite(path.resolve('_site'),version);
+  const site=process.argv[3]??'_site';
+  if(!version)throw new Error('Usage: node scripts/version-build.js <build-number> [site-directory]');
+  versionSite(path.resolve(site),version);
 }

@@ -20,6 +20,12 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Check out friends testing build
+        uses: actions/checkout@v4
+        with:
+          ref: friends-build-15
+          path: _friends
+
       - name: Prepare static site
         run: |
           mkdir -p _site
@@ -27,6 +33,13 @@ jobs:
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
           cp -R src assets _site/
           node scripts/version-build.js "${{ github.run_number }}"
+
+          mkdir -p _site/friends
+          cp _friends/index.html _friends/style.css _site/friends/
+          printf 'globalThis.DRIVES_DINKS_BUILD = "FRIENDS 15";\n' > _site/friends/build-info.js
+          cp -R _friends/src _friends/assets _site/friends/
+          node scripts/version-build.js 15 _site/friends
+
           touch _site/.nojekyll
 
       - name: Publish gh-pages branch
