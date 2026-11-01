@@ -1,4 +1,4 @@
-import {playerProfile} from './core.js?v=4';
+import {playerProfile} from './core.js?v=5';
 
 // Development playtests use a skilled roster. Public build 15 is frozen separately.
 export const PLAYTEST_SKILLS=Object.freeze({control:1.42,serve:1.3,speed:1.18,acceleration:1.15,reaction:.72});
