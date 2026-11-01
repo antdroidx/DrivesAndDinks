@@ -72,7 +72,7 @@ test('material changes cannot recolor another body part or the black paddle face
  const base=appearancePalette(),shirt=appearancePalette({shirtColor:'red'}),hair=appearancePalette({hairColor:'pink'}),skin=appearancePalette({skinColor:'deep'}),edge=appearancePalette({paddleColor:'coral'});
  assert.notEqual(base.shirt,shirt.shirt);assert.equal(base.skin,shirt.skin);assert.equal(base.hair,shirt.hair);assert.equal(base.paddle,shirt.paddle);
  assert.notEqual(base.hair,hair.hair);assert.equal(base.shirt,hair.shirt);assert.notEqual(base.skin,skin.skin);assert.equal(base.shirt,skin.shirt);
- assert.notEqual(base.paddle,edge.paddle);assert.notEqual(edge.paddle,edge.paddleLight);assert.equal(edge.paddleInterior,'#10151d');assert.equal(base.skin,edge.skin);
+ assert.notEqual(base.paddle,edge.paddle);assert.notEqual(edge.paddle,edge.paddleLight);const channel=hex=>hex.slice(1).match(/../g).map(v=>parseInt(v,16));assert.ok(channel(edge.paddleLight).every((v,i)=>v>=channel(edge.paddle)[i]),'paddle rim should be a lighter tint of the same edge color');assert.equal(edge.paddleInterior,'#10151d');assert.equal(base.skin,edge.skin);
 });
 
 test('character raster detail stays above the original desktop density',()=>{
