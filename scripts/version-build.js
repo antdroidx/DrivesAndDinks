@@ -26,7 +26,7 @@ export function versionSite(root,version){
   }
   writeFileSync(indexPath,html);
 
-  // The motion studio is optional in the frozen public build.
+  // Version the motion studio whenever it is included in a deployment.
   if(readdirSync(site).includes('studio.html')){
     const studioPath=path.join(site,'studio.html');
     writeFileSync(studioPath,readFileSync(studioPath,'utf8')

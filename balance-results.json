@@ -4,7 +4,8 @@
   "pairedSeeds": 12,
   "results": [
     {
-      "player": "Avery Lane",
+      "archetype": "avery",
+      "style": "All-rounder",
       "paddle": "Allcourt",
       "games": 24,
       "wins": 12,
@@ -12,92 +13,211 @@
       "pointDifference": 0
     },
     {
-      "player": "Avery Lane",
+      "archetype": "avery",
+      "style": "All-rounder",
       "paddle": "Ignite",
       "games": 24,
-      "wins": 18,
+      "wins": 15,
       "completed": 24,
-      "pointDifference": 85
+      "pointDifference": 61
     },
     {
-      "player": "Avery Lane",
+      "archetype": "avery",
+      "style": "All-rounder",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 8,
+      "completed": 24,
+      "pointDifference": -66
+    },
+    {
+      "archetype": "remy",
+      "style": "Court runner",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 14,
+      "completed": 24,
+      "pointDifference": 17
+    },
+    {
+      "archetype": "remy",
+      "style": "Court runner",
+      "paddle": "Ignite",
+      "games": 24,
+      "wins": 14,
+      "completed": 24,
+      "pointDifference": 33
+    },
+    {
+      "archetype": "remy",
+      "style": "Court runner",
       "paddle": "Touch",
       "games": 24,
       "wins": 12,
+      "completed": 24,
+      "pointDifference": -3
+    },
+    {
+      "archetype": "morgan",
+      "style": "Kitchen specialist",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 10,
+      "completed": 24,
+      "pointDifference": -40
+    },
+    {
+      "archetype": "morgan",
+      "style": "Kitchen specialist",
+      "paddle": "Ignite",
+      "games": 24,
+      "wins": 14,
       "completed": 24,
       "pointDifference": 19
     },
     {
-      "player": "Remy Cruz",
+      "archetype": "morgan",
+      "style": "Kitchen specialist",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 10,
+      "completed": 24,
+      "pointDifference": -17
+    },
+    {
+      "archetype": "jordan",
+      "style": "Net pressure",
       "paddle": "Allcourt",
+      "games": 24,
+      "wins": 10,
+      "completed": 24,
+      "pointDifference": -3
+    },
+    {
+      "archetype": "jordan",
+      "style": "Net pressure",
+      "paddle": "Ignite",
       "games": 24,
       "wins": 13,
       "completed": 24,
-      "pointDifference": -8
+      "pointDifference": 39
     },
     {
-      "player": "Remy Cruz",
+      "archetype": "jordan",
+      "style": "Net pressure",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 8,
+      "completed": 24,
+      "pointDifference": -68
+    },
+    {
+      "archetype": "selena",
+      "style": "Counter-attacker",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 16,
+      "completed": 24,
+      "pointDifference": 65
+    },
+    {
+      "archetype": "selena",
+      "style": "Counter-attacker",
       "paddle": "Ignite",
       "games": 24,
-      "wins": 17,
+      "wins": 16,
       "completed": 24,
-      "pointDifference": 74
+      "pointDifference": 67
     },
     {
-      "player": "Remy Cruz",
+      "archetype": "selena",
+      "style": "Counter-attacker",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 14,
+      "completed": 24,
+      "pointDifference": 42
+    },
+    {
+      "archetype": "harper",
+      "style": "Speed specialist",
+      "paddle": "Allcourt",
+      "games": 24,
+      "wins": 12,
+      "completed": 24,
+      "pointDifference": 20
+    },
+    {
+      "archetype": "harper",
+      "style": "Speed specialist",
+      "paddle": "Ignite",
+      "games": 24,
+      "wins": 19,
+      "completed": 24,
+      "pointDifference": 107
+    },
+    {
+      "archetype": "harper",
+      "style": "Speed specialist",
       "paddle": "Touch",
       "games": 24,
       "wins": 13,
       "completed": 24,
-      "pointDifference": 22
+      "pointDifference": -2
     },
     {
-      "player": "Morgan Reed",
+      "archetype": "quinn",
+      "style": "Control specialist",
       "paddle": "Allcourt",
       "games": 24,
-      "wins": 17,
+      "wins": 8,
       "completed": 24,
-      "pointDifference": 54
+      "pointDifference": -50
     },
     {
-      "player": "Morgan Reed",
+      "archetype": "quinn",
+      "style": "Control specialist",
       "paddle": "Ignite",
+      "games": 24,
+      "wins": 16,
+      "completed": 24,
+      "pointDifference": 60
+    },
+    {
+      "archetype": "quinn",
+      "style": "Control specialist",
+      "paddle": "Touch",
+      "games": 24,
+      "wins": 9,
+      "completed": 24,
+      "pointDifference": -42
+    },
+    {
+      "archetype": "lena",
+      "style": "Power interceptor",
+      "paddle": "Allcourt",
       "games": 24,
       "wins": 18,
       "completed": 24,
-      "pointDifference": 76
+      "pointDifference": 99
     },
     {
-      "player": "Morgan Reed",
-      "paddle": "Touch",
-      "games": 24,
-      "wins": 13,
-      "completed": 24,
-      "pointDifference": 31
-    },
-    {
-      "player": "Jordan Vale",
-      "paddle": "Allcourt",
-      "games": 24,
-      "wins": 12,
-      "completed": 24,
-      "pointDifference": 1
-    },
-    {
-      "player": "Jordan Vale",
+      "archetype": "lena",
+      "style": "Power interceptor",
       "paddle": "Ignite",
       "games": 24,
-      "wins": 13,
+      "wins": 19,
       "completed": 24,
-      "pointDifference": 30
+      "pointDifference": 87
     },
     {
-      "player": "Jordan Vale",
+      "archetype": "lena",
+      "style": "Power interceptor",
       "paddle": "Touch",
       "games": 24,
-      "wins": 12,
+      "wins": 16,
       "completed": 24,
-      "pointDifference": -16
+      "pointDifference": 74
     }
   ]
 }

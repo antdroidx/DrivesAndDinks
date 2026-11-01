@@ -9,18 +9,18 @@ npm start
 npm test
 ```
 
-The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and `/dev/` serve this **development checkout locally**. GitHub Pages keeps the public release separate:
+The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and `/dev/` serve this **development checkout locally**. GitHub Pages publishes one active build:
 
-- Public: `https://antdroidx.github.io/DrivesAndDinks/` — frozen build 15.
-- Playtests: `https://antdroidx.github.io/DrivesAndDinks/dev/` — current main branch.
+- Dev playtest: `https://antdroidx.github.io/DrivesAndDinks/dev/` — the `codex/high-resolution-players` development branch.
 - Motion studio: `https://antdroidx.github.io/DrivesAndDinks/dev/studio.html`.
-- High-resolution art directions preview: `https://antdroidx.github.io/DrivesAndDinks/preview/high-resolution/art-directions.html`.
+
+The Pages root redirects to `/dev/`. Frozen release and experimental preview builds are no longer published.
 
 The studio compares male T-shirt/shorts and female tennis-dress players for running, side-step, volley, forehand/backhand drives, forehand/backhand dinks, forehand/backhand drops, overhead smash, lob, and two-handed backhand drive. Select front/back view, change materials, slow playback, pause, scrub, or jump to impact at 52%. Use Ready pose to inspect the net-facing stance and Joints to show the shoulder/elbow/wrist chains. The Zoom control defaults to 75% so complete characters fit inside each comparison card. `studio.html?view=near&pose=ready` opens the back-facing ready comparison. A ball marker approaches and leaves toward the net for the selected court view. The studio uses the same renderer as matches.
 
-## Higher-density desktop experiment
+## High-density character rendering
 
-Branch `codex/high-resolution-players` starts from the tagged good animation base `dev-build-40-good-base`. The isolated preview also includes `art-directions.html`, which compares the current pixel treatment with clipped pixel-relief lighting and a stronger pixel 2.5D pass using the same silhouette, skeleton, and motion phase. Its 3D image is a static art-direction concept only; a playable 3D version would require separate modeling and animation production. `/dev` remains on build 40 while this experiment is reviewed. The character buffer rasterizes limb and clothing curves on a 3× grid instead of enlarging a 48 × 64 source grid directly. High-quality downsampling maps that detail back to the existing character proportions. The game court uses a 2× backing canvas (1920 × 1200); the studio and player preview use 2× too. This adds desktop detail without increasing the court-space size of the players. A headless desktop check held about 85 FPS at 1440 × 1000.
+The character buffer rasterizes limb and clothing curves on a 3× grid instead of enlarging a 48 × 64 source grid directly. High-quality downsampling maps that detail back to the existing character proportions. The game court uses a 2× backing canvas (1920 × 1200); the studio and player preview use 2× too. This adds desktop detail without increasing the court-space size of the players. A headless desktop check held about 85 FPS at 1440 × 1000.
 
 ## Rebuilt character system
 
@@ -34,17 +34,17 @@ Gameplay now applies the animated pixel 2.5D pass: the high-density silhouette i
 
 At a real hit, the solid paddle face targets the recorded ball contact point and court depth, then releases smoothly into follow-through. Grips point back toward the shoulder in 3D; low contacts bend the torso and knees while the feet stay planted. Targets beyond anatomical reach are limited instead of stretching the forearm. Physics responds immediately; a queued human swing uses a preparation pose. These are procedural animations, not captured athletic motion. Extreme reaches can leave a small paddle-centre alignment offset; the nominal studio contact demonstration does not replace live rally playtesting. Ball height, player height and the net share a perspective scale. Ordinary contacts reach chest height; overhead selection starts at 5.2 court feet, with an overhead reach ceiling of 7.4 feet.
 
-Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve solid-color guards remain independently selectable; all paddle faces stay black. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed; the frozen public release retains its own assets.
+Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve solid-color guards remain independently selectable; all paddle faces stay black. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed.
 
 ## Match setup and controls
 
-The setup screen has one player selector, a preview, seven horizontal rating bars (0–100), and collapsed equipment/appearance sections. Eight original players and three paddles retain distinct abilities and tradeoffs. Clothing, hair, skin, paddle guard, and court choices affect appearance only. Submitted selections persist locally. This dev playtest uses a skilled roster: control ×1.42, serve ×1.30, speed ×1.18, acceleration ×1.15, and reaction delay ×0.72. These adjustments apply to all four players and appear in the rating bars. Mishit probability is rolled separately from hit quality, so a clean rolled contact is not automatically mislabeled a mishit; high control provides stronger mishit resistance.
+The setup screen has one archetype selector, a preview, seven horizontal rating bars (0–100), and collapsed equipment/appearance sections. Eight original archetypes and three paddles retain distinct abilities, named strengths, and explicit tradeoffs. A new match generates unique names and kits for the human player's partner and both opponents, and the four roster slots use different cultural name pools. Skin-tone choices overlap broadly within each pool so generated names and complexions stay coherent without mapping a group to one tone. The human player's clothing, hair, skin, paddle guard, and court choices persist locally. This dev playtest uses a skilled roster: control ×1.42, serve ×1.30, speed ×1.18, acceleration ×1.15, and reaction delay ×0.72. These adjustments apply to all four players and appear in the rating bars. Mishit probability is rolled separately from hit quality, so a clean rolled contact is not automatically mislabeled a mishit; high control provides stronger mishit resistance.
 
 Players move automatically. Aim with mouse, touch, or left/right arrows; hold Shift for fine arrow adjustments. Space swings. Keys 1–3 or the shot buttons select and immediately attempt Attack (drive/high ball), Soft (drop/dink), or Lob. Attack and Soft become hard/soft serves; Lob is unavailable during a serve. The ring turns white when contact is available. Early presses queue briefly; Easy widens the timing window. P or Escape pauses. Play/Watch toggles control or CPU demonstration. Sound unlocks on the first gesture.
 
 ## Deployment
 
-`.github/workflows/pages.yml` tests main, copies public build 15 from immutable commit `2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab` into the site root, and packages current source plus the motion studio exclusively into `/dev`. Publishing replaces the generated site tree, removing obsolete dev assets. It does not rewrite Git history. All current modules and the studio entry points receive the deployment build number for cache invalidation. This checkout's root files are dev **source**, not the public GitHub Pages release.
+`.github/workflows/pages.yml` tests the development branch and packages its current source plus the motion studio exclusively into `/dev`. `main` remains unchanged while the dev build is validated. The site root is a redirect to the dev build. Publishing replaces the generated site tree, removing obsolete builds and assets without rewriting Git history. All current modules and the studio entry points receive the deployment build number for cache invalidation. This checkout's root files are dev **source**, not the generated GitHub Pages site.
 
 ## Verification and limitations
 

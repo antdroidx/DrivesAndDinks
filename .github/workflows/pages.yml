@@ -1,9 +1,9 @@
-name: Deploy Drives & Dinks to GitHub Pages
+name: Deploy Drives & Dinks dev build to GitHub Pages
 
 on:
   push:
     branches:
-      - main
+      - codex/high-resolution-players
   workflow_dispatch:
 
 permissions:
@@ -17,35 +17,39 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
+      - name: Check out source
         uses: actions/checkout@v4
-
-      - name: Check out frozen public release (build 15)
-        uses: actions/checkout@v4
-        with:
-          ref: 2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab
-          path: _friends
 
       - name: Test dev source
         run: node --test
 
-      - name: Prepare public release and fresh dev site
+      - name: Prepare dev-only site
         run: |
-          mkdir -p _site
-          cp _friends/index.html _friends/style.css _site/
-          printf 'globalThis.DRIVES_DINKS_BUILD = "15";\n' > _site/build-info.js
-          cp -R _friends/src _friends/assets _site/
-          node scripts/version-build.js 15 _site
-
           mkdir -p _site/dev
           cp index.html style.css studio.html studio.css _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
 
+          cat > _site/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width,initial-scale=1">
+            <meta http-equiv="refresh" content="0; url=./dev/">
+            <title>Drives &amp; Dinks Dev</title>
+          </head>
+          <body>
+            <p><a href="./dev/">Open the Drives &amp; Dinks development build</a></p>
+            <script>location.replace('./dev/');</script>
+          </body>
+          </html>
+          HTML
+
           touch _site/.nojekyll
 
-      - name: Publish gh-pages branch
+      - name: Publish dev build
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -53,4 +57,4 @@ jobs:
           publish_dir: ./_site
           user_name: github-actions[bot]
           user_email: github-actions[bot]@users.noreply.github.com
-          commit_message: Deploy ${{ github.sha }}
+          commit_message: Deploy dev build ${{ github.run_number }}
