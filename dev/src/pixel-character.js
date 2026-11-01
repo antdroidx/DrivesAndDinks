@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=35';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=36';
 
 const SHEET_PATHS={
  female:{near:'../assets/player-human-female-near-v5.png',far:'../assets/player-human-female-far-v5.png'},
@@ -93,20 +93,21 @@ function preparedSheet(body,view,appearance){
  const canvas=document.createElement('canvas');canvas.width=source.naturalWidth;canvas.height=source.naturalHeight;
  const context=canvas.getContext('2d',{willReadFrequently:true});context.drawImage(source,0,0);
  const image=context.getImageData(0,0,canvas.width,canvas.height),data=image.data,faceMask=new Uint8Array(data.length/4);
+ for(let i=3;i<data.length;i+=4)if(data[i]>0)data[i]=255;
  const shirtHsl=rgbToHsl(...hexRgb(shirt)),bottomHsl={...shirtHsl,l:Math.max(.08,shirtHsl.l*.43)},paddleHsl=rgbToHsl(...hexRgb(paddle)),hairHsl=rgbToHsl(...hexRgb(hairColor)),skinHsl=rgbToHsl(...hexRgb(skinColor));
  for(let i=0;i<data.length;i+=4){
   const r=data[i],g=data[i+1],b=data[i+2],alpha=data[i+3];if(alpha<48)continue;
   const max=Math.max(r,g,b),min=Math.min(r,g,b),spread=max-min;
   const jersey=body==='female'?(r>125&&g<125&&b>g*.72&&r>g*1.35&&r>b*1.08):(g>70&&g>r*1.12&&b>r*.94);
   const hairMask=r>110&&g>65&&b>65&&r-g>18&&g-b>10&&r+b>200&&r<235;
-  const skinMask=r>190&&g>135&&b>115&&r-g>20&&g-b>10&&r>g&&g>b;
+ 
   const shorts=body==='male'&&b>r*1.12&&g>r*1.08&&b>55;
-  const paddleFace=max>=18&&max<115&&spread<36&&b>=r-8;if(paddleFace)faceMask[i/4]=1;
+  const sourceHsl=rgbToHsl(r,g,b);const hueClose=body==='male'?Math.abs(sourceHsl.h-.52)<.06:Math.abs(sourceHsl.h-.99)<.06;
+ const paddleFace=sourceHsl.s>.65&&sourceHsl.l>.35&&hueClose;if(paddleFace)faceMask[i/4]=1;
   if(jersey)recolorPixel(data,i,shirtHsl,body==='female'?.46:.4);
   else if(shorts)recolorPixel(data,i,bottomHsl,.23);
   else if(paddleFace)recolorPixel(data,i,paddleHsl,.2);
-  else if(hairMask)recolorPixel(data,i,hairHsl,.3);
-  else if(skinMask)recolorPixel(data,i,skinHsl,.38);
+
 
  }
  const paddleComponents=findPaddleComponents(faceMask,canvas.width,canvas.height);
