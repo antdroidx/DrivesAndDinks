@@ -1,4 +1,4 @@
-import {playerProfile} from './core.js?v=28';
+import {playerProfile} from './core.js?v=29';
 
 export const CHARACTERS = Object.freeze([
   {id:'avery',name:'Avery Lane',gender:'male',style:'All-rounder',description:'Steady movement, reach and placement. A versatile starting point.',abilities:{speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1}},

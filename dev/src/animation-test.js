@@ -15,8 +15,9 @@ export function forceSpecialShot(game,{shot='overhead',character='avery'}){
  Object.assign(player,{x:10,y:35,vx:0,vy:0,windup:0,swing:0,motion:'planted',contactPoint:null});
  Object.assign(game.ball,{x:player.x,y:player.y,z:3.35,vx:0,vy:0,vz:0,spin:0});
  const physicalShot=shot==='forehand'||shot==='backhand'?'drive':shot;
- game.hit(player,physicalShot,10,1);game.resolveImpact();
+ game.hit(player,physicalShot,10,1);
  if(shot==='forehand'||shot==='backhand'){player.stroke=shot;player.animationShot='drive';game.lastShot='drive'}
+ player.animationContactStart=false;
  player.swingDuration=SWING_SECONDS;
  player.swing=SWING_SECONDS;
  player.motion='planted';
