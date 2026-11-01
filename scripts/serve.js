@@ -3,15 +3,16 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const allowed=new Map([
-  ['/', ['index.html','text/html']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],['/build-info.js',['build-info.js','text/javascript']],
-  ...['animation-test','stroke-animation','update-check','core','game','main','pixel-character','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
-  ...['player-human-female-near-v5','player-human-female-far-v5','player-human-male-near-v5','player-human-male-far-v5','player-sprites-v1','vertical-swings-v1','female-player-skirt-v2','male-tshirt-atlas-v3','male-polo-atlas-v3','female-tshirt-atlas-v3','female-dress-atlas-v3'].map(name=>[`/assets/${name}.png`,[`assets/${name}.png`,'image/png']])
+  ['/', ['index.html','text/html']],['/studio.html',['studio.html','text/html']],['/studio.css',['studio.css','text/css']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],['/build-info.js',['build-info.js','text/javascript']],
+  ...['studio','animation-test','update-check','core','game','main','pixel-character','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
+
 ]);
 const port=Number(process.argv[2]||8768);
 if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('Choose a port from 1024 to 65535');
 const server=http.createServer(async(req,res)=>{
   if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405);res.end();return}
-  const entry=allowed.get(new URL(req.url,'http://localhost').pathname);
+  const pathname=new URL(req.url,'http://localhost').pathname;
+  const entry=allowed.get(pathname.startsWith('/dev/')?pathname.slice(4):pathname==='/dev'?'/':pathname);
   if(!entry){res.writeHead(404);res.end();return}
   try{const data=await readFile(fileURLToPath(new URL(entry[0],root)));res.writeHead(200,{'Content-Type':entry[1],'Cache-Control':'no-store'});res.end(req.method==='HEAD'?undefined:data)}catch{res.writeHead(500);res.end('Unable to load game asset')}
 });

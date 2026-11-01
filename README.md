@@ -1,70 +1,44 @@
 # Drives & Dinks Pickleball
 
-An early browser-based doubles pickleball prototype. Four players move automatically; control the near-side player marked with a cyan ring or switch to watch mode.
+Browser doubles pickleball with original SNES-inspired pixel characters. No runtime dependencies; Node 18+ runs the local server and checks.
 
-## Run
+## Play and inspect
 
-The header shows a sequential `BUILD` number on GitHub Pages, generated from the GitHub Actions run number; local runs show `BUILD dev`. Run `node scripts/serve.js` and visit `http://127.0.0.1:8768`. The local server serves only the game files. You can also use another static HTTP server. No runtime packages are required. Run the automated checks with `node --test` (Node.js 18 or newer).
+```sh
+npm start
+npm test
+```
 
-## Choose a player and paddle
+The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and `/dev/` serve this **development checkout locally**. GitHub Pages keeps the public release separate:
 
-The game opens with match setup. Choose from eight originals: Avery Lane, Remy Cruz, Morgan Reed, and Jordan Vale, plus female players Selena Ortiz, Harper Brooks, Quinn Vásquez, and Lena Park. Every match uses mixed doubles: each team has one male and one female player, regardless of the selected player. Pick Allcourt (balanced), Ignite (power at a control cost), or Touch (placement and spin at a power cost). The comparison panel shows their combined effects relative to Avery + Allcourt. Jersey, paddle finish, and court colors affect appearance only. Each character keeps their original face, hair, skin, and uniform silhouette. All eight players use matched front- and back-facing pixel-art animations with athletic proportions and broad short-handled pickleball paddles; near-court players are shown from behind and far-court players face the camera to match the vertical court. The color and court choices live in a collapsed disclosure so the setup screen stays compact.
+- Public: `https://antdroidx.github.io/DrivesAndDinks/` — frozen build 15.
+- Playtests: `https://antdroidx.github.io/DrivesAndDinks/dev/` — current main branch.
+- Motion studio: `https://antdroidx.github.io/DrivesAndDinks/dev/studio.html`.
 
-Start a playable doubles match or a CPU demonstration. The remaining three characters fill the other positions. PLAYER & PADDLE or NEW GAME opens setup again and pauses the match; BACK TO MATCH resumes, while START NEW MATCH applies the choices and resets the score. Last-used selections are remembered locally in the browser, but character progression is not implemented.
+The studio compares male T-shirt/shorts and female tennis-dress players for running, side-step, volley, forehand/backhand drives, forehand/backhand dinks, forehand/backhand drops, overhead smash, lob, and two-handed backhand drive. Select front/back view, change materials, slow playback, pause, scrub, or jump to impact at 52%. A ball marker shows each stroke's nominal contact point. The studio uses the same renderer as matches.
 
-## Force special-shot animations
+## Rebuilt character system
 
-Open `http://127.0.0.1:8768/?test=animations` for a visual QA mode that loops overhead, forehand, backhand, ATP and Erne swings. Use the SHOT and CHARACTER buttons to compare the clips on a male and female player. Female backhands use a two-handed grip; male backhands are one-handed. The URL also accepts `shot=overhead|forehand|backhand|atp|erne` and `character=avery|selena`. Run `node --test` to verify every forced clip for both character sets.
+`src/pixel-character.js` draws an original 48 × 64 pixel rig using integer scan conversion. Two hip/knee/ankle chains and two shoulder/elbow/wrist chains are shared by all actions. The male wears a short-sleeve T-shirt and shorts; the female wears a sleeveless pleated tennis dress. Near-court players show their backs; far-court players show their faces.
 
-## Controls
+Ten stroke paths use continuous cubic Hermite interpolation through anticipation, impact, follow-through, and recovery. Velocity carries through impact. Locomotion runs from distance traveled, independently of frame rate; it continues underneath swings. A two-handed backhand joins both hands to the short paddle grip. The match currently uses this grip for female backhand drives; both bodies can demonstrate it in the studio.
 
-Choose ATTACK, SOFT, or LOB with 1–3 or the on-screen shot buttons. Selecting an action immediately swings. ATTACK becomes a drive or overhead based on ball height; SOFT becomes a drop or dink based on the player court position; LOB always produces a lob. Move the cyan target left or right on the opposite court with the mouse, arrow keys, the left-side touch pad, or a touch on the court. The target indicates direction rather than the exact landing spot for every shot. Press Space or 1–3 to swing; clicking the court also swings. During your serve, ATTACK sends a hard serve and SOFT sends a soft serve; aim either serve with the target. LOB is unavailable until the rally begins. The ring turns white and the display says HIT NOW when contact is available; a slightly early press is buffered. The controlled player serves with the same action; other players serve automatically. Toggle PLAY/WATCH or start a new game with the buttons. On a touchscreen, use the BALL CONTROL pad on the left to aim, then tap one of the three shot buttons on the right to swing. All controls remain inside the playfield and visible without page scrolling.
+At a real hit, the rendered solid paddle face is constrained to the recorded ball contact point, then releases smoothly into follow-through. Feet and hips are not translated to fake contact. Physics responds immediately; a queued human swing uses a preparation pose. These are procedural animations, not captured athletic motion. Extreme reaches can extend the arm, and the nominal studio contact demonstration does not replace live rally playtesting.
 
-Choose EASY or NORMAL from the setup screen or the DIFFICULTY button. NORMAL keeps the standard 0.32-second swing buffer; EASY opens a wider timing window: about 0.70 seconds early and 0.30 seconds late around contact, and it softens mishit penalties on buffered contacts. The rules, movement, and shot selection remain the same.
+Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve guards pair the chosen base color with a contrasting accent; all paddle faces stay black. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed; the frozen public release retains its own assets.
 
-Sound unlocks on your first click or keypress; the SOUND button toggles synthesized paddle, bounce, and net effects. Ball trails, bounce rings, and contact flashes help show the ball trajectory.
+## Match setup and controls
 
-## Architecture
+The setup screen has one player selector, a preview, seven horizontal rating bars (0–100), and collapsed equipment/appearance sections. Eight original players and three paddles retain distinct abilities and tradeoffs. Clothing, hair, skin, paddle guard, and court choices affect appearance only. Submitted selections persist locally.
 
-`src/core.js` contains configurable physics, movement, scoring and rule helpers; `src/game.js` manages the rally and player decisions; `src/main.js` renders and handles input. The simulation advances at a fixed 120 Hz independently of rendering. Court dimensions are in feet and time is in seconds.
+Players move automatically. Aim with mouse, touch, or left/right arrows; hold Shift for fine arrow adjustments. Space swings. Keys 1–3 or the shot buttons select and immediately attempt Attack (drive/high ball), Soft (drop/dink), or Lob. Attack and Soft become hard/soft serves; Lob is unavailable during a serve. The ring turns white when contact is available. Early presses queue briefly; Easy widens the timing window. P or Escape pauses. Play/Watch toggles control or CPU demonstration. Sound unlocks on the first gesture.
 
-## Prototype limitations
+## Deployment
 
-This is an early playable experiment, not a rules-certified simulation. AI positioning and shot selection are basic and need playtesting and tuning; movement and reaction settings are configurable per player. Shot timing is a reach window rather than a graded timing meter, and spin is a simplified but directional drag-and-curvature model. Kitchen faults only check the hitter's location at contact, not momentum or later contact with the zone. Service-line edge cases, partner positioning, and service rotation need continued playtesting. There is no player collision or serve motion validation. Rendering and mobile interaction need testing on real devices. Desktop browser and a phone-sized landscape viewport have been checked; physical Android touch and performance have not been tested. Gameplay and rules should be reviewed before calling this v0.1 complete.
+`.github/workflows/pages.yml` tests main, copies public build 15 from immutable commit `2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab` into the site root, and packages current source plus the motion studio exclusively into `/dev`. Publishing replaces the generated site tree, removing obsolete dev assets. It does not rewrite Git history. All current modules and the studio entry points receive the deployment build number for cache invalidation. This checkout's root files are dev **source**, not the public GitHub Pages release.
 
-## Contextual plays, special shots and movement
+## Verification and limitations
 
-Pressing Swing chooses the best available shot from the circumstance. A high reachable ball can become an automatic overhead. A very wide sideline contact can become an ATP. The same sideline contact, with height and the player near the kitchen, can become an Erne. These are not separate buttons; the player only chooses aim and stroke. Manual shot selection is reduced to attack, soft, and lob; the game resolves those actions into drive or overhead, drop or dink, and lob based on the current situation.
+`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all twelve motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
 
-Players also get a short slide during fast lateral recovery. Speed, reach, control and paddle properties still influence contact quality and mishit chance.
-
-## Professional doubles inspiration
-
-The CPU uses deep returns, third-shot drops or drives, transition toward the kitchen, and dinks or attacks based on ball height. The serving team stays back for the return bounce. These are simplified tactical heuristics inspired by [USA Pickleball's third-shot guidance](https://usapickleball.org/pickleball-skills/level-four/third-shot-drive-fifth-shot-drop-and-driving-slice-return/) and [drop placement guidance](https://usapickleball.org/pickleball-skills/level-three/where-to-hit-your-drops/). They are not calibrated from PPA tracking data or individual professional players. Shot flight, error rates, reactions, and movement remain approximations requiring playtesting.
-
-## Repeatable match checks
-
-Run `node --test` for rules, movement, contact, and state checks. Run `node scripts/simulate.js 20` to play 20 deterministic matches (alternating watch mode and simulated human input). The runner reports completed games, rally outcomes, shot distribution, maximum rally length, simulated human hits, and execution time; it exits unsuccessfully if a match fails to finish or the human-side bot never hits. The match count can be 1–1000. These checks exercise game logic, not browser rendering or real touch latency.
-
-A realistic playtest should also cover keyboard and mouse on desktop, plus serving, aiming, shot selection, rallies, and landscape layout on an actual Android device. A mobile-sized browser viewport is only a layout check. The simulation is a tuning aid, not proof of professional realism: very long dink exchanges and an over-reliance on out calls remain possible.
-
-
-## Abilities, appearance, and equipment foundation
-
-Each player now owns separate `abilities`, `appearance`, and `paddle` settings. Speed, acceleration, reach, reaction delay, and control affect movement and contact; serve skill determines how closely a serve follows the aimed target. Player power and spin combine with paddle power and spin in shot physics, while control continues to affect placement and mishit resistance. `appearance.shirtColor`, `paddleColor`, and `court` select the active visual palette; character identity and hair stay fixed to the source art. Defaults are equal for all players. Settings survive between rallies, but there is no character progression or saved career yet.
-
-The selection screen exposes character identities, jersey and paddle finish customization, court palettes, and equipment tradeoffs. The expanded color section defaults closed and summarizes the current kit. Future development can add alternate uniforms, hairstyles, progression, and persistent career saves while keeping appearance independent of abilities. The selected character style references are `assets/reference/human-female-pickleball-concept.png` and `assets/reference/human-male-pickleball-concept.png`.
-
-Contact is evaluated by distance, current movement, ball height, shot difficulty, control and buffered timing. Higher control makes mishits less likely. A mishit is still a contact, but it travels slower, more slowly recovers its arc, and can be off-target; the display labels it MISHIT. The current animation uses distance-based footwork with a light contact stride adjustment, so the player keeps moving instead of freezing after a swing. Overheads use a full vertical sequence with a deep wind-up, overhead apex, fast downward slam, and follow-through; forehands use the side-swing sequence, and backhands reverse that sequence with opposite body orientation. Female backhands add a second arm reaching to the grip. ATP and Erne have their own clips. These are rendered from view-matched, illustrated sprite sequences with alternating footwork, knee bend, weight transfer, shoulder rotation, elbow-led paddle acceleration, hair secondary motion, and follow-through. A legal hit now requires the ball to enter the paddle-sized contact volume rather than merely the player's body radius. The illustrated paddle is aligned to the impact point, and the incoming velocity plus paddle face angle add a subtle collision deflection. A legal hit launches the ball immediately, while the slower illustrated swing continues through follow-through without pausing the ball, reactions or player movement. Character scale and gait cadence are tuned to match the court perspective. Flight includes air drag, topspin or backspin curvature, surface friction, and shot-specific bounce response. The poses are hand-authored for the game rather than motion-captured.
-
-## Player/paddle balance smoke test
-
-Run `node scripts/balance.js 12` for 288 deterministic CPU matches covering all twelve combinations, with the candidate tested on both court sides alongside a standard partner against standard opponents. The test requires every match to finish; at twelve or more paired seeds, it flags win rates outside a broad 20–80% band. Results are a balance warning system, not evidence of competitive parity or human performance. The sample `balance-results.json` records the latest check. Run `node scripts/simulate.js 24 --roster` to additionally exercise the roster in watch mode and with simulated human input; the runner reports mishits.
-
-## Doubles movement and poaching
-
-Players shade laterally with the ball, protect the middle when a partner is pulled wide, pinch after drives, and retreat to cover lobs. A short trajectory forecast selects one incoming-ball owner. A kitchen player can poach a reachable middle volley when it offers an interception advantage; the partner covers the vacated lane. Rally coverage may switch temporarily, while scoring/service positions reset correctly for the next serve. Service receivers and the two-bounce opening remain protected. Soft spacing makes the supporting player give room to the hitter.
-
-`src/tactics.js` contains these decisions. The match runner reports poach attempts, actual poach hits, coverage swaps and off-ball travel; runs of twenty or more games fail if no poach contacts occur. The positioning is still heuristic and should be tuned through human playtests.
-
-Keyboard aim now moves about 2.5 court feet per arrow press, adjusted by combined player/paddle control: higher control gives slightly smaller, more precise steps. Shift + arrow uses quarter-size fine adjustments; mouse and touch aim remain continuous. Slice (5) is a deep backspin shot with a lower rebound and modest speed loss on the bounce. Spin behavior remains a simplified game model.
+`src/core.js` handles physics and scoring; `src/game.js` manages matches; `src/tactics.js` plans doubles positioning; `src/main.js` renders and handles input. Simulation advances at 120 Hz. Ball flight, spin, AI positioning and reaction are simplified. Kitchen faults check the hitter at contact, not subsequent momentum; there is no player collision. Physical-device touch performance and the final athletic feel still require human playtests.

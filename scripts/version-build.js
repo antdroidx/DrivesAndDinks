@@ -26,6 +26,14 @@ export function versionSite(root,version){
   }
   writeFileSync(indexPath,html);
 
+  // The motion studio is optional in the frozen public build.
+  if(readdirSync(site).includes('studio.html')){
+    const studioPath=path.join(site,'studio.html');
+    writeFileSync(studioPath,readFileSync(studioPath,'utf8')
+      .replace('href="studio.css"',`href="studio.css?v=${version}"`)
+      .replace('src="src/studio.js"',`src="src/studio.js?v=${version}"`));
+  }
+
   const sourceDir=path.join(site,'src');
   for(const name of readdirSync(sourceDir)){
     if(!name.endsWith('.js'))continue;

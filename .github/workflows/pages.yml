@@ -20,13 +20,16 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Check out friends testing build
+      - name: Check out frozen public release (build 15)
         uses: actions/checkout@v4
         with:
-          ref: friends-build-15
+          ref: 2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab
           path: _friends
 
-      - name: Prepare static site
+      - name: Test dev source
+        run: node --test
+
+      - name: Prepare public release and fresh dev site
         run: |
           mkdir -p _site
           cp _friends/index.html _friends/style.css _site/
@@ -35,7 +38,7 @@ jobs:
           node scripts/version-build.js 15 _site
 
           mkdir -p _site/dev
-          cp index.html style.css _site/dev/
+          cp index.html style.css studio.html studio.css _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
