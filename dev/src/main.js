@@ -1,12 +1,12 @@
-import {sampleMatchAnimation} from './match-animation.js?v=40';
-import {setupSelection} from './selection.js?v=40';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=40';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=40';
-import {Game} from './game.js?v=40';
-import {selectShot,serveAim} from './core.js?v=40';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=40';
+import {sampleMatchAnimation} from './match-animation.js?v=41';
+import {setupSelection} from './selection.js?v=41';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=41';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=41';
+import {Game} from './game.js?v=41';
+import {selectShot,serveAim} from './core.js?v=41';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=41';
 
-const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1',difficultyButton=document.querySelector('#difficulty');
@@ -35,10 +35,10 @@ function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b)
 function drawLoadoutPreview(selection){
  const c=document.querySelector('#player-preview');if(!c)return;
  const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor};
- x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
+ x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(2,0,0,2,0,0);x.imageSmoothingEnabled=false;x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
  x.fillStyle='#355e60';x.fillRect(0,178,c.width,42);x.fillStyle='#eff3cf66';x.fillRect(0,195,c.width,2);
  for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
- try{const drawn=drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
+ try{const drawn=drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
 }
 function drawSprite(p,q){
  const scale=.9+p.y/125,moving=Math.hypot(p.vx,p.vy)>.7;
@@ -51,7 +51,7 @@ function drawSprite(p,q){
  const alignStrength=animation?.alignStrength??0;
  ctx.save();ctx.translate(q.x,q.y);ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,16*scale,5*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
- drawPixelCharacter(ctx,{appearance:p.appearance,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:1,alignTo:contact,alignStrength,contactDepth});
+ drawPixelCharacter(ctx,{appearance:p.appearance,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:1,alignTo:contact,alignStrength,contactDepth,lighting:'depth'});
 }
 function drawPixelBall(x,y,radius){
  const r=Math.max(3,Math.round(radius));

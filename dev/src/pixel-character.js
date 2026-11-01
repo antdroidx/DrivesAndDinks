@@ -1,9 +1,11 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=40';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=41';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
 export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand']);
 export const CONTACT_PHASE=.52;
+export const PIXEL_DENSITY=3;
+export const CHARACTER_BUFFER={width:96*PIXEL_DENSITY,height:96*PIXEL_DENSITY};
 export const characterSpritesReady=()=>true;
 export function onCharacterSpritesReady(callback){callback?.();return true}
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -13,7 +15,7 @@ const resolve=(items,id)=>items.find(item=>item.id===id)??items[0];
 function shade(hex,amount){return '#'+hex.slice(1).match(/../g).map(v=>Math.round(lerp(parseInt(v,16),amount>0?255:0,Math.abs(amount))).toString(16).padStart(2,'0')).join('')}
 export function appearancePalette(a={}){
  const shirt=resolve(CLOTHING_COLORS,a.shirtColor??'green').color,hair=resolve(HAIR_COLORS,a.hairColor??'brown').color,skin=resolve(SKIN_COLORS,a.skinColor??'medium').color,p=resolve(PADDLE_COLORS,a.paddleColor??'mint');
- return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleLight:p.accentColor??shade(p.edgeColor,.65),paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7'};
+ return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7'};
 }
 export function characterFrame(mode='idle',phase=0,frame=0){
  const row=Math.max(0,MOTIONS.indexOf(mode==='slide'?'shuffle':mode==='serve'?'lob':mode));
@@ -73,7 +75,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=40';
+export {courtView,strokeForContact} from './player-facing.js?v=41';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
@@ -115,16 +117,31 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
 export function characterPaddleAnchor(options={}){return sampleCharacterPose(options).paddle}
 
 // Integer scan conversion: no antialiasing, rotated sprites or ghost limbs.
-function polygon(c,points,color){c.fillStyle=color;const low=Math.floor(Math.min(...points.map(p=>p.y))),high=Math.ceil(Math.max(...points.map(p=>p.y)));for(let y=low;y<high;y++){const cuts=[];for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length];if((a.y<=y+.5&&b.y>y+.5)||(b.y<=y+.5&&a.y>y+.5))cuts.push(a.x+(y+.5-a.y)*(b.x-a.x)/(b.y-a.y))}cuts.sort((a,b)=>a-b);for(let i=0;i+1<cuts.length;i+=2)c.fillRect(Math.round(cuts[i]),y,Math.max(1,Math.round(cuts[i+1])-Math.round(cuts[i])),1)}}
+function polygon(c,points,color){
+ // Rasterize slopes and curves on a denser pixel grid. The context is scaled
+ // by the same density, so fill commands still map to one physical pixel.
+ const d=PIXEL_DENSITY,scaled=points.map(p=>({x:p.x*d,y:p.y*d}));
+ c.fillStyle=color;
+ const low=Math.floor(Math.min(...scaled.map(p=>p.y))),high=Math.ceil(Math.max(...scaled.map(p=>p.y)));
+ for(let sy=low;sy<high;sy++){
+  const cuts=[];
+  for(let i=0;i<scaled.length;i++){
+   const a=scaled[i],b=scaled[(i+1)%scaled.length];
+   if((a.y<=sy+.5&&b.y>sy+.5)||(b.y<=sy+.5&&a.y>sy+.5))cuts.push(a.x+(sy+.5-a.y)*(b.x-a.x)/(b.y-a.y));
+  }
+  cuts.sort((a,b)=>a-b);
+  for(let i=0;i+1<cuts.length;i+=2)c.fillRect(cuts[i]/d,sy/d,Math.max(1,cuts[i+1]-cuts[i])/d,1/d);
+ }
+}
 const poly=(c,coords,color)=>polygon(c,coords.map(([x,y])=>({x,y})),color);
 function segment(c,a,b,width,color){const d=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/d*width/2,ny=(b.x-a.x)/d*width/2;polygon(c,[{x:a.x+nx,y:a.y+ny},{x:b.x+nx,y:b.y+ny},{x:b.x-nx,y:b.y-ny},{x:a.x-nx,y:a.y-ny}],color);c.fillStyle=color;for(const p of [a,b])c.fillRect(Math.round(p.x-width/2),Math.round(p.y-width/2),Math.round(width),Math.round(width))}
 let buffer;
-export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false}={}){
- buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(96,96):Object.assign(document.createElement('canvas'),{width:96,height:96});
+export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false,lighting='classic'}={}){
+ buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const contact=alignTo?{x:(alignTo.x-x)*48/width,y:(alignTo.y-y)*64/height}:null;
  const pose=sampleCharacterPose({mode,phase,frame,view,side,contact,contactWeight:alignStrength,contactDepth,moving});
- c.clearRect(0,0,96,96);c.save();c.translate(24,16);
+ c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;
  for(const [hip,knee,foot] of legs){segment(c,hip,knee,6,colors.outline);segment(c,knee,foot,5,colors.outline);segment(c,hip,knee,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-4},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2)}
@@ -139,7 +156,6 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
   segment(c,rot([0,4]),hand,3,colors.outline);segment(c,rot([0,5]),hand,1,colors.shoeDark);
   const shape=[[-3,-6],[2,-6],[4,-4],[4,3],[2,5],[-2,5],[-4,3],[-4,-4]];
   polygon(c,shape.map(rot),colors.outline);polygon(c,shape.map(([a,b])=>rot([a*.83,b*.86])),colors.paddle);polygon(c,shape.map(([a,b])=>rot([a*.58,b*.62])),colors.paddleInterior);
-  segment(c,rot([-2,-5]),rot([1,-5]),1,colors.paddleLight);
  }
  const parts=arms.flatMap((chain,index)=>[0,1].map(part=>({index,part,depth:(chain[part].depth+chain[part+1].depth)/2}))).sort((a,b)=>a.depth-b.depth);
  for(const part of parts.filter(p=>p.depth<neck.depth))armPart(part.index,part.part);
@@ -163,6 +179,16 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  if(female){poly(c,[[hx+4,hy-3],[hx+8,hy-1],[hx+8+Math.sin(frame)*1.5,hy+7],[hx+5,hy+9],[hx+5,hy+2]],colors.hair);c.fillStyle=colors.shirtLight;c.fillRect(Math.round(hx+5),Math.round(hy),2,2)}
  for(const part of parts.filter(p=>p.depth>=neck.depth))armPart(part.index,part.part);
  if(p.depth>=neck.depth)drawPaddle();
- c.restore();target.save();target.imageSmoothingEnabled=false;
+ c.restore();
+ // Preserve the exact pixel silhouette. The light pass is clipped to existing
+ // sprite pixels, so no rectangular background is introduced.
+ if(lighting==='relief'||lighting==='depth'){
+  const depth=lighting==='depth',light=c.createLinearGradient(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);
+  light.addColorStop(0,'rgba(255,248,220,.055)');light.addColorStop(.4,'rgba(255,255,255,0)');light.addColorStop(1,depth?'rgba(8,22,36,.31)':'rgba(18,32,48,.17)');
+  c.save();c.globalCompositeOperation='source-atop';c.fillStyle=light;c.fillRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);
+  if(depth){const rim=c.createLinearGradient(0,0,CHARACTER_BUFFER.width,0);rim.addColorStop(0,'rgba(207,255,232,.075)');rim.addColorStop(.38,'rgba(207,255,232,0)');rim.addColorStop(1,'rgba(9,20,34,.8)');c.fillStyle=rim;c.fillRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height)}
+  c.restore();
+ }
+ target.save();target.imageSmoothingEnabled=true;target.imageSmoothingQuality='high';
  target.drawImage(buffer,x-width/2,y-height/4,width*2,height*1.5);target.restore();return true;
 }
