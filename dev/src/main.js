@@ -1,10 +1,10 @@
-import {setupSelection} from './selection.js?v=27';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=27';
-import {drawPixelCharacter} from './pixel-character.js?v=27';
-import {Game} from './game.js?v=27';
-import {selectShot,serveAim} from './core.js?v=27';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=27';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=27';
+import {setupSelection} from './selection.js?v=28';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=28';
+import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=28';
+import {Game} from './game.js?v=28';
+import {selectShot,serveAim} from './core.js?v=28';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=28';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=28';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -29,28 +29,27 @@ function playEffect(event){if(!['hit','bounce','net'].includes(event.type))retur
 const project=(x,y,z=0)=>({x:480+(x-10)*(13+y*.21),y:204+y*8.5-z*14});
 function poly(points,fill,stroke='#f8edc7',width=2){ctx.beginPath();points.forEach(([x,y],i)=>{const p=project(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}}
 function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
-// Characters are rasterized from one low-resolution pixel grid. This keeps the
-// silhouette, animation, and recoloring consistent without atlas-boundary artifacts.
+// View-matched raster sheets keep the character silhouette and animation
+// readable from both halves of the vertical court.
 function drawLoadoutPreview(selection){
  const c=document.querySelector('#player-preview');if(!c)return;
- const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:character.gender,outfit:selection.outfit,hair:selection.hair,skin:selection.skin,shirtColor:selection.shirtColor,bottomColor:selection.bottomColor,paddleColor:selection.paddleColor};
+ const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor};
  x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
  x.fillStyle='#355e60';x.fillRect(0,178,c.width,42);x.fillStyle='#eff3cf66';x.fillRect(0,195,c.width,2);
  for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
- drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:Math.floor(performance.now()/280)%4,x:9,y:-2,width:162,height:216,view:'front'});
+ try{const drawn=drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
 }
 function drawSprite(p,q){
  const scale=.9+p.y/125,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const back=p.team===0,progress=p.swing/(p.swingDuration||.36),contactFrame=p.id===game.lastHitter&&game.contact?.time>0,strokePhase=contactFrame?.52:p.swing>0?1-progress:0;
  const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,contactFrame?.52:1-progress):null;
  const gait=Math.floor((p.stride||0)/1.1),locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?gait%8:(Math.floor(game.clock*5)+p.id)%8);
- const width=84*scale,height=112*scale,spriteY=Math.round(q.y-height*111/128+2);
+ const width=112*scale,height=112*scale,spriteY=Math.round(q.y-height+2);
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){
   ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke();ctx.restore();
  }
- const mirrored=strokeAnimation?.mirror??(p.swingSide||1)<0;let contactTarget=null;if(strokeAnimation&&p.contactPoint){const point=project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z),spriteX=Math.round(q.x-width/2),targetX=(point.x-spriteX)/width*96;contactTarget=[mirrored?96-targetX:targetX,(point.y-spriteY)/height*128]}
- drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,view:strokeAnimation?'front':back?'back':'front',mirror:mirrored,contactTarget,x:Math.round(q.x-width/2),y:spriteY,width,height});
+ drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(q.x-width/2),y:spriteY,width,height,view:p.team===0?'near':'far'});
 }
 function drawPixelBall(x,y,radius){
  const r=Math.max(3,Math.round(radius));
@@ -82,7 +81,7 @@ syncShotButtonsForPhase();
 function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=Math.max(1,Math.min(19,(e.clientX-rect.left)/rect.width*20));syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen())return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
 
-selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,onStart:()=>{document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();
+selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,onStart:()=>{document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
 if(animationTestMode){
  const panel=document.querySelector('#animation-test'),status=document.querySelector('#animation-test-status');
  const requestedShot=animationQuery.get('shot'),requestedCharacter=animationQuery.get('character');

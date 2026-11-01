@@ -1,4 +1,4 @@
-import {playerProfile} from './core.js?v=27';
+import {playerProfile} from './core.js?v=28';
 
 export const CHARACTERS = Object.freeze([
   {id:'avery',name:'Avery Lane',gender:'male',style:'All-rounder',description:'Steady movement, reach and placement. A versatile starting point.',abilities:{speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1}},
@@ -14,18 +14,6 @@ export const PADDLES = Object.freeze([
   {id:'balanced',name:'Allcourt',style:'Balanced',description:'Even power, precision and spin.',power:1,control:1,spin:1},
   {id:'power',name:'Ignite',style:'Power',description:'Faster eligible drives; less control and spin.',power:1.12,control:.95,spin:.96},
   {id:'control',name:'Touch',style:'Control',description:'Tighter placement and more spin; slower drives.',power:.94,control:1.08,spin:1.1}
-]);
-export const HAIR_COLORS = Object.freeze([
-  {id:'black',name:'Black',color:'#171a21',rgb:[23,26,33]},
-  {id:'brown',name:'Brown',color:'#6b4025',rgb:[107,64,37]},
-  {id:'blonde',name:'Blonde',color:'#e4bd56',rgb:[228,189,86]},
-  {id:'red',name:'Red',color:'#b84c32',rgb:[184,76,50]},
-  {id:'gray',name:'Gray',color:'#939ba1',rgb:[147,155,161]}
-]);
-export const SKIN_TONES = Object.freeze([
-  {id:'light',name:'Light',color:'#f1c7a8',rgb:[241,199,168]},
-  {id:'medium',name:'Medium',color:'#c78960',rgb:[199,137,96]},
-  {id:'dark',name:'Dark',color:'#7b4d36',rgb:[123,77,54]}
 ]);
 export const CLOTHING_COLORS = Object.freeze([
   {id:'black',name:'Black',color:'#171a21',rgb:[23,26,33]},
@@ -50,40 +38,30 @@ export const COURT_PALETTES = Object.freeze([
   {id:'green-orange',name:'Green / Orange',background:'#17352b',stripe:'#24553a',outer:'#0d251a',outerLight:'#183b29',apron:'#477f59',court:'#2f7957',kitchen:'#d27a3e',line:'#ffe9bd'},
   {id:'pink-black',name:'Pink / Black',background:'#35232f',stripe:'#543047',outer:'#171219',outerLight:'#30212b',apron:'#75566e',court:'#a6577e',kitchen:'#201a22',line:'#ffe8e2'}
 ]);
-export const OUTFITS = Object.freeze({
-  male:[{id:'tee',name:'T-Shirt + Shorts'},{id:'polo',name:'Polo + Shorts'}],
-  female:[{id:'tee',name:'T-Shirt + Shorts'},{id:'dress',name:'Tennis Dress'}]
-});
-export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',hair:'brown',skin:'medium',outfit:'tee',shirtColor:'green',bottomColor:'black',paddleColor:'mint',court:'blue-gray'});
+export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',shirtColor:'green',paddleColor:'mint',court:'blue-gray'});
 const valid=(items,id)=>items.some(item=>item.id===id)?id:null;
 export function normalizeSelection(input={}){
   const character=CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character;
-  const gender=CHARACTERS.find(c=>c.id===character).gender;
   const legacyPaddleColor=input?.paddleColor??(input?.design==='ocean'?'blue':input?.design);
-  const outfit=valid(OUTFITS[gender],input?.outfit)??DEFAULT_SELECTION.outfit;
   return {
     character,
     paddle:valid(PADDLES,input?.paddle)??DEFAULT_SELECTION.paddle,
-    hair:valid(HAIR_COLORS,input?.hair)??DEFAULT_SELECTION.hair,
-    skin:valid(SKIN_TONES,input?.skin)??DEFAULT_SELECTION.skin,
-    outfit,
     shirtColor:valid(CLOTHING_COLORS,input?.shirtColor)??DEFAULT_SELECTION.shirtColor,
-    bottomColor:valid(CLOTHING_COLORS,input?.bottomColor)??DEFAULT_SELECTION.bottomColor,
     paddleColor:valid(PADDLE_COLORS,legacyPaddleColor)??DEFAULT_SELECTION.paddleColor,
     court:valid(COURT_PALETTES,input?.court)??DEFAULT_SELECTION.court
   };
 }
 export function buildProfile(input){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle);
-  return {...playerProfile(),characterId:character.id,name:character.name,gender:character.gender,abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin},appearance:{body:character.gender,outfit:selection.outfit,hair:selection.hair,skin:selection.skin,shirtColor:selection.shirtColor,bottomColor:selection.bottomColor,paddleColor:selection.paddleColor,court:selection.court}};
+  return {...playerProfile(),characterId:character.id,name:character.name,gender:character.gender,abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin},appearance:{body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,court:selection.court}};
 }
 export function createLineup(input){
   const selected=normalizeSelection(input),profile=CHARACTERS.find(c=>c.id===selected.character),same=CHARACTERS.filter(c=>c.gender===profile.gender&&c.id!==selected.character),other=CHARACTERS.filter(c=>c.gender!==profile.gender);
   const order=[selected.character,other[0].id,other[1].id,same[(CHARACTERS.indexOf(profile)+1)%same.length].id];
   return order.map((id,index)=>{
-    const character=CHARACTERS.find(c=>c.id===id),female=character.gender==='female';
+    const character=CHARACTERS.find(c=>c.id===id);
     if(index===0)return buildProfile(selected);
-    return buildProfile({character:id,paddle:'balanced',hair:HAIR_COLORS[(index+character.id.length)%HAIR_COLORS.length].id,skin:SKIN_TONES[(index+1)%SKIN_TONES.length].id,outfit:female&&index%2===0?'dress':'tee',shirtColor:CLOTHING_COLORS[(index+2)%CLOTHING_COLORS.length].id,bottomColor:CLOTHING_COLORS[(index+4)%CLOTHING_COLORS.length].id,paddleColor:PADDLE_COLORS[(index+3)%PADDLE_COLORS.length].id,court:selected.court});
+    return buildProfile({character:id,paddle:'balanced',shirtColor:CLOTHING_COLORS[(index+character.id.length)%CLOTHING_COLORS.length].id,paddleColor:PADDLE_COLORS[(index+3)%PADDLE_COLORS.length].id,court:selected.court});
   });
 }
 export function selectionStats(input){const p=buildProfile(input);return {serve:p.abilities.serve,speed:p.abilities.speed/12,reach:p.abilities.reach,reactions:.09/p.abilities.reaction,placement:p.abilities.control*p.paddle.control,power:p.abilities.power*p.paddle.power,spin:p.abilities.spin*p.paddle.spin}}
