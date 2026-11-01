@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=5';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=6';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -15,7 +15,7 @@ const resolve=(items,id)=>items.find(item=>item.id===id)??items[0];
 function shade(hex,amount){return '#'+hex.slice(1).match(/../g).map(v=>Math.round(lerp(parseInt(v,16),amount>0?255:0,Math.abs(amount))).toString(16).padStart(2,'0')).join('')}
 export function appearancePalette(a={}){
  const shirt=resolve(CLOTHING_COLORS,a.shirtColor??'green').color,hair=resolve(HAIR_COLORS,a.hairColor??'brown').color,skin=resolve(SKIN_COLORS,a.skinColor??'medium').color,p=resolve(PADDLE_COLORS,a.paddleColor??'mint');
- return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleLight:p.accentColor??shade(p.edgeColor,.65),paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7'};
+ return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleLight:shade(p.edgeColor,.68),paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7'};
 }
 export function characterFrame(mode='idle',phase=0,frame=0){
  const row=Math.max(0,MOTIONS.indexOf(mode==='slide'?'shuffle':mode==='serve'?'lob':mode));
@@ -75,7 +75,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=5';
+export {courtView,strokeForContact} from './player-facing.js?v=6';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
@@ -185,9 +185,9 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  // sprite pixels, so no rectangular background is introduced.
  if(lighting==='relief'||lighting==='depth'){
   const depth=lighting==='depth',light=c.createLinearGradient(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);
-  light.addColorStop(0,'rgba(255,248,220,.20)');light.addColorStop(.46,'rgba(255,255,255,0)');light.addColorStop(1,depth?'rgba(10,24,40,.42)':'rgba(18,32,48,.24)');
+  light.addColorStop(0,'rgba(255,248,220,.055)');light.addColorStop(.4,'rgba(255,255,255,0)');light.addColorStop(1,depth?'rgba(8,22,36,.31)':'rgba(18,32,48,.17)');
   c.save();c.globalCompositeOperation='source-atop';c.fillStyle=light;c.fillRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);
-  if(depth){const rim=c.createLinearGradient(0,0,CHARACTER_BUFFER.width,0);rim.addColorStop(0,'rgba(207,255,232,.16)');rim.addColorStop(.38,'rgba(207,255,232,0)');rim.addColorStop(1,'rgba(9,20,34,.8)');c.fillStyle=rim;c.fillRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height)}
+  if(depth){const rim=c.createLinearGradient(0,0,CHARACTER_BUFFER.width,0);rim.addColorStop(0,'rgba(207,255,232,.075)');rim.addColorStop(.38,'rgba(207,255,232,0)');rim.addColorStop(1,'rgba(9,20,34,.8)');c.fillStyle=rim;c.fillRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height)}
   c.restore();
  }
  target.save();target.imageSmoothingEnabled=true;target.imageSmoothingQuality='high';
