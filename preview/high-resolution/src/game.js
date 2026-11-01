@@ -1,8 +1,8 @@
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=6';
-import {strokeForContact} from './player-facing.js?v=6';
-import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=6';
-import {createLineup} from './roster.js?v=6';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget} from './core.js?v=6';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=7';
+import {strokeForContact} from './player-facing.js?v=7';
+import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=7';
+import {createLineup} from './roster.js?v=7';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget} from './core.js?v=7';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection){this.lineup=createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=difficulty==='easy'?'easy':'normal';return this.difficulty}
