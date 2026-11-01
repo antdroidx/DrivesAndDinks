@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette} from '../src/pixel-character.js';
+import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette,ARM_LENGTHS,courtView,strokeForContact,solveArm3D} from '../src/pixel-character.js';
 
 test('every motion has two connected arms and legs, without pose discontinuities',()=>{
  for(const mode of MOTIONS)for(const view of ['near','far'])for(const side of [-1,1]){
@@ -9,17 +9,52 @@ test('every motion has two connected arms and legs, without pose discontinuities
    const pose=sampleCharacterPose({mode,view,side,phase:i/1000,frame:i/250});
    assert.equal(pose.arms.length,2);assert.equal(pose.legs.length,2);
    for(const chain of [...pose.arms,...pose.legs]){assert.equal(chain.length,3);for(const p of chain)assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y))}
-   if(previous){assert.ok(Math.hypot(pose.paddle.x-previous.paddle.x,pose.paddle.y-previous.paddle.y)<.6,`${mode}: paddle jumps`);assert.ok(Math.abs(pose.angle-previous.angle)<.02,`${mode}: wrist jumps`)}
+   if(previous){for(let arm=0;arm<2;arm++)for(let joint=0;joint<3;joint++){const a=pose.arms[arm][joint],b=previous.arms[arm][joint];assert.ok(Math.hypot(a.x-b.x,a.y-b.y)<.6,`${mode}: arm joint jumps`)}assert.ok(Math.hypot(pose.paddle.x-previous.paddle.x,pose.paddle.y-previous.paddle.y)<.6,`${mode}: paddle jumps`);assert.ok(Math.abs(pose.angle-previous.angle)<.02,`${mode}: wrist jumps`)}
    previous=pose;
   }
  }
 });
-test('impact constraint places face exactly on the ball without shifting the feet',()=>{
- for(const mode of MOTIONS.slice(2))for(const contact of [{x:3,y:20},{x:45,y:35},{x:24,y:4}]){
-  const ready=sampleCharacterPose({mode,phase:CONTACT_PHASE});
-  const impact=sampleCharacterPose({mode,phase:CONTACT_PHASE,contact,contactWeight:1});
-  assert.deepEqual(impact.paddle,contact);assert.deepEqual(impact.feet,ready.feet);assert.deepEqual(impact.hips,ready.hips);
-  assert.ok(Math.abs(Math.hypot(impact.hand.x-contact.x,impact.hand.y-contact.y)-8)<.00001);
+test('reachable contact locks the paddle face while preserving planted feet',()=>{
+ for(const view of ['near','far'])for(const mode of MOTIONS.slice(2)){
+  const ready=sampleCharacterPose({mode,view,phase:CONTACT_PHASE});
+  const contact={x:ready.paddle.x+.2,y:ready.paddle.y-.2};
+  const impact=sampleCharacterPose({mode,view,phase:CONTACT_PHASE,contact,contactWeight:1});
+  assert.ok(Math.hypot(impact.paddle.x-contact.x,impact.paddle.y-contact.y)<1e-8,mode);
+  assert.deepEqual(impact.feet,ready.feet);assert.deepEqual(impact.hips,ready.hips);
+ }
+});
+test('all authored motions keep fixed human arm lengths without reaching the solver limit',()=>{
+ for(const mode of ['idle',...MOTIONS])for(const view of ['near','far'])for(const side of [-1,1])for(let i=0;i<=200;i++){
+  const pose=sampleCharacterPose({mode,view,side,phase:i/200,frame:i/50});
+  assert.equal(pose.reachLimited,false,`${mode} ${i}: authored pose overreaches`);
+  for(const chain of pose.arms3)for(let bone=0;bone<2;bone++){
+   const a=chain[bone],b=chain[bone+1];
+   assert.ok(Math.abs(Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)-ARM_LENGTHS[bone])<1e-7,`${mode}: changing arm length`);
+  }
+ }
+});
+test('unreachable targets cannot dislocate or stretch the arm',()=>{
+ const chain=solveArm3D({x:0,y:0,z:0},{x:100,y:100,z:100},{x:7,y:9,z:-4});
+ for(let bone=0;bone<2;bone++){const a=chain[bone],b=chain[bone+1];assert.ok(Math.abs(Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z)-ARM_LENGTHS[bone])<1e-7)}
+});
+test('ready grips are forward, elbows stay below shoulders and back views occlude the arms',()=>{
+ const front=sampleCharacterPose({view:'far'}),back=sampleCharacterPose({view:'near'});
+ assert.ok(front.paddle.depth>0);assert.ok(back.paddle.depth<0);
+ assert.ok(Math.abs(front.paddle.x+back.paddle.x-48)<1e-8);
+ assert.ok(front.paddle.y>back.paddle.y);
+ for(const view of ['far','near']){
+  const pose=sampleCharacterPose({view});
+  for(const chain of pose.arms3){assert.ok(chain[2].z>0);assert.ok(chain[1].y>chain[0].y);assert.ok(chain[1].z<chain[2].z)}
+  for(const chain of pose.arms)for(let part=0;part<2;part++)assert.ok((chain[part].depth+chain[part+1].depth)*(view==='near'?-1:1)>0);
+ }
+});
+test('court end determines facing and anatomical forehand/backhand, never stroke mirroring',()=>{
+ assert.equal(courtView(0),'near');assert.equal(courtView(1),'far');
+ for(const team of [0,1])for(const offset of [-1,1])assert.equal(strokeForContact({team,x:10},{x:10+offset}),offset*(team===0?1:-1)>0?'forehand':'backhand');
+ for(const mode of ['forehand','backhand','forehandDink','backhandDink']){
+  const front=sampleCharacterPose({mode,view:'far',phase:CONTACT_PHASE}),back=sampleCharacterPose({mode,view:'near',phase:CONTACT_PHASE});
+  assert.ok(Math.abs(front.paddle.x+back.paddle.x-48)<1e-8);
+  assert.ok(mode.startsWith('forehand')?back.paddle.x>24:back.paddle.x<24);
  }
 });
 test('two-handed grip stays connected through the entire stroke on both sides',()=>{

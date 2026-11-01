@@ -14,12 +14,12 @@ export function aimStep(player,fine=false){const placement=(player.abilities?.co
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
 export function paddleContactTarget(p,b,shot='drive'){
  const reach=p.abilities?.reach??1,side=b.x>=p.x?1:-1,netward=p.team===0?-.46:.46;
- if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+netward*.55,z:Math.max(2.2,Math.min(3.2,b.z??2.7))};
- return {x:p.x+side*(.62+.2*reach),y:p.y+netward,z:Math.max(.35,Math.min(2.55,b.z??1.2))};
+ if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+netward*.55,z:Math.max(5.2,Math.min(7,b.z??5.8))};
+ return {x:p.x+side*(.62+.2*reach),y:p.y+netward,z:Math.max(.35,Math.min(4.5,b.z??1.2))};
 }
 export function paddleContactAvailable(p,b,shot='drive'){
  const target=paddleContactTarget(p,b,shot),reach=p.abilities?.reach??1;
- return b.z>=0&&b.z<=3.5&&((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2<=1;
+ return b.z>=0&&b.z<=(shot==='overhead'?7.4:5.2)&&((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2<=1;
 }
 export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
  const reach=p.abilities?.reach??1
@@ -70,7 +70,7 @@ export function selectShot(p,b,desired,random=Math.random()){
  if(desired==='attack'||desired==='drive'){
   if(nearSideline&&wideBall&&b.z>=3.2)return 'erne'
   if(nearSideline&&wideBall)return 'atp'
-  return b.z>=3.2?'overhead':'drive'
+  return b.z>=5.2?'overhead':'drive'
  }
  return desired
 }

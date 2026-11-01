@@ -41,7 +41,7 @@ test('missed timing feedback appears when an early swing expires',()=>{const g=n
 test('side out retains the correct player positions across points',()=>{const s=new Score();s.point(1);const server=s.player;s.point(1);s.point(1);assert.equal(s.player,server);s.point(0);assert.notEqual(s.player,server);s.point(0);assert.equal(s.team,0);assert.equal(s.player,s.rightPlayer[0])});
 
 
-test('human contact requires ball inside visible reach and height',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35});Object.assign(g.ball,{x:12.5,y:35,z:1});assert.equal(g.canHumanHit(),false);Object.assign(g.ball,{x:11,y:35,z:4});assert.equal(g.canHumanHit(),false);g.ball.z=2;assert.equal(g.canHumanHit(),true)});
+test('human contact requires ball inside visible reach and height',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35});Object.assign(g.ball,{x:12.5,y:35,z:1});assert.equal(g.canHumanHit(),false);Object.assign(g.ball,{x:11,y:35,z:8});assert.equal(g.canHumanHit(),false);g.ball.z=2;assert.equal(g.canHumanHit(),true)});
 
 
 
@@ -49,7 +49,7 @@ test('abilities are isolated per player and affect speed and reach',()=>{const a
 test('contact is limited to the paddle volume rather than the whole player silhouette',()=>{
  const p={...playerProfile(),team:0,x:10,y:35};const near={x:10.7,y:34.7,z:1.35},behind={x:10.5,y:36.2,z:1.5};
  assert.equal(contactAvailable(p,behind),true);assert.equal(paddleContactAvailable(p,behind,'drive'),false);assert.equal(paddleContactAvailable(p,near,'drive'),true);
- assert.ok(paddleContactTarget(p,near,'drive').x>p.x);assert.equal(paddleContactAvailable(p,{x:10.7,y:34.7,z:3.3},'overhead'),true);
+ assert.ok(paddleContactTarget(p,near,'drive').x>p.x);assert.equal(paddleContactAvailable(p,{x:10.7,y:34.7,z:5.8},'overhead'),true);
 });
 test('paddle power and spin change flight independently',()=>{const a={x:10,y:44,z:4},b={...a};launch(a,10,0,'drive',{power:1,spin:1});launch(b,10,0,'drive',{power:1.5,spin:1.4});assert.ok(Math.abs(b.vy)>Math.abs(a.vy));assert.ok(b.spin>a.spin)});
 test('contact responds immediately without pausing the ball or simulation',()=>{const g=new Game();g.phase='rally';g.shots=3;g.last=1;g.bounces=0;const p=g.players[0];p.x=10;p.y=35;Object.assign(g.ball,{x:11,y:35,z:2,vx:0,vy:-4,vz:0});assert.equal(g.hit(p,'drive',15),true);assert.equal(p.stroke,'forehand');assert.equal(p.contactType,'volley');assert.deepEqual(p.contactPoint,{x:11,y:35,z:2});assert.equal(g.events.filter(e=>e.type==='hit').length,1);assert.equal(g.pendingImpact,undefined);assert.ok(Math.hypot(g.ball.vx,g.ball.vy)>0);const before={x:p.x,y:p.y};move(p,19,35,C.dt);assert.ok(p.x>before.x);assert.notEqual(p.motion,'planted')});
@@ -105,4 +105,20 @@ test('spin bends the flight and air drag removes forward speed',()=>{
  const top={x:10,y:5,z:10,vx:8,vy:0,vz:0,spin:2},back={...top,spin:-2};const before=Math.hypot(top.vx,top.vy);
  for(let i=0;i<20;i++){stepBall(top);stepBall(back)}
  assert.ok(top.vz<back.vz);assert.ok(Math.hypot(top.vx,top.vy)<before);
+});
+
+test('forehand and backhand follow the player facing on both court ends',()=>{
+ for(const team of [0,1])for(const offset of [-.7,.7]){
+  const g=new Game();g.phase='rally';g.shots=3;g.last=1-team;g.bounces=1;
+  const p=g.players[team*2];Object.assign(p,{x:10,y:team===0?35:9});
+  Object.assign(g.ball,{x:10+offset,y:p.y,z:2.5});
+  assert.equal(g.hit(p,'drive',10),true);
+  assert.equal(p.stroke,offset*(team===0?1:-1)>0?'forehand':'backhand');
+ }
+});
+test('overheads require head-height balls and ordinary chest-height balls stay drives',()=>{
+ const p={...playerProfile(),team:0,x:10,y:35};
+ assert.equal(paddleContactAvailable(p,{x:10.7,y:34.7,z:5.8},'overhead'),true);
+ assert.equal(paddleContactAvailable(p,{x:10.7,y:34.7,z:2.5},'overhead'),false);
+ assert.equal(paddleContactAvailable(p,{x:10.7,y:34.7,z:4.5},'drive'),true);
 });

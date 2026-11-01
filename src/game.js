@@ -1,3 +1,4 @@
+import {strokeForContact} from './player-facing.js';
 import {planIncoming,formationTarget,separateTargets} from './tactics.js';
 import {createLineup} from './roster.js';
 import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget} from './core.js';
@@ -19,7 +20,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   const incomingVelocity={x:this.ball.vx||0,y:this.ball.vy||0,z:this.ball.vz||0},poor=quality<.8,wasPoach=!poor&&this.poachReservation?.shot===this.shots&&this.poachReservation.playerId===player.id;
   player.mishit=poor;this.lastShot=shot;player.animationShot=shot;player.animationContactStart=true;this.lastHitter=player.id;
   const targetY=player.team===0?(shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4):(shot==='dink'?30:shot==='drop'?32:shot==='slice'?38:40);
-  player.stroke=this.ball.x<player.x?'backhand':'forehand';player.contactType=this.bounces===0?'volley':'groundstroke';player.contactPoint={x:this.ball.x,y:this.ball.y,z:this.ball.z};player.contactPaddleTarget=paddleContactTarget(player,this.ball,shot);
+  player.stroke=strokeForContact(player,this.ball);player.contactType=this.bounces===0?'volley':'groundstroke';player.contactPoint={x:this.ball.x,y:this.ball.y,z:this.ball.z};player.contactPaddleTarget=paddleContactTarget(player,this.ball,shot);
   player.swingDuration=player.stroke==='volley'?.44:shot==='dink'?.48:.56;
   if(poor)aim+=(Math.random()-.5)*4/quality;
   player.swingSide=this.ball.x>=player.x?1:-1;player.swing=player.swingDuration;player.windup=0;

@@ -17,7 +17,7 @@ for(const [character,gender] of characters){
    assert.equal(player.swing,SWING_SECONDS);
    assert.equal(player.swingDuration,SWING_SECONDS);
    assert.equal(player.motion,'planted');
-   assert.deepEqual(player.contactPoint,{x:10,y:35,z:3.35});
+   assert.deepEqual(player.contactPoint,{x:10,y:35,z:shot==='overhead'?6:3.35});
    assert.equal(game.events.at(-1).type,'hit');
    assert.equal(game.events.at(-1).shot,physicalShot);
 

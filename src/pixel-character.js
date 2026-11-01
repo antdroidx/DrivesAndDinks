@@ -21,18 +21,26 @@ export function characterFrame(mode='idle',phase=0,frame=0){
 }
 // Ready, anticipation, impact, follow-through, recovery. Different arcs for
 // compact dinks, lifting drops, blocks, full drives and overhead acceleration.
+const READY=[7,27,11];
+// Coordinates are anatomical: +x = player's right, +z = toward the net.
 const paths={
- volley:[[32,29],[33,26],[37,28],[38,25],[32,29]],
- forehand:[[32,29],[40,28],[40,35],[19,23],[32,29]],
- backhand:[[32,29],[17,24],[9,34],[32,21],[32,29]],
- forehandDink:[[32,29],[33,40],[36,42],[38,34],[32,29]],
- backhandDink:[[32,29],[20,40],[13,42],[13,34],[32,29]],
- forehandDrop:[[32,29],[37,42],[39,39],[30,22],[32,29]],
- backhandDrop:[[32,29],[16,42],[10,39],[23,22],[32,29]],
- overhead:[[32,29],[18,8],[34,7],[40,39],[32,29]],
- lob:[[32,29],[29,44],[36,39],[35,12],[32,29]],
- serve:[[32,29],[36,43],[37,42],[23,22],[32,29]],
- twoBackhand:[[32,29],[16,25],[9,33],[34,18],[32,29]]
+ volley:[READY,[8,26,8],[11,27,14],[10,25,15],READY],
+ forehand:[READY,[14,29,-3],[17,33,11],[-9,24,13],READY],
+ backhand:[READY,[-9,25,1],[-13,33,12],[10,22,13],READY],
+ forehandDink:[READY,[9,39,6],[12,42,14],[13,35,16],READY],
+ backhandDink:[READY,[-5,39,6],[-11,42,11],[-12,35,12],READY],
+ forehandDrop:[READY,[13,41,2],[15,40,13],[5,24,17],READY],
+ backhandDrop:[READY,[-9,41,2],[-12,40,11],[-2,24,14],READY],
+ overhead:[READY,[9,7,-3],[10,3,10],[14,36,15],READY],
+ lob:[READY,[6,43,4],[10,41,14],[6,15,17],READY],
+ serve:[READY,[11,43,1],[12,42,13],[-4,24,17],READY],
+ twoBackhand:[READY,[-9,26,1],[-13,33,12],[10,20,14],READY]
+};
+const wristAngles={
+ volley:[0,.3,.65,.8,0],forehand:[0,1.3,1.3,-1.1,0],backhand:[0,-1.1,-1.3,1.1,0],
+ forehandDink:[0,2.6,2.7,2,0],backhandDink:[0,-2.2,-2.25,-1.7,0],
+ forehandDrop:[0,2.4,2.5,1.4,0],backhandDrop:[0,-2.2,-2.25,-1.2,0],
+ overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,2.5,2.5,.8,0],twoBackhand:[0,-1.1,-1.3,-.4,0]
 };
 const times=[0,.28,CONTACT_PHASE,.78,1];
 function samplePath(path,phase){
@@ -41,28 +49,68 @@ function samplePath(path,phase){
  const tangent=(k,axis)=>k===0||k===4?0:(path[k+1][axis]-path[k-1][axis])/(times[k+1]-times[k-1]);
  const sample=axis=>(2*t3-3*t2+1)*path[i][axis]+(t3-2*t2+t)*span*tangent(i,axis)+(-2*t3+3*t2)*path[i+1][axis]+(t3-t2)*span*tangent(i+1,axis);
  // Hermite tangents carry velocity through impact instead of stopping at each pose.
- return {x:sample(0),y:sample(1)};
+ return {x:sample(0),y:sample(1),z:path[0].length>2?sample(2):0};
 }
 export function jointBetween(a,b,l1,l2,bend=1){
  const dx=b.x-a.x,dy=b.y-a.y,d=Math.max(.001,Math.hypot(dx,dy)),reach=Math.min(d,l1+l2-.001),along=(l1*l1-l2*l2+reach*reach)/(2*reach),h=Math.sqrt(Math.max(0,l1*l1-along*along));
  return {x:a.x+dx/d*along-dy/d*h*bend,y:a.y+dy/d*along+dx/d*h*bend};
 }
-export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,moving=false}={}){
+const vadd=(a,b)=>({x:a.x+b.x,y:a.y+b.y,z:a.z+b.z});
+const vsub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z});
+const vmul=(a,s)=>({x:a.x*s,y:a.y*s,z:a.z*s});
+const dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z;
+const length=a=>Math.hypot(a.x,a.y,a.z);
+const mix3=(a,b,t)=>vadd(a,vmul(vsub(b,a),t));
+export const ARM_LENGTHS=Object.freeze([9.5,10]);
+// Pole vectors are in the player's body space, not left/right screen space.
+// Clamp impossible targets as a whole grip+paddle, never stretch the forearm.
+export function solveArm3D(shoulder,wrist,pole){
+ const [upper,lower]=ARM_LENGTHS,delta=vsub(wrist,shoulder),distance=Math.max(.001,length(delta));
+ const dir=vmul(delta,1/distance),reach=clamp(distance,Math.abs(upper-lower)+.001,upper+lower-.01);
+ const end=vadd(shoulder,vmul(dir,reach)),along=(upper*upper-lower*lower+reach*reach)/(2*reach);
+ const normal=vsub(pole,vmul(dir,dot(pole,dir))),normalLength=length(normal);
+ const bend=normalLength>.0001?vmul(normal,1/normalLength):{x:1,y:0,z:0};
+ const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
+ return [shoulder,elbow,end];
+}
+export {courtView,strokeForContact} from './player-facing.js';
+export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
- const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI)*1.2:0;
- const hips={x:24+weight*(mode.startsWith('back')||mode==='twoBackhand'?-1:1),y:41+bob},neck={x:24+weight*.5,y:23+bob};
+ const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
+ const back=mode.startsWith('back')||mode==='twoBackhand',twoHanded=mode==='twoBackhand';
+ const mirror=view==='near'?1:-1,facing=view==='near'?-1:1;
+ const yaw=weight*(back?-.45:.35)*side,cos=Math.cos(yaw),sin=Math.sin(yaw),lean=weight*(back?-1:1)*1.2*side;
+ const project=p=>{const depth=p.z*cos-p.x*sin;return {x:24+mirror*(p.x*cos+p.z*sin+lean),y:p.y+facing*.4*depth,depth:facing*depth}};
+ let paddle3=action?samplePath(paths[mode],phase):{x:READY[0]+stride*.35,y:READY[1]+bob,z:READY[2]};
+ paddle3.x*=side;
+ if(contact){const cx=(contact.x-24)/mirror-lean;
+  const depth=contactDepth??(paddle3.z-cx*sin)/cos;
+  const x=cx*cos-depth*sin,z=cx*sin+depth*cos;
+  paddle3=mix3(paddle3,{x,y:contact.y-facing*.4*depth,z},clamp(contactWeight));
+ }
+ let gripAngle=action?samplePath(wristAngles[mode].map(v=>[v,0]),phase).x*side:0;
+ // At live impact the handle points back toward the shoulder, so a low
+ // face cannot drag the wrist below the paddle or reverse the elbow.
+ const crouch=clamp((paddle3.y-43)*.7,0,14),shoulderY=26+bob+crouch,forwardLean=crouch*.45;
+ if(contact){const toward=Math.atan2(paddle3.x-side*6,shoulderY-paddle3.y),difference=Math.atan2(Math.sin(toward-gripAngle),Math.cos(toward-gripAngle));gripAngle+=difference*clamp(contactWeight)}
+ const shoulders=[{x:-6,y:shoulderY,z:forwardLean},{x:6,y:shoulderY,z:forwardLean}];
+ let hand3={x:paddle3.x-Math.sin(gripAngle)*8,y:paddle3.y+Math.cos(gripAngle)*8,z:paddle3.z};
+ if(contact){const towardShoulder=vsub(twoHanded?mix3(shoulders[0],shoulders[1],.5):shoulders[side<0?0:1],paddle3);hand3=mix3(hand3,vadd(paddle3,vmul(towardShoulder,8/Math.max(.001,length(towardShoulder)))),clamp(contactWeight))}
+ const gripSide=side<0?0:1,freeSide=1-gripSide;
+ let gripArm=solveArm3D(shoulders[gripSide],hand3,{x:side*7,y:9,z:-4});
+ const correction=vsub(gripArm[2],hand3);paddle3=vadd(paddle3,correction);hand3=gripArm[2];
+ // The off hand supports the throat at ready, balances drives, and shares the
+ // grip for a two-hander. It always has its own natural downward elbow pole.
+ const support={x:hand3.x-side*2,y:hand3.y-2,z:hand3.z};
+ const balance={x:-side*(12+stride*.4),y:34+bob,z:6+weight*2};
+ const freeHand=twoHanded?vadd(hand3,{x:0,y:1.6,z:0}):mix3(support,balance,weight);
+ const arms3=[];arms3[gripSide]=gripArm;arms3[freeSide]=solveArm3D(shoulders[freeSide],freeHand,{x:-side*7,y:9,z:-4});
+ const arms=arms3.map(chain=>chain.map(project)),paddle=project(paddle3),hand=project(hand3);
+ const angle=Math.atan2(-(hand.x-paddle.x),hand.y-paddle.y);
+ const neck=project({x:0,y:23+bob+crouch,z:forwardLean}),hips={x:24+mirror*lean*.45,y:41+bob+crouch*.45};
  const feet=mode==='run'?[{x:19+stride*2,y:59-stride*3},{x:29-stride*2,y:59+stride*3}]:[{x:19-stride*4,y:59-Math.max(0,stride)*2},{x:29+stride*4,y:59-Math.max(0,-stride)*2}];
- let paddle=action?samplePath(paths[mode],phase):{x:33+stride*.7,y:30+bob};
- if(side<0)paddle.x=48-paddle.x;
- if(contact)paddle=point(paddle,contact,clamp(contactWeight));
- const angle=mode==='overhead'?-.2+.9*Math.sin((phase-.52)*Math.PI)*Math.sin(phase*Math.PI):mode==='lob'?-.3:mode.startsWith('back')||mode==='twoBackhand'?.35:-.2;
- const hand={x:paddle.x-Math.sin(angle)*8,y:paddle.y+Math.cos(angle)*8};
- const twoHanded=mode==='twoBackhand',shoulders=[{x:neck.x-6,y:26+bob},{x:neck.x+6,y:26+bob}];
- const gripSide=side<0?0:1,freeSide=1-gripSide,hands=[];
- hands[gripSide]=hand;hands[freeSide]=twoHanded?{x:hand.x-1,y:hand.y+2}:{x:shoulders[freeSide].x+(freeSide?1:-1)*3-stride*2,y:39+bob};
- const arms=shoulders.map((s,i)=>[s,jointBetween(s,hands[i],10,10,i?1:-1),hands[i]]);
  const legs=feet.map((f,i)=>{const hip={x:hips.x+(i?4:-4),y:hips.y};return [hip,jointBetween(hip,f,9,9,i?-1:1),f]});
- return {mode,phase,view,hips,neck,feet,arms,legs,paddle,hand,angle,twoHanded,bob};
+ return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,angle,twoHanded,bob:bob+crouch,gripSide,reachLimited:length(correction)>.01};
 }
 export function characterPaddleAnchor(options={}){return sampleCharacterPose(options).paddle}
 
@@ -71,25 +119,40 @@ function polygon(c,points,color){c.fillStyle=color;const low=Math.floor(Math.min
 const poly=(c,coords,color)=>polygon(c,coords.map(([x,y])=>({x,y})),color);
 function segment(c,a,b,width,color){const d=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/d*width/2,ny=(b.x-a.x)/d*width/2;polygon(c,[{x:a.x+nx,y:a.y+ny},{x:b.x+nx,y:b.y+ny},{x:b.x-nx,y:b.y-ny},{x:a.x-nx,y:a.y-ny}],color);c.fillStyle=color;for(const p of [a,b])c.fillRect(Math.round(p.x-width/2),Math.round(p.y-width/2),Math.round(width),Math.round(width))}
 let buffer;
-export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,moving=false}={}){
+export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(96,96):Object.assign(document.createElement('canvas'),{width:96,height:96});
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const contact=alignTo?{x:(alignTo.x-x)*48/width,y:(alignTo.y-y)*64/height}:null;
- const pose=sampleCharacterPose({mode,phase,frame,view,side,contact,contactWeight:alignStrength,moving});
+ const pose=sampleCharacterPose({mode,phase,frame,view,side,contact,contactWeight:alignStrength,contactDepth,moving});
  c.clearRect(0,0,96,96);c.save();c.translate(24,16);
  const {hips,neck,bob,arms,legs}=pose;
+ const waist=hips.y-2,top=neck.y;
  for(const [hip,knee,foot] of legs){segment(c,hip,knee,6,colors.outline);segment(c,knee,foot,5,colors.outline);segment(c,hip,knee,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-4},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2)}
- function arm(index){const [a,b,d]=arms[index];segment(c,a,b,6,colors.outline);segment(c,b,d,5,colors.outline);segment(c,a,b,4,colors.skinDark);segment(c,b,d,3,colors.skin);if(!female){const sleeve=point(a,b,.52);segment(c,a,sleeve,6,colors.shirtDark);segment(c,a,sleeve,4,colors.shirt)}c.fillStyle=colors.skinLight;c.fillRect(Math.round(d.x-1),Math.round(d.y-1),2,2)}
- arm(0);
- poly(c,[[neck.x-5,23+bob],[neck.x+5,23+bob],[neck.x+8,27+bob],[hips.x+5,39+bob],[hips.x-5,39+bob],[neck.x-8,27+bob]],colors.outline);
- poly(c,[[neck.x-4,24+bob],[neck.x+4,24+bob],[neck.x+6,27+bob],[hips.x+4,39+bob],[hips.x-4,39+bob],[neck.x-6,27+bob]],colors.shirt);
- poly(c,[[neck.x-5,26+bob],[neck.x-2,26+bob],[hips.x-2,38+bob],[hips.x-4,38+bob]],colors.shirtLight);
- poly(c,[[neck.x+4,26+bob],[neck.x+6,27+bob],[hips.x+4,39+bob],[hips.x+1,39+bob]],colors.shirtDark);
- c.fillStyle=colors.shoe;c.fillRect(Math.round(hips.x-4),Math.round(38+bob),8,1);
- if(female){poly(c,[[hips.x-5,39+bob],[hips.x+5,39+bob],[hips.x+9,47+bob],[hips.x-9,47+bob]],colors.outline);poly(c,[[hips.x-4,39+bob],[hips.x+4,39+bob],[hips.x+7,46+bob],[hips.x-7,46+bob]],colors.shirt);for(const offset of [-4,0,4])segment(c,{x:hips.x+offset*.6,y:41+bob},{x:hips.x+offset,y:46+bob},1,colors.shirtDark)}
- else {poly(c,[[hips.x-6,39+bob],[hips.x+6,39+bob],[hips.x+7,47+bob],[hips.x+1,47+bob],[hips.x,43+bob],[hips.x-1,47+bob],[hips.x-7,47+bob]],colors.outline);c.fillStyle=colors.bottom;c.fillRect(Math.round(hips.x-5),Math.round(40+bob),5,6);c.fillRect(Math.round(hips.x+1),Math.round(40+bob),5,6)}
+ function armPart(index,part){
+  const a=arms[index][part],d=arms[index][part+1];
+  segment(c,a,d,part?4:5,colors.outline);segment(c,a,d,part?2:3,part?colors.skin:colors.skinDark);
+  if(!female&&part===0){const sleeve=point(a,d,.46);segment(c,a,sleeve,5,colors.shirtDark);segment(c,a,sleeve,3,colors.shirt)}
+  if(part===1){c.fillStyle=colors.skinLight;c.fillRect(Math.round(d.x-1),Math.round(d.y-1),2,2)}
+ }
+ const {paddle:p,angle,hand}=pose,rot=([a,b])=>({x:p.x+a*Math.cos(angle)-b*Math.sin(angle),y:p.y+a*Math.sin(angle)+b*Math.cos(angle)});
+ function drawPaddle(){
+  segment(c,rot([0,4]),hand,3,colors.outline);segment(c,rot([0,5]),hand,1,colors.shoeDark);
+  const shape=[[-3,-6],[2,-6],[4,-4],[4,3],[2,5],[-2,5],[-4,3],[-4,-4]];
+  polygon(c,shape.map(rot),colors.outline);polygon(c,shape.map(([a,b])=>rot([a*.83,b*.86])),colors.paddle);polygon(c,shape.map(([a,b])=>rot([a*.58,b*.62])),colors.paddleInterior);
+  segment(c,rot([-2,-5]),rot([1,-5]),1,colors.paddleLight);
+ }
+ const parts=arms.flatMap((chain,index)=>[0,1].map(part=>({index,part,depth:(chain[part].depth+chain[part+1].depth)/2}))).sort((a,b)=>a.depth-b.depth);
+ for(const part of parts.filter(p=>p.depth<neck.depth))armPart(part.index,part.part);
+ if(p.depth<neck.depth)drawPaddle();
+ poly(c,[[neck.x-5,top],[neck.x+5,top],[neck.x+8,top+4],[hips.x+5,waist],[hips.x-5,waist],[neck.x-8,top+4]],colors.outline);
+ poly(c,[[neck.x-4,top+1],[neck.x+4,top+1],[neck.x+6,top+4],[hips.x+4,waist],[hips.x-4,waist],[neck.x-6,top+4]],colors.shirt);
+ poly(c,[[neck.x-5,top+3],[neck.x-2,top+3],[hips.x-2,waist-1],[hips.x-4,waist-1]],colors.shirtLight);
+ poly(c,[[neck.x+4,top+3],[neck.x+6,top+4],[hips.x+4,waist],[hips.x+1,waist]],colors.shirtDark);
+ c.fillStyle=colors.shoe;c.fillRect(Math.round(hips.x-4),Math.round(waist-1),8,1);
+ if(female){poly(c,[[hips.x-5,waist],[hips.x+5,waist],[hips.x+9,waist+8],[hips.x-9,waist+8]],colors.outline);poly(c,[[hips.x-4,waist],[hips.x+4,waist],[hips.x+7,waist+7],[hips.x-7,waist+7]],colors.shirt);for(const offset of [-4,0,4])segment(c,{x:hips.x+offset*.6,y:waist+2},{x:hips.x+offset,y:waist+7},1,colors.shirtDark)}
+ else {poly(c,[[hips.x-6,waist],[hips.x+6,waist],[hips.x+7,waist+8],[hips.x+1,waist+8],[hips.x,waist+4],[hips.x-1,waist+8],[hips.x-7,waist+8]],colors.outline);c.fillStyle=colors.bottom;c.fillRect(Math.round(hips.x-5),Math.round(waist+1),5,6);c.fillRect(Math.round(hips.x+1),Math.round(waist+1),5,6)}
  c.fillStyle=colors.skinDark;c.fillRect(Math.round(neck.x-2),Math.round(21+bob),4,4);
- const hx=neck.x,hy=15+bob;
+ const hx=neck.x,hy=neck.y-8;
  poly(c,[[hx-4,hy-7],[hx+3,hy-7],[hx+6,hy-4],[hx+6,hy+3],[hx+3,hy+7],[hx-3,hy+7],[hx-6,hy+3],[hx-6,hy-4]],colors.outline);
  poly(c,[[hx-3,hy-5],[hx+3,hy-5],[hx+5,hy-2],[hx+4,hy+4],[hx+2,hy+6],[hx-2,hy+6],[hx-4,hy+3],[hx-5,hy-2]],colors.skin);
  c.fillStyle=colors.skinLight;c.fillRect(Math.round(hx-3),Math.round(hy-1),3,4);
@@ -98,12 +161,8 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  if(view==='near')poly(c,[[hx-5,hy-2],[hx+5,hy-2],[hx+4,hy+4],[hx+2,hy+5],[hx-3,hy+4]],colors.hair);
  else{c.fillStyle=colors.outline;c.fillRect(Math.round(hx-3),Math.round(hy+1),1,2);c.fillRect(Math.round(hx+2),Math.round(hy+1),1,2);c.fillStyle=colors.skinDark;c.fillRect(Math.round(hx),Math.round(hy+4),2,1)}
  if(female){poly(c,[[hx+4,hy-3],[hx+8,hy-1],[hx+8+Math.sin(frame)*1.5,hy+7],[hx+5,hy+9],[hx+5,hy+2]],colors.hair);c.fillStyle=colors.shirtLight;c.fillRect(Math.round(hx+5),Math.round(hy),2,2)}
- arm(1);
- const {paddle:p,angle,hand}=pose,rot=([a,b])=>({x:p.x+a*Math.cos(angle)-b*Math.sin(angle),y:p.y+a*Math.sin(angle)+b*Math.cos(angle)});
- segment(c,rot([0,4]),hand,3,colors.outline);segment(c,rot([0,5]),hand,1,colors.shoeDark);
- const shape=[[-3,-6],[2,-6],[4,-4],[4,3],[2,5],[-2,5],[-4,3],[-4,-4]];
- polygon(c,shape.map(rot),colors.outline);polygon(c,shape.map(([a,b])=>rot([a*.83,b*.86])),colors.paddle);polygon(c,shape.map(([a,b])=>rot([a*.58,b*.62])),colors.paddleInterior);
- segment(c,rot([-2,-5]),rot([1,-5]),1,colors.paddleLight);
+ for(const part of parts.filter(p=>p.depth>=neck.depth))armPart(part.index,part.part);
+ if(p.depth>=neck.depth)drawPaddle();
  c.restore();target.save();target.imageSmoothingEnabled=false;
  target.drawImage(buffer,x-width/2,y-height/4,width*2,height*1.5);target.restore();return true;
 }

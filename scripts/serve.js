@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const allowed=new Map([
   ['/', ['index.html','text/html']],['/studio.html',['studio.html','text/html']],['/studio.css',['studio.css','text/css']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],['/build-info.js',['build-info.js','text/javascript']],
-  ...['studio','animation-test','update-check','core','game','main','pixel-character','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
+  ...['player-facing','studio','animation-test','update-check','core','game','main','pixel-character','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
 
 ]);
 const port=Number(process.argv[2]||8768);
