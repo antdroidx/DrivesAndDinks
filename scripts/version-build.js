@@ -34,6 +34,13 @@ export function versionSite(root,version){
       .replace('src="src/studio.js"',`src="src/studio.js?v=${version}"`));
   }
 
+  if(readdirSync(site).includes('art-directions.html')){
+    const artPath=path.join(site,'art-directions.html');
+    writeFileSync(artPath,readFileSync(artPath,'utf8')
+      .replace('href="art-directions.css"',`href="art-directions.css?v=${version}"`)
+      .replace('src="src/art-directions.js"',`src="src/art-directions.js?v=${version}"`));
+  }
+
   const sourceDir=path.join(site,'src');
   for(const name of readdirSync(sourceDir)){
     if(!name.endsWith('.js'))continue;

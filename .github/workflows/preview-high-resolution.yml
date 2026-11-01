@@ -35,7 +35,7 @@ jobs:
           rsync -a --exclude=.git _published/ _site/
           rm -rf _site/preview/high-resolution
           mkdir -p _site/preview/high-resolution
-          cp index.html style.css studio.html studio.css _site/preview/high-resolution/
+          cp index.html style.css studio.html studio.css art-directions.html art-directions.css _site/preview/high-resolution/
           printf 'globalThis.DRIVES_DINKS_BUILD = "PREVIEW";\n' > _site/preview/high-resolution/build-info.js
           cp -R src assets _site/preview/high-resolution/
           node scripts/version-build.js "${{ github.run_number }}" _site/preview/high-resolution
