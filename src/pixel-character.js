@@ -84,7 +84,7 @@ function preparedSheet(body,view,appearance){
  const cached=recoloredSheets.get(key);if(cached)return cached;
  const canvas=document.createElement('canvas');canvas.width=source.naturalWidth;canvas.height=source.naturalHeight;
  const context=canvas.getContext('2d',{willReadFrequently:true});context.drawImage(source,0,0);
- const image=context.getImageData(0,0,canvas.width,canvas.height),data=image.data,faceMask=new Uint8Array(data.length/4),jerseyMask=new Uint8Array(data.length/4);
+ const image=context.getImageData(0,0,canvas.width,canvas.height),data=image.data,faceMask=new Uint8Array(data.length/4);
  const shirtHsl=rgbToHsl(...hexRgb(shirt)),bottomHsl={...shirtHsl,l:Math.max(.08,shirtHsl.l*.43)},paddleHsl=rgbToHsl(...hexRgb(paddle));
  for(let i=0;i<data.length;i+=4){
   const r=data[i],g=data[i+1],b=data[i+2],alpha=data[i+3];if(alpha<48)continue;
@@ -92,22 +92,12 @@ function preparedSheet(body,view,appearance){
   const jersey=body==='female'?(r>125&&g<125&&b>g*.72&&r>g*1.35&&r>b*1.08):(g>70&&g>r*1.12&&b>r*.94);
   const shorts=body==='male'&&b>r*1.12&&g>r*1.08&&b>55;
   const paddleFace=max>=18&&max<115&&spread<36&&b>=r-8;if(paddleFace)faceMask[i/4]=1;
-  if(jersey){jerseyMask[i/4]=1;recolorPixel(data,i,shirtHsl,body==='female'?.46:.4)}
+  if(jersey)recolorPixel(data,i,shirtHsl,body==='female'?.46:.4);
   else if(shorts)recolorPixel(data,i,bottomHsl,.23);
+  else if(paddleFace)recolorPixel(data,i,paddleHsl,.2);
 
  }
- const paddleComponents=findPaddleComponents(faceMask,canvas.width,canvas.height),nearRim=new Uint8Array(faceMask.length),queue=[];
- for(let index=0;index<faceMask.length;index++)if(faceMask[index]){nearRim[index]=1;queue.push(index)}
- for(let cursor=0;cursor<queue.length;cursor++){
-  const index=queue[cursor],x=index%canvas.width,y=Math.floor(index/canvas.width),distance=nearRim[index];
-  if(distance>5)continue;
-  for(const next of [index-1,index+1,index-canvas.width,index+canvas.width]){
-   if(next<0||next>=nearRim.length||nearRim[next])continue;
-   const nx=next%canvas.width,ny=Math.floor(next/canvas.width);if(Math.abs(nx-x)+Math.abs(ny-y)!==1)continue;
-   nearRim[next]=distance+1;queue.push(next);
-  }
- }
- for(let index=0;index<jerseyMask.length;index++)if(jerseyMask[index]&&nearRim[index])recolorPixel(data,index*4,paddleHsl,.4);
+ const paddleComponents=findPaddleComponents(faceMask,canvas.width,canvas.height);
  context.putImageData(image,0,0);canvas.paddleAnchors=paddleComponents.anchors;
  recoloredSheets.set(key,canvas);
  if(recoloredSheets.size>24)recoloredSheets.delete(recoloredSheets.keys().next().value);
@@ -130,6 +120,8 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  const anchor=alignTo?sheet.paddleAnchors?.[row*4+col]:null,clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
  const alignX=anchor?clamp((alignTo.x-anchor.x*width-x)*alignStrength,-12,12):0,alignY=anchor?clamp((alignTo.y-anchor.y*height-y)*alignStrength,-10,10):0;
  const idleBob=mode==='idle'&&Math.floor(frame)%4>1?Math.max(1,height*.012):0;
- const moving=['run','shuffle','slide'].includes(mode),runPhase=Math.sin(frame*Math.PI),runBob=moving?Math.abs(runPhase)*Math.max(1,height*.003):0,runSway=moving?runPhase*Math.max(.6,width*.006):0;
- target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,x+alignX+runSway,y+Math.max(idleBob,runBob)+alignY,width,height);target.restore();return true;
+ const moving=['run','shuffle','slide'].includes(mode),actionMode=!['idle','ready','run','shuffle','slide'].includes(mode),runPhase=Math.sin(frame*Math.PI),runBob=moving||actionMode?Math.abs(runPhase)*Math.max(1,height*.003):0,runSway=moving?runPhase*Math.max(.6,width*.006):0,drawX=x+alignX+runSway,drawY=y+Math.max(idleBob,runBob)+alignY;
+ target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,drawX,drawY,width,height);
+ if(actionMode){const legCol=moving?1:0;target.save();target.beginPath();target.rect(drawX,drawY+height*.55,width,height*.45);target.clip();target.drawImage(sheet,legCol*cellWidth,0,cellWidth,cellHeight,drawX,drawY,width,height);target.restore()}
+ target.restore();return true;
 }
