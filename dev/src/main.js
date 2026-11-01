@@ -1,10 +1,10 @@
-import {setupSelection} from './selection.js?v=31';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=31';
-import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=31';
-import {Game} from './game.js?v=31';
-import {selectShot,serveAim} from './core.js?v=31';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=31';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=31';
+import {setupSelection} from './selection.js?v=32';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=32';
+import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=32';
+import {Game} from './game.js?v=32';
+import {selectShot,serveAim} from './core.js?v=32';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=32';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=32';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
