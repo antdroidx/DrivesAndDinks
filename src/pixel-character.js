@@ -25,7 +25,7 @@ export function appearancePalette(appearance={}){
 // The sheet is authored for a vertical court. Near-court players are seen from
 // behind while far-court players face the camera, so never mirror by side.
 const FRAME_ORDER={
- idle:[[0,0]],ready:[[0,0]],run:[[0,0],[0,1]],
+ idle:[[0,0]],ready:[[0,0]],run:[[0,0],[0,1]],shuffle:[[0,0],[0,1]],slide:[[0,0],[0,1]],
  forehand:[[0,0],[0,0],[0,2],[0,2],[0,3],[0,3],[1,3],[0,0]],
  backhand:[[0,0],[0,0],[0,2],[0,2],[1,0],[1,0],[1,3],[0,0]],
  overhead:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[0,0]],
@@ -83,7 +83,7 @@ function preparedSheet(body,view,appearance){
 }
 export function characterFrame(mode='idle',phase=0,frame=0){
  const sequence=FRAME_ORDER[mode]??FRAME_ORDER.idle;
- const index=sequence===FRAME_ORDER.run?Math.abs(Math.floor(frame))%sequence.length:Math.max(0,Math.min(sequence.length-1,Math.floor(Math.max(0,Math.min(.999,phase))*sequence.length)));
+ const cyclical=[FRAME_ORDER.run,FRAME_ORDER.shuffle,FRAME_ORDER.slide].includes(sequence),index=cyclical?Math.abs(Math.floor(frame))%sequence.length:Math.max(0,Math.min(sequence.length-1,Math.floor(Math.max(0,Math.min(.999,phase))*sequence.length)));
  return {row:sequence[index][0],col:sequence[index][1]};
 }
 export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=100,height=100,view='near'}={}){
@@ -92,5 +92,6 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  if(!sheet)return false;
  const {row,col}=characterFrame(mode,phase,frame),sheetWidth=sheet.naturalWidth||sheet.width,sheetHeight=sheet.naturalHeight||sheet.height,cellWidth=sheetWidth/4,cellHeight=sheetHeight/2;
  const idleBob=mode==='idle'&&Math.floor(frame)%4>1?Math.max(1,height*.012):0;
- target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,x,y+idleBob,width,height);target.restore();return true;
+ const runBob=['run','shuffle','slide'].includes(mode)?Math.abs(Math.sin(frame*Math.PI))*Math.max(1,height*.018):0;
+ target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,x,y+Math.max(idleBob,runBob),width,height);target.restore();return true;
 }

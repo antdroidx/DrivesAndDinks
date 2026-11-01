@@ -41,9 +41,9 @@ function drawLoadoutPreview(selection){
 }
 function drawSprite(p,q){
  const scale=.9+p.y/125,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
- const back=p.team===0,progress=p.swing/(p.swingDuration||.36),contactFrame=p.id===game.lastHitter&&game.contact?.time>0,strokePhase=contactFrame?.52:p.swing>0?1-progress:0;
- const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,contactFrame?.52:1-progress):null;
- const gait=Math.floor((p.stride||0)/1.1),locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?gait%8:(Math.floor(game.clock*5)+p.id)%8);
+ const swingProgress=p.swing>0?1-p.swing/(p.swingDuration||.36):0,startPhase=p.animationContactStart?.52:0,strokePhase=p.windup>0?0:startPhase+(1-startPhase)*Math.min(1,swingProgress);
+ const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,strokePhase):null;
+ const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?(p.stride||0)/1.1:(Math.floor(game.clock*5)+p.id)%8);
  const width=112*scale,height=112*scale,spriteY=Math.round(q.y-height+2);
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){

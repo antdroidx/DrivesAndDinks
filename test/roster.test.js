@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {CHARACTERS,PADDLES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
 import {statRating} from '../src/selection.js';
-import {appearancePalette,characterSpritesReady,onCharacterSpritesReady} from '../src/pixel-character.js';
+import {appearancePalette,characterSpritesReady,onCharacterSpritesReady,characterFrame} from '../src/pixel-character.js';
 import {Game} from '../src/game.js';
 
 test('every requested appearance option is available',()=>{
@@ -34,6 +34,11 @@ test('sprite readiness invokes callbacks even when sheets are already cached',()
  assert.equal(characterSpritesReady(),true);
  assert.equal(onCharacterSpritesReady(()=>calls++),true);
  assert.equal(calls,1);
+});
+test('lateral shuffle and slide states use the moving sprite cycle',()=>{
+ assert.deepEqual(characterFrame('shuffle',0,0),{row:0,col:0});
+ assert.deepEqual(characterFrame('shuffle',0,1),{row:0,col:1});
+ assert.deepEqual(characterFrame('slide',0,2),{row:0,col:0});
 });
 test('pixel sprite palettes follow every appearance color choice',()=>{
  const first=appearancePalette({shirtColor:'blue',paddleColor:'coral'});

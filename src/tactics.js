@@ -64,6 +64,15 @@ export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingT
   return {x,y,role};
 }
 
+export function separateTargets(entries,team,receiverId){
+  const pair=entries.filter(entry=>entry.player.team===team);if(pair.length<2)return;
+  const [a,b]=pair,support=a.player.id===receiverId?b:a,active=support===a?b:a;
+  const distance=Math.hypot(support.player.x-active.player.x,support.player.y-active.player.y);if(distance>=2.3)return;
+  const direction=(support.player.x-active.player.x)||((lane(support.player)<lane(active.player))?-1:1),push=Math.min(1.1,(2.3-distance)*.42);
+  support.target.x=clamp(support.target.x+Math.sign(direction)*push,.5,19.5);
+  support.target.y=clamp(support.target.y+(team===0?push:-push),team===0?23:0,team===0?44:21);
+}
+
 export function separatePartners(players,team,receiverId){
   const pair=players.filter(p=>p.team===team),[a,b]=pair;
   const distance=Math.hypot(a.x-b.x,a.y-b.y);if(distance>=2.3)return;

@@ -47,7 +47,7 @@ test('human contact requires ball inside visible reach and height',()=>{const g=
 
 test('abilities are isolated per player and affect speed and reach',()=>{const a={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0},b={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0};a.abilities.speed=6;for(let n=0;n<60;n++){move(a,19,35,C.dt);move(b,19,35,C.dt)}assert.ok(b.x>a.x);assert.equal(b.abilities.speed,12);const ball={x:12,y:35,z:2};a.x=b.x=10;assert.equal(contactAvailable(a,ball),false);a.abilities.reach=1.5;assert.equal(contactAvailable(a,ball),true)});
 test('paddle power and spin change flight independently',()=>{const a={x:10,y:44,z:4},b={...a};launch(a,10,0,'drive',{power:1,spin:1});launch(b,10,0,'drive',{power:1.5,spin:1.4});assert.ok(Math.abs(b.vy)>Math.abs(a.vy));assert.ok(b.spin>a.spin)});
-test('contact plants a player and launches the ball at the paddle contact frame',()=>{const g=new Game();g.phase='rally';g.shots=3;g.last=1;g.bounces=0;const p=g.players[0];p.x=10;p.y=35;Object.assign(g.ball,{x:11,y:35,z:2,vx:0,vy:-4,vz:0});assert.equal(g.hit(p,'drive',15),true);assert.equal(p.stroke,'volley');assert.deepEqual(p.contactPoint,{x:11,y:35,z:2});assert.equal(g.events.filter(e=>e.type==='hit').length,0);assert.ok(g.pendingImpact.time>0);assert.equal(g.ball.vy,0);g.resolveImpact();assert.equal(g.events.filter(e=>e.type==='hit').length,1);assert.notEqual(g.ball.vy,0);move(p,19,35,C.dt);assert.equal(p.motion,'planted')});
+test('contact responds immediately without pausing the ball or simulation',()=>{const g=new Game();g.phase='rally';g.shots=3;g.last=1;g.bounces=0;const p=g.players[0];p.x=10;p.y=35;Object.assign(g.ball,{x:11,y:35,z:2,vx:0,vy:-4,vz:0});assert.equal(g.hit(p,'drive',15),true);assert.equal(p.stroke,'volley');assert.deepEqual(p.contactPoint,{x:11,y:35,z:2});assert.equal(g.events.filter(e=>e.type==='hit').length,1);assert.equal(g.pendingImpact,undefined);assert.ok(Math.hypot(g.ball.vx,g.ball.vy)>0);const before={x:p.x,y:p.y};move(p,19,35,C.dt);assert.ok(p.x>before.x);assert.notEqual(p.motion,'planted')});
 test('new serve preserves appearance and equipment while clearing old animation',()=>{const g=new Game();const p=g.players[0];p.appearance.shirtColor='red';p.paddle.power=1.2;p.contactPoint={x:1,y:1,z:1};g.serveSetup();assert.equal(p.appearance.shirtColor,'red');assert.equal(p.paddle.power,1.2);assert.equal(p.contactPoint,null)});
 
 
@@ -71,7 +71,7 @@ test('easy difficulty is more forgiving at the edge of the hit window',()=>{
 test('easy difficulty accepts a slightly late swing while normal does not',()=>{
  const setup=(difficulty)=>{const g=new Game();g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:38.8,z:1,vx:0,vy:-3,vz:0});g.clock=.2;g.lastHumanContactAt=0;g.swing();return g};
  const normal=setup('normal');assert.equal(normal.last,1);assert.equal(normal.hitBuffer,.32)
- const easy=setup('easy');assert.equal(easy.last,0);assert.equal(easy.hitBuffer,0);assert.ok(easy.pendingImpact);easy.resolveImpact();assert.ok(easy.events.some(event=>event.type==='hit'))
+ const easy=setup('easy');assert.equal(easy.last,0);assert.equal(easy.hitBuffer,0);assert.ok(easy.events.some(event=>event.type==='hit'));assert.ok(Math.hypot(easy.ball.vx,easy.ball.vy)>0)
 });
 test('serve skill improves placement and hard and soft serves use distinct trajectories',()=>{
  const weak=playerProfile(),strong=playerProfile();weak.abilities.serve=.7;strong.abilities.serve=1.3;
