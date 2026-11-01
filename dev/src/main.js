@@ -1,10 +1,10 @@
-import {setupSelection} from './selection.js?v=32';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=32';
-import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=32';
-import {Game} from './game.js?v=32';
-import {selectShot,serveAim} from './core.js?v=32';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=32';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=32';
+import {setupSelection} from './selection.js?v=33';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=33';
+import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=33';
+import {Game} from './game.js?v=33';
+import {selectShot,serveAim} from './core.js?v=33';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=33';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=33';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -43,7 +43,7 @@ function drawSprite(p,q){
  const scale=.9+p.y/125,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const swingProgress=p.swing>0?1-p.swing/(p.swingDuration||.36):0,startPhase=p.animationContactStart?.52:0,strokePhase=p.windup>0?0:startPhase+(1-startPhase)*Math.min(1,swingProgress);
  const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,strokePhase):null;
- const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?(p.stride||0)/2.8:(Math.floor(game.clock*5)+p.id)%8);
+ const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?(p.stride||0)/4.2:(Math.floor(game.clock*5)+p.id)%8);
  const width=88*scale,height=98*scale,spriteY=Math.round(q.y-height+2),contactPoint=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null,alignStrength=contactPoint?Math.max(0,Math.min(1,(p.swing/(p.swingDuration||.5)-.62)/.38)):0;
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){

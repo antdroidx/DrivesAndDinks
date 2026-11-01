@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS} from './roster.js?v=32';
+import {CLOTHING_COLORS,PADDLE_COLORS} from './roster.js?v=33';
 
 const SHEET_PATHS={
  female:{near:'../assets/player-human-female-near-v2.png',far:'../assets/player-human-female-far-v2.png'},
@@ -25,7 +25,7 @@ export function appearancePalette(appearance={}){
 // The sheet is authored for a vertical court. Near-court players are seen from
 // behind while far-court players face the camera, so never mirror by side.
 const FRAME_ORDER={
- idle:[[0,0]],ready:[[0,0]],run:[[0,0],[0,1]],shuffle:[[0,0],[0,1]],slide:[[0,0],[0,1]],
+ idle:[[0,0]],ready:[[0,0]],run:[[0,1]],shuffle:[[0,1]],slide:[[0,1]],
  forehand:[[0,0],[0,0],[0,2],[0,2],[0,3],[0,3],[1,3],[1,3]],
  backhand:[[0,0],[0,0],[0,2],[0,2],[1,0],[1,0],[1,3],[1,3]],
  overhead:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[1,3]],
@@ -96,11 +96,18 @@ function preparedSheet(body,view,appearance){
   else if(shorts)recolorPixel(data,i,bottomHsl,.23);
 
  }
- const paddleComponents=findPaddleComponents(faceMask,canvas.width,canvas.height);
- for(let index=0;index<jerseyMask.length;index++)if(jerseyMask[index]){
-  const x=index%canvas.width,y=Math.floor(index/canvas.width),nearRim=paddleComponents.boxes.some(box=>box&&x>=box.left&&x<=box.right&&y>=box.top&&y<=box.bottom);
-  if(nearRim)recolorPixel(data,index*4,paddleHsl,.4);
+ const paddleComponents=findPaddleComponents(faceMask,canvas.width,canvas.height),nearRim=new Uint8Array(faceMask.length),queue=[];
+ for(let index=0;index<faceMask.length;index++)if(faceMask[index]){nearRim[index]=1;queue.push(index)}
+ for(let cursor=0;cursor<queue.length;cursor++){
+  const index=queue[cursor],x=index%canvas.width,y=Math.floor(index/canvas.width),distance=nearRim[index];
+  if(distance>5)continue;
+  for(const next of [index-1,index+1,index-canvas.width,index+canvas.width]){
+   if(next<0||next>=nearRim.length||nearRim[next])continue;
+   const nx=next%canvas.width,ny=Math.floor(next/canvas.width);if(Math.abs(nx-x)+Math.abs(ny-y)!==1)continue;
+   nearRim[next]=distance+1;queue.push(next);
+  }
  }
+ for(let index=0;index<jerseyMask.length;index++)if(jerseyMask[index]&&nearRim[index])recolorPixel(data,index*4,paddleHsl,.4);
  context.putImageData(image,0,0);canvas.paddleAnchors=paddleComponents.anchors;
  recoloredSheets.set(key,canvas);
  if(recoloredSheets.size>24)recoloredSheets.delete(recoloredSheets.keys().next().value);
@@ -119,15 +126,10 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  const body=appearance.body==='female'?'female':'male';
  const sheet=preparedSheet(body,view==='far'?'far':'near',appearance);
  if(!sheet)return false;
- const initialFrame=characterFrame(mode,phase,frame),sequence=FRAME_ORDER[mode]??FRAME_ORDER.idle,cyclical=sequence.length>1&&[FRAME_ORDER.run,FRAME_ORDER.shuffle,FRAME_ORDER.slide].includes(sequence);
- const position=Math.abs(frame),cycleIndex=cyclical?Math.floor(position)%sequence.length:0,nextIndex=cyclical?(cycleIndex+1)%sequence.length:0,fraction=cyclical?position-Math.floor(position):0,blend=fraction*fraction*(3-2*fraction);
- const row=cyclical?sequence[cycleIndex][0]:initialFrame.row,col=cyclical?sequence[cycleIndex][1]:initialFrame.col,nextRow=cyclical?sequence[nextIndex][0]:null,nextCol=cyclical?sequence[nextIndex][1]:null;
- const sheetWidth=sheet.naturalWidth||sheet.width,sheetHeight=sheet.naturalHeight||sheet.height,cellWidth=sheetWidth/4,cellHeight=sheetHeight/2;
+ const {row,col}=characterFrame(mode,phase,frame),sheetWidth=sheet.naturalWidth||sheet.width,sheetHeight=sheet.naturalHeight||sheet.height,cellWidth=sheetWidth/4,cellHeight=sheetHeight/2;
  const anchor=alignTo?sheet.paddleAnchors?.[row*4+col]:null,clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
  const alignX=anchor?clamp((alignTo.x-anchor.x*width-x)*alignStrength,-12,12):0,alignY=anchor?clamp((alignTo.y-anchor.y*height-y)*alignStrength,-10,10):0;
  const idleBob=mode==='idle'&&Math.floor(frame)%4>1?Math.max(1,height*.012):0;
- const runBob=['run','shuffle','slide'].includes(mode)?Math.abs(Math.sin(frame*Math.PI))*Math.max(1,height*.006):0,drawX=x+alignX,drawY=y+Math.max(idleBob,runBob)+alignY;
- target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,drawX,drawY,width,height);
- if(cyclical&&blend>0){target.save();target.beginPath();target.rect(drawX,drawY+height*.43,width,height*.57);target.clip();target.globalAlpha=blend;target.drawImage(sheet,nextCol*cellWidth,nextRow*cellHeight,cellWidth,cellHeight,drawX,drawY,width,height);target.restore()}
- target.restore();return true;
+ const moving=['run','shuffle','slide'].includes(mode),runPhase=Math.sin(frame*Math.PI),runBob=moving?Math.abs(runPhase)*Math.max(1,height*.003):0,runSway=moving?runPhase*Math.max(.6,width*.006):0;
+ target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,x+alignX+runSway,y+Math.max(idleBob,runBob)+alignY,width,height);target.restore();return true;
 }
