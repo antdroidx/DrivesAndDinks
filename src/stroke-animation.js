@@ -4,11 +4,14 @@ export const STROKE_CLIPS = Object.freeze({
  backhand:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-1,-1,0,-1,-1,0,0],tilt:[0,.015,.03,.045,.04,.025,.01,0],scaleY:[1,1,.99,1,1.01,1,.99,1]},
  atp:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-1,-2,-3,-2,-1,0,0],tilt:[0,.025,.055,.08,.07,.04,.01,0],scaleY:[1,1.01,1.03,1.04,1.03,1.02,1,1]},
  erne:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-2,-5,-8,-7,-4,-1,0],tilt:[0,-.03,-.06,-.1,-.08,-.05,-.02,0],scaleY:[1,1.02,1.04,1.07,1.05,1.03,1.01,1]}
+,
+ serve:{sheet:'atlas',frames:[0,1,2,3,4,5,6,7],lift:[0,-1,-3,-7,-6,-2,2,0],tilt:[0,-.02,-.04,-.09,-.07,-.02,.05,0],scaleY:[1,1.01,1.03,1.06,1.05,1.02,.98,1]}
 });
 
 function clipFor(player){
  const shot=player.animationShot;
  if(shot==='overhead')return ['overhead',STROKE_CLIPS.overhead];
+ if(shot==='serve')return ['serve',STROKE_CLIPS.serve];
  if(shot==='erne')return ['erne',STROKE_CLIPS.erne];
  if(shot==='atp')return ['atp',STROKE_CLIPS.atp];
  if(player.stroke==='backhand')return ['backhand',STROKE_CLIPS.backhand];

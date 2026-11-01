@@ -1,13 +1,13 @@
 import {test} from 'node:test';import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
-import {CHARACTERS,PADDLES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
+import {CHARACTERS,PADDLES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
 import {statRating} from '../src/selection.js';
 import {appearancePalette,characterSpritesReady,onCharacterSpritesReady,characterFrame} from '../src/pixel-character.js';
 import {Game} from '../src/game.js';
 
 test('every requested appearance option is available',()=>{
  assert.deepEqual(CLOTHING_COLORS.map(item=>item.name),['Black','Gray','White','Blue','Yellow','Red','Green','Purple','Pink','Orange']);
- assert.equal(PADDLE_COLORS.length,10);
+ assert.equal(PADDLE_COLORS.length,12);assert.ok(HAIR_COLORS.length>=6);assert.ok(SKIN_COLORS.length>=4);
  assert.equal(COURT_PALETTES.length,3);
  const blueGray=COURT_PALETTES.find(item=>item.id==='blue-gray'),rgb=blueGray.kitchen.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16));
  assert.ok(Math.max(...rgb)-Math.min(...rgb)<=12);
@@ -17,7 +17,7 @@ test('invalid and legacy selections safely normalize',()=>{
  assert.equal(fallback.shirtColor,'green');assert.equal(fallback.paddleColor,'mint');
  const invalid=normalizeSelection({character:'nope',paddle:'nope',hair:'nope',skin:'nope',outfit:'dress',shirtColor:'nope',bottomColor:'nope',paddleColor:'nope',court:'nope'});
  assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');
- assert.equal('hair' in invalid,false);assert.equal('skin' in invalid,false);
+ assert.equal(invalid.hairColor,'brown');assert.equal(invalid.skinColor,'medium');
  assert.equal('outfit' in invalid,false);assert.equal('bottomColor' in invalid,false);
 });
 test('every player and paddle combination produces an independent playable profile',()=>{
@@ -33,7 +33,7 @@ test('player power and spin modify effective equipment and stat bars are bounded
 
 test('all four versioned character sheets are present for the DEV build',()=>{
  for(const body of ['female','male'])for(const view of ['near','far']){
-  const bytes=readFileSync(new URL(`../assets/player-human-${body}-${view}-v2.png`,import.meta.url));
+  const bytes=readFileSync(new URL(`../assets/player-human-${body}-${view}-v5.png`,import.meta.url));
   assert.ok(bytes.length>100000);assert.equal(bytes.readUInt32BE(0),0x89504e47);
  }
 });
@@ -44,10 +44,19 @@ test('sprite readiness invokes callbacks even when sheets are already cached',()
  assert.equal(calls,1);
 });
 test('lateral shuffle and slide states use the moving sprite cycle',()=>{
- assert.deepEqual(characterFrame('shuffle',0,0),{row:0,col:1});
- assert.deepEqual(characterFrame('shuffle',0,1),{row:0,col:1});
- assert.deepEqual(characterFrame('slide',0,2),{row:0,col:1});
- assert.deepEqual(characterFrame('forehand',.999),{row:1,col:3});
+ assert.deepEqual(characterFrame('shuffle',0,0),{row:1,col:0});
+ assert.deepEqual(characterFrame('shuffle',0,1),{row:1,col:1});
+ assert.deepEqual(characterFrame('slide',0,2),{row:1,col:2});
+ assert.deepEqual(characterFrame('serve',.999),{row:10,col:3});
+ assert.deepEqual(characterFrame('forehand',.999),{row:3,col:3});
+ assert.deepEqual(characterFrame('overhead',.999),{row:9,col:3});
+ assert.deepEqual(characterFrame('lob',.999),{row:10,col:3});
+});
+
+test('expanded motion rows cover every requested shot',()=>{
+ for(const mode of ['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand']){
+  const frame=characterFrame(mode,0,0);assert.ok(Number.isInteger(frame.row)&&frame.row>=0&&frame.row<12);assert.ok(Number.isInteger(frame.col)&&frame.col>=0&&frame.col<4);
+ }
 });
 test('pixel sprite palettes follow every appearance color choice',()=>{
  const first=appearancePalette({shirtColor:'blue',paddleColor:'coral'});
