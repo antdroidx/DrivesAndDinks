@@ -43,7 +43,7 @@ function drawSprite(p,q){
  const scale=.9+p.y/125,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
  const swingProgress=p.swing>0?1-p.swing/(p.swingDuration||.36):0,startPhase=p.animationContactStart?.52:0,strokePhase=p.windup>0?0:startPhase+(1-startPhase)*Math.min(1,swingProgress);
  const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,strokePhase):null;
- const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?(p.stride||0)/2.8:(Math.floor(game.clock*5)+p.id)%8);
+ const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?(p.stride||0)/4.2:(Math.floor(game.clock*5)+p.id)%8);
  const width=88*scale,height=98*scale,spriteY=Math.round(q.y-height+2),contactPoint=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null,alignStrength=contactPoint?Math.max(0,Math.min(1,(p.swing/(p.swingDuration||.5)-.62)/.38)):0;
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){

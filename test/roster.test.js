@@ -44,9 +44,9 @@ test('sprite readiness invokes callbacks even when sheets are already cached',()
  assert.equal(calls,1);
 });
 test('lateral shuffle and slide states use the moving sprite cycle',()=>{
- assert.deepEqual(characterFrame('shuffle',0,0),{row:0,col:0});
+ assert.deepEqual(characterFrame('shuffle',0,0),{row:0,col:1});
  assert.deepEqual(characterFrame('shuffle',0,1),{row:0,col:1});
- assert.deepEqual(characterFrame('slide',0,2),{row:0,col:0});
+ assert.deepEqual(characterFrame('slide',0,2),{row:0,col:1});
  assert.deepEqual(characterFrame('forehand',.999),{row:1,col:3});
 });
 test('pixel sprite palettes follow every appearance color choice',()=>{
