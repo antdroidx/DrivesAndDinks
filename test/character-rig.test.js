@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette,ARM_LENGTHS,courtView,strokeForContact,solveArm3D} from '../src/pixel-character.js';
+import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette,ARM_LENGTHS,courtView,strokeForContact,solveArm3D,PIXEL_DENSITY,CHARACTER_BUFFER} from '../src/pixel-character.js';
 
 test('every motion has two connected arms and legs, without pose discontinuities',()=>{
  for(const mode of MOTIONS)for(const view of ['near','far'])for(const side of [-1,1]){
@@ -73,4 +73,10 @@ test('material changes cannot recolor another body part or the black paddle face
  assert.notEqual(base.shirt,shirt.shirt);assert.equal(base.skin,shirt.skin);assert.equal(base.hair,shirt.hair);assert.equal(base.paddle,shirt.paddle);
  assert.notEqual(base.hair,hair.hair);assert.equal(base.shirt,hair.shirt);assert.notEqual(base.skin,skin.skin);assert.equal(base.shirt,skin.shirt);
  assert.notEqual(base.paddle,edge.paddle);assert.notEqual(edge.paddle,edge.paddleLight);assert.equal(edge.paddleInterior,'#10151d');assert.equal(base.skin,edge.skin);
+});
+
+test('character raster detail stays above the original desktop density',()=>{
+ assert.ok(PIXEL_DENSITY>=3);
+ assert.equal(CHARACTER_BUFFER.width,96*PIXEL_DENSITY);
+ assert.equal(CHARACTER_BUFFER.height,96*PIXEL_DENSITY);
 });

@@ -17,6 +17,10 @@ The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and
 
 The studio compares male T-shirt/shorts and female tennis-dress players for running, side-step, volley, forehand/backhand drives, forehand/backhand dinks, forehand/backhand drops, overhead smash, lob, and two-handed backhand drive. Select front/back view, change materials, slow playback, pause, scrub, or jump to impact at 52%. Use Ready pose to inspect the net-facing stance and Joints to show the shoulder/elbow/wrist chains. `studio.html?view=near&pose=ready` opens the back-facing ready comparison. A ball marker approaches and leaves toward the net for the selected court view. The studio uses the same renderer as matches.
 
+## Higher-density desktop experiment
+
+Branch `codex/high-resolution-players` starts from the tagged good animation base `dev-build-40-good-base`. `/dev` remains on build 40 while this experiment is reviewed. The character buffer rasterizes limb and clothing curves on a 3× grid instead of enlarging a 48 × 64 source grid directly. High-quality downsampling maps that detail back to the existing character proportions. The game court uses a 2× backing canvas (1920 × 1200); the studio and player preview use 2× too. This adds desktop detail without increasing the court-space size of the players. A headless desktop check held about 85 FPS at 1440 × 1000.
+
 ## Rebuilt character system
 
 `src/pixel-character.js` draws an original 48 × 64 pixel rig using integer scan conversion. Two hip/knee/ankle chains and two shoulder/elbow/wrist chains are shared by all actions. Upper-body joints are solved in body-relative 3D space with fixed bone lengths and downward elbow poles, then projected for the selected court end. Arms and paddles are depth-sorted around the torso, so the near-side back covers forward-held equipment. The far-side view mirrors anatomical right and left; gameplay selects forehand/backhand relative to the player's facing, not the screen. The male wears a short-sleeve T-shirt and shorts; the female wears a sleeveless pleated tennis dress. Near-court players show their backs; far-court players show their faces.

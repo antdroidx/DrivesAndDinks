@@ -4,6 +4,8 @@ import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
 export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand']);
 export const CONTACT_PHASE=.52;
+export const PIXEL_DENSITY=3;
+export const CHARACTER_BUFFER={width:96*PIXEL_DENSITY,height:96*PIXEL_DENSITY};
 export const characterSpritesReady=()=>true;
 export function onCharacterSpritesReady(callback){callback?.();return true}
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
@@ -115,16 +117,31 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
 export function characterPaddleAnchor(options={}){return sampleCharacterPose(options).paddle}
 
 // Integer scan conversion: no antialiasing, rotated sprites or ghost limbs.
-function polygon(c,points,color){c.fillStyle=color;const low=Math.floor(Math.min(...points.map(p=>p.y))),high=Math.ceil(Math.max(...points.map(p=>p.y)));for(let y=low;y<high;y++){const cuts=[];for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length];if((a.y<=y+.5&&b.y>y+.5)||(b.y<=y+.5&&a.y>y+.5))cuts.push(a.x+(y+.5-a.y)*(b.x-a.x)/(b.y-a.y))}cuts.sort((a,b)=>a-b);for(let i=0;i+1<cuts.length;i+=2)c.fillRect(Math.round(cuts[i]),y,Math.max(1,Math.round(cuts[i+1])-Math.round(cuts[i])),1)}}
+function polygon(c,points,color){
+ // Rasterize slopes and curves on a denser pixel grid. The context is scaled
+ // by the same density, so fill commands still map to one physical pixel.
+ const d=PIXEL_DENSITY,scaled=points.map(p=>({x:p.x*d,y:p.y*d}));
+ c.fillStyle=color;
+ const low=Math.floor(Math.min(...scaled.map(p=>p.y))),high=Math.ceil(Math.max(...scaled.map(p=>p.y)));
+ for(let sy=low;sy<high;sy++){
+  const cuts=[];
+  for(let i=0;i<scaled.length;i++){
+   const a=scaled[i],b=scaled[(i+1)%scaled.length];
+   if((a.y<=sy+.5&&b.y>sy+.5)||(b.y<=sy+.5&&a.y>sy+.5))cuts.push(a.x+(sy+.5-a.y)*(b.x-a.x)/(b.y-a.y));
+  }
+  cuts.sort((a,b)=>a-b);
+  for(let i=0;i+1<cuts.length;i+=2)c.fillRect(cuts[i]/d,sy/d,Math.max(1,cuts[i+1]-cuts[i])/d,1/d);
+ }
+}
 const poly=(c,coords,color)=>polygon(c,coords.map(([x,y])=>({x,y})),color);
 function segment(c,a,b,width,color){const d=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/d*width/2,ny=(b.x-a.x)/d*width/2;polygon(c,[{x:a.x+nx,y:a.y+ny},{x:b.x+nx,y:b.y+ny},{x:b.x-nx,y:b.y-ny},{x:a.x-nx,y:a.y-ny}],color);c.fillStyle=color;for(const p of [a,b])c.fillRect(Math.round(p.x-width/2),Math.round(p.y-width/2),Math.round(width),Math.round(width))}
 let buffer;
 export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false}={}){
- buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(96,96):Object.assign(document.createElement('canvas'),{width:96,height:96});
+ buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const contact=alignTo?{x:(alignTo.x-x)*48/width,y:(alignTo.y-y)*64/height}:null;
  const pose=sampleCharacterPose({mode,phase,frame,view,side,contact,contactWeight:alignStrength,contactDepth,moving});
- c.clearRect(0,0,96,96);c.save();c.translate(24,16);
+ c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;
  for(const [hip,knee,foot] of legs){segment(c,hip,knee,6,colors.outline);segment(c,knee,foot,5,colors.outline);segment(c,hip,knee,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-4},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2)}
@@ -163,6 +180,6 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  if(female){poly(c,[[hx+4,hy-3],[hx+8,hy-1],[hx+8+Math.sin(frame)*1.5,hy+7],[hx+5,hy+9],[hx+5,hy+2]],colors.hair);c.fillStyle=colors.shirtLight;c.fillRect(Math.round(hx+5),Math.round(hy),2,2)}
  for(const part of parts.filter(p=>p.depth>=neck.depth))armPart(part.index,part.part);
  if(p.depth>=neck.depth)drawPaddle();
- c.restore();target.save();target.imageSmoothingEnabled=false;
+ c.restore();target.save();target.imageSmoothingEnabled=true;target.imageSmoothingQuality='high';
  target.drawImage(buffer,x-width/2,y-height/4,width*2,height*1.5);target.restore();return true;
 }
