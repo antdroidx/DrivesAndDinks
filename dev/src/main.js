@@ -1,10 +1,10 @@
-import {setupSelection} from './selection.js?v=30';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=30';
-import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=30';
-import {Game} from './game.js?v=30';
-import {selectShot,serveAim} from './core.js?v=30';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=30';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=30';
+import {setupSelection} from './selection.js?v=31';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=31';
+import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=31';
+import {Game} from './game.js?v=31';
+import {selectShot,serveAim} from './core.js?v=31';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=31';
+import {sampleStrokeAnimation} from './stroke-animation.js?v=31';
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -44,15 +44,17 @@ function drawSprite(p,q){
  const swingProgress=p.swing>0?1-p.swing/(p.swingDuration||.36):0,startPhase=p.animationContactStart?.52:0,strokePhase=p.windup>0?0:startPhase+(1-startPhase)*Math.min(1,swingProgress);
  const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,strokePhase):null;
  const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?(p.stride||0)/2.8:(Math.floor(game.clock*5)+p.id)%8);
- const width=88*scale,height=98*scale,spriteY=Math.round(q.y-height+2);
+ const width=88*scale,height=98*scale,spriteY=Math.round(q.y-height+2),contactPoint=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null,alignStrength=contactPoint?Math.max(0,Math.min(1,(p.swing/(p.swingDuration||.5)-.62)/.38)):0;
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){
   ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke();ctx.restore();
  }
  if(strokeAnimation){
-  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.translate(0,strokeAnimation.offsetY*.28);ctx.rotate(strokeAnimation.rotation*.55);ctx.scale(1,strokeAnimation.scaleY);
-  drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(-width/2),y:Math.round(-height+2),width,height,view:p.team===0?'near':'far'});ctx.restore();
- }else drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(q.x-width/2),y:spriteY,width,height,view:p.team===0?'near':'far'});
+  const shiftY=strokeAnimation.offsetY*.28,angle=strokeAnimation.rotation*.55,dx=contactPoint?contactPoint.x-q.x:0,dy=contactPoint?contactPoint.y-(q.y+shiftY):0,cos=Math.cos(angle),sin=Math.sin(angle);
+  const alignTo=contactPoint?{x:cos*dx+sin*dy,y:(-sin*dx+cos*dy)/strokeAnimation.scaleY}:null;
+  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.translate(0,shiftY);ctx.rotate(angle);ctx.scale(1,strokeAnimation.scaleY);
+  drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(-width/2),y:Math.round(-height+2),width,height,view:p.team===0?'near':'far',alignTo,alignStrength});ctx.restore();
+ }else drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(q.x-width/2),y:spriteY,width,height,view:p.team===0?'near':'far',alignTo:contactPoint,alignStrength});
 }
 function drawPixelBall(x,y,radius){
  const r=Math.max(3,Math.round(radius));
