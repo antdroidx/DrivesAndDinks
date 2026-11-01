@@ -14,7 +14,7 @@ for(const [character,gender] of characters){
    const physicalShot=shot==='forehand'||shot==='backhand'?'drive':shot;
    assert.equal(player.animationShot,physicalShot);
    assert.equal(game.lastShot,physicalShot);
-   assert.equal(player.stroke,shot==='forehand'||shot==='backhand'?shot:'volley');
+   assert.equal(player.stroke,shot==='backhand'?'backhand':'forehand');
    assert.equal(player.swing,SWING_SECONDS);
    assert.equal(player.swingDuration,SWING_SECONDS);
    assert.equal(player.motion,'planted');

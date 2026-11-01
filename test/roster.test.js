@@ -1,4 +1,4 @@
-import {test} from 'node:test';
+import {test} from 'node:test';import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
 import {CHARACTERS,PADDLES,CLOTHING_COLORS,PADDLE_COLORS,COURT_PALETTES,normalizeSelection,buildProfile,createLineup,selectionStats} from '../src/roster.js';
 import {statRating} from '../src/selection.js';
@@ -29,6 +29,12 @@ test('configured lineup contains four characters and survives match resets',()=>
 test('female selections receive a male partner and male selections receive a female partner',()=>{for(const player of CHARACTERS){const lineup=createLineup({character:player.id});for(const team of [lineup.slice(0,2),lineup.slice(2,4)])assert.deepEqual(new Set(team.map(p=>p.gender)),new Set(['male','female']))}});
 test('player power and spin modify effective equipment and stat bars are bounded',()=>{const g=new Game();g.configure({character:'jordan',paddle:'balanced'});const p=g.players[0],effective=g.paddleFor(p);assert.ok(effective.power>p.paddle.power);assert.ok(effective.spin<p.paddle.spin);assert.equal(Object.keys(selectionStats({character:'jordan'}))[0],'serve');for(const value of [.4,.8,1,1.2,1.5])assert.ok(statRating(value)>=0&&statRating(value)<=100)});
 
+test('all four versioned character sheets are present for the DEV build',()=>{
+ for(const body of ['female','male'])for(const view of ['near','far']){
+  const bytes=readFileSync(new URL(`../assets/player-human-${body}-${view}-v2.png`,import.meta.url));
+  assert.ok(bytes.length>100000);assert.equal(bytes.readUInt32BE(0),0x89504e47);
+ }
+});
 test('sprite readiness invokes callbacks even when sheets are already cached',()=>{
  let calls=0;
  assert.equal(characterSpritesReady(),true);

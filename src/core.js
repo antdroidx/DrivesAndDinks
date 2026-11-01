@@ -12,9 +12,18 @@ export function serveTarget(player,aim,type='hard',random=Math.random()){
 }
 export function aimStep(player,fine=false){const placement=(player.abilities?.control??1)*(player.paddle?.control??1);return Math.max(1.5,Math.min(3.5,2.5/placement))*(fine?.25:1)}
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
+export function paddleContactTarget(p,b,shot='drive'){
+ const reach=p.abilities?.reach??1,side=b.x>=p.x?1:-1,netward=p.team===0?-.46:.46;
+ if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+netward*.55,z:Math.max(2.2,Math.min(3.2,b.z??2.7))};
+ return {x:p.x+side*(.62+.2*reach),y:p.y+netward,z:Math.max(.35,Math.min(2.55,b.z??1.2))};
+}
+export function paddleContactAvailable(p,b,shot='drive'){
+ const target=paddleContactTarget(p,b,shot),reach=p.abilities?.reach??1;
+ return b.z>=0&&b.z<=3.5&&((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2<=1;
+}
 export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
  const reach=p.abilities?.reach??1
- const radial=Math.sqrt(((b.x-p.x)/(1.6*reach))**2+((b.y-p.y)/(1.9*reach))**2)
+ const paddle=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-paddle.x)/(.95*reach))**2+((b.y-paddle.y)/.9)**2+((b.z-paddle.z)/1.1)**2)
  const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed)
  const shotDifficulty={serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
  const easy=difficulty==='easy'

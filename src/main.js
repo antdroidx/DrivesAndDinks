@@ -44,15 +44,17 @@ function drawSprite(p,q){
  const swingProgress=p.swing>0?1-p.swing/(p.swingDuration||.36):0,startPhase=p.animationContactStart?.52:0,strokePhase=p.windup>0?0:startPhase+(1-startPhase)*Math.min(1,swingProgress);
  const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,strokePhase):null;
  const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run',mode=strokeAnimation?.kind??(moving?locomotion:'idle'),frame=strokeAnimation?.frameColumn??(moving?(p.stride||0)/2.8:(Math.floor(game.clock*5)+p.id)%8);
- const width=88*scale,height=98*scale,spriteY=Math.round(q.y-height+2);
+ const width=88*scale,height=98*scale,spriteY=Math.round(q.y-height+2),contactPoint=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null,alignStrength=contactPoint?Math.max(0,Math.min(1,(p.swing/(p.swingDuration||.5)-.62)/.38)):0;
  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){
   ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke();ctx.restore();
  }
  if(strokeAnimation){
-  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.translate(0,strokeAnimation.offsetY*.28);ctx.rotate(strokeAnimation.rotation*.55);ctx.scale(1,strokeAnimation.scaleY);
-  drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(-width/2),y:Math.round(-height+2),width,height,view:p.team===0?'near':'far'});ctx.restore();
- }else drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(q.x-width/2),y:spriteY,width,height,view:p.team===0?'near':'far'});
+  const shiftY=strokeAnimation.offsetY*.28,angle=strokeAnimation.rotation*.55,dx=contactPoint?contactPoint.x-q.x:0,dy=contactPoint?contactPoint.y-(q.y+shiftY):0,cos=Math.cos(angle),sin=Math.sin(angle);
+  const alignTo=contactPoint?{x:cos*dx+sin*dy,y:(-sin*dx+cos*dy)/strokeAnimation.scaleY}:null;
+  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.translate(0,shiftY);ctx.rotate(angle);ctx.scale(1,strokeAnimation.scaleY);
+  drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(-width/2),y:Math.round(-height+2),width,height,view:p.team===0?'near':'far',alignTo,alignStrength});ctx.restore();
+ }else drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(q.x-width/2),y:spriteY,width,height,view:p.team===0?'near':'far',alignTo:contactPoint,alignStrength});
 }
 function drawPixelBall(x,y,radius){
  const r=Math.max(3,Math.round(radius));

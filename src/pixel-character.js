@@ -1,10 +1,10 @@
 import {CLOTHING_COLORS,PADDLE_COLORS} from './roster.js';
 
 const SHEET_PATHS={
- female:{near:'../assets/player-human-female-near-v1.png',far:'../assets/player-human-female-far-v1.png'},
- male:{near:'../assets/player-human-male-near-v1.png',far:'../assets/player-human-male-far-v1.png'}
+ female:{near:'../assets/player-human-female-near-v2.png',far:'../assets/player-human-female-far-v2.png'},
+ male:{near:'../assets/player-human-male-near-v2.png',far:'../assets/player-human-male-far-v2.png'}
 };
-const sheets=typeof Image==='undefined'?{}:Object.fromEntries(Object.entries(SHEET_PATHS).map(([body,views])=>[body,Object.fromEntries(Object.entries(views).map(([view,path])=>{const image=new Image();image.src=path;return [view,image]}))]));
+const sheets=typeof Image==='undefined'?{}:Object.fromEntries(Object.entries(SHEET_PATHS).map(([body,views])=>[body,Object.fromEntries(Object.entries(views).map(([view,path])=>{const image=new Image();image.src=new URL(path,import.meta.url).href;image.addEventListener('error',()=>setTimeout(()=>{image.src=new URL(path,import.meta.url).href},300),{once:true});return [view,image]}))]));
 const allSheets=()=>Object.values(sheets).flatMap(views=>Object.values(views));
 const recoloredSheets=new Map();
 const readyListeners=[];
@@ -56,6 +56,26 @@ function recolorPixel(data,index,target,baseLight){
  const [r,g,b]=hslToRgb({h:target.h,s:Math.max(.08,Math.min(1,target.s*.82+source.s*.18)),l:lightness});
  data[index]=r;data[index+1]=g;data[index+2]=b;
 }
+function findPaddleAnchors(mask,width,height){
+ const anchors=new Array(8).fill(null),visited=new Uint8Array(width*height);
+ for(let row=0;row<2;row++)for(let col=0;col<4;col++){
+  const cell=row*4+col,left=Math.round(col*width/4),right=Math.round((col+1)*width/4),top=Math.round(row*height/2),bottom=Math.round((row+1)*height/2);
+  let best={area:0,x:.5,y:.5};
+  for(let y=top;y<bottom;y++)for(let x=left;x<right;x++){
+   const start=y*width+x;if(!mask[start]||visited[start])continue;
+   const queue=[start];visited[start]=1;let area=0,sumX=0,sumY=0;
+   for(let cursor=0;cursor<queue.length;cursor++){
+    const index=queue[cursor],px=index%width,py=Math.floor(index/width);area++;sumX+=px;sumY+=py;
+    for(let yy=Math.max(top,py-1);yy<=Math.min(bottom-1,py+1);yy++)for(let xx=Math.max(left,px-1);xx<=Math.min(right-1,px+1);xx++){
+     const next=yy*width+xx;if(mask[next]&&!visited[next]){visited[next]=1;queue.push(next)}
+    }
+   }
+   if(area>best.area)best={area,x:(sumX/area-left)/(right-left),y:(sumY/area-top)/(bottom-top)};
+  }
+  if(best.area>=18)anchors[cell]={x:best.x,y:best.y};
+ }
+ return anchors;
+}
 function preparedSheet(body,view,appearance){
  const source=sheets[body]?.[view];if(!source?.complete||!source.naturalWidth||typeof document==='undefined')return null;
  const shirt=resolve(CLOTHING_COLORS,appearance.shirtColor,'green').color;
@@ -64,19 +84,19 @@ function preparedSheet(body,view,appearance){
  const cached=recoloredSheets.get(key);if(cached)return cached;
  const canvas=document.createElement('canvas');canvas.width=source.naturalWidth;canvas.height=source.naturalHeight;
  const context=canvas.getContext('2d',{willReadFrequently:true});context.drawImage(source,0,0);
- const image=context.getImageData(0,0,canvas.width,canvas.height),data=image.data;
+ const image=context.getImageData(0,0,canvas.width,canvas.height),data=image.data,faceMask=new Uint8Array(data.length/4);
  const shirtHsl=rgbToHsl(...hexRgb(shirt)),bottomHsl={...shirtHsl,l:Math.max(.08,shirtHsl.l*.43)},paddleHsl=rgbToHsl(...hexRgb(paddle));
  for(let i=0;i<data.length;i+=4){
   const r=data[i],g=data[i+1],b=data[i+2],alpha=data[i+3];if(alpha<48)continue;
   const max=Math.max(r,g,b),min=Math.min(r,g,b),spread=max-min;
   const jersey=body==='female'?(r>125&&g<125&&b>g*.72&&r>g*1.35&&r>b*1.08):(g>70&&g>r*1.12&&b>r*.94);
   const shorts=body==='male'&&b>r*1.12&&g>r*1.08&&b>55;
-  const paddleFace=max>=18&&max<115&&spread<36&&b>=r-8;
+  const paddleFace=max>=18&&max<115&&spread<36&&b>=r-8;if(paddleFace)faceMask[i/4]=1;
   if(jersey)recolorPixel(data,i,shirtHsl,body==='female'?.46:.4);
   else if(shorts)recolorPixel(data,i,bottomHsl,.23);
   else if(paddleFace)recolorPixel(data,i,paddleHsl,.2);
  }
- context.putImageData(image,0,0);
+ context.putImageData(image,0,0);canvas.paddleAnchors=findPaddleAnchors(faceMask,canvas.width,canvas.height);
  recoloredSheets.set(key,canvas);
  if(recoloredSheets.size>24)recoloredSheets.delete(recoloredSheets.keys().next().value);
  return canvas;
@@ -86,12 +106,18 @@ export function characterFrame(mode='idle',phase=0,frame=0){
  const cyclical=[FRAME_ORDER.run,FRAME_ORDER.shuffle,FRAME_ORDER.slide].includes(sequence),index=cyclical?Math.abs(Math.floor(frame))%sequence.length:Math.max(0,Math.min(sequence.length-1,Math.floor(Math.max(0,Math.min(.999,phase))*sequence.length)));
  return {row:sequence[index][0],col:sequence[index][1]};
 }
-export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=100,height=100,view='near'}={}){
+export function characterPaddleAnchor({appearance={},view='near',row=0,col=0}={}){
+ const body=appearance.body==='female'?'female':'male',sheet=preparedSheet(body,view==='far'?'far':'near',appearance);
+ return sheet?.paddleAnchors?.[row*4+col]??null;
+}
+export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=100,height=100,view='near',alignTo=null,alignStrength=0}={}){
  const body=appearance.body==='female'?'female':'male';
  const sheet=preparedSheet(body,view==='far'?'far':'near',appearance);
  if(!sheet)return false;
  const {row,col}=characterFrame(mode,phase,frame),sheetWidth=sheet.naturalWidth||sheet.width,sheetHeight=sheet.naturalHeight||sheet.height,cellWidth=sheetWidth/4,cellHeight=sheetHeight/2;
+ const anchor=alignTo?sheet.paddleAnchors?.[row*4+col]:null,clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+ const alignX=anchor?clamp((alignTo.x-anchor.x*width-x)*alignStrength,-12,12):0,alignY=anchor?clamp((alignTo.y-anchor.y*height-y)*alignStrength,-10,10):0;
  const idleBob=mode==='idle'&&Math.floor(frame)%4>1?Math.max(1,height*.012):0;
  const runBob=['run','shuffle','slide'].includes(mode)?Math.abs(Math.sin(frame*Math.PI))*Math.max(1,height*.008):0;
- target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,x,y+Math.max(idleBob,runBob),width,height);target.restore();return true;
+ target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,x+alignX,y+Math.max(idleBob,runBob)+alignY,width,height);target.restore();return true;
 }
