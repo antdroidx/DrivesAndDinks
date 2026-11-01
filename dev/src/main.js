@@ -1,10 +1,10 @@
-import {setupSelection} from './selection.js?v=37';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=37';
-import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=37';
-import {Game} from './game.js?v=37';
-import {selectShot,serveAim} from './core.js?v=37';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=37';
-import {sampleStrokeAnimation} from './stroke-animation.js?v=37';
+import {setupSelection} from './selection.js?v=38';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=38';
+import {drawPixelCharacter,onCharacterSpritesReady} from './pixel-character.js?v=38';
+import {Game} from './game.js?v=38';
+import {selectShot,serveAim} from './core.js?v=38';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=38';
+
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game();let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -33,30 +33,28 @@ function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b)
 // readable from both halves of the vertical court.
 function drawLoadoutPreview(selection){
  const c=document.querySelector('#player-preview');if(!c)return;
- const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor};
+ const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor};
  x.clearRect(0,0,c.width,c.height);x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
  x.fillStyle='#355e60';x.fillRect(0,178,c.width,42);x.fillStyle='#eff3cf66';x.fillRect(0,195,c.width,2);
  for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
  try{const drawn=drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
 }
 function drawSprite(p,q){
- const scale=.9+p.y/125,moving=p.motion!=='planted'&&Math.hypot(p.vx,p.vy)>1.2;
- const swingProgress=p.swing>0?1-p.swing/(p.swingDuration||.36):0,startPhase=p.animationContactStart?.52:0,strokePhase=p.windup>0?0:startPhase+(1-startPhase)*Math.min(1,swingProgress);
- const strokeAnimation=p.windup>0?sampleStrokeAnimation(p,0):p.swing>0?sampleStrokeAnimation(p,strokePhase):null;
- const locomotion=p.motion==='slide'?'slide':p.motion==='shuffle'?'shuffle':'run';
- const strokeMode=strokeAnimation?p.animationShot==='dink'?(p.stroke==='backhand'?'backhandDink':'forehandDink'):p.animationShot==='drop'?(p.stroke==='backhand'?'backhandDrop':'forehandDrop'):p.animationShot==='lob'?'lob':p.animationShot==='drive'&&p.stroke==='backhand'&&(p.gender==='female'||p.appearance?.body==='female')?'twoBackhand':strokeAnimation.kind:'serve';
- const mode=strokeMode??(moving?locomotion:'idle');
- const width=88*scale,height=98*scale,spriteY=Math.round(q.y-height+2),contactPoint=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null,alignStrength=contactPoint?Math.max(0,Math.min(1,(p.swing/(p.swingDuration||.5)-.62)/.38)):0;
- ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,19,6,0,0,Math.PI*2);ctx.fill();ctx.restore();
- if(p.id===0&&game.mode==='play'){
-  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(0,0,20,7,0,0,Math.PI*2);ctx.stroke();ctx.restore();
- }
- if(strokeAnimation){
-  const shiftY=strokeAnimation.offsetY*.28,angle=strokeAnimation.rotation*.55,dx=contactPoint?contactPoint.x-q.x:0,dy=contactPoint?contactPoint.y-(q.y+shiftY):0,cos=Math.cos(angle),sin=Math.sin(angle);
-  const alignTo=contactPoint?{x:cos*dx+sin*dy,y:(-sin*dx+cos*dy)/strokeAnimation.scaleY}:null;
-  ctx.save();ctx.translate(Math.round(q.x),Math.round(q.y));ctx.translate(0,shiftY);ctx.rotate(angle);ctx.scale(1,strokeAnimation.scaleY);
-  drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(-width/2),y:Math.round(-height+2),width,height,view:p.team===0?'near':'far',alignTo,alignStrength});ctx.restore();
- }else drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame,phase:strokePhase,moving,x:Math.round(q.x-width/2),y:spriteY,width,height,view:p.team===0?'near':'far',alignTo:contactPoint,alignStrength});
+ const scale=.9+p.y/125,moving=Math.hypot(p.vx,p.vy)>.7;
+ const progress=p.swing>0?1-p.swing/(p.swingDuration||.36):0;
+ const phase=p.animationContactStart?.52+.48*progress:progress;
+ const active=p.swing>0||p.windup>0;
+ const back=p.stroke==='backhand';
+ const mode=active?(p.animationShot==='overhead'?'overhead':p.animationShot==='serve'?'serve':p.animationShot==='lob'?'lob':p.animationShot==='dink'?(back?'backhandDink':'forehandDink'):p.animationShot==='drop'?(back?'backhandDrop':'forehandDrop'):p.contactType==='volley'?'volley':back?(p.gender==='female'?'twoBackhand':'backhand'):'forehand'):(moving?(p.motion==='run'?'run':'shuffle'):'idle');
+ const width=74*scale,height=98*scale,contact=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null;
+ // Lock the face to the real impact location at phase .52. Release smoothly;
+ // only the arm follows the contact, never the feet or the whole character.
+ const t=Math.min(1,progress/.38),alignStrength=contact?1-t*t*(3-2*t):0;
+ ctx.save();ctx.translate(q.x,q.y);ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,16*scale,5*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
+ if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
+ const authoredLeft=mode.startsWith('backhand')||mode==='twoBackhand';
+ const side=active?((p.swingSide??1)*(authoredLeft?-1:1)):1;
+ drawPixelCharacter(ctx,{appearance:p.appearance,mode,frame:(p.stride||0)*1.35,phase:p.windup>0?.28:phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:p.team===0?'near':'far',side,alignTo:contact,alignStrength});
 }
 function drawPixelBall(x,y,radius){
  const r=Math.max(3,Math.round(radius));
