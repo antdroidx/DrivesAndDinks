@@ -1,1 +1,1 @@
-globalThis.DRIVES_DINKS_BUILD = "38";
+globalThis.DRIVES_DINKS_BUILD = "39";
