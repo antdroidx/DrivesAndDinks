@@ -9,6 +9,8 @@ test('every requested appearance option is available',()=>{
  assert.deepEqual(CLOTHING_COLORS.map(item=>item.name),['Black','Gray','White','Blue','Yellow','Red','Green','Purple','Pink','Orange']);
  assert.equal(PADDLE_COLORS.length,10);
  assert.equal(COURT_PALETTES.length,3);
+ const blueGray=COURT_PALETTES.find(item=>item.id==='blue-gray'),rgb=blueGray.kitchen.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16));
+ assert.ok(Math.max(...rgb)-Math.min(...rgb)<=12);
 });
 test('invalid and legacy selections safely normalize',()=>{
  const fallback=normalizeSelection(null);
