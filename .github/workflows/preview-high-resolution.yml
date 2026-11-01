@@ -1,0 +1,52 @@
+name: Preview high-resolution players
+
+on:
+  push:
+    branches:
+      - codex/high-resolution-players
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out experiment branch
+        uses: actions/checkout@v4
+
+      - name: Test high-resolution experiment
+        run: node --test
+
+      - name: Check out current published site
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: _published
+
+      - name: Add preview without changing public or dev builds
+        run: |
+          mkdir -p _site
+          rsync -a --exclude=.git _published/ _site/
+          rm -rf _site/preview/high-resolution
+          mkdir -p _site/preview/high-resolution
+          cp index.html style.css studio.html studio.css _site/preview/high-resolution/
+          printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/preview/high-resolution/build-info.js
+          cp -R src assets _site/preview/high-resolution/
+          node scripts/version-build.js "${{ github.run_number }}" _site/preview/high-resolution
+          touch _site/.nojekyll
+
+      - name: Publish preview
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./_site
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: Preview high-resolution players
