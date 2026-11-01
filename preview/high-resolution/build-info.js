@@ -1,1 +1,1 @@
-globalThis.DRIVES_DINKS_BUILD = "1";
+globalThis.DRIVES_DINKS_BUILD = "PREVIEW";
