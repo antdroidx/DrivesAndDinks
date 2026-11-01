@@ -84,11 +84,11 @@ export function drawSmoothCharacter(target,{appearance={},mode='idle',phase=0,fr
  }
  const armChains=pose.arms.map(chain=>chain.map(p=>pathPoint(p,scope)));
  const drawArm=(chain,back)=>{const armSkin=volume&&back?colors.skinDark:skin;smoothChain(target,chain,4.1*scale,armSkin,colors.outline,scale);if(!female){smoothLine(target,chain[0],chain[1],4.25*scale,volume?colorGradient(target,scope,[colors.shirtDark,colors.shirt,colors.shirtLight]):colors.shirt,colors.outline,scale); target.fillStyle=skin;target.beginPath();target.arc(chain[2].x,chain[2].y,1.45*scale,0,Math.PI*2);target.fill()}};
- armChains.forEach((chain,i)=>{if((pose.arms3[i][1].depth<0))drawArm(chain,true)});
+ armChains.forEach((chain,i)=>{if((pose.arms[i][1].depth<0))drawArm(chain,true)});
  if(pose.paddle.depth<0)drawPaddle(target,pose,scope,colors,volume);
  bodyShape(target,pose,scope,colors,volume,female);
  headAndHair(target,pose,scope,colors,volume,female,view);
- armChains.forEach((chain,i)=>{if((pose.arms3[i][1].depth>=0))drawArm(chain,false)});
+ armChains.forEach((chain,i)=>{if((pose.arms[i][1].depth>=0))drawArm(chain,false)});
  if(pose.paddle.depth>=0)drawPaddle(target,pose,scope,colors,volume);
  target.restore();return true;
 }
