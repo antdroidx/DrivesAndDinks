@@ -136,7 +136,7 @@ function polygon(c,points,color){
 const poly=(c,coords,color)=>polygon(c,coords.map(([x,y])=>({x,y})),color);
 function segment(c,a,b,width,color){const d=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/d*width/2,ny=(b.x-a.x)/d*width/2;polygon(c,[{x:a.x+nx,y:a.y+ny},{x:b.x+nx,y:b.y+ny},{x:b.x-nx,y:b.y-ny},{x:a.x-nx,y:a.y-ny}],color);c.fillStyle=color;for(const p of [a,b])c.fillRect(Math.round(p.x-width/2),Math.round(p.y-width/2),Math.round(width),Math.round(width))}
 let buffer;
-export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false}={}){
+export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false,lighting='classic'}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const contact=alignTo?{x:(alignTo.x-x)*48/width,y:(alignTo.y-y)*64/height}:null;
@@ -180,6 +180,16 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  if(female){poly(c,[[hx+4,hy-3],[hx+8,hy-1],[hx+8+Math.sin(frame)*1.5,hy+7],[hx+5,hy+9],[hx+5,hy+2]],colors.hair);c.fillStyle=colors.shirtLight;c.fillRect(Math.round(hx+5),Math.round(hy),2,2)}
  for(const part of parts.filter(p=>p.depth>=neck.depth))armPart(part.index,part.part);
  if(p.depth>=neck.depth)drawPaddle();
- c.restore();target.save();target.imageSmoothingEnabled=true;target.imageSmoothingQuality='high';
+ c.restore();
+ // Preserve the exact pixel silhouette. The light pass is clipped to existing
+ // sprite pixels, so no rectangular background is introduced.
+ if(lighting==='relief'||lighting==='depth'){
+  const depth=lighting==='depth',light=c.createLinearGradient(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);
+  light.addColorStop(0,'rgba(255,248,220,.20)');light.addColorStop(.46,'rgba(255,255,255,0)');light.addColorStop(1,depth?'rgba(10,24,40,.42)':'rgba(18,32,48,.24)');
+  c.save();c.globalCompositeOperation='source-atop';c.fillStyle=light;c.fillRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);
+  if(depth){const rim=c.createLinearGradient(0,0,CHARACTER_BUFFER.width,0);rim.addColorStop(0,'rgba(207,255,232,.16)');rim.addColorStop(.38,'rgba(207,255,232,0)');rim.addColorStop(1,'rgba(9,20,34,.8)');c.fillStyle=rim;c.fillRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height)}
+  c.restore();
+ }
+ target.save();target.imageSmoothingEnabled=true;target.imageSmoothingQuality='high';
  target.drawImage(buffer,x-width/2,y-height/4,width*2,height*1.5);target.restore();return true;
 }
