@@ -17,7 +17,7 @@ function contacts(players,team,ball,shots,bounces){
       const target={x:clamp(future.x,1,19),y:clamp(y,team===0?23:1,team===0?43:21)};
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
       const reach=1.3*(p.abilities?.reach??1),speed=(p.abilities?.speed??12)*.8;
-      if(travel<=Math.max(0,time-(p.reactionWait||0))*speed+reach)found.set(p.id,{...target,time,bounces:count});
+      if(travel<=Math.max(0,time-(p.reactionWait||0))*speed+reach)found.set(p.id,{...target,z:future.z,time,bounces:count});
     }
     if(found.size===players.length)break;
   }

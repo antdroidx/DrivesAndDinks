@@ -1,5 +1,7 @@
 import {playerProfile} from './core.js';
 
+// Development playtests use a skilled roster. Public build 15 is frozen separately.
+export const PLAYTEST_SKILLS=Object.freeze({control:1.42,serve:1.3,speed:1.18,acceleration:1.15,reaction:.72});
 export const CHARACTERS = Object.freeze([
   {id:'avery',name:'Avery Lane',gender:'male',style:'All-rounder',description:'Steady movement, reach and placement. A versatile starting point.',abilities:{speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1}},
   {id:'remy',name:'Remy Cruz',gender:'male',style:'Court runner',description:'Quick coverage and recovery; shorter reach and less precise placement.',abilities:{speed:13.6,acceleration:51,reach:.96,control:.98,reaction:.082,serve:.96,power:.96,spin:.98}},
@@ -9,7 +11,7 @@ export const CHARACTERS = Object.freeze([
   {id:'harper',name:'Harper Brooks',gender:'female',style:'Court runner',description:'Explosive lateral coverage; slightly wider shot spread.',abilities:{speed:13.4,acceleration:52,reach:.96,control:.99,reaction:.078,serve:.95,power:.95,spin:1.04}},
   {id:'quinn',name:'Quinn Vásquez',gender:'female',style:'Kitchen specialist',description:'Fast reactions and precise soft play; slower recovery.',abilities:{speed:11,acceleration:44,reach:1.03,control:1.09,reaction:.081,serve:1.06,power:.94,spin:1.1}},
   {id:'lena',name:'Lena Park',gender:'female',style:'Reach & pressure',description:'Extended reach for interceptions; slower reactions.',abilities:{speed:11.6,acceleration:41,reach:1.11,control:.98,reaction:.105,serve:1.08,power:1.1,spin:.96}}
-]);
+].map(character=>({...character,abilities:Object.fromEntries(Object.entries(character.abilities).map(([key,value])=>[key,value*(PLAYTEST_SKILLS[key]??1)]))})));
 export const PADDLES = Object.freeze([
   {id:'balanced',name:'Allcourt',style:'Balanced',description:'Even power, precision and spin.',power:1,control:1,spin:1},
   {id:'power',name:'Ignite',style:'Power',description:'Faster eligible drives; less control and spin.',power:1.12,control:.95,spin:.96},

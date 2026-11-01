@@ -1,3 +1,4 @@
+import {sampleMatchAnimation} from './match-animation.js';
 import {setupSelection} from './selection.js';
 import {COURT_PALETTES,CHARACTERS} from './roster.js';
 import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js';
@@ -41,19 +42,16 @@ function drawLoadoutPreview(selection){
 }
 function drawSprite(p,q){
  const scale=.9+p.y/125,moving=Math.hypot(p.vx,p.vy)>.7;
- const progress=p.swing>0?1-p.swing/(p.swingDuration||.36):0;
- const phase=p.animationContactStart?.52+.48*progress:progress;
- const active=p.swing>0||p.windup>0;
- const back=p.stroke==='backhand';
- const mode=active?(p.animationShot==='overhead'?'overhead':p.animationShot==='serve'?'serve':p.animationShot==='lob'?'lob':p.animationShot==='dink'?(back?'backhandDink':'forehandDink'):p.animationShot==='drop'?(back?'backhandDrop':'forehandDrop'):p.contactType==='volley'?'volley':back?(p.gender==='female'?'twoBackhand':'backhand'):'forehand'):(moving?(p.motion==='run'?'run':'shuffle'):'idle');
+ const animation=sampleMatchAnimation(p,game);
+ const mode=animation?.mode??(moving?(p.motion==='run'?'run':'shuffle'):'idle'),phase=animation?.phase??0;
  const width=70.5*scale,height=94*scale,contact=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null;
  // Lock the face to the real impact location at phase .52. Release smoothly;
  // only the arm follows the contact, never the feet or the whole character.
  const contactDepth=contact?(p.team===0?-1:1)*(p.contactPoint.y-p.y)*8.5/(height/64*.4):null;
- const t=Math.min(1,progress/.38),alignStrength=contact?1-t*t*(3-2*t):0;
+ const alignStrength=animation?.alignStrength??0;
  ctx.save();ctx.translate(q.x,q.y);ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,16*scale,5*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
- drawPixelCharacter(ctx,{appearance:p.appearance,mode,frame:(p.stride||0)*1.35,phase:p.windup>0?.28:phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:1,alignTo:contact,alignStrength,contactDepth});
+ drawPixelCharacter(ctx,{appearance:p.appearance,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:1,alignTo:contact,alignStrength,contactDepth});
 }
 function drawPixelBall(x,y,radius){
  const r=Math.max(3,Math.round(radius));

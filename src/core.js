@@ -27,13 +27,16 @@ export function contactQuality(p,b,shot,buffered=false,random=Math.random(),diff
  const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed)
  const shotDifficulty={serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
  const easy=difficulty==='easy'
- let chance=.012+.09*radial**2+.05*radial**4+.05*motion**2+.04*Math.max(0,.9-(b.z??1))/.9+.03*Math.max(0,(b.z??1)-2.8)/.7
+ const highContact=shot==='overhead'?7:4.5
+ let chance=.012+.09*radial**2+.05*radial**4+.05*motion**2+.04*Math.max(0,.9-(b.z??1))/.9+.03*Math.max(0,(b.z??1)-highContact)/.7
  chance*=shotDifficulty
  if(easy)chance*=.62
  if(buffered)chance*=easy?.52:.84
- chance/=Math.max(.55,((p.abilities?.control??1)*(p.paddle?.control??1))**.8)
+ chance/=Math.max(.55,((p.abilities?.control??1)*(p.paddle?.control??1))**3)
  chance=Math.min(easy?.3:.42,Math.max(0,chance))
- return {quality:Math.max(easy?.65:.42,1-chance),mishit:random<chance}
+ const mishit=random<chance;
+ // Probability is not impact quality: only a rolled mishit gets a weak hit.
+ return {chance,mishit,quality:mishit?Math.max(easy?.65:.45,.74-chance*.55):1-Math.min(.12,chance*.2)}
 }
 export const side=y=>y>22?0:1;
 export function stepBall(b,dt=C.dt){const oldY=b.y,oldZ=b.z,spin=b.spin||0,drag=Math.max(.94,1-(C.airDrag+Math.abs(spin)*.002)*dt);b.vx*=drag;b.vy*=drag;b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;b.vz-=C.gravity*dt+spin*C.spinLift*dt; if((oldY-22)*(b.y-22)<=0&&oldY!==b.y){const f=(22-oldY)/(b.y-oldY);if(oldZ+(b.z-oldZ)*f<3)return 'net'} if(b.z<=0&&b.vz<0){b.z=0;b.vz=-b.vz*C.bounce;const surface=.89+(spin<0?.015:-.012);b.vx*=surface;b.vy*=surface;if(b.shot==='slice'){b.vz*=.82;b.vx*=.94;b.vy*=.94}return 'bounce'}return null}
