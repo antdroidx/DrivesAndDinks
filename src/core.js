@@ -1,7 +1,7 @@
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32,bounce:.72,airDrag:.018,spinLift:.055,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
-export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',outfit:'tee',hair:'brown',skin:'medium',shirtColor:'green',bottomColor:'black',paddleColor:'mint',court:'blue-gray'}}}
+export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',shirtColor:'green',paddleColor:'mint',court:'blue-gray'}}}
 export function serveAim(player,aim){
  const value=Math.max(1,Math.min(19,Number(aim)||10));
  return player.x<10?Math.max(10.8,value):Math.min(9.2,value)

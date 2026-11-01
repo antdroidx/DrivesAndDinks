@@ -5,7 +5,7 @@ const root=new URL('../',import.meta.url);
 const allowed=new Map([
   ['/', ['index.html','text/html']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],['/build-info.js',['build-info.js','text/javascript']],
   ...['animation-test','stroke-animation','update-check','core','game','main','pixel-character','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
-  ...['player-sprites-v1','vertical-swings-v1','female-player-skirt-v2','male-tshirt-atlas-v3','male-polo-atlas-v3','female-tshirt-atlas-v3','female-dress-atlas-v3'].map(name=>[`/assets/${name}.png`,[`assets/${name}.png`,'image/png']])
+  ...['player-human-female-near-v1','player-human-female-far-v1','player-human-male-near-v1','player-human-male-far-v1','player-sprites-v1','vertical-swings-v1','female-player-skirt-v2','male-tshirt-atlas-v3','male-polo-atlas-v3','female-tshirt-atlas-v3','female-dress-atlas-v3'].map(name=>[`/assets/${name}.png`,[`assets/${name}.png`,'image/png']])
 ]);
 const port=Number(process.argv[2]||8768);
 if(!Number.isInteger(port)||port<1024||port>65535)throw new Error('Choose a port from 1024 to 65535');
