@@ -50,18 +50,18 @@ export const SKIN_COLORS = Object.freeze([
   {id:'deep',name:'Deep',color:'#5f3f28',rgb:[95,63,40]}
 ]);
 export const PADDLE_COLORS = Object.freeze([
-  {id:'mint',name:'Mint',color:'#4be3c2',edgeColor:'#4be3c2',accentColor:'#ffe28a',interiorColor:'#0e1518',rgb:[75,227,194]},
-  {id:'coral',name:'Coral',color:'#ff6b57',edgeColor:'#ff6b57',accentColor:'#90f4d7',interiorColor:'#180f12',rgb:[255,107,87]},
-  {id:'blue',name:'Blue',color:'#4c8fe8',edgeColor:'#4c8fe8',accentColor:'#ffd46d',interiorColor:'#0d101d',rgb:[76,143,232]},
-  {id:'yellow',name:'Yellow',color:'#f5cd55',edgeColor:'#f5cd55',accentColor:'#ac8cff',interiorColor:'#151310',rgb:[245,205,85]},
-  {id:'red',name:'Red',color:'#cf4444',edgeColor:'#cf4444',accentColor:'#f5ede3',interiorColor:'#150e10',rgb:[207,68,68]},
-  {id:'purple',name:'Purple',color:'#a06ad2',edgeColor:'#a06ad2',accentColor:'#8df5d1',interiorColor:'#130e14',rgb:[160,106,210]},
-  {id:'orange',name:'Orange',color:'#f5883d',edgeColor:'#f5883d',accentColor:'#82cfff',interiorColor:'#171008',rgb:[245,136,61]},
-  {id:'white',name:'White',color:'#f6f1e9',edgeColor:'#f6f1e9',accentColor:'#ef92b7',interiorColor:'#121213',rgb:[246,241,233]},
-  {id:'black',name:'Black',color:'#33393f',edgeColor:'#33393f',accentColor:'#b8f170',interiorColor:'#0d0f11',rgb:[51,57,63]},
-  {id:'teal',name:'Teal',color:'#2fc4e4',edgeColor:'#2fc4e4',accentColor:'#ff9b76',interiorColor:'#0f1416',rgb:[47,196,228]},
-  {id:'silver',name:'Silver',color:'#c5c8cc',edgeColor:'#c5c8cc',accentColor:'#76aaff',interiorColor:'#0e0f10',rgb:[197,200,204]},
-  {id:'pink',name:'Pink',color:'#f078b8',edgeColor:'#f078b8',accentColor:'#a6efcf',interiorColor:'#160d11',rgb:[240,120,184]}
+  {id:'mint',name:'Mint',color:'#4be3c2',edgeColor:'#4be3c2',interiorColor:'#0e1518',rgb:[75,227,194]},
+  {id:'coral',name:'Coral',color:'#ff6b57',edgeColor:'#ff6b57',interiorColor:'#180f12',rgb:[255,107,87]},
+  {id:'blue',name:'Blue',color:'#4c8fe8',edgeColor:'#4c8fe8',interiorColor:'#0d101d',rgb:[76,143,232]},
+  {id:'yellow',name:'Yellow',color:'#f5cd55',edgeColor:'#f5cd55',interiorColor:'#151310',rgb:[245,205,85]},
+  {id:'red',name:'Red',color:'#cf4444',edgeColor:'#cf4444',interiorColor:'#150e10',rgb:[207,68,68]},
+  {id:'purple',name:'Purple',color:'#a06ad2',edgeColor:'#a06ad2',interiorColor:'#130e14',rgb:[160,106,210]},
+  {id:'orange',name:'Orange',color:'#f5883d',edgeColor:'#f5883d',interiorColor:'#171008',rgb:[245,136,61]},
+  {id:'white',name:'White',color:'#f6f1e9',edgeColor:'#f6f1e9',interiorColor:'#121213',rgb:[246,241,233]},
+  {id:'black',name:'Black',color:'#33393f',edgeColor:'#33393f',interiorColor:'#0d0f11',rgb:[51,57,63]},
+  {id:'teal',name:'Teal',color:'#2fc4e4',edgeColor:'#2fc4e4',interiorColor:'#0f1416',rgb:[47,196,228]},
+  {id:'silver',name:'Silver',color:'#c5c8cc',edgeColor:'#c5c8cc',interiorColor:'#0e0f10',rgb:[197,200,204]},
+  {id:'pink',name:'Pink',color:'#f078b8',edgeColor:'#f078b8',interiorColor:'#160d11',rgb:[240,120,184]}
 ]);
 export const PADDLE_DESIGNS = PADDLE_COLORS;
 export const COURT_PALETTES = Object.freeze([
