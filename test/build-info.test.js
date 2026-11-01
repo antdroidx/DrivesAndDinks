@@ -22,6 +22,7 @@ test('the Pages workflow publishes only the dev build and keeps the motion studi
  const workflow=read('.github/workflows/pages.yml');
  assert.match(workflow,/cp index\.html style\.css studio\.html studio\.css _site\/dev\//);
  assert.match(workflow,/location\.replace\('\.\/dev\/'\)/);
+ assert.doesNotMatch(read('studio.html'),/art-directions\.html/);
  assert.doesNotMatch(workflow,/2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab|_friends|DRIVES_DINKS_BUILD = "15"|preview\/high-resolution/);
  const workflows=readdirSync(new URL('../.github/workflows/',import.meta.url));
  assert.deepEqual(workflows,['pages.yml']);
