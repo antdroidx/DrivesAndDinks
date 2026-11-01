@@ -24,6 +24,11 @@ test('the Pages workflow keeps the public root, publishes dev, and preserves the
  assert.match(workflow,/ref: ce59a6af09c78309ac30c7c3f7d362fd6c370dc8/);
  assert.match(workflow,/path: _public/);
  assert.match(workflow,/rsync -a --exclude=\.git --exclude=dev --exclude=preview _public\/ _site\//);
+ assert.match(workflow,/cp sw\.js _site\//);
+ assert.match(workflow,/src\/cache-refresh\.js\?v=15/);
+ assert.match(read('sw.js'),/request\.mode!=='navigate'/);
+ assert.match(read('sw.js'),/cache:'no-store'/);
+ assert.match(read('src\/cache-refresh\.js'),/updateViaCache:'none'/);
  assert.doesNotMatch(read('studio.html'),/art-directions\.html/);
  assert.doesNotMatch(workflow,/2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab|_friends|cat > _site\/index\.html/);
  const workflows=readdirSync(new URL('../.github/workflows/',import.meta.url));

@@ -16,11 +16,11 @@ test('static build versions the page and all module entry points',()=>{
   const root=mkdtempSync(path.join(os.tmpdir(),'drives-dinks-version-'));
   try{
     mkdirSync(path.join(root,'src'));
-    writeFileSync(path.join(root,'index.html'),'<link href="style.css"><script src="build-info.js"></script><script type="module" src="src/update-check.js"></script><script type="module" src="src/main.js"></script>');
+    writeFileSync(path.join(root,'index.html'),'<link href="style.css"><script src="build-info.js"></script><script type="module" src="src/update-check.js"></script><script type="module" src="src/cache-refresh.js"></script><script type="module" src="src/main.js"></script>');
     writeFileSync(path.join(root,'src','main.js'),"import {Game} from './game.js';\n");
     writeFileSync(path.join(root,'src','update-check.js'),'export {};\n');
     writeFileSync(path.join(root,'src','game.js'),'export const Game=1;\n');
-    writeFileSync(path.join(root,'studio.html'),'<link href="studio.css"><script src="src/studio.js"></script>');
+    writeFileSync(path.join(root,'studio.html'),'<link href="studio.css"><script src="src/studio.js"></script><script type="module" src="src/cache-refresh.js"></script>');
     writeFileSync(path.join(root,'art-directions.html'),'<link href="art-directions.css"><script src="src/art-directions.js"></script>');
     writeFileSync(path.join(root,'src','studio.js'),"import {Game} from './game.js';\n");
     versionSite(root,'23');
@@ -29,10 +29,12 @@ test('static build versions the page and all module entry points',()=>{
     assert.match(html,/href="style\.css\?v=23"/);
     assert.match(html,/src="build-info\.js\?v=23"/);
     assert.match(html,/src="src\/update-check\.js\?v=23"/);
+    assert.match(html,/src="src\/cache-refresh\.js\?v=23"/);
     assert.match(html,/src="src\/main\.js\?v=23"/);
     assert.match(main,/from '\.\/game\.js\?v=23'/);
     assert.match(readFileSync(path.join(root,'studio.html'),'utf8'),/studio\.css\?v=23/);
     assert.match(readFileSync(path.join(root,'studio.html'),'utf8'),/src\/studio\.js\?v=23/);
+    assert.match(readFileSync(path.join(root,'studio.html'),'utf8'),/src\/cache-refresh\.js\?v=23/);
     assert.match(readFileSync(path.join(root,'art-directions.html'),'utf8'),/art-directions\.css\?v=23/);
     assert.match(readFileSync(path.join(root,'art-directions.html'),'utf8'),/src\/art-directions\.js\?v=23/);
   }finally{

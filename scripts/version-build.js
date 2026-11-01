@@ -18,6 +18,7 @@ export function versionSite(root,version){
     ['href="style.css"',`href="style.css?v=${version}"`],
     ['src="build-info.js"',`src="build-info.js?v=${version}"`],
     ['src="src/update-check.js"',`src="src/update-check.js?v=${version}"`],
+    ['src="src/cache-refresh.js"',`src="src/cache-refresh.js?v=${version}"`],
     ['src="src/main.js"',`src="src/main.js?v=${version}"`]
   ];
   for(const [from,to] of replacements){
@@ -31,7 +32,8 @@ export function versionSite(root,version){
     const studioPath=path.join(site,'studio.html');
     writeFileSync(studioPath,readFileSync(studioPath,'utf8')
       .replace('href="studio.css"',`href="studio.css?v=${version}"`)
-      .replace('src="src/studio.js"',`src="src/studio.js?v=${version}"`));
+      .replace('src="src/studio.js"',`src="src/studio.js?v=${version}"`)
+      .replace('src="src/cache-refresh.js"',`src="src/cache-refresh.js?v=${version}"`));
   }
 
   if(readdirSync(site).includes('art-directions.html')){

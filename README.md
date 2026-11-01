@@ -45,7 +45,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Deployment
 
-`.github/workflows/pages.yml` tests the development branch, restores the frozen public root from `gh-pages`, and packages the current source plus motion studio into `/dev`. `main` remains unchanged while the dev build is validated. Publishing removes the retired experimental preview without changing the public root or rewrites to Git history. All dev modules and studio entry points receive the deployment build number for cache invalidation. This checkout's root files are dev **source**, not the generated GitHub Pages site.
+`.github/workflows/pages.yml` tests the development branch, restores the frozen public root from `gh-pages`, and packages the current source plus motion studio into `/dev`. `main` remains unchanged while the dev build is validated. Publishing removes the retired experimental preview without changing the public root or rewrites to Git history. All dev modules and studio entry points receive the deployment build number for cache invalidation. A root-scoped service worker makes page navigations network-first and build-numbered modules continue to provide asset cache invalidation. Loading a URL with a fresh query, such as `?v=15`, also escapes any stale browser copy of the HTML. This checkout's root files are dev **source**, not the generated GitHub Pages site.
 
 ## Verification and limitations
 
