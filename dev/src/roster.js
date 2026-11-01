@@ -1,4 +1,4 @@
-import {playerProfile} from './core.js?v=42';
+import {playerProfile} from './core.js?v=43';
 
 // Development playtests use a skilled roster shared by every generated identity.
 export const PLAYTEST_SKILLS=Object.freeze({control:1.42,serve:1.3,speed:1.18,acceleration:1.15,reaction:.72});
