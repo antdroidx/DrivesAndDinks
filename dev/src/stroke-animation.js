@@ -17,17 +17,17 @@ function clipFor(player){
 
 export function sampleStrokeAnimation(player,progress=0){
  const [kind,clip]=clipFor(player),phase=Math.max(0,Math.min(1,Number(progress)||0));
- const index=Math.min(clip.frames.length-1,Math.floor(phase*clip.frames.length));
- const contactRight=(player.swingSide??1)>=0,twoHanded=kind==='backhand'&&(player.gender==='female'||player.appearance?.body==='female');
+ const position=phase*(clip.frames.length-1),index=Math.floor(position),next=Math.min(clip.frames.length-1,index+1),blend=position-index;
+ const lerp=(a,b)=>a+(b-a)*blend,contactRight=(player.swingSide??1)>=0,twoHanded=kind==='backhand'&&(player.gender==='female'||player.appearance?.body==='female');
  const mirror=kind==='forehand'?contactRight:kind==='backhand'? !contactRight:kind==='atp'?!contactRight:false;
  return {
   kind,
-  frameColumn:clip.frames[index],
+  frameColumn:clip.frames[Math.round(position)],
   useSwingSheet:false,
   artRowOffset:0,
-  offsetY:clip.lift[index],
-  rotation:clip.tilt[index],
-  scaleY:clip.scaleY[index],
+  offsetY:lerp(clip.lift[index],clip.lift[next]),
+  rotation:lerp(clip.tilt[index],clip.tilt[next]),
+  scaleY:lerp(clip.scaleY[index],clip.scaleY[next]),
   mirror,
   twoHanded,
   supportHandX:0,

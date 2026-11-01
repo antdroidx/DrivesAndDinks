@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS} from './roster.js?v=29';
+import {CLOTHING_COLORS,PADDLE_COLORS} from './roster.js?v=30';
 
 const SHEET_PATHS={
  female:{near:'../assets/player-human-female-near-v1.png',far:'../assets/player-human-female-far-v1.png'},
@@ -26,12 +26,12 @@ export function appearancePalette(appearance={}){
 // behind while far-court players face the camera, so never mirror by side.
 const FRAME_ORDER={
  idle:[[0,0]],ready:[[0,0]],run:[[0,0],[0,1]],shuffle:[[0,0],[0,1]],slide:[[0,0],[0,1]],
- forehand:[[0,0],[0,0],[0,2],[0,2],[0,3],[0,3],[1,3],[0,0]],
- backhand:[[0,0],[0,0],[0,2],[0,2],[1,0],[1,0],[1,3],[0,0]],
- overhead:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[0,0]],
- erne:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[0,0]],
- atp:[[0,0],[0,0],[1,0],[1,0],[1,2],[1,2],[1,3],[0,0]],
- serve:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[0,0]]
+ forehand:[[0,0],[0,0],[0,2],[0,2],[0,3],[0,3],[1,3],[1,3]],
+ backhand:[[0,0],[0,0],[0,2],[0,2],[1,0],[1,0],[1,3],[1,3]],
+ overhead:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[1,3]],
+ erne:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[1,3]],
+ atp:[[0,0],[0,0],[1,0],[1,0],[1,2],[1,2],[1,3],[1,3]],
+ serve:[[0,0],[0,0],[1,1],[1,1],[1,2],[1,2],[1,3],[1,3]]
 };
 function rgbToHsl(r,g,b){
  r/=255;g/=255;b/=255;
@@ -92,6 +92,6 @@ export function drawPixelCharacter(target,{appearance={},mode='idle',frame=0,pha
  if(!sheet)return false;
  const {row,col}=characterFrame(mode,phase,frame),sheetWidth=sheet.naturalWidth||sheet.width,sheetHeight=sheet.naturalHeight||sheet.height,cellWidth=sheetWidth/4,cellHeight=sheetHeight/2;
  const idleBob=mode==='idle'&&Math.floor(frame)%4>1?Math.max(1,height*.012):0;
- const runBob=['run','shuffle','slide'].includes(mode)?Math.abs(Math.sin(frame*Math.PI))*Math.max(1,height*.018):0;
+ const runBob=['run','shuffle','slide'].includes(mode)?Math.abs(Math.sin(frame*Math.PI))*Math.max(1,height*.008):0;
  target.save();target.imageSmoothingEnabled=true;target.drawImage(sheet,col*cellWidth,row*cellHeight,cellWidth,cellHeight,x,y+Math.max(idleBob,runBob),width,height);target.restore();return true;
 }
