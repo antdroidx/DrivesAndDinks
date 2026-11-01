@@ -11,10 +11,11 @@ npm test
 
 The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and `/dev/` serve this **development checkout locally**. GitHub Pages publishes one active build:
 
+- Public release: `https://antdroidx.github.io/DrivesAndDinks/` — unchanged frozen build 15.
 - Dev playtest: `https://antdroidx.github.io/DrivesAndDinks/dev/` — the `codex/high-resolution-players` development branch.
 - Motion studio: `https://antdroidx.github.io/DrivesAndDinks/dev/studio.html`.
 
-The Pages root redirects to `/dev/`. Frozen release and experimental preview builds are no longer published.
+The Pages root remains on frozen build 15 while the randomized-player work is tested under `/dev/`. The experimental preview build is no longer published.
 
 The studio compares male T-shirt/shorts and female tennis-dress players for running, side-step, volley, forehand/backhand drives, forehand/backhand dinks, forehand/backhand drops, overhead smash, lob, and two-handed backhand drive. Select front/back view, change materials, slow playback, pause, scrub, or jump to impact at 52%. Use Ready pose to inspect the net-facing stance and Joints to show the shoulder/elbow/wrist chains. The Zoom control defaults to 75% so complete characters fit inside each comparison card. `studio.html?view=near&pose=ready` opens the back-facing ready comparison. A ball marker approaches and leaves toward the net for the selected court view. The studio uses the same renderer as matches.
 
@@ -44,7 +45,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Deployment
 
-`.github/workflows/pages.yml` tests the development branch and packages its current source plus the motion studio exclusively into `/dev`. `main` remains unchanged while the dev build is validated. The site root is a redirect to the dev build. Publishing replaces the generated site tree, removing obsolete builds and assets without rewriting Git history. All current modules and the studio entry points receive the deployment build number for cache invalidation. This checkout's root files are dev **source**, not the generated GitHub Pages site.
+`.github/workflows/pages.yml` tests the development branch, restores the frozen public root from `gh-pages`, and packages the current source plus motion studio into `/dev`. `main` remains unchanged while the dev build is validated. Publishing removes the retired experimental preview without changing the public root or rewrites to Git history. All dev modules and studio entry points receive the deployment build number for cache invalidation. This checkout's root files are dev **source**, not the generated GitHub Pages site.
 
 ## Verification and limitations
 

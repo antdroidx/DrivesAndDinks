@@ -18,12 +18,14 @@ test('deployments expose a sequential build number in the visible dev header',()
  assert.match(main,/BUILD \$\{buildNumber\}/);
 });
 
-test('the Pages workflow publishes only the dev build and keeps the motion studio',()=>{
+test('the Pages workflow keeps the public root, publishes dev, and preserves the motion studio',()=>{
  const workflow=read('.github/workflows/pages.yml');
  assert.match(workflow,/cp index\.html style\.css studio\.html studio\.css _site\/dev\//);
- assert.match(workflow,/location\.replace\('\.\/dev\/'\)/);
+ assert.match(workflow,/ref: ce59a6af09c78309ac30c7c3f7d362fd6c370dc8/);
+ assert.match(workflow,/path: _public/);
+ assert.match(workflow,/rsync -a --exclude=\.git --exclude=dev --exclude=preview _public\/ _site\//);
  assert.doesNotMatch(read('studio.html'),/art-directions\.html/);
- assert.doesNotMatch(workflow,/2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab|_friends|DRIVES_DINKS_BUILD = "15"|preview\/high-resolution/);
+ assert.doesNotMatch(workflow,/2efbddc8f4b56546e0b2ef9a108db7e6f42ee3ab|_friends|cat > _site\/index\.html/);
  const workflows=readdirSync(new URL('../.github/workflows/',import.meta.url));
  assert.deepEqual(workflows,['pages.yml']);
 });
