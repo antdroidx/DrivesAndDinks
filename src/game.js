@@ -20,7 +20,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   player.mishit=poor;this.lastShot=shot;player.animationShot=shot;player.animationContactStart=true;this.lastHitter=player.id;
   const targetY=player.team===0?(shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4):(shot==='dink'?30:shot==='drop'?32:shot==='slice'?38:40);
   player.stroke=this.bounces===0?'volley':this.ball.x<player.x?'backhand':'forehand';player.contactPoint={x:this.ball.x,y:this.ball.y,z:this.ball.z};
-  player.swingDuration=player.stroke==='volley'?.28:shot==='dink'?.32:.38;
+  player.swingDuration=player.stroke==='volley'?.44:shot==='dink'?.48:.56;
   if(poor)aim+=(Math.random()-.5)*4/quality;
   player.swingSide=this.ball.x>=player.x?1:-1;player.swing=player.swingDuration;player.windup=0;
   launch(this.ball,aim,targetY,shot,this.paddleFor(player),quality);
