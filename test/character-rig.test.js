@@ -80,3 +80,13 @@ test('character raster detail stays above the original desktop density',()=>{
  assert.equal(CHARACTER_BUFFER.width,96*PIXEL_DENSITY);
  assert.equal(CHARACTER_BUFFER.height,96*PIXEL_DENSITY);
 });
+
+
+test('stroke loading shifts stance and weight without moving the feet during contact alignment',()=>{
+ const ready=sampleCharacterPose({mode:'forehand',phase:0,view:'near'});
+ const loaded=sampleCharacterPose({mode:'forehand',phase:CONTACT_PHASE,view:'near'});
+ const readyWidth=Math.abs(ready.feet[1].x-ready.feet[0].x),loadedWidth=Math.abs(loaded.feet[1].x-loaded.feet[0].x);
+ assert.ok(loadedWidth>readyWidth);assert.ok(Math.abs(loaded.weightShift)>.1);
+ const locked=sampleCharacterPose({mode:'forehand',phase:CONTACT_PHASE,view:'near',contact:{x:loaded.paddle.x,y:loaded.paddle.y-.2},contactWeight:1});
+ assert.deepEqual(locked.feet,loaded.feet);assert.deepEqual(locked.hips,loaded.hips);
+});

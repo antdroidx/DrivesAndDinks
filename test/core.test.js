@@ -122,3 +122,38 @@ test('overheads require head-height balls and ordinary chest-height balls stay d
  assert.equal(paddleContactAvailable(p,{x:10.7,y:34.7,z:2.5},'overhead'),false);
  assert.equal(paddleContactAvailable(p,{x:10.7,y:34.7,z:4.5},'drive'),true);
 });
+
+
+test('individual shot ratings change mishit risk independently',()=>{
+ const common={...playerProfile(),x:10,y:35,vx:0,vy:0},ball={x:10.6,y:35.2,z:1.4};
+ const weak={...common,abilities:{...common.abilities,control:1.4,dink:.74,drive:1.2}};
+ const strong={...common,abilities:{...common.abilities,control:1.4,dink:1.22,drive:.8}};
+ const weakDink=contactQuality(weak,ball,'dink',false,.99),strongDink=contactQuality(strong,ball,'dink',false,.99);
+ const weakDrive=contactQuality(weak,ball,'drive',false,.99),strongDrive=contactQuality(strong,ball,'drive',false,.99);
+ assert.ok(strongDink.chance<weakDink.chance);assert.ok(strongDrive.chance>weakDrive.chance);
+});
+
+test('aggression changes attack selection without changing ball rules',()=>{
+ const low=chooseCpuShot({shots:2,team:0,y:40,height:3.6,aggression:.15,random:.4});
+ const high=chooseCpuShot({shots:2,team:0,y:40,height:3.6,aggression:1,random:.4});
+ assert.equal(low,'drop');assert.equal(high,'drive');
+});
+
+test('ball radius makes a low center-of-ball cross the net',()=>{
+ const b={x:10,y:22.1,z:2.95,vx:0,vy:-10,vz:0,radius:C.ballRadius};
+ assert.equal(stepBall(b,.02),'net');
+});
+
+test('high-speed impacts lose more bounce than slow impacts',()=>{
+ const slow={x:10,y:10,z:C.ballRadius+.001,vx:0,vy:-4,vz:-14,radius:C.ballRadius};
+ const fast={...slow,z:C.ballRadius+.001,vz:-36};
+ stepBall(slow);stepBall(fast);
+ assert.ok(slow.vz/Math.abs(-14)>fast.vz/Math.abs(-36));
+});
+
+test('side spin curves the ball laterally and decays over time',()=>{
+ const straight={x:10,y:10,z:2,vx:12,vy:-10,vz:3,spin:0,radius:C.ballRadius};
+ const curved={...straight,spinY:20};
+ for(let i=0;i<15;i++){stepBall(straight);stepBall(curved)}
+ assert.ok(curved.x>straight.x+.005);assert.ok(curved.spinY<20);
+});
