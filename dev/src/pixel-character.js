@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=59';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=60';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -11,7 +11,6 @@ export function onCharacterSpritesReady(callback){callback?.();return true}
 const clamp=(n,a=0,b=1)=>Math.max(a,Math.min(b,n));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const point=(a,b,t)=>({x:lerp(a.x,b.x,t),y:lerp(a.y,b.y,t)});
-const lerpPoint=(a,b,t)=>[lerp(a[0],b[0],t),lerp(a[1],b[1],t)];
 const resolve=(items,id)=>items.find(item=>item.id===id)??items[0];
 function shade(hex,amount){return '#'+hex.slice(1).match(/../g).map(v=>Math.round(lerp(parseInt(v,16),amount>0?255:0,Math.abs(amount))).toString(16).padStart(2,'0')).join('')}
 export function appearancePalette(a={}){
@@ -78,7 +77,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=59';
+export {courtView,strokeForContact} from './player-facing.js?v=60';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
@@ -128,21 +127,6 @@ export function animationRootOffset(mode,phase,side=1){
  const p=clamp(phase);
  return side*(9*Math.sin(Math.PI*p)+5*Math.sin(Math.PI*clamp((p-.08)/.72)));
 }
-export function lowerGarmentPose(pose,body='male'){
- const {hips,legs}=pose,waist=hips.y-2;
- const sample=(chain,t)=>({x:lerp(chain[0].x,chain[1].x,t),y:lerp(chain[0].y,chain[1].y,t)});
- const shorts=legs.map(([hip,knee])=>{
-  const dx=knee.x-hip.x,dy=knee.y-hip.y,d=Math.max(.001,Math.hypot(dx,dy)),nx=-dy/d,ny=dx/d,end=sample([hip,knee],.48);
-  return [[hip.x+nx*4.5,hip.y+ny*4.5],[end.x+nx*3.7,end.y+ny*3.7],[end.x-nx*3.7,end.y-ny*3.7],[hip.x-nx*4.5,hip.y-ny*4.5]];
- });
- if(body==='female'){
-  const left=sample(legs[0],.42),right=sample(legs[1],.42),hemY=Math.max(left.y,right.y)+2.8;
-  const leftHem=Math.min(hips.x-8,left.x-2.5),rightHem=Math.max(hips.x+8,right.x+2.5),poly=[[hips.x-5,waist],[hips.x+5,waist],[rightHem,hemY],[leftHem,hemY]];
-  return {waist,shorts,skirt:{poly,pleats:[-.4,0,.4].map(f=>[[lerp(hips.x-3,hips.x+3,(f+.4)/.8),waist+2],[lerp(leftHem,rightHem,(f+.4)/.8),hemY-1]])}};
- }
- const bridge=[[hips.x-6,waist],[hips.x+6,waist],[hips.x+5,waist+4],[hips.x+2,waist+5],[hips.x,waist+7],[hips.x-2,waist+5],[hips.x-5,waist+4]];
- return {waist,shorts,skirt:null,bridge};
-}
 export function characterPaddleAnchor(options={}){return sampleCharacterPose(options).paddle}
 
 // Integer scan conversion: no antialiasing, rotated sprites or ghost limbs.
@@ -169,7 +153,6 @@ function taperedSegment(c,a,b,startWidth,endWidth,color){
  polygon(c,[{x:a.x+nx*startWidth/2,y:a.y+ny*startWidth/2},{x:b.x+nx*endWidth/2,y:b.y+ny*endWidth/2},{x:b.x-nx*endWidth/2,y:b.y-ny*endWidth/2},{x:a.x-nx*startWidth/2,y:a.y-ny*startWidth/2}],color);
 }
 let buffer;
-const insetPolygon=(points,amount=.12)=>{const center=points.reduce((a,[x,y])=>({x:a.x+x/points.length,y:a.y+y/points.length}),{x:0,y:0});return points.map(([x,y])=>[lerp(x,center.x,amount),lerp(y,center.y,amount)]);};
 export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false,lighting='classic'}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
@@ -201,10 +184,8 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  poly(c,[[neck.x-5,top+3],[neck.x-2,top+3],[hips.x-2,waist-1],[hips.x-4,waist-1]],colors.shirtLight);
  poly(c,[[neck.x+4,top+3],[neck.x+6,top+4],[hips.x+4,waist],[hips.x+1,waist]],colors.shirtDark);
  c.fillStyle=colors.shoe;c.fillRect(Math.round(hips.x-4),Math.round(waist-1),8,1);
- const garment=lowerGarmentPose(pose,appearance.body);
- if(female){const skirt=garment.skirt,[topL,topR,hemR,hemL]=skirt.poly;poly(c,skirt.poly,colors.outline);poly(c,skirt.poly,colors.shirt);poly(c,[topL,[lerp(topL[0],topR[0],.34),topL[1]],lerpPoint(hemL,hemR,.3),hemL],colors.shirtDark);poly(c,[[lerp(topL[0],topR[0],.68),topR[1]],topR,hemR,lerpPoint(hemL,hemR,.72)],colors.shirtDark);poly(c,[[lerp(topL[0],topR[0],.28),topL[1]],[lerp(topL[0],topR[0],.72),topR[1]],lerpPoint(hemL,hemR,.7),lerpPoint(hemL,hemR,.3)],colors.shirtLight);for(const [a,b] of skirt.pleats)segment(c,{x:a,y:b},b,1,colors.shirtDark)}
- else {for(const part of [garment.bridge,...garment.shorts]){poly(c,part,colors.outline);poly(c,part,colors.bottomDark);poly(c,insetPolygon(part),colors.bottom)}segment(c,{x:hips.x,y:garment.waist+1},{x:hips.x,y:garment.waist+5},1,colors.accent)}
- c.fillStyle=colors.accent;c.fillRect(Math.round(hips.x-4),Math.round(garment.waist-1),8,1)
+ if(female){poly(c,[[hips.x-5,waist],[hips.x+5,waist],[hips.x+9,waist+8],[hips.x-9,waist+8]],colors.outline);poly(c,[[hips.x-4,waist],[hips.x+4,waist],[hips.x+7,waist+7],[hips.x-7,waist+7]],colors.shirt);for(const offset of [-4,0,4])segment(c,{x:hips.x+offset*.6,y:waist+2},{x:hips.x+offset,y:waist+7},1,colors.shirtDark)}
+ else {poly(c,[[hips.x-6,waist],[hips.x+6,waist],[hips.x+7,waist+8],[hips.x+1,waist+8],[hips.x,waist+4],[hips.x-1,waist+8],[hips.x-7,waist+8]],colors.outline);c.fillStyle=colors.bottom;c.fillRect(Math.round(hips.x-5),Math.round(waist+1),5,6);c.fillRect(Math.round(hips.x+1),Math.round(waist+1),5,6)}
  c.fillStyle=colors.skinDark;c.fillRect(Math.round(neck.x-2),Math.round(21+bob),4,4);
  const style=identityStyle,hx=neck.x+(view==='far'?(style-1.5)*.35:0),hy=neck.y-8;
  poly(c,[[hx-4,hy-7],[hx+3,hy-7],[hx+6,hy-4],[hx+6,hy+3],[hx+3,hy+7],[hx-3,hy+7],[hx-6,hy+3],[hx-6,hy-4]],colors.outline);
