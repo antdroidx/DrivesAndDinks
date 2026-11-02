@@ -1,16 +1,17 @@
-import {selectShot} from './core.js?v=53';
-import {strokeForContact} from './player-facing.js?v=53';
+import {selectShot,backhandGrip} from './core.js?v=54';
+import {strokeForContact} from './player-facing.js?v=54';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 export function matchStrokeMode(player,shot=player.animationShot,stroke=player.stroke){
  const back=stroke==='backhand',kitchen=player.team===0?player.y<=32:player.y>=12;
  if(['overhead','serve','lob'].includes(shot))return shot;
- if(shot==='dink')return back?'backhandDink':'forehandDink';
+ const two=player.contactGrip?player.contactGrip==='two':backhandGrip(player,player.contactPoint??{x:player.x+(player.team===0?-1:1),z:2},shot)==='two';
+ if(shot==='dink')return back?(two?'twoBackhandDink':'backhandDink'):'forehandDink';
  if(shot==='drop')return back?'backhandDrop':'forehandDrop';
  // A baseline attack in the air still needs a full stroke. Only an actual
  // kitchen block uses the compact volley clip.
  if(player.contactType==='volley'&&kitchen&&shot==='drive')return 'volley';
- return back?(player.gender==='female'?'twoBackhand':'backhand'):'forehand';
+ return back?(two?'twoBackhand':'backhand'):'forehand';
 }
 export function strokeDuration(player,shot=player.animationShot){
  const mode=matchStrokeMode(player,shot);

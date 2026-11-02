@@ -1,10 +1,10 @@
-import {sampleMatchAnimation} from './match-animation.js?v=53';
-import {setupSelection} from './selection.js?v=53';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=53';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=53';
-import {Game} from './game.js?v=53';
-import {selectShot,serveAim} from './core.js?v=53';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=53';
+import {sampleMatchAnimation} from './match-animation.js?v=54';
+import {setupSelection} from './selection.js?v=54';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=54';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=54';
+import {Game} from './game.js?v=54';
+import {selectShot,serveAim} from './core.js?v=54';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=54';
 
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
@@ -13,7 +13,7 @@ const DIFFICULTY_KEY='drives-dinks.difficulty.v1',difficultyButton=document.quer
 function syncDifficultyButton(){const label=game.difficulty.toUpperCase();difficultyButton.textContent=`DIFFICULTY: ${label}`;difficultyButton.setAttribute('aria-label',`Difficulty: ${label}`)}
 function setDifficulty(value,persist=true){game.setDifficulty(value);syncDifficultyButton();if(persist)try{localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}}
 let savedDifficulty='normal';try{savedDifficulty=localStorage.getItem(DIFFICULTY_KEY)||'normal'}catch{}
-setDifficulty(savedDifficulty,false);difficultyButton.onclick=()=>setDifficulty(game.difficulty==='easy'?'normal':'easy');
+setDifficulty(savedDifficulty,false);difficultyButton.onclick=()=>setDifficulty(({easy:'normal',normal:'hard',hard:'easy'})[game.difficulty]);
 function syncPauseButton(){pauseButton.textContent=game.paused?'RESUME':'PAUSE';pauseButton.setAttribute('aria-pressed',String(game.paused));pauseButton.setAttribute('aria-label',game.paused?'Resume match':'Pause match');pauseButton.disabled=game.phase==='over'}
 function setPaused(paused){game.setPaused(paused);last=0;acc=0;syncPauseButton();syncShotButtonsForPhase();render()}
 pauseButton.onclick=()=>setPaused(!game.paused);
@@ -80,7 +80,7 @@ const replayToggle=document.createElement('button');replayToggle.textContent='RE
 function playReplay(t){
  if(!replayPlayback)return false;
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
- const frames=replayPlayback.frames,elapsed=(t-replayStarted)/1000*.65,index=Math.floor(elapsed*30);
+ const frames=replayPlayback.frames,elapsed=(t-replayStarted)/1000*.75,index=Math.floor(elapsed*30);
  if(index>=frames.length){finishReplay();return false;}
  const snapshot=frames[index];render({...snapshot,score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
 }
