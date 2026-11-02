@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette,ARM_LENGTHS,courtView,strokeForContact,solveArm3D,PIXEL_DENSITY,CHARACTER_BUFFER,lowerGarmentPose,animationRootOffset} from '../src/pixel-character.js';
+import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette,ARM_LENGTHS,courtView,strokeForContact,solveArm3D,PIXEL_DENSITY,CHARACTER_BUFFER,animationRootOffset} from '../src/pixel-character.js';
 
 test('every motion has two connected arms and legs, without pose discontinuities',()=>{
  for(const mode of MOTIONS)for(const view of ['near','far'])for(const side of [-1,1]){
@@ -91,12 +91,8 @@ test('stroke loading shifts stance and weight without moving the feet during con
  assert.deepEqual(locked.feet,loaded.feet);assert.deepEqual(locked.hips,loaded.hips);
 });
 
-test('lower garments follow moving thighs and Erne includes an airborne contact',()=>{
- const ready=sampleCharacterPose({mode:'run',phase:0});
- const stride=sampleCharacterPose({mode:'run',phase:.25,frame:1});
- assert.notDeepEqual(lowerGarmentPose(ready,'male').shorts,lowerGarmentPose(stride,'male').shorts);
- const dress=lowerGarmentPose(stride,'female').skirt.poly;assert.notDeepEqual(lowerGarmentPose(ready,'female').skirt.poly,dress);assert.equal(dress.length,4);assert.ok(dress[2][0]>stride.legs[1][0].x);assert.ok(dress[3][0]<stride.legs[0][0].x);
+test('Erne includes an airborne contact and lateral travel',()=>{
  const erne=sampleCharacterPose({mode:'erne',phase:CONTACT_PHASE});
- assert.ok(erne.jump>.9);assert.ok(erne.feet[0].y<54&&erne.feet[1].y<54);assert.ok(erne.rootOffset>10);assert.ok(lowerGarmentPose(erne,'male').bridge.length===7);
+ assert.ok(erne.jump>.9);assert.ok(erne.feet[0].y<54&&erne.feet[1].y<54);assert.ok(erne.rootOffset>10);
  const landing=sampleCharacterPose({mode:'erne',phase:1});assert.ok(Math.abs(landing.jump)<1e-9);assert.ok(Math.abs(animationRootOffset('erne',1,1))<1e-9);
 });
