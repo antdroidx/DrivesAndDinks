@@ -1,4 +1,4 @@
-import {CHARACTERS,PADDLES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup} from './roster.js?v=67';
+import {CHARACTERS,PADDLES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup} from './roster.js?v=68';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
