@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=57';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=58';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -77,7 +77,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=57';
+export {courtView,strokeForContact} from './player-facing.js?v=58';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
@@ -135,8 +135,10 @@ export function lowerGarmentPose(pose,body='male'){
   return [[hip.x+nx*4.5,hip.y+ny*4.5],[end.x+nx*3.7,end.y+ny*3.7],[end.x-nx*3.7,end.y-ny*3.7],[hip.x-nx*4.5,hip.y-ny*4.5]];
  });
  if(body==='female'){
-  const left=sample(legs[0],.42),right=sample(legs[1],.42),hemY=Math.max(left.y,right.y)+2.8;
-  return {waist,shorts,skirt:{poly:[[hips.x-5,waist],[hips.x+5,waist],[Math.max(hips.x+8,right.x+3.6),hemY],[Math.min(hips.x-8,left.x-3.6),hemY]],pleats:[-.45,0,.45].map(f=>[[lerp(hips.x,left.x,.22)*((1+f)/2)+lerp(hips.x,right.x,.22)*((1-f)/2),waist+2],[lerp(Math.min(hips.x-8,left.x-3.6),Math.max(hips.x+8,right.x+3.6),(f+.45)/.9),hemY-1]])}};
+  const left=sample(legs[0],.42),right=sample(legs[1],.42),hemY=Math.max(left.y,right.y)+2.8,upperY=waist+2.6;
+  const leftHem=Math.min(hips.x-9,left.x-4),rightHem=Math.max(hips.x+9,right.x+4),leftUpper=Math.min(hips.x-8.5,left.x-3.2),rightUpper=Math.max(hips.x+8.5,right.x+3.2);
+  const poly=[[hips.x-5,waist],[hips.x+5,waist],[rightUpper,upperY],[rightHem,hemY],[leftHem,hemY],[leftUpper,upperY]];
+  return {waist,shorts,skirt:{poly,pleats:[-.45,0,.45].map(f=>[[lerp(hips.x,left.x,.22)*((1+f)/2)+lerp(hips.x,right.x,.22)*((1-f)/2),waist+2],[lerp(leftHem,rightHem,(f+.45)/.9),hemY-1]])}};
  }
  const bridge=[[hips.x-6,waist],[hips.x+6,waist],[hips.x+5,waist+4],[hips.x+2,waist+5],[hips.x,waist+7],[hips.x-2,waist+5],[hips.x-5,waist+4]];
  return {waist,shorts,skirt:null,bridge};
@@ -195,7 +197,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  poly(c,[[neck.x+4,top+3],[neck.x+6,top+4],[hips.x+4,waist],[hips.x+1,waist]],colors.shirtDark);
  c.fillStyle=colors.shoe;c.fillRect(Math.round(hips.x-4),Math.round(waist-1),8,1);
  const garment=lowerGarmentPose(pose,appearance.body);
- if(female){const skirt=garment.skirt;poly(c,skirt.poly,colors.outline);poly(c,skirt.poly.map(([x,y])=>[lerp(x,hips.x,.08),lerp(y,waist,.06)]),colors.shirt);for(const [a,b] of skirt.pleats)segment(c,{x:a,y:b},b,1,colors.shirtDark)}
+ if(female){const skirt=garment.skirt;poly(c,skirt.poly,colors.outline);poly(c,skirt.poly.map(([x,y])=>[lerp(x,hips.x,.025),lerp(y,waist,.025)]),colors.shirt);for(const [a,b] of skirt.pleats)segment(c,{x:a,y:b},b,1,colors.shirtDark)}
  else {poly(c,garment.bridge,colors.outline);poly(c,garment.bridge.map(([x,y])=>[x,lerp(y,garment.waist+.3,.08)]),colors.bottom);for(const panel of garment.shorts){poly(c,panel,colors.outline);poly(c,panel.map(([x,y])=>[lerp(x,hips.x,.1),lerp(y,garment.waist+.5,.08)]),colors.bottom)}}
  c.fillStyle=colors.accent;c.fillRect(Math.round(hips.x-4),Math.round(garment.waist-1),8,1)
  c.fillStyle=colors.skinDark;c.fillRect(Math.round(neck.x-2),Math.round(21+bob),4,4);

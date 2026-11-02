@@ -1,10 +1,10 @@
-import {sampleMatchAnimation} from './match-animation.js?v=57';
-import {setupSelection} from './selection.js?v=57';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=57';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=57';
-import {Game} from './game.js?v=57';
-import {selectShot,serveAim} from './core.js?v=57';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=57';
+import {sampleMatchAnimation} from './match-animation.js?v=58';
+import {setupSelection} from './selection.js?v=58';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=58';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=58';
+import {Game} from './game.js?v=58';
+import {selectShot,serveAim} from './core.js?v=58';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=58';
 
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
@@ -73,7 +73,7 @@ function render(game=liveGame){const palette=COURT_PALETTES.find(item=>item.id==
 const liveGame=game;
 let replayEnabled=true,replayPlayback=null,replayStarted=0;
 const replayBar=document.createElement('div');replayBar.className='replay-banner';replayBar.hidden=true;
-const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button');skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,skipReplay);document.querySelector('.game').append(replayBar);
+const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button');skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,skipReplay);document.querySelector('.playfield').append(replayBar);
 function finishReplay(){replayPlayback=null;replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
 skipReplay.onclick=finishReplay;
 const replayToggle=document.createElement('button');replayToggle.textContent='REPLAYS: ON';document.querySelector('.header-actions').append(replayToggle);replayToggle.onclick=()=>{replayEnabled=!replayEnabled;replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;finishReplay()};
