@@ -1,8 +1,8 @@
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=65';
-import {strokeForContact} from './player-facing.js?v=65';
-import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=65';
-import {createLineup} from './roster.js?v=65';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers} from './core.js?v=65';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=66';
+import {strokeForContact} from './player-facing.js?v=66';
+import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=66';
+import {createLineup} from './roster.js?v=66';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers} from './core.js?v=66';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.lineup=lineup??createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=['easy','normal','hard'].includes(difficulty)?difficulty:'normal';return this.difficulty}
@@ -51,7 +51,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   this.mode='watch';this.phase='rally';this.shots=5;this.bounces=erne?0:1;this.last=1;
   Object.assign(this.players[0],{x:startPos.x,y:startPos.y,vx:0,vy:0,outsideTimer:0,preparation:{shot:type,stroke:'forehand',phase:0}});
   Object.assign(this.players[1],{x:12,y:31});Object.assign(this.players[2],{x:8,y:9});Object.assign(this.players[3],{x:14,y:7});
-  const ballStart=erne?{x:5.5,y:12,z:3.2}:{x:5,y:18,z:3.6};
+  const ballStart=erne?{x:5.5,y:12,z:3.2}:{x:5,y:18,z:4.2};
   this.ball={...ballStart,vx:0,vy:0,vz:0,spin:0,spinX:0,spinY:0,spinZ:0,radius:C.ballRadius,shot:'drive'};
   this.trail=[];this.scenario={type,erne,time:0,contactTime:1.05,startPos,contact,ballStart,bouncePoint:{x:1,y:24,z:C.ballRadius},bounced:false};
   this.message=`DEV SCENARIO · ${type.toUpperCase()} APPROACH`;return true;
@@ -60,8 +60,8 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   const s=this.scenario,p=this.players[0],t=Math.max(0,Math.min(1,s.time/s.contactTime)),mix=(a,b)=>a+(b-a)*t;
   this.clock+=dt;s.time+=dt;p.x=mix(s.startPos.x,s.contact.x-.3);p.y=mix(s.startPos.y,s.contact.y);p.vx=(s.contact.x-.3-s.startPos.x)/s.contactTime;p.vy=(s.contact.y-s.startPos.y)/s.contactTime;p.preparation.phase=.48*t;p.preparation.stroke='forehand';
   if(s.erne){Object.assign(this.ball,{x:mix(s.ballStart.x,s.contact.x),y:mix(s.ballStart.y,s.contact.y),z:mix(s.ballStart.z,s.contact.z)+Math.sin(Math.PI*t)*.75});}
-  else if(t<.48){const u=t/.48;Object.assign(this.ball,{x:mix(s.ballStart.x,s.bouncePoint.x),y:mix(s.ballStart.y,s.bouncePoint.y),z:mix(s.ballStart.z,s.bouncePoint.z)+Math.sin(Math.PI*u)*.9});}
-  else {if(!s.bounced){s.bounced=true;this.bounceMark={x:s.bouncePoint.x,y:s.bouncePoint.y,time:.35};this.emit('bounce');}const u=(t-.48)/.52;Object.assign(this.ball,{x:mix(s.bouncePoint.x,s.contact.x),y:mix(s.bouncePoint.y,s.contact.y),z:mix(s.bouncePoint.z,s.contact.z)+Math.sin(Math.PI*u)*.65});}
+  else if(t<.48){const u=t/.48,local=(a,b)=>a+(b-a)*u;Object.assign(this.ball,{x:local(s.ballStart.x,s.bouncePoint.x),y:local(s.ballStart.y,s.bouncePoint.y),z:local(s.ballStart.z,s.bouncePoint.z)+Math.sin(Math.PI*u)*2.2});}
+  else {if(!s.bounced){s.bounced=true;this.bounceMark={x:s.bouncePoint.x,y:s.bouncePoint.y,time:.35};this.emit('bounce');}const u=(t-.48)/.52,local=(a,b)=>a+(b-a)*u;Object.assign(this.ball,{x:local(s.bouncePoint.x,s.contact.x),y:local(s.bouncePoint.y,s.contact.y),z:local(s.bouncePoint.z,s.contact.z)+Math.sin(Math.PI*u)*.65});}
   this.trail.push({x:this.ball.x,y:this.ball.y,z:this.ball.z});if(this.trail.length>8)this.trail.shift();this.recordReplay();
   if(t>=1){Object.assign(this.ball,s.contact);const type=s.type;this.hit(p,type,type==='atp'?2:10,1);this.scenario=null;}
  }
