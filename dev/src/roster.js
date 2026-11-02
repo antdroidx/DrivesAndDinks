@@ -1,4 +1,4 @@
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=75';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=76';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -120,7 +120,7 @@ export const COURT_PALETTES = Object.freeze([
   {id:'pink-black',name:'Pink / Black',background:'#35232f',stripe:'#543047',outer:'#171219',outerLight:'#30212b',apron:'#75566e',court:'#a6577e',kitchen:'#201a22',line:'#ffe8e2'},
   {id:'black-gray',name:'Black / Gray',background:'#11151a',stripe:'#20262d',outer:'#090c10',outerLight:'#282e35',apron:'#484f56',court:'#292f35',kitchen:'#969da2',line:'#f5f1e7'},
   {id:'violet-blue',name:'Violet / Blue',background:'#17172f',stripe:'#29254f',outer:'#0b0b18',outerLight:'#29244d',apron:'#514d83',court:'#3e52a8',kitchen:'#7169df',line:'#f0ecff'},
-  {id:'red-white',name:'Red / White',background:'#320f16',stripe:'#521923',outer:'#17080d',outerLight:'#42131d',apron:'#9a303c',court:'#b8434f',kitchen:'#e9e1d7',line:'#fff9f0'}
+  {id:'red-gray',name:'Red / Gray',background:'#320f16',stripe:'#521923',outer:'#17080d',outerLight:'#42131d',apron:'#9a303c',court:'#b8434f',kitchen:'#95999d',line:'#eee7dc'}
 ]);
 // Identity pools provide varied names while archetype mechanics remain fixed.
 // Tone weights are broad and overlapping so no group maps to one complexion.
@@ -190,7 +190,7 @@ export function normalizeSelection(input={}){
     paddleColor:valid(PADDLE_COLORS,legacyPaddleColor)??DEFAULT_SELECTION.paddleColor,
     hairColor:valid(HAIR_COLORS,input?.hairColor)??DEFAULT_SELECTION.hairColor,
     skinColor:valid(SKIN_COLORS,input?.skinColor)??DEFAULT_SELECTION.skinColor,
-    court:valid(COURT_PALETTES,input?.court)??DEFAULT_SELECTION.court
+    court:valid(COURT_PALETTES,input?.court==='red-white'?'red-gray':input?.court)??DEFAULT_SELECTION.court
   };
 }
 export function buildProfile(input, options={}){
