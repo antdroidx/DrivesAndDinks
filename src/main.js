@@ -51,7 +51,7 @@ function drawSprite(p,q,game){
  const alignStrength=animation?.alignStrength??0;
  ctx.save();ctx.translate(q.x,q.y);ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,16*scale,5*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
- drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:1,alignTo:contact,alignStrength,contactDepth,lighting:'depth'});
+ drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:1,travelSide:p.x<10?-1:1,alignTo:contact,alignStrength,contactDepth,lighting:'depth'});
 }
 function drawPixelBall(x,y,radius,squashX=1,squashY=1){
  const rx=Math.max(3,radius*squashX),ry=Math.max(3,radius*squashY),rows=Math.ceil(ry);
@@ -100,6 +100,9 @@ function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach
 
 
 selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,onStart:()=>{document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
+
+const scenarioType=new URLSearchParams(location.search).get('scenario');
+if(['erne','atp'].includes(scenarioType)){document.querySelector('#match-setup').close();game.configure();game.startScenario(scenarioType);document.querySelector('#active-loadout').textContent=`DEV SCENARIO · ${scenarioType.toUpperCase()} · WATCH THE FULL CONTACT AND FOLLOW-THROUGH`;document.querySelector('#mode').textContent='MODE: DEV SCENARIO';last=0;acc=0;syncPauseButton();}
 if(animationTestMode){
  const panel=document.querySelector('#animation-test'),status=document.querySelector('#animation-test-status');
  const requestedShot=animationQuery.get('shot'),requestedCharacter=animationQuery.get('character');

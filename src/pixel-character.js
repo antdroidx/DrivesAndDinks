@@ -78,7 +78,7 @@ export function solveArm3D(shoulder,wrist,pole){
  return [shoulder,elbow,end];
 }
 export {courtView,strokeForContact} from './player-facing.js';
-export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
+export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
  const back=mode.startsWith('back')||mode.startsWith('twoBackhand'),twoHanded=mode.startsWith('twoBackhand');
@@ -112,7 +112,7 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  const arms=arms3.map(chain=>chain.map(project)),paddle=project(paddle3),hand=project(hand3);
  const angle=Math.atan2(-(hand.x-paddle.x),hand.y-paddle.y);
  const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-.62:.78)*side,stance=action?1.6+load*1.2:0;
- const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*1.2:0,rootOffset=animationRootOffset(mode,phase,side);
+ const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*1.2:0,rootOffset=animationRootOffset(mode,phase,travelSide);
  const neck=project({x:0,y:23+bob+crouch-jump*3.2,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift+lateralJump,y:41+bob+crouch*.45-jump*3.2};
  let feet=mode==='run'?[{x:19+stride*2,y:59-stride*3},{x:29-stride*2,y:59+stride*3}]:[
   {x:19-stance-stride*4,y:59-Math.max(0,stride)*2-Math.max(0,weightShift)*.9},
@@ -157,7 +157,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const identitySeed=[...String(characterId||appearance.hairColor)].reduce((sum,char)=>sum+char.charCodeAt(0),0),identityStyle=identitySeed%4,torsoSpread=(identitySeed%3)*.45;
- const rootOffset=animationRootOffset(mode,phase,side),contact=alignTo?{x:(alignTo.x-x)*48/width-rootOffset,y:(alignTo.y-y)*64/height}:null;
+ const rootOffset=animationRootOffset(mode,phase,travelSide),contact=alignTo?{x:(alignTo.x-x)*48/width-rootOffset,y:(alignTo.y-y)*64/height}:null;
  const pose=sampleCharacterPose({mode,phase,frame,view,side,contact,contactWeight:alignStrength,contactDepth,moving});
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24+rootOffset,16);
  const {hips,neck,bob,arms,legs}=pose;
