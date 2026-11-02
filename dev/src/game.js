@@ -1,8 +1,8 @@
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=54';
-import {strokeForContact} from './player-facing.js?v=54';
-import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=54';
-import {createLineup} from './roster.js?v=54';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers} from './core.js?v=54';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=55';
+import {strokeForContact} from './player-facing.js?v=55';
+import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=55';
+import {createLineup} from './roster.js?v=55';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers} from './core.js?v=55';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.lineup=lineup??createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=['easy','normal','hard'].includes(difficulty)?difficulty:'normal';return this.difficulty}
@@ -20,6 +20,9 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   if(this.bounces>1){this.fault(player.team,'Double bounce');return false}
   const incomingVelocity={x:this.ball.vx||0,y:this.ball.vy||0,z:this.ball.vz||0},poor=quality<.8,wasPoach=!poor&&this.poachReservation?.shot===this.shots&&this.poachReservation.playerId===player.id;
   if(!poor&&(shot==='atp'||shot==='erne'))this.replayHighlights.push({time:this.clock,label:shot==='atp'?'AROUND THE POST':'ERNE'});
+  const nearKitchen=player.team===0?player.y<=33:player.y>=11,incomingAttack=['drive','overhead'].includes(this.ball.shot??this.lastShot);
+  const reset=!poor&&['drop','dink'].includes(shot)&&incomingAttack&&(nearKitchen||this.bounces===0);
+  player.shotLabel=reset?'RESET':shot.toUpperCase();
   player.mishit=poor;this.lastShot=shot;player.animationShot=shot;player.animationContactStart=true;this.lastHitter=player.id;
   let targetY=player.team===0?(shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4):(shot==='dink'?30:shot==='drop'?32:shot==='slice'?38:40);
   const technique=shotSkill(player,shot),grip=gripModifiers(player,this.ball,shot);player.contactGrip=grip.grip;
@@ -39,10 +42,10 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   for(const p of this.players)if(p.team!==player.team)p.reactionWait=p.abilities.reaction;
   this.contact={x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z,time:.12};
   this.emit('hit',{shot,stroke:player.stroke});this.last=player.team;this.shots++;this.bounces=0;
-  this.message=(wasPoach?'POACH · ':poor?'MISHIT · ':'')+shot.toUpperCase();return true;
+  this.message=(wasPoach?'POACH · ':poor?'MISHIT · ':'')+player.shotLabel;return true;
  }
  canHumanHit(late=false){if(this.paused)return false;const p=this.players[0],b=this.ball,timing=this.timingWindow();return this.mode==='play'&&this.phase==='rally'&&this.last!==0&&(this.shots!==1||this.serveReceiver.id===0)&&side(b.y)===0&&(paddleContactAvailable(p,b,selectShot(p,b,this.shot))||(late&&timing.late>0&&this.clock-this.lastHumanContactAt<=timing.late))&&!legalVolley(0,p.y,this.bounces,this.shots)}
- tryHumanHit(late=false){if(!this.canHumanHit(late))return false;const p=this.players[0];const distance=Math.hypot(p.x-this.ball.x,p.y-this.ball.y);const buffered=this.hitBuffer>0,timed=buffered||late;this.hitBuffer=0;p.windup=0;const chosen=selectShot(p,this.ball,this.shot);const contact=contactQuality(p,this.ball,chosen,timed,Math.random(),this.difficulty);const aim=this.aim+(Math.random()-.5)*distance/(p.abilities.control*p.paddle.control*shotSkill(p,chosen));this.hit(p,chosen,aim,contact.quality);this.message=contact.mishit?`MISHIT · ${chosen.toUpperCase()}`:late?'GOOD LATE TIMING':buffered?'GOOD TIMING':distance<1.8?'GREAT CONTACT':'REACHING';this.feedbackTime=.65;return true}
+ tryHumanHit(late=false){if(!this.canHumanHit(late))return false;const p=this.players[0];const distance=Math.hypot(p.x-this.ball.x,p.y-this.ball.y);const buffered=this.hitBuffer>0,timed=buffered||late;this.hitBuffer=0;p.windup=0;const chosen=selectShot(p,this.ball,this.shot);const contact=contactQuality(p,this.ball,chosen,timed,Math.random(),this.difficulty);const aim=this.aim+(Math.random()-.5)*distance/(p.abilities.control*p.paddle.control*shotSkill(p,chosen));this.hit(p,chosen,aim,contact.quality);this.message=contact.mishit?`MISHIT · ${chosen.toUpperCase()}`:late?'GOOD LATE TIMING':buffered?'GOOD TIMING':distance<1.8?'GREAT CONTACT':'REACHING';if(p.shotLabel==='RESET')this.message=`RESET · ${this.message}`;this.feedbackTime=.65;return true}
  swing(){if(this.paused)return;if(this.phase==='serve'&&this.server.id===0&&this.mode==='play'){this.serve();return}if(this.phase!=='rally'||this.mode!=='play')return;if(this.tryHumanHit()||this.tryHumanHit(true))return;const window=this.timingWindow();this.hitBuffer=window.early;this.players[0].windup=this.hitBuffer;this.message='SWING QUEUED'}
  serve(){const type=this.shot==='soft'?'soft':'hard',shot=type==='soft'?'serve-soft':'serve-hard',target=serveTarget(this.server,this.aim,type);this.server.contactPoint={x:this.ball.x,y:this.ball.y,z:this.ball.z};this.server.stroke='serve';this.server.animationShot='serve';this.server.animationContactStart=true;this.server.swingDuration=strokeDuration(this.server,'serve');this.server.preparation=null;this.emit('hit',{shot,stroke:'serve'});this.server.swingSide=1;this.server.swing=this.server.swingDuration;this.contact={x:this.ball.x,y:this.ball.y,z:this.ball.z,time:.12};this.serveX=this.server.x;launch(this.ball,target,this.server.team===0?8:36,shot,this.paddleFor(this.server,'serve'));this.ball.spinY=0;this.last=this.server.team;this.shots=1;this.bounces=0;this.phase='rally';this.message=type.toUpperCase()+' SERVE'}
  recordReplay(){
