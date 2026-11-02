@@ -1,5 +1,5 @@
 import {strokeForContact} from './player-facing.js';
-export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,dt:1/120,speed:12,accel:45,reach:2.6};
+export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',shirtColor:'green',paddleColor:'mint',court:'blue-gray'}}}
@@ -89,7 +89,13 @@ export function stepBall(b,dt=C.dt){
  if(spinX||spinY||spinZ){b.vx+=(spinY*b.vz-spinZ*b.vy)*C.magnus*dt;b.vy+=(spinZ*b.vx-spinX*b.vz)*C.magnus*dt;b.vz+=(spinX*b.vy-spinY*b.vx)*C.magnus*dt}
  b.spin=(b.spin||0)*Math.exp(-C.spinDecay*dt);b.spinX=(b.spinX||0)*Math.exp(-C.spinDecay*dt);b.spinY=(b.spinY||0)*Math.exp(-C.spinDecay*dt);b.spinZ=(b.spinZ||0)*Math.exp(-C.spinDecay*dt);
  b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;
- if((oldY-C.net)*(b.y-C.net)<=0&&oldY!==b.y){const f=(C.net-oldY)/(b.y-oldY),crossX=b.x-b.vx*dt*(1-f),crossZ=oldZ+(b.z-oldZ)*f;if(crossX>=0&&crossX<=C.width&&crossZ-radius<netHeightAt(crossX))return 'net'}
+ if((oldY-C.net)*(b.y-C.net)<=0&&oldY!==b.y){
+  const f=(C.net-oldY)/(b.y-oldY),crossX=b.x-b.vx*dt*(1-f),crossZ=oldZ+(b.z-oldZ)*f,postHit=(Math.abs(crossX-C.netPostLeft)<=C.netPostRadius||Math.abs(crossX-C.netPostRight)<=C.netPostRadius)&&crossZ<C.netPostHeight+C.ballRadius;
+  if(postHit){b.x=crossX;b.z=crossZ;b.vx*=-.2;b.vy*=-.2;b.vz*=-.15;return 'post'}
+  if(crossX>=0&&crossX<=C.width&&crossZ-radius<netHeightAt(crossX)){
+   const incomingSide=oldY<C.net? -1:1;b.y=C.net+incomingSide*radius;b.z=crossZ;b.vy=-b.vy*C.netRestitution;b.vx*=.52;b.vz*=.28;b.spin*=.6;b.spinX=(b.spinX||0)*.6;b.spinY=(b.spinY||0)*.6;b.spinZ=(b.spinZ||0)*.6;b.netContact=true;return 'net';
+  }
+}
  if(b.z<=radius&&b.vz<0){
   b.z=radius;
   const impactSpeed=Math.abs(b.vz),restitution=Math.max(.58,C.bounce-Math.max(0,impactSpeed-22)*.003)+(spin>0?.025:spin<0?-.045:0);

@@ -188,3 +188,7 @@ test('paddle contact uses sweet spot incoming pace and contact quality',()=>{
 });
 
 test('serve uses a physical toss before contact',()=>{const g=new Game(),start=g.ball.z;g.serve();assert.ok(g.serveToss);g.update(.2);assert.equal(g.phase,'serve');assert.ok(g.ball.z>start);while(g.serveToss)g.update(1/120);assert.equal(g.phase,'rally');assert.ok(Math.abs(g.ball.z-2.35)<.02)});
+
+test('net collision slows and rebounds the ball instead of deleting it',()=>{const b={x:10,y:22.1,z:1,vx:8,vy:-10,vz:-2,radius:C.ballRadius};assert.equal(stepBall(b,.02),'net');assert.equal(b.netContact,true);assert.ok(b.vy>0);assert.ok(Math.abs(b.vx)<8);assert.ok(b.y>C.net);});
+test('net post collision has its own geometry and fault',()=>{const post={x:C.netPostLeft,y:22.1,z:1,vx:2,vy:-10,vz:0,radius:C.ballRadius};assert.equal(stepBall(post,.02),'post');const g=new Game();g.phase='rally';g.shots=3;g.last=0;g.bounces=0;g.ball={x:C.netPostLeft,y:22.1,z:1,vx:2,vy:-10,vz:0,radius:C.ballRadius};g.update(.02);assert.equal(g.message,'POST FAULT');});
+test('a net touch falls back to the hitter before the net fault is called',()=>{const g=new Game();g.phase='rally';g.shots=3;g.last=0;g.bounces=0;g.ball={x:10,y:22.1,z:1,vx:8,vy:-10,vz:-2,radius:C.ballRadius};g.update(.02);assert.equal(g.phase,'rally');for(let i=0;i<200&&g.phase==='rally';i++)g.update(C.dt);assert.equal(g.message,'NET FAULT');});
