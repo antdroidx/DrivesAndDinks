@@ -33,7 +33,7 @@ test('serving team stays back while awaiting the return',()=>{const g=new Game()
 test('seeded watch match reaches a legal winning score',()=>{const original=Math.random;let seed=123456;Math.random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};try{const g=new Game();g.mode='watch';let maxShots=0;for(let i=0;i<120*1200&&g.phase!=='over';i++){g.update(C.dt);maxShots=Math.max(maxShots,g.shots)}assert.equal(g.phase,'over');assert.ok(maxShots>=3);const [a,b]=g.score.points;assert.ok(Math.max(a,b)>=11&&Math.abs(a-b)>=2)}finally{Math.random=original}});
 
 
-test('serve returner stays near baseline before the serve bounces',()=>{for(const team of [0,1]){const g=new Game();g.mode='watch';g.score.team=team;g.serveSetup();const r=g.serveReceiver;g.serve();for(let i=0;i<110&&g.phase==='rally'&&g.bounces===0;i++){g.update(C.dt);assert.ok(r.team===0?r.y>=40:r.y<=4,`returner moved to ${r.y}`)}}});
+test('serve returner starts behind the baseline and approaches the return',()=>{for(const team of [0,1]){const g=new Game();g.mode='watch';g.score.team=team;g.serveSetup();const r=g.serveReceiver,startY=r.y;assert.ok(r.team===0?startY>44:startY<0);g.serve();for(let i=0;i<110&&g.phase==='rally'&&g.bounces===0;i++){g.update(C.dt);assert.ok(r.y>=-3&&r.y<=47)}assert.ok(r.team===0?r.y<startY:r.y>startY)}});
 
 
 test('CPU can use a defensive lob against a pair at the kitchen',()=>{assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:true,random:.99}),'lob');assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:false,random:.99}),'dink')});
