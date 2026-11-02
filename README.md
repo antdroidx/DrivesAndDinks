@@ -79,3 +79,6 @@ Development courts can force a repeatable special-shot look with `?scenario=erne
 
 
 CPU planning now receives a contact-difficulty estimate based on reach, movement, and contact height. Difficult returns reduce attack preference and can choose a defensive lob. Deep lobs continue to use the shared physics forecast, so recovery speed and reaction delay determine whether a player can reach them.
+
+
+The ATP demo’s incoming path is scripted separately from live-game physics, but its net crossing is checked to remain above the center/post net profile before the ball bounces and travels outside the sideline.

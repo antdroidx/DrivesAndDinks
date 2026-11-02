@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../src/game.js';
-import {backhandGrip,gripModifiers,chooseCpuShot,launch} from '../src/core.js';
+import {backhandGrip,gripModifiers,chooseCpuShot,launch,C,netHeightAt} from '../src/core.js';
 import {buildProfile} from '../src/roster.js';
 import {matchStrokeMode} from '../src/match-animation.js';
 test('three timing modes retain Normal as the default',()=>{const g=new Game();assert.equal(g.difficulty,'normal');for(const [mode,early,late] of [['easy',.6,.2],['normal',.3,.08],['hard',.15,0]]){g.setDifficulty(mode);assert.deepEqual(g.timingWindow(),{early,late});}g.setDifficulty('invalid');assert.equal(g.difficulty,'normal');});
@@ -11,4 +11,10 @@ test('weak overhead contact reduces pace',()=>{const a={x:10,y:30,z:6},b={...a};
 
 test('dev scenarios move into position and trigger real Erne and ATP shots',()=>{
  for(const type of ['erne','atp']){const g=new Game();assert.equal(g.startScenario(type),true);assert.equal(g.mode,'watch');for(let i=0;i<140&&g.scenario;i++)g.update(1/120);assert.equal(g.scenario,null);assert.equal(g.lastShot,type);assert.equal(g.players[0].animationShot,type);assert.equal(g.players[0].contactPoint.z,type==='erne'?3.8:1.35);if(type==='atp'){assert.equal(g.players[0].contactType,'groundstroke');assert.ok(g.players[0].contactPoint.x<-1);assert.ok(g.ball.vx>0)}assert.ok(Math.hypot(g.ball.vx,g.ball.vy)>0)};
+});
+
+test('ATP scenario approach clears the net before bouncing',()=>{
+ const g=new Game();g.startScenario('atp');let crossed=false;
+ for(let i=0;i<140&&g.scenario;i++){const beforeY=g.ball.y;g.update(1/120);if(beforeY<22&&g.ball.y>=22){crossed=true;assert.ok(g.ball.z>C.ballRadius+netHeightAt(g.ball.x),`ball center ${g.ball.z} below net at x ${g.ball.x}`)}}
+ assert.equal(crossed,true);
 });
