@@ -1,8 +1,9 @@
-name: Deploy Drives & Dinks dev build to GitHub Pages
+name: Deploy public prototype and development build
 
 on:
   push:
     branches:
+      - main
       - codex/high-resolution-players
   workflow_dispatch:
 
@@ -17,37 +18,38 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out source
+      - name: Check out development source
         uses: actions/checkout@v4
-
-      - name: Check out frozen public release
+        with:
+          ref: main
+      - name: Check out frozen Build 15
         uses: actions/checkout@v4
         with:
           ref: ce59a6af09c78309ac30c7c3f7d362fd6c370dc8
-          path: _public
-
-      - name: Test dev source
+          path: _archive15
+      - name: Check out public playable prototype
+        uses: actions/checkout@v4
+        with:
+          ref: dd6eae74fc3ae3a32c2d2a15cb27a27e4629124e
+          path: _prototype
+      - name: Test source
         run: node --test
-
-      - name: Prepare public release and dev site
+      - name: Package public prototype, archive and dev
         run: |
-          mkdir -p _site
-          rsync -a --exclude=.git --exclude=dev --exclude=preview _public/ _site/
+          mkdir -p _site/archive/build-15 _site/prototype _site/dev
+          rsync -a --exclude=.git --exclude=dev --exclude=preview _archive15/ _site/archive/build-15/
+          cp _prototype/index.html _prototype/style.css _prototype/studio.html _prototype/studio.css _site/
+          cp -R _prototype/src _prototype/assets _site/
           cp sw.js _site/
-          mkdir -p _site/src
-          cp src/cache-refresh.js _site/src/cache-refresh.js
-          sed -i 's#<head>#<head><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">#' _site/index.html
-          sed -i 's#</body>#<script type="module" src="src/cache-refresh.js?v=15"></script></body>#' _site/index.html
-
-          mkdir -p _site/dev
+          printf 'globalThis.DRIVES_DINKS_BUILD = "48";\n' > _site/build-info.js
+          node scripts/version-build.js 48 _site
+          cp -R _site/index.html _site/style.css _site/studio.html _site/studio.css _site/build-info.js _site/src _site/assets _site/prototype/
           cp index.html style.css studio.html studio.css _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
-
           touch _site/.nojekyll
-
-      - name: Publish public release and dev build
+      - name: Publish GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -55,4 +57,4 @@ jobs:
           publish_dir: ./_site
           user_name: github-actions[bot]
           user_email: github-actions[bot]@users.noreply.github.com
-          commit_message: Deploy dev build ${{ github.run_number }}
+          commit_message: Publish prototype, Build 15 archive and dev ${{ github.run_number }}
