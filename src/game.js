@@ -19,7 +19,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   const err=legalVolley(player.team,player.y,this.bounces,this.shots);if(err){this.fault(player.team,err);return false}
   if(this.bounces>1){this.fault(player.team,'Double bounce');return false}
   const incomingVelocity={x:this.ball.vx||0,y:this.ball.vy||0,z:this.ball.vz||0},poor=quality<.8,wasPoach=!poor&&this.poachReservation?.shot===this.shots&&this.poachReservation.playerId===player.id;
-  if(!poor){const reach=player.abilities?.reach??1,target=paddleContactTarget(player,this.ball,shot),edge=Math.hypot((this.ball.x-target.x)/(.95*reach),(this.ball.y-target.y)/.9);if(shot==='atp'||shot==='erne'||edge>=.82)this.replayHighlights.push({time:this.clock,label:shot==='atp'?'AROUND THE POST':shot==='erne'?'ERNE':'STRETCH SAVE'});}
+  if(!poor&&(shot==='atp'||shot==='erne'))this.replayHighlights.push({time:this.clock,label:shot==='atp'?'AROUND THE POST':'ERNE'});
   player.mishit=poor;this.lastShot=shot;player.animationShot=shot;player.animationContactStart=true;this.lastHitter=player.id;
   const targetY=player.team===0?(shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4):(shot==='dink'?30:shot==='drop'?32:shot==='slice'?38:40);
   player.stroke=strokeForContact(player,this.ball);player.contactType=this.bounces===0?'volley':'groundstroke';player.contactPoint={x:this.ball.x,y:this.ball.y,z:this.ball.z};player.contactPaddleTarget=paddleContactTarget(player,this.ball,shot);
