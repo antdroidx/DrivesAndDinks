@@ -4,6 +4,7 @@ import {Game} from '../src/game.js';
 import {backhandGrip,gripModifiers,chooseCpuShot,launch,C,netHeightAt,move,resolvePlayerCollisions,contactQuality,playerProfile} from '../src/core.js';
 import {buildProfile} from '../src/roster.js';
 import {matchStrokeMode} from '../src/match-animation.js';
+import {staminaOverlayEnabled,staminaPercent} from '../src/player-facing.js';
 test('three timing modes retain Normal as the default',()=>{const g=new Game();assert.equal(g.difficulty,'normal');for(const [mode,early,late] of [['easy',.6,.2],['normal',.3,.08],['hard',.15,0]]){g.setDifficulty(mode);assert.deepEqual(g.timingWindow(),{early,late});}g.setDifficulty('invalid');assert.equal(g.difficulty,'normal');});
 test('backhand grips depend on style and reach, independently of gender',()=>{const ball={x:9,y:35,z:2};for(const gender of ['male','female']){const p={...buildProfile({character:'jordan',gender}),team:0,x:10,y:35};assert.equal(backhandGrip(p,ball),'two');assert.equal(backhandGrip(p,{...ball,x:7}),'one');assert.equal(backhandGrip(p,ball,'slice'),'one');const two=gripModifiers(p,ball,'drive'),one=gripModifiers({...p,backhandStyle:'one'},ball,'drive');assert.ok(two.power>one.power&&two.control>one.control&&two.spin>one.spin&&one.reach>two.reach);assert.equal(matchStrokeMode({...p,stroke:'backhand',contactGrip:'two'},'dink'),'twoBackhandDink');}});
 test('CPU attacks reachable overheads rather than choosing a drop',()=>{for(const random of [0,.5,.99])assert.equal(chooseCpuShot({shots:5,team:0,y:40,height:6,random}),'drive');});
@@ -27,4 +28,19 @@ test('players retain momentum and cannot overlap through collision',()=>{
 });
 test('special-shot returns carry extra mishit difficulty',()=>{
  const p={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0},ball={x:10.6,y:35.2,z:1.5,shot:'drive'};assert.ok(contactQuality(p,{...ball,shot:'atp'},'drive',false,.5).chance>contactQuality(p,ball,'drive',false,.5).chance);
+});
+
+test('DEV stamina diagnostics activate only in development or through the query override',()=>{
+ assert.equal(staminaOverlayEnabled({pathname:'/DrivesAndDinks/dev/',hostname:'antdroidx.github.io'}),true);
+ assert.equal(staminaOverlayEnabled({pathname:'/DrivesAndDinks/',hostname:'antdroidx.github.io'}),false);
+ assert.equal(staminaOverlayEnabled({pathname:'/',hostname:'localhost'}),true);
+ assert.equal(staminaOverlayEnabled({pathname:'/',hostname:'antdroidx.github.io',search:'?stamina=1'}),true);
+ assert.equal(staminaOverlayEnabled({pathname:'/dev/',hostname:'antdroidx.github.io',search:'?stamina=0'}),false);
+});
+test('stamina percentages are clamped and rounded for the DEV overlay',()=>{
+ assert.equal(staminaPercent(1),100);
+ assert.equal(staminaPercent(.876),88);
+ assert.equal(staminaPercent(-1),0);
+ assert.equal(staminaPercent(2),100);
+ assert.equal(staminaPercent(undefined),100);
 });
