@@ -1,4 +1,4 @@
-import {strokeForContact} from './player-facing.js?v=68';
+import {strokeForContact} from './player-facing.js?v=70';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
@@ -114,7 +114,7 @@ export function move(p,tx,ty,dt){
  p.vx+=dvx;p.vy+=dvy;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;
  const movingSpeed=Math.hypot(p.vx,p.vy);if(!contactLock&&!recovering&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
  p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=recovering?'recover':p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';
- const outside=(p.outsideTimer||0)>0;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y));
+ const outside=(p.outsideTimer||0)>0;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));const deep=(p.baselineTimer||0)>0;p.y=p.team===0?Math.max(23,Math.min(deep?47:44,p.y)):Math.max(deep?-3:0,Math.min(21,p.y));
 }
 export function resolvePlayerCollisions(players,radius=.62,restitution=.18){
  for(let i=0;i<players.length;i++)for(let j=i+1;j<players.length;j++){
