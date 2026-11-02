@@ -1,13 +1,13 @@
-import {MOTIONS,CONTACT_PHASE,drawPixelCharacter,sampleCharacterPose} from './pixel-character.js?v=55';
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=55';
-const labels=['Running','Side-step','Volley','Forehand drive','Backhand drive','Forehand dink','Backhand dink','Forehand drop','Backhand drop','Overhead smash','Lob','Two-hand backhand drive','Two-hand backhand dink'];
-const notes=['Alternating planted feet','Lateral push & recovery','Compact blocking motion','Full side swing','Cross-body follow-through','Short, low lifting arc','Compact cross-body lift','Low to high, longer finish','Cross-body lifting drop','High reach, downward finish','Underhand lift & high finish','Both hands stay on the grip','Two-handed dink · shared drive motion for now'];
+import {MOTIONS,CONTACT_PHASE,drawPixelCharacter,sampleCharacterPose} from './pixel-character.js?v=56';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=56';
+const labels=['Running','Side-step','Volley','Forehand drive','Backhand drive','Forehand dink','Backhand dink','Forehand drop','Backhand drop','Overhead smash','Lob','Two-hand backhand drive','Two-hand backhand dink','Erne approach + airborne volley'];
+const notes=['Alternating planted feet','Lateral push & recovery','Compact blocking motion','Full side swing','Cross-body follow-through','Short, low lifting arc','Compact cross-body lift','Low to high, longer finish','Cross-body lifting drop','High reach, downward finish','Underhand lift & high finish','Both hands stay on the grip','Two-handed dink · shared drive motion for now','Outside-kitchen approach, jump, volley, and recovery'];
 const root=document.querySelector('#motions'),appearance={shirtColor:'green',paddleColor:'mint',hairColor:'brown',skinColor:'medium'};
 for(const [id,items] of [['shirtColor',CLOTHING_COLORS],['paddleColor',PADDLE_COLORS],['hairColor',HAIR_COLORS],['skinColor',SKIN_COLORS]]){const select=document.getElementById(id);select.innerHTML=items.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');select.value=appearance[id];select.onchange=()=>appearance[id]=select.value}
 const canvases=MOTIONS.map((mode,i)=>{const section=document.createElement('article');section.className='motion';section.innerHTML=`<h2><span>${String(i+1).padStart(2,'0')}</span>${labels[i]}</h2><p>${notes[i]}</p><canvas width="880" height="420" aria-label="${labels[i]}, male and female"></canvas><div class="labels"><span>T-SHIRT + SHORTS</span><span>TENNIS DRESS</span></div>`;root.append(section);return section.querySelector('canvas')});
 let playing=true,phase=0,last=0;
 const play=document.querySelector('#play'),slider=document.querySelector('#phase');
-const query=new URLSearchParams(location.search);if(['near','far'].includes(query.get('view')))document.querySelector('#view').value=query.get('view');if(query.get('pose')==='ready'){playing=false;play.textContent='Play'}
+const query=new URLSearchParams(location.search);if(['near','far'].includes(query.get('view')))document.querySelector('#view').value=query.get('view');if(query.get('pose')==='ready'||query.get('pose')==='impact'){playing=false;phase=query.get('pose')==='impact'?CONTACT_PHASE:0;play.textContent='Play'}
 function pause(){playing=false;play.textContent='Play'}
 play.onclick=()=>{playing=!playing;play.textContent=playing?'Pause':'Play'};
 slider.oninput=()=>{pause();phase=Number(slider.value)/1000};
