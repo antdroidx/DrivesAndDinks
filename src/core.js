@@ -55,11 +55,11 @@ export function paddleContactAvailable(p,b,shot='drive'){
 export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
  const reach=p.abilities?.reach??1
  const paddle=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-paddle.x)/(.95*reach))**2+((b.y-paddle.y)/.9)**2+((b.z-paddle.z)/1.1)**2)
- const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed)
+ const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed),fatigue=1-Math.max(0,Math.min(1,p.stamina??1))
  const shotDifficulty={serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
  const easy=difficulty==='easy',highContact=shot==='overhead'?7:4.5
  let chance=.009+.064*radial**2+.035*radial**4+.034*motion**2+.029*Math.max(0,.9-(b.z??1))/.9+.022*Math.max(0,(b.z??1)-highContact)/.7
- chance*=shotDifficulty
+ chance*=shotDifficulty*(1+fatigue*.35)
  if(easy)chance*=.62
  if(buffered)chance*=easy?.52:.84
  const specialReturn=b.shot==='atp'||b.shot==='erne'?1.55:1,control=Math.max(.55,(p.abilities?.control??1)*(p.paddle?.control??1)*gripModifiers(p,b,shot).control),technique=Math.max(.72,shotSkill(p,shot)),defense=Math.max(.75,p.abilities?.defense??1)
@@ -127,13 +127,13 @@ export class Score {
  get call(){return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
 export function move(p,tx,ty,dt){
- const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=p.abilities?.speed??C.speed,acceleration=p.abilities?.acceleration??C.accel,contactLock=p.swing>(p.swingDuration||.36)*.82,recovering=(p.recoveryTimer||0)>0,settling=(p.splitStepTimer||0)>0;
+ p.stamina=Math.max(0,Math.min(1,p.stamina??1));const staminaScale=.82+.18*p.stamina,dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=(p.abilities?.speed??C.speed)*staminaScale,acceleration=(p.abilities?.acceleration??C.accel)*(.78+.22*p.stamina),contactLock=p.swing>(p.swingDuration||.36)*.82,recovering=(p.recoveryTimer||0)>0,settling=(p.splitStepTimer||0)>0;
  const desiredSpeed=recovering||d<.03?0:Math.min(maxSpeed*(contactLock?.72:1),Math.sqrt(Math.max(0,3*acceleration*d)));
  const desiredVx=d?dx/d*desiredSpeed:0,desiredVy=d?dy/d*desiredSpeed:0,reversing=p.vx*desiredVx+p.vy*desiredVy<0;
  const turnFactor=(reversing?.62:1)*(0.85+Math.min(.25,Math.max(0,(acceleration-C.accel)/120))),maxDelta=acceleration*1.5*turnFactor*dt;
  let dvx=desiredVx-p.vx,dvy=desiredVy-p.vy,dv=Math.hypot(dvx,dvy);if(dv>maxDelta&&dv){dvx*=maxDelta/dv;dvy*=maxDelta/dv}
  p.vx+=dvx;p.vy+=dvy;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;
- const movingSpeed=Math.hypot(p.vx,p.vy);if(!contactLock&&!recovering&&!settling&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
+ const movingSpeed=Math.hypot(p.vx,p.vy),agility=Math.max(8,p.abilities?.speed??C.speed);if(movingSpeed>5)p.stamina=Math.max(0,p.stamina-dt*(movingSpeed-4)*.0045*(12/agility));else p.stamina=Math.min(1,p.stamina+dt*.009*(agility/12));if(!contactLock&&!recovering&&!settling&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
  p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=settling?'splitStep':recovering?'recover':p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';
  const outside=(p.outsideTimer||0)>0;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));const deep=(p.baselineTimer||0)>0;p.y=p.team===0?Math.max(23,Math.min(deep?47:44,p.y)):Math.max(deep?-3:0,Math.min(21,p.y));
 }

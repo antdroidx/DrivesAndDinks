@@ -194,3 +194,5 @@ test('net post collision has its own geometry and fault',()=>{const post={x:C.ne
 test('a net touch falls back to the hitter before the net fault is called',()=>{const g=new Game();g.phase='rally';g.shots=3;g.last=0;g.bounces=0;g.ball={x:10,y:22.1,z:1,vx:8,vy:-10,vz:-2,radius:C.ballRadius};g.update(.02);assert.equal(g.phase,'rally');for(let i=0;i<200&&g.phase==='rally';i++)g.update(C.dt);assert.equal(g.message,'NET FAULT');});
 
 test('bounce friction transfers topspin forward and checks backspin',()=>{const top={x:10,y:10,z:C.ballRadius+.001,vx:10,vy:0,vz:-10,spin:2},back={...top,spin:-2};stepBall(top);stepBall(back);assert.ok(Math.hypot(top.vx,top.vy)>Math.hypot(back.vx,back.vy));assert.ok(Math.abs(top.spin)<2);});
+
+test('sprinting consumes stamina while recovery restores it',()=>{const p={...playerProfile(),team:0,x:0,y:35,vx:0,vy:0,stamina:1};let tiredSpeed=0;for(let i=0;i<240;i++){move(p,i<120?20:0,35,1/120);tiredSpeed=Math.max(tiredSpeed,Math.hypot(p.vx,p.vy))}assert.ok(p.stamina<.95);const tired=p.stamina;for(let i=0;i<180;i++)move(p,p.x,p.y,1/120);assert.ok(p.stamina>tired);assert.ok(tiredSpeed>0);});
