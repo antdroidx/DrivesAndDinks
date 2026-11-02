@@ -1,4 +1,4 @@
-name: Deploy public prototype and development build
+name: Deploy public release, archives and development build
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out development source
+      - name: Check out main release source
         uses: actions/checkout@v4
         with:
           ref: main
@@ -34,20 +34,29 @@ jobs:
           path: _prototype
       - name: Test source
         run: node --test
-      - name: Package public prototype, archive and dev
+      - name: Package public release, archives and dev
         run: |
           mkdir -p _site/archive/build-15 _site/prototype _site/dev
           rsync -a --exclude=.git --exclude=dev --exclude=preview _archive15/ _site/archive/build-15/
-          cp _prototype/index.html _prototype/style.css _prototype/studio.html _prototype/studio.css _site/
-          cp -R _prototype/src _prototype/assets _site/
-          cp sw.js _site/
-          printf 'globalThis.DRIVES_DINKS_BUILD = "48";\n' > _site/build-info.js
-          node scripts/version-build.js 48 _site
-          cp -R _site/index.html _site/style.css _site/studio.html _site/studio.css _site/build-info.js _site/src _site/assets _site/prototype/
+
+          # Keep the historical Build 48 playable and inspectable.
+          cp _prototype/index.html _prototype/style.css _prototype/studio.html _prototype/studio.css _site/prototype/
+          cp -R _prototype/src _prototype/assets _site/prototype/
+          printf 'globalThis.DRIVES_DINKS_BUILD = "48";\n' > _site/prototype/build-info.js
+          node scripts/version-build.js 48 _site/prototype
+
+          # Build the development mirror from current main.
           cp index.html style.css studio.html studio.css _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
+
+          # Current main is the public release at the Pages root.
+          cp index.html style.css studio.html studio.css _site/
+          printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
+          cp -R src assets _site/
+          cp sw.js _site/
+          node scripts/version-build.js "${{ github.run_number }}" _site
           touch _site/.nojekyll
       - name: Publish GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
@@ -57,4 +66,4 @@ jobs:
           publish_dir: ./_site
           user_name: github-actions[bot]
           user_email: github-actions[bot]@users.noreply.github.com
-          commit_message: Publish prototype, Build 15 archive and dev ${{ github.run_number }}
+          commit_message: Publish release ${{ github.run_number }}, archives and dev

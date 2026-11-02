@@ -9,13 +9,13 @@ npm start
 npm test
 ```
 
-The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and `/dev/` serve this **development checkout locally**. GitHub Pages publishes one active build:
+The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and `/dev/` serve this **development checkout locally**. GitHub Pages publishes the current `main` source as the public release:
 
-- Public release: `https://antdroidx.github.io/DrivesAndDinks/` — unchanged frozen build 15.
-- Dev playtest: `https://antdroidx.github.io/DrivesAndDinks/dev/` — the `codex/high-resolution-players` development branch.
-- Motion studio: `https://antdroidx.github.io/DrivesAndDinks/dev/studio.html`.
-
-The Pages root remains on frozen build 15 while the randomized-player work is tested under `/dev/`. The experimental preview build is no longer published.
+- Public release: `https://antdroidx.github.io/DrivesAndDinks/` — promoted from `main`.
+- Dev mirror: `https://antdroidx.github.io/DrivesAndDinks/dev/` — the same current source with development diagnostics.
+- Motion studio: `https://antdroidx.github.io/DrivesAndDinks/studio.html`.
+- Build 48 prototype: `https://antdroidx.github.io/DrivesAndDinks/prototype/`.
+- Build 15 archive: `https://antdroidx.github.io/DrivesAndDinks/archive/build-15/`.
 
 The studio compares male T-shirt/shorts and female tennis-dress players for running, side-step, volley, forehand/backhand drives, forehand/backhand dinks, forehand/backhand drops, overhead smash, lob, and two-handed backhand drive. Select front/back view, change materials, slow playback, pause, scrub, or jump to impact at 52%. Use Ready pose to inspect the net-facing stance and Joints to show the shoulder/elbow/wrist chains. The Zoom control defaults to 75% so complete characters fit inside each comparison card. `studio.html?view=near&pose=ready` opens the back-facing ready comparison. A ball marker approaches and leaves toward the net for the selected court view. The studio uses the same renderer as matches.
 
@@ -45,7 +45,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Deployment
 
-`.github/workflows/pages.yml` tests the development branch, restores the frozen public root from `gh-pages`, and packages the current source plus motion studio into `/dev`. `main` remains unchanged while the dev build is validated. Publishing removes the retired experimental preview without changing the public root or rewrites to Git history. All dev modules and studio entry points receive the deployment build number for cache invalidation. A root-scoped service worker makes page navigations network-first and build-numbered modules continue to provide asset cache invalidation. Loading a URL with a fresh query, such as `?v=15`, also escapes any stale browser copy of the HTML. This checkout's root files are dev **source**, not the generated GitHub Pages site.
+`.github/workflows/pages.yml` tests current `main`, promotes it to the public Pages root, and builds the same source into `/dev`. Build 48 remains available under `/prototype/`, while Build 15 remains under `/archive/build-15/`. Publishing removes the retired experimental preview without rewriting Git history. Release and dev modules and studio entry points receive the deployment build number for cache invalidation. A root-scoped service worker makes page navigations network-first and build-numbered modules continue to provide asset cache invalidation. Loading a URL with a fresh query, such as `?v=76`, also escapes a stale browser copy of the HTML. This checkout's root files are source, not the generated GitHub Pages site.
 
 ## Verification and limitations
 
@@ -56,7 +56,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Public prototype and future development
 
-The public root and `/prototype/` preserve Playable Prototype Build 48 from commit `dd6eae74fc3ae3a32c2d2a15cb27a27e4629124e`, including the public Motion Viewer at `studio.html`. Build 15 is preserved at `/archive/build-15/` from its original frozen commit. The `main` branch is the starting point for future game development, published under `/dev/`; changes there do not replace the frozen prototype. The Pages workflow pins both historical versions explicitly.
+`main` is the public release source at the Pages root and is mirrored under `/dev/`. `/prototype/` preserves Playable Prototype Build 48 from commit `dd6eae74fc3ae3a32c2d2a15cb27a27e4629124e`, including its Motion Viewer. Build 15 is preserved at `/archive/build-15/` from its original frozen commit. The Pages workflow builds current source for both the root and `/dev/` while pinning the two historical versions.
 
 
 ## Development gameplay tuning
