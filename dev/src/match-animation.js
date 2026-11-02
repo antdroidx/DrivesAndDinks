@@ -1,5 +1,5 @@
-import {selectShot,backhandGrip} from './core.js?v=72';
-import {strokeForContact} from './player-facing.js?v=72';
+import {selectShot,backhandGrip} from './core.js?v=73';
+import {strokeForContact} from './player-facing.js?v=73';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 export function matchStrokeMode(player,shot=player.animationShot,stroke=player.stroke){
@@ -40,7 +40,7 @@ export function sampleMatchAnimation(player,game){
   const release=clamp(progress/.16);
   return {mode:matchStrokeMode(player),phase,progress,alignStrength:player.animationContactStart?1-release*release*(3-2*release):0};
  }
- if(game.phase==='serve'&&game.server===player)return {mode:'serve',phase:.28*clamp(game.timer/.4),alignStrength:0};
+ if(game.phase==='serve'&&game.server===player){const toss=game.serveToss,progress=toss?clamp(toss.time/toss.duration):clamp(game.timer/.4);return {mode:'serve',phase:.12+.4*progress,alignStrength:0}};
  if(game.phase==='rally'&&player.preparation)return {mode:matchStrokeMode({...player,contactType:null},player.preparation.shot,player.preparation.stroke),phase:player.preparation.phase,alignStrength:0};
  if(player.windup>0)return {mode:matchStrokeMode(player,selectShot(player,game.ball,game.shot),strokeForContact(player,game.ball)),phase:.28,alignStrength:0};
  return null;
