@@ -49,7 +49,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Verification and limitations
 
-`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all seventeen motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
+`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all eighteen motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
 
 `src/core.js` handles physics and scoring; `src/game.js` manages matches; `src/tactics.js` plans doubles positioning; `src/main.js` renders and handles input. Simulation advances at 120 Hz. Ball flight now includes velocity-squared drag, Magnus curve, spin decay, radius-aware net contact, and speed-dependent bounce restitution. CPU shot selection uses aggression, Court IQ and relative attack/soft skill. Kitchen faults check the hitter at contact, not subsequent momentum; there is no player collision. Physical-device touch performance and the final athletic feel still require human playtests.
 
@@ -91,3 +91,6 @@ Serve returns use a dedicated safe target and lower pressure scaling. They remai
 
 
 Serve receivers start one foot behind the baseline, remain behind the line during the initial serve presentation, and then move forward under the normal momentum model. A short serve-hold plus the deeper-start allowance prevents players from snapping back inbounds before the return.
+
+
+Deep receivers avoid the lowest post-bounce contact through contact-quality penalties rather than a hard wait that could strand them. Deep drives struck while the ball is still rising from a bounce carry extra mishit risk and lower pace. Dinks, drops, and resets remain available early. A visual split-step state is triggered near contact when the receiver is close enough, but movement physics continues so preparation cannot make the ball unreachable. The 18th Motion Viewer card demonstrates the split-step.

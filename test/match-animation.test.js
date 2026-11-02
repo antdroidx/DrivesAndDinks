@@ -17,8 +17,8 @@ test('receiver prepares continuously before contact without delaying the ball',(
  g.teamPlan={receiverId:p.id,created:0,point:{x:p.x+.6,y:p.y,z:2,time:1}};
  g.clock=.75;prepareReceiver(p,g);const first=sampleMatchAnimation(p,g);
  assert.ok(first.phase>0&&first.phase<.1);
- g.clock=.95;prepareReceiver(p,g);const next=sampleMatchAnimation(p,g);
- assert.ok(next.phase>first.phase&&next.phase<.52);
+ g.clock=.95;prepareReceiver(p,g);const next=sampleMatchAnimation(p,g);assert.equal(next.mode,'splitStep');p.splitStepTimer=0;const prepared=sampleMatchAnimation(p,g);
+ assert.ok(prepared.phase>first.phase&&prepared.phase<.52);
  const ball={...g.ball};g.hit(p,'drive',10);assert.notDeepEqual(g.ball,ball);
  const impact=sampleMatchAnimation(p,g);assert.equal(impact.phase,.52);assert.equal(impact.alignStrength,1);
  p.swing=p.swingDuration*.8;const follow=sampleMatchAnimation(p,g);assert.ok(follow.phase>.52);assert.equal(follow.alignStrength,0);
