@@ -17,6 +17,8 @@ test('manual pause freezes the match and blocks shots',()=>{
   assert.equal(game.phase,'serve');
   assert.equal(game.setPaused(false),false);
   game.swing();
+  assert.ok(game.serveToss);
+  game.update(game.serveToss.duration+.01);
   assert.equal(game.phase,'rally');
 });
 
