@@ -1,4 +1,4 @@
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=45';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=46';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -170,6 +170,8 @@ export function normalizeSelection(input={}){
   const legacyPaddleColor=input?.paddleColor??(input?.design==='ocean'?'blue':input?.design);
   return {
     character,
+    gender:input?.gender==='male'||input?.gender==='female'?input.gender:CHARACTERS.find(c=>c.id===character).gender,
+    customName:String(input?.customName??'').trim().slice(0,40),
     paddle:valid(PADDLES,input?.paddle)??DEFAULT_SELECTION.paddle,
     shirtColor:valid(CLOTHING_COLORS,input?.shirtColor)??DEFAULT_SELECTION.shirtColor,
     paddleColor:valid(PADDLE_COLORS,legacyPaddleColor)??DEFAULT_SELECTION.paddleColor,
@@ -180,23 +182,20 @@ export function normalizeSelection(input={}){
 }
 export function buildProfile(input, options={}){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle);
-  const identity=options.identity??generateIdentity({gender:character.gender,skinColor:selection.skinColor,random:options.random??Math.random});
-  return {...playerProfile(),characterId:character.id,archetypeId:character.id,ratingStyle:character.ratingStyle,archetype:character.style,name:identity.name,culture:identity.culture,gender:character.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...character.ratings},abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier},appearance:{body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
+  const identity=options.identity??generateIdentity({gender:selection.gender,skinColor:selection.skinColor,random:options.random??Math.random});
+  return {...playerProfile(),characterId:character.id,archetypeId:character.id,ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...character.ratings},abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
   const playerCulture=weightedPick(compatibleCultures(selected.skinColor),random)??randomItem(CULTURE_IDS,random);
-  const playerIdentity=generateIdentity({gender:player.gender,skinColor:selected.skinColor,culture:playerCulture,random,usedNames});
-  const partner=randomItem(CHARACTERS.filter(c=>c.gender!==player.gender),random);
-  const remaining=CHARACTERS.filter(c=>c.id!==player.id&&c.id!==partner.id);
-  const opponents=[randomItem(remaining.filter(c=>c.gender==='male'),random),randomItem(remaining.filter(c=>c.gender==='female'),random)];
-  if(random()<.5)opponents.reverse();
-  const characters=[player,partner,...opponents];
+  const playerIdentity=generateIdentity({gender:selected.gender,skinColor:selected.skinColor,culture:playerCulture,random,usedNames});
+  const remaining=shuffle(CHARACTERS.filter(c=>c.id!==player.id),random);
+  const characters=[player,...remaining.slice(0,3)];
   const cpuCultures=shuffle(CULTURE_IDS.filter(id=>id!==playerCulture),random).slice(0,3);
   return characters.map((character,index)=>{
     if(index===0)return buildProfile(selected,{identity:playerIdentity});
-    const identity=generateIdentity({gender:character.gender,culture:cpuCultures[index-1],random,usedNames});
-    return buildProfile({...selected,character:character.id,paddle:'balanced',shirtColor:identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});
+    const gender=random()<.5?'male':'female',identity=generateIdentity({gender,culture:cpuCultures[index-1],random,usedNames});
+    return buildProfile({...selected,character:character.id,gender,customName:'',paddle:randomItem(PADDLES,random).id,shirtColor:identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});
   });
 }
 export function selectionStats(input){
