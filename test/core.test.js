@@ -157,3 +157,7 @@ test('side spin curves the ball laterally and decays over time',()=>{
  for(let i=0;i<15;i++){stepBall(straight);stepBall(curved)}
  assert.ok(curved.x>straight.x+.005);assert.ok(curved.spinY<20);
 });
+
+test('serves make contact at a forward waist-height toss point',()=>{
+ for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();const server=g.server,y=server.y;g.serve();assert.equal(server.contactPoint.z,2.35);assert.equal(g.ball.z,2.35);assert.ok(team===0?server.contactPoint.y<y:server.contactPoint.y>y);assert.equal(server.stroke,'serve');assert.equal(server.animationContactStart,true)};
+});

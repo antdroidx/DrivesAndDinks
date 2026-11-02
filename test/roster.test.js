@@ -48,15 +48,15 @@ test('lateral shuffle and slide states use the moving sprite cycle',()=>{
  assert.deepEqual(characterFrame('shuffle',0,0),{row:1,col:0});
  assert.deepEqual(characterFrame('shuffle',0,1),{row:1,col:1});
  assert.deepEqual(characterFrame('slide',0,2),{row:1,col:2});
- assert.deepEqual(characterFrame('serve',.999),{row:10,col:3});
+ assert.deepEqual(characterFrame('serve',.999),{row:14,col:3});
  assert.deepEqual(characterFrame('forehand',.999),{row:3,col:3});
  assert.deepEqual(characterFrame('overhead',.999),{row:9,col:3});
  assert.deepEqual(characterFrame('lob',.999),{row:10,col:3});
 });
 
 test('expanded motion rows cover every requested shot',()=>{
- for(const mode of ['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne']){
-  const frame=characterFrame(mode,0,0);assert.ok(Number.isInteger(frame.row)&&frame.row>=0&&frame.row<14);assert.ok(Number.isInteger(frame.col)&&frame.col>=0&&frame.col<4);
+ for(const mode of ['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne','serve']){
+  const frame=characterFrame(mode,0,0);assert.ok(Number.isInteger(frame.row)&&frame.row>=0&&frame.row<15);assert.ok(Number.isInteger(frame.col)&&frame.col>=0&&frame.col<4);
  }
 });
 test('pixel sprite palettes follow every appearance color choice',()=>{

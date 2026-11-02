@@ -49,7 +49,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Verification and limitations
 
-`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all fourteen motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
+`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all fifteen motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
 
 `src/core.js` handles physics and scoring; `src/game.js` manages matches; `src/tactics.js` plans doubles positioning; `src/main.js` renders and handles input. Simulation advances at 120 Hz. Ball flight now includes velocity-squared drag, Magnus curve, spin decay, radius-aware net contact, and speed-dependent bounce restitution. CPU shot selection uses aggression, Court IQ and relative attack/soft skill. Kitchen faults check the hitter at contact, not subsequent momentum; there is no player collision. Physical-device touch performance and the final athletic feel still require human playtests.
 
@@ -70,3 +70,6 @@ Shorts and skirt hems are generated from the animated thigh positions, so the lo
 
 
 The replay banner sits at the top of the playfield so it stays clear of both near-court players on small screens. The tennis dress keeps its original shaded silhouette while tapered thigh roots remain beneath the garment through running and jumping poses. Men’s shorts also retain the established Build 48 renderer and 2.5D lighting pass.
+
+
+Serve contact now occurs at a forward, waist-height toss point 2.35 court feet above the surface. The serve stroke travels from a low load through upward contact to a high finish, and the serve is available as the 15th Motion Viewer comparison.
