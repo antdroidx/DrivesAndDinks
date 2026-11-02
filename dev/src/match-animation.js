@@ -1,5 +1,5 @@
-import {selectShot,backhandGrip} from './core.js?v=70';
-import {strokeForContact} from './player-facing.js?v=70';
+import {selectShot,backhandGrip} from './core.js?v=71';
+import {strokeForContact} from './player-facing.js?v=71';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 export function matchStrokeMode(player,shot=player.animationShot,stroke=player.stroke){
@@ -26,12 +26,15 @@ export function prepareReceiver(player,game){
  const forecast={...plan.point,z:plan.point.z??game.ball.z};
  if(player.preparation?.shotNumber!==game.shots){
   const kitchen=player.team===0?player.y<33:player.y>11;
+  if(player.splitStepShot!==game.shots){player.splitStepArmed=false;player.splitStepShot=game.shots}
   const desired=player.id===0&&game.mode==='play'?game.shot:game.shots===1?'drive':kitchen?(forecast.z>2.7?'drive':'dink'):'drop';
   player.preparation={shotNumber:game.shots,shot:selectShot(player,forecast,desired),stroke:strokeForContact(player,forecast),phase:0};
  }
+ if(eta<=.22&&eta>=-.04&&!player.splitStepArmed&&Math.hypot(player.x-plan.point.x,player.y-plan.point.y)<2.5){player.splitStepArmed=true;player.splitStepTimer=.18}
  player.preparation.phase=Math.max(player.preparation.phase,.5*clamp(1-eta/.26));
 }
 export function sampleMatchAnimation(player,game){
+ if((player.splitStepTimer||0)>0)return {mode:'splitStep',phase:1-player.splitStepTimer/.18,alignStrength:0};
  if(player.swing>0){
   const progress=clamp(1-player.swing/(player.swingDuration||.8)),phase=player.animationContactStart?.52+.48*progress:progress;
   const release=clamp(progress/.16);
