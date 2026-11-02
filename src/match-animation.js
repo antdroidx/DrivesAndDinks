@@ -16,7 +16,7 @@ export function matchStrokeMode(player,shot=player.animationShot,stroke=player.s
 }
 export function strokeDuration(player,shot=player.animationShot){
  const mode=matchStrokeMode(player,shot);
- return mode==='overhead'?.9:mode==='erne'?.82:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8;
+ return mode==='overhead'?.9:mode==='erne'?1.2:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8;
 }
 export function prepareReceiver(player,game){
  const plan=game.teamPlan,eta=plan?.created+(plan?.point?.time??Infinity)-game.clock;

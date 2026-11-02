@@ -55,6 +55,14 @@ export function contactQuality(p,b,shot,buffered=false,random=Math.random(),diff
  const mishit=random<chance;
  return {chance,mishit,quality:mishit?Math.max(easy?.65:.45,.74-chance*.55):1-Math.min(.12,chance*.2)}
 }
+export function contactDifficulty(p,b,shot='drive'){
+ const reach=p.abilities?.reach??1,target=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2),motion=Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed),height=shot==='overhead'?Math.abs((b.z??1)-6):Math.max(0,Math.abs((b.z??1)-1.6)-1.1)/2.4;
+ return Math.max(0,Math.min(1,radial*.5+motion*.32+height*.18));
+}
+export function netCrossingX(start,target){
+ const dy=target.y-start.y;
+ return Math.abs(dy)<1e-6?start.x:start.x+(target.x-start.x)*((C.net-start.y)/dy);
+}
 export const side=y=>y>22?0:1;
 export function netHeightAt(x){return C.netCenterHeight+(C.netPostHeight-C.netCenterHeight)*Math.min(1,Math.abs(x-C.width/2)/(C.width/2))}
 export function stepBall(b,dt=C.dt){
@@ -97,7 +105,7 @@ export class Score {
  get player(){return this.serverPlayer}
  get call(){return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
-export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=p.abilities?.speed??C.speed;const contactLock=p.swing>(p.swingDuration||.36)*.82;const speed=Math.min(maxSpeed*(contactLock?.72:1),d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const response=1-Math.exp(-((p.abilities?.acceleration??C.accel)/2.2)*dt);p.vx+=(vx-p.vx)*Math.min(1,response);p.vy+=(vy-p.vy)*Math.min(1,response);p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;const movingSpeed=Math.hypot(p.vx,p.vy);if(!contactLock&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';const outside=p.outsideTimer>0; p.x=Math.max(outside?-2.2:0,Math.min(outside?22.2:20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
+export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=p.abilities?.speed??C.speed;const contactLock=p.swing>(p.swingDuration||.36)*.82,recovering=(p.recoveryTimer||0)>0;const speed=recovering?0:Math.min(maxSpeed*(contactLock?.72:1),d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const response=1-Math.exp(-((p.abilities?.acceleration??C.accel)/2.2)*dt);p.vx+=(vx-p.vx)*Math.min(1,response);p.vy+=(vy-p.vy)*Math.min(1,response);p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;const movingSpeed=Math.hypot(p.vx,p.vy);if(!contactLock&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';const outside=p.outsideTimer>0; p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
 export function receiver(players,team,x,y){return players.filter(p=>p.team===team).reduce((a,b)=>Math.hypot(a.x-x,a.y-y)<Math.hypot(b.x-x,b.y-y)?a:b)}
 
 
@@ -116,9 +124,13 @@ export function selectShot(p,b,desired,random=Math.random()){
  }
  return desired
 }
-export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, random=Math.random()}){
- const nearKitchen=team===0?y<33:y>11,bias=Math.max(0,Math.min(1,Number(aggression)||.5)),relativeSkill=Math.max(-.12,Math.min(.12,(Number(attackSkill||1)-Number(softSkill||1))*.32)),attackBias=(bias-.5)*.24+(.95-Math.max(.7,Number(courtIQ)||1))*.14+relativeSkill;
+export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, random=Math.random()}){
+ const nearKitchen=team===0?y<33:y>11;
+ const bias=Math.max(0,Math.min(1,Number(aggression)||.5));
+ const relativeSkill=Math.max(-.12,Math.min(.12,(Number(attackSkill||1)-Number(softSkill||1))*.32-Math.max(0,Math.min(1,Number(difficulty)||0))*.3));
+ const attackBias=(bias-.5)*.24+(.95-Math.max(.7,Number(courtIQ)||1))*.14+relativeSkill;
  if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
+ if(difficulty>.82&&height<3.2)return 'lob';
  if(shots===1)return 'drive';
  if(shots===2)return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop';
  if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';return height>2.7||(height>.65&&random<Math.max(.1,Math.min(.55,.28+attackBias)))?'drive':'dink'}

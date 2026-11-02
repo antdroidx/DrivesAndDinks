@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,paddleContactAvailable,paddleContactTarget,contactQuality,serveTarget,serveAim} from '../src/core.js';import {Game} from '../src/game.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,paddleContactAvailable,paddleContactTarget,contactQuality,serveTarget,serveAim,contactDifficulty,netCrossingX} from '../src/core.js';import {Game} from '../src/game.js';
 test('ball arcs and bounces',()=>{let b={x:5,y:40,z:1};launch(b,15,5,'lob');let high=0,event;for(let i=0;i<300&&!event;i++){event=stepBall(b);high=Math.max(high,b.z)}assert.equal(event,'bounce');assert.ok(high>5);assert.ok(b.vz>0);assert.ok(Math.abs(b.x-15)<1)});
 test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.equal(stepBall(b,.02),'net');assert.ok(inBounds(0,44));assert.ok(!inBounds(-.1,4))});
 test('two bounce and kitchen volleys',()=>{assert.match(legalVolley(0,35,0,1),/Two-bounce/);assert.match(legalVolley(0,35,0,2),/Two-bounce/);assert.match(legalVolley(0,28,0,3),/Kitchen/);assert.equal(legalVolley(0,28,1,3),null);assert.equal(legalVolley(0,35,0,3),null)});
@@ -165,4 +165,11 @@ test('serves make contact at a forward waist-height toss point',()=>{
 test('the net cannot block a ball passing outside the posts',()=>{
  const b={x:-1,y:22.1,z:1,vx:2,vy:-10,vz:0,radius:C.ballRadius};
  assert.notEqual(stepBall(b,.02),'net');assert.ok(b.y<22);
+});
+
+test('return difficulty affects mishit pressure and safe shot selection',()=>{
+ const p={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0},ball={x:10.6,y:35.2,z:1.5},far={...ball,x:15,y:39,z:.3};
+ assert.ok(contactDifficulty(p,far,'drive')>contactDifficulty(p,ball,'drive'));
+ assert.ok(netCrossingX({x:-1.65,y:26.5},{x:2,y:4})<0);
+ assert.equal(chooseCpuShot({shots:5,team:0,y:30,height:2,aggression:.8,courtIQ:1,difficulty:.9,random:.5}),'lob');
 });

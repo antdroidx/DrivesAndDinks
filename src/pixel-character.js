@@ -126,8 +126,8 @@ export function animationRootOffset(mode,phase,side=1){
  if(mode!=='erne')return 0;
  const p=clamp(phase);
  if(p<.52)return side*lerp(0,15,p/.52);
- if(p<.78)return side*15;
- return side*lerp(15,0,(p-.78)/.22);
+ if(p<.9)return side*15;
+ return side*lerp(15,0,(p-.9)/.1);
 }
 export function characterPaddleAnchor(options={}){return sampleCharacterPose(options).paddle}
 
