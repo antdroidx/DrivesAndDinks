@@ -94,3 +94,14 @@ Serve receivers start one foot behind the baseline, remain behind the line durin
 
 
 Deep receivers avoid the lowest post-bounce contact through contact-quality penalties rather than a hard wait that could strand them. Deep drives struck while the ball is still rising from a bounce carry extra mishit risk and lower pace. Dinks, drops, and resets remain available early. A visual split-step state is triggered near contact when the receiver is close enough, but movement physics continues so preparation cannot make the ball unreachable. The 18th Motion Viewer card demonstrates the split-step.
+
+
+## Physics contact and collision pass
+
+Paddle contact now responds to sweet-spot offset, incoming pace, paddle velocity, shot direction, Power, Control, Spin, and contact quality. Center contact preserves more pace and control; edge contact introduces twist, aim error, and spin variation before the ball enters flight.
+
+The serve has a physical toss phase, with the ball rising and falling under gravity before the stroke launches it near waist height. The net now absorbs and deflects balls during live play instead of deleting them immediately; a net touch becomes a fault only if the ball subsequently lands on the hitter’s side. Net posts have separate collision geometry, while balls crossing outside the posts remain legal.
+
+Court bounces include surface friction, speed-dependent restitution, and spin decay. Topspin carries speed into the bounce, while backspin and slice check the ball. Player stamina falls during sustained sprinting, reduces speed and contact accuracy, and recovers when the player slows; Agility improves both fatigue resistance and recovery. Stamina resets between points.
+
+Physics regression checks cover paddle sweet-spot behavior, physical serve toss, net deflection, post faults, net-fall faults, outside-post ATP clearance, bounce spin transfer, player momentum, player collision separation, and fatigue recovery.
