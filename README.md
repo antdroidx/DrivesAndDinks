@@ -85,3 +85,6 @@ The ATP demo’s incoming path is scripted separately from live-game physics, bu
 
 
 Movement now integrates acceleration-limited velocity and braking rather than directly snapping to a target velocity. Fast direction changes retain momentum, and partner collision separation prevents sprites from occupying the same court space. Contact difficulty is applied to every return through mishit pressure and CPU attack bias; ATP and Erne returns carry an additional difficulty penalty. Dedicated poach-lunge and sliding-return motions join the Motion Viewer, and shoe/sock geometry ends lower on the ankle.
+
+
+Serve returns use a dedicated safe target and lower pressure scaling. They remain drives under high return difficulty, with placement constrained away from the sidelines. In a 30-match regression sample this reduced shot-two rally endings from 122 to 4, all of which were unreachable rather than out.

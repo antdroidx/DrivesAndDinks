@@ -112,10 +112,10 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   if(!paddleContactAvailable(r,b,chosen)){ }
   else{
    const middle=(opponents[0].x+opponents[1].x)/2,attackMiddle=Math.random()<.38;
-   const target=attackMiddle?Math.max(6.5,Math.min(13.5,middle)):(shot==='drive'?(middle<10?18.2:1.8):(r.x<10?17.5:2.5));
+   const serveReturn=this.shots===1,target=serveReturn?(middle<10?16:4):attackMiddle?Math.max(6.5,Math.min(13.5,middle)):(shot==='drive'?(middle<10?18.2:1.8):(r.x<10?17.5:2.5));
    const pressure=Math.min(2,Math.hypot(r.vx,r.vy)/12)+Math.min(1,this.shots/40);
-   const error=(Math.random()+Math.random()+Math.random()-1.5)*(shot==='drive'?2.5:2.2)*(1+pressure*.4)/(r.abilities.control*r.paddle.control*shotSkill(r,chosen)*(shot==='drop'||shot==='dink'?(r.abilities.defense??1):1));
-   const contact=contactQuality(r,b,chosen,false);this.hit(r,chosen,target+error,contact.quality);
+   const returnSafety=serveReturn?.55:1,error=(Math.random()+Math.random()+Math.random()-1.5)*(shot==='drive'?2.5:2.2)*(1+pressure*.4)*returnSafety/(r.abilities.control*r.paddle.control*shotSkill(r,chosen)*(shot==='drop'||shot==='dink'?(r.abilities.defense??1):1));
+   const adjustedTarget=serveReturn?Math.max(3,Math.min(17,target+error)):target+error,contact=contactQuality(r,b,chosen,false);this.hit(r,chosen,adjustedTarget,contact.quality);
   }
  }
  if(b.y< -5||b.y>49||b.x< -8||b.x>28)this.fault(this.bounces>0?1-this.last:this.last,this.bounces>0?'Unreturned':'Out')}

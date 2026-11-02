@@ -173,3 +173,7 @@ test('return difficulty affects mishit pressure and safe shot selection',()=>{
  assert.ok(netCrossingX({x:-1.65,y:26.5},{x:2,y:4})<0);
  assert.equal(chooseCpuShot({shots:5,team:0,y:30,height:2,aggression:.8,courtIQ:1,difficulty:.9,random:.5}),'lob');
 });
+
+test('serve returns remain drives even when return difficulty is severe',()=>{
+ assert.equal(chooseCpuShot({shots:1,team:0,y:40,height:1.4,difficulty:.95,random:.5}),'drive');
+});
