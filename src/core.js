@@ -30,6 +30,19 @@ export function shotSkill(player,shot='drive'){
  if(shot==='slice')return ((abilities.drive??1)+(abilities.control??1))/2;
  return abilities[shot]??abilities.drive??1;
 }
+export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocity={x:0,y:0,z:0},normal={x:0,y:-1,z:0},center,power=1,control=1,spin=1,quality=1,swingDirection=1}){
+ const dx=(ball.x??0)-(center?.x??0),dy=(ball.y??0)-(center?.y??0),dz=((ball.z??0)-(center?.z??0))*.55,offset=Math.hypot(dx,dy,dz),sweetSpot=Math.exp(-((offset/.72)**2));
+ const relative={x:(incoming.x??0)-paddleVelocity.x,y:(incoming.y??0)-paddleVelocity.y,z:(incoming.z??0)-paddleVelocity.z};
+ const closing=Math.max(0,-(relative.x*normal.x+relative.y*normal.y+relative.z*normal.z)+(paddleVelocity.x*normal.x+paddleVelocity.y*normal.y+paddleVelocity.z*normal.z));
+ const closingPace=Math.max(0,Math.min(1,closing/34)),edge=1-sweetSpot,tangent=Math.hypot(dx,dy)*swingDirection;
+ return {
+  sweetSpot,offset,closing,
+  paceScale:Math.max(.82,Math.min(1.12,(.88+closingPace*.09+Math.max(0,power-1)*.06+sweetSpot*.06)*Math.max(.72,quality))),
+  spinKick:Math.max(-1.8,Math.min(1.8,tangent*edge*.42*Math.max(.55,spin)*(swingDirection>=0?1:-1))),
+  twist:Math.max(-1,Math.min(1,tangent*edge*1.4)),
+  aimError:Math.max(-.65,Math.min(.65,tangent*edge*(.6/Math.max(.7,control))))
+ };
+}
 export function paddleContactTarget(p,b,shot='drive'){
  const reach=p.abilities?.reach??1,side=b.x>=p.x?1:-1,netward=p.team===0?-.46:.46;
  if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+netward*.55,z:Math.max(5.2,Math.min(7,b.z??5.8))};

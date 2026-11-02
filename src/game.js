@@ -2,7 +2,7 @@ import {prepareReceiver,strokeDuration} from './match-animation.js';
 import {strokeForContact} from './player-facing.js';
 import {planIncoming,formationTarget,separateTargets} from './tactics.js';
 import {createLineup} from './roster.js';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions} from './core.js';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse} from './core.js';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.lineup=lineup??createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=['easy','normal','hard'].includes(difficulty)?difficulty:'normal';return this.difficulty}
@@ -32,9 +32,12 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   player.swingDuration=strokeDuration(player,shot);player.preparation=null;
   if(poor)aim+=(Math.random()-.5)*4/quality;
   player.swingSide=this.ball.x>=player.x?1:-1;player.swing=player.swingDuration;player.windup=0;
-  launch(this.ball,aim,targetY,shot,{...this.paddleFor(player,shot),power:this.paddleFor(player,shot).power*grip.power,spin:this.paddleFor(player,shot).spin*grip.spin,loft:shot==='lob'?1+Math.random()*.22:1},quality);this.ball.spinY=(this.ball.x-player.x)*12;if(shot==='slice')this.ball.spinZ=Math.sign(this.ball.vy||-1)*.8;
-  const netward=player.team===0?-1:1,faceSide=(this.ball.x>=player.x?1:-1)*(player.stroke==='backhand'?-1:1),normalLength=Math.hypot(faceSide*.32,1,shot==='overhead'?.22:.12);
-  const normal={x:faceSide*.32/normalLength,y:netward/normalLength,z:(shot==='overhead'?-.22:.12)/normalLength};
+  const netward=player.team===0?-1:1,faceSide=(this.ball.x>=player.x?1:-1)*(player.stroke==='backhand'?-1:1),normalLength=Math.hypot(faceSide*.32,1,shot==='overhead'?.22:.12),normal={x:faceSide*.32/normalLength,y:netward/normalLength,z:(shot==='overhead'?-.22:.12)/normalLength};
+  const effectivePaddle={...this.paddleFor(player,shot),power:this.paddleFor(player,shot).power*grip.power,spin:this.paddleFor(player,shot).spin*grip.spin,loft:shot==='lob'?1+Math.random()*.22:1};
+  const contactResponse=paddleContactResponse({ball:this.ball,incoming:incomingVelocity,paddleVelocity:{x:(player.vx||0)*.35+faceSide*7.5,y:(player.vy||0)*.35+netward*2.2,z:shot==='overhead'?-4:1.2},normal,center:player.contactPaddleTarget,power:effectivePaddle.power,control:effectivePaddle.control,spin:effectivePaddle.spin,quality,swingDirection:faceSide});
+  aim+=contactResponse.aimError;player.paddleTwist=contactResponse.twist;player.contactSweetSpot=contactResponse.sweetSpot;
+  launch(this.ball,aim,targetY,shot,{...effectivePaddle,power:effectivePaddle.power*contactResponse.paceScale},quality);this.ball.spin+=contactResponse.spinKick;
+  this.ball.spinY=(this.ball.x-player.x)*12;if(shot==='slice')this.ball.spinZ=Math.sign(this.ball.vy||-1)*.8;
   const closing=Math.max(0,-(incomingVelocity.x*normal.x+incomingVelocity.y*normal.y+incomingVelocity.z*normal.z));
   const restitution=(shot==='overhead'?.18:['drop','dink'].includes(shot)?.06:.12)*quality;
   this.ball.vx+=normal.x*closing*restitution;this.ball.vy+=normal.y*closing*restitution*.2;this.ball.vz+=normal.z*closing*restitution;

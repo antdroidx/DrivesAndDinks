@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,paddleContactAvailable,paddleContactTarget,contactQuality,serveTarget,serveAim,contactDifficulty,netCrossingX} from '../src/core.js';import {Game} from '../src/game.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,paddleContactAvailable,paddleContactTarget,contactQuality,serveTarget,serveAim,contactDifficulty,netCrossingX,paddleContactResponse} from '../src/core.js';import {Game} from '../src/game.js';
 test('ball arcs and bounces',()=>{let b={x:5,y:40,z:1};launch(b,15,5,'lob');let high=0,event;for(let i=0;i<300&&!event;i++){event=stepBall(b);high=Math.max(high,b.z)}assert.equal(event,'bounce');assert.ok(high>5);assert.ok(b.vz>0);assert.ok(Math.abs(b.x-15)<1)});
 test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.equal(stepBall(b,.02),'net');assert.ok(inBounds(0,44));assert.ok(!inBounds(-.1,4))});
 test('two bounce and kitchen volleys',()=>{assert.match(legalVolley(0,35,0,1),/Two-bounce/);assert.match(legalVolley(0,35,0,2),/Two-bounce/);assert.match(legalVolley(0,28,0,3),/Kitchen/);assert.equal(legalVolley(0,28,1,3),null);assert.equal(legalVolley(0,35,0,3),null)});
@@ -179,3 +179,9 @@ test('serve returns remain drives even when return difficulty is severe',()=>{
 });
 
 test('serve receivers begin behind the baseline while awaiting the bounce',()=>{for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();assert.ok(g.serveReceiver.team===0?g.serveReceiver.y>44:g.serveReceiver.y<0);assert.ok(g.serveReceiver.baselineTimer>2);}});
+
+test('paddle contact uses sweet spot incoming pace and contact quality',()=>{
+ const center={x:10,y:35,z:1.5},base={incoming:{x:0,y:-20,z:0},paddleVelocity:{x:0,y:-10,z:0},normal:{x:0,y:-1,z:0},center,power:1.1,control:1.4,spin:1.1,quality:1,swingDirection:1};
+ const sweet=paddleContactResponse({...base,ball:center}),edge=paddleContactResponse({...base,ball:{...center,x:10.55,y:35.1,z:1.5}}),fast=paddleContactResponse({...base,ball:center,incoming:{x:0,y:-34,z:0}}),weak=paddleContactResponse({...base,ball:center,quality:.65});
+ assert.ok(sweet.sweetSpot>edge.sweetSpot);assert.ok(sweet.paceScale>edge.paceScale);assert.ok(Math.abs(edge.twist)>0);assert.ok(fast.paceScale>=sweet.paceScale);assert.ok(weak.paceScale<sweet.paceScale);
+});
