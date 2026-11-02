@@ -1,23 +1,63 @@
-import {playerProfile} from './core.js?v=44';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=45';
 
-// Development playtests use a skilled roster shared by every generated identity.
+// Ratings are the design-facing values. Internal simulation multipliers are
+// derived from them so each shot category can influence play independently.
+export const RATING_KEYS=Object.freeze(['serve','drive','volley','drop','dink','lob','smash','power','control','defense','agility','courtIQ','reach','aggression']);
+export const RATING_LABELS=Object.freeze({serve:'Serve',drive:'Drive',volley:'Volley / Hands',drop:'Drop',dink:'Dink',lob:'Lob',smash:'Slam / Smash',power:'Power',control:'Control',defense:'Defense / Reset',agility:'Speed / Agility',courtIQ:'Court IQ',reach:'Reach',aggression:'Offense / Aggressiveness'});
+export const PLAYTEST_BASE_RATING=70;
 export const PLAYTEST_SKILLS=Object.freeze({control:1.42,serve:1.3,speed:1.18,acceleration:1.15,reaction:.72});
+
+const PLAYSTYLE_RATINGS=Object.freeze({
+  balanced:{serve:70,drive:70,volley:70,drop:70,dink:70,lob:70,smash:70,power:70,control:70,defense:70,agility:70,courtIQ:70,reach:70,aggression:70},
+  speed:{serve:63,drive:61,volley:73,drop:67,dink:69,lob:73,smash:59,power:61,control:73,defense:85,agility:93,courtIQ:75,reach:61,aggression:57},
+  soft:{serve:66,drive:68,volley:74,drop:82,dink:86,lob:70,smash:60,power:68,control:82,defense:84,agility:68,courtIQ:74,reach:66,aggression:48},
+  banger:{serve:75,drive:86,volley:80,drop:55,dink:54,lob:62,smash:86,power:90,control:64,defense:56,agility:70,courtIQ:62,reach:74,aggression:90},
+  net:{serve:62,drive:64,volley:90,drop:56,dink:64,lob:50,smash:86,power:76,control:70,defense:66,agility:68,courtIQ:76,reach:82,aggression:82}
+});
+
+export function ratingScale(rating){return 1+(Number(rating)-PLAYTEST_BASE_RATING)/100}
+export function abilitiesFromRatings(ratings){
+  const scale=key=>ratingScale(ratings[key]);
+  return {
+    ...DEFAULT_ABILITIES,
+    speed:12*PLAYTEST_SKILLS.speed*scale('agility'),
+    acceleration:45*PLAYTEST_SKILLS.acceleration*scale('agility'),
+    reach:1.12*scale('reach'),
+    control:PLAYTEST_SKILLS.control*scale('control'),
+    reaction:(.09*PLAYTEST_SKILLS.reaction)/scale('agility'),
+    serve:PLAYTEST_SKILLS.serve*scale('serve'),
+    power:1.1*scale('power'),
+    spin:1.05*scale('control'),
+    drive:scale('drive'),
+    volley:scale('volley'),
+    drop:scale('drop'),
+    dink:scale('dink'),
+    lob:scale('lob'),
+    smash:scale('smash'),
+    defense:scale('defense'),
+    courtIQ:scale('courtIQ'),
+    aggression:scale('aggression')
+  }
+}
+
+// Eight visual identities share five clearly differentiated rating templates.
 export const CHARACTERS = Object.freeze([
-  {id:'avery',gender:'male',style:'All-rounder',description:'Reliable coverage, placement and serve with no severe weakness.',strengths:['Balanced movement','Stable placement'],tradeoffs:['No elite category'],abilities:{speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1}},
-  {id:'remy',gender:'male',style:'Court runner',description:'Covers ground quickly and turns defense into another chance.',strengths:['Top-end speed','Quick acceleration'],tradeoffs:['Shorter reach','Less power'],abilities:{speed:13.6,acceleration:50,reach:.97,control:.97,reaction:.084,serve:.97,power:.95,spin:.98}},
-  {id:'morgan',gender:'male',style:'Kitchen specialist',description:'Controls soft exchanges and reads close contact earlier.',strengths:['Best reactions','Strong spin'],tradeoffs:['Slow recovery','Low power'],abilities:{speed:11.1,acceleration:43,reach:1.01,control:1.06,reaction:.075,serve:1.02,power:.94,spin:1.1}},
-  {id:'jordan',gender:'male',style:'Net pressure',description:'Uses extra reach and pace to crowd the kitchen and intercept.',strengths:['Long reach','Strong serve'],tradeoffs:['Slower reactions','Wider placement'],abilities:{speed:11.5,acceleration:41,reach:1.11,control:.97,reaction:.104,serve:1.06,power:1.05,spin:.94}},
-  {id:'selena',gender:'female',style:'Counter-attacker',description:'Balances sharp placement with enough speed to reverse a rally.',strengths:['Accurate placement','Quick recovery'],tradeoffs:['Short reach','Moderate power'],abilities:{speed:12.3,acceleration:46,reach:.98,control:1.04,reaction:.085,serve:1.02,power:1.01,spin:1.03}},
-  {id:'harper',gender:'female',style:'Speed specialist',description:'Explodes laterally and closes angles before opponents reset.',strengths:['Elite acceleration','Broad coverage'],tradeoffs:['Short reach','Lower power'],abilities:{speed:13.6,acceleration:53,reach:.96,control:.98,reaction:.078,serve:.95,power:.97,spin:1.02}},
-  {id:'quinn',gender:'female',style:'Control specialist',description:'Places dinks and drops tightly while adding heavy spin.',strengths:['Top spin','Precise soft game'],tradeoffs:['Slowest runner','Low power'],abilities:{speed:11.2,acceleration:44,reach:1.02,control:1.1,reaction:.079,serve:1.06,power:.93,spin:1.12}},
-  {id:'lena',gender:'female',style:'Power interceptor',description:'Reaches across the middle and finishes high balls with force.',strengths:['Long reach','Top power'],tradeoffs:['Slow reactions','Low spin'],abilities:{speed:11.7,acceleration:42,reach:1.12,control:.99,reaction:.102,serve:1.09,power:1.11,spin:.96}}
-].map(character=>({...character,abilities:Object.fromEntries(Object.entries(character.abilities).map(([key,value])=>[key,value*(PLAYTEST_SKILLS[key]??1)]))})));
+  {id:'avery',gender:'male',ratingStyle:'balanced',style:'All-rounder',description:'Reliable coverage, placement and serve with no severe weakness.',strengths:['Balanced attack and defense','Stable placement'],tradeoffs:['No elite category']},
+  {id:'remy',gender:'male',ratingStyle:'speed',style:'Court runner',description:'Covers ground quickly and turns defense into another chance.',strengths:['Top-end movement','Strong defensive coverage'],tradeoffs:['Low smash power']},
+  {id:'morgan',gender:'male',ratingStyle:'soft',style:'Kitchen specialist',description:'Controls soft exchanges and resets pressure with patient hands.',strengths:['Best soft game','Strong reset defense'],tradeoffs:['Low power and drive pace']},
+  {id:'jordan',gender:'male',ratingStyle:'banger',style:'Net pressure',description:'Uses extra pace and a heavy attack to crowd the kitchen.',strengths:['Elite drive and power','Aggressive attack'],tradeoffs:['Weak dinks and resets']},
+  {id:'selena',gender:'female',ratingStyle:'net',style:'Counter-attacker',description:'Controls the exchange at the net and reverses pressure with quick hands.',strengths:['Elite volleys','Long reach'],tradeoffs:['Weak lob and drop']},
+  {id:'harper',gender:'female',ratingStyle:'speed',style:'Speed specialist',description:'Explodes laterally and closes angles before opponents reset.',strengths:['Elite acceleration','Broad coverage'],tradeoffs:['Low smash power']},
+  {id:'quinn',gender:'female',ratingStyle:'soft',style:'Control specialist',description:'Places dinks and drops tightly while absorbing pace.',strengths:['Top control','Precise soft game'],tradeoffs:['Low power and drive pace']},
+  {id:'lena',gender:'female',ratingStyle:'banger',style:'Power interceptor',description:'Reaches across the middle and finishes high balls with force.',strengths:['Elite power','Aggressive smash'],tradeoffs:['Weak dinks and resets']}
+].map(character=>{const ratings={...PLAYSTYLE_RATINGS[character.ratingStyle]};return {...character,ratings,abilities:abilitiesFromRatings(ratings)}}));
 
 export const PADDLES = Object.freeze([
-  {id:'balanced',name:'Allcourt',style:'Balanced',description:'Even power, precision and spin.',power:1,control:1,spin:1},
-  {id:'power',name:'Ignite',style:'Power',description:'Faster eligible drives; less control and spin.',power:1.12,control:.95,spin:.96},
-  {id:'control',name:'Touch',style:'Control',description:'Tighter placement and more spin; slower drives.',power:.94,control:1.08,spin:1.1}
+  {id:'balanced',name:'Allcourt',style:'Balanced',description:'Even power, precision and spin.',power:1,control:1,spin:1,ratingModifiers:{power:0,control:0},spinModifier:0},
+  {id:'power',name:'Ignite',style:'Power',description:'Faster drives and smashes; less control and spin.',power:1.12,control:.95,spin:.96,ratingModifiers:{power:10,control:-5},spinModifier:-4},
+  {id:'control',name:'Touch',style:'Control',description:'Tighter placement and more spin; slower attacks.',power:.98,control:1.08,spin:1.1,ratingModifiers:{power:-4,control:8},spinModifier:10}
 ]);
+
 export const CLOTHING_COLORS = Object.freeze([
   {id:'black',name:'Black',color:'#171a21',rgb:[23,26,33]},
   {id:'gray',name:'Gray',color:'#929a9e',rgb:[146,154,158]},
@@ -141,7 +181,7 @@ export function normalizeSelection(input={}){
 export function buildProfile(input, options={}){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle);
   const identity=options.identity??generateIdentity({gender:character.gender,skinColor:selection.skinColor,random:options.random??Math.random});
-  return {...playerProfile(),characterId:character.id,archetypeId:character.id,archetype:character.style,name:identity.name,culture:identity.culture,gender:character.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin},appearance:{body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
+  return {...playerProfile(),characterId:character.id,archetypeId:character.id,ratingStyle:character.ratingStyle,archetype:character.style,name:identity.name,culture:identity.culture,gender:character.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...character.ratings},abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier},appearance:{body:character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
@@ -159,4 +199,13 @@ export function createLineup(input,{random=Math.random}={}){
     return buildProfile({...selected,character:character.id,paddle:'balanced',shirtColor:identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});
   });
 }
-export function selectionStats(input){const p=buildProfile(input);return {serve:p.abilities.serve,speed:p.abilities.speed/12,reach:p.abilities.reach,reactions:.09/p.abilities.reaction,placement:p.abilities.control*p.paddle.control,power:p.abilities.power*p.paddle.power,spin:p.abilities.spin*p.paddle.spin}}
+export function selectionStats(input){
+ const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character);
+ return {...character.ratings};
+}
+export function effectiveRatings(input){
+ const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),ratings={...character.ratings};
+ for(const [key,delta] of Object.entries(paddle.ratingModifiers??{}))ratings[key]=Math.max(0,Math.min(100,ratings[key]+delta));
+ return ratings;
+}
+export function skillAverage(ratings){const keys=RATING_KEYS.filter(key=>key!=='aggression');return Math.round(keys.reduce((sum,key)=>sum+(Number(ratings[key])||0),0)/keys.length)}

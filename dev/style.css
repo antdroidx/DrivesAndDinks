@@ -129,10 +129,27 @@ dialog{width:min(740px,96vw);border:1px solid #638b8b;border-radius:12px;padding
 dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading small{font-size:10px;color:#7fdbbd}
 .setup-top{grid-template-columns:160px 1fr;align-items:center;margin-bottom:18px}.player-preview{border:0;border-radius:8px;overflow:hidden}.player-preview canvas{width:160px}.player-preview span{font-size:9px}
 .character-grid{display:block}.character-grid select{width:100%;padding:13px 9px;background:#213e48;color:#f8f3da;border:1px solid #608080;border-radius:5px;font:inherit;font-size:13px}
-#player-description{font-size:12px;line-height:1.6;color:#adcbc6;margin-bottom:0}.equipment-panel{margin:12px 0;border-bottom:1px solid #3a5861}.equipment-panel summary{padding:12px 0;cursor:pointer;color:#b4d2cb;font-size:13px}.equipment-panel fieldset{margin-top:12px}
+#player-description{font-size:12px;line-height:1.6;color:#adcbc6;margin-bottom:0}.equipment-panel{margin:12px 0;border-bottom:1px solid #3a5861}.equipment-panel summary{padding:12px 0;cursor:pointer;color:#b4d2cb;font-size:13px}.equipment-panel fieldset{margin-top:12px}.equipment-panel .choice-description{display:block;line-height:1.4}
 .choice-description{display:none}.choice-card{font-family:system-ui,sans-serif;border-width:1px;border-radius:5px;padding:12px 9px 12px 30px}.choice-title{font-size:14px}.choice-style{font-size:11px}
 .ratings-heading{display:flex;justify-content:space-between;font-size:11px;letter-spacing:1px;margin:20px 0 12px;color:#d2e7dc}.ratings-heading small{font-size:10px;letter-spacing:0;color:#94b0ad}
-.loadout-stats{border:0;padding:0;gap:10px 24px;margin-bottom:22px}.stat-row{border:0!important;background:none!important;padding:0;grid-template-columns:65px 1fr 25px;gap:8px}.stat-row>span{border:0!important;padding:0;background:none!important;font-size:11px;color:#a5c1bd}.stat-meter{height:10px;border:0;padding:0;background:#29434b;border-radius:2px}.stat-meter i{border-radius:2px;background:#76dab7}.stat-row>strong{color:#c8dfd6}
+.loadout-stats{border:0;padding:0;gap:10px 24px;margin-bottom:22px}.stat-row{border:0!important;background:none!important;padding:0;grid-template-columns:65px 1fr 25px;gap:8px}.stat-row>span{border:0!important;padding:0;background:none!important;font-size:11px;color:#a5c1bd}.stat-meter{position:relative;height:10px;border:0;padding:0;background:#29434b;border-radius:2px;overflow:visible}.stat-meter i{position:absolute;inset:0 auto 0 0;border-radius:2px;background:#76dab7}.stat-meter.positive i{background:#eabf63}.stat-meter.negative i{background:#d9806c}.stat-meter u{position:absolute;top:-2px;bottom:-2px;width:2px;background:#f7f1dc;transform:translateX(-1px);pointer-events:none}.stat-meter .average-notch{position:absolute;top:-4px;bottom:-4px;width:1px;background:#ffffff55;transform:translateX(-.5px);pointer-events:none}.stat-row>strong{color:#c8dfd6;white-space:nowrap}.stat-row>strong em{display:block;font-style:normal;font-size:8px;color:#87a9a4}.stat-row>strong em:not(:empty){margin-top:1px}
 .appearance-panel{border:1px solid #3a5861;border-radius:6px;background:none}.appearance-panel summary{font-size:12px;min-height:48px;color:#d4e6dc}.appearance-panel summary small{max-width:240px}.appearance-panel summary::before{border:0;background:none}.swatch{border-width:1px;border-radius:4px}.appearance-grid{gap:18px}.color-swatch{min-width:90px;font-size:10px}
 .setup-footer{margin-top:20px;gap:12px;flex-wrap:wrap}.setup-footer label{font-size:11px;color:#a8c5bd;display:grid;gap:5px}.setup-footer select{font-size:11px;padding:8px;border-color:#496a70;border-radius:4px}.start-match{margin-left:auto;border:0;border-radius:5px;background:#80e0b5;padding:16px 20px;font-size:12px}.studio-link{color:#8fd8de;font-size:12px}.setup-heading button{border-width:1px;border-radius:4px}#team-preview{font-size:10px;color:#87aaa7}
 @media(max-width:650px){dialog{padding:18px}.setup-top{grid-template-columns:100px 1fr;gap:12px}.player-preview{display:flex}.player-preview canvas{width:100px}.player-preview span{font-size:8px}.loadout-stats{grid-template-columns:1fr 1fr;gap:10px 12px}.stat-row{grid-template-columns:52px 1fr 22px}.stat-row>span{font-size:10px}.appearance-panel summary small{display:none}.start-match{width:100%;margin:0}dialog h2{font-size:25px}.character-grid select{font-size:11px}}
+
+
+/* Expanded paddle and fourteen-skill layouts stay inside narrow dialogs. */
+@media(max-width:650px){
+  dialog{width:calc(100vw - 12px);max-width:calc(100vw - 12px);padding:12px;overflow-x:hidden}
+  .setup-heading{flex-wrap:wrap}
+  .setup-top{grid-template-columns:82px minmax(0,1fr);align-items:start;gap:10px}
+  .setup-top fieldset,.character-grid,#player-description{min-width:0;max-width:100%}
+  .character-grid select{width:100%;min-width:0}
+  .paddle-grid{grid-template-columns:1fr;min-width:0}
+  .equipment-panel .choice-card,.equipment-panel .choice-description{min-width:0;overflow-wrap:anywhere}
+  .ratings-heading{align-items:flex-start;flex-direction:column;gap:4px}
+  .ratings-heading small{line-height:1.4;white-space:normal}
+  .loadout-stats{grid-template-columns:1fr;gap:8px}
+  .stat-row{grid-template-columns:82px minmax(0,1fr) 38px}
+  .setup-footer>label,.setup-footer select{min-width:0;max-width:100%}
+}
