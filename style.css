@@ -153,3 +153,5 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
   .stat-row{grid-template-columns:82px minmax(0,1fr) 38px}
   .setup-footer>label,.setup-footer select{min-width:0;max-width:100%}
 }
+
+.appearance-grid select,.character-grid input{width:100%;background:#213e48;color:#fff;padding:10px;border:1px solid #608080;border-radius:5px}.character-grid label{display:block;margin-top:8px}.appearance-grid .swatch-row{display:block}#match-result{text-align:center}
