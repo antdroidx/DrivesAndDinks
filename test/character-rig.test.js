@@ -95,7 +95,7 @@ test('lower garments follow moving thighs and Erne includes an airborne contact'
  const ready=sampleCharacterPose({mode:'run',phase:0});
  const stride=sampleCharacterPose({mode:'run',phase:.25,frame:1});
  assert.notDeepEqual(lowerGarmentPose(ready,'male').shorts,lowerGarmentPose(stride,'male').shorts);
- assert.notDeepEqual(lowerGarmentPose(ready,'female').skirt.poly,lowerGarmentPose(stride,'female').skirt.poly);
+ const dress=lowerGarmentPose(stride,'female').skirt.poly;assert.notDeepEqual(lowerGarmentPose(ready,'female').skirt.poly,dress);assert.ok(dress[2][0]>stride.legs[1][0].x+1);assert.ok(dress[5][0]<stride.legs[0][0].x-1);
  const erne=sampleCharacterPose({mode:'erne',phase:CONTACT_PHASE});
  assert.ok(erne.jump>.9);assert.ok(erne.feet[0].y<54&&erne.feet[1].y<54);assert.ok(erne.rootOffset>10);assert.ok(lowerGarmentPose(erne,'male').bridge.length===7);
  const landing=sampleCharacterPose({mode:'erne',phase:1});assert.ok(Math.abs(landing.jump)<1e-9);assert.ok(Math.abs(animationRootOffset('erne',1,1))<1e-9);
