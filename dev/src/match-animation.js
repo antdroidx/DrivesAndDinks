@@ -1,5 +1,5 @@
-import {selectShot} from './core.js?v=50';
-import {strokeForContact} from './player-facing.js?v=50';
+import {selectShot} from './core.js?v=52';
+import {strokeForContact} from './player-facing.js?v=52';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 export function matchStrokeMode(player,shot=player.animationShot,stroke=player.stroke){
