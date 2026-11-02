@@ -57,3 +57,10 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 ## Public prototype and future development
 
 The public root and `/prototype/` preserve Playable Prototype Build 48 from commit `dd6eae74fc3ae3a32c2d2a15cb27a27e4629124e`, including the public Motion Viewer at `studio.html`. Build 15 is preserved at `/archive/build-15/` from its original frozen commit. The `main` branch is the starting point for future game development, published under `/dev/`; changes there do not replace the frozen prototype. The Pages workflow pins both historical versions explicitly.
+
+
+## Development gameplay tuning
+
+Replays use a larger centered banner and play at 75% speed. Timing windows (early / late seconds) are Easy 0.60 / 0.20, Normal 0.30 / 0.08, Hard 0.15 / 0.00; Normal is the default, with explicit difficulty choices saved locally. CPU planning includes descending head-height contacts and prioritizes legal overhead attacks. Lobs vary in height and depth; overhead pace and depth depend on technique and contact quality.
+
+Backhand style is independent of gender: bangers use two hands; speed and net styles use one; balanced and soft styles mix grips. Two hands receive power ×1.07, control ×1.08 and topspin ×1.15 with reach ×0.94. One hand receives reach ×1.10 and slice spin ×1.20. Stretched contacts and slices release to one hand. The 13th studio motion, two-handed backhand dink, temporarily shares the drive path.

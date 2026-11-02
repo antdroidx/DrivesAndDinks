@@ -13,7 +13,7 @@ const DIFFICULTY_KEY='drives-dinks.difficulty.v1',difficultyButton=document.quer
 function syncDifficultyButton(){const label=game.difficulty.toUpperCase();difficultyButton.textContent=`DIFFICULTY: ${label}`;difficultyButton.setAttribute('aria-label',`Difficulty: ${label}`)}
 function setDifficulty(value,persist=true){game.setDifficulty(value);syncDifficultyButton();if(persist)try{localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}}
 let savedDifficulty='normal';try{savedDifficulty=localStorage.getItem(DIFFICULTY_KEY)||'normal'}catch{}
-setDifficulty(savedDifficulty,false);difficultyButton.onclick=()=>setDifficulty(game.difficulty==='easy'?'normal':'easy');
+setDifficulty(savedDifficulty,false);difficultyButton.onclick=()=>setDifficulty(({easy:'normal',normal:'hard',hard:'easy'})[game.difficulty]);
 function syncPauseButton(){pauseButton.textContent=game.paused?'RESUME':'PAUSE';pauseButton.setAttribute('aria-pressed',String(game.paused));pauseButton.setAttribute('aria-label',game.paused?'Resume match':'Pause match');pauseButton.disabled=game.phase==='over'}
 function setPaused(paused){game.setPaused(paused);last=0;acc=0;syncPauseButton();syncShotButtonsForPhase();render()}
 pauseButton.onclick=()=>setPaused(!game.paused);
@@ -80,7 +80,7 @@ const replayToggle=document.createElement('button');replayToggle.textContent='RE
 function playReplay(t){
  if(!replayPlayback)return false;
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
- const frames=replayPlayback.frames,elapsed=(t-replayStarted)/1000*.65,index=Math.floor(elapsed*30);
+ const frames=replayPlayback.frames,elapsed=(t-replayStarted)/1000*.75,index=Math.floor(elapsed*30);
  if(index>=frames.length){finishReplay();return false;}
  const snapshot=frames[index];render({...snapshot,score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
 }

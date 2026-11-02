@@ -2,7 +2,7 @@ import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
-export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand']);
+export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink']);
 export const CONTACT_PHASE=.52;
 export const PIXEL_DENSITY=3;
 export const CHARACTER_BUFFER={width:96*PIXEL_DENSITY,height:96*PIXEL_DENSITY};
@@ -44,6 +44,7 @@ const wristAngles={
  forehandDrop:[0,2.4,2.5,1.4,0],backhandDrop:[0,-2.2,-2.25,-1.2,0],
  overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,2.5,2.5,.8,0],twoBackhand:[0,-1.1,-1.3,-.4,0]
 };
+paths.twoBackhandDink=paths.twoBackhand;wristAngles.twoBackhandDink=wristAngles.twoBackhand;
 const times=[0,.28,CONTACT_PHASE,.78,1];
 function samplePath(path,phase){
  let i=0;while(i<3&&phase>times[i+1])i++;
@@ -79,7 +80,7 @@ export {courtView,strokeForContact} from './player-facing.js';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
- const back=mode.startsWith('back')||mode==='twoBackhand',twoHanded=mode==='twoBackhand';
+ const back=mode.startsWith('back')||mode.startsWith('twoBackhand'),twoHanded=mode.startsWith('twoBackhand');
  const mirror=view==='near'?1:-1,facing=view==='near'?-1:1;
  const yaw=weight*(back?-.45:.35)*side,cos=Math.cos(yaw),sin=Math.sin(yaw),lean=weight*(back?-1:1)*1.2*side;
  const project=p=>{const depth=p.z*cos-p.x*sin;return {x:24+mirror*(p.x*cos+p.z*sin+lean),y:p.y+facing*.4*depth,depth:facing*depth}};

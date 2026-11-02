@@ -163,3 +163,5 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
 
 
 .replay-banner{position:absolute;left:10%;right:10%;bottom:15%;z-index:10;background:#102c35ee;border:2px solid #80e0b5;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;font:12px system-ui}.replay-banner button{min-height:44px}
+
+.replay-banner{left:7%;right:7%;bottom:12%;padding:20px;flex-direction:column;text-align:center;font-size:clamp(16px,2.3vw,26px);border-width:3px;box-shadow:0 5px 24px #000a}.replay-banner strong{width:100%;text-align:center;line-height:1.4}.replay-banner button{font-size:14px;padding:12px 24px}
