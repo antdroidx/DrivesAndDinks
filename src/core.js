@@ -114,7 +114,7 @@ export function move(p,tx,ty,dt){
  p.vx+=dvx;p.vy+=dvy;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;
  const movingSpeed=Math.hypot(p.vx,p.vy);if(!contactLock&&!recovering&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
  p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=recovering?'recover':p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';
- const outside=(p.outsideTimer||0)>0;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y));
+ const outside=(p.outsideTimer||0)>0;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));const deep=(p.baselineTimer||0)>0;p.y=p.team===0?Math.max(23,Math.min(deep?47:44,p.y)):Math.max(deep?-3:0,Math.min(21,p.y));
 }
 export function resolvePlayerCollisions(players,radius=.62,restitution=.18){
  for(let i=0;i<players.length;i++)for(let j=i+1;j<players.length;j++){

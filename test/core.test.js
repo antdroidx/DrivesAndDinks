@@ -20,7 +20,7 @@ test('kitchen lines forbid volleys',()=>{assert.match(legalVolley(0,29,0,3),/Kit
 test('service on kitchen line is a fault',()=>{const g=new Game();g.serve();Object.assign(g.ball,{x:g.serveX<10?15:5,y:15,z:.001,vx:0,vy:0,vz:-1});g.update(C.dt);assert.equal(g.message,'SERVICE FAULT')});
 
 
-test('serve formation keeps serving team back and receiving partner at kitchen',()=>{const g=new Game();for(const team of [0,1]){g.score.team=team;g.serveSetup();const serving=g.players.filter(p=>p.team===team),receiving=g.players.filter(p=>p.team!==team);for(const p of serving)assert.ok(team===0?p.y>=43:p.y<=1);const partner=receiving.find(p=>p!==g.serveReceiver);assert.equal(g.serveReceiver.y,team===0?2:42);assert.equal(partner.y,team===0?14:30);assert.notEqual(g.serveReceiver.x<10,g.server.x<10)}});
+test('serve formation keeps serving team back and receiving partner at kitchen',()=>{const g=new Game();for(const team of [0,1]){g.score.team=team;g.serveSetup();const serving=g.players.filter(p=>p.team===team),receiving=g.players.filter(p=>p.team!==team);for(const p of serving)assert.ok(team===0?p.y>=43:p.y<=1);const partner=receiving.find(p=>p!==g.serveReceiver);assert.equal(g.serveReceiver.y,team===0?-1:45);assert.equal(partner.y,team===0?14:30);assert.notEqual(g.serveReceiver.x<10,g.server.x<10)}});
 
 
 test('receiving partner holds their assigned side during the serve',()=>{for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();const partner=g.players.find(p=>p.team!==team&&p!==g.serveReceiver);const startX=partner.x;g.serve();for(let i=0;i<30&&g.phase==='rally';i++)g.update(C.dt);assert.equal(partner.x<10,startX<10);assert.ok(Math.abs(partner.x-startX)<1)}});
@@ -33,7 +33,7 @@ test('serving team stays back while awaiting the return',()=>{const g=new Game()
 test('seeded watch match reaches a legal winning score',()=>{const original=Math.random;let seed=123456;Math.random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};try{const g=new Game();g.mode='watch';let maxShots=0;for(let i=0;i<120*1200&&g.phase!=='over';i++){g.update(C.dt);maxShots=Math.max(maxShots,g.shots)}assert.equal(g.phase,'over');assert.ok(maxShots>=3);const [a,b]=g.score.points;assert.ok(Math.max(a,b)>=11&&Math.abs(a-b)>=2)}finally{Math.random=original}});
 
 
-test('serve returner stays near baseline before the serve bounces',()=>{for(const team of [0,1]){const g=new Game();g.mode='watch';g.score.team=team;g.serveSetup();const r=g.serveReceiver;g.serve();for(let i=0;i<110&&g.phase==='rally'&&g.bounces===0;i++){g.update(C.dt);assert.ok(r.team===0?r.y>=37:r.y<=7,`returner moved to ${r.y}`)}}});
+test('serve returner stays near baseline before the serve bounces',()=>{for(const team of [0,1]){const g=new Game();g.mode='watch';g.score.team=team;g.serveSetup();const r=g.serveReceiver;g.serve();for(let i=0;i<110&&g.phase==='rally'&&g.bounces===0;i++){g.update(C.dt);assert.ok(r.team===0?r.y>=40:r.y<=4,`returner moved to ${r.y}`)}}});
 
 
 test('CPU can use a defensive lob against a pair at the kitchen',()=>{assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:true,random:.99}),'lob');assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:false,random:.99}),'dink')});
@@ -177,3 +177,5 @@ test('return difficulty affects mishit pressure and safe shot selection',()=>{
 test('serve returns remain drives even when return difficulty is severe',()=>{
  assert.equal(chooseCpuShot({shots:1,team:0,y:40,height:1.4,difficulty:.95,random:.5}),'drive');
 });
+
+test('serve receivers begin behind the baseline while awaiting the bounce',()=>{for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();assert.ok(g.serveReceiver.team===0?g.serveReceiver.y>44:g.serveReceiver.y<0);assert.ok(g.serveReceiver.baselineTimer>2);}});

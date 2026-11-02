@@ -88,3 +88,6 @@ Movement now integrates acceleration-limited velocity and braking rather than di
 
 
 Serve returns use a dedicated safe target and lower pressure scaling. They remain drives under high return difficulty, with placement constrained away from the sidelines. In a 30-match regression sample this reduced shot-two rally endings from 122 to 4, all of which were unreachable rather than out.
+
+
+Serve receivers start one foot behind the baseline, remain behind the line during the initial serve presentation, and then move forward under the normal momentum model. A short serve-hold plus the deeper-start allowance prevents players from snapping back inbounds before the return.
