@@ -161,3 +161,8 @@ test('side spin curves the ball laterally and decays over time',()=>{
 test('serves make contact at a forward waist-height toss point',()=>{
  for(const team of [0,1]){const g=new Game();g.score.team=team;g.serveSetup();const server=g.server,y=server.y;g.serve();assert.equal(server.contactPoint.z,2.35);assert.equal(g.ball.z,2.35);assert.ok(team===0?server.contactPoint.y<y:server.contactPoint.y>y);assert.equal(server.stroke,'serve');assert.equal(server.animationContactStart,true)};
 });
+
+test('the net cannot block a ball passing outside the posts',()=>{
+ const b={x:-1,y:22.1,z:1,vx:2,vy:-10,vz:0,radius:C.ballRadius};
+ assert.notEqual(stepBall(b,.02),'net');assert.ok(b.y<22);
+});

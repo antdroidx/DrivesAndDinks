@@ -93,6 +93,6 @@ test('stroke loading shifts stance and weight without moving the feet during con
 
 test('Erne includes an airborne contact and lateral travel',()=>{
  const erne=sampleCharacterPose({mode:'erne',phase:CONTACT_PHASE});
- assert.ok(erne.jump>.9);assert.ok(erne.feet[0].y<54&&erne.feet[1].y<54);assert.ok(erne.rootOffset>10);
+ assert.ok(erne.jump>.9);assert.ok(erne.feet[0].y<54&&erne.feet[1].y<54);assert.ok(erne.rootOffset>14);assert.ok(animationRootOffset('erne',.72,1)>14);assert.ok(animationRootOffset('erne',.9,1)>0&&animationRootOffset('erne',.9,1)<15);
  const landing=sampleCharacterPose({mode:'erne',phase:1});assert.ok(Math.abs(landing.jump)<1e-9);assert.ok(Math.abs(animationRootOffset('erne',1,1))<1e-9);
 });

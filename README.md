@@ -75,4 +75,4 @@ The replay banner sits at the top of the playfield so it stays clear of both nea
 Serve contact now occurs at a forward, waist-height toss point 2.35 court feet above the surface. The serve stroke travels from a low load through upward contact to a high finish, and the serve is available as the 15th Motion Viewer comparison.
 
 
-Development courts can force a repeatable special-shot look with `?scenario=erne` or `?scenario=atp`. The player moves into position while the ball approaches, then the actual shot animation and physics begin at contact. These URLs exercise the normal game renderer and court rather than the Motion Viewer.
+Development courts can force a repeatable special-shot look with `?scenario=erne` or `?scenario=atp`. The Erne approaches from inside the court toward the outside sideline. The ATP scenario includes an in-court bounce, an outside-sideline chase, and a return whose ball crosses the net plane outside the post. In both cases the actual shot animation and physics begin at contact. These URLs exercise the normal game renderer and court rather than the Motion Viewer.

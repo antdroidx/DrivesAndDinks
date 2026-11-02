@@ -10,5 +10,5 @@ test('CPU attacks reachable overheads rather than choosing a drop',()=>{for(cons
 test('weak overhead contact reduces pace',()=>{const a={x:10,y:30,z:6},b={...a};launch(a,12,6,'overhead',{power:1.2,spin:1},1);launch(b,12,6,'overhead',{power:1.2,spin:1},.5);assert.ok(Math.abs(a.vy)>Math.abs(b.vy));});
 
 test('dev scenarios move into position and trigger real Erne and ATP shots',()=>{
- for(const type of ['erne','atp']){const g=new Game();assert.equal(g.startScenario(type),true);assert.equal(g.mode,'watch');for(let i=0;i<120&&g.scenario;i++)g.update(1/120);assert.equal(g.scenario,null);assert.equal(g.lastShot,type);assert.equal(g.players[0].animationShot,type);assert.equal(g.players[0].contactPoint.z,type==='erne'?3.8:1.55);assert.ok(Math.hypot(g.ball.vx,g.ball.vy)>0)};
+ for(const type of ['erne','atp']){const g=new Game();assert.equal(g.startScenario(type),true);assert.equal(g.mode,'watch');for(let i=0;i<140&&g.scenario;i++)g.update(1/120);assert.equal(g.scenario,null);assert.equal(g.lastShot,type);assert.equal(g.players[0].animationShot,type);assert.equal(g.players[0].contactPoint.z,type==='erne'?3.8:1.35);if(type==='atp'){assert.equal(g.players[0].contactType,'groundstroke');assert.ok(g.players[0].contactPoint.x<-1);assert.ok(g.ball.vx>0)}assert.ok(Math.hypot(g.ball.vx,g.ball.vy)>0)};
 });
