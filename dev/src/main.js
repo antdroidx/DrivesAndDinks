@@ -1,10 +1,10 @@
-import {sampleMatchAnimation} from './match-animation.js?v=48';
-import {setupSelection} from './selection.js?v=48';
-import {COURT_PALETTES,CHARACTERS} from './roster.js?v=48';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=48';
-import {Game} from './game.js?v=48';
-import {selectShot,serveAim} from './core.js?v=48';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=48';
+import {sampleMatchAnimation} from './match-animation.js?v=50';
+import {setupSelection} from './selection.js?v=50';
+import {COURT_PALETTES,CHARACTERS} from './roster.js?v=50';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=50';
+import {Game} from './game.js?v=50';
+import {selectShot,serveAim} from './core.js?v=50';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=50';
 
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');

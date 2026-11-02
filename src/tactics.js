@@ -1,4 +1,4 @@
-import {C,stepBall,side} from './core.js?v=15';
+import {C,stepBall,side} from './core.js?v=48';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -17,7 +17,7 @@ function contacts(players,team,ball,shots,bounces){
       const target={x:clamp(future.x,1,19),y:clamp(y,team===0?23:1,team===0?43:21)};
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
       const reach=1.3*(p.abilities?.reach??1),speed=(p.abilities?.speed??12)*.8;
-      if(travel<=Math.max(0,time-(p.reactionWait||0))*speed+reach)found.set(p.id,{...target,time,bounces:count});
+      if(travel<=Math.max(0,time-(p.reactionWait||0))*speed+reach)found.set(p.id,{...target,z:future.z,time,bounces:count});
     }
     if(found.size===players.length)break;
   }
@@ -62,6 +62,15 @@ export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingT
     }
   }
   return {x,y,role};
+}
+
+export function separateTargets(entries,team,receiverId){
+  const pair=entries.filter(entry=>entry.player.team===team);if(pair.length<2)return;
+  const [a,b]=pair,support=a.player.id===receiverId?b:a,active=support===a?b:a;
+  const distance=Math.hypot(support.player.x-active.player.x,support.player.y-active.player.y);if(distance>=2.3)return;
+  const direction=(support.player.x-active.player.x)||((lane(support.player)<lane(active.player))?-1:1),push=Math.min(1.1,(2.3-distance)*.42);
+  support.target.x=clamp(support.target.x+Math.sign(direction)*push,.5,19.5);
+  support.target.y=clamp(support.target.y+(team===0?push:-push),team===0?23:0,team===0?44:21);
 }
 
 export function separatePartners(players,team,receiverId){
