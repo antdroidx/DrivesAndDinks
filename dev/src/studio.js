@@ -1,5 +1,5 @@
-import {MOTIONS,CONTACT_PHASE,drawPixelCharacter,sampleCharacterPose,animationRootOffset} from './pixel-character.js?v=63';
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=63';
+import {MOTIONS,CONTACT_PHASE,drawPixelCharacter,sampleCharacterPose,animationRootOffset} from './pixel-character.js?v=64';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=64';
 const labels=['Running','Side-step','Volley','Forehand drive','Backhand drive','Forehand dink','Backhand dink','Forehand drop','Backhand drop','Overhead smash','Lob','Two-hand backhand drive','Two-hand backhand dink','Erne approach + airborne volley','Serve toss and contact'];
 const notes=['Alternating planted feet','Lateral push & recovery','Compact blocking motion','Full side swing','Cross-body follow-through','Short, low lifting arc','Compact cross-body lift','Low to high, longer finish','Cross-body lifting drop','High reach, downward finish','Underhand lift & high finish','Both hands stay on the grip','Two-handed dink · shared drive motion for now','Outside-kitchen approach, jump, volley, and recovery','Low-to-high toss, waist contact, and high finish'];
 const root=document.querySelector('#motions'),appearance={shirtColor:'green',paddleColor:'mint',hairColor:'brown',skinColor:'medium'};

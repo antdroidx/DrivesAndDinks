@@ -1,4 +1,4 @@
-import {strokeForContact} from './player-facing.js?v=63';
+import {strokeForContact} from './player-facing.js?v=64';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
@@ -67,7 +67,7 @@ export function stepBall(b,dt=C.dt){
  if(spinX||spinY||spinZ){b.vx+=(spinY*b.vz-spinZ*b.vy)*C.magnus*dt;b.vy+=(spinZ*b.vx-spinX*b.vz)*C.magnus*dt;b.vz+=(spinX*b.vy-spinY*b.vx)*C.magnus*dt}
  b.spin=(b.spin||0)*Math.exp(-C.spinDecay*dt);b.spinX=(b.spinX||0)*Math.exp(-C.spinDecay*dt);b.spinY=(b.spinY||0)*Math.exp(-C.spinDecay*dt);b.spinZ=(b.spinZ||0)*Math.exp(-C.spinDecay*dt);
  b.x+=b.vx*dt;b.y+=b.vy*dt;b.z+=b.vz*dt;
- if((oldY-C.net)*(b.y-C.net)<=0&&oldY!==b.y){const f=(C.net-oldY)/(b.y-oldY),crossX=b.x-b.vx*dt*(1-f),crossZ=oldZ+(b.z-oldZ)*f;if(crossZ-radius<netHeightAt(crossX))return 'net'}
+ if((oldY-C.net)*(b.y-C.net)<=0&&oldY!==b.y){const f=(C.net-oldY)/(b.y-oldY),crossX=b.x-b.vx*dt*(1-f),crossZ=oldZ+(b.z-oldZ)*f;if(crossX>=0&&crossX<=C.width&&crossZ-radius<netHeightAt(crossX))return 'net'}
  if(b.z<=radius&&b.vz<0){
   b.z=radius;
   const impactSpeed=Math.abs(b.vz),restitution=Math.max(.58,C.bounce-Math.max(0,impactSpeed-22)*.003)+(spin>0?.025:spin<0?-.045:0);
@@ -97,7 +97,7 @@ export class Score {
  get player(){return this.serverPlayer}
  get call(){return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
-export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=p.abilities?.speed??C.speed;const contactLock=p.swing>(p.swingDuration||.36)*.82;const speed=Math.min(maxSpeed*(contactLock?.72:1),d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const response=1-Math.exp(-((p.abilities?.acceleration??C.accel)/2.2)*dt);p.vx+=(vx-p.vx)*Math.min(1,response);p.vy+=(vy-p.vy)*Math.min(1,response);p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;const movingSpeed=Math.hypot(p.vx,p.vy);if(!contactLock&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';p.x=Math.max(0,Math.min(20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
+export function move(p,tx,ty,dt){const dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=p.abilities?.speed??C.speed;const contactLock=p.swing>(p.swingDuration||.36)*.82;const speed=Math.min(maxSpeed*(contactLock?.72:1),d/dt);const vx=d?dx/d*speed:0,vy=d?dy/d*speed:0;const response=1-Math.exp(-((p.abilities?.acceleration??C.accel)/2.2)*dt);p.vx+=(vx-p.vx)*Math.min(1,response);p.vy+=(vy-p.vy)*Math.min(1,response);p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;const movingSpeed=Math.hypot(p.vx,p.vy);if(!contactLock&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';const outside=p.outsideTimer>0; p.x=Math.max(outside?-2.2:0,Math.min(outside?22.2:20,p.x));p.y=p.team===0?Math.max(23,Math.min(44,p.y)):Math.max(0,Math.min(21,p.y))}
 export function receiver(players,team,x,y){return players.filter(p=>p.team===team).reduce((a,b)=>Math.hypot(a.x-x,a.y-y)<Math.hypot(b.x-x,b.y-y)?a:b)}
 
 
