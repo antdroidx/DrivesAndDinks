@@ -1,8 +1,8 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=60';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=61';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
-export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne']);
+export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne','serve']);
 export const CONTACT_PHASE=.52;
 export const PIXEL_DENSITY=3;
 export const CHARACTER_BUFFER={width:96*PIXEL_DENSITY,height:96*PIXEL_DENSITY};
@@ -18,7 +18,7 @@ export function appearancePalette(a={}){
  return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7',sock:'#dbe3de',accent:shade(shirt,.55),grip:'#d9dde0'};
 }
 export function characterFrame(mode='idle',phase=0,frame=0){
- const row=Math.max(0,MOTIONS.indexOf(mode==='slide'?'shuffle':mode==='serve'?'lob':mode));
+ const row=Math.max(0,MOTIONS.indexOf(mode==='slide'?'shuffle':mode));
  return {row,col:['run','shuffle','slide'].includes(mode)?Math.abs(Math.floor(frame))%4:Math.floor(clamp(phase,0,.999)*4)};
 }
 // Ready, anticipation, impact, follow-through, recovery. Different arcs for
@@ -35,7 +35,7 @@ const paths={
  backhandDrop:[READY,[-9,41,2],[-12,40,11],[-2,24,14],READY],
  overhead:[READY,[9,7,-3],[10,3,10],[14,36,15],READY],
  lob:[READY,[6,43,4],[10,41,14],[6,15,17],READY],
- serve:[READY,[11,43,1],[12,42,13],[-4,24,17],READY],
+ serve:[READY,[12,39,2],[11,33,14],[-4,15,16],READY],
  twoBackhand:[READY,[-9,26,1],[-13,33,12],[10,20,14],READY],
  erne:[READY,[15,31,-2],[19,23,7],[7,22,13],READY]
 };
@@ -43,7 +43,7 @@ const wristAngles={
  volley:[0,.3,.65,.8,0],forehand:[0,1.3,1.3,-1.1,0],backhand:[0,-1.1,-1.3,1.1,0],
  forehandDink:[0,2.6,2.7,2,0],backhandDink:[0,-2.2,-2.25,-1.7,0],
  forehandDrop:[0,2.4,2.5,1.4,0],backhandDrop:[0,-2.2,-2.25,-1.2,0],
- overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,2.5,2.5,.8,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0]
+ overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,1.4,1.9,-.6,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0]
 };
 paths.twoBackhandDink=paths.twoBackhand;wristAngles.twoBackhandDink=wristAngles.twoBackhand;
 const times=[0,.28,CONTACT_PHASE,.78,1];
@@ -77,7 +77,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=60';
+export {courtView,strokeForContact} from './player-facing.js?v=61';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
