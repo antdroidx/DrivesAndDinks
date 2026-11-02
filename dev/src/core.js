@@ -1,7 +1,12 @@
-import {strokeForContact} from './player-facing.js?v=74';
+import {strokeForContact} from './player-facing.js?v=75';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
-export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1});
+export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
+const DEFAULT_SHAPE_MODIFIERS=Object.freeze({power:1,control:1,reach:1,handSpeed:1,sweetSpot:1});
+export function paddleShapeModifiers(playerOrPaddle={}){
+ const paddle=playerOrPaddle?.paddle??playerOrPaddle??{};
+ return {power:paddle.shapePower??1,control:paddle.shapeControl??1,reach:paddle.shapeReach??1,handSpeed:paddle.shapeHandSpeed??1,sweetSpot:paddle.shapeSweetSpot??1};
+}
 export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',shirtColor:'green',paddleColor:'mint',court:'blue-gray'}}}
 export function serveAim(player,aim){
  const value=Math.max(1,Math.min(19,Number(aim)||10));
@@ -30,8 +35,8 @@ export function shotSkill(player,shot='drive'){
  if(shot==='slice')return ((abilities.drive??1)+(abilities.control??1))/2;
  return abilities[shot]??abilities.drive??1;
 }
-export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocity={x:0,y:0,z:0},normal={x:0,y:-1,z:0},center,power=1,control=1,spin=1,quality=1,swingDirection=1}){
- const dx=(ball.x??0)-(center?.x??0),dy=(ball.y??0)-(center?.y??0),dz=((ball.z??0)-(center?.z??0))*.55,offset=Math.hypot(dx,dy,dz),sweetSpot=Math.exp(-((offset/.72)**2));
+export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocity={x:0,y:0,z:0},normal={x:0,y:-1,z:0},center,power=1,control=1,spin=1,quality=1,swingDirection=1,sweetSpotScale=1}){
+ const dx=(ball.x??0)-(center?.x??0),dy=(ball.y??0)-(center?.y??0),dz=((ball.z??0)-(center?.z??0))*.55,offset=Math.hypot(dx,dy,dz),sweetSpot=Math.exp(-((offset/(.72*Math.max(.55,sweetSpotScale)))**2));
  const relative={x:(incoming.x??0)-paddleVelocity.x,y:(incoming.y??0)-paddleVelocity.y,z:(incoming.z??0)-paddleVelocity.z};
  const closing=Math.max(0,-(relative.x*normal.x+relative.y*normal.y+relative.z*normal.z)+(paddleVelocity.x*normal.x+paddleVelocity.y*normal.y+paddleVelocity.z*normal.z));
  const closingPace=Math.max(0,Math.min(1,closing/34)),edge=1-sweetSpot,tangent=Math.hypot(dx,dy)*swingDirection;
@@ -44,16 +49,16 @@ export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocit
  };
 }
 export function paddleContactTarget(p,b,shot='drive'){
- const reach=p.abilities?.reach??1,side=b.x>=p.x?1:-1,netward=p.team===0?-.46:.46;
+ const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,side=b.x>=p.x?1:-1,netward=p.team===0?-.46:.46;
  if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+netward*.55,z:Math.max(5.2,Math.min(7,b.z??5.8))};
  return {x:p.x+side*(.62+.2*reach),y:p.y+netward,z:Math.max(.35,Math.min(4.5,b.z??1.2))};
 }
 export function paddleContactAvailable(p,b,shot='drive'){
- const target=paddleContactTarget(p,b,shot),reach=(p.abilities?.reach??1)*gripModifiers(p,b,shot).reach;
+ const target=paddleContactTarget(p,b,shot),shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*gripModifiers(p,b,shot).reach*shape.reach;
  return b.z>=0&&b.z<=(shot==='overhead'?7.4:5.2)&&((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2<=1;
 }
 export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
- const reach=p.abilities?.reach??1
+ const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach
  const paddle=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-paddle.x)/(.95*reach))**2+((b.y-paddle.y)/.9)**2+((b.z-paddle.z)/1.1)**2)
  const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed),fatigue=1-Math.max(0,Math.min(1,p.stamina??1))
  const shotDifficulty={serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
@@ -62,7 +67,7 @@ export function contactQuality(p,b,shot,buffered=false,random=Math.random(),diff
  chance*=shotDifficulty*(1+fatigue*.35)
  if(easy)chance*=.62
  if(buffered)chance*=easy?.52:.84
- const specialReturn=b.shot==='atp'||b.shot==='erne'?1.55:1,control=Math.max(.55,(p.abilities?.control??1)*(p.paddle?.control??1)*gripModifiers(p,b,shot).control),technique=Math.max(.72,shotSkill(p,shot)),defense=Math.max(.75,p.abilities?.defense??1)
+ const specialReturn=b.shot==='atp'||b.shot==='erne'?1.55:1,control=Math.max(.55,(p.abilities?.control??1)*(p.paddle?.control??1)*shape.control*gripModifiers(p,b,shot).control),technique=Math.max(.72,shotSkill(p,shot)),defense=Math.max(.75,p.abilities?.defense??1)
  if(shot==='drive'&&b.vz>0&&(b.z??0)<1.5&&(b.shot==='serve-hard'||b.shot==='serve-soft'||b.bounces>0))chance*=1.25;
  chance*=specialReturn;chance/=Math.max(.55,control**2.2*technique*(shot==='dink'||shot==='drop'?defense:1))
  chance=Math.min(easy?.3:.42,Math.max(0,chance))
@@ -70,7 +75,7 @@ export function contactQuality(p,b,shot,buffered=false,random=Math.random(),diff
  return {chance,mishit,quality:mishit?Math.max(easy?.65:.45,.74-chance*.55):1-Math.min(.12,chance*.2)}
 }
 export function contactDifficulty(p,b,shot='drive'){
- const reach=p.abilities?.reach??1,target=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2),motion=Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed),height=shot==='overhead'?Math.abs((b.z??1)-6):Math.max(0,Math.abs((b.z??1)-1.6)-1.1)/2.4,special=b.shot==='atp'||b.shot==='erne'?.18:0;
+ const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,target=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2),motion=Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed),height=shot==='overhead'?Math.abs((b.z??1)-6):Math.max(0,Math.abs((b.z??1)-1.6)-1.1)/2.4,special=b.shot==='atp'||b.shot==='erne'?.18:0;
  return Math.max(0,Math.min(1,radial*.5+motion*.32+height*.18+special));
 }
 export function netCrossingX(start,target){
