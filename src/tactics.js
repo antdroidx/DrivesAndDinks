@@ -1,4 +1,4 @@
-import {C,stepBall,side} from './core.js?v=48';
+import {C,stepBall,side} from './core.js?v=77';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -9,11 +9,12 @@ function contacts(players,team,ball,shots,bounces){
   for(let tick=1;tick<=216;tick++){
     const event=stepBall(future,C.dt);if(event==='net')break;
     if(event==='bounce'){count++;if(count>=2||future.x<0||future.x>20||future.y<0||future.y>44)break}
-    if(tick%4||side(future.y)!==team||future.z>3.4||(shots<=2&&count===0))continue;
+    if(tick%4||side(future.y)!==team||future.z>7.4||(shots<=2&&count===0))continue;
     for(const p of players){
       if(found.has(p.id))continue;
       const y=count===0?(team===0?Math.max(29.6,future.y):Math.min(14.4,future.y)):future.y;
       if(Math.abs(future.y-y)>1.6)continue;
+      if(future.z>3.4&&(future.z<5.2||future.vz>0))continue;
       const target={x:clamp(future.x,1,19),y:clamp(y,team===0?23:1,team===0?43:21)};
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
       const reach=1.3*(p.abilities?.reach??1),speed=(p.abilities?.speed??12)*.8;

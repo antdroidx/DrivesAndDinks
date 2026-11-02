@@ -161,3 +161,10 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
 /* Keep radio inputs accessible while showing only the actual color swatch. */
 .color-options label{position:relative}.color-options input{position:absolute;opacity:0;width:1px;height:1px;margin:0}.color-options label:focus-within{outline:2px solid #80e0b5;outline-offset:-2px}
 
+
+.playfield{position:relative}.replay-banner{position:absolute;left:10%;right:10%;top:8px;bottom:auto;z-index:10;background:#102c35ee;border:2px solid #80e0b5;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;font:12px system-ui}.replay-banner button{min-height:44px}
+
+.replay-banner{left:7%;right:7%;top:8px;bottom:auto;padding:20px;flex-direction:column;text-align:center;font-size:clamp(16px,2.3vw,26px);border-width:3px;box-shadow:0 5px 24px #000a}.replay-banner strong{width:100%;text-align:center;line-height:1.4}.replay-banner button{font-size:14px;padding:12px 24px}
+
+
+.point-actions{display:flex;align-items:center;justify-content:center;gap:18px;min-height:56px;padding:9px 16px;background:#122b33;border-top:1px solid #557c77;border-bottom:1px solid #557c77;color:#f7f1da}.point-actions[hidden]{display:none}.point-actions div{display:flex;align-items:baseline;gap:10px}.point-actions small{color:#8fd9bd;font-size:10px;letter-spacing:1px}.point-actions strong{font:700 13px system-ui}.point-actions button{min-height:40px;padding:8px 16px;background:#80e0b5;color:#122b33;border:0;border-radius:4px;font-weight:800;cursor:pointer}.point-actions button:focus-visible{outline:2px solid #fff3c4;outline-offset:2px}@media(max-width:650px){.point-actions{flex-direction:column;gap:8px;padding:10px}.point-actions div{flex-direction:column;align-items:center;gap:2px}.point-actions button{width:100%}}
