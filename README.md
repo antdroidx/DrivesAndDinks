@@ -69,4 +69,4 @@ Backhand style is independent of gender: bangers use two hands; speed and net st
 Shorts and skirt hems are generated from the animated thigh positions, so the lower garment follows the legs through running, sliding, jumping, and recovery instead of remaining a fixed silhouette. The Motion Viewer supports `?pose=impact` to inspect contact and flight poses directly.
 
 
-The replay banner sits at the top of the playfield so it stays clear of both near-court players on small screens. The tennis dress widens below the waistband to cover the animated upper-thigh joints throughout the running and jumping poses.
+The replay banner sits at the top of the playfield so it stays clear of both near-court players on small screens. The tennis dress keeps its original silhouette while tapered thigh roots remain beneath the garment through running and jumping poses. Shorts and skirt use layered shading and pleats for the 2.5D treatment.
