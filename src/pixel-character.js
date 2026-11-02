@@ -2,7 +2,7 @@ import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
-export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink']);
+export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne']);
 export const CONTACT_PHASE=.52;
 export const PIXEL_DENSITY=3;
 export const CHARACTER_BUFFER={width:96*PIXEL_DENSITY,height:96*PIXEL_DENSITY};
@@ -36,13 +36,14 @@ const paths={
  overhead:[READY,[9,7,-3],[10,3,10],[14,36,15],READY],
  lob:[READY,[6,43,4],[10,41,14],[6,15,17],READY],
  serve:[READY,[11,43,1],[12,42,13],[-4,24,17],READY],
- twoBackhand:[READY,[-9,26,1],[-13,33,12],[10,20,14],READY]
+ twoBackhand:[READY,[-9,26,1],[-13,33,12],[10,20,14],READY],
+ erne:[READY,[15,31,-2],[19,23,7],[7,22,13],READY]
 };
 const wristAngles={
  volley:[0,.3,.65,.8,0],forehand:[0,1.3,1.3,-1.1,0],backhand:[0,-1.1,-1.3,1.1,0],
  forehandDink:[0,2.6,2.7,2,0],backhandDink:[0,-2.2,-2.25,-1.7,0],
  forehandDrop:[0,2.4,2.5,1.4,0],backhandDrop:[0,-2.2,-2.25,-1.2,0],
- overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,2.5,2.5,.8,0],twoBackhand:[0,-1.1,-1.3,-.4,0]
+ overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,2.5,2.5,.8,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0]
 };
 paths.twoBackhandDink=paths.twoBackhand;wristAngles.twoBackhandDink=wristAngles.twoBackhand;
 const times=[0,.28,CONTACT_PHASE,.78,1];
@@ -111,13 +112,28 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  const arms=arms3.map(chain=>chain.map(project)),paddle=project(paddle3),hand=project(hand3);
  const angle=Math.atan2(-(hand.x-paddle.x),hand.y-paddle.y);
  const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-.62:.78)*side,stance=action?1.6+load*1.2:0;
- const neck=project({x:0,y:23+bob+crouch,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift,y:41+bob+crouch*.45};
- const feet=mode==='run'?[{x:19+stride*2,y:59-stride*3},{x:29-stride*2,y:59+stride*3}]:[
+ const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*3.2:0;
+ const neck=project({x:0,y:23+bob+crouch-jump*3.2,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift+lateralJump,y:41+bob+crouch*.45-jump*3.2};
+ let feet=mode==='run'?[{x:19+stride*2,y:59-stride*3},{x:29-stride*2,y:59+stride*3}]:[
   {x:19-stance-stride*4,y:59-Math.max(0,stride)*2-Math.max(0,weightShift)*.9},
   {x:29+stance+stride*4,y:59-Math.max(0,-stride)*2-Math.max(0,-weightShift)*.9}
  ];
+ if(mode==='erne')feet=feet.map((foot,index)=>({x:foot.x+(index?1:-1)*side*jump*2,y:foot.y-jump*(index?7.2:5.6)}));
  const legs=feet.map((f,i)=>{const hip={x:hips.x+(i?4:-4),y:hips.y};return [hip,jointBetween(hip,f,9,9,i?-1:1),f]});
- return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,angle,twoHanded,bob:bob+crouch,gripSide,weightShift,reachLimited:length(correction)>.01};
+ return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,angle,twoHanded,bob:bob+crouch,gripSide,weightShift,jump,reachLimited:length(correction)>.01};
+}
+export function lowerGarmentPose(pose,body='male'){
+ const {hips,legs}=pose,waist=hips.y-2;
+ const sample=(chain,t)=>({x:lerp(chain[0].x,chain[1].x,t),y:lerp(chain[0].y,chain[1].y,t)});
+ const shorts=legs.map(([hip,knee])=>{
+  const dx=knee.x-hip.x,dy=knee.y-hip.y,d=Math.max(.001,Math.hypot(dx,dy)),nx=-dy/d,ny=dx/d,end=sample([hip,knee],.48);
+  return [[hip.x+nx*4.5,hip.y+ny*4.5],[end.x+nx*3.7,end.y+ny*3.7],[end.x-nx*3.7,end.y-ny*3.7],[hip.x-nx*4.5,hip.y-ny*4.5]];
+ });
+ if(body==='female'){
+  const left=sample(legs[0],.42),right=sample(legs[1],.42),hemY=Math.max(left.y,right.y)+2.8;
+  return {waist,shorts,skirt:{poly:[[hips.x-5,waist],[hips.x+5,waist],[Math.max(hips.x+8,right.x+3.6),hemY],[Math.min(hips.x-8,left.x-3.6),hemY]],pleats:[-.45,0,.45].map(f=>[[lerp(hips.x,left.x,.22)*((1+f)/2)+lerp(hips.x,right.x,.22)*((1-f)/2),waist+2],[lerp(Math.min(hips.x-8,left.x-3.6),Math.max(hips.x+8,right.x+3.6),(f+.45)/.9),hemY-1]])}};
+ }
+ return {waist,shorts,skirt:null};
 }
 export function characterPaddleAnchor(options={}){return sampleCharacterPose(options).paddle}
 
@@ -172,8 +188,10 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  poly(c,[[neck.x-5,top+3],[neck.x-2,top+3],[hips.x-2,waist-1],[hips.x-4,waist-1]],colors.shirtLight);
  poly(c,[[neck.x+4,top+3],[neck.x+6,top+4],[hips.x+4,waist],[hips.x+1,waist]],colors.shirtDark);
  c.fillStyle=colors.shoe;c.fillRect(Math.round(hips.x-4),Math.round(waist-1),8,1);
- if(female){poly(c,[[hips.x-5,waist],[hips.x+5,waist],[hips.x+9,waist+8],[hips.x-9,waist+8]],colors.outline);poly(c,[[hips.x-4,waist],[hips.x+4,waist],[hips.x+7,waist+7],[hips.x-7,waist+7]],colors.shirt);for(const offset of [-4,0,4])segment(c,{x:hips.x+offset*.6,y:waist+2},{x:hips.x+offset,y:waist+7},1,colors.shirtDark)}
- else {poly(c,[[hips.x-6,waist],[hips.x+6,waist],[hips.x+7,waist+8],[hips.x+1,waist+8],[hips.x,waist+4],[hips.x-1,waist+8],[hips.x-7,waist+8]],colors.outline);c.fillStyle=colors.bottom;c.fillRect(Math.round(hips.x-5),Math.round(waist+1),5,6);c.fillRect(Math.round(hips.x+1),Math.round(waist+1),5,6)}
+ const garment=lowerGarmentPose(pose,appearance.body);
+ if(female){const skirt=garment.skirt;poly(c,skirt.poly,colors.outline);poly(c,skirt.poly.map(([x,y])=>[lerp(x,hips.x,.08),lerp(y,waist,.06)]),colors.shirt);for(const [a,b] of skirt.pleats)segment(c,{x:a,y:b},b,1,colors.shirtDark)}
+ else {for(const panel of garment.shorts){poly(c,panel,colors.outline);poly(c,panel.map(([x,y])=>[lerp(x,hips.x,.1),lerp(y,garment.waist+.5,.08)]),colors.bottom)}}
+ c.fillStyle=colors.accent;c.fillRect(Math.round(hips.x-4),Math.round(garment.waist-1),8,1)
  c.fillStyle=colors.skinDark;c.fillRect(Math.round(neck.x-2),Math.round(21+bob),4,4);
  const style=identityStyle,hx=neck.x+(view==='far'?(style-1.5)*.35:0),hy=neck.y-8;
  poly(c,[[hx-4,hy-7],[hx+3,hy-7],[hx+6,hy-4],[hx+6,hy+3],[hx+3,hy+7],[hx-3,hy+7],[hx-6,hy+3],[hx-6,hy-4]],colors.outline);

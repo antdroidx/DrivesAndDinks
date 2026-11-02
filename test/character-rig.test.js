@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette,ARM_LENGTHS,courtView,strokeForContact,solveArm3D,PIXEL_DENSITY,CHARACTER_BUFFER} from '../src/pixel-character.js';
+import {MOTIONS,CONTACT_PHASE,sampleCharacterPose,appearancePalette,ARM_LENGTHS,courtView,strokeForContact,solveArm3D,PIXEL_DENSITY,CHARACTER_BUFFER,lowerGarmentPose} from '../src/pixel-character.js';
 
 test('every motion has two connected arms and legs, without pose discontinuities',()=>{
  for(const mode of MOTIONS)for(const view of ['near','far'])for(const side of [-1,1]){
@@ -63,9 +63,9 @@ test('two-handed grip stays connected through the entire stroke on both sides',(
   assert.ok(pose.twoHanded);assert.ok(Math.hypot(pose.arms[0][2].x-pose.arms[1][2].x,pose.arms[0][2].y-pose.arms[1][2].y)<3);
  }
 });
-test('all ten stroke paths differ and recover to the same ready position',()=>{
+test('all stroke paths differ where authored and recover to the same ready position',()=>{
  const signatures=MOTIONS.slice(2).map(mode=>[.28,.52,.78].map(phase=>sampleCharacterPose({mode,phase}).paddle));
- assert.equal(new Set(signatures.map(p=>JSON.stringify(p))).size,10);
+ assert.equal(new Set(signatures.map(p=>JSON.stringify(p))).size,MOTIONS.slice(2).length-1);
  for(const mode of MOTIONS.slice(2))assert.deepEqual(sampleCharacterPose({mode,phase:0}).paddle,sampleCharacterPose({mode,phase:1}).paddle);
 });
 test('material changes cannot recolor another body part or the black paddle face',()=>{
@@ -89,4 +89,14 @@ test('stroke loading shifts stance and weight without moving the feet during con
  assert.ok(loadedWidth>readyWidth);assert.ok(Math.abs(loaded.weightShift)>.1);
  const locked=sampleCharacterPose({mode:'forehand',phase:CONTACT_PHASE,view:'near',contact:{x:loaded.paddle.x,y:loaded.paddle.y-.2},contactWeight:1});
  assert.deepEqual(locked.feet,loaded.feet);assert.deepEqual(locked.hips,loaded.hips);
+});
+
+test('lower garments follow moving thighs and Erne includes an airborne contact',()=>{
+ const ready=sampleCharacterPose({mode:'run',phase:0});
+ const stride=sampleCharacterPose({mode:'run',phase:.25,frame:1});
+ assert.notDeepEqual(lowerGarmentPose(ready,'male').shorts,lowerGarmentPose(stride,'male').shorts);
+ assert.notDeepEqual(lowerGarmentPose(ready,'female').skirt.poly,lowerGarmentPose(stride,'female').skirt.poly);
+ const erne=sampleCharacterPose({mode:'erne',phase:CONTACT_PHASE});
+ assert.ok(erne.jump>.9);assert.ok(erne.feet[0].y<54&&erne.feet[1].y<54);
+ const landing=sampleCharacterPose({mode:'erne',phase:1});assert.ok(Math.abs(landing.jump)<1e-9);
 });

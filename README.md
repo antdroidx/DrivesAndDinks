@@ -29,7 +29,7 @@ The character buffer rasterizes limb and clothing curves on a 3× grid instead o
 
 Match receivers start a short anticipation from the incoming-ball forecast; drives retain a full stroke away from the kitchen. Follow-throughs last 0.5–0.9 seconds depending on the shot, with the paddle contact constraint releasing early enough to show the swing. Ball response remains immediate.
 
-Ten stroke paths use continuous cubic Hermite interpolation through anticipation, impact, follow-through, and recovery. Velocity carries through impact. Locomotion runs from distance traveled, independently of frame rate; it continues underneath swings. A two-handed backhand joins both hands to the short paddle grip. The match currently uses this grip for female backhand drives; both bodies can demonstrate it in the studio.
+Authored stroke paths use continuous cubic Hermite interpolation through anticipation, impact, follow-through, and recovery. Velocity carries through impact. Locomotion runs from distance traveled, independently of frame rate; it continues underneath swings. A two-handed backhand joins both hands to the short paddle grip. Grip style follows archetype and contact situation; both bodies can demonstrate either grip in the studio.
 
 Gameplay now applies the animated pixel 2.5D pass: the high-density silhouette is preserved, identity-specific hair and uniform accents add readable variety, wristbands and socks detail the limbs, and stroke poses shift stance and weight through loading, contact and recovery. A faint top-left warm highlight follows the arena lights, and cool shadow falls through the lower-right. Paddle guards use one solid selected edge color; any shading comes only from the character lighting pass.
 
@@ -49,7 +49,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Verification and limitations
 
-`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all twelve motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
+`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all fourteen motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
 
 `src/core.js` handles physics and scoring; `src/game.js` manages matches; `src/tactics.js` plans doubles positioning; `src/main.js` renders and handles input. Simulation advances at 120 Hz. Ball flight now includes velocity-squared drag, Magnus curve, spin decay, radius-aware net contact, and speed-dependent bounce restitution. CPU shot selection uses aggression, Court IQ and relative attack/soft skill. Kitchen faults check the hitter at contact, not subsequent momentum; there is no player collision. Physical-device touch performance and the final athletic feel still require human playtests.
 
@@ -63,4 +63,7 @@ The public root and `/prototype/` preserve Playable Prototype Build 48 from comm
 
 Replays use a larger centered banner and play at 75% speed. Timing windows (early / late seconds) are Easy 0.60 / 0.20, Normal 0.30 / 0.08, Hard 0.15 / 0.00; Normal is the default, with explicit difficulty choices saved locally. CPU planning includes descending head-height contacts and prioritizes legal overhead attacks. Lobs vary in height and depth; overhead pace and depth depend on technique and contact quality.
 
-Backhand style is independent of gender: bangers use two hands; speed and net styles use one; balanced and soft styles mix grips. Two hands receive power ×1.07, control ×1.08 and topspin ×1.15 with reach ×0.94. One hand receives reach ×1.10 and slice spin ×1.20. Stretched contacts and slices release to one hand. The 13th studio motion, two-handed backhand dink, temporarily shares the drive path.
+Backhand style is independent of gender: bangers use two hands; speed and net styles use one; balanced and soft styles mix grips. Two hands receive power ×1.07, control ×1.08 and topspin ×1.15 with reach ×0.94. One hand receives reach ×1.10 and slice spin ×1.20. Stretched contacts and slices release to one hand. The 13th studio motion, two-handed backhand dink, temporarily shares the drive path. The 14th adds an Erne approach, airborne side volley, landing, and recovery.
+
+
+Shorts and skirt hems are generated from the animated thigh positions, so the lower garment follows the legs through running, sliding, jumping, and recovery instead of remaining a fixed silhouette. The Motion Viewer supports `?pose=impact` to inspect contact and flight poses directly.

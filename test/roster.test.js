@@ -55,8 +55,8 @@ test('lateral shuffle and slide states use the moving sprite cycle',()=>{
 });
 
 test('expanded motion rows cover every requested shot',()=>{
- for(const mode of ['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand']){
-  const frame=characterFrame(mode,0,0);assert.ok(Number.isInteger(frame.row)&&frame.row>=0&&frame.row<12);assert.ok(Number.isInteger(frame.col)&&frame.col>=0&&frame.col<4);
+ for(const mode of ['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne']){
+  const frame=characterFrame(mode,0,0);assert.ok(Number.isInteger(frame.row)&&frame.row>=0&&frame.row<14);assert.ok(Number.isInteger(frame.col)&&frame.col>=0&&frame.col<4);
  }
 });
 test('pixel sprite palettes follow every appearance color choice',()=>{
