@@ -161,3 +161,5 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
 /* Keep radio inputs accessible while showing only the actual color swatch. */
 .color-options label{position:relative}.color-options input{position:absolute;opacity:0;width:1px;height:1px;margin:0}.color-options label:focus-within{outline:2px solid #80e0b5;outline-offset:-2px}
 
+
+.replay-banner{position:absolute;left:10%;right:10%;bottom:15%;z-index:10;background:#102c35ee;border:2px solid #80e0b5;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#fff;font:12px system-ui}.replay-banner button{min-height:44px}
