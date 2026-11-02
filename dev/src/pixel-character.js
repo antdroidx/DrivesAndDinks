@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=62';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=63';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -77,7 +77,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=62';
+export {courtView,strokeForContact} from './player-facing.js?v=63';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
@@ -153,12 +153,12 @@ function taperedSegment(c,a,b,startWidth,endWidth,color){
  polygon(c,[{x:a.x+nx*startWidth/2,y:a.y+ny*startWidth/2},{x:b.x+nx*endWidth/2,y:b.y+ny*endWidth/2},{x:b.x-nx*endWidth/2,y:b.y-ny*endWidth/2},{x:a.x-nx*startWidth/2,y:a.y-ny*startWidth/2}],color);
 }
 let buffer;
-export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,alignTo=null,alignStrength=0,contactDepth=null,moving=false,lighting='classic'}={}){
+export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,lighting='classic'}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const identitySeed=[...String(characterId||appearance.hairColor)].reduce((sum,char)=>sum+char.charCodeAt(0),0),identityStyle=identitySeed%4,torsoSpread=(identitySeed%3)*.45;
  const rootOffset=animationRootOffset(mode,phase,travelSide),contact=alignTo?{x:(alignTo.x-x)*48/width-rootOffset,y:(alignTo.y-y)*64/height}:null;
- const pose=sampleCharacterPose({mode,phase,frame,view,side,contact,contactWeight:alignStrength,contactDepth,moving});
+ const pose=sampleCharacterPose({mode,phase,frame,view,side,travelSide,contact,contactWeight:alignStrength,contactDepth,moving});
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24+rootOffset,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;
