@@ -49,7 +49,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Verification and limitations
 
-`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all fifteen motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
+`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all seventeen motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
 
 `src/core.js` handles physics and scoring; `src/game.js` manages matches; `src/tactics.js` plans doubles positioning; `src/main.js` renders and handles input. Simulation advances at 120 Hz. Ball flight now includes velocity-squared drag, Magnus curve, spin decay, radius-aware net contact, and speed-dependent bounce restitution. CPU shot selection uses aggression, Court IQ and relative attack/soft skill. Kitchen faults check the hitter at contact, not subsequent momentum; there is no player collision. Physical-device touch performance and the final athletic feel still require human playtests.
 
@@ -82,3 +82,6 @@ CPU planning now receives a contact-difficulty estimate based on reach, movement
 
 
 The ATP demo’s incoming path is scripted separately from live-game physics, but its net crossing is checked to remain above the center/post net profile before the ball bounces and travels outside the sideline.
+
+
+Movement now integrates acceleration-limited velocity and braking rather than directly snapping to a target velocity. Fast direction changes retain momentum, and partner collision separation prevents sprites from occupying the same court space. Contact difficulty is applied to every return through mishit pressure and CPU attack bias; ATP and Erne returns carry an additional difficulty penalty. Dedicated poach-lunge and sliding-return motions join the Motion Viewer, and shoe/sock geometry ends lower on the ankle.

@@ -2,7 +2,7 @@ import {prepareReceiver,strokeDuration} from './match-animation.js';
 import {strokeForContact} from './player-facing.js';
 import {planIncoming,formationTarget,separateTargets} from './tactics.js';
 import {createLineup} from './roster.js';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers} from './core.js';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions} from './core.js';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.lineup=lineup??createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=['easy','normal','hard'].includes(difficulty)?difficulty:'normal';return this.difficulty}
@@ -25,7 +25,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   player.shotLabel=reset?'RESET':shot.toUpperCase();
   player.mishit=poor;this.lastShot=shot;player.animationShot=shot;player.animationContactStart=true;this.lastHitter=player.id;
   let targetY=player.team===0?(shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4):(shot==='dink'?30:shot==='drop'?32:shot==='slice'?38:40);
-  const technique=shotSkill(player,shot),grip=gripModifiers(player,this.ball,shot);player.contactGrip=grip.grip;
+  const technique=shotSkill(player,shot),grip=gripModifiers(player,this.ball,shot),difficulty=contactDifficulty(player,this.ball,shot);player.wasPoach=wasPoach;player.contactDifficulty=difficulty;player.contactSpeed=Math.hypot(player.vx||0,player.vy||0);player.contactMotion=player.motion;player.contactGrip=grip.grip;
   if(shot==='lob'){const depth=1.8+(1-quality)*13+Math.max(0,1-technique)*7+Math.random()*2;targetY=player.team===0?depth:44-depth;}
   if(shot==='overhead'){const depth=3+Math.random()*9+(1-quality)*8+Math.max(0,1-technique)*5;targetY=player.team===0?depth:44-depth;}
   player.stroke=strokeForContact(player,this.ball);player.contactType=this.bounces===0?'volley':'groundstroke';player.contactPoint={x:this.ball.x,y:this.ball.y,z:this.ball.z};player.contactPaddleTarget=paddleContactTarget(player,this.ball,shot);
@@ -74,7 +74,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
  const frame=structuredClone({clock:this.clock,players:this.players,ball:this.ball,trail:this.trail,contact:this.contact,bounceMark:this.bounceMark,score:this.score,phase:this.phase,mode:this.mode,difficulty:this.difficulty,aim:this.aim,shot:this.shot,shots:this.shots,message:this.message,timer:this.timer,serverId:this.server.id});
  this.replayFrames.push(frame);if(this.replayFrames.length>360)this.replayFrames.shift();
  }
- update(dt){if(this.paused)return;if(this.scenario){this.updateScenario(dt);return}this.recordReplay();this.clock+=dt;for(const p of this.players){p.reactionWait=Math.max(0,(p.reactionWait||0)-dt);p.outsideTimer=Math.max(0,(p.outsideTimer||0)-dt);p.swing=Math.max(0,p.swing-dt);p.windup=Math.max(0,(p.windup||0)-dt)}if(this.contact)this.contact.time=Math.max(0,this.contact.time-dt);const pending=this.hitBuffer;this.hitBuffer=Math.max(0,this.hitBuffer-dt);this.feedbackTime=Math.max(0,this.feedbackTime-dt);if(pending>0&&this.hitBuffer===0&&this.phase==='rally'){this.message='MISSED TIMING';this.feedbackTime=.65}if(this.phase==='over')return;if(this.phase==='pause'){this.pause-=dt;if(this.pause<=0)this.serveSetup();return}if(this.phase==='serve'){this.timer+=dt;if((this.mode==='watch'||this.server.id!==0)&&this.timer>1.2)this.serve();return}
+ update(dt){if(this.paused)return;if(this.scenario){this.updateScenario(dt);return}this.recordReplay();this.clock+=dt;for(const p of this.players){p.reactionWait=Math.max(0,(p.reactionWait||0)-dt);p.outsideTimer=Math.max(0,(p.outsideTimer||0)-dt);p.recoveryTimer=Math.max(0,(p.recoveryTimer||0)-dt);p.swing=Math.max(0,p.swing-dt);p.windup=Math.max(0,(p.windup||0)-dt)}if(this.contact)this.contact.time=Math.max(0,this.contact.time-dt);const pending=this.hitBuffer;this.hitBuffer=Math.max(0,this.hitBuffer-dt);this.feedbackTime=Math.max(0,this.feedbackTime-dt);if(pending>0&&this.hitBuffer===0&&this.phase==='rally'){this.message='MISSED TIMING';this.feedbackTime=.65}if(this.phase==='over')return;if(this.phase==='pause'){this.pause-=dt;if(this.pause<=0)this.serveSetup();return}if(this.phase==='serve'){this.timer+=dt;if((this.mode==='watch'||this.server.id!==0)&&this.timer>1.2)this.serve();return}
  const b=this.ball;this.trail.push({x:b.x,y:b.y,z:b.z});if(this.trail.length>8)this.trail.shift();const event=stepBall(b,dt);if(event){this.emit(event);if(event==='bounce')this.bounceMark={x:b.x,y:b.y,time:.35}}if(this.bounceMark)this.bounceMark.time=Math.max(0,this.bounceMark.time-dt);if(event==='net'){this.fault(this.last,'Net fault');return}if(event==='bounce'){const team=side(b.y);if(this.bounces>0){this.fault(1-this.last,'Double bounce');return}if(!inBounds(b.x,b.y)){this.fault(this.last,'Out');return}if(team===this.last){this.fault(this.last,'Wrong side');return}this.bounces++;if(this.shots===1){const legalX=this.serveX<10?b.x>=10:b.x<=10;const legalY=team===0?b.y>29:b.y<15;if(!legalX||!legalY){this.fault(this.last,'Service fault');return}}if(this.bounces>=2){this.fault(team,'Double bounce');return}}
  const incoming=1-this.last;
  if(!this.teamPlan||this.teamPlan.shot!==this.shots||this.clock>this.teamPlan.expires){
@@ -98,6 +98,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
    if(p.reactionWait<=0)move(p,target.x,target.y,dt);else move(p,p.x,p.y,dt);
    if(p!==r)this.tacticalStats.offBallDistance+=Math.hypot(p.x-oldX,p.y-oldY);
  }
+ resolvePlayerCollisions(this.players);
  for(const p of this.players)prepareReceiver(p,this);
  if(this.canHumanHit())this.lastHumanContactAt=this.clock;
  if(this.hitBuffer>0&&this.tryHumanHit())return;

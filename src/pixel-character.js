@@ -2,7 +2,7 @@ import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
-export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne','serve']);
+export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne','serve','poachLunge','slideReturn']);
 export const CONTACT_PHASE=.52;
 export const PIXEL_DENSITY=3;
 export const CHARACTER_BUFFER={width:96*PIXEL_DENSITY,height:96*PIXEL_DENSITY};
@@ -37,13 +37,15 @@ const paths={
  lob:[READY,[6,43,4],[10,41,14],[6,15,17],READY],
  serve:[READY,[12,39,2],[11,33,14],[-4,15,16],READY],
  twoBackhand:[READY,[-9,26,1],[-13,33,12],[10,20,14],READY],
- erne:[READY,[15,31,-2],[19,23,7],[7,22,13],READY]
+ erne:[READY,[15,31,-2],[19,23,7],[7,22,13],READY],
+ poachLunge:[READY,[16,31,-1],[19,30,12],[12,23,14],READY],
+ slideReturn:[READY,[16,38,-2],[22,31,15],[8,27,17],READY]
 };
 const wristAngles={
  volley:[0,.3,.65,.8,0],forehand:[0,1.3,1.3,-1.1,0],backhand:[0,-1.1,-1.3,1.1,0],
  forehandDink:[0,2.6,2.7,2,0],backhandDink:[0,-2.2,-2.25,-1.7,0],
  forehandDrop:[0,2.4,2.5,1.4,0],backhandDrop:[0,-2.2,-2.25,-1.2,0],
- overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,1.4,1.9,-.6,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0]
+ overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,1.4,1.9,-.6,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0],poachLunge:[0,1.2,1.75,-.4,0],slideReturn:[0,1.5,1.9,-.25,0]
 };
 paths.twoBackhandDink=paths.twoBackhand;wristAngles.twoBackhandDink=wristAngles.twoBackhand;
 const times=[0,.28,CONTACT_PHASE,.78,1];
@@ -95,7 +97,7 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  let gripAngle=action?samplePath(wristAngles[mode].map(v=>[v,0]),phase).x*side:0;
  // At live impact the handle points back toward the shoulder, so a low
  // face cannot drag the wrist below the paddle or reverse the elbow.
- const crouch=clamp((paddle3.y-43)*.7,0,14),shoulderY=26+bob+crouch,forwardLean=crouch*.45;
+ const crouch=clamp((paddle3.y-43)*.7,0,14)+(mode==='slideReturn'?7:mode==='poachLunge'?4:0),shoulderY=26+bob+crouch,forwardLean=crouch*.45;
  if(contact){const toward=Math.atan2(paddle3.x-side*6,shoulderY-paddle3.y),difference=Math.atan2(Math.sin(toward-gripAngle),Math.cos(toward-gripAngle));gripAngle+=difference*clamp(contactWeight)}
  const shoulders=[{x:-6,y:shoulderY,z:forwardLean},{x:6,y:shoulderY,z:forwardLean}];
  let hand3={x:paddle3.x-Math.sin(gripAngle)*8,y:paddle3.y+Math.cos(gripAngle)*8,z:paddle3.z};
@@ -111,7 +113,7 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  const arms3=[];arms3[gripSide]=gripArm;arms3[freeSide]=solveArm3D(shoulders[freeSide],freeHand,{x:-side*7,y:9,z:-4});
  const arms=arms3.map(chain=>chain.map(project)),paddle=project(paddle3),hand=project(hand3);
  const angle=Math.atan2(-(hand.x-paddle.x),hand.y-paddle.y);
- const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-.62:.78)*side,stance=action?1.6+load*1.2:0;
+ const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-.62:.78)*side;let stance=action?1.6+load*1.2:0;if(mode==='poachLunge')stance+=load*2.8;if(mode==='slideReturn')stance+=load*4.2;
  const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*1.2:0,rootOffset=animationRootOffset(mode,phase,travelSide);
  const neck=project({x:0,y:23+bob+crouch-jump*3.2,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift+lateralJump,y:41+bob+crouch*.45-jump*3.2};
  let feet=mode==='run'?[{x:19+stride*2,y:59-stride*3},{x:29-stride*2,y:59+stride*3}]:[
@@ -164,7 +166,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24+rootOffset,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;
- for(const [hip,knee,foot] of legs){taperedSegment(c,hip,knee,2.9,6,colors.outline);segment(c,knee,foot,5,colors.outline);taperedSegment(c,hip,knee,1.7,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-6},foot,4,colors.sock);segment(c,{x:foot.x,y:foot.y-4},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2);c.fillStyle=colors.accent;c.fillRect(Math.round(foot.x-1),Math.round(foot.y-5),3,1)}
+ for(const [hip,knee,foot] of legs){taperedSegment(c,hip,knee,2.9,6,colors.outline);segment(c,knee,foot,5,colors.outline);taperedSegment(c,hip,knee,1.7,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-3.5},foot,4,colors.sock);segment(c,{x:foot.x,y:foot.y-2.5},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2);c.fillStyle=colors.accent;c.fillRect(Math.round(foot.x-1),Math.round(foot.y-3),3,1)}
  function armPart(index,part){
   const a=arms[index][part],d=arms[index][part+1];
   segment(c,a,d,part?4:5,colors.outline);segment(c,a,d,part?2:3,part?colors.skin:colors.skinDark);

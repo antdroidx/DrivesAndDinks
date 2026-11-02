@@ -39,3 +39,9 @@ test('skilled control reduces contact errors without making them impossible',()=
  const a=contactQuality(base,ball,'drive',false,.999),b=contactQuality(expert,ball,'drive',false,.999);
  assert.ok(b.chance>0&&b.chance<a.chance*.6);
 });
+
+test('poach and sliding contacts select their dedicated motions',()=>{
+ const base={team:0,y:31,stroke:'backhand',animationShot:'drive',contactType:'volley'};
+ assert.equal(matchStrokeMode({...base,wasPoach:true,contactDifficulty:.5}),'poachLunge');
+ assert.equal(matchStrokeMode({...base,contactMotion:'slide',contactDifficulty:.5}),'slideReturn');
+});

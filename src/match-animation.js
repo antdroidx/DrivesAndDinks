@@ -6,6 +6,8 @@ export function matchStrokeMode(player,shot=player.animationShot,stroke=player.s
  const back=stroke==='backhand',kitchen=player.team===0?player.y<=32:player.y>=12;
  if(shot==='erne')return 'erne';
  if(['overhead','serve','lob'].includes(shot))return shot;
+ if(shot==='drive'&&player.wasPoach&&(player.contactDifficulty??0)>.25)return 'poachLunge';
+ if(shot==='drive'&&(player.contactMotion==='slide'||(player.contactSpeed??0)>9)&&(player.contactDifficulty??0)>.35)return 'slideReturn';
  const two=player.contactGrip?player.contactGrip==='two':backhandGrip(player,player.contactPoint??{x:player.x+(player.team===0?-1:1),z:2},shot)==='two';
  if(shot==='dink')return back?(two?'twoBackhandDink':'backhandDink'):'forehandDink';
  if(shot==='drop')return back?'backhandDrop':'forehandDrop';

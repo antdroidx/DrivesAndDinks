@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../src/game.js';
-import {backhandGrip,gripModifiers,chooseCpuShot,launch,C,netHeightAt} from '../src/core.js';
+import {backhandGrip,gripModifiers,chooseCpuShot,launch,C,netHeightAt,move,resolvePlayerCollisions,contactQuality,playerProfile} from '../src/core.js';
 import {buildProfile} from '../src/roster.js';
 import {matchStrokeMode} from '../src/match-animation.js';
 test('three timing modes retain Normal as the default',()=>{const g=new Game();assert.equal(g.difficulty,'normal');for(const [mode,early,late] of [['easy',.6,.2],['normal',.3,.08],['hard',.15,0]]){g.setDifficulty(mode);assert.deepEqual(g.timingWindow(),{early,late});}g.setDifficulty('invalid');assert.equal(g.difficulty,'normal');});
@@ -17,4 +17,14 @@ test('ATP scenario approach clears the net before bouncing',()=>{
  const g=new Game();g.startScenario('atp');let crossed=false;
  for(let i=0;i<140&&g.scenario;i++){const beforeY=g.ball.y;g.update(1/120);if(beforeY<22&&g.ball.y>=22){crossed=true;assert.ok(g.ball.z>C.ballRadius+netHeightAt(g.ball.x),`ball center ${g.ball.z} below net at x ${g.ball.x}`)}}
  assert.equal(crossed,true);
+});
+
+test('players retain momentum and cannot overlap through collision',()=>{
+ const p={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0};
+ for(let i=0;i<40;i++)move(p,18,35,1/120);assert.ok(p.vx>5);
+ p.vx=8;move(p,2,35,1/120);assert.ok(p.vx>7.5);
+ const players=[{...playerProfile(),x:10,y:35,vx:4,vy:0},{...playerProfile(),x:10.3,y:35,vx:-4,vy:0}];resolvePlayerCollisions(players);assert.ok(Math.hypot(players[1].x-players[0].x,players[1].y-players[0].y)>=1.239);assert.ok(players[0].vx<players[1].vx);
+});
+test('special-shot returns carry extra mishit difficulty',()=>{
+ const p={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0},ball={x:10.6,y:35.2,z:1.5,shot:'drive'};assert.ok(contactQuality(p,{...ball,shot:'atp'},'drive',false,.5).chance>contactQuality(p,ball,'drive',false,.5).chance);
 });
