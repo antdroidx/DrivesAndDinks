@@ -35,7 +35,7 @@ Gameplay now applies the animated pixel 2.5D pass: the high-density silhouette i
 
 At a real hit, the solid paddle face targets the recorded ball contact point and court depth, then releases smoothly into follow-through. Grips point back toward the shoulder in 3D; low contacts bend the torso and knees while the feet stay planted. Targets beyond anatomical reach are limited instead of stretching the forearm. Physics responds immediately; a queued human swing uses a preparation pose. These are procedural animations, not captured athletic motion. Extreme reaches can leave a small paddle-centre alignment offset; the nominal studio contact demonstration does not replace live rally playtesting. Ball height, player height and the net share a perspective scale. Ordinary contacts reach chest height; overhead selection starts at 5.2 court feet, with an overhead reach ceiling of 7.4 feet.
 
-Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve solid-color guards remain independently selectable; all paddle faces stay black. Six court combinations are available, including the added Black / Gray, Violet / Blue, and Red / Gray palettes. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed.
+Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve solid-color guards remain independently selectable; all paddle faces stay black. Six court combinations are available, including the added Black / Gray, Violet / Blue, and Gray / Red palettes. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed.
 
 ## Match setup and controls
 

@@ -8,7 +8,7 @@ import {Game} from '../src/game.js';
 test('every requested appearance option is available',()=>{
  assert.deepEqual(CLOTHING_COLORS.map(item=>item.name),['Black','Gray','White','Blue','Yellow','Red','Green','Purple','Pink','Orange']);
  assert.equal(PADDLE_COLORS.length,12);assert.ok(HAIR_COLORS.length>=6);assert.ok(SKIN_COLORS.length>=4);
- assert.deepEqual(PADDLE_SHAPES.map(item=>item.id),['wide','elongated','hybrid']);assert.deepEqual(COURT_PALETTES.map(item=>item.id),['blue-gray','green-orange','pink-black','black-gray','violet-blue','red-gray']);
+ assert.deepEqual(PADDLE_SHAPES.map(item=>item.id),['wide','elongated','hybrid']);assert.deepEqual(COURT_PALETTES.map(item=>item.id),['blue-gray','green-orange','pink-black','black-gray','violet-blue','gray-red']);
  const blueGray=COURT_PALETTES.find(item=>item.id==='blue-gray'),rgb=blueGray.kitchen.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16));
  assert.ok(Math.max(...rgb)-Math.min(...rgb)<=12);
 });
@@ -16,7 +16,7 @@ test('invalid and legacy selections safely normalize',()=>{
  const fallback=normalizeSelection(null);
  assert.equal(fallback.shirtColor,'green');assert.equal(fallback.paddleColor,'mint');assert.equal(fallback.paddleShape,'hybrid');
  const invalid=normalizeSelection({character:'nope',paddle:'nope',paddleShape:'nope',hair:'nope',skin:'nope',outfit:'dress',shirtColor:'nope',bottomColor:'nope',paddleColor:'nope',court:'nope'});
- assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');assert.equal(invalid.paddleShape,'hybrid');assert.equal(normalizeSelection({court:'red-white'}).court,'red-gray');
+ assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');assert.equal(invalid.paddleShape,'hybrid');assert.equal(normalizeSelection({court:'red-white'}).court,'gray-red');assert.equal(normalizeSelection({court:'red-gray'}).court,'gray-red');
  assert.equal(invalid.hairColor,'brown');assert.equal(invalid.skinColor,'medium');
  assert.equal('outfit' in invalid,false);assert.equal('bottomColor' in invalid,false);
 });
