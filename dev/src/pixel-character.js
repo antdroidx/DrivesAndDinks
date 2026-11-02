@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=56';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=57';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -77,7 +77,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=56';
+export {courtView,strokeForContact} from './player-facing.js?v=57';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
@@ -112,7 +112,7 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  const arms=arms3.map(chain=>chain.map(project)),paddle=project(paddle3),hand=project(hand3);
  const angle=Math.atan2(-(hand.x-paddle.x),hand.y-paddle.y);
  const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-.62:.78)*side,stance=action?1.6+load*1.2:0;
- const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*3.2:0;
+ const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*1.2:0,rootOffset=animationRootOffset(mode,phase,side);
  const neck=project({x:0,y:23+bob+crouch-jump*3.2,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift+lateralJump,y:41+bob+crouch*.45-jump*3.2};
  let feet=mode==='run'?[{x:19+stride*2,y:59-stride*3},{x:29-stride*2,y:59+stride*3}]:[
   {x:19-stance-stride*4,y:59-Math.max(0,stride)*2-Math.max(0,weightShift)*.9},
@@ -120,7 +120,12 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  ];
  if(mode==='erne')feet=feet.map((foot,index)=>({x:foot.x+(index?1:-1)*side*jump*2,y:foot.y-jump*(index?7.2:5.6)}));
  const legs=feet.map((f,i)=>{const hip={x:hips.x+(i?4:-4),y:hips.y};return [hip,jointBetween(hip,f,9,9,i?-1:1),f]});
- return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,angle,twoHanded,bob:bob+crouch,gripSide,weightShift,jump,reachLimited:length(correction)>.01};
+ return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,angle,twoHanded,bob:bob+crouch,gripSide,weightShift,jump,rootOffset,reachLimited:length(correction)>.01};
+}
+export function animationRootOffset(mode,phase,side=1){
+ if(mode!=='erne')return 0;
+ const p=clamp(phase);
+ return side*(9*Math.sin(Math.PI*p)+5*Math.sin(Math.PI*clamp((p-.08)/.72)));
 }
 export function lowerGarmentPose(pose,body='male'){
  const {hips,legs}=pose,waist=hips.y-2;
@@ -133,7 +138,8 @@ export function lowerGarmentPose(pose,body='male'){
   const left=sample(legs[0],.42),right=sample(legs[1],.42),hemY=Math.max(left.y,right.y)+2.8;
   return {waist,shorts,skirt:{poly:[[hips.x-5,waist],[hips.x+5,waist],[Math.max(hips.x+8,right.x+3.6),hemY],[Math.min(hips.x-8,left.x-3.6),hemY]],pleats:[-.45,0,.45].map(f=>[[lerp(hips.x,left.x,.22)*((1+f)/2)+lerp(hips.x,right.x,.22)*((1-f)/2),waist+2],[lerp(Math.min(hips.x-8,left.x-3.6),Math.max(hips.x+8,right.x+3.6),(f+.45)/.9),hemY-1]])}};
  }
- return {waist,shorts,skirt:null};
+ const bridge=[[hips.x-6,waist],[hips.x+6,waist],[hips.x+5,waist+4],[hips.x+2,waist+5],[hips.x,waist+7],[hips.x-2,waist+5],[hips.x-5,waist+4]];
+ return {waist,shorts,skirt:null,bridge};
 }
 export function characterPaddleAnchor(options={}){return sampleCharacterPose(options).paddle}
 
@@ -161,9 +167,9 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const identitySeed=[...String(characterId||appearance.hairColor)].reduce((sum,char)=>sum+char.charCodeAt(0),0),identityStyle=identitySeed%4,torsoSpread=(identitySeed%3)*.45;
- const contact=alignTo?{x:(alignTo.x-x)*48/width,y:(alignTo.y-y)*64/height}:null;
+ const rootOffset=animationRootOffset(mode,phase,side),contact=alignTo?{x:(alignTo.x-x)*48/width-rootOffset,y:(alignTo.y-y)*64/height}:null;
  const pose=sampleCharacterPose({mode,phase,frame,view,side,contact,contactWeight:alignStrength,contactDepth,moving});
- c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24,16);
+ c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24+rootOffset,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;
  for(const [hip,knee,foot] of legs){segment(c,hip,knee,6,colors.outline);segment(c,knee,foot,5,colors.outline);segment(c,hip,knee,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-6},foot,4,colors.sock);segment(c,{x:foot.x,y:foot.y-4},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2);c.fillStyle=colors.accent;c.fillRect(Math.round(foot.x-1),Math.round(foot.y-5),3,1)}
@@ -190,7 +196,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  c.fillStyle=colors.shoe;c.fillRect(Math.round(hips.x-4),Math.round(waist-1),8,1);
  const garment=lowerGarmentPose(pose,appearance.body);
  if(female){const skirt=garment.skirt;poly(c,skirt.poly,colors.outline);poly(c,skirt.poly.map(([x,y])=>[lerp(x,hips.x,.08),lerp(y,waist,.06)]),colors.shirt);for(const [a,b] of skirt.pleats)segment(c,{x:a,y:b},b,1,colors.shirtDark)}
- else {for(const panel of garment.shorts){poly(c,panel,colors.outline);poly(c,panel.map(([x,y])=>[lerp(x,hips.x,.1),lerp(y,garment.waist+.5,.08)]),colors.bottom)}}
+ else {poly(c,garment.bridge,colors.outline);poly(c,garment.bridge.map(([x,y])=>[x,lerp(y,garment.waist+.3,.08)]),colors.bottom);for(const panel of garment.shorts){poly(c,panel,colors.outline);poly(c,panel.map(([x,y])=>[lerp(x,hips.x,.1),lerp(y,garment.waist+.5,.08)]),colors.bottom)}}
  c.fillStyle=colors.accent;c.fillRect(Math.round(hips.x-4),Math.round(garment.waist-1),8,1)
  c.fillStyle=colors.skinDark;c.fillRect(Math.round(neck.x-2),Math.round(21+bob),4,4);
  const style=identityStyle,hx=neck.x+(view==='far'?(style-1.5)*.35:0),hy=neck.y-8;
