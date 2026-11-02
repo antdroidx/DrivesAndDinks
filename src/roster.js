@@ -58,6 +58,15 @@ export const PADDLES = Object.freeze([
   {id:'control',name:'Touch',style:'Control',description:'Tighter placement and more spin; slower attacks.',power:.98,control:1.08,spin:1.1,ratingModifiers:{power:-4,control:8},spinModifier:10}
 ]);
 
+// Shape is independent from the paddle performance profile. The guide used
+// for this tuning describes elongated paddles as higher swing-weight and
+// higher reach, while wide shapes prioritize forgiveness and quick hands.
+export const PADDLE_SHAPES = Object.freeze([
+  {id:'wide',name:'Wide',style:'Fast hands · forgiving',description:'A larger side-to-side sweet spot and quicker hands; slightly less reach and power.',reach:.96,power:.96,control:1.06,handSpeed:1.1,sweetSpot:1.15,ratingModifiers:{volley:6,power:-4,reach:-3}},
+  {id:'elongated',name:'Elongated',style:'Reach · power',description:'More leverage and reach; slower hands and a narrower side-to-side sweet spot.',reach:1.07,power:1.05,control:.97,handSpeed:.92,sweetSpot:.9,ratingModifiers:{power:6,reach:6,volley:-5}},
+  {id:'hybrid',name:'Hybrid',style:'Balanced',description:'Balanced reach, power, sweet spot and hand speed.',reach:1,power:1,control:1,handSpeed:1,sweetSpot:1,ratingModifiers:{power:0,reach:0,volley:0}}
+]);
+
 export const CLOTHING_COLORS = Object.freeze([
   {id:'black',name:'Black',color:'#171a21',rgb:[23,26,33]},
   {id:'gray',name:'Gray',color:'#929a9e',rgb:[146,154,158]},
@@ -108,7 +117,10 @@ export const PADDLE_DESIGNS = PADDLE_COLORS;
 export const COURT_PALETTES = Object.freeze([
   {id:'blue-gray',name:'Blue / Gray',background:'#163b3b',stripe:'#254d43',outer:'#122a29',outerLight:'#263d3a',apron:'#507b70',court:'#357282',kitchen:'#8f9799',line:'#e9eee0'},
   {id:'green-orange',name:'Green / Orange',background:'#17352b',stripe:'#24553a',outer:'#0d251a',outerLight:'#183b29',apron:'#477f59',court:'#2f7957',kitchen:'#d27a3e',line:'#ffe9bd'},
-  {id:'pink-black',name:'Pink / Black',background:'#35232f',stripe:'#543047',outer:'#171219',outerLight:'#30212b',apron:'#75566e',court:'#a6577e',kitchen:'#201a22',line:'#ffe8e2'}
+  {id:'pink-black',name:'Pink / Black',background:'#35232f',stripe:'#543047',outer:'#171219',outerLight:'#30212b',apron:'#75566e',court:'#a6577e',kitchen:'#201a22',line:'#ffe8e2'},
+  {id:'black-gray',name:'Black / Gray',background:'#11151a',stripe:'#20262d',outer:'#090c10',outerLight:'#282e35',apron:'#484f56',court:'#292f35',kitchen:'#969da2',line:'#f5f1e7'},
+  {id:'violet-blue',name:'Violet / Blue',background:'#17172f',stripe:'#29254f',outer:'#0b0b18',outerLight:'#29244d',apron:'#514d83',court:'#3e52a8',kitchen:'#7169df',line:'#f0ecff'},
+  {id:'red-white',name:'Red / White',background:'#320f16',stripe:'#521923',outer:'#17080d',outerLight:'#42131d',apron:'#9a303c',court:'#b8434f',kitchen:'#e9e1d7',line:'#fff9f0'}
 ]);
 // Identity pools provide varied names while archetype mechanics remain fixed.
 // Tone weights are broad and overlapping so no group maps to one complexion.
@@ -163,7 +175,7 @@ export function generateIdentity({gender='male',skinColor=null,culture=null,rand
   return {name,culture:selectedCulture,skinColor:resolvedSkin,hairColor:randomItem(HAIR_COLORS,random).id,shirtColor:randomItem(CLOTHING_COLORS,random).id,paddleColor:randomItem(PADDLE_COLORS,random).id};
 }
 
-export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',shirtColor:'green',paddleColor:'mint',hairColor:'brown',skinColor:'medium',court:'blue-gray'});
+export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',hairColor:'brown',skinColor:'medium',court:'blue-gray'});
 const valid=(items,id)=>items.some(item=>item.id===id)?id:null;
 export function normalizeSelection(input={}){
   const character=CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character;
@@ -173,6 +185,7 @@ export function normalizeSelection(input={}){
     gender:input?.gender==='male'||input?.gender==='female'?input.gender:CHARACTERS.find(c=>c.id===character).gender,
     customName:String(input?.customName??'').trim().slice(0,40),
     paddle:valid(PADDLES,input?.paddle)??DEFAULT_SELECTION.paddle,
+    paddleShape:valid(PADDLE_SHAPES,input?.paddleShape)??DEFAULT_SELECTION.paddleShape,
     shirtColor:valid(CLOTHING_COLORS,input?.shirtColor)??DEFAULT_SELECTION.shirtColor,
     paddleColor:valid(PADDLE_COLORS,legacyPaddleColor)??DEFAULT_SELECTION.paddleColor,
     hairColor:valid(HAIR_COLORS,input?.hairColor)??DEFAULT_SELECTION.hairColor,
@@ -181,9 +194,9 @@ export function normalizeSelection(input={}){
   };
 }
 export function buildProfile(input, options={}){
-  const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle);
+  const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),shape=PADDLE_SHAPES.find(item=>item.id===selection.paddleShape);
   const identity=options.identity??generateIdentity({gender:selection.gender,skinColor:selection.skinColor,random:options.random??Math.random});
-  return {...playerProfile(),characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...character.ratings},abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
+  return {...playerProfile(),characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...character.ratings},abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
@@ -195,7 +208,7 @@ export function createLineup(input,{random=Math.random}={}){
   return characters.map((character,index)=>{
     if(index===0)return buildProfile(selected,{identity:playerIdentity});
     const gender=random()<.5?'male':'female',identity=generateIdentity({gender,culture:cpuCultures[index-1],random,usedNames});
-    return buildProfile({...selected,character:character.id,gender,customName:'',paddle:randomItem(PADDLES,random).id,shirtColor:identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});
+    return buildProfile({...selected,character:character.id,gender,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});
   });
 }
 export function selectionStats(input){
@@ -203,8 +216,8 @@ export function selectionStats(input){
  return {...character.ratings};
 }
 export function effectiveRatings(input){
- const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),ratings={...character.ratings};
- for(const [key,delta] of Object.entries(paddle.ratingModifiers??{}))ratings[key]=Math.max(0,Math.min(100,ratings[key]+delta));
+ const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),shape=PADDLE_SHAPES.find(item=>item.id===selection.paddleShape),ratings={...character.ratings};
+ for(const modifiers of [paddle.ratingModifiers,shape.ratingModifiers])for(const [key,delta] of Object.entries(modifiers??{}))ratings[key]=Math.max(0,Math.min(100,ratings[key]+delta));
  return ratings;
 }
 export function skillAverage(ratings){const keys=RATING_KEYS.filter(key=>key!=='aggression');return Math.round(keys.reduce((sum,key)=>sum+(Number(ratings[key])||0),0)/keys.length)}

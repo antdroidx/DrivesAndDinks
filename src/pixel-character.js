@@ -158,8 +158,14 @@ function taperedSegment(c,a,b,startWidth,endWidth,color){
  const d=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/d,ny=(b.x-a.x)/d;
  polygon(c,[{x:a.x+nx*startWidth/2,y:a.y+ny*startWidth/2},{x:b.x+nx*endWidth/2,y:b.y+ny*endWidth/2},{x:b.x-nx*endWidth/2,y:b.y-ny*endWidth/2},{x:a.x-nx*startWidth/2,y:a.y-ny*startWidth/2}],color);
 }
+const PADDLE_OUTLINES=Object.freeze({
+ wide:Object.freeze([[-4.5,-5],[3.5,-5],[5,-3],[5,2.5],[3.5,4.5],[-3.5,4.5],[-5,2.5],[-5,-3]]),
+ elongated:Object.freeze([[-2.4,-8],[2.4,-8],[3.5,-6],[3.5,2],[2.4,4.5],[-2.4,4.5],[-3.5,2],[-3.5,-6]]),
+ hybrid:Object.freeze([[-3,-6],[2,-6],[4,-4],[4,3],[2,5],[-2,5],[-4,3],[-4,-4]])
+});
+export function paddleOutline(shapeId='hybrid'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES.hybrid}
 let buffer;
-export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,lighting='classic'}={}){
+export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,paddleShape='hybrid',lighting='classic'}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const identitySeed=[...String(characterId||appearance.hairColor)].reduce((sum,char)=>sum+char.charCodeAt(0),0),identityStyle=identitySeed%4,torsoSpread=(identitySeed%3)*.45;
@@ -178,7 +184,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  const {paddle:p,angle,hand}=pose,rot=([a,b])=>({x:p.x+a*Math.cos(angle)-b*Math.sin(angle),y:p.y+a*Math.sin(angle)+b*Math.cos(angle)});
  function drawPaddle(){
   segment(c,rot([0,4]),hand,3,colors.outline);segment(c,rot([0,5]),hand,1,colors.grip);c.fillStyle=colors.outline;c.fillRect(Math.round(rot([0,6]).x),Math.round(rot([0,6]).y),1,1);
-  const shape=[[-3,-6],[2,-6],[4,-4],[4,3],[2,5],[-2,5],[-4,3],[-4,-4]];
+  const shape=paddleOutline(paddleShape);
   polygon(c,shape.map(rot),colors.outline);polygon(c,shape.map(([a,b])=>rot([a*.83,b*.86])),colors.paddle);polygon(c,shape.map(([a,b])=>rot([a*.58,b*.62])),colors.paddleInterior);
  }
  const parts=arms.flatMap((chain,index)=>[0,1].map(part=>({index,part,depth:(chain[part].depth+chain[part+1].depth)/2}))).sort((a,b)=>a.depth-b.depth);

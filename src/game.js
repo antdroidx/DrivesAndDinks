@@ -2,19 +2,38 @@ import {prepareReceiver,strokeDuration} from './match-animation.js';
 import {strokeForContact} from './player-facing.js';
 import {planIncoming,formationTarget,separateTargets} from './tactics.js';
 import {createLineup} from './roster.js';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse} from './core.js';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers} from './core.js';
 export class Game{constructor(){this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.lineup=lineup??createLineup(selection);this.reset()}
  setDifficulty(difficulty){this.difficulty=['easy','normal','hard'].includes(difficulty)?difficulty:'normal';return this.difficulty}
  timingWindow(){return this.difficulty==='easy'?{early:.6,late:.2}:this.difficulty==='hard'?{early:.15,late:0}:{early:.3,late:.08}}
- paddleFor(player,shot='drive'){const paddle=player.paddle??{},abilities=player.abilities??{};return {...paddle,power:(paddle.power??1)*(abilities.power??1),spin:(paddle.spin??1)*(abilities.spin??1),skill:shotSkill(player,shot)}}
+ paddleFor(player,shot='drive'){const paddle=player.paddle??{},abilities=player.abilities??{},shape=paddleShapeModifiers(player);return {...paddle,power:(paddle.power??1)*shape.power*(abilities.power??1),control:(paddle.control??1)*shape.control,spin:(paddle.spin??1)*(abilities.spin??1),skill:shotSkill(player,shot)}}
  reset(){this.scenario=null;this.teamPlan=null;this.tacticalStats={poachAttempts:0,poachHits:0,coverSwaps:0,offBallDistance:0,mishitHits:0};this.events=[];this.trail=[];this.clock=0;this.score=new Score();this.players=[0,1,2,3].map((id)=>({...(this.lineup?structuredClone(this.lineup[id]):playerProfile()),id,team:id<2?0:1,x:id%2?15:5,y:id<2?39:5,vx:0,vy:0,swing:0}));this.aim=10;this.shot='attack';this.hitBuffer=0;this.feedbackTime=0;this.message='GET READY';this.pause=1;this.paused=false;this.serveSetup()}
  setPaused(paused){if(this.phase==='over'){this.paused=false;return false}this.paused=Boolean(paused);if(this.paused){this.hitBuffer=0;if(this.players[0])this.players[0].windup=0}return this.paused}
  togglePaused(){return this.setPaused(!this.paused)}
  nudgeAim(direction,fine=false){this.aim=Math.max(1,Math.min(19,this.aim+Math.sign(direction)*aimStep(this.players[0],fine)))}
  emit(type,detail={}){this.events.push({type,...detail});if(this.events.length>32)this.events.shift()}
- serveSetup(){this.serveToss=null;this.replayFrames=[];this.replayHighlights=[];this.replayClip=null;this.replayTick=0;this.poachReservation=null;this.teamPlan=null;this.lastShot='serve';this.lastHitter=null;this.bounceMark=null;this.trail=[];this.contact=null;this.phase='serve';this.hitBuffer=0;this.lastHumanContactAt=-Infinity;this.shots=0;this.bounces=0;this.last=this.score.team;this.server=this.players[this.score.team*2+this.score.player];let right=this.score.player===this.score.rightPlayer[this.score.team];this.server.x=(this.score.team===0?right:!right)?15:5;this.server.y=this.score.team===0?45.5:-1.5;let mate=this.players[this.score.team*2+(1-this.score.player)];mate.x=20-this.server.x;mate.y=this.score.team===0?43:1;for(const p of this.players.filter(p=>p.team!==this.score.team)){const right=p.id%2===this.score.rightPlayer[p.team];p.x=(p.team===0?right:!right)?15:5;p.y=p.team===0?38:6;p.vx=0;p.vy=0}this.server.vx=this.server.vy=mate.vx=mate.vy=0;this.serveReceiver=this.players[(1-this.score.team)*2+(this.server.x<10?this.players[(1-this.score.team)*2].x>10?0:1:this.players[(1-this.score.team)*2].x<10?0:1)];for(const p of this.players.filter(p=>p.team!==this.score.team)){p.y=p===this.serveReceiver?(p.team===0?45:-1):(p.team===0?30:14)}for(const p of this.players){p.lane=p.x<10?5:15;p.coverLane=p.lane;p.tacticalRole='hold';p.swing=0;p.windup=0;p.preparation=null;p.contactPoint=null;p.contactGrip=null;p.stroke='ready';p.animationShot='ready';p.reactionWait=0;p.baselineTimer=0;p.serveHold=0;p.stamina=1;p.stride=0}this.serveReceiver.baselineTimer=2.4;this.serveReceiver.serveHold=.3;this.message=this.server.id===0&&this.mode==='play'?'YOUR SERVE: HARD OR SOFT':'GET READY';const serveSide=this.server.x<10?.58:-.58,serveForward=this.server.team===0?-.7:.7;this.serveContact={x:this.server.x+serveSide,y:this.server.y+serveForward,z:2.35};this.ball={...this.serveContact,z:1.65,vx:0,vy:0,vz:0,spin:0,spinX:0,spinY:0,spinZ:0,radius:C.ballRadius};this.timer=0}
- fault(team,why){if(this.phase==='pause'||this.phase==='over')return;const servingTeam=this.score.team,winner=1-team;this.score.point(winner);this.result=`${winner===0?'YOUR TEAM':'CPU'} WINS RALLY · ${why.toUpperCase()}`;this.outcome=winner===servingTeam?'POINT':this.score.team!==servingTeam?'SIDE OUT':'SECOND SERVER';this.message=why.toUpperCase();this.phase=this.score.winner===null?'pause':'over';this.pause=2.5;const highlight=this.replayHighlights.at(-1);if(this.replayFrames.length>15&&(highlight||this.shots>=15)){const start=highlight?Math.max(0,highlight.time-2):Math.max(0,this.clock-7),end=highlight?Math.min(this.clock,highlight.time+2):this.clock;this.replayClip={label:highlight?.label??`${this.shots}-SHOT RALLY`,frames:this.replayFrames.filter(f=>f.clock>=start&&f.clock<=end)};}}
+ serveSetup(){this.serveToss=null;this.replayFrames=[];this.replayHighlights=[];this.replayClip=null;this.pointReplay=null;this.replayTick=0;this.poachReservation=null;this.teamPlan=null;this.lastShot='serve';this.lastHitter=null;this.bounceMark=null;this.trail=[];this.contact=null;this.phase='serve';this.hitBuffer=0;this.lastHumanContactAt=-Infinity;this.shots=0;this.bounces=0;this.last=this.score.team;this.server=this.players[this.score.team*2+this.score.player];let right=this.score.player===this.score.rightPlayer[this.score.team];this.server.x=(this.score.team===0?right:!right)?15:5;this.server.y=this.score.team===0?45.5:-1.5;let mate=this.players[this.score.team*2+(1-this.score.player)];mate.x=20-this.server.x;mate.y=this.score.team===0?43:1;for(const p of this.players.filter(p=>p.team!==this.score.team)){const right=p.id%2===this.score.rightPlayer[p.team];p.x=(p.team===0?right:!right)?15:5;p.y=p.team===0?38:6;p.vx=0;p.vy=0}this.server.vx=this.server.vy=mate.vx=mate.vy=0;this.serveReceiver=this.players[(1-this.score.team)*2+(this.server.x<10?this.players[(1-this.score.team)*2].x>10?0:1:this.players[(1-this.score.team)*2].x<10?0:1)];for(const p of this.players.filter(p=>p.team!==this.score.team)){p.y=p===this.serveReceiver?(p.team===0?45:-1):(p.team===0?30:14)}for(const p of this.players){p.lane=p.x<10?5:15;p.coverLane=p.lane;p.tacticalRole='hold';p.swing=0;p.windup=0;p.preparation=null;p.contactPoint=null;p.contactGrip=null;p.stroke='ready';p.animationShot='ready';p.reactionWait=0;p.baselineTimer=0;p.serveHold=0;p.stamina=1;p.stride=0}this.serveReceiver.baselineTimer=2.4;this.serveReceiver.serveHold=.3;this.message=this.server.id===0&&this.mode==='play'?'YOUR SERVE: HARD OR SOFT':'GET READY';const serveSide=this.server.x<10?.58:-.58,serveForward=this.server.team===0?-.7:.7;this.serveContact={x:this.server.x+serveSide,y:this.server.y+serveForward,z:2.35};this.ball={...this.serveContact,z:1.65,vx:0,vy:0,vz:0,spin:0,spinX:0,spinY:0,spinZ:0,radius:C.ballRadius};this.timer=0}
+ fault(team,why){
+  if(this.phase==='pause'||this.phase==='over')return;
+  const servingTeam=this.score.team,winner=1-team;
+  this.score.point(winner);
+  this.result=`${winner===0?'YOUR TEAM':'CPU'} WINS RALLY · ${why.toUpperCase()}`;
+  this.outcome=winner===servingTeam?'POINT':this.score.team!==servingTeam?'SIDE OUT':'SECOND SERVER';
+  this.message=why.toUpperCase();this.phase=this.score.winner===null?'pause':'over';this.pause=4;
+  const highlight=this.replayHighlights.at(-1),matchPoint=this.score.winner!==null,longRally=this.shots>=20;
+  if(this.replayFrames.length>15){
+    const qualifiers=[];
+    if(highlight)qualifiers.push(highlight.label);
+    if(longRally)qualifiers.push(`${this.shots}-SHOT RALLY`);
+    if(matchPoint)qualifiers.push('MATCH POINT WIN');
+    const start=highlight?Math.max(0,highlight.time-2):Math.max(0,this.clock-(matchPoint?10:8));
+    const end=highlight?Math.min(this.clock,highlight.time+2):this.clock;
+    const frames=this.replayFrames.filter(f=>f.clock>=start&&f.clock<=end);
+    this.pointReplay={label:qualifiers.join(' · ')||`${this.shots}-SHOT RALLY`,frames};
+    if(qualifiers.length&&frames.length>15)this.replayClip={...this.pointReplay};
+  }
+ }
  hit(player,shot,aim,quality=1){
   const err=legalVolley(player.team,player.y,this.bounces,this.shots);if(err){this.fault(player.team,err);return false}
   if(this.bounces>1){this.fault(player.team,'Double bounce');return false}
@@ -34,7 +53,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
   player.swingSide=this.ball.x>=player.x?1:-1;player.swing=player.swingDuration;player.windup=0;
   const netward=player.team===0?-1:1,faceSide=(this.ball.x>=player.x?1:-1)*(player.stroke==='backhand'?-1:1),normalLength=Math.hypot(faceSide*.32,1,shot==='overhead'?.22:.12),normal={x:faceSide*.32/normalLength,y:netward/normalLength,z:(shot==='overhead'?-.22:.12)/normalLength};
   const effectivePaddle={...this.paddleFor(player,shot),power:this.paddleFor(player,shot).power*grip.power,spin:this.paddleFor(player,shot).spin*grip.spin,loft:shot==='lob'?1+Math.random()*.22:1};
-  const contactResponse=paddleContactResponse({ball:this.ball,incoming:incomingVelocity,paddleVelocity:{x:(player.vx||0)*.35+faceSide*7.5,y:(player.vy||0)*.35+netward*2.2,z:shot==='overhead'?-4:1.2},normal,center:player.contactPaddleTarget,power:effectivePaddle.power,control:effectivePaddle.control,spin:effectivePaddle.spin,quality,swingDirection:faceSide});
+  const contactResponse=paddleContactResponse({ball:this.ball,incoming:incomingVelocity,paddleVelocity:{x:(player.vx||0)*.35+faceSide*7.5,y:(player.vy||0)*.35+netward*2.2,z:shot==='overhead'?-4:1.2},normal,center:player.contactPaddleTarget,power:effectivePaddle.power,control:effectivePaddle.control,spin:effectivePaddle.spin,quality,swingDirection:faceSide,sweetSpotScale:paddleShapeModifiers(player).sweetSpot});
   aim+=contactResponse.aimError;player.paddleTwist=contactResponse.twist;player.contactSweetSpot=contactResponse.sweetSpot;
   launch(this.ball,aim,targetY,shot,{...effectivePaddle,power:effectivePaddle.power*contactResponse.paceScale},quality);this.ball.spin+=contactResponse.spinKick;
   this.ball.spinY=(this.ball.x-player.x)*12;if(shot==='slice')this.ball.spinZ=Math.sign(this.ball.vy||-1)*.8;
@@ -125,7 +144,7 @@ export class Game{constructor(){this.mode='play';this.difficulty='normal';this.l
    const middle=(opponents[0].x+opponents[1].x)/2,attackMiddle=Math.random()<.38;
    const serveReturn=this.shots===1,target=serveReturn?(middle<10?16:4):attackMiddle?Math.max(6.5,Math.min(13.5,middle)):(shot==='drive'?(middle<10?18.2:1.8):(r.x<10?17.5:2.5));
    const pressure=Math.min(2,Math.hypot(r.vx,r.vy)/12)+Math.min(1,this.shots/40);
-   const returnSafety=serveReturn?.55:1,error=(Math.random()+Math.random()+Math.random()-1.5)*(shot==='drive'?2.5:2.2)*(1+pressure*.4)*returnSafety/(r.abilities.control*r.paddle.control*shotSkill(r,chosen)*(shot==='drop'||shot==='dink'?(r.abilities.defense??1):1));
+   const returnSafety=serveReturn?.55:1,error=(Math.random()+Math.random()+Math.random()-1.5)*(shot==='drive'?2.5:2.2)*(1+pressure*.4)*returnSafety/(r.abilities.control*this.paddleFor(r,chosen).control*shotSkill(r,chosen)*(shot==='drop'||shot==='dink'?(r.abilities.defense??1):1));
    const adjustedTarget=serveReturn?Math.max(3,Math.min(17,target+error)):target+error,contact=contactQuality(r,b,chosen,false);this.hit(r,chosen,adjustedTarget,contact.quality);
   }
  }

@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {CHARACTERS,PADDLES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,NAME_CULTURES,RATING_KEYS,PLAYTEST_BASE_RATING,normalizeSelection,buildProfile,createLineup,selectionStats,effectiveRatings,skillAverage} from '../src/roster.js';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,NAME_CULTURES,RATING_KEYS,PLAYTEST_BASE_RATING,normalizeSelection,buildProfile,createLineup,selectionStats,effectiveRatings,skillAverage} from '../src/roster.js';
 import {statRating} from '../src/selection.js';
 import {appearancePalette,characterSpritesReady,onCharacterSpritesReady,characterFrame} from '../src/pixel-character.js';
 import {Game} from '../src/game.js';
@@ -8,20 +8,20 @@ import {Game} from '../src/game.js';
 test('every requested appearance option is available',()=>{
  assert.deepEqual(CLOTHING_COLORS.map(item=>item.name),['Black','Gray','White','Blue','Yellow','Red','Green','Purple','Pink','Orange']);
  assert.equal(PADDLE_COLORS.length,12);assert.ok(HAIR_COLORS.length>=6);assert.ok(SKIN_COLORS.length>=4);
- assert.equal(COURT_PALETTES.length,3);
+ assert.deepEqual(PADDLE_SHAPES.map(item=>item.id),['wide','elongated','hybrid']);assert.deepEqual(COURT_PALETTES.map(item=>item.id),['blue-gray','green-orange','pink-black','black-gray','violet-blue','red-white']);
  const blueGray=COURT_PALETTES.find(item=>item.id==='blue-gray'),rgb=blueGray.kitchen.match(/[0-9a-f]{2}/gi).map(value=>parseInt(value,16));
  assert.ok(Math.max(...rgb)-Math.min(...rgb)<=12);
 });
 test('invalid and legacy selections safely normalize',()=>{
  const fallback=normalizeSelection(null);
- assert.equal(fallback.shirtColor,'green');assert.equal(fallback.paddleColor,'mint');
- const invalid=normalizeSelection({character:'nope',paddle:'nope',hair:'nope',skin:'nope',outfit:'dress',shirtColor:'nope',bottomColor:'nope',paddleColor:'nope',court:'nope'});
- assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');
+ assert.equal(fallback.shirtColor,'green');assert.equal(fallback.paddleColor,'mint');assert.equal(fallback.paddleShape,'hybrid');
+ const invalid=normalizeSelection({character:'nope',paddle:'nope',paddleShape:'nope',hair:'nope',skin:'nope',outfit:'dress',shirtColor:'nope',bottomColor:'nope',paddleColor:'nope',court:'nope'});
+ assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');assert.equal(invalid.paddleShape,'hybrid');
  assert.equal(invalid.hairColor,'brown');assert.equal(invalid.skinColor,'medium');
  assert.equal('outfit' in invalid,false);assert.equal('bottomColor' in invalid,false);
 });
 test('every player and paddle combination produces an independent playable profile',()=>{
- for(const c of CHARACTERS)for(const p of PADDLES){const config={character:c.id,paddle:p.id,shirtColor:'orange',paddleColor:'yellow',court:'pink-black'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.appearance.shirtColor,'orange');assert.equal(profile.appearance.paddleColor,'yellow');profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}
+ for(const c of CHARACTERS)for(const p of PADDLES)for(const shape of PADDLE_SHAPES){const config={character:c.id,paddle:p.id,paddleShape:shape.id,shirtColor:'orange',paddleColor:'yellow',court:'pink-black'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.paddle.shapeId,shape.id);assert.equal(profile.appearance.shirtColor,'orange');assert.equal(profile.appearance.paddleColor,'yellow');profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}
 });
 test('each character has a meaningful strength and a tradeoff',()=>{const standard=selectionStats({});for(const c of CHARACTERS.filter(c=>c.id!=='avery')){const stats=selectionStats({character:c.id});assert.ok(Object.keys(stats).some(k=>stats[k]>standard[k]));assert.ok(Object.keys(stats).some(k=>stats[k]<standard[k]))}});
 test('playtest archetypes average around 70 and keep shot identities distinct',()=>{

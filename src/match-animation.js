@@ -17,8 +17,8 @@ export function matchStrokeMode(player,shot=player.animationShot,stroke=player.s
  return back?(two?'twoBackhand':'backhand'):'forehand';
 }
 export function strokeDuration(player,shot=player.animationShot){
- const mode=matchStrokeMode(player,shot);
- return mode==='overhead'?.9:mode==='erne'?1.2:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8;
+ const mode=matchStrokeMode(player,shot),base=mode==='overhead'?.9:mode==='erne'?1.2:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8,handSpeed=Math.max(.8,Math.min(1.2,player.paddle?.shapeHandSpeed??1));
+ return base/handSpeed;
 }
 export function prepareReceiver(player,game){
  const plan=game.teamPlan,eta=plan?.created+(plan?.point?.time??Infinity)-game.clock;

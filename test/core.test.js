@@ -5,7 +5,7 @@ test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.e
 test('two bounce and kitchen volleys',()=>{assert.match(legalVolley(0,35,0,1),/Two-bounce/);assert.match(legalVolley(0,35,0,2),/Two-bounce/);assert.match(legalVolley(0,28,0,3),/Kitchen/);assert.equal(legalVolley(0,28,1,3),null);assert.equal(legalVolley(0,35,0,3),null)});
 test('first server exception, score, rotations and win by two',()=>{let s=new Score();assert.equal(s.server,2);s.point(1);assert.equal(s.team,1);assert.equal(s.server,1);s.point(1);assert.equal(s.points[1],1);assert.equal(s.player,0);s.point(0);assert.equal(s.server,2);s.point(0);assert.equal(s.team,0);s.points=[10,10];s.point(0);assert.equal(s.winner,null);s.point(0);assert.equal(s.winner,0)});
 test('movement and receiver selection',()=>{let a={team:0,x:2,y:40,vx:0,vy:0},b={team:0,x:18,y:40,vx:0,vy:0};assert.equal(receiver([a,b],0,3,35),a);move(a,5,35,.1);assert.ok(a.x>2&&a.y<40)});
-test('game serve, fault and reset transitions',()=>{let g=new Game();assert.equal(g.phase,'serve');completeToss(g);assert.equal(g.phase,'rally');g.fault(0,'test');assert.equal(g.phase,'pause');g.update(3);assert.equal(g.phase,'serve');assert.equal(g.score.team,1);g.reset();assert.deepEqual(g.score.points,[0,0])});
+test('game serve, fault and reset transitions',()=>{let g=new Game();assert.equal(g.phase,'serve');completeToss(g);assert.equal(g.phase,'rally');g.fault(0,'test');assert.equal(g.phase,'pause');g.update(4.01);assert.equal(g.phase,'serve');assert.equal(g.score.team,1);g.reset();assert.deepEqual(g.score.points,[0,0])});
 
 
 test('servers start behind their baseline on both sides',()=>{const g=new Game();assert.ok(g.server.y>44);g.score.team=1;g.serveSetup();assert.ok(g.server.y<0)});
