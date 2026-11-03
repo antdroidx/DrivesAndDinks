@@ -119,6 +119,8 @@ export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1){
  let [t,spin]=specs[shot]||specs.drive;
  const slow=1/(.72+.28*quality),technique=Math.max(.72,Math.min(1.28,paddle.skill??1));t*=slow;if(shot==='lob')t*=paddle.loft??1;
  if(['drive','overhead','atp','erne'].includes(shot))t=Math.max(.38,Math.hypot(x-b.x,y-b.y)/(48*(paddle.power??1)*technique*(shot==='overhead'?1.12:1)))*slow;
+ const aggressive=['drive','overhead','atp','erne'].includes(shot);
+ if(aggressive&&b.z<2.2)t*=1+(2.2-b.z)*.15;
  const f=(22-b.y)/(y-b.y);let clearance=['drive','overhead','atp','erne'].includes(shot)?Math.max(C.netCenterHeight+C.ballRadius+.25,(shot==='overhead'?3.35:3.65)/(paddle.power??1)):shot==='drop'?3.7:3.4;if(quality<.8)clearance*=1+(0.8-quality)*.35;
  if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
  b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;b.spin=spin*(paddle.spin??1);b.spinX=0;b.spinY=0;b.spinZ=0;b.radius=C.ballRadius;b.shot=shot;
@@ -140,7 +142,7 @@ export function move(p,tx,ty,dt){
  p.vx+=dvx;p.vy+=dvy;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;
  const movingSpeed=Math.hypot(p.vx,p.vy),agility=Math.max(8,p.abilities?.speed??C.speed);if(movingSpeed>5)p.stamina=Math.max(0,p.stamina-dt*(movingSpeed-4)*.0045*(12/agility));else p.stamina=Math.min(1,p.stamina+dt*.009*(agility/12));if(!contactLock&&!recovering&&!settling&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
  p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=settling?'splitStep':recovering?'recover':p.slideTimer>0?'slide':movingSpeed<.7?'ready':Math.abs(p.vx)>Math.abs(p.vy)*1.3?'shuffle':'run';
- const outside=(p.outsideTimer||0)>0;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));const deep=(p.baselineTimer||0)>0;p.y=p.team===0?Math.max(23,Math.min(deep?47:44,p.y)):Math.max(deep?-3:0,Math.min(21,p.y));
+ const outside=true;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));const deep=true;p.y=p.team===0?Math.max(23,Math.min(deep?47:44,p.y)):Math.max(deep?-3:0,Math.min(21,p.y));
 }
 export function resolvePlayerCollisions(players,radius=.62,restitution=.18){
  for(let i=0;i<players.length;i++)for(let j=i+1;j<players.length;j++){
@@ -164,8 +166,8 @@ export function selectShot(p,b,desired,random=Math.random()){
  if(desired==='soft')return kitchenSide?'dink':'drop'
  if(desired==='lob')return 'lob'
  if(desired==='attack'||desired==='drive'){
-  if(nearSideline&&wideBall&&b.z>=3.2)return 'erne'
-  if(nearSideline&&wideBall)return 'atp'
+  if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne'
+  if((b.x<C.netPostLeft-C.ballRadius||b.x>C.netPostRight+C.ballRadius)&&nearSideline&&b.z<3.2)return 'atp'
   return b.z>=5.2?'overhead':'drive'
  }
  return desired
@@ -179,6 +181,14 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
  if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
  if(difficulty>.82&&height<3.2)return 'lob';
  if(shots===2)return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop';
- if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';return height>2.7||(height>.65&&random<Math.max(.1,Math.min(.55,.28+attackBias)))?'drive':'dink'}
+ if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';if(difficulty>.55&&height<2.7)return 'dink';return height>3.1||(height>1.8&&random<Math.max(.1,Math.min(.55,.28+attackBias)))?'drive':'dink'}
  return height>3.2&&random<Math.max(.2,Math.min(.72,.45+attackBias))?'drive':'drop';
+}
+export function kitchenFootContact(p){return p.team===0?p.y-.42<=29:p.y+.42>=15}
+export function chooseCpuTarget(player,opponents,shot){
+ const candidates=shot==='dink'?[3,7,13,17]:[2.5,6,10,14,17.5];
+ return candidates.reduce((best,x)=>{
+  const value=v=>Math.min(...opponents.map(o=>Math.abs(v-o.x)-Math.sign(v-o.x)*(o.vx||0)*.18));
+  return value(x)>value(best)?x:best;
+ },candidates[0]);
 }

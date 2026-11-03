@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - codex/high-resolution-players
+      - codex/dev-gameplay-polish
   workflow_dispatch:
 
 permissions:
@@ -21,7 +22,12 @@ jobs:
       - name: Check out main release source
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.ref_name }}
+      - name: Check out public release source
+        uses: actions/checkout@v4
+        with:
           ref: main
+          path: _release
       - name: Check out frozen Build 15
         uses: actions/checkout@v4
         with:
@@ -46,16 +52,16 @@ jobs:
           node scripts/version-build.js 48 _site/prototype
 
           # Build the development mirror from current main.
-          cp index.html style.css studio.html studio.css _site/dev/
+          cp _release/index.html _release/style.css _release/studio.html _release/studio.css _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
-          cp -R src assets _site/dev/
+          cp -R _release/src _release/assets _site/dev/
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
 
           # Current main is the public release at the Pages root.
-          cp index.html style.css studio.html studio.css _site/
+          cp _release/index.html _release/style.css _release/studio.html _release/studio.css _site/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
-          cp -R src assets _site/
-          cp sw.js _site/
+          cp -R _release/src _release/assets _site/
+          cp _release/sw.js _site/
           node scripts/version-build.js "${{ github.run_number }}" _site
           touch _site/.nojekyll
       - name: Publish GitHub Pages

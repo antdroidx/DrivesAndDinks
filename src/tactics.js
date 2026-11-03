@@ -15,7 +15,7 @@ function contacts(players,team,ball,shots,bounces){
       const y=count===0?(team===0?Math.max(29.6,future.y):Math.min(14.4,future.y)):future.y;
       if(Math.abs(future.y-y)>1.6)continue;
       if(future.z>3.4&&(future.z<5.2||future.vz>0))continue;
-      const target={x:clamp(future.x,1,19),y:clamp(y,team===0?23:1,team===0?43:21)};
+      const target={x:clamp(future.x,-3,23),y:clamp(y,team===0?23:-3,team===0?47:21)};
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
       const reach=1.3*(p.abilities?.reach??1),speed=(p.abilities?.speed??12)*.8;
       if(travel<=Math.max(0,time-(p.reactionWait||0))*speed+reach)found.set(p.id,{...target,z:future.z,time,bounces:count});
@@ -28,14 +28,14 @@ function contacts(players,team,ball,shots,bounces){
 export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0}){
   const pair=players.filter(p=>p.team===team),flight={...ball};
   const landingTime=Math.max(0,(flight.vz+Math.sqrt(Math.max(0,flight.vz**2+2*C.gravity*flight.z)))/C.gravity);
-  const landing={x:clamp(flight.x+flight.vx*landingTime,1,19),y:clamp(flight.y+flight.vy*landingTime,team===0?23:1,team===0?43:21)};
+  const landing={x:clamp(flight.x+flight.vx*landingTime,1,19),y:clamp(flight.y+flight.vy*landingTime,team===0?23:-3,team===0?47:21)};
   const owner=shots===1?serveReceiver:pair.reduce((a,b)=>Math.abs(lane(a)-landing.x)<=Math.abs(lane(b)-landing.x)?a:b);
   const available=contacts(pair,team,ball,shots,bounces);
   let selected=owner,point=available.get(owner.id),poach=false;
   if(shots>2){
     const partner=pair.find(p=>p!==owner),chance=available.get(partner.id);
     const nearLine=team===0?partner.y<=34:partner.y>=10;
-    const earlier=chance&&(!point||chance.time+.08<point.time);const middleAttack=chance&&chance.x>=7&&chance.x<=13&&(!point||chance.time<=point.time+.1)&&(shots+partner.id)%3===0;
+    const earlier=chance&&(!point||chance.time+.08<point.time);const middleAttack=chance&&chance.x>=7&&chance.x<=13&&(!point||chance.time<=point.time+.1)&&(partner.abilities?.courtIQ??1)>=.9;
     if(chance&&chance.bounces===0&&(earlier||middleAttack)&&nearLine&&chance.x>=5&&chance.x<=15&&Math.abs(chance.x-partner.x)<6){
       selected=partner;point=chance;poach=true;
     }else if(!point&&chance){selected=partner;point=chance}
@@ -68,10 +68,17 @@ export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingT
 export function separateTargets(entries,team,receiverId){
   const pair=entries.filter(entry=>entry.player.team===team);if(pair.length<2)return;
   const [a,b]=pair,support=a.player.id===receiverId?b:a,active=support===a?b:a;
-  const distance=Math.hypot(support.player.x-active.player.x,support.player.y-active.player.y);if(distance>=2.3)return;
-  const direction=(support.player.x-active.player.x)||((lane(support.player)<lane(active.player))?-1:1),push=Math.min(1.1,(2.3-distance)*.42);
-  support.target.x=clamp(support.target.x+Math.sign(direction)*push,.5,19.5);
-  support.target.y=clamp(support.target.y+(team===0?push:-push),team===0?23:0,team===0?44:21);
+  // Reserve the hitter's destination and the approach segment before overlap.
+  const start=active.player,end=active.target,dx=end.x-start.x,dy=end.y-start.y;
+  const t=clamp(((support.target.x-start.x)*dx+(support.target.y-start.y)*dy)/(dx*dx+dy*dy||1),0,1);
+  const closest={x:start.x+dx*t,y:start.y+dy*t};
+  const gap=Math.hypot(support.target.x-closest.x,support.target.y-closest.y);
+  if(gap<3.6){
+    const direction=lane(support.player)<lane(active.player)?-1:1;
+    support.target.x=clamp(closest.x+direction*3.6,.5,19.5);
+    support.target.y=clamp(closest.y+(team===0?1.6:-1.6),team===0?23:0,team===0?47:21);
+    support.target.role='yield-contact';
+  }
 }
 
 export function separatePartners(players,team,receiverId){

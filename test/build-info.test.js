@@ -27,7 +27,7 @@ test('Pages promotes main to the public root and preserves Build 48 and Build 15
  assert.match(workflow,/_site\/archive\/build-15/);
  assert.match(workflow,/_site\/prototype/);
  assert.match(workflow,/_prototype\/studio\.html[^\n]*_site\/prototype\//);
- assert.match(workflow,/cp index\.html style\.css studio\.html studio\.css _site\//);
+ assert.match(workflow,/cp _release\/index\.html _release\/style\.css _release\/studio\.html _release\/studio\.css _site\//);
  assert.match(workflow,/Current main is the public release at the Pages root/);
  assert.doesNotMatch(workflow,/cp _prototype\/index\.html[^\n]*_site\/\n/);
 });

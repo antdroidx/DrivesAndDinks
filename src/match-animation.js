@@ -30,7 +30,7 @@ export function prepareReceiver(player,game){
   const desired=player.id===0&&game.mode==='play'?game.shot:game.shots===1?'drive':kitchen?(forecast.z>2.7?'drive':'dink'):'drop';
   player.preparation={shotNumber:game.shots,shot:selectShot(player,forecast,desired),stroke:strokeForContact(player,forecast),phase:0};
  }
- if(eta<=.22&&eta>=-.04&&!player.splitStepArmed&&Math.hypot(player.x-plan.point.x,player.y-plan.point.y)<2.5){player.splitStepArmed=true;player.splitStepTimer=.18}
+ if(eta<=.22&&eta>=-.04&&!player.splitStepArmed&&Math.hypot(player.x-plan.point.x,player.y-plan.point.y)<2.5){player.splitStepArmed=true;player.splitStepTimer=0}
  player.preparation.phase=Math.max(player.preparation.phase,.5*clamp(1-eta/.26));
 }
 export function sampleMatchAnimation(player,game){

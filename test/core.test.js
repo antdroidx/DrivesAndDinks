@@ -38,7 +38,7 @@ test('serve returner starts behind the baseline and approaches the return',()=>{
 
 
 test('CPU can use a defensive lob against a pair at the kitchen',()=>{assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:true,random:.99}),'lob');assert.equal(chooseCpuShot({shots:4,team:0,y:30,height:1,opponentsAtKitchen:false,random:.99}),'dink')});
-test('missed timing feedback appears when an early swing expires',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=0;Object.assign(g.ball,{x:19,y:5,z:5,vx:0,vy:0,vz:0});g.swing();for(let i=0;i<45;i++)g.update(C.dt);assert.equal(g.message,'MISSED TIMING')});
+test('missed timing feedback appears when an early swing expires',()=>{const g=new Game();g.phase='rally';g.last=1;g.shots=3;g.bounces=0;Object.assign(g.ball,{x:19,y:5,z:5,vx:0,vy:0,vz:0});g.swing();for(let i=0;i<45;i++)g.update(C.dt);assert.equal(g.message,'OUT OF REACH')});
 test('side out retains the correct player positions across points',()=>{const s=new Score();s.point(1);const server=s.player;s.point(1);s.point(1);assert.equal(s.player,server);s.point(0);assert.notEqual(s.player,server);s.point(0);assert.equal(s.team,0);assert.equal(s.player,s.rightPlayer[0])});
 
 

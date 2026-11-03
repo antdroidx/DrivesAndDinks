@@ -65,7 +65,7 @@ test('two-handed grip stays connected through the entire stroke on both sides',(
 });
 test('all stroke paths differ where authored and recover to the same ready position',()=>{
  const signatures=MOTIONS.slice(2).map(mode=>[.28,.52,.78].map(phase=>sampleCharacterPose({mode,phase}).paddle));
- assert.equal(new Set(signatures.map(p=>JSON.stringify(p))).size,MOTIONS.slice(2).length-1);
+ assert.equal(new Set(signatures.map(p=>JSON.stringify(p))).size,MOTIONS.slice(2).length);
  for(const mode of MOTIONS.slice(2))assert.deepEqual(sampleCharacterPose({mode,phase:0}).paddle,sampleCharacterPose({mode,phase:1}).paddle);
 });
 test('material changes cannot recolor another body part or the black paddle face',()=>{
