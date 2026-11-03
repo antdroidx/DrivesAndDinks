@@ -1,0 +1,6 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {thighGarment,skirtGarment} from '../src/character-concepts.js';
+function inside(p,poly){let hit=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [x,y]=poly[i],[xx,yy]=poly[j];if((y>p.y)!==(yy>p.y)&&p.x<(xx-x)*(p.y-y)/(yy-y)+x)hit=!hit}return hit}
+test('shorts cover upper thigh skin when legs bend sideways',()=>{for(const direction of [-1,1])for(const bend of [0,5,12,20]){const chain=[{x:24+direction*3,y:41},{x:24+direction*(3+bend),y:51},{x:24+direction*12,y:60}],width=6,garment=thighGarment(chain,width);for(let n=1;n<10;n++){const t=n/20,p={x:chain[0].x+(chain[1].x-chain[0].x)*t,y:chain[0].y+(chain[1].y-chain[0].y)*t};assert.ok(inside(p,garment.polygon))}assert.ok(Math.abs(garment.end.x-chain[0].x)>bend*.5-.001)}});
+test('skirt hem expands to cover wide bent thighs without losing its waistband',()=>{const hips={x:24,y:41},legs=[[{x:21,y:41},{x:5,y:50}],[{x:27,y:41},{x:43,y:50}]],g=skirtGarment(hips,legs,7,4);assert.ok(g.left<15);assert.ok(g.right>33);assert.deepEqual(g.polygon[0],[17,40]);assert.deepEqual(g.polygon[1],[31,40]);for(const chain of legs){const p=thighGarment(chain,6).end;assert.ok(inside(p,g.polygon))}});

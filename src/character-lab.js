@@ -1,5 +1,5 @@
 import {MOTIONS,sampleCharacterPose,drawPixelCharacter} from './pixel-character.js';
-import {CHARACTER_CONCEPTS,conceptDimensions,conceptPoint} from './character-concepts.js';
+import {CHARACTER_CONCEPTS,conceptDimensions,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js';
 const $=id=>document.getElementById(id),motionNames={idle:'Ready stance',run:'Running',shuffle:'Side-step',volley:'Volley',forehand:'Forehand drive',backhand:'Backhand drive',forehandDink:'Forehand dink',backhandDink:'Backhand dink',forehandDrop:'Forehand drop',backhandDrop:'Backhand drop',overhead:'Overhead',lob:'Lob',twoBackhand:'Two-hand backhand',twoBackhandDink:'Two-hand dink',erne:'Erne',serve:'Serve',poachLunge:'Poach',slideReturn:'Sliding return',splitStep:'Split-step',resetBlock:'Reset block',counterVolley:'Counter volley',halfVolley:'Half-volley',wideForehand:'Wide forehand',wideBackhand:'Wide backhand',backpedal:'Backpedal',crossover:'Crossover',tweener:'Tweener'};
 $('motion').innerHTML=['idle',...MOTIONS].map(m=>`<option value="${m}">${motionNames[m]}</option>`).join('');$('motion').value='forehand';
 const cards=CHARACTER_CONCEPTS.map(d=>{const article=document.createElement('article');article.className='design';article.innerHTML=`<div class="card-head"><div><div class="tag">${d.tag}</div><h3>${d.name}</h3></div><span>${String(CHARACTER_CONCEPTS.indexOf(d)+1).padStart(2,'0')}</span></div><canvas width="960" height="774" aria-label="${d.name}, animated character proposal"></canvas><div class="card-copy"><div class="measurements"><span class="height"></span><span class="build"></span><span class="hat"></span></div><p>${d.note}</p></div>`;$('designs').append(article);return {article,canvas:article.querySelector('canvas'),design:d}});
@@ -9,12 +9,12 @@ function shape(c,points,fill,stroke='#182633',line=.65){c.beginPath();points.for
 function limb(c,a,b,width,color){c.lineCap='round';c.strokeStyle='#182633';c.lineWidth=width+1;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.strokeStyle=gradient(c,color,(a.x+b.x)/2,(a.y+b.y)/2,width);c.lineWidth=width;c.stroke()}
 function ellipse(c,x,y,rx,ry,fill){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=fill;c.fill()}
 function hairBack(c,x,y,d,phase,near){const hair=gradient(c,d.hairColor,x,y,7),sway=Math.sin(phase*Math.PI*2)*1.5;if(d.hair==='bob'){c.fillStyle=hair;c.beginPath();c.ellipse(x,y+1,6.8,8,0,Math.PI,Math.PI*2);c.lineTo(x+7.2,y+9);c.quadraticCurveTo(x,y+12,x-7.2,y+9);c.closePath();c.fill()}if(d.hair==='ponytail'){limb(c,{x:x+4,y:y-2},{x:x+9+sway,y:y+7},3.5,d.hairColor);limb(c,{x:x+9+sway,y:y+7},{x:x+7+sway,y:y+13},2.7,d.hairColor);ellipse(c,x+4,y-2,1.7,1.3,d.trim)}if(d.hair==='braid'){for(let i=0;i<7;i++){const bx=x+(near?1:5)+Math.sin(i*.6+phase*6)*.7;ellipse(c,bx,y+3+i*1.7,1.7-i*.09,1.4,shade(d.hairColor,i%2?.12:-.1))}ellipse(c,x+(near?1:5),y+15,1.2,.65,d.trim)}}
-function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='near';hairBack(c,x,y,d,phase,near);
+function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='near';
  ellipse(c,x,y,5.8,7.2,'#182633');ellipse(c,x,y,5.1,6.5,gradient(c,d.skin,x,y,5));ellipse(c,x-5,y+1,1.2,1.8,shade(d.skin,-.12));ellipse(c,x+5,y+1,1.2,1.8,shade(d.skin,-.16));
  if(!near){c.strokeStyle=shade(d.skin,-.35);c.lineWidth=.65;c.beginPath();c.moveTo(x+.6,y);c.lineTo(x+1.4,y+2.4);c.lineTo(x+.1,y+2.6);c.stroke();ellipse(c,x-2.2,y+.3,.65,.8,'#25313a');ellipse(c,x+2.2,y+.3,.65,.8,'#25313a');c.strokeStyle=shade(d.skin,-.45);c.beginPath();c.moveTo(x-1.3,y+4);c.quadraticCurveTo(x,y+4.8,x+1.6,y+4);c.stroke()}
  const hair=gradient(c,d.hairColor,x,y-4,6);
  if(near){ellipse(c,x,y-1,5.6,6,hair);shape(c,[[x-5,y],[x+5,y],[x+4,y+4],[x,y+5],[x-4,y+4]],hair,null)}else{c.fillStyle=hair;c.beginPath();c.moveTo(x-5.5,y);c.quadraticCurveTo(x-6,y-7,x,y-7);c.quadraticCurveTo(x+6,y-7,x+5.5,y-1);c.lineTo(x+2,y-3);c.lineTo(x-1,y-2);c.lineTo(x-3,y-3);c.closePath();c.fill()}
- if(d.hair==='curls'){for(let i=0;i<7;i++)ellipse(c,x-4.8+i*1.6,y-4.4-Math.sin(i/6*Math.PI)*2.6,1.7,1.7,shade(d.hairColor,i%2?.14:-.12))}if(d.hair==='bob'){limb(c,{x:x-5,y:y-1},{x:x-5.5,y:y+7},2,d.hairColor);limb(c,{x:x+5,y:y-1},{x:x+5.5,y:y+7},2,d.hairColor)}
+ if(d.hair==='curls'){for(let i=0;i<7;i++)ellipse(c,x-4.8+i*1.6,y-4.4-Math.sin(i/6*Math.PI)*2.6,1.7,1.7,shade(d.hairColor,i%2?.14:-.12))}if(d.hair==='bob'){limb(c,{x:x-5,y:y-1},{x:x-5.5,y:y+(near?7:5)},2,d.hairColor);limb(c,{x:x+5,y:y-1},{x:x+5.5,y:y+(near?7:5)},2,d.hairColor)}
  if(d.headwear==='cap'){c.fillStyle=gradient(c,d.trim,x,y-4,7);c.beginPath();c.moveTo(x-6,y-2);c.quadraticCurveTo(x-6,y-9,x,y-9);c.quadraticCurveTo(x+6,y-9,x+6,y-2);c.closePath();c.fill();c.strokeStyle=shade(d.trim,-.35);c.lineWidth=.6;c.beginPath();c.moveTo(x,y-8);c.lineTo(x+.5,y-2);c.stroke();if(near){shape(c,[[x-2,y-2],[x+2,y-2],[x+2,y],[x-2,y]],d.hairColor,null)}else{ellipse(c,x+.5,y-1.8,7.2,1.5,shade(d.trim,-.12));ellipse(c,x,y-5,.8,.8,d.shirt)}}
  if(d.headwear==='visor'){limb(c,{x:x-5.7,y:y-2},{x:x+5.7,y:y-2},1.6,d.trim);if(!near){shape(c,[[x-5.7,y-1.5],[x+5.7,y-1.5],[x+8,y+.2],[x+3,y+1],[x-5,y+.2]],gradient(c,d.trim,x,y,6))}}
  if(d.headwear==='headband'){limb(c,{x:x-5.2,y:y-2},{x:x+5.2,y:y-2},2.1,d.trim);if(near){limb(c,{x:x+4,y:y-1},{x:x+6,y:y+3},1.3,d.trim)}}
@@ -22,8 +22,13 @@ function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='
 function athlete(c,design,mode,phase,view,cx,baseline,scale){const raw=sampleCharacterPose({mode,phase,frame:phase*4,view}),d=design,convert=p=>conceptPoint(p,d),pose={...raw,neck:convert(raw.neck),hips:convert(raw.hips),paddle:convert(raw.paddle),hand:convert(raw.hand)};
  pose.arms=raw.arms.map(chain=>chain.map((p,i)=>{const q=convert(p),sign=chain[0].x<24?-1:1;return {...q,x:q.x+sign*(d.shoulder-6)*(1-i*.3)}}));pose.paddle.x+=pose.arms[raw.gripSide][2].x-pose.hand.x;pose.paddle.y+=pose.arms[raw.gripSide][2].y-pose.hand.y;pose.hand=pose.arms[raw.gripSide][2];pose.legs=raw.legs.map((chain,i)=>chain.map((p,j)=>{const q=convert(p);return {...q,x:q.x+(i?1:-1)*(d.hip-5)*(1-j*.35)}}));
  c.save();c.translate(cx-24*scale,baseline-63*scale);c.scale(scale,scale);const {hips:h,neck:n}=pose,skin=d.skin,w=2.3+d.build*1.3;
+ pose.legs.forEach((chain,i)=>{chain[0].x=h.x+(i?1:-1)*Math.max(1.5,d.hip-(w+1)/2-.8)});
  const groundY=63;ellipse(c,24,groundY+1,10+d.build*2,2,'#07151a55');
+ const skirtCoverage=d.body==='female'?skirtGarment(h,pose.legs,d.hip,w):null;
+ c.save();if(skirtCoverage){c.beginPath();c.rect(-100,skirtCoverage.bottom,250,100);c.clip();}
  for(const chain of pose.legs){limb(c,chain[0],chain[1],w+1,skin);limb(c,chain[1],chain[2],w,skin);const f=chain[2];limb(c,{x:f.x,y:f.y-2.6},f,w+.1,'#ede8db');shape(c,[[f.x-2.3,f.y-.4],[f.x+1.8,f.y-.7],[f.x+3.1,f.y+1.2],[f.x+2.6,f.y+2],[f.x-2.5,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3));limb(c,{x:f.x-1.5,y:f.y+.8},{x:f.x+2,y:f.y+1},.6,d.trim)}
+ c.restore();
+ hairBack(c,n.x,n.y-8,d,phase,view==='near');
  function arm(index){const a=pose.arms[index];limb(c,a[0],a[1],w+.3,skin);limb(c,a[1],a[2],w-.2,skin);if(d.body==='male'){limb(c,a[0],{x:a[0].x+(a[1].x-a[0].x)*.4,y:a[0].y+(a[1].y-a[0].y)*.4},w+1,d.shirt)}ellipse(c,a[2].x,a[2].y,w*.48,w*.55,shade(skin,.08));limb(c,{x:a[2].x-.8,y:a[2].y-1.6},{x:a[2].x+.8,y:a[2].y-1.6},.8,d.trim)}
  function paddle(){const p=pose.paddle,hand=pose.hand;limb(c,p,hand,1.5,'#353239');c.save();c.translate(p.x,p.y);c.rotate(raw.angle);ellipse(c,0,0,3.9,5.3,'#182633');ellipse(c,0,0,3.2,4.6,d.trim);ellipse(c,0,0,2.6,4,'#171b25');c.restore()}
  const behind=pose.arms.map((a,i)=>({i,depth:raw.arms[i][1].depth}));behind.filter(a=>a.depth<raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
@@ -32,7 +37,15 @@ function athlete(c,design,mode,phase,view,cx,baseline,scale){const raw=sampleCha
  c.fillStyle=gradient(c,d.shirt,n.x,top+8,shoulder);c.strokeStyle='#182633';c.lineWidth=.8;c.beginPath();c.moveTo(n.x-3,top-1);c.lineTo(n.x-shoulder,top+2);c.quadraticCurveTo(n.x-shoulder-1,(top+hem)/2,h.x-waist,hem);c.quadraticCurveTo(h.x,hem+1,h.x+waist,hem);c.quadraticCurveTo(n.x+shoulder+1,(top+hem)/2,n.x+shoulder,top+2);c.lineTo(n.x+3,top-1);c.quadraticCurveTo(n.x,top+2,n.x-3,top-1);c.closePath();c.fill();c.stroke();
  shape(c,[[n.x+shoulder-2,top+3],[n.x+shoulder,top+3],[h.x+waist,hem],[h.x+waist-2,hem]],shade(d.shirt,-.2),null);limb(c,{x:n.x-2.8,y:top},{x:n.x,y:top+2},.75,d.trim);limb(c,{x:n.x,y:top+2},{x:n.x+2.8,y:top},.75,d.trim);
  if(view==='far'){ellipse(c,n.x-2.4,top+5,.8,1,d.trim)}else{limb(c,{x:n.x-2,y:top+4},{x:n.x+2,y:top+4},.8,d.trim)}
- if(d.body==='female'){const bottom=hem+8;shape(c,[[h.x-hip,hem],[h.x+hip,hem],[h.x+hip+2,bottom],[h.x-hip-2,bottom]],gradient(c,d.shirt,h.x,hem,hip));for(const offset of [-.7,-.25,.25,.7]){shape(c,[[h.x+hip*offset,hem+1],[h.x+hip*offset+.7,hem+1],[h.x+(hip+2)*offset+1,bottom-.7],[h.x+(hip+2)*offset-.5,bottom-.7]],shade(d.shirt,-.23),null)}limb(c,{x:h.x-hip-1.5,y:bottom},{x:h.x+hip+1.5,y:bottom},.65,d.trim)}else{shape(c,[[h.x-hip,hem],[h.x+hip,hem],[h.x+hip+.5,hem+8],[h.x+.7,hem+8],[h.x,hem+4],[h.x-.7,hem+8],[h.x-hip-.5,hem+8]],gradient(c,shade(d.shirt,-.45),h.x,hem+4,hip));limb(c,{x:h.x-hip+.8,y:hem+1},{x:h.x-hip+.5,y:hem+6},.8,d.trim)}
+ if(d.body==='female'){
+  const skirt=skirtGarment(h,pose.legs,hip,w);shape(c,skirt.polygon,gradient(c,d.shirt,h.x,hem,hip));
+  for(const offset of [-.7,-.25,.25,.7]){const edge=offset<0?h.x-skirt.left:skirt.right-h.x;shape(c,[[h.x+hip*offset,hem+1],[h.x+hip*offset+.7,hem+1],[h.x+edge*offset+1,skirt.bottom-.7],[h.x+edge*offset-.5,skirt.bottom-.7]],shade(d.shirt,-.23),null)}
+  limb(c,{x:skirt.left,y:skirt.bottom},{x:skirt.right,y:skirt.bottom},.65,d.trim);
+ }else{
+  const cloth=shade(d.shirt,-.45);
+  for(const chain of pose.legs){const panel=thighGarment(chain,w+2);shape(c,panel.polygon,gradient(c,cloth,chain[0].x,hem+4,hip));const edge=panel.polygon;limb(c,{x:edge[1][0],y:edge[1][1]},{x:edge[2][0],y:edge[2][1]},.65,d.trim)}
+  shape(c,[[h.x-hip,hem],[h.x+hip,hem],[h.x+hip,hem+3],[h.x,hem+4],[h.x-hip,hem+3]],gradient(c,cloth,h.x,hem+2,hip));
+ }
  limb(c,{x:h.x-waist,y:hem},{x:h.x+waist,y:hem},1.1,shade(d.shirt,-.3));head(c,pose,d,view,phase);behind.filter(a=>a.depth>=raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
 }
 let playing=true,phase=0,last=0;function pause(){playing=false;$('play').textContent='Play';$('play').setAttribute('aria-pressed','false')}

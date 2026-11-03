@@ -11,3 +11,15 @@ export function conceptDimensions(design,heightDelta=0,buildDelta=0){
  return {...design,height,build,shoulder:design.shoulder+(build-design.build)*2.5,waist:design.waist+(build-design.build)*3,hip:design.hip+(build-design.build)*2};
 }
 export function conceptPoint(p,design){const heightScale=design.height/177;return {x:24+(p.x-24),y:63+(p.y-63)*heightScale}}
+
+// Clothing follows the thigh rather than a fixed rectangle over moving legs.
+export function thighGarment(chain,width){
+ const [hip,knee]=chain,dx=knee.x-hip.x,dy=knee.y-hip.y,length=Math.hypot(dx,dy)||1,nx=-dy/length,ny=dx/length;
+ const start={x:hip.x-dx/length,y:hip.y-dy/length},end={x:hip.x+dx*.52,y:hip.y+dy*.52},half=width/2;
+ return {end,polygon:[[start.x+nx*half,start.y+ny*half],[end.x+nx*half,end.y+ny*half],[end.x-nx*half,end.y-ny*half],[start.x-nx*half,start.y-ny*half]]};
+}
+export function skirtGarment(hips,legs,hipWidth,limbWidth){
+ const hem=hips.y-1,ends=legs.map(chain=>thighGarment(chain,limbWidth+2).end),left=Math.min(hips.x-hipWidth-2,...ends.map(p=>p.x-(limbWidth+2)/2)),right=Math.max(hips.x+hipWidth+2,...ends.map(p=>p.x+(limbWidth+2)/2)),bottom=Math.max(hem+8,...ends.map(p=>p.y+1));
+ const leftY=Math.min(bottom-1,ends[0].y),rightY=Math.min(bottom-1,ends[1].y);
+ return {left,right,bottom,polygon:[[hips.x-hipWidth,hem],[hips.x+hipWidth,hem],[right,rightY],[right,bottom],[left,bottom],[left,leftY]]};
+}
