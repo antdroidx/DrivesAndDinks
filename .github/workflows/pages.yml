@@ -51,10 +51,10 @@ jobs:
           printf 'globalThis.DRIVES_DINKS_BUILD = "48";\n' > _site/prototype/build-info.js
           node scripts/version-build.js 48 _site/prototype
 
-          # Build the development mirror from current main.
-          cp _release/index.html _release/style.css _release/studio.html _release/studio.css _site/dev/
+          # Build DEV from the triggering development branch.
+          cp index.html style.css studio.html studio.css _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
-          cp -R _release/src _release/assets _site/dev/
+          cp -R src assets _site/dev/
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
 
           # Current main is the public release at the Pages root.
