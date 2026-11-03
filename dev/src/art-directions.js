@@ -1,4 +1,4 @@
-import {CONTACT_PHASE,drawPixelCharacter} from './pixel-character.js?v=85';
+import {CONTACT_PHASE,drawPixelCharacter} from './pixel-character.js?v=86';
 const ids={current:document.querySelector('#current'),rounded:document.querySelector('#rounded'),volume:document.querySelector('#volume')};
 const motion=document.querySelector('#motion'),view=document.querySelector('#view'),speed=document.querySelector('#speed'),phaseInput=document.querySelector('#phase'),phaseLabel=document.querySelector('#phase-value'),playButton=document.querySelector('#play');
 let playing=true,phase=0,last=0;
