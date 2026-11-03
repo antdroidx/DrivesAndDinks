@@ -31,5 +31,5 @@ test('Pages promotes main to the public root and preserves Build 48 and Build 15
  assert.match(workflow,/Current main is the public release at the Pages root/);
  assert.doesNotMatch(workflow,/cp _prototype\/index\.html[^\n]*_site\/\n/);
 });
-test("DEV packages branch assets separately from public main",async()=>{const workflow=readFileSync(new URL("../.github/workflows/pages.yml",import.meta.url),"utf8");assert.match(workflow,/cp -R src assets _site\/dev\//);assert.match(workflow,/cp -R _release\/src _release\/assets _site\/\n/)});
+test("DEV packages branch assets separately from public main",async()=>{const workflow=readFileSync(new URL("../.github/workflows/pages.yml",import.meta.url),"utf8");assert.match(workflow,/cp -R src assets _site\/dev\//);assert.match(workflow,/cp -R _release\/src _release\/assets _site\/\r?\n/)});
 
