@@ -1,4 +1,4 @@
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=79';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=80';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.

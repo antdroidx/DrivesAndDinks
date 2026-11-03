@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=79';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=80';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -48,7 +48,7 @@ const wristAngles={
  forehandDrop:[0,2.4,2.5,1.4,0],backhandDrop:[0,-2.2,-2.25,-1.2,0],
  overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,1.4,1.9,-.6,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0],poachLunge:[0,1.2,1.75,-.4,0],slideReturn:[0,1.5,1.9,-.25,0],splitStep:[0,.4,.65,.2,0]
 };
-paths.twoBackhandDink=paths.twoBackhand;wristAngles.twoBackhandDink=wristAngles.twoBackhand;
+paths.twoBackhandDink=[READY,[-6,36,7],[-10,40,12],[-8,34,14],READY];wristAngles.twoBackhandDink=[0,-1.8,-2,-1.5,0];
 const times=[0,.28,CONTACT_PHASE,.78,1];
 function samplePath(path,phase){
  let i=0;while(i<3&&phase>times[i+1])i++;
@@ -80,7 +80,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=79';
+export {courtView,strokeForContact} from './player-facing.js?v=80';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
@@ -114,10 +114,10 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  const arms3=[];arms3[gripSide]=gripArm;arms3[freeSide]=solveArm3D(shoulders[freeSide],freeHand,{x:-side*7,y:9,z:-4});
  const arms=arms3.map(chain=>chain.map(project)),paddle=project(paddle3),hand=project(hand3);
  const angle=Math.atan2(-(hand.x-paddle.x),hand.y-paddle.y);
- const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-.62:.78)*side;let stance=action?1.6+load*1.2:0;if(mode==='poachLunge')stance+=load*2.8;if(mode==='slideReturn')stance+=load*4.2;if(mode==='splitStep')stance+=load*2;
+ const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-1.4:1.7)*side;let stance=action?1.6+load*1.2:0;if(mode==='poachLunge')stance+=load*2.8;if(mode==='slideReturn')stance+=load*4.2;if(mode==='splitStep')stance+=load*2;
  const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*1.2:0,rootOffset=animationRootOffset(mode,phase,travelSide);
  const neck=project({x:0,y:23+bob+crouch-jump*3.2,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift+lateralJump,y:41+bob+crouch*.45-jump*3.2};
- let feet=mode==='run'?[{x:19+stride*2,y:59-stride*3},{x:29-stride*2,y:59+stride*3}]:[
+ let feet=mode==='run'?[{x:19+stride*4*travelSide,y:59-Math.max(0,stride)*5},{x:29-stride*4*travelSide,y:59-Math.max(0,-stride)*5}]:[
   {x:19-stance-stride*4,y:59-Math.max(0,stride)*2-Math.max(0,weightShift)*.9},
   {x:29+stance+stride*4,y:59-Math.max(0,-stride)*2-Math.max(0,-weightShift)*.9}
  ];
