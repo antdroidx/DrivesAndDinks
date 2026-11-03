@@ -38,7 +38,7 @@ const paths={
  serve:[READY,[12,39,2],[11,33,14],[-4,15,16],READY],
  twoBackhand:[READY,[-9,26,1],[-13,33,12],[10,20,14],READY],
  erne:[READY,[15,31,-2],[19,23,7],[7,22,13],READY],
- poachLunge:[READY,[16,31,-1],[19,30,12],[12,23,14],READY],
+ poachLunge:[READY,[10,27,5],[15,27,14],[11,25,15],READY],
  slideReturn:[READY,[16,38,-2],[22,31,15],[8,27,17],READY],
  splitStep:[READY,[8,29,7],[9,28,11],[7,27,9],READY]
 };
@@ -121,6 +121,21 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
   {x:19-stance-stride*4,y:59-Math.max(0,stride)*2-Math.max(0,weightShift)*.9},
   {x:29+stance+stride*4,y:59-Math.max(0,-stride)*2-Math.max(0,-weightShift)*.9}
  ];
+ // A poach is a short netward step-and-block; a slide is a low lateral
+ // reach with a planted lead shoe and a long trailing leg. Fade both out
+ // before recovery instead of keeping locomotion cycling through impact.
+ if(mode==='poachLunge'){
+  const lead=travelSide<0?0:1,trail=1-lead;
+  feet[lead]={x:feet[lead].x+travelSide*load*2,y:feet[lead].y-load*3};
+  feet[trail]={x:feet[trail].x-travelSide*load,y:feet[trail].y+load};
+  hips.x+=travelSide*load*1.5;hips.y+=load*.8;
+ }
+ if(mode==='slideReturn'){
+  const lead=travelSide<0?0:1,trail=1-lead;
+  feet[lead]={x:24+travelSide*(8+load*4),y:59};
+  feet[trail]={x:24-travelSide*(5+load*3),y:59-load*1.5};
+  hips.x+=travelSide*load*2;hips.y+=load*3;
+ }
  if(mode==='splitStep')feet=feet.map(foot=>({...foot,y:foot.y-load*.8}));
  if(mode==='erne')feet=feet.map((foot,index)=>({x:foot.x+(index?1:-1)*side*jump*2,y:foot.y-jump*(index?7.2:5.6)}));
  const legs=feet.map((f,i)=>{const hip={x:hips.x+(i?4:-4),y:hips.y};return [hip,jointBetween(hip,f,9,9,i?-1:1),f]});
@@ -196,7 +211,15 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  poly(c,[[neck.x-5,top+3],[neck.x-2,top+3],[hips.x-2,waist-1],[hips.x-4,waist-1]],colors.shirtLight);
  poly(c,[[neck.x+4,top+3],[neck.x+6,top+4],[hips.x+4,waist],[hips.x+1,waist]],colors.shirtDark);
  c.fillStyle=colors.shoe;c.fillRect(Math.round(hips.x-4),Math.round(waist-1),8,1);
- if(female){poly(c,[[hips.x-5,waist],[hips.x+5,waist],[hips.x+9,waist+8],[hips.x-9,waist+8]],colors.outline);poly(c,[[hips.x-4,waist],[hips.x+4,waist],[hips.x+7,waist+7],[hips.x-7,waist+7]],colors.shirt);for(const offset of [-4,0,4])segment(c,{x:hips.x+offset*.6,y:waist+2},{x:hips.x+offset,y:waist+7},1,colors.shirtDark)}
+ if(female){poly(c,[[hips.x-5,waist],[hips.x+5,waist],[hips.x+9,waist+8],[hips.x-9,waist+8]],colors.outline);poly(c,[[hips.x-4,waist],[hips.x+4,waist],[hips.x+7,waist+7],[hips.x-7,waist+7]],colors.shirt);
+ const fold=appearance.shirtColor==='white'?'#8999ac':colors.shirtDark;
+ const highlight=appearance.shirtColor==='white'?'#fffdf5':colors.shirtLight;
+ for(const offset of [-4,0,4]){
+  poly(c,[[hips.x+offset*.65,waist+1],[hips.x+offset*.65+1,waist+1],[hips.x+offset+1.2,waist+7],[hips.x+offset-.5,waist+7]],fold);
+  segment(c,{x:hips.x+offset*.65-1,y:waist+2},{x:hips.x+offset-1,y:waist+6},.65,highlight);
+ }
+ segment(c,{x:hips.x-6.8,y:waist+7},{x:hips.x+6.8,y:waist+7},.8,fold);
+ segment(c,{x:hips.x-4.5,y:waist+.5},{x:hips.x+4.5,y:waist+.5},1,fold)}
  else {poly(c,[[hips.x-6,waist],[hips.x+6,waist],[hips.x+7,waist+8],[hips.x+1,waist+8],[hips.x,waist+4],[hips.x-1,waist+8],[hips.x-7,waist+8]],colors.outline);c.fillStyle=colors.bottom;c.fillRect(Math.round(hips.x-5),Math.round(waist+1),5,6);c.fillRect(Math.round(hips.x+1),Math.round(waist+1),5,6)}
  c.fillStyle=colors.skinDark;c.fillRect(Math.round(neck.x-2),Math.round(21+bob),4,4);
  const style=identityStyle,hx=neck.x+(view==='far'?(style-1.5)*.35:0),hy=neck.y-8;

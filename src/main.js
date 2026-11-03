@@ -87,8 +87,9 @@ function render(game=liveGame){const palette=COURT_PALETTES.find(item=>item.id==
 const liveGame=game;
 let replayEnabled=true,replayPlayback=null,replayStarted=0;
 const replayBar=document.createElement('div');replayBar.className='replay-banner';replayBar.hidden=true;
-const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button');skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,skipReplay);document.querySelector('.playfield').append(replayBar);
+const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button');skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,skipReplay);document.querySelector('.game').append(replayBar);
 const pointActions=document.querySelector('#point-actions'),pointReplayLabel=document.querySelector('#point-replay-label'),watchPointReplay=document.querySelector('#watch-point-replay');
+document.querySelector('.game').append(pointActions);
 function beginReplay(clip,startedAt=performance.now()){
  if(!clip||clip.frames.length<=15)return false;
  replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`INSTANT REPLAY · ${clip.label} · SLOW MOTION`;replayBar.hidden=false;pointActions.hidden=true;return true;
