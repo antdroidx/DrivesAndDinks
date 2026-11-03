@@ -170,3 +170,10 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
 .point-actions{display:flex;align-items:center;justify-content:center;gap:18px;min-height:56px;padding:9px 16px;background:#122b33;border-top:1px solid #557c77;border-bottom:1px solid #557c77;color:#f7f1da}.point-actions[hidden]{display:none}.point-actions div{display:flex;align-items:baseline;gap:10px}.point-actions small{color:#8fd9bd;font-size:10px;letter-spacing:1px}.point-actions strong{font:700 13px system-ui}.point-actions button{min-height:40px;padding:8px 16px;background:#80e0b5;color:#122b33;border:0;border-radius:4px;font-weight:800;cursor:pointer}.point-actions button:focus-visible{outline:2px solid #fff3c4;outline-offset:2px}@media(max-width:650px){.point-actions{flex-direction:column;gap:8px;padding:10px}.point-actions div{flex-direction:column;align-items:center;gap:2px}.point-actions button{width:100%}}
 
 .control-lesson{margin:.4rem auto;padding:.6rem 1rem;color:#fff8df;background:#182c35;font:14px/1.5 system-ui;text-align:center}
+
+/* Court overlays never participate in the playfield sizing calculation. */
+.game .point-actions{position:absolute;z-index:12;left:24%;right:24%;bottom:15%;min-height:0;border:1px solid #80e0b5;border-radius:6px;box-shadow:0 3px 16px #0008;padding:8px 12px;gap:12px;background:#102c35f2}
+.game .point-actions div{flex-direction:column;align-items:center;gap:3px}
+.game .point-actions strong{font-size:12px}
+.game .point-actions button{min-height:38px;white-space:nowrap}
+@media(max-width:650px){.game .point-actions{left:20%;right:20%;bottom:16%;flex-direction:row;padding:6px;gap:6px}.game .point-actions small{display:none}.game .point-actions strong{font-size:10px}.game .point-actions button{width:auto;font-size:10px;padding:6px;min-height:32px}}
