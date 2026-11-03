@@ -102,13 +102,13 @@ Paddle contact now responds to sweet-spot offset, incoming pace, paddle velocity
 
 The serve has a physical toss phase, with the ball rising and falling under gravity before the stroke launches it near waist height. The net now absorbs and deflects balls during live play instead of deleting them immediately; a net touch becomes a fault only if the ball subsequently lands on the hitter’s side. Net posts have separate collision geometry, while balls crossing outside the posts remain legal.
 
-Court bounces include surface friction, speed-dependent restitution, and spin decay. Topspin carries speed into the bounce, while backspin and slice check the ball. Player stamina falls during sustained sprinting, reduces speed and contact accuracy, and recovers when the player slows; Agility improves both fatigue resistance and recovery. Stamina resets between points.
+Court bounces include surface friction, speed-dependent restitution, and spin decay. Topspin carries speed into the bounce, while backspin and slice check the ball. Player stamina falls during sustained sprinting, reduces speed and contact accuracy, and recovers when the player slows; Agility improves both fatigue resistance and recovery. Stamina partially recovers between points.
 
 Paddle shape is independent from paddle family and archetype. Wide paddles shorten reach slightly while improving hand speed, control, and the side-to-side sweet spot. Elongated paddles increase reach and leverage but slow the swing and narrow the side-to-side sweet spot. Hybrid remains neutral. CPU players receive a random family and shape each match.
 
 Physics regression checks cover paddle sweet-spot behavior, physical serve toss, net deflection, post faults, net-fall faults, outside-post ATP clearance, bounce spin transfer, player momentum, player collision separation, and fatigue recovery.
 
-The DEV court shows an overhead stamina bar beside every player. It appears automatically under /dev/ and on localhost. Use ?stamina=1 to enable it on another build or ?stamina=0 to hide it on DEV.
+Fatigue remains part of gameplay, but stamina bars are not displayed.
 
 ## DEV level and animation foundation
 

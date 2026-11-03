@@ -2,13 +2,12 @@ import {sampleMatchAnimation} from './match-animation.js';
 import {setupSelection} from './selection.js';
 import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js';
 import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js';
-import {staminaOverlayEnabled,staminaPercent} from './player-facing.js';
 import {Game} from './game.js';
 import {selectShot,serveAim} from './core.js';
 import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
-const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;const showStaminaOverlay=staminaOverlayEnabled({pathname:location.pathname,hostname:location.hostname,search:location.search});
+const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1',difficultyButton=document.querySelector('#difficulty');
@@ -42,15 +41,6 @@ function drawLoadoutPreview(selection){
  for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
  try{const drawn=drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',paddleShape:selection.paddleShape??'hybrid',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
 }
-function drawStaminaBar(player,q,scale){
- const percent=staminaPercent(player.stamina),x=q.x+28*scale,y=q.y-52*scale,width=42*scale,height=6*scale;
- ctx.save();ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.font=`bold ${Math.max(7,Math.round(8*scale))}px monospace`;
- ctx.fillStyle='#07171bdc';ctx.fillRect(x-3*scale,y-13*scale,width+6*scale,22*scale);
- ctx.fillStyle='#dce7d6';ctx.fillText(`STA ${percent}`,x,y-4*scale);
- ctx.fillStyle='#09191d';ctx.fillRect(x,y,width,height);
- ctx.fillStyle=percent>=60?'#8ee06f':percent>=35?'#f4cf62':'#ff806e';ctx.fillRect(x+1*scale,y+1*scale,Math.max(0,(width-2*scale)*percent/100),Math.max(1,height-2*scale));
- ctx.strokeStyle='#f4eed8aa';ctx.lineWidth=Math.max(1,.65*scale);ctx.strokeRect(x,y,width,height);ctx.restore();
-}
 function drawSprite(p,q,game){
  const scale=.9+p.y/125,moving=Math.hypot(p.vx,p.vy)>.7;
  const animation=sampleMatchAnimation(p,game);
@@ -66,7 +56,6 @@ function drawSprite(p,q,game){
  if(p.id===0&&game.mode==='play'){
  ctx.save();ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle='#10232ded';ctx.fillRect(q.x-65,q.y+9,130,16);ctx.fillStyle='#fff8df';ctx.fillText(game.canHumanHit()?'HIT: 1 / 2 / 3':game.feedbackTime>0?game.message:game.teamPlan?.receiverId===1?'PARTNER BALL':'YOU: AIM + TIME SHOT',q.x,q.y+20);ctx.restore();
  }
- if(showStaminaOverlay)drawStaminaBar(p,q,scale);
 }
 function drawPixelBall(x,y,radius,squashX=1,squashY=1){
  const rx=Math.max(3,radius*squashX),ry=Math.max(3,radius*squashY),rows=Math.ceil(ry);
