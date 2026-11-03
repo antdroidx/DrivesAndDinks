@@ -177,3 +177,5 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
 .game .point-actions strong{font-size:12px}
 .game .point-actions button{min-height:38px;white-space:nowrap}
 @media(max-width:650px){.game .point-actions{left:20%;right:20%;bottom:16%;flex-direction:row;padding:6px;gap:6px}.game .point-actions small{display:none}.game .point-actions strong{font-size:10px}.game .point-actions button{width:auto;font-size:10px;padding:6px;min-height:32px}}
+
+.player-preview label:has(#detailed-model){display:grid;gap:5px;padding:8px;width:100%;font-size:10px;color:#e9d9ad}.player-preview #detailed-model{width:100%;min-width:0;font-size:11px}

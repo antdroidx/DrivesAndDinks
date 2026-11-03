@@ -1,13 +1,22 @@
-import {sampleMatchAnimation} from './match-animation.js?v=89';
-import {setupSelection} from './selection.js?v=89';
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=89';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=89';
-import {Game} from './game.js?v=89';
-import {selectShot,serveAim} from './core.js?v=89';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=89';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=90';
+import {drawDetailedCharacter} from './detailed-character.js?v=90';
+import {sampleMatchAnimation} from './match-animation.js?v=90';
+import {setupSelection} from './selection.js?v=90';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=90';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=90';
+import {Game} from './game.js?v=90';
+import {selectShot,serveAim} from './core.js?v=90';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=90';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
+const detailedArtAvailable=location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname);
+let detailedArt=detailedArtAvailable&&balanceQuery.get('art')!=='current';
+const footPlants=new Map();let selectedDetailedDesign='';
+if(detailedArtAvailable){const label=document.createElement('label');label.textContent='DEV character design ';const select=document.createElement('select');select.id='detailed-model';select.setAttribute('aria-label','DEV character design');select.innerHTML='<option value="">Match athlete automatically</option>'+CHARACTER_CONCEPTS.map(d=>`<option value="${d.id}">${d.name} � ${d.height} cm � ${d.body}</option>`).join('');label.append(select);document.querySelector('#player-preview').after(label);select.onchange=()=>{selectedDetailedDesign=select.value;footPlants.clear();selectionUI?.refreshPreview()}}
+
+function drawPlayer(c,options){return (detailedArt?drawDetailedCharacter:drawPixelCharacter)(c,options)}
+if(detailedArtAvailable){const button=document.createElement('button');button.id='character-art';const sync=()=>{button.textContent='ART: '+(detailedArt?'DETAILED':'CURRENT');button.setAttribute('aria-pressed',String(detailedArt))};sync();document.querySelector('.header-actions').append(button);button.onclick=()=>{detailedArt=!detailedArt;footPlants.clear();sync();selectionUI?.refreshPreview()}}
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1',difficultyButton=document.querySelector('#difficulty');
@@ -39,7 +48,7 @@ function drawLoadoutPreview(selection){
  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(2,0,0,2,0,0);x.imageSmoothingEnabled=false;x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
  x.fillStyle='#355e60';x.fillRect(0,178,c.width,42);x.fillStyle='#eff3cf66';x.fillRect(0,195,c.width,2);
  for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
- try{const drawn=drawPixelCharacter(x,{appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',paddleShape:selection.paddleShape??'hybrid',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
+ try{const drawn=drawPlayer(x,{designId:selectedDetailedDesign,appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',paddleShape:selection.paddleShape??'hybrid',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
 }
 function drawSprite(p,q,game){
  const scale=.9+p.y/125,moving=Math.hypot(p.vx,p.vy)>.7;
@@ -52,7 +61,7 @@ function drawSprite(p,q,game){
  const alignStrength=animation?.alignStrength??0;
  ctx.save();ctx.translate(q.x,q.y);ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,16*scale,5*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
- drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth'});
+ drawPlayer(ctx,{designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth'});
  if(p.id===0&&game.mode==='play'){
  ctx.save();ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle='#10232ded';ctx.fillRect(q.x-65,q.y+9,130,16);ctx.fillStyle='#fff8df';ctx.fillText(game.canHumanHit()?'HIT: 1 / 2 / 3':game.feedbackTime>0?game.message:game.teamPlan?.receiverId===1?'PARTNER BALL':'YOU: AIM + TIME SHOT',q.x,q.y+20);ctx.restore();
  }

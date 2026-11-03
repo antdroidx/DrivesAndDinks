@@ -20,8 +20,8 @@ export function thighGarment(chain,width){
 }
 export function skirtGarment(hips,legs,hipWidth,limbWidth){
  const hem=hips.y-1,ends=legs.map(chain=>thighGarment(chain,limbWidth+2).end),left=Math.min(hips.x-hipWidth-2,...ends.map(p=>p.x-(limbWidth+2)/2)),right=Math.max(hips.x+hipWidth+2,...ends.map(p=>p.x+(limbWidth+2)/2)),bottom=Math.max(hem+8,...ends.map(p=>p.y+1));
- const leftY=Math.min(bottom-1,ends[0].y),rightY=Math.min(bottom-1,ends[1].y);
- return {left,right,bottom,polygon:[[hips.x-hipWidth,hem],[hips.x+hipWidth,hem],[right,rightY],[right,bottom],[left,bottom],[left,leftY]]};
+ const leftY=ends[0].y+1,rightY=ends[1].y+1;
+ return {left,right,bottom,ends,polygon:[[hips.x-hipWidth,hem],[hips.x+hipWidth,hem],[right,rightY],[hips.x+(right-hips.x)*.3,bottom],[hips.x-(hips.x-left)*.3,bottom],[left,leftY]]};
 }
 
 export const HAIR_OPTIONS=Object.freeze({
