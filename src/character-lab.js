@@ -9,7 +9,7 @@ function shape(c,points,fill,stroke='#182633',line=.65){c.beginPath();points.for
 function limb(c,a,b,width,color){c.lineCap='round';c.strokeStyle='#182633';c.lineWidth=width+1;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.strokeStyle=gradient(c,color,(a.x+b.x)/2,(a.y+b.y)/2,width);c.lineWidth=width;c.stroke()}
 function ellipse(c,x,y,rx,ry,fill){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=fill;c.fill()}
 function hairBack(c,x,y,d,phase,near){const hair=gradient(c,d.hairColor,x,y,7),sway=Math.sin(phase*Math.PI*2)*1.5;if(d.hair==='bob'){c.fillStyle=hair;c.beginPath();c.ellipse(x,y+1,6.8,8,0,Math.PI,Math.PI*2);c.lineTo(x+7.2,y+9);c.quadraticCurveTo(x,y+12,x-7.2,y+9);c.closePath();c.fill()}if(d.hair==='ponytail'){limb(c,{x:x+4,y:y-2},{x:x+9+sway,y:y+7},3.5,d.hairColor);limb(c,{x:x+9+sway,y:y+7},{x:x+7+sway,y:y+13},2.7,d.hairColor);ellipse(c,x+4,y-2,1.7,1.3,d.trim)}if(d.hair==='braid'){for(let i=0;i<7;i++){const bx=x+(near?1:5)+Math.sin(i*.6+phase*6)*.7;ellipse(c,bx,y+3+i*1.7,1.7-i*.09,1.4,shade(d.hairColor,i%2?.12:-.1))}ellipse(c,x+(near?1:5),y+15,1.2,.65,d.trim)}}
-function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='near';
+function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='near';if(d.hair!=='bob')hairBack(c,x,y,d,phase,near);
  ellipse(c,x,y,5.8,7.2,'#182633');ellipse(c,x,y,5.1,6.5,gradient(c,d.skin,x,y,5));ellipse(c,x-5,y+1,1.2,1.8,shade(d.skin,-.12));ellipse(c,x+5,y+1,1.2,1.8,shade(d.skin,-.16));
  if(!near){c.strokeStyle=shade(d.skin,-.35);c.lineWidth=.65;c.beginPath();c.moveTo(x+.6,y);c.lineTo(x+1.4,y+2.4);c.lineTo(x+.1,y+2.6);c.stroke();ellipse(c,x-2.2,y+.3,.65,.8,'#25313a');ellipse(c,x+2.2,y+.3,.65,.8,'#25313a');c.strokeStyle=shade(d.skin,-.45);c.beginPath();c.moveTo(x-1.3,y+4);c.quadraticCurveTo(x,y+4.8,x+1.6,y+4);c.stroke()}
  const hair=gradient(c,d.hairColor,x,y-4,6);
@@ -28,7 +28,7 @@ function athlete(c,design,mode,phase,view,cx,baseline,scale){const raw=sampleCha
  c.save();if(skirtCoverage){c.beginPath();c.rect(-100,skirtCoverage.bottom,250,100);c.clip();}
  for(const chain of pose.legs){limb(c,chain[0],chain[1],w+1,skin);limb(c,chain[1],chain[2],w,skin);const f=chain[2];limb(c,{x:f.x,y:f.y-2.6},f,w+.1,'#ede8db');shape(c,[[f.x-2.3,f.y-.4],[f.x+1.8,f.y-.7],[f.x+3.1,f.y+1.2],[f.x+2.6,f.y+2],[f.x-2.5,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3));limb(c,{x:f.x-1.5,y:f.y+.8},{x:f.x+2,y:f.y+1},.6,d.trim)}
  c.restore();
- hairBack(c,n.x,n.y-8,d,phase,view==='near');
+ if(d.hair==='bob')hairBack(c,n.x,n.y-8,d,phase,view==='near');
  function arm(index){const a=pose.arms[index];limb(c,a[0],a[1],w+.3,skin);limb(c,a[1],a[2],w-.2,skin);if(d.body==='male'){limb(c,a[0],{x:a[0].x+(a[1].x-a[0].x)*.4,y:a[0].y+(a[1].y-a[0].y)*.4},w+1,d.shirt)}ellipse(c,a[2].x,a[2].y,w*.48,w*.55,shade(skin,.08));limb(c,{x:a[2].x-.8,y:a[2].y-1.6},{x:a[2].x+.8,y:a[2].y-1.6},.8,d.trim)}
  function paddle(){const p=pose.paddle,hand=pose.hand;limb(c,p,hand,1.5,'#353239');c.save();c.translate(p.x,p.y);c.rotate(raw.angle);ellipse(c,0,0,3.9,5.3,'#182633');ellipse(c,0,0,3.2,4.6,d.trim);ellipse(c,0,0,2.6,4,'#171b25');c.restore()}
  const behind=pose.arms.map((a,i)=>({i,depth:raw.arms[i][1].depth}));behind.filter(a=>a.depth<raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
