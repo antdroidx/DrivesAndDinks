@@ -1,4 +1,4 @@
-import {C,stepBall,side} from './core.js?v=90';
+import {C,stepBall,side} from './core.js?v=91';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
