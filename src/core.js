@@ -169,7 +169,7 @@ export function selectShot(p,b,desired,random=Math.random()){
  const wideBall=b.x<=.75||b.x>=19.25
  const kitchenSide=p.team===0?p.y<=31:p.y>=13
  if(desired==='soft')return kitchenSide?'dink':'drop'
- if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if(behind>.3&&behind<1.5&&b.z>.4&&b.z<1.8&&Math.hypot(p.vx||0,p.vy||0)>6&&(p.abilities?.lob??1)>1.1)return 'tweener';return 'lob'}
+ if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>3:(p.vy||0)< -3)&&behind>.3&&behind<1.5&&b.z>.4&&b.z<1.8&&Math.hypot(p.vx||0,p.vy||0)>6&&(p.abilities?.lob??1)>1.1)return 'tweener';return 'lob'}
  if(desired==='attack'||desired==='drive'){
   if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne'
   if((b.x<C.netPostLeft-C.ballRadius||b.x>C.netPostRight+C.ballRadius)&&nearSideline&&b.z<3.2){const cross=netCrossingX(b,{x:b.x<0?1:19,y:p.team===0?4:40});if(cross<C.netPostLeft-C.netPostRadius-C.ballRadius||cross>C.netPostRight+C.netPostRadius+C.ballRadius)return 'atp'}

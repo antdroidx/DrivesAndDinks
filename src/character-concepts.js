@@ -3,7 +3,7 @@ export const CHARACTER_CONCEPTS=Object.freeze([
  {id:'stride',name:'The Long Stride',tag:'Tall & lean / female',height:190,build:.22,shoulder:6.2,waist:4.5,hip:5.8,body:'female',hair:'braid',headwear:'visor',shirt:'#916276',trim:'#f0d9b1',skin:'#8c6047',hairColor:'#262329',note:'Longer legs and a lean torso. An open visor preserves the hairline; a segmented braid moves independently behind the shoulder.'},
  {id:'anchor',name:'The Anchor',tag:'Compact & broad / male',height:166,build:.86,shoulder:8.5,waist:7.1,hip:6.8,body:'male',hair:'curls',headwear:'cap',shirt:'#bb724e',trim:'#f5dfab',skin:'#d6a27f',hairColor:'#49362b',note:'A deeper torso, thicker limbs and broad shoulders. A curved-brim cap and panel seams create depth without losing the original outline language.'},
  {id:'touch',name:'The Touch Artist',tag:'Soft & strong / female',height:169,build:.78,shoulder:7,waist:6.5,hip:7.5,body:'female',hair:'bob',headwear:'none',shirt:'#e3ddd0',trim:'#5b8292',skin:'#a77559',hairColor:'#492f2d',note:'A fuller waist and hips, with a layered bob and a pleated skort. Cool fold shadows keep the light fabric readable in both court views.'},
- {id:'reach',name:'The Net Presence',tag:'Tall & broad / male',height:195,build:.72,shoulder:8.8,waist:6.8,hip:6.5,body:'male',hair:'crop',headwear:'visor',shirt:'#666d9c',trim:'#d9c6a0',skin:'#75503b',hairColor:'#242325',note:'A taller frame with substantial shoulders and calves. The visor sits above a visible textured crown; a two-tone jersey separates the torso planes.'},
+ {id:'reach',name:'The Net Presence',tag:'Tall & broad / male',height:195,build:.72,shoulder:8.8,waist:6.8,hip:6.5,body:'male',hair:'spiky',headwear:'visor',shirt:'#666d9c',trim:'#d9c6a0',skin:'#75503b',hairColor:'#242325',note:'A taller frame with substantial shoulders and calves. The visor sits above a visible spiked crown; a two-tone jersey separates the torso planes.'},
  {id:'spark',name:'The Quick Step',tag:'Short & athletic / female',height:158,build:.35,shoulder:6.4,waist:4.9,hip:5.9,body:'female',hair:'ponytail',headwear:'headband',shirt:'#79965c',trim:'#f3dfaf',skin:'#e3b291',hairColor:'#6b4531',note:'A compact frame with defined shoulders, a high ponytail and a wide headband. Shorter proportions stay legible during low shots and crossover steps.'}
 ]);
 export function conceptDimensions(design,heightDelta=0,buildDelta=0){
@@ -23,3 +23,9 @@ export function skirtGarment(hips,legs,hipWidth,limbWidth){
  const leftY=Math.min(bottom-1,ends[0].y),rightY=Math.min(bottom-1,ends[1].y);
  return {left,right,bottom,polygon:[[hips.x-hipWidth,hem],[hips.x+hipWidth,hem],[right,rightY],[right,bottom],[left,bottom],[left,leftY]]};
 }
+
+export const HAIR_OPTIONS=Object.freeze({
+ male:Object.freeze([{id:'crop',name:'Textured crop'},{id:'curls',name:'Soft curls'},{id:'spiky',name:'Anime-inspired spikes'},{id:'sidePart',name:'Swept side part'},{id:'buzz',name:'Close buzz cut'}]),
+ female:Object.freeze([{id:'bob',name:'Chin-length bob'},{id:'ponytail',name:'High ponytail'},{id:'braid',name:'Long braid'},{id:'pixie',name:'Feathered pixie'},{id:'waves',name:'Layered waves'},{id:'twinTails',name:'Anime-inspired twin tails'}])
+});
+export function conceptHair(body,selected,designed){return HAIR_OPTIONS[body]?.some(item=>item.id===selected)?selected:designed}
