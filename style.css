@@ -179,3 +179,22 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
 @media(max-width:650px){.game .point-actions{left:20%;right:20%;bottom:16%;flex-direction:row;padding:6px;gap:6px}.game .point-actions small{display:none}.game .point-actions strong{font-size:10px}.game .point-actions button{width:auto;font-size:10px;padding:6px;min-height:32px}}
 
 .player-preview label:has(#detailed-model){display:grid;gap:5px;padding:8px;width:100%;font-size:10px;color:#e9d9ad}.player-preview #detailed-model{width:100%;min-width:0;font-size:11px}
+
+/* A closer portrait camera uses the court width instead of the empty aprons. */
+@media (min-width:1000px) and (pointer:fine){main{max-width:1600px}}
+@media (max-width:600px) and (orientation:portrait){
+ main{width:100%;max-width:none;padding:4px;display:grid;grid-template-rows:auto minmax(0,1fr);gap:4px}
+ header{flex-wrap:wrap}.header-actions{flex-wrap:wrap;gap:3px}.header-actions button{min-height:32px;padding:5px;font-size:8px}
+ .playfield{width:100%;height:auto;aspect-ratio:auto;align-self:start;display:grid;gap:6px;max-height:100%;min-height:0}
+ .game{width:100%;height:auto;aspect-ratio:520/580;border-width:2px;overflow:hidden}
+ .game #court{width:100%;height:100%;max-width:none;margin:0}
+ .controls{position:relative;inset:auto;display:grid;grid-template-columns:1fr 2.5fr;gap:6px;height:80px;padding:0;margin:0;pointer-events:none}
+ .controls>div:first-child{display:contents}.controls>.tip,.controls strong,footer{display:none}
+ #shots{grid-column:2;grid-row:1;display:flex;align-items:stretch;gap:4px;width:100%;height:80px;margin:0;max-width:none}
+ #shots::before,#shots::after{display:none}
+ #shots button{width:auto;flex:1;max-width:none;height:80px;padding:4px;min-height:44px;font-size:11px;pointer-events:auto;align-self:stretch}
+ #shots button small{display:block;font-size:8px;line-height:1.2;white-space:normal}
+ #aim-pad{display:grid;position:relative;left:auto;top:auto;bottom:auto;transform:none;grid-column:1;grid-row:1;width:100%;height:80px;aspect-ratio:auto;padding:6px;pointer-events:auto}
+ #aim-pad strong{display:block;font-size:8px}#aim-pad small{font-size:7px}
+ .game .point-actions{left:4%;right:4%;bottom:10%}
+}

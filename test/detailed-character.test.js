@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {drawDetailedCharacter,drawConceptAthlete,matchDesign,plantFeet} from '../src/detailed-character.js';
+import {drawDetailedCharacter,drawConceptAthlete,matchDesign,plantFeet,legDimensions,conceptLegs,movingStance} from '../src/detailed-character.js';
 import {CHARACTER_CONCEPTS} from '../src/character-concepts.js';
 import {MOTIONS,sampleCharacterPose} from '../src/pixel-character.js';
 function canvas(){let depth=0,calls=0;const gradient={addColorStop(){}};return new Proxy({get depth(){return depth},get calls(){return calls}}, {get(target,key){if(key in target)return target[key];if(key==='createLinearGradient')return ()=>gradient;return (...args)=>{calls++;for(const n of args)if(typeof n==='number')assert.ok(Number.isFinite(n),`${key} received ${n}`);if(key==='save')depth++;if(key==='restore')assert.ok(--depth>=0)}},set(){return true}})}
@@ -20,4 +20,25 @@ test('a stance foot stays planted as the root moves; swing, jump and teleport re
  plantFeet(p,{plantState:state,frame:3},raw,102,200,2);assert.equal(state.feet[1],null);
  plantFeet(p,{plantState:state,frame:1},{...raw,jump:1},102,200,2);assert.deepEqual(state.feet,[null,null]);
  p=pose();plantFeet(p,{plantState:state,frame:1},raw,500,200,2);assert.ok(state.feet[1].x>450);
+});
+
+test('idle knees remain identical over repeated planted frames at every body size',()=>{
+ for(const d of CHARACTER_CONCEPTS){const state={},raw=sampleCharacterPose({mode:'idle'}),expected=conceptLegs(raw,d);
+ for(let frame=0;frame<600;frame++){const pose={legs:conceptLegs(raw,d)};plantFeet(pose,{plantState:state,frame,legLengths:legDimensions(d)},raw,100,200,2);assert.deepEqual(pose.legs,expected)}
+ }
+});
+test('small speed corrections do not alternate idle and locomotion',()=>{
+ const state={};for(const speed of [.6,.72,.65,1,.4,.8])assert.equal(movingStance(state,speed),false);
+ assert.equal(movingStance(state,1.2),true);for(const speed of [1,.7,.5,.4])assert.equal(movingStance(state,speed),true);assert.equal(movingStance(state,.3),false);
+});
+test('thighs, calves, ankles and footwear grow with build; height scales both bones',()=>{
+ const base=CHARACTER_CONCEPTS[0],lean=legDimensions({...base,build:.1,height:160}),full=legDimensions({...base,build:1,height:200});
+ for(const key of ['thigh','calf','ankle','shoe'])assert.ok(full[key]>lean[key]*1.2,key);
+ assert.equal(full.upper/lean.upper,200/160);assert.equal(full.lower/lean.lower,200/160);
+});
+test('scaled legs keep stable anatomical bend poles across a full movement cycle',()=>{
+ for(const d of CHARACTER_CONCEPTS)for(const mode of ['idle','run','shuffle','forehand','slideReturn'])for(let n=0;n<80;n++){
+ const raw=sampleCharacterPose({mode,phase:n/80,frame:n/20}),legs=conceptLegs(raw,d);
+ for(const chain of legs)for(const p of chain)assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y));
+ }
 });
