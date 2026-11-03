@@ -36,6 +36,11 @@ export function versionSite(root,version){
       .replace('src="src/cache-refresh.js"',`src="src/cache-refresh.js?v=${version}"`));
   }
 
+  if(readdirSync(site).includes('character-lab.html')){
+    const labPath=path.join(site,'character-lab.html');
+    writeFileSync(labPath,readFileSync(labPath,'utf8').replace('href="character-lab.css"',`href="character-lab.css?v=${version}"`).replace('src="src/character-lab.js"',`src="src/character-lab.js?v=${version}"`));
+  }
+
   if(readdirSync(site).includes('art-directions.html')){
     const artPath=path.join(site,'art-directions.html');
     writeFileSync(artPath,readFileSync(artPath,'utf8')

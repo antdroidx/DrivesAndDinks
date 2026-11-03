@@ -6,6 +6,7 @@ on:
       - main
       - codex/high-resolution-players
       - codex/dev-gameplay-polish
+      - codex/character-design-viewer
   workflow_dispatch:
 
 permissions:
@@ -55,6 +56,7 @@ jobs:
           cp index.html style.css studio.html studio.css _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/
+          if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
 
           # Current main is the public release at the Pages root.
