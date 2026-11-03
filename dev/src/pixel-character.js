@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=87';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=88';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -31,7 +31,7 @@ const paths={
  halfVolley:[READY,[8,40,5],[11,43,12],[9,36,14],READY],
  wideForehand:[READY,[14,32,0],[18,34,11],[7,27,15],READY],
  wideBackhand:[READY,[-10,28,2],[-13,32,11],[-4,28,14],READY],
- tweener:[READY,[3,37,3],[0,45,6],[2,36,10],READY],
+ tweener:[READY,[2,42,8],[0,56,-5],[1,42,-8],READY],
  volley:[READY,[8,26,8],[11,27,14],[10,25,15],READY],
  forehand:[READY,[14,29,-3],[17,33,11],[-9,24,13],READY],
  backhand:[READY,[-9,25,1],[-13,33,12],[10,22,13],READY],
@@ -87,8 +87,10 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=87';
+export {courtView,strokeForContact} from './player-facing.js?v=88';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
+ // A tweener is struck backward while retreating with the back toward the net.
+ if(mode==='tweener')view=view==='near'?'far':'near';
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide','backpedal','crossover'].includes(mode)||moving;
  const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
  const back=mode==='wideBackhand'||mode.startsWith('back')||mode.startsWith('twoBackhand'),twoHanded=mode.startsWith('twoBackhand');
@@ -198,7 +200,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const identitySeed=[...String(characterId||appearance.hairColor)].reduce((sum,char)=>sum+char.charCodeAt(0),0),identityStyle=identitySeed%4,torsoSpread=(identitySeed%3)*.45;
  const rootOffset=animationRootOffset(mode,phase,travelSide),contact=alignTo?{x:(alignTo.x-x)*48/width-rootOffset,y:(alignTo.y-y)*64/height}:null;
- const pose=sampleCharacterPose({mode,phase,frame,view,side,travelSide,contact,contactWeight:alignStrength,contactDepth,moving});
+ const pose=sampleCharacterPose({mode,phase,frame,view,side,travelSide,contact,contactWeight:alignStrength,contactDepth,moving});view=pose.view;
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24+rootOffset,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;

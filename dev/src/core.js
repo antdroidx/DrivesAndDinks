@@ -1,4 +1,4 @@
-import {strokeForContact} from './player-facing.js?v=87';
+import {strokeForContact} from './player-facing.js?v=88';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -169,7 +169,7 @@ export function selectShot(p,b,desired,random=Math.random()){
  const wideBall=b.x<=.75||b.x>=19.25
  const kitchenSide=p.team===0?p.y<=31:p.y>=13
  if(desired==='soft')return kitchenSide?'dink':'drop'
- if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if(behind>.3&&behind<1.5&&b.z>.4&&b.z<1.8&&Math.hypot(p.vx||0,p.vy||0)>6&&(p.abilities?.lob??1)>1.1)return 'tweener';return 'lob'}
+ if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>3:(p.vy||0)< -3)&&behind>.3&&behind<1.5&&b.z>.4&&b.z<1.8&&Math.hypot(p.vx||0,p.vy||0)>6&&(p.abilities?.lob??1)>1.1)return 'tweener';return 'lob'}
  if(desired==='attack'||desired==='drive'){
   if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne'
   if((b.x<C.netPostLeft-C.ballRadius||b.x>C.netPostRight+C.ballRadius)&&nearSideline&&b.z<3.2){const cross=netCrossingX(b,{x:b.x<0?1:19,y:p.team===0?4:40});if(cross<C.netPostLeft-C.netPostRadius-C.ballRadius||cross>C.netPostRight+C.netPostRadius+C.ballRadius)return 'atp'}
