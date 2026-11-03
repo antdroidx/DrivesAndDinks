@@ -1,13 +1,18 @@
-import {selectShot,backhandGrip} from './core.js?v=81';
-import {strokeForContact} from './player-facing.js?v=81';
+import {selectShot,backhandGrip} from './core.js?v=82';
+import {strokeForContact} from './player-facing.js?v=82';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 export function matchStrokeMode(player,shot=player.animationShot,stroke=player.stroke){
  const back=stroke==='backhand',kitchen=player.team===0?player.y<=32:player.y>=12;
+ if(shot==='tweener')return 'tweener';
  if(shot==='erne')return 'erne';
  if(['overhead','serve','lob'].includes(shot))return shot;
  if(shot==='drive'&&player.wasPoach&&(player.contactDifficulty??0)>.25)return 'poachLunge';
  if(shot==='drive'&&(player.contactMotion==='slide'||(player.contactSpeed??0)>9)&&(player.contactDifficulty??0)>.35)return 'slideReturn';
+ if(player.contactType==='groundstroke'&&(player.contactAge??1)<.18&&(player.contactPoint?.z??2)<1.1)return 'halfVolley';
+ if((player.contactDifficulty??0)>.65&&shot==='drive')return back?'wideBackhand':'wideForehand';
+ if(['drop','dink'].includes(shot)&&player.contactType==='volley'&&(player.incomingSpeed??0)>28)return 'resetBlock';
+ if(shot==='drive'&&player.contactType==='volley'&&kitchen&&(player.incomingSpeed??0)>30)return 'counterVolley';
  const two=player.contactGrip?player.contactGrip==='two':backhandGrip(player,player.contactPoint??{x:player.x+(player.team===0?-1:1),z:2},shot)==='two';
  if(shot==='dink')return back?(two?'twoBackhandDink':'backhandDink'):'forehandDink';
  if(shot==='drop')return back?'backhandDrop':'forehandDrop';
@@ -17,7 +22,7 @@ export function matchStrokeMode(player,shot=player.animationShot,stroke=player.s
  return back?(two?'twoBackhand':'backhand'):'forehand';
 }
 export function strokeDuration(player,shot=player.animationShot){
- const mode=matchStrokeMode(player,shot),base=mode==='overhead'?.9:mode==='erne'?1.2:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8,handSpeed=Math.max(.8,Math.min(1.2,player.paddle?.shapeHandSpeed??1));
+ const mode=matchStrokeMode(player,shot),base=mode==='resetBlock'?.48:mode==='counterVolley'?.52:mode==='halfVolley'?.62:mode==='tweener'?1:mode==='overhead'?.9:mode==='erne'?1.2:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8,handSpeed=Math.max(.8,Math.min(1.2,player.paddle?.shapeHandSpeed??1));
  return base/handSpeed;
 }
 export function prepareReceiver(player,game){
