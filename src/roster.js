@@ -1,3 +1,4 @@
+import {competitionRecord} from './competition.js';
 import {DEFAULT_ABILITIES,playerProfile} from './core.js';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
@@ -24,7 +25,8 @@ export function abilitiesFromRatings(ratings){
     acceleration:45*PLAYTEST_SKILLS.acceleration*scale('agility'),
     reach:1.12*scale('reach'),
     control:PLAYTEST_SKILLS.control*scale('control'),
-    reaction:(.09*PLAYTEST_SKILLS.reaction)/scale('agility'),
+    reaction:Math.max(.045,(.09*PLAYTEST_SKILLS.reaction)/scale('agility')+Math.max(0,55-ratings.courtIQ)*.006),
+    endurance:scale('agility'),
     serve:PLAYTEST_SKILLS.serve*scale('serve'),
     power:1.1*scale('power'),
     spin:1.05*scale('control'),
@@ -196,7 +198,8 @@ export function normalizeSelection(input={}){
 export function buildProfile(input, options={}){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),shape=PADDLE_SHAPES.find(item=>item.id===selection.paddleShape);
   const identity=options.identity??generateIdentity({gender:selection.gender,skinColor:selection.skinColor,random:options.random??Math.random});
-  return {...playerProfile(),characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...character.ratings},abilities:{...character.abilities},paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
+  const attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,Number.isFinite(options.attributes?.[key])?options.attributes[key]:character.ratings[key]))])),abilities=abilitiesFromRatings(attributes);
+  return {...playerProfile(),attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
@@ -221,3 +224,13 @@ export function effectiveRatings(input){
  return ratings;
 }
 export function skillAverage(ratings){const keys=RATING_KEYS.filter(key=>key!=='aggression');return Math.round(keys.reduce((sum,key)=>sum+(Number(ratings[key])||0),0)/keys.length)}
+
+// Internal balance profiles: presentation/demo selections remain unchanged.
+export const SKILL_LEVELS=Object.freeze({beginner:35,intermediate:55,demo:70,advanced:85});
+export function levelLineup(level='demo',random=Math.random){
+ const baseline=SKILL_LEVELS[level];if(baseline===undefined)throw new Error('Unknown skill level');
+ return ['avery','remy','jordan','selena'].map((character,index)=>{
+  const source=CHARACTERS.find(c=>c.id===character),attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,baseline+(source.ratings[key]-70)*.45))]));
+  return buildProfile({character,shirtColor:['green','white','orange','purple'][index],paddleColor:['mint','blue','yellow','coral'][index]},{attributes,random});
+ });
+}

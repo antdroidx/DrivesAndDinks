@@ -5,15 +5,15 @@ const useRoster=process.argv.includes('--roster');
 
 const games=Number(process.argv[2]||20);
 if(!Number.isInteger(games)||games<1||games>1000)throw new Error('Match count must be an integer from 1 to 1000');
-const originalRandom=Math.random;
+
 const summary={games,roster:useRoster,completed:0,rallies:0,shots:0,maxRally:0,humanHits:0,humanMishitHits:0,results:{},shotTypes:{},tactics:{poachAttempts:0,poachHits:0,coverSwaps:0,offBallDistance:0,mishitHits:0},contactQuality:{},mishitHits:0,elapsedMs:0};
 const lengths=[];const start=performance.now();
-try{
+{
  for(let seed=1;seed<=games;seed++){
-  let state=seed;Math.random=()=>{state=(1664525*state+1013904223)>>>0;return state/4294967296};
-  const game=new Game();if(useRoster){game.configure({character:CHARACTERS[(seed-1)%4].id,paddle:PADDLES[Math.floor((seed-1)/4)%3].id,jersey:(seed-1)%4});game.mode=Math.floor((seed-1)/12)%2?'play':'watch'}else game.mode=seed%2?'watch':'play';
+
+  const game=new Game({seed});if(useRoster){game.configure({character:CHARACTERS[(seed-1)%4].id,paddle:PADDLES[Math.floor((seed-1)/4)%3].id,jersey:(seed-1)%4});game.mode=Math.floor((seed-1)/12)%2?'play':'watch'}else game.mode=seed%2?'watch':'play';
   const hit=game.hit.bind(game),fault=game.fault.bind(game);
-  game.hit=(player,shot,aim,quality=1)=>{summary.shots++;summary.shotTypes[shot]=(summary.shotTypes[shot]||0)+1;if(game.mode==='play'&&player.id===0)summary.humanHits++;const result=hit(player,shot,aim,quality);if(player.mishit){summary.mishitHits++;summary.tactics.mishitHits++;if(game.mode==='play')summary.humanMishitHits=(summary.humanMishitHits||0)+1}return result};
+  game.hit=(player,shot,aim,quality=1)=>{const result=hit(player,shot,aim,quality);if(!result)return result;summary.shots++;summary.shotTypes[shot]=(summary.shotTypes[shot]||0)+1;if(game.mode==='play'&&player.id===0)summary.humanHits++;if(player.mishit){summary.mishitHits++;if(game.mode==='play'&&player.id===0)summary.humanMishitHits++}return result};
   game.fault=(team,reason)=>{if(game.phase!=='pause'&&game.phase!=='over'){summary.rallies++;lengths.push(game.shots);summary.maxRally=Math.max(summary.maxRally,game.shots);summary.results[reason]=(summary.results[reason]||0)+1}return fault(team,reason)};
   for(let tick=0;tick<120*1800&&game.phase!=='over';tick++){
    if(game.mode==='play'){
@@ -25,7 +25,7 @@ try{
   for(const key of Object.keys(summary.tactics))summary.tactics[key]+=game.tacticalStats[key];
   if(game.phase==='over'&&Math.max(...game.score.points)>=11&&Math.abs(game.score.points[0]-game.score.points[1])>=2)summary.completed++;
  }
-}finally{Math.random=originalRandom}
+}
 lengths.sort((a,b)=>a-b);summary.averageRally=Number((lengths.reduce((a,b)=>a+b,0)/lengths.length).toFixed(1));summary.p95Rally=lengths[Math.floor((lengths.length-1)*.95)];
 summary.elapsedMs=Math.round(performance.now()-start);
 console.log(JSON.stringify(summary,null,2));

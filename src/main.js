@@ -1,12 +1,13 @@
 import {sampleMatchAnimation} from './match-animation.js';
 import {setupSelection} from './selection.js';
-import {COURT_PALETTES,CHARACTERS} from './roster.js';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js';
 import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js';
 import {staminaOverlayEnabled,staminaPercent} from './player-facing.js';
 import {Game} from './game.js';
 import {selectShot,serveAim} from './core.js';
 import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js';
 
+const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;const showStaminaOverlay=staminaOverlayEnabled({pathname:location.pathname,hostname:location.hostname,search:location.search});
 const pauseButton=document.querySelector('#pause-button');
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -53,7 +54,7 @@ function drawStaminaBar(player,q,scale){
 function drawSprite(p,q,game){
  const scale=.9+p.y/125,moving=Math.hypot(p.vx,p.vy)>.7;
  const animation=sampleMatchAnimation(p,game);
- const mode=animation?.mode??(moving?(p.motion==='run'?'run':'shuffle'):'idle'),phase=animation?.phase??0;
+ const mode=animation?.mode??(moving?(['backpedal','crossover'].includes(p.motion)?p.motion:p.motion==='run'?'run':'shuffle'):'idle'),phase=animation?.phase??0;
  const width=70.5*scale,height=94*scale,contact=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null;
  // Lock the face to the real impact location at phase .52. Release smoothly;
  // only the arm follows the contact, never the feet or the whole character.
@@ -61,7 +62,7 @@ function drawSprite(p,q,game){
  const alignStrength=animation?.alignStrength??0;
  ctx.save();ctx.translate(q.x,q.y);ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,16*scale,5*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
- drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:1,travelSide:p.x<10?-1:1,alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth'});
+ drawPixelCharacter(ctx,{appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth'});
  if(p.id===0&&game.mode==='play'){
  ctx.save();ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle='#10232ded';ctx.fillRect(q.x-65,q.y+9,130,16);ctx.fillStyle='#fff8df';ctx.fillText(game.canHumanHit()?'HIT: 1 / 2 / 3':game.feedbackTime>0?game.message:game.teamPlan?.receiverId===1?'PARTNER BALL':'YOU: AIM + TIME SHOT',q.x,q.y+20);ctx.restore();
  }
@@ -125,7 +126,7 @@ syncShotButtonsForPhase();
 function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=Math.max(1,Math.min(19,(e.clientX-rect.left)/rect.width*20));syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen())return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
 
-selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,onStart:()=>{document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
+selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,onStart:()=>{if(balanceLevel){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
 
 const scenarioParams=new URLSearchParams(location.search),scenarioType=scenarioParams.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(scenarioParams.get('speed'))||.65));
 if(['erne','atp'].includes(scenarioType)){document.querySelector('#match-setup').close();game.configure();game.startScenario(scenarioType);document.querySelector('#active-loadout').textContent=`DEV SCENARIO · ${scenarioType.toUpperCase()} · ${Math.round(scenarioSpeed*100)}% SPEED · ADD ?speed=1 FOR REAL TIME`;document.querySelector('#mode').textContent='MODE: DEV SCENARIO';last=0;acc=0;syncPauseButton();}

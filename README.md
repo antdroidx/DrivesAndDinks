@@ -109,3 +109,7 @@ Paddle shape is independent from paddle family and archetype. Wide paddles short
 Physics regression checks cover paddle sweet-spot behavior, physical serve toss, net deflection, post faults, net-fall faults, outside-post ATP clearance, bounce spin transfer, player momentum, player collision separation, and fatigue recovery.
 
 The DEV court shows an overhead stamina bar beside every player. It appears automatically under /dev/ and on localhost. Use ?stamina=1 to enable it on another build or ?stamina=0 to hide it on DEV.
+
+## DEV level and animation foundation
+
+See [ENGINE-NOTES.md](ENGINE-NOTES.md) for independent competitive ratings, attribute profiles, seeded validation, exertion/contact changes, and the expanded 26-motion studio. Run `npm run validate:levels` for the beginner-through-advanced matrix. The ordinary playable demo retains its approximately 70 baseline; optional DEV test profiles are documented in the notes.
