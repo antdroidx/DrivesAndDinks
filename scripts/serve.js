@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const allowed=new Map([
   ['/character-lab.html',['character-lab.html','text/html']],['/character-lab.css',['character-lab.css','text/css']],['/', ['index.html','text/html']],['/studio.html',['studio.html','text/html']],['/studio.css',['studio.css','text/css']],['/art-directions.html',['art-directions.html','text/html']],['/art-directions.css',['art-directions.css','text/css']],['/assets/art-direction-3d-concept.png',['assets/art-direction-3d-concept.png','image/png']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],['/build-info.js',['build-info.js','text/javascript']],['/sw.js',['sw.js','text/javascript']],
-  ...['character-lab','character-concepts','competition','art-directions','cache-refresh','match-animation','player-facing','studio','animation-test','update-check','core','game','main','pixel-character','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
+  ...['detailed-character','character-lab','character-concepts','competition','art-directions','cache-refresh','match-animation','player-facing','studio','animation-test','update-check','core','game','main','pixel-character','roster','selection','tactics'].map(name=>[`/src/${name}.js`,[`src/${name}.js`,'text/javascript']]),
 
 ]);
 const port=Number(process.argv[2]||8768);
