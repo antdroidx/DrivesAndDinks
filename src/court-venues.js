@@ -1,8 +1,7 @@
 export const COURT_VENUES=Object.freeze([
  {id:'garden',name:'Garden club',sky:'#b7d6d0',hills:'#779a84',foliage:'#466d58',accent:'#e6c1a9',court:'#658a87',kitchen:'#d7b489',outer:'#354e48',outerLight:'#4b695b',apron:'#88a18a',line:'#fff3d9',background:'#9ab9a0'},
  {id:'campus',name:'School courtyard',sky:'#b8d6e4',hills:'#83978e',foliage:'#527866',accent:'#d4b28b',court:'#6c8b9b',kitchen:'#aabcac',outer:'#465867',outerLight:'#697a85',apron:'#bcc4b5',line:'#fff6df',background:'#aebead'},
- {id:'sunset',name:'Sunset coast',sky:'#e6b8aa',hills:'#9a8e9a',foliage:'#5d7771',accent:'#efd49b',court:'#778d9b',kitchen:'#c69a84',outer:'#5c5966',outerLight:'#7a7480',apron:'#c5b2a0',line:'#fff3d9',background:'#c7b6a0'},
- {id:'mountain',name:'Mountain park',sky:'#b9cbdc',hills:'#738c99',foliage:'#496d65',accent:'#d9c9a6',court:'#7b9185',kitchen:'#c6b687',outer:'#3c5459',outerLight:'#5c7575',apron:'#9baa96',line:'#fff4da',background:'#99aea3'}
+ {id:'stadium',name:'Club stadium',sky:'#b7d5de',hills:'#718c81',foliage:'#4c7562',accent:'#e4c2a0',court:'#557f89',kitchen:'#b2bba0',outer:'#3c5459',outerLight:'#5c7575',apron:'#9baa96',line:'#fff4da',background:'#99aea3'}
 ]);
 export function chooseCourtVenue(previousId,random=Math.random){const choices=COURT_VENUES.filter(v=>v.id!==previousId);return choices[Math.min(choices.length-1,Math.max(0,Math.floor(random()*choices.length)))];}
 function polygon(c,points,color){c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=color;c.fill()}
