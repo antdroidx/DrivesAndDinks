@@ -15,3 +15,7 @@ test('pointer aim maps to the same court coordinate under either camera',()=>{
 test('wide cameras preserve player proportions and frame both baselines',()=>{
  for(const [w,h] of [[1208,700],[844,340]]){const c=courtCamera(w/h);assert.ok(Math.abs(w/c.width-h/c.height)<1e-10);assert.equal(c.x+c.width/2,480);assert.equal(c.y+c.height,600)}
 });
+
+test('a narrow court between thumb lanes stays fully visible without stretching players',()=>{
+ const c=courtCamera(.8);assert.equal(c.width,520);assert.equal(c.height,650);assert.ok(c.x<=220&&c.x+c.width>=740);assert.equal(c.y+c.height,600);assert.ok(Math.abs(400/c.width-500/c.height)<1e-10);
+});
