@@ -22,6 +22,16 @@ test('edits and match resets preserve body effects without stacking multipliers'
  const g=new Game({seed:5});g.configure({});g.setPhysique({height:200,build:.9});const once=structuredClone(g.players[0].abilities);g.setPhysique({height:200,build:.9});assert.deepEqual(g.players[0].abilities,once);g.reset();assert.deepEqual(g.players[0].abilities,once);assert.equal(g.players[0].appearance.height,200);assert.ok(g.players.every(p=>p.physique));
 });
 
+test('extreme height and broad build retain bounded movement penalties',()=>{
+ const neutral=athlete(),broad=athlete(210,1.1);
+ assert.ok(broad.abilities.speed>=neutral.abilities.speed*.95);
+ assert.ok(broad.abilities.acceleration>=neutral.abilities.acceleration*.89);
+ assert.ok(broad.abilities.endurance>=neutral.abilities.endurance*.95);
+ assert.ok(broad.abilities.volley>=neutral.abilities.volley*.95);
+ assert.ok(broad.abilities.power>neutral.abilities.power);
+ assert.ok(broad.abilities.reach>neutral.abilities.reach);
+});
+
 import {bodyContactDifficulty,scorpionOpportunity,selectShot} from '../src/core.js';
 test('taller bodies pay a low-ball penalty while short players access lower behind-shoulder blocks',()=>{
  const short=athlete(155),tall=athlete(205),low={x:10.5,y:34.5,z:.4};assert.ok(bodyContactDifficulty(tall,low,'dink')>bodyContactDifficulty(short,low,'dink'));

@@ -1,0 +1,617 @@
+{
+  "seedsPerSide": 2,
+  "neutral": {
+    "height": 177,
+    "build": 0.5225
+  },
+  "bodies": [
+    {
+      "id": "short-lean",
+      "height": 145,
+      "build": 0.1
+    },
+    {
+      "id": "short-strong",
+      "height": 145,
+      "build": 1.05
+    },
+    {
+      "id": "tall-lean",
+      "height": 210,
+      "build": 0.1
+    },
+    {
+      "id": "tall-strong",
+      "height": 210,
+      "build": 1.05
+    }
+  ],
+  "results": [
+    {
+      "format": "singles",
+      "character": "avery",
+      "body": "short-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 4,
+      "points": [
+        44,
+        11
+      ],
+      "faults": {
+        "Unreturned": 39,
+        "Net fault": 14,
+        "Double bounce": 27,
+        "Out": 15
+      },
+      "patternReads": 472,
+      "subjectWinRate": 1,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "avery",
+      "body": "short-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 2,
+      "points": [
+        36,
+        32
+      ],
+      "faults": {
+        "Out": 20,
+        "Net fault": 16,
+        "Unreturned": 58,
+        "Double bounce": 34
+      },
+      "patternReads": 606,
+      "subjectWinRate": 0.5,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "avery",
+      "body": "tall-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        25,
+        37
+      ],
+      "faults": {
+        "Net fault": 16,
+        "Unreturned": 29,
+        "Double bounce": 33,
+        "Out": 13
+      },
+      "patternReads": 424,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "avery",
+      "body": "tall-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 0,
+      "points": [
+        9,
+        44
+      ],
+      "faults": {
+        "Out": 13,
+        "Net fault": 16,
+        "Unreturned": 36,
+        "Double bounce": 22
+      },
+      "patternReads": 363,
+      "subjectWinRate": 0,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "morgan",
+      "body": "short-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 4,
+      "points": [
+        44,
+        8
+      ],
+      "faults": {
+        "Unreturned": 29,
+        "Double bounce": 37,
+        "Net fault": 11,
+        "Out": 7
+      },
+      "patternReads": 475,
+      "subjectWinRate": 1,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "morgan",
+      "body": "short-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 3,
+      "points": [
+        38,
+        27
+      ],
+      "faults": {
+        "Double bounce": 73,
+        "Net fault": 10,
+        "Unreturned": 43,
+        "Out": 8
+      },
+      "patternReads": 673,
+      "subjectWinRate": 0.75,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "morgan",
+      "body": "tall-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        28,
+        44
+      ],
+      "faults": {
+        "Double bounce": 60,
+        "Unreturned": 33,
+        "Out": 10,
+        "Net fault": 8
+      },
+      "patternReads": 596,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "morgan",
+      "body": "tall-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 0,
+      "points": [
+        6,
+        44
+      ],
+      "faults": {
+        "Unreturned": 32,
+        "Double bounce": 36,
+        "Net fault": 6,
+        "Out": 4
+      },
+      "patternReads": 358,
+      "subjectWinRate": 0,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "jordan",
+      "body": "short-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 4,
+      "points": [
+        44,
+        14
+      ],
+      "faults": {
+        "Unreturned": 60,
+        "Net fault": 15,
+        "Double bounce": 13,
+        "Out": 26
+      },
+      "patternReads": 383,
+      "subjectWinRate": 1,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "jordan",
+      "body": "short-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 3,
+      "points": [
+        42,
+        30
+      ],
+      "faults": {
+        "Unreturned": 51,
+        "Net fault": 35,
+        "Double bounce": 26,
+        "Out": 27
+      },
+      "patternReads": 444,
+      "subjectWinRate": 0.75,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "jordan",
+      "body": "tall-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        27,
+        41
+      ],
+      "faults": {
+        "Unreturned": 48,
+        "Out": 36,
+        "Net fault": 24,
+        "Double bounce": 15
+      },
+      "patternReads": 380,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "character": "jordan",
+      "body": "tall-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        14,
+        37
+      ],
+      "faults": {
+        "Unreturned": 29,
+        "Out": 23,
+        "Double bounce": 9,
+        "Net fault": 13
+      },
+      "patternReads": 227,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "avery",
+      "body": "short-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        20,
+        42
+      ],
+      "faults": {
+        "Net fault": 36,
+        "Kitchen momentum fault": 9,
+        "Unreturned": 58,
+        "Double bounce": 6,
+        "Out": 10
+      },
+      "patternReads": 2151,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "avery",
+      "body": "short-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 3,
+      "points": [
+        43,
+        31
+      ],
+      "faults": {
+        "Unreturned": 81,
+        "Double bounce": 9,
+        "Net fault": 41,
+        "Out": 6,
+        "Kitchen momentum fault": 1
+      },
+      "patternReads": 2605,
+      "subjectWinRate": 0.75,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "avery",
+      "body": "tall-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 0,
+      "points": [
+        33,
+        46
+      ],
+      "faults": {
+        "Unreturned": 54,
+        "Net fault": 68,
+        "Double bounce": 17,
+        "Out": 3,
+        "Kitchen momentum fault": 2
+      },
+      "patternReads": 3002,
+      "subjectWinRate": 0,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "avery",
+      "body": "tall-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 0,
+      "points": [
+        17,
+        45
+      ],
+      "faults": {
+        "Double bounce": 24,
+        "Unreturned": 34,
+        "Net fault": 35,
+        "Out": 4,
+        "Kitchen momentum fault": 8
+      },
+      "patternReads": 1849,
+      "subjectWinRate": 0,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "morgan",
+      "body": "short-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        27,
+        39
+      ],
+      "faults": {
+        "Double bounce": 6,
+        "Unreturned": 79,
+        "Net fault": 33,
+        "Kitchen momentum fault": 4,
+        "Out": 3
+      },
+      "patternReads": 3559,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "morgan",
+      "body": "short-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 2,
+      "points": [
+        35,
+        35
+      ],
+      "faults": {
+        "Double bounce": 20,
+        "Unreturned": 77,
+        "Net fault": 35,
+        "Kitchen momentum fault": 12
+      },
+      "patternReads": 3724,
+      "subjectWinRate": 0.5,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "morgan",
+      "body": "tall-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 4,
+      "points": [
+        44,
+        18
+      ],
+      "faults": {
+        "Double bounce": 21,
+        "Unreturned": 32,
+        "Net fault": 38,
+        "Kitchen momentum fault": 12,
+        "Out": 3
+      },
+      "patternReads": 3212,
+      "subjectWinRate": 1,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "morgan",
+      "body": "tall-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        17,
+        43
+      ],
+      "faults": {
+        "Double bounce": 37,
+        "Net fault": 34,
+        "Kitchen momentum fault": 10,
+        "Unreturned": 37
+      },
+      "patternReads": 2874,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "jordan",
+      "body": "short-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 2,
+      "points": [
+        27,
+        38
+      ],
+      "faults": {
+        "Out": 18,
+        "Net fault": 33,
+        "Unreturned": 52,
+        "Kitchen momentum fault": 2,
+        "Double bounce": 2
+      },
+      "patternReads": 1125,
+      "subjectWinRate": 0.5,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "jordan",
+      "body": "short-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 0,
+      "points": [
+        22,
+        44
+      ],
+      "faults": {
+        "Unreturned": 64,
+        "Net fault": 38,
+        "Out": 11,
+        "Kitchen momentum fault": 3
+      },
+      "patternReads": 1146,
+      "subjectWinRate": 0,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "jordan",
+      "body": "tall-lean",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        29,
+        44
+      ],
+      "faults": {
+        "Kitchen momentum fault": 3,
+        "Net fault": 62,
+        "Out": 18,
+        "Unreturned": 50
+      },
+      "patternReads": 1270,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "jordan",
+      "body": "tall-strong",
+      "games": 4,
+      "completed": 4,
+      "subjectWins": 1,
+      "points": [
+        15,
+        35
+      ],
+      "faults": {
+        "Kitchen momentum fault": 10,
+        "Net fault": 29,
+        "Out": 6,
+        "Unreturned": 32,
+        "Double bounce": 6
+      },
+      "patternReads": 604,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    }
+  ],
+  "bodySummary": [
+    {
+      "format": "singles",
+      "body": "short-lean",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 12,
+      "subjectWinRate": 1,
+      "review": "investigate across more seeds"
+    },
+    {
+      "format": "singles",
+      "body": "short-strong",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 8,
+      "subjectWinRate": 0.6666666666666666,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "body": "tall-lean",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 3,
+      "subjectWinRate": 0.25,
+      "review": "sample only"
+    },
+    {
+      "format": "singles",
+      "body": "tall-strong",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 1,
+      "subjectWinRate": 0.08333333333333333,
+      "review": "investigate across more seeds"
+    },
+    {
+      "format": "doubles",
+      "body": "short-lean",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 4,
+      "subjectWinRate": 0.3333333333333333,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "body": "short-strong",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 5,
+      "subjectWinRate": 0.4166666666666667,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "body": "tall-lean",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 5,
+      "subjectWinRate": 0.4166666666666667,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "body": "tall-strong",
+      "games": 12,
+      "completed": 12,
+      "subjectWins": 2,
+      "subjectWinRate": 0.16666666666666666,
+      "review": "sample only"
+    }
+  ]
+}

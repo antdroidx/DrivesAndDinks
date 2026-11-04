@@ -119,7 +119,7 @@ See [ENGINE-NOTES.md](ENGINE-NOTES.md) for independent competitive ratings, attr
 
 ## DEV height and build tradeoffs
 
-Body effects multiply archetype abilities, independently of clothing and gender. The neutral body is 177 cm (about 5 ft 10 in), build slider 45. Height ranges from 145 to 210 cm; the UI shows feet/inches. Taller bodies gain up to 9% horizontal reach and 4% power while losing up to 4% speed, 7% acceleration, 4% endurance and 3% volley skill. Overhead and ordinary contact ceilings scale with height / 177. Shorter bodies reverse these tradeoffs. Broader bodies add up to 10% power while losing up to 6% speed, 12% acceleration, 8% endurance and 4% volley skill; leaner bodies reverse them. Effects combine, so neither extreme is a free upgrade. These are tunable game balance rules, not claims about real athletes. Archetype rating bars stay as the skill foundation; exact body modifiers appear in the designer. Body edits apply immediately and persist into resets and new configured matches.
+Body effects multiply archetype abilities, independently of clothing and gender. The neutral body is 177 cm (about 5 ft 10 in), build slider 45. Height ranges from 145 to 210 cm; the UI shows feet/inches. Taller bodies gain up to 9% horizontal reach and 4% power while losing up to 2.5% speed, 4.5% acceleration, 2% endurance and 2% volley skill. Overhead and ordinary contact ceilings scale with height / 177. Shorter bodies reverse these tradeoffs. Broader bodies add up to 10% power while losing up to 2.5% speed, 6% acceleration, 2.5% endurance and 2% volley skill; leaner bodies reverse them. Effects combine, so neither extreme is a free upgrade. These are tunable game balance rules, not claims about real athletes. Archetype rating bars stay as the skill foundation; exact body modifiers appear in the designer. Body edits apply immediately and persist into resets and new configured matches.
 
 Low-contact difficulty also scales with stature: taller bodies need more preparation for ankle-height balls, while shorter bodies receive a modest low-contact advantage. High balls just behind the shoulder can select a scorpion-style reflex overhead at a height-scaled threshold, with additional difficulty rather than guaranteed success. This reuses the overhead animation; a dedicated crouch-and-behind-head pose remains future work.
 
@@ -139,3 +139,10 @@ Match setup offers Doubles (2 vs 2) and Singles (1 vs 1). Singles uses the full 
 In New Game → Match mode, choose Deep return, Third-shot drop, or Kitchen reset under Practice. Each session supplies ten repeatable feeds and a visible target. Use the normal shot buttons and aim/depth controls; the two soft drills begin with a short depth setting. Repeat Drill repeats the feed sequence, while New Game returns to match setup.
 
 Settings → Download Report exports the current session as JSON. The completion screen also offers a report and a short summary. Reports include contacts, rally/fault outcomes, player/body/paddle attributes, and practice attempts; they remain separate from the sound/UI queue and are bounded in memory. Nothing is uploaded automatically or retained after a page reload.
+
+
+## DEV adaptive opponents and validation
+
+CPU players gradually anticipate repeated placement and lobs using observed balls from the current match. Court IQ controls their small recovery-position adjustments. Changing direction can catch them leaning; serves and unseen aim inputs are excluded. Learning resets for a new match and is included in Download Report.
+
+Run `npm run validate:matchups` for mirrored singles/doubles body and archetype checks, or `npm run profile:engine` for CPU update/replay/journal timing. Saved samples are in `validation/`. The CPU timings exclude rendering and real mobile hardware. Body extremes still need playtesting, particularly short/lean and tall/broad singles matchups.

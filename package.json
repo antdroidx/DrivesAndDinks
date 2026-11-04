@@ -7,6 +7,8 @@
     "start": "node scripts/serve.js",
     "simulate": "node scripts/simulate.js",
     "balance": "node scripts/balance.js",
-    "validate:levels": "node scripts/validate-levels.js 12"
+    "validate:levels": "node scripts/validate-levels.js 12",
+    "validate:matchups": "node scripts/validate-matchups.js 2",
+    "profile:engine": "node scripts/profile-engine.js 60"
   }
 }
