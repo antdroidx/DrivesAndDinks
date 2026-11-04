@@ -1,6 +1,6 @@
-export function courtSize(width,height,stacked){
- const controls=stacked?86:0,sideSpace=stacked?0:220;
- return Math.max(1,Math.floor(Math.min(width-sideSpace,height-controls-46)));
+export function courtSize(width,height){
+ // Touch controls share the court rather than reserving side/bottom space.
+ return Math.max(1,Math.floor(Math.min(width,height-46)));
 }
 export async function toggleFullscreen(doc,element){
  if(doc.fullscreenElement||doc.webkitFullscreenElement){const exit=doc.exitFullscreen??doc.webkitExitFullscreen;if(exit)await exit.call(doc);return false}
@@ -11,6 +11,11 @@ export async function toggleFullscreen(doc,element){
 export function setupCourtDisplay(){
  document.body.classList.add('court-app');
  const main=document.querySelector('main'),field=document.querySelector('.playfield'),header=document.querySelector('header'),actions=document.querySelector('.header-actions');
+ document.querySelector('.game').append(document.querySelector('.controls'));
+ for(const [i,button] of [...document.querySelectorAll('#shots [data-shot]')].entries()){
+ button.firstChild.textContent=button.dataset.shot.toUpperCase()+' ';
+ button.setAttribute('aria-keyshortcuts',String(i+1));
+ }
  const hud=document.createElement('div');hud.id='court-hud';hud.setAttribute('aria-live','off');field.prepend(hud);
  const full=document.createElement('button');full.id='fullscreen-button';full.textContent='FULL SCREEN';actions.prepend(full);
  const menu=document.createElement('button');menu.id='court-menu';menu.textContent='SETTINGS';menu.setAttribute('aria-expanded','false');header.append(menu);menu.onclick=()=>{const open=main.classList.toggle('settings-open');menu.setAttribute('aria-expanded',String(open))};

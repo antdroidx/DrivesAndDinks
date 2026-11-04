@@ -100,7 +100,7 @@ document.querySelector('.game').append(pointActions);
 function beginReplay(clip,startedAt=performance.now(),automatic=false){
  if(!clip||clip.frames.length<=15)return false;
  if(automatic&&game.pointReplay)automaticallyReplayedPoints.add(game.pointReplay);
- replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`INSTANT REPLAY · ${clip.label} · SLOW MOTION`;replayBar.hidden=false;pointActions.hidden=true;return true;
+ replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`REPLAY · ${clip.label}`;replayBar.hidden=false;pointActions.hidden=true;return true;
 }
 function finishReplay(){replayPlayback=null;replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
 function syncPointActions(){

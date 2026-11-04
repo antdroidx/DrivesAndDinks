@@ -232,3 +232,28 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app main[data-court-layout="stacked"] #court-hud{gap:3px;flex-direction:column;font-size:10px}.court-app main[data-court-layout="stacked"] #court-hud strong{font-size:13px}
 .court-app #overlay{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);display:block}
 .court-app main:fullscreen{width:100vw;height:100dvh}.court-app main:-webkit-full-screen{width:100vw;height:100vh}
+
+/* Touch controls float over the court; the empty layer passes touches through. */
+.court-app .game{container-type:inline-size}
+.court-app main[data-court-layout="stacked"] .playfield{grid-template-rows:42px var(--court-size) minmax(0,1fr)}
+.court-app .game .controls,.court-app main[data-court-layout="stacked"] .game .controls{position:absolute;inset:0;top:0;display:block;width:100%;height:100%;padding:0;margin:0;pointer-events:none}
+.court-app .game #shots,.court-app main[data-court-layout="stacked"] .game #shots{position:absolute;right:2.5%;bottom:3%;display:grid;grid-template-columns:repeat(2,clamp(56px,14cqw,88px));grid-template-rows:repeat(2,clamp(56px,14cqw,88px));gap:6px;width:auto;height:auto;align-items:stretch;justify-content:end;pointer-events:none}
+.court-app .game #shots button,.court-app main[data-court-layout="stacked"] .game #shots button{width:100%;height:100%;min-width:44px;min-height:44px;padding:4px;border:1px solid #d5eee69c;border-radius:18px;background:#163e4c70;color:#fff8e6;font-size:clamp(10px,2.2cqw,14px);line-height:1.1;text-shadow:0 1px 3px #07151f;box-shadow:0 2px 8px #07151f40;pointer-events:auto;touch-action:none}
+.court-app .game #shots button small{font-size:clamp(7px,1.6cqw,10px);color:#f6e1a9;line-height:1.1}
+.court-app .game #shots [data-shot="attack"]{grid-column:2;grid-row:1}
+.court-app .game #shots [data-shot="soft"]{grid-column:1;grid-row:2}
+.court-app .game #shots [data-shot="lob"]{grid-column:2;grid-row:2}
+.court-app main[data-court-layout] .game #shots button.active,.court-app main[data-court-layout] .game #shots button:active{background:#c18a3580;border-color:#ffe6a9;color:#fff9df}
+.court-app .game #shots button:focus-visible{outline:2px solid #fff5bc;outline-offset:2px}
+.court-app .game #aim-pad,.court-app main[data-court-layout="stacked"] .game #aim-pad{position:absolute;left:2.5%;bottom:3%;top:auto;transform:none;width:clamp(100px,27cqw,170px);height:clamp(68px,18cqw,100px);padding:7px;border:1px solid #a9e9ee9c;border-radius:18px;background:#103c4370;box-shadow:0 2px 8px #07151f40;pointer-events:auto}
+.court-app .game #aim-pad strong{font-size:clamp(8px,1.7cqw,11px);color:#e8fff7;text-shadow:0 1px 3px #07151f}
+.court-app .game #aim-pad small{font-size:clamp(7px,1.4cqw,9px);color:#d6e9e3}
+.court-app .game .aim-pad-track{background:#23444c66;height:18px;border-width:1px}.court-app .game .aim-pad-thumb{width:24px;height:24px;background:#65d7e0bc}
+/* Replay text is sized against its court, including fullscreen phone viewports. */
+.court-app .game .point-actions{left:3%;right:3%;top:5%;bottom:auto;width:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;padding:8px;background:#102c35d9;box-sizing:border-box}
+.court-app .game .point-actions div{display:block;min-width:0;text-align:left}.court-app .game .point-actions small{display:none}
+.court-app .game .point-actions strong{display:block;font:700 clamp(11px,2.5cqw,16px)/1.3 system-ui;white-space:normal;overflow-wrap:normal}
+.court-app .game .point-actions button{width:auto;min-height:44px;max-width:100%;padding:8px 10px;font:800 clamp(11px,2.5cqw,16px)/1.2 system-ui;white-space:nowrap}
+.court-app .game .replay-banner{left:3%;right:3%;top:3%;bottom:auto;width:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px;border-width:1px;box-sizing:border-box;background:#102c35d9;font-size:clamp(11px,2.5cqw,16px)}
+.court-app .game .replay-banner strong{font:700 clamp(11px,2.5cqw,16px)/1.35 system-ui;text-align:left;min-width:0;overflow-wrap:normal}
+.court-app .game .replay-banner button{min-height:44px;padding:8px 10px;font-size:clamp(11px,2.5cqw,16px);white-space:nowrap}
