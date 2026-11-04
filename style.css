@@ -313,4 +313,4 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 
 .court-app .control-lesson{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
-#dev-art-options{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px;border:1px solid #3a5861;border-radius:6px}#dev-art-options label{display:grid;gap:5px;min-width:0;font:12px system-ui;color:#b4ceca}#dev-art-options select{width:100%;min-width:0;padding:9px;background:#213e48;color:#fff3da;border:1px solid #608080;border-radius:4px}#dev-art-options a{grid-column:1/-1;color:#8fd8de;font-size:12px}
+#dev-art-options{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px;border:1px solid #3a5861;border-radius:6px}#dev-art-options label{display:grid;gap:5px;min-width:0;font:12px system-ui;color:#b4ceca}#dev-art-options select,#dev-art-options input{width:100%;min-width:0;padding:9px;background:#213e48;color:#fff3da;border:1px solid #608080;border-radius:4px}#dev-art-options a{grid-column:1/-1;color:#8fd8de;font-size:12px}

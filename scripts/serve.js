@@ -3,6 +3,7 @@ import {readFile} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 const root=new URL('../',import.meta.url);
 const allowed=new Map([
+ ...['outdoor','indoor','stadium'].map(id=>[`/assets/venues/${id}-v2.png`,[`assets/venues/${id}-v2.png`,'image/png']]),
  ...['garden','stadium','campus'].map(id=>[`/assets/venues/${id}-painted.png`,[`assets/venues/${id}-painted.png`,'image/png']]),
  ['/manifest.webmanifest',['manifest.webmanifest','application/manifest+json']],...['192','512'].map(n=>[`/assets/app-${n}.png`,[`assets/app-${n}.png`,'image/png']]),
   ['/style-lab.html',['style-lab.html','text/html']],['/character-lab.html',['character-lab.html','text/html']],['/character-lab.css',['character-lab.css','text/css']],['/', ['index.html','text/html']],['/studio.html',['studio.html','text/html']],['/studio.css',['studio.css','text/css']],['/art-directions.html',['art-directions.html','text/html']],['/art-directions.css',['art-directions.css','text/css']],['/assets/art-direction-3d-concept.png',['assets/art-direction-3d-concept.png','image/png']],['/index.html',['index.html','text/html']],['/style.css',['style.css','text/css']],['/build-info.js',['build-info.js','text/javascript']],['/sw.js',['sw.js','text/javascript']],

@@ -27,7 +27,7 @@ export function plantFeet(pose,options,raw,cx,baseline,scale){
   // Leave a stationary pose untouched. Re-solving an almost straight knee is
   // numerically sensitive and used to make otherwise idle legs snap sideways.
   if(Math.hypot(locked.x-world.x,locked.y-world.y)<.01)return;
-  const lengths=options.legLengths??{upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(foot.x-chain[1].x,foot.y-chain[1].y)};
+  const lengths=(Array.isArray(options.legLengths)?options.legLengths[i]:options.legLengths)??{upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(foot.x-chain[1].x,foot.y-chain[1].y)};
   foot.x=24+(locked.x-cx)/scale;foot.y=63+(locked.y-baseline)/scale;
   chain[1]=jointBetween(chain[0],foot,lengths.upper,lengths.lower,i?-1:1);
  });

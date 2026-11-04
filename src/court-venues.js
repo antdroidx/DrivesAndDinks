@@ -1,13 +1,14 @@
 export const COURT_VENUES=Object.freeze([
- {id:'garden',name:'Garden club',sky:'#b7d6d0',hills:'#779a84',foliage:'#466d58',accent:'#e6c1a9',court:'#658a87',kitchen:'#d7b489',outer:'#354e48',outerLight:'#4b695b',apron:'#88a18a',line:'#fff3d9',background:'#9ab9a0'},
- {id:'campus',name:'School courtyard',sky:'#b8d6e4',hills:'#83978e',foliage:'#527866',accent:'#d4b28b',court:'#6c8b9b',kitchen:'#aabcac',outer:'#465867',outerLight:'#697a85',apron:'#bcc4b5',line:'#fff6df',background:'#aebead'},
- {id:'stadium',name:'Club stadium',sky:'#b7d5de',hills:'#718c81',foliage:'#4c7562',accent:'#e4c2a0',court:'#557f89',kitchen:'#b2bba0',outer:'#3c5459',outerLight:'#5c7575',apron:'#9baa96',line:'#fff4da',background:'#99aea3'}
+ {id:'outdoor',name:'Outdoor pickleball park',sky:'#b7d6d0',hills:'#779a84',foliage:'#466d58',accent:'#e6c1a9',court:'#658a87',kitchen:'#d7b489',outer:'#354e48',outerLight:'#4b695b',apron:'#88a18a',line:'#fff3d9',background:'#9ab9a0'},
+ {id:'indoor',name:'Indoor pickleball hall',sky:'#b8d6e4',hills:'#83978e',foliage:'#527866',accent:'#d4b28b',court:'#6c8b9b',kitchen:'#aabcac',outer:'#465867',outerLight:'#697a85',apron:'#bcc4b5',line:'#fff6df',background:'#aebead'},
+ {id:'stadium',name:'Crowded championship stadium',sky:'#b7d5de',hills:'#718c81',foliage:'#4c7562',accent:'#e4c2a0',court:'#557f89',kitchen:'#b2bba0',outer:'#3c5459',outerLight:'#5c7575',apron:'#9baa96',line:'#fff4da',background:'#99aea3'}
 ]);
 export function chooseCourtVenue(previousId,random=Math.random){const choices=COURT_VENUES.filter(v=>v.id!==previousId);return choices[Math.min(choices.length-1,Math.max(0,Math.floor(random()*choices.length)))];}
 function polygon(c,points,color){c.beginPath();points.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fillStyle=color;c.fill()}
 function oval(c,x,y,rx,ry,color){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=color;c.fill()}
 export function drawCourtVenue(c,v,camera){
  c.save();c.fillStyle=v.background;c.fillRect(camera.x,camera.y,camera.width,camera.height);
+ if(v.id==='indoor'){c.fillStyle='#b7ab96';c.fillRect(camera.x,camera.y,camera.width,Math.max(0,170-camera.y));c.restore();return}
  c.fillStyle=v.sky;c.fillRect(camera.x,camera.y,camera.width,Math.max(0,205-camera.y));
  oval(c,v.id==='sunset'?755:160,Math.max(camera.y+35,96),v.id==='sunset'?30:19,v.id==='sunset'?30:19,v.accent);
  // Painted cloud clusters and distant hills use broad quiet shapes behind play.

@@ -1,9 +1,9 @@
-// The source artwork contains an empty court. Baselines are aligned to the
+// The source artwork contains neutral, unmarked ground with no court patch. Baselines are aligned to the
 // engine projection; all rules, line positions and collision geometry stay live.
 export const SCENE_LAYOUTS=Object.freeze({
- garden:{file:'garden-painted.png',far:.404,near:.92,edge:'#879976'},
- campus:{file:'campus-painted.png',far:.382,near:.967,edge:'#bc8f75'},
- stadium:{file:'stadium-painted.png',far:.384,near:.962,edge:'#809b99'}
+ outdoor:{file:'outdoor-v2.png',far:.42,near:.97,edge:'#b9a58b'},
+ indoor:{file:'indoor-v2.png',far:.47,near:.97,edge:'#a79987'},
+ stadium:{file:'stadium-v2.png',far:.44,near:.97,edge:'#9ba38d'}
 });
 export function scenePlacement(layout){const height=374/(layout.near-layout.far);return {x:0,y:204-layout.far*height,width:960,height};}
 export function retroCourtPalette(palette){return {...palette,court:'#376e8c',kitchen:'#b97855',line:'#fff1bd'};}

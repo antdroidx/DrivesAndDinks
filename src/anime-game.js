@@ -1,5 +1,6 @@
 import {drawAnimeAthlete,animePixelPalette} from './anime-character.js';
 import {matchDesign} from './detailed-character.js';
+import {conceptDimensions} from './character-concepts.js';
 import {animationRootOffset} from './pixel-character.js';
 
 export function animeGameLayout(options,design){
@@ -7,11 +8,16 @@ export function animeGameLayout(options,design){
  const contact=options.alignTo?{x:24+(options.alignTo.x-cx)/scale-animationRootOffset(options.mode,options.phase,options.travelSide??options.side??1),y:63+(options.alignTo.y-baseline)/scale*177/design.height}:null;
  return {scale,cx,baseline,contact};
 }
+export function resolveAnimeGameDesign(options){
+ const base=matchDesign(options.appearance??{},options.characterId??'',options.designId??'');
+ const height=Number.isFinite(options.customHeight)?Math.max(145,Math.min(210,options.customHeight)):base.height,build=Number.isFinite(options.customBuild)?Math.max(.05,Math.min(1.1,options.customBuild)):base.build;
+ return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance'};
+}
 export function createAnimeGameRenderer(createCanvas=()=>document.createElement('canvas')){
  const contexts=new WeakMap(),palettes=new Map();
  return (c,options)=>{
   const {mode='idle',phase=0,view='near',appearance={},characterId='',designId='',style='anime',look='sports',outfit='performance'}=options;
-  let d={...matchDesign(appearance,characterId,designId),outfit};
+  let d=resolveAnimeGameDesign(options);
   if(look==='storybook')for(const key of ['shirt','skin','hairColor','trim']){const rgb=d[key].slice(1).match(/../g).map(v=>parseInt(v,16));d[key]='#'+rgb.map((v,i)=>Math.round(v*.82+[210,187,140][i]*.18).toString(16).padStart(2,'0')).join('')}
   const layout=animeGameLayout({...options,mode,phase},d),{scale,cx,baseline,contact}=layout;
   const renderOptions={...options,look,contact,contactWeight:options.alignStrength??0,plantWorld:{cx,baseline,scale}};

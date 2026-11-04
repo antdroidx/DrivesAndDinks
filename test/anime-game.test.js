@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {createAnimeGameRenderer,animeGameLayout} from '../src/anime-game.js';
+import {createAnimeGameRenderer,animeGameLayout,resolveAnimeGameDesign} from '../src/anime-game.js';
 import {animePose} from '../src/anime-character.js';
 import {CHARACTER_CONCEPTS} from '../src/character-concepts.js';
 import {MOTIONS} from '../src/pixel-character.js';
@@ -21,4 +21,8 @@ test('game adapter converts world contact into the same pose coordinates at each
 });
 test('venue randomization avoids immediate repeats and preserves valid court colors',()=>{
  for(const venue of COURT_VENUES){for(const random of [0,.25,.5,.999])assert.notEqual(chooseCourtVenue(venue.id,()=>random).id,venue.id);for(const key of ['court','kitchen','outer','outerLight','apron','line','background'])assert.match(venue[key],/^#[0-9a-f]{6}$/i);const c=context();drawCourtVenue(c,venue,{x:-100,y:-200,width:1160,height:800});assert.equal(c.depth,0)}
+});
+
+test('personal height and build affect appearance without mutating the selected preset',()=>{
+ for(const source of CHARACTER_CONCEPTS){const before=JSON.stringify(source),options={designId:source.id},base=resolveAnimeGameDesign(options),lean=resolveAnimeGameDesign({...options,customHeight:150,customBuild:.05}),broad=resolveAnimeGameDesign({...options,customHeight:205,customBuild:1.05});assert.equal(base.height,source.height);assert.equal(lean.height,150);assert.equal(broad.height,205);assert.ok(lean.waist<broad.waist);assert.equal(JSON.stringify(source),before)}
 });

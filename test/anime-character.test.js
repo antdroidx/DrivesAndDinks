@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {drawAnimeAthlete,animePose,animeHeadCenter,skinPalette,animePixelPalette,animeTorso} from '../src/anime-character.js';
+import {drawAnimeAthlete,animePose,animeHeadCenter,skinPalette,animePixelPalette,animeTorso,animeBodyDimensions} from '../src/anime-character.js';
 import {CHARACTER_CONCEPTS,HAIR_OPTIONS} from '../src/character-concepts.js';
 import {MOTIONS,sampleCharacterPose} from '../src/pixel-character.js';
 function context(){let depth=0,calls=0;return new Proxy({get depth(){return depth},get calls(){return calls}},{get(target,key){if(key in target)return target[key];return (...args)=>{calls++;for(const value of args)if(typeof value==='number')assert.ok(Number.isFinite(value),`${key}: invalid coordinate`);if(key==='save')depth++;if(key==='restore')assert.ok(--depth>=0)}},set(){return true}})}
@@ -37,4 +37,8 @@ test('female crop top has an exposed waist while other supported outfits retain 
   const design={...d,outfit},p=animePose(design,mode,phase,'far'),t=animeTorso(design,p);
   assert.equal(t.crop,d.body==='female'&&outfit==='shorts');assert.equal(t.bottom-t.hem,t.crop?5:0);assert.ok(t.hem>t.top);
  }
+});
+
+test('upper legs attach inside the torso silhouette for every body preset',()=>{
+ for(const d of CHARACTER_CONCEPTS){const p=animePose(d,'idle',0,'far'),body=animeBodyDimensions(d);for(const leg of p.legs){const outer=Math.abs(leg[0].x-p.hips.x)+body.thigh/2;assert.ok(outer<=body.hip+.25,`${d.id}: upper leg outside pelvis`)}assert.ok(body.hip<d.shoulder*.97)}
 });
