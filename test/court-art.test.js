@@ -18,5 +18,5 @@ test('painted and retro scenery load lazily and reuse their cached pixel treatme
 });
 test('court art uses a coarse raster for retro style and preserves valid surface geometry',()=>{
  const canvases=[],draw=createCourtSurfaceRenderer((x,y)=>({x:480+(x-10)*(13+y*.21),y:204+y*8.5}),()=>{const canvas={getContext:context};canvases.push(canvas);return canvas}),c=context(),palette=COURT_VENUES[0];
- draw(c,palette,'painted');assert.equal(canvases[0].width,960);draw(c,retroCourtPalette(palette),'retro');assert.equal(canvases[0].width,320);assert.equal(canvases.length,1);assert.equal(c.depth,0);
+ draw(c,palette,'painted');assert.equal(canvases[0].width,1920);draw(c,retroCourtPalette(palette),'retro');assert.equal(canvases[0].width,320);assert.equal(canvases.length,1);assert.equal(c.depth,0);
 });

@@ -12,18 +12,22 @@ export function createCourtSurfaceRenderer(project,createCanvas=()=>document.cre
  return (c,palette,style='painted')=>{
   const key=JSON.stringify([palette.court,palette.kitchen,palette.line,style]);
   if(key!==previous){
-   surface??=createCanvas();surface.width=style==='retro'?320:960;surface.height=style==='retro'?200:600;
+   surface??=createCanvas();surface.width=style==='retro'?320:1920;surface.height=style==='retro'?200:1200;
    const paint=surface.getContext('2d'),scale=surface.width/960,position=(x,y)=>{const p=project(x,y);return style==='retro'?{x:Math.round(p.x/3)*3+1.5,y:Math.round(p.y/3)*3+1.5}:p};paint.setTransform(scale,0,0,scale,0,0);
    const poly=(points,fill,stroke)=>{paint.beginPath();points.forEach(([x,y],i)=>{const p=position(x,y);i?paint.lineTo(p.x,p.y):paint.moveTo(p.x,p.y)});paint.closePath();if(fill){paint.fillStyle=fill;paint.fill()}if(stroke){paint.strokeStyle=stroke;paint.lineWidth=3;paint.stroke()}};
    poly([[0,0],[20,0],[20,44],[0,44]],palette.court);
    poly([[0,15],[20,15],[20,29],[0,29]],palette.kitchen);
    paint.save();poly([[0,0],[20,0],[20,44],[0,44]]);paint.clip();
    for(let i=0;i<450;i++){const p=project((i*137%1000)/50,(i*269%1000)/1000*44);paint.fillStyle=i%2?'#fff3db09':'#182e3709';paint.fillRect(Math.floor(p.x/3)*3,Math.floor(p.y/3)*3,style==='retro'?3:1.5,style==='retro'?3:1)}paint.restore();
-   poly([[0,0],[20,0],[20,44],[0,44]],null,palette.line);
+   if(style==='retro'){poly([[0,0],[20,0],[20,44],[0,44]],null,palette.line);
    for(const [a,b] of [[[0,15],[20,15]],[[0,29],[20,29]],[[10,0],[10,15]],[[10,29],[10,44]]]){const p=position(...a),q=position(...b);paint.beginPath();paint.moveTo(p.x,p.y);paint.lineTo(q.x,q.y);paint.strokeStyle=palette.line;paint.lineWidth=style==='retro'?3:2;paint.stroke()}
-   previous=key;
+   }previous=key;
   }
   c.save();c.imageSmoothingEnabled=style!=='retro';c.drawImage(surface,0,0,960,600);c.restore();
+  if(style!=='retro'){
+   c.save();c.strokeStyle=palette.line;c.lineWidth=3;c.beginPath();for(const [i,[x,y]] of [[0,0],[20,0],[20,44],[0,44]].entries()){const p=project(x,y);i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y)}c.closePath();c.stroke();
+   c.lineWidth=2;for(const [a,b] of [[[0,15],[20,15]],[[0,29],[20,29]],[[10,0],[10,15]],[[10,29],[10,44]]]){const p=project(...a),q=project(...b);c.beginPath();c.moveTo(p.x,p.y);c.lineTo(q.x,q.y);c.stroke()}c.restore();
+  }
  };
 }
 export function createCourtArtRenderer(createImage=()=>new Image(),createCanvas=()=>document.createElement('canvas')){
