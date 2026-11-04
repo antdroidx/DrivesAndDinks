@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=112';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=112';
-import {legDimensions,plantFeet} from './detailed-character.js?v=112';
+import {sampleCharacterPose} from './pixel-character.js?v=113';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=113';
+import {legDimensions,plantFeet} from './detailed-character.js?v=113';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -146,7 +146,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
   trainer(c,f,d,ink,options.footTargets?.[index].sole);
  }
  function arm(i){const a=p.arms[i],width=2.6+d.build*1.2;ribbon(c,a,[width,width*.85,width*.5],d.skin,ink,skin);
-  if((d.outfit==='polo')&&d.outfit!=='shorts'){const end=point(a[0].x+(a[1].x-a[0].x)*.43,a[0].y+(a[1].y-a[0].y)*.43);ribbon(c,[a[0],end],[width+1.5,width+1],d.shirt,ink);line(c,[point(end.x-.7,end.y-.1),point(end.x+.8,end.y+.3)],d.trim,.55)}
+  if(d.outfit==='polo'||(d.body==='male'&&d.outfit==='performance')){const end=point(a[0].x+(a[1].x-a[0].x)*.43,a[0].y+(a[1].y-a[0].y)*.43);ribbon(c,[a[0],end],[width+1.5,width+1],d.shirt,ink);line(c,[point(end.x-.7,end.y-.1),point(end.x+.8,end.y+.3)],d.trim,.55)}
   oval(c,a[2].x,a[2].y,width*.36,width*.48,d.skin);line(c,[point(a[2].x-.7,a[2].y-1.7),point(a[2].x+.8,a[2].y-1.5)],d.trim,.8);
  }
  function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const wide=options.paddleShape==='wide'?1.15:options.paddleShape==='elongated'?.88:1,tall=options.paddleShape==='elongated'?1.14:1;oval(c,0,0,3.7*wide,5*tall,d.trim);oval(c,0,0,3.05*wide,4.3*tall,'#1c2430');line(c,[point(-1.7,-2.3),point(-.5,-3),point(.9,-2.8)],'#ffffff28',.4);c.restore()}

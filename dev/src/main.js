@@ -1,36 +1,36 @@
-import {playerFeet,footSole} from './player-feet.js?v=112';
+import {playerFeet,footSole} from './player-feet.js?v=113';
 
-import {faultReplaySample,faultReplayCamera,drawFaultContact} from './fault-replay.js?v=112';
+import {faultReplaySample,faultReplayCamera,drawFaultContact} from './fault-replay.js?v=113';
 
-import {drawCourtNet} from './court-net.js?v=112';
+import {drawCourtNet} from './court-net.js?v=113';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=112';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=113';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=112';
+import {createAnimeGameRenderer} from './anime-game.js?v=113';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=112';
+import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=113';
 
-import {setupCourtDisplay} from './court-display.js?v=112';
+import {setupCourtDisplay} from './court-display.js?v=113';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=112';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=113';
 
-import {courtCamera,courtAim} from './court-camera.js?v=112';
+import {courtCamera,courtAim} from './court-camera.js?v=113';
 
-import {movingStance} from './detailed-character.js?v=112';
+import {movingStance} from './detailed-character.js?v=113';
 
-import {sampleMatchAnimation} from './match-animation.js?v=112';
+import {sampleMatchAnimation} from './match-animation.js?v=113';
 
-import {setupSelection} from './selection.js?v=112';
+import {setupSelection} from './selection.js?v=113';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=112';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=113';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=112';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=113';
 
-import {Game} from './game.js?v=112';
+import {Game} from './game.js?v=113';
 
-import {selectShot,serveAim} from './core.js?v=112';
+import {selectShot,serveAim} from './core.js?v=113';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=112';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=113';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -84,7 +84,7 @@ if(detailedArtAvailable){
 
  const panel=document.createElement('div');panel.id='dev-art-options';panel.style.cssText='display:grid;gap:8px;margin:10px 0';
 
- panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless / crop top + shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (cm)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Height and build change appearance only.</small><a href="style-lab.html">Character motion viewer ↗</a>`;
+ panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Height and build change appearance only.</small><a href="style-lab.html">Character motion viewer ↗</a>`;
 
  document.querySelector('.setup-top').after(panel);
 
@@ -92,7 +92,7 @@ if(detailedArtAvailable){
 
  const sync=()=>{button.textContent='ART: '+(artPreferences.style==='anime'?'ANIME':'ANIME PIXEL');button.setAttribute('aria-label','Switch character art. Current style: '+(artPreferences.style==='anime'?'Anime':'Anime Pixel'));panel.querySelector('#game-art-style').value=artPreferences.style};
 
- for(const key of ['style','look','outfit','venue','height','build']){const select=panel.querySelector('#game-art-'+key);select.value=artPreferences[key]||(key==='height'?'177':key==='build'?'45':'');if(select.type==='range'){const value=document.createElement('output');value.textContent=select.value;select.after(value);select.oninput=()=>{value.textContent=select.value;select.onchange()}}select.onchange=()=>{artPreferences[key]=select.value;if(key==='height'||key==='build'){const number=Number(select.value);artPreferences[key]=select.value!==''&&Number.isFinite(number)?String(Math.max(key==='height'?145:0,Math.min(key==='height'?210:100,number))):'';select.value=artPreferences[key]}if(key==='venue')refreshVenue();footPlants.clear();saveArtPreferences();sync();selectionUI?.refreshPreview()}}
+ for(const key of ['style','look','outfit','venue','height','build']){const select=panel.querySelector('#game-art-'+key);select.value=artPreferences[key]||(key==='height'?'177':key==='build'?'45':'');if(select.type==='range'){const value=document.createElement('output');const updateValue=()=>{const inches=Math.round(Number(select.value)/2.54);value.textContent=key==='height'?Math.floor(inches/12)+' ft '+(inches%12)+' in':select.value;select.setAttribute('aria-valuetext',value.textContent)};updateValue();select.after(value);select.oninput=()=>{select.onchange();updateValue()}}select.onchange=()=>{artPreferences[key]=select.value;if(key==='height'||key==='build'){const number=Number(select.value);artPreferences[key]=select.value!==''&&Number.isFinite(number)?String(Math.max(key==='height'?145:0,Math.min(key==='height'?210:100,number))):'';select.value=artPreferences[key]}if(key==='venue')refreshVenue();footPlants.clear();saveArtPreferences();sync();selectionUI?.refreshPreview()}}
 
  document.querySelector('#match-setup form').addEventListener('change',event=>{if(event.target.name==='court'){artPreferences.courtColors='custom';saveArtPreferences()}});
 
@@ -331,7 +331,7 @@ watchPointReplay.onclick=()=>beginReplay(game.pointReplay);
 
 skipReplay.onclick=finishReplay;
 
-const replayToggle=document.createElement('button');replayToggle.textContent='REPLAYS: ON';document.querySelector('.header-actions').append(replayToggle);replayToggle.onclick=()=>{replayEnabled=!replayEnabled;replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;finishReplay()};
+const replayToggle=document.createElement('button');replayToggle.id='replay-toggle';replayToggle.textContent='REPLAYS: ON';document.querySelector('.header-actions').append(replayToggle);replayToggle.onclick=()=>{replayEnabled=!replayEnabled;replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;finishReplay()};
 
 function playReplay(t){
 
@@ -438,3 +438,9 @@ canvas.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
 canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
 window.addEventListener('keydown',e=>{if(!document.querySelector('dialog[open]')&&(e.ctrlKey||e.metaKey)&&['+','-','=','0'].includes(e.key))e.preventDefault()},{capture:true});
+
+// Keep persistent play controls together, followed by setup, gameplay and presentation settings.
+const settingsActions=document.querySelector('.header-actions');
+for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','sound']){
+ const control=document.getElementById(id);if(control)settingsActions.append(control);
+}
