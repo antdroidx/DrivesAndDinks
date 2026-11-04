@@ -78,8 +78,8 @@ const mix3=(a,b,t)=>vadd(a,vmul(vsub(b,a),t));
 export const ARM_LENGTHS=Object.freeze([9.5,10]);
 // Pole vectors are in the player's body space, not left/right screen space.
 // Clamp impossible targets as a whole grip+paddle, never stretch the forearm.
-export function solveArm3D(shoulder,wrist,pole){
- const [upper,lower]=ARM_LENGTHS,delta=vsub(wrist,shoulder),distance=Math.max(.001,length(delta));
+export function solveArm3D(shoulder,wrist,pole,lengths=ARM_LENGTHS){
+ const [upper,lower]=lengths,delta=vsub(wrist,shoulder),distance=Math.max(.001,length(delta));
  const dir=vmul(delta,1/distance),reach=clamp(distance,Math.abs(upper-lower)+.001,upper+lower-.01);
  const end=vadd(shoulder,vmul(dir,reach)),along=(upper*upper-lower*lower+reach*reach)/(2*reach);
  const normal=vsub(pole,vmul(dir,dot(pole,dir))),normalLength=length(normal);
@@ -88,7 +88,7 @@ export function solveArm3D(shoulder,wrist,pole){
  return [shoulder,elbow,end];
 }
 export {courtView,strokeForContact} from './player-facing.js';
-export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
+export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,contact3D=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide','backpedal','crossover'].includes(mode)||moving;
@@ -105,14 +105,15 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
   const x=cx*cos-depth*sin,z=cx*sin+depth*cos;
   paddle3=mix3(paddle3,{x,y:contact.y-facing*.4*depth,z},clamp(contactWeight));
  }
+ if(contact3D){const target={x:contact3D.x*cos-contact3D.z*sin,y:contact3D.y,z:contact3D.x*sin+contact3D.z*cos};paddle3=mix3(paddle3,target,clamp(contactWeight))}
  let gripAngle=action?samplePath(wristAngles[mode].map(v=>[v,0]),phase).x*side:0;
  // At live impact the handle points back toward the shoulder, so a low
  // face cannot drag the wrist below the paddle or reverse the elbow.
  const crouch=authoredCrouch+(mode==='slideReturn'?7:mode==='poachLunge'?4:0),shoulderY=26+bob+crouch,forwardLean=crouch*.45;
- if(contact){const toward=Math.atan2(paddle3.x-side*6,shoulderY-paddle3.y),difference=Math.atan2(Math.sin(toward-gripAngle),Math.cos(toward-gripAngle));gripAngle+=difference*clamp(contactWeight)}
+ if(contact||contact3D){const toward=Math.atan2(paddle3.x-side*6,shoulderY-paddle3.y),difference=Math.atan2(Math.sin(toward-gripAngle),Math.cos(toward-gripAngle));gripAngle+=difference*clamp(contactWeight)}
  const shoulders=[{x:-6,y:shoulderY,z:forwardLean},{x:6,y:shoulderY,z:forwardLean}];
  let hand3={x:paddle3.x-Math.sin(gripAngle)*8,y:paddle3.y+Math.cos(gripAngle)*8,z:paddle3.z};
- if(contact){const towardShoulder=vsub(twoHanded?mix3(shoulders[0],shoulders[1],.5):shoulders[side<0?0:1],paddle3);hand3=mix3(hand3,vadd(paddle3,vmul(towardShoulder,8/Math.max(.001,length(towardShoulder)))),clamp(contactWeight))}
+ if(contact||contact3D){const towardShoulder=vsub(twoHanded?mix3(shoulders[0],shoulders[1],.5):shoulders[side<0?0:1],paddle3);hand3=mix3(hand3,vadd(paddle3,vmul(towardShoulder,8/Math.max(.001,length(towardShoulder)))),clamp(contactWeight))}
  const gripSide=side<0?0:1,freeSide=1-gripSide;
  let gripArm=solveArm3D(shoulders[gripSide],hand3,{x:side*7,y:9,z:-4});
  const correction=vsub(gripArm[2],hand3);paddle3=vadd(paddle3,correction);hand3=gripArm[2];
@@ -154,7 +155,8 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  if(mode==='splitStep')feet=feet.map(foot=>({...foot,y:foot.y-load*.8}));
  if(mode==='erne')feet=feet.map((foot,index)=>({x:foot.x+(index?1:-1)*side*jump*2,y:foot.y-jump*(index?7.2:5.6)}));
  const legs=feet.map((f,i)=>{const hip={x:hips.x+(i?4:-4),y:hips.y};return [hip,jointBetween(hip,f,9,9,i?-1:1),f]});
- return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,angle,twoHanded,bob:bob+crouch,gripSide,weightShift,jump,rootOffset,reachLimited:length(correction)>.01};
+ const rig={yaw,neck:{x:0,y:23+bob+crouch-jump*3.2,z:forwardLean},hips:{x:weightShift+lateralJump,y:hips.y,z:forwardLean*.45},paddle:paddle3,hand:hand3};
+ return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,rig,angle,twoHanded,bob:bob+crouch,gripSide,weightShift,jump,rootOffset,reachLimited:length(correction)>.01};
 }
 export function animationRootOffset(mode,phase,side=1){
  if(mode!=='erne')return 0;

@@ -183,7 +183,7 @@ export function receiver(players,team,x,y){return players.filter(p=>p.team===tea
 
 
 // Tactical approximation: deep returns, third-shot transition, and kitchen exchanges.
-export function selectShot(p,b,desired,random=Math.random()){
+export function selectShot(p,b,desired){
  const nearSideline=p.x<=1.25||p.x>=18.75
  const wideBall=b.x<=.75||b.x>=19.25
  const kitchenSide=p.team===0?p.y<=31:p.y>=13

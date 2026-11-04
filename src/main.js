@@ -1,6 +1,9 @@
+import {seededRandom} from './competition.js';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js';
+import {drawContactCue,replayContactAt} from './contact-cues.js';
 import {playerFeet,footSole} from './player-feet.js';
 
-import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js';
+import {ReplayClock,faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js';
 
 import {drawCourtNet} from './court-net.js';
 
@@ -115,11 +118,11 @@ let savedDifficulty='normal';try{savedDifficulty=localStorage.getItem(DIFFICULTY
 
 setDifficulty(savedDifficulty,false);difficultyButton.onclick=()=>setDifficulty(({easy:'normal',normal:'hard',hard:'easy'})[game.difficulty]);
 
-function syncPauseButton(){pauseButton.textContent=game.paused?'RESUME':'PAUSE';pauseButton.setAttribute('aria-pressed',String(game.paused));pauseButton.setAttribute('aria-label',game.paused?'Resume match':'Pause match');pauseButton.disabled=game.phase==='over'}
+function syncPauseButton(){const paused=replayPlayback?replayClock.paused:game.paused,subject=replayPlayback?'replay':'match';pauseButton.textContent=paused?'RESUME':'PAUSE';pauseButton.setAttribute('aria-pressed',String(paused));pauseButton.setAttribute('aria-label',`${paused?'Resume':'Pause'} ${subject}`);pauseButton.disabled=!replayPlayback&&game.phase==='over'}
 
-function setPaused(paused){game.setPaused(paused);last=0;acc=0;syncPauseButton();syncShotButtonsForPhase();render()}
+function setPaused(paused){if(replayPlayback){replayClock.setPaused(paused,performance.now());syncPauseButton();return}game.setPaused(paused);last=0;acc=0;syncPauseButton();syncShotButtonsForPhase();render()}
 
-pauseButton.onclick=()=>setPaused(!game.paused);
+pauseButton.onclick=()=>setPaused(replayPlayback?!replayClock.paused:!game.paused);
 
 for(const gesture of ['gesturestart','gesturechange','gestureend'])document.addEventListener(gesture,event=>event.preventDefault(),{passive:false});
 
@@ -286,7 +289,7 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
  if(game.faultFocus&&game.clock>=game.faultFocus.time)drawFaultContact(ctx,game.faultFocus,project);
 
- if(game.contact&&game.contact.time>0){const c=project(game.contact.x,game.contact.y,game.contact.z),age=1-game.contact.time/.12;ctx.save();ctx.globalAlpha=Math.max(0,(1-age)*.5);ctx.strokeStyle='#fff4b8';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(c.x,c.y,4+age*5,2+age*2,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ drawContactCue(ctx,game.contact,project,{labels:!!replayPlayback});
 
  updateCourtHud(game);
 
@@ -296,13 +299,14 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
 const liveGame=game;
 
-let replayEnabled=true,replayPlayback=null,replayStarted=0;
+let replayEnabled=true,replayPlayback=null,replayStarted=0,replayAngle='overview';
+const drawSideReplay=createSideReplayRenderer(),replayClock=new ReplayClock();
 
 const automaticallyReplayedPoints=new WeakSet();
 
 const replayBar=document.createElement('div');replayBar.className='replay-banner';replayBar.hidden=true;
 
-const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button');skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,skipReplay);document.querySelector('.game').append(replayBar);
+const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button'),replayAngleButton=document.createElement('button');replayAngleButton.type='button';replayAngleButton.textContent='ANGLE: OVERVIEW';replayAngleButton.setAttribute('aria-label','Switch replay camera angle');replayAngleButton.onclick=()=>{replayAngle=replayAngle==='sideline'?'overview':'sideline';replayAngleButton.textContent='ANGLE: '+replayAngle.toUpperCase();replayAngleButton.setAttribute('aria-pressed',String(replayAngle==='sideline'))};skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,replayAngleButton,skipReplay);document.querySelector('.game').append(replayBar);
 
 const pointActions=document.querySelector('#point-actions'),pointReplayLabel=document.querySelector('#point-replay-label'),watchPointReplay=document.querySelector('#watch-point-replay');
 
@@ -314,11 +318,11 @@ function beginReplay(clip,startedAt=performance.now(),automatic=false){
 
  if(automatic&&game.pointReplay)automaticallyReplayedPoints.add(game.pointReplay);
 
- replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`REPLAY · ${clip.label}`;replayBar.hidden=false;pointActions.hidden=true;return true;
+ replayAngle=replayAngleFor(clip,{aspect:canvas.width/canvas.height});replayAngleButton.textContent='ANGLE: '+replayAngle.toUpperCase();replayAngleButton.setAttribute('aria-pressed',String(replayAngle==='sideline'));replayPlayback=clip;replayStarted=startedAt;replayClock.start(startedAt);document.querySelector('.game').classList.add('replaying');syncPauseButton();replayLabel.textContent=`REPLAY · ${clip.label}`;replayBar.hidden=false;pointActions.hidden=true;return true;
 
 }
 
-function finishReplay(){replayPlayback=null;replayCamera=null;replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
+function finishReplay(){replayPlayback=null;replayCamera=null;document.querySelector('.game').classList.remove('replaying');syncPauseButton();replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
 
 function syncPointActions(){
 
@@ -342,17 +346,22 @@ function playReplay(t){
 
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
 
- const elapsed=(t-replayStarted)/1000,snapshot=faultReplaySample(replayPlayback,elapsed);
+ const replayProbe=balanceQuery.get('test')==='sideline-replay'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname));
+ const elapsed=replayProbe?Math.max(0,Number(balanceQuery.get('at'))||1.5):replayClock.elapsed(t),snapshot=faultReplaySample(replayPlayback,elapsed);
 
  if(!snapshot){finishReplay();return false;}
 
+ if(replayAngle==='sideline'){
+  replayCamera=null;const palette=COURT_PALETTES.find(item=>item.id===snapshot.players[0]?.appearance?.court)??COURT_PALETTES[0];
+  drawSideReplay(ctx,{width:canvas.width,height:canvas.height},snapshot,replayPlayback,{palette,style:artPreferences.style,look:artPreferences.look,outfit:artPreferences.outfit});updateCourtHud({...snapshot,score:{...snapshot.score,call:'REPLAY'}});last=t;acc=0;return true;
+ }
  replayCamera=highlightReplayCamera(displayCamera,replayPlayback,project,snapshot);
 
- render({...snapshot,score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
+ render({...snapshot,contact:replayContactAt(replayPlayback,snapshot.clock),score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
 
 }
 
-window.addEventListener('keydown',event=>{if(replayPlayback){event.preventDefault();event.stopImmediatePropagation();if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
+window.addEventListener('keydown',event=>{if(replayPlayback){if(event.key==='Tab'||(event.target===pauseButton||event.target.closest?.('.replay-banner button'))&&['Enter',' '].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(event.key==='p'||event.key==='P'){if(!event.repeat)setPaused(!replayClock.paused)}else if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
 
 let previousStatus='';function frame(t){if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 
@@ -374,7 +383,7 @@ const attackButton=document.querySelector('[data-shot="attack"]'),softButton=doc
 
 function syncShotButtonsForPhase(){syncAimPad();const humanServe=game.mode==='play'&&game.phase==='serve'&&game.server.id===0,paused=game.paused;if(humanServe===previousHumanServe&&paused===previousPaused)return;previousHumanServe=humanServe;previousPaused=paused;attackButton.querySelector('small').textContent=humanServe?'HARD SERVE':'DRIVE · HIGH';softButton.querySelector('small').textContent=humanServe?'SOFT SERVE':'DROP / DINK';lobButton.querySelector('small').textContent=humanServe?'NOT ON SERVE':'ANYWHERE';attackButton.disabled=paused;softButton.disabled=paused;lobButton.disabled=humanServe||paused}
 
-function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen())return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
+function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen()||replayPlayback)return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
@@ -440,6 +449,13 @@ if(detailedArtAvailable&&balanceQuery.get('test')==='kitchen-fault'){
 
  game.fault(0,'Kitchen momentum fault',offender);game.setPaused(true);beginReplay(game.replayClip,performance.now(),true);syncPauseButton();
 
+}
+
+// A frozen, genuinely simulated replay for checking the new camera and artwork.
+if(balanceQuery.get('test')==='sideline-replay'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))){
+ document.querySelector('#match-setup').close();game.random=seededRandom(37);game.configure({format:'singles'});game.mode='watch';
+ for(let tick=0;tick<120*180;tick++){game.update(1/120);if(game.phase==='pause'&&game.pointReplay?.frames.length>15&&game.pointReplay.focus?.boundary===undefined)break;if(game.phase==='over')break}
+ game.setPaused(true);if(game.pointReplay){beginReplay(game.pointReplay,performance.now(),true);replayLabel.textContent='REPLAY INSPECTOR · FROZEN FRAME'}
 }
 
 // Suppress game-surface browser gestures; dialogs retain normal scrolling.

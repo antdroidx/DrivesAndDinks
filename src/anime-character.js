@@ -27,6 +27,7 @@ function ribbon(c,chain,widths,color,ink,palette){
   path(c,[...inset(sides[left],.16),...inset(sides[left],.38).toReversed()],palette.light,null);
  }else path(c,[...sides[1],...chain.toReversed()],tone(color,-.16),null);
 }
+export {ribbon as drawAnimeRibbon};
 
 export function animeBodyDimensions(d){
  const leg=legDimensions(d),waist=d.waist*.87,legScale=Math.min(1,(waist+1)/(d.hip+1));

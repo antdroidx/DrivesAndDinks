@@ -337,3 +337,10 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app .game #aim-pad .aim-pad-thumb{width:14px;height:14px;pointer-events:none}
 .court-app .game #aim-pad:focus-visible{outline:2px solid #fff3ba;outline-offset:3px}
 .court-app .game #aim-pad.serve-aim .aim-pad-track{background:linear-gradient(transparent calc(50% - .5px),#cde9e34d 50%,transparent calc(50% + .5px)),#173d4666}
+
+/* Replay angle controls remain within the existing top banner. */
+.court-app .game .replay-banner{grid-template-columns:minmax(0,1fr) auto auto}
+.court-app main[data-court-layout="stacked"] .game .replay-banner{grid-template-columns:1fr 1fr}
+.court-app main[data-court-layout="stacked"] .game .replay-banner strong{grid-column:1 / -1}
+
+.court-app .game.replaying .controls{visibility:hidden;pointer-events:none}

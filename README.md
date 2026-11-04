@@ -146,3 +146,12 @@ Settings → Download Report exports the current session as JSON. The completion
 CPU players gradually anticipate repeated placement and lobs using observed balls from the current match. Court IQ controls their small recovery-position adjustments. Changing direction can catch them leaning; serves and unseen aim inputs are excluded. Learning resets for a new match and is included in Download Report.
 
 Run `npm run validate:matchups` for mirrored singles/doubles body and archetype checks, or `npm run profile:engine` for CPU update/replay/journal timing. Saved samples are in `validation/`. The CPU timings exclude rendering and real mobile hardware. Body extremes still need playtesting, particularly short/lean and tall/broad singles matchups.
+
+
+## DEV sideline replays
+
+Wide-screen ball replays now use a sideline camera with purpose-drawn anime profiles and 3D limb poses. ANGLE switches between Sideline and Overview during playback. Portrait screens and kitchen-foot faults begin in Overview. Pause/Resume (or P) freezes replay time; Space/Escape skips. Shot/aim controls are hidden during replays.
+
+The sideline scene uses the selected two-tone court colors and a clean surround. Anime Pixel retains palette-quantized, crisp character edges. Impact cues distinguish clean, pressured, off-center, and mishit contacts; replay labels last briefly for readability.
+
+On DEV, `?test=sideline-replay` opens a frozen, simulated replay inspector. `&at=2` selects another playback time; `&art=anime-pixel` checks the pixel treatment. Use the ordinary DEV URL for animated gameplay and replays.

@@ -1,3 +1,11 @@
+export class ReplayClock{
+ constructor(){this.start(0)}
+ start(time){this.started=time;this.held=0;this.pausedAt=null}
+ get paused(){return this.pausedAt!==null}
+ setPaused(paused,time){if(paused&&!this.paused)this.pausedAt=time;else if(!paused&&this.paused){this.held+=time-this.pausedAt;this.pausedAt=null}}
+ elapsed(time){return Math.max(0,((this.pausedAt??time)-this.started-this.held)/1000)}
+}
+
 export function faultReplaySample(clip,elapsed){
  const frames=clip.frames,start=frames[0].clock,end=frames.at(-1).clock;
  if(!clip.focus){const index=Math.floor(elapsed*.75*30);return index>=frames.length?null:frames[index]}
