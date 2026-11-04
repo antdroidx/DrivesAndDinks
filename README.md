@@ -37,7 +37,7 @@ At a real hit, the solid paddle face targets the recorded ball contact point and
 
 Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve solid-color guards remain independently selectable; all paddle faces stay black. Six court combinations are available, including the added Black / Gray, Violet / Blue, and Gray / Red palettes. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed.
 
-DEV uses automatic poaching weighted by Court IQ, volley ability and aggression. Character designer opens from setup; height/build sliders affect appearance only. Modern procedural venues fill wide screens without stretched image borders. Replays still use front/back characters with pan/zoom; true side profiles require additional rendering work.
+DEV uses automatic poaching weighted by Court IQ, volley ability and aggression. Character designer opens from setup; height/build sliders affect appearance and gameplay. Modern procedural venues fill wide screens without stretched image borders. Replays still use front/back characters with pan/zoom; true side profiles require additional rendering work.
 
 ## Match setup and controls
 
@@ -115,3 +115,10 @@ Fatigue remains part of gameplay, but stamina bars are not displayed.
 ## DEV level and animation foundation
 
 See [ENGINE-NOTES.md](ENGINE-NOTES.md) for independent competitive ratings, attribute profiles, seeded validation, exertion/contact changes, and the expanded 26-motion studio. Run `npm run validate:levels` for the beginner-through-advanced matrix. The ordinary playable demo retains its approximately 70 baseline; optional DEV test profiles are documented in the notes.
+
+
+## DEV height and build tradeoffs
+
+Body effects multiply archetype abilities, independently of clothing and gender. The neutral body is 177 cm (about 5 ft 10 in), build slider 45. Height ranges from 145 to 210 cm; the UI shows feet/inches. Taller bodies gain up to 9% horizontal reach and 4% power while losing up to 4% speed, 7% acceleration, 4% endurance and 3% volley skill. Overhead and ordinary contact ceilings scale with height / 177. Shorter bodies reverse these tradeoffs. Broader bodies add up to 10% power while losing up to 6% speed, 12% acceleration, 8% endurance and 4% volley skill; leaner bodies reverse them. Effects combine, so neither extreme is a free upgrade. These are tunable game balance rules, not claims about real athletes. Archetype rating bars stay as the skill foundation; exact body modifiers appear in the designer. Body edits apply immediately and persist into resets and new configured matches.
+
+Low-contact difficulty also scales with stature: taller bodies need more preparation for ankle-height balls, while shorter bodies receive a modest low-contact advantage. High balls just behind the shoulder can select a scorpion-style reflex overhead at a height-scaled threshold, with additional difficulty rather than guaranteed success. This reuses the overhead animation; a dedicated crouch-and-behind-head pose remains future work.

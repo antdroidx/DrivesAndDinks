@@ -1,4 +1,4 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup} from './roster.js';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -17,7 +17,7 @@ function fitSetupDialog(dialog){
  window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit);window.visualViewport?.addEventListener('scroll',fit);fit();return fit;
 }
 
-export function setupSelection({game,onStart,drawPreview}){
+export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   const dialog=document.querySelector('#match-setup'),form=dialog.querySelector('form');
   const footer=form.querySelector('.setup-footer'),scroll=document.createElement('div');scroll.className='setup-scroll';
   for(const node of [...form.childNodes])if(node!==footer)scroll.append(node);form.prepend(scroll);
@@ -64,8 +64,11 @@ export function setupSelection({game,onStart,drawPreview}){
   function render(){
     for(const [key,value] of Object.entries(draft))selected(key,value);
     if(!previewLineup.length||previewLineup[0]?.characterId!==draft.character||previewLineup[0]?.gender!==draft.gender)previewLineup=createLineup(draft);
-    else previewLineup[0]=buildProfile(draft,{identity:previewLineup[0]});
+    else {const appearance=previewLineup[0].appearance;previewLineup[0]=buildProfile(draft,{identity:previewLineup[0]});Object.assign(previewLineup[0].appearance,{height:appearance.height,build:appearance.build,hairStyle:appearance.hairStyle})}
+    const body={...previewLineup[0].appearance,...getPhysique()};
+    previewLineup[0]=applyPhysique(previewLineup[0],body);
     const player=previewLineup[0];
+    const effects=document.querySelector('#body-effects');if(effects)effects.textContent=Object.entries(player.physique.modifiers).map(([key,value])=>key+': '+((value-1)*100>=0?'+':'')+Math.round((value-1)*100)+'%').join(' · ');
     dialog.querySelector('#appearance-summary').textContent=appearanceSummary(draft);
     dialog.querySelector('#player-description').textContent=`${player.name} · ${player.archetype}. Pros: ${player.strengths.join(', ')}. Tradeoff: ${player.tradeoffs.join(', ')}.`;
     const stats=selectionStats(draft),effective=effectiveRatings(draft),average=skillAverage(stats);
@@ -83,5 +86,5 @@ export function setupSelection({game,onStart,drawPreview}){
   dialog.querySelector('#resume-match').onclick=()=>dialog.close();
   dialog.addEventListener('cancel',e=>{if(!started)e.preventDefault()});
   function open(){dialog.querySelector('#resume-match').hidden=!started;dialog.querySelector('.start-match').textContent=started?'START NEW MATCH →':'START MATCH →';form.elements.matchMode.value=game.mode;form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
-  open();return {open,isOpen:()=>dialog.open,refreshPreview:()=>drawPreview(draft)};
+  open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
 }
