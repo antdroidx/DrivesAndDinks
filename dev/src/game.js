@@ -1,11 +1,11 @@
-import {kitchenContact} from './player-feet.js?v=114';
-import {seededRandom} from './competition.js?v=114';
-import {kitchenFootContact,chooseCpuTarget} from './core.js?v=114';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=114';
-import {strokeForContact} from './player-facing.js?v=114';
-import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=114';
-import {createLineup} from './roster.js?v=114';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers} from './core.js?v=114';
+import {kitchenContact} from './player-feet.js?v=115';
+import {seededRandom} from './competition.js?v=115';
+import {kitchenFootContact,chooseCpuTarget} from './core.js?v=115';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=115';
+import {strokeForContact} from './player-facing.js?v=115';
+import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=115';
+import {createLineup} from './roster.js?v=115';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers} from './core.js?v=115';
 export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.lineup=lineup??createLineup(selection,{random:this.random});this.reset()}
  setDifficulty(difficulty){this.difficulty=['easy','normal','hard'].includes(difficulty)?difficulty:'normal';return this.difficulty}
@@ -21,6 +21,7 @@ export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.r
  fault(team,why,player=null){
   if(this.phase==='pause'||this.phase==='over')return;
   if(why.startsWith('Kitchen')&&player){const foot=kitchenContact(player);if(foot){this.faultFocus={...foot,time:this.clock,reason:why};this.recordReplay(true)}}
+  this.recordReplay(true);
   const servingTeam=this.score.team,winner=1-team;
   this.stats.rallies++;this.stats.faults[why]=(this.stats.faults[why]||0)+1;this.emit('rally-end',{winner,reason:why,shots:this.shots});this.score.point(winner);
   this.result=`${winner===0?'YOUR TEAM':'CPU'} WINS RALLY · ${why.toUpperCase()}`;
@@ -37,7 +38,7 @@ export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.r
     if(longRally)qualifiers.push(`${this.shots}-SHOT RALLY`);
     if(matchPoint)qualifiers.push('MATCH POINT WIN');
     const start=highlight?Math.max(0,highlight.time-2):Math.max(0,this.clock-(matchPoint?10:8));
-    const end=highlight?Math.min(this.clock,highlight.time+2):this.clock;
+    const end=this.clock;
     const frames=this.replayFrames.filter(f=>f.clock>=start&&f.clock<=end);
     this.pointReplay={label:qualifiers.join(' · ')||`${this.shots}-SHOT RALLY`,frames,...(focus?{focus}:{})};
     if(qualifiers.length&&frames.length>15)this.replayClip={...this.pointReplay};
