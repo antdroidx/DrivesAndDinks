@@ -13,7 +13,7 @@ test('all six proposals can be selected for the match renderer without mutating 
 
 test('matte and stylized silhouettes render the full motion library without canvas leaks or preset mutation',()=>{
  for(const design of CHARACTER_CONCEPTS)for(const silhouette of [undefined,'compact','toy'])for(const mode of ['idle',...MOTIONS])for(const view of ['near','far'])for(const phase of [0,.25,.52,.8,1]){
-  const before=JSON.stringify(design),c=canvas();drawConceptAthlete(c,design,mode,phase,view,120,270,2.9,{material:'matte',silhouette});assert.equal(c.depth,0);assert.equal(JSON.stringify(design),before);
+  const before=JSON.stringify(design),c=canvas();drawConceptAthlete(c,design,mode,phase,view,120,270,2.9,{material:'matte',silhouette,faceStyle:silhouette==='toy'?'storybook':'anime',illustrated:true});assert.equal(c.depth,0);assert.equal(JSON.stringify(design),before);
  }
 });
 
