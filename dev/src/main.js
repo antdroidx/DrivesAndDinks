@@ -1,14 +1,14 @@
-import {setupCourtDisplay} from './court-display.js?v=93';
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=93';
-import {courtCamera,courtAim} from './court-camera.js?v=93';
-import {drawDetailedCharacter,movingStance} from './detailed-character.js?v=93';
-import {sampleMatchAnimation} from './match-animation.js?v=93';
-import {setupSelection} from './selection.js?v=93';
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=93';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=93';
-import {Game} from './game.js?v=93';
-import {selectShot,serveAim} from './core.js?v=93';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=93';
+import {setupCourtDisplay} from './court-display.js?v=94';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=94';
+import {courtCamera,courtAim} from './court-camera.js?v=94';
+import {drawDetailedCharacter,movingStance} from './detailed-character.js?v=94';
+import {sampleMatchAnimation} from './match-animation.js?v=94';
+import {setupSelection} from './selection.js?v=94';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=94';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=94';
+import {Game} from './game.js?v=94';
+import {selectShot,serveAim} from './core.js?v=94';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=94';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
@@ -100,7 +100,7 @@ document.querySelector('.game').append(pointActions);
 function beginReplay(clip,startedAt=performance.now(),automatic=false){
  if(!clip||clip.frames.length<=15)return false;
  if(automatic&&game.pointReplay)automaticallyReplayedPoints.add(game.pointReplay);
- replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`INSTANT REPLAY · ${clip.label} · SLOW MOTION`;replayBar.hidden=false;pointActions.hidden=true;return true;
+ replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`REPLAY · ${clip.label}`;replayBar.hidden=false;pointActions.hidden=true;return true;
 }
 function finishReplay(){replayPlayback=null;replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
 function syncPointActions(){
