@@ -18,10 +18,10 @@ export function createCourtSurfaceRenderer(project,createCanvas=()=>document.cre
    poly([[0,0],[20,0],[20,44],[0,44]],palette.court);
    poly([[0,15],[20,15],[20,29],[0,29]],palette.kitchen);
    paint.save();poly([[0,0],[20,0],[20,44],[0,44]]);paint.clip();
-   const outdoors=surfaceType!=='indoor',count=outdoors?2600:420;
-    for(let i=0;i<count;i++){const x=(i*137%1000)/50,y=(i*269%1000)/1000*44,p=project(x,y);
-     paint.fillStyle=i%2?'#fff3db09':'#182e3709';paint.fillRect(Math.floor(p.x/3)*3,Math.floor(p.y/3)*3,style==='retro'?3:1.5,style==='retro'?3:1);
-     if(outdoors&&i%4===0){const q=project(x+.18,y+.11);paint.fillStyle=i%8?'#ffffff08':'#0e2b3109';paint.fillRect(q.x,q.y,style==='retro'?4:2.4,style==='retro'?3:1.4)}
+   const outdoors=surfaceType!=='indoor',count=outdoors?10000:1800;
+    for(let i=0;i<count;i++){const x=((Math.imul(i+1,1597334677)>>>0)/4294967296)*20,y=((Math.imul(i+17,3812015801)>>>0)/4294967296)*44,p=project(x,y);
+     paint.fillStyle=i%2?'#fff3db15':'#182e3715';paint.fillRect(Math.floor(p.x/3)*3,Math.floor(p.y/3)*3,style==='retro'?3:1.5,style==='retro'?3:1);
+     if(outdoors&&i%4===0){const q=project(x+.18,y+.11);paint.fillStyle=i%8?'#ffffff0c':'#0e2b3110';paint.fillRect(q.x,q.y,style==='retro'?4:2.4,style==='retro'?3:1.4)}
      if(outdoors&&i%37===0){const q=project(x-.25,y-.18);paint.fillStyle='#00000005';paint.fillRect(q.x,q.y,style==='retro'?9:7.5,style==='retro'?7:5)}
     }paint.restore();
    if(style==='retro'){poly([[0,0],[20,0],[20,44],[0,44]],null,palette.line);

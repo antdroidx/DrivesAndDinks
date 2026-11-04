@@ -25,7 +25,7 @@ export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.r
   this.stats.rallies++;this.stats.faults[why]=(this.stats.faults[why]||0)+1;this.emit('rally-end',{winner,reason:why,shots:this.shots});this.score.point(winner);
   this.result=`${winner===0?'YOUR TEAM':'CPU'} WINS RALLY · ${why.toUpperCase()}`;
   this.outcome=winner===servingTeam?'POINT':this.score.team!==servingTeam?'SIDE OUT':'SECOND SERVER';
-  this.message=why.toUpperCase();this.phase=this.score.winner===null?'pause':'over';this.pause=4;
+  this.message=why.toUpperCase();this.phase=this.score.winner===null?'pause':'over';this.pause=2.5;
   const highlight=this.faultFocus?{time:this.clock,label:why.toUpperCase()}:this.replayHighlights.at(-1),matchPoint=this.score.winner!==null,longRally=this.shots>=20;
  let focus=this.faultFocus?structuredClone(this.faultFocus):null;
  if(!focus&&highlight?.x!==undefined)focus={x:highlight.x,y:highlight.y,z:highlight.z,time:highlight.time,reason:highlight.label};
