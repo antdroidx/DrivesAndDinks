@@ -314,3 +314,7 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app .control-lesson{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
 #dev-art-options{grid-template-columns:repeat(2,minmax(0,1fr));padding:12px;border:1px solid #3a5861;border-radius:6px}#dev-art-options label{display:grid;gap:5px;min-width:0;font:12px system-ui;color:#b4ceca}#dev-art-options select,#dev-art-options input{width:100%;min-width:0;padding:9px;background:#213e48;color:#fff3da;border:1px solid #608080;border-radius:4px}#dev-art-options a{grid-column:1/-1;color:#8fd8de;font-size:12px}
+
+#poach-button{background:#1f3f4d;border-color:#80e0b5;min-width:104px}#poach-button.armed{background:#80e0b5;color:#122b33;border-color:#d8f7e4}
+.court-app .game #shots #poach-button{grid-area:auto}
+@media (pointer:coarse) and (orientation:portrait), (pointer:coarse) and (orientation:landscape){#shots [id="poach-button"]{grid-column:3;grid-row:5}}

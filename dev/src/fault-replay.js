@@ -7,7 +7,7 @@ export function faultReplaySample(clip,elapsed){
  let selected=frames[0];for(const frame of frames){if(frame.clock>clock)break;selected=frame}return selected;
 }
 export function faultReplayCamera(base,focus,project,clock){
- if(!focus)return null;const t=Math.max(0,Math.min(1,(clock-focus.time+.8)/.8)),ease=t*t*(3-2*t),zoom=1+ease*.9,target=project(focus.x,focus.y),width=base.width/zoom,height=base.height/zoom;
+ if(!focus)return null;const t=Math.max(0,Math.min(1,(clock-focus.time+.8)/.8)),ease=t*t*(3-2*t),zoom=1+ease*.7,target=project(focus.x,focus.y),width=base.width/zoom,height=base.height/zoom;
  const cx=(base.x+base.width/2)*(1-ease)+target.x*ease,cy=(base.y+base.height/2)*(1-ease)+(target.y-25)*ease;
  return {x:cx-width/2,y:cy-height/2,width,height};
 }
@@ -16,3 +16,4 @@ export function drawFaultContact(c,focus,project){
  c.save();c.strokeStyle='#ff694e';c.lineWidth=2.5;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.beginPath();c.ellipse(foot.x,foot.y,8,5,0,0,Math.PI*2);c.stroke();
  const text=focus.reason==='Kitchen momentum fault'?'MOMENTUM · FOOT CONTACT':'KITCHEN · FOOT CONTACT';c.font='bold 9px monospace';c.textAlign='center';c.fillStyle='#112a35ed';c.fillRect(foot.x-86,foot.y+10,172,16);c.fillStyle='#ffe2b5';c.fillText(text,foot.x,foot.y+21);c.restore();
 }
+

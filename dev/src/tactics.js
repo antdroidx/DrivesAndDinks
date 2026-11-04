@@ -1,4 +1,4 @@
-import {C,stepBall,side} from './core.js?v=109';
+import {C,stepBall,side} from './core.js?v=110';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -26,7 +26,7 @@ function contacts(players,team,ball,shots,bounces){
   return found;
 }
 
-export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0}){
+export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0,requestedPoachId=null}){
   const pair=players.filter(p=>p.team===team),flight={...ball};
   const landingTime=Math.max(0,(flight.vz+Math.sqrt(Math.max(0,flight.vz**2+2*C.gravity*flight.z)))/C.gravity);
   const landing={x:clamp(flight.x+flight.vx*landingTime,1,19),y:clamp(flight.y+flight.vy*landingTime,team===0?23:-3,team===0?47:21)};
@@ -39,7 +39,11 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
     const earlier=chance&&(!point||chance.time+.08<point.time);const middleAttack=chance&&chance.x>=7&&chance.x<=13&&(!point||chance.time<=point.time+.1)&&(partner.abilities?.courtIQ??1)>=.9;
     if(chance&&chance.bounces===0&&(earlier||middleAttack)&&nearLine&&chance.x>=5&&chance.x<=15&&Math.abs(chance.x-partner.x)<6){
       selected=partner;point=chance;poach=true;
-    }else if(!point&&chance){selected=partner;point=chance}
+      }else if(!point&&chance){selected=partner;point=chance}
+  }
+  if(requestedPoachId!==null&&requestedPoachId!==selected.id&&!(shots<=2&&serveReceiver)){
+    const partner=pair.find(p=>p.id===requestedPoachId),requestedContact=partner&&available.get(partner.id);
+    if(partner){selected=partner;poach=true;if(requestedContact)point=requestedContact;else point=landing}
   }
   // A locked owner prevents both teammates chasing a continually changing nearest-ball estimate.
   return {shot:shots,receiverId:selected.id,point:point||landing,poach,created:clock,expires:clock+(point?.time??.65)+.2};

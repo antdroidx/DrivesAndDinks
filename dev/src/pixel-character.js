@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=109';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=110';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -87,7 +87,7 @@ export function solveArm3D(shoulder,wrist,pole){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=109';
+export {courtView,strokeForContact} from './player-facing.js?v=110';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';
@@ -195,7 +195,7 @@ const PADDLE_OUTLINES=Object.freeze({
 });
 export function paddleOutline(shapeId='hybrid'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES.hybrid}
 let buffer;
-export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,paddleShape='hybrid',lighting='classic'}={}){
+export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,paddleShape='hybrid',lighting='classic',emotion='focus'}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const identitySeed=[...String(characterId||appearance.hairColor)].reduce((sum,char)=>sum+char.charCodeAt(0),0),identityStyle=identitySeed%4,torsoSpread=(identitySeed%3)*.45;
@@ -245,7 +245,19 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  c.fillStyle=colors.hairLight;c.fillRect(Math.round(hx-2),Math.round(hy-5),4,1);
  if(style===1){c.fillStyle=colors.hair;c.fillRect(Math.round(hx-5),Math.round(hy-4),2,3)}else if(style===2){c.fillStyle=colors.hairLight;c.fillRect(Math.round(hx-4),Math.round(hy-6),4,1)}
  if(view==='near')poly(c,[[hx-5,hy-2],[hx+5,hy-2],[hx+4,hy+4],[hx+2,hy+5],[hx-3,hy+4]],colors.hair);
- else{c.fillStyle=colors.outline;c.fillRect(Math.round(hx-3),Math.round(hy+1),1,2);c.fillRect(Math.round(hx+2),Math.round(hy+1),1,2);c.fillStyle=colors.hairLight;c.fillRect(Math.round(hx-1),Math.round(hy+3),3,1);c.fillStyle=colors.skinDark;c.fillRect(Math.round(hx),Math.round(hy+4),2,1)}
+  else{
+   const eyeY=(emotion==='reaction'?hy:hy+1)+(emotion==='smile'?1:0),mouthY=hy+(emotion==='effort'?5:emotion==='smile'?5:4);
+   c.fillStyle=colors.outline;
+   for(const dx of [-3,2])c.fillRect(Math.round(hx+dx),Math.round(eyeY),1,Math.max(1,emotion==='reaction'?3:2));
+   c.fillStyle=colors.skinDark;
+   if(emotion==='smile'){c.fillRect(Math.round(hx-1),Math.round(mouthY),2,1);c.fillStyle=colors.outline;c.fillRect(Math.round(hx-2),Math.round(mouthY-1),1,1);c.fillRect(Math.round(hx+1),Math.round(mouthY-1),1,1)}
+   else c.fillRect(Math.round(hx-2),Math.round(mouthY+1),emotion==='effort'?3:2,1);
+   c.fillStyle=colors.outline;
+   if(emotion==='effort'){c.fillRect(Math.round(hx-3),Math.round(hy-1),2,1);c.fillRect(Math.round(hx+2),Math.round(hy-1),2,1)}
+   else if(emotion==='reaction'){c.fillRect(Math.round(hx-4),Math.round(hy),2,1);c.fillRect(Math.round(hx+3),Math.round(hy),2,1)}
+   else {c.fillStyle=colors.hairLight;c.fillRect(Math.round(hx-1),Math.round(hy+3),3,1)}
+   c.fillStyle=colors.skinDark;c.fillRect(Math.round(hx),Math.round(hy+4+(emotion==='smile'?1:0)),2,1);
+  }
  if(female){const tail=8+(style%2),sway=Math.sin((Number(frame)||0)*.35)*1.5;poly(c,[[hx+4,hy-3],[hx+tail,hy-1],[hx+tail+sway,hy+7],[hx+5,hy+9],[hx+5,hy+2]],colors.hair);c.fillStyle=colors.accent;c.fillRect(Math.round(hx+5),Math.round(hy),2,2);if(style===3){c.fillStyle=colors.outline;c.fillRect(Math.round(hx-5),Math.round(hy-1),10,1)}}
  else if(style===3){c.fillStyle=colors.accent;c.fillRect(Math.round(hx-5),Math.round(hy-2),10,1);c.fillRect(Math.round(hx+4),Math.round(hy-2),1,3)}
  for(const part of parts.filter(p=>p.depth>=neck.depth))armPart(part.index,part.part);
