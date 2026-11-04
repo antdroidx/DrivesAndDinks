@@ -1,6 +1,6 @@
-import {MOTIONS} from './pixel-character.js?v=117';
-import {CHARACTER_CONCEPTS,HAIR_OPTIONS,conceptDimensions} from './character-concepts.js?v=117';
-import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=117';
+import {MOTIONS} from './pixel-character.js?v=118';
+import {CHARACTER_CONCEPTS,HAIR_OPTIONS,conceptDimensions} from './character-concepts.js?v=118';
+import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=118';
 
 const $=id=>document.getElementById(id);
 const styles=[
