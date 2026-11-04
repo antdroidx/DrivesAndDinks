@@ -272,3 +272,32 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app main[data-court-layout="stacked"] .game #shots button{width:100%;height:clamp(56px,14cqw,80px);flex:none;font-size:clamp(11px,2.4cqw,14px)}
 .court-app main[data-court-layout="stacked"] .game #aim-pad{left:3%;bottom:5%;width:clamp(100px,27cqw,170px)}
 .court-app main[data-court-layout="wide"] .game .point-actions,.court-app main[data-court-layout="wide"] .game .replay-banner{left:50%;right:auto;top:44px;transform:translateX(-50%);width:min(64%,560px)}
+
+/* Keep setup in the visual viewport; its Start action never scrolls off-screen. */
+#match-setup{position:fixed;box-sizing:border-box;min-width:0;padding:0;overflow:hidden;transform:none}
+#match-setup[open]{display:flex;flex-direction:column}
+#match-setup>form{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;width:100%;height:100%;margin:0;overflow:hidden}
+#match-setup .setup-scroll{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;padding:18px;scroll-padding:14px;-webkit-overflow-scrolling:touch}
+#match-setup .setup-footer{flex:none;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(140px,.8fr);gap:10px;margin:0;padding:12px 18px max(12px,env(safe-area-inset-bottom));background:#152c35;border-top:1px solid #638b8b;align-items:end;min-width:0}
+#match-setup .setup-footer>label{display:grid;gap:5px;min-width:0;margin:0;font-size:11px}
+#match-setup .setup-footer select{width:100%;max-width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;min-height:42px;font-size:11px}
+#match-setup .start-match{width:100%;min-width:0;min-height:44px;margin:0;padding:12px 8px;font-size:12px;white-space:normal}
+#match-setup :is(fieldset,.setup-top,.character-grid,.paddle-grid,.appearance-grid,.loadout-stats,.choice-card,.color-menu,.appearance-panel){min-width:0;max-width:100%}
+#match-setup .setup-top{grid-template-columns:160px minmax(0,1fr)}
+#match-setup .paddle-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+#match-setup .appearance-grid,#match-setup .loadout-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+#match-setup :is(p,.choice-description,.choice-style,.ratings-heading){overflow-wrap:anywhere}
+#match-setup .ratings-heading{gap:6px;flex-wrap:wrap}#match-setup .ratings-heading small{white-space:normal;letter-spacing:0}
+#match-setup .appearance-panel summary{min-width:0}#match-setup .appearance-panel summary small{min-width:0}
+#match-setup .color-menu summary span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+#match-setup[data-compact="true"] .setup-scroll{padding:12px}
+#match-setup[data-compact="true"] .setup-top{grid-template-columns:82px minmax(0,1fr);gap:10px;align-items:start}
+#match-setup[data-compact="true"] .player-preview canvas{width:100%}
+#match-setup[data-compact="true"] .paddle-grid,#match-setup[data-compact="true"] .appearance-grid,#match-setup[data-compact="true"] .loadout-stats{grid-template-columns:minmax(0,1fr)}
+#match-setup[data-compact="true"] .stat-row{grid-template-columns:82px minmax(0,1fr) 38px}
+#match-setup[data-compact="true"] .ratings-heading{display:grid;gap:4px;letter-spacing:0}
+#match-setup[data-compact="true"] .appearance-panel summary small{display:none}
+#match-setup[data-compact="true"] .setup-footer{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:10px 12px}
+#match-setup[data-compact="true"] .start-match{grid-column:1/-1}
+
+#match-setup .stat-row>span{min-width:0;overflow-wrap:anywhere;line-height:1.3}

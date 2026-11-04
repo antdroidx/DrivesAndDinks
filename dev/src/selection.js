@@ -1,12 +1,27 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup} from './roster.js?v=95';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup} from './roster.js?v=96';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
 
 export function statRating(value){const number=Number(value);return Math.max(0,Math.min(100,Math.round(number>=0&&number<=100?number:50+(number-1)*100)))}
 
+// Use the visible viewport, including browser zoom, keyboard and orientation changes.
+export function setupDialogBounds(viewport){
+ const width=Math.max(1,Math.min(740,viewport.width-16)),height=Math.max(1,Math.min(900,viewport.height-16));
+ return {width,height,left:(viewport.offsetLeft||0)+(viewport.width-width)/2,top:(viewport.offsetTop||0)+8,compact:width<650};
+}
+function fitSetupDialog(dialog){
+ const fit=()=>{const visible=window.visualViewport,bounds=setupDialogBounds({width:visible?.width??innerWidth,height:visible?.height??innerHeight,offsetLeft:visible?.offsetLeft??0,offsetTop:visible?.offsetTop??0});
+ Object.assign(dialog.style,{inset:'auto',margin:'0',width:bounds.width+'px',maxWidth:bounds.width+'px',height:bounds.height+'px',maxHeight:bounds.height+'px',left:bounds.left+'px',top:bounds.top+'px'});dialog.dataset.compact=String(bounds.compact);
+ };
+ window.addEventListener('resize',fit);window.visualViewport?.addEventListener('resize',fit);window.visualViewport?.addEventListener('scroll',fit);fit();return fit;
+}
+
 export function setupSelection({game,onStart,drawPreview}){
   const dialog=document.querySelector('#match-setup'),form=dialog.querySelector('form');
+  const footer=form.querySelector('.setup-footer'),scroll=document.createElement('div');scroll.className='setup-scroll';
+  for(const node of [...form.childNodes])if(node!==footer)scroll.append(node);form.prepend(scroll);
+  const fitDialog=fitSetupDialog(dialog);
   let draft=normalizeSelection(),started=false,previewLineup=[];
   try{draft=normalizeSelection(JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null'))}catch{}
   function equipmentCards(items,name,detail){return items.map(item=>{const labels=Object.entries(item.ratingModifiers??{}).filter(([,delta])=>delta).map(([key,delta])=>`${RATING_LABELS[key]} ${delta>0?'+':''}${delta}`);if(item.spinModifier)labels.push(`Spin ${item.spinModifier>0?'+':''}${item.spinModifier}`);if(item.sweetSpot&&item.sweetSpot!==1)labels.push(`Sweet spot ${item.sweetSpot>1?'+':''}${Math.round((item.sweetSpot-1)*100)}%`);return `<label class="choice-card"><input type="radio" name="${name}" value="${item.id}"><span class="choice-title">${item.name}</span><span class="choice-style">${item.style}</span><span class="choice-description">${detail(item)} ${labels.join(' · ')}</span></label>`}).join('')}
@@ -46,6 +61,6 @@ export function setupSelection({game,onStart,drawPreview}){
   form.addEventListener('submit',e=>{e.preventDefault();game.configure(draft);game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify(draft));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});
   dialog.querySelector('#resume-match').onclick=()=>dialog.close();
   dialog.addEventListener('cancel',e=>{if(!started)e.preventDefault()});
-  function open(){dialog.querySelector('#resume-match').hidden=!started;dialog.querySelector('.start-match').textContent=started?'START NEW MATCH →':'START MATCH →';form.elements.matchMode.value=game.mode;form.elements.difficulty.value=game.difficulty;render();dialog.showModal()}
+  function open(){dialog.querySelector('#resume-match').hidden=!started;dialog.querySelector('.start-match').textContent=started?'START NEW MATCH →':'START MATCH →';form.elements.matchMode.value=game.mode;form.elements.difficulty.value=game.difficulty;render();fitDialog();dialog.showModal()}
   open();return {open,isOpen:()=>dialog.open,refreshPreview:()=>drawPreview(draft)};
 }
