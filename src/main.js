@@ -331,7 +331,7 @@ watchPointReplay.onclick=()=>beginReplay(game.pointReplay);
 
 skipReplay.onclick=finishReplay;
 
-const replayToggle=document.createElement('button');replayToggle.textContent='REPLAYS: ON';document.querySelector('.header-actions').append(replayToggle);replayToggle.onclick=()=>{replayEnabled=!replayEnabled;replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;finishReplay()};
+const replayToggle=document.createElement('button');replayToggle.id='replay-toggle';replayToggle.textContent='REPLAYS: ON';document.querySelector('.header-actions').append(replayToggle);replayToggle.onclick=()=>{replayEnabled=!replayEnabled;replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;finishReplay()};
 
 function playReplay(t){
 
@@ -438,3 +438,9 @@ canvas.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
 canvas.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 
 window.addEventListener('keydown',e=>{if(!document.querySelector('dialog[open]')&&(e.ctrlKey||e.metaKey)&&['+','-','=','0'].includes(e.key))e.preventDefault()},{capture:true});
+
+// Keep persistent play controls together, followed by setup, gameplay and presentation settings.
+const settingsActions=document.querySelector('.header-actions');
+for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','sound']){
+ const control=document.getElementById(id);if(control)settingsActions.append(control);
+}
