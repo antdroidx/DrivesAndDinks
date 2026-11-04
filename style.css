@@ -257,3 +257,18 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app .game .replay-banner{left:3%;right:3%;top:3%;bottom:auto;width:auto;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:8px;border-width:1px;box-sizing:border-box;background:#102c35d9;font-size:clamp(11px,2.5cqw,16px)}
 .court-app .game .replay-banner strong{font:700 clamp(11px,2.5cqw,16px)/1.35 system-ui;text-align:left;min-width:0;overflow-wrap:normal}
 .court-app .game .replay-banner button{min-height:44px;padding:8px 10px;font-size:clamp(11px,2.5cqw,16px);white-space:nowrap}
+
+/* Landscape uses the full field; controls sit at each thumb's middle edge. */
+.court-app .game{width:var(--court-width);height:var(--court-height);aspect-ratio:auto}
+.court-app main[data-court-layout="wide"] .playfield{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
+.court-app main[data-court-layout="wide"] .game{grid-column:1;grid-row:1;border-width:0}
+.court-app main[data-court-layout="wide"] #court-hud{position:absolute;top:3px;left:18%;right:18%;height:34px;z-index:6;border-radius:5px;background:#142936b3;pointer-events:none;font-size:11px;gap:12px}
+.court-app main[data-court-layout="wide"] #court-hud strong{font-size:14px}
+.court-app main[data-court-layout="wide"] .game #shots{right:3%;top:50%;bottom:auto;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px;width:clamp(76px,11cqw,120px);height:auto}
+.court-app main[data-court-layout="wide"] .game #shots button{width:100%;height:clamp(48px,11vh,72px);min-height:44px;flex:none;font-size:13px}
+.court-app main[data-court-layout="wide"] .game #aim-pad{left:3%;top:50%;bottom:auto;transform:translateY(-50%);width:clamp(110px,15cqw,180px);height:clamp(80px,20vh,110px)}
+/* Separate portrait targets vertically instead of crowding a corner cluster. */
+.court-app main[data-court-layout="stacked"] .game #shots{right:3%;top:50%;bottom:auto;transform:translateY(-50%);display:flex;flex-direction:column;gap:18px;width:clamp(58px,16cqw,88px);height:auto}
+.court-app main[data-court-layout="stacked"] .game #shots button{width:100%;height:clamp(56px,14cqw,80px);flex:none;font-size:clamp(11px,2.4cqw,14px)}
+.court-app main[data-court-layout="stacked"] .game #aim-pad{left:3%;bottom:5%;width:clamp(100px,27cqw,170px)}
+.court-app main[data-court-layout="wide"] .game .point-actions,.court-app main[data-court-layout="wide"] .game .replay-banner{left:50%;right:auto;top:44px;transform:translateX(-50%);width:min(64%,560px)}
