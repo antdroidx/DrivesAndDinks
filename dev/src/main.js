@@ -1,42 +1,43 @@
-import {playerFeet,footSole} from './player-feet.js?v=122';
+import {playerFeet,footSole} from './player-feet.js?v=125';
 
-import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=122';
+import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=125';
 
-import {drawCourtNet} from './court-net.js?v=122';
+import {drawCourtNet} from './court-net.js?v=125';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=122';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=125';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=122';
+import {createAnimeGameRenderer} from './anime-game.js?v=125';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=122';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=125';
 
-import {setupCourtDisplay} from './court-display.js?v=122';
+import {setupCourtDisplay} from './court-display.js?v=125';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=122';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=125';
 
-import {courtCamera,courtAim} from './court-camera.js?v=122';
+import {courtCamera,courtAim} from './court-camera.js?v=125';
 
-import {movingStance} from './detailed-character.js?v=122';
+import {movingStance} from './detailed-character.js?v=125';
 
-import {sampleMatchAnimation} from './match-animation.js?v=122';
+import {sampleMatchAnimation} from './match-animation.js?v=125';
 
-import {setupSelection} from './selection.js?v=122';
+import {setupSelection} from './selection.js?v=125';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=122';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=125';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=122';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=125';
 
-import {Game} from './game.js?v=122';
+import {Game} from './game.js?v=125';
 
-import {selectShot,serveAim} from './core.js?v=122';
+import {selectShot,serveAim} from './core.js?v=125';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=122';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=125';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 
-const detailedArtAvailable=location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname);
+// The promoted release and DEV share the current character and court renderer.
+const detailedArtAvailable=true;
 
 let artPreferences={style:'anime',look:'sports',outfit:'performance',venue:'random',courtStyle:'painted',courtColors:'venue',height:'',build:''};
 

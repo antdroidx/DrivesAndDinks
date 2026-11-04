@@ -1,4 +1,4 @@
-import {C,stepBall,side} from './core.js?v=122';
+import {C,stepBall,side} from './core.js?v=125';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -9,13 +9,13 @@ function contacts(players,team,ball,shots,bounces){
   for(let tick=1;tick<=216;tick++){
     const event=stepBall(future,C.dt);if(event==='net')continue;
     if(event==='bounce'){count++;if(count>=2||future.x<0||future.x>20||future.y<0||future.y>44)break}
-    if(tick%4||side(future.y)!==team||future.z>7.4||(shots<=2&&count===0))continue;
+    if(tick%4||side(future.y)!==team||(shots<=2&&count===0))continue;
     for(const p of players){
-      if(found.has(p.id))continue;
+      if(found.has(p.id)||future.z>7.4*(p.physique?.heightScale??1))continue;
       const y=count===0?(team===0?Math.max(29.6,future.y):Math.min(14.4,future.y)):future.y;
       if(Math.abs(future.y-y)>1.6)continue;
       if(count>0&&future.vz>3&&future.z<1.35)continue;
-      if(future.z>3.4&&(future.z<5.2||future.vz>0))continue;
+      if(future.z>3.4&&(future.z<5.2*(p.physique?.heightScale??1)||future.vz>0))continue;
       const target={x:clamp(future.x,-3,23),y:clamp(y,team===0?23:-3,team===0?47:21)};
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
       const reach=1.3*(p.abilities?.reach??1),speed=(p.abilities?.speed??12)*.8;
@@ -35,11 +35,13 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   let selected=owner,point=available.get(owner.id),poach=false;
   if(shots>2){
     const partner=pair.find(p=>p!==owner),chance=available.get(partner.id);
+    const iq=partner.abilities?.courtIQ??1,volley=partner.abilities?.volley??1,aggression=partner.playstyle?.aggression??partner.abilities?.aggression??.7;
+    const initiative=iq*.4+volley*.35+aggression*.25;
     const nearLine=team===0?partner.y<=34:partner.y>=10;
-    const earlier=chance&&(!point||chance.time+.08<point.time);const middleAttack=chance&&chance.x>=7&&chance.x<=13&&(!point||chance.time<=point.time+.1)&&(partner.abilities?.courtIQ??1)>=.9;
-    if(chance&&chance.bounces===0&&(earlier||middleAttack)&&nearLine&&chance.x>=5&&chance.x<=15&&Math.abs(chance.x-partner.x)<6){
+    const earlier=chance&&(!point||chance.time+Math.max(.03,.3-initiative*.24)<point.time);const middleAttack=chance&&chance.x>=7&&chance.x<=13&&(!point||chance.time<=point.time+.1)&&(partner.abilities?.courtIQ??1)>=.9;
+    if(initiative>=.72&&iq>=.75&&volley>=.75&&chance&&chance.bounces===0&&(earlier||middleAttack)&&nearLine&&chance.x>=5&&chance.x<=15&&Math.abs(chance.x-partner.x)<6){
       selected=partner;point=chance;poach=true;
-    }else if(!point&&chance){selected=partner;point=chance}
+      }else if(!point&&chance){selected=partner;point=chance}
   }
   // A locked owner prevents both teammates chasing a continually changing nearest-ball estimate.
   return {shot:shots,receiverId:selected.id,point:point||landing,poach,created:clock,expires:clock+(point?.time??.65)+.2};

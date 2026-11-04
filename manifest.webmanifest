@@ -1,0 +1,21 @@
+{
+  "name": "Drives & Dinks DEV",
+  "short_name": "Dinks DEV",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "background_color": "#111c2a",
+  "theme_color": "#111c2a",
+  "icons": [
+    {
+      "src": "assets/app-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/app-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
