@@ -34,7 +34,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   const expanded=document.createElement('section');expanded.id=appearance.id;expanded.className=appearance.className;
   while(appearance.firstChild)expanded.append(appearance.firstChild);appearance.replaceWith(expanded);
 
-  const setDesigner=open=>{designer.hidden=!open;dialog.classList.toggle('designing',open);for(const node of [...scroll.children])if(node!==designer)node.hidden=open;footer.hidden=open;dialog.setAttribute('aria-label',open?'Character designer':'Match setup')};
+  const setDesigner=open=>{const preview=document.querySelector('.player-preview');if(open)designer.append(preview);else document.querySelector('.setup-top').prepend(preview);designer.hidden=!open;dialog.classList.toggle('designing',open);for(const node of [...scroll.children])if(node!==designer)node.hidden=open;footer.hidden=open;dialog.setAttribute('aria-label',open?'Character designer':'Match setup')};
   designButton.onclick=()=>setDesigner(true);back.onclick=()=>setDesigner(false);
   for(const node of [...scroll.children]){
    if(node.matches('#dev-art-options,#appearance-options'))designer.append(node);

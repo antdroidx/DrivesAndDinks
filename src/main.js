@@ -8,7 +8,7 @@ import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} fro
 
 import {createAnimeGameRenderer} from './anime-game.js';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js';
 
 import {setupCourtDisplay} from './court-display.js';
 
@@ -52,7 +52,7 @@ if(!['performance','polo','shorts'].includes(artPreferences.outfit))artPreferenc
 
 if(artPreferences.venue==='garden')artPreferences.venue='outdoor';if(artPreferences.venue==='campus')artPreferences.venue='indoor';if(artPreferences.venue==='custom'){artPreferences.venue='outdoor';artPreferences.courtColors='custom'}
 
-if(!['random',...COURT_VENUES.map(v=>v.id)].includes(artPreferences.venue))artPreferences.venue='random';
+if(!['none','random',...COURT_VENUES.map(v=>v.id)].includes(artPreferences.venue))artPreferences.venue='random';
 
 if(!['venue','custom'].includes(artPreferences.courtColors))artPreferences.courtColors='venue';
 
@@ -84,7 +84,7 @@ if(detailedArtAvailable){
 
  const panel=document.createElement('div');panel.id='dev-art-options';panel.style.cssText='display:grid;gap:8px;margin:10px 0';
 
- panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower acceleration and harder low contacts. Broader: more power, slower movement and more fatigue. Leaner / shorter: quicker coverage. Shorter players handle low balls and behind-shoulder reflex blocks more easily.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
+ panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="none">No background · court color theme</option><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower acceleration and harder low contacts. Broader: more power, slower movement and more fatigue. Leaner / shorter: quicker coverage. Shorter players handle low balls and behind-shoulder reflex blocks more easily.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
 
  document.querySelector('.setup-top').after(panel);
 
@@ -269,7 +269,7 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
  const illustrated=activeVenue&&drawPaintedVenue?.(ctx,activeVenue,camera);
 
- if(!illustrated){if(activeVenue)drawCourtVenue(ctx,activeVenue,camera);else{ctx.fillStyle=palette.background;ctx.fillRect(camera.x,camera.y,camera.width,camera.height)}poly([[-6,-2.4],[26,-2.4],[26,47.1],[-6,47.1]],palette.outer,null);poly([[-5.7,-2.4],[25.7,-2.4],[25.7,46.4],[-5.7,46.4]],palette.outerLight,null);poly([[-5.4,-2],[25.4,-2],[25.4,46],[-5.4,46]],palette.apron,null)}
+ if(!illustrated){drawCourtBackdrop(ctx,palette,camera);poly([[-6,-2.4],[26,-2.4],[26,47.1],[-6,47.1]],palette.outer,null);poly([[-5.7,-2.4],[25.7,-2.4],[25.7,46.4],[-5.7,46.4]],palette.outerLight,null);poly([[-5.4,-2],[25.4,-2],[25.4,46],[-5.4,46]],palette.apron,null)}
 
  drawSurface(ctx,palette,courtStyle,activeVenue?.id??'outdoor');
 

@@ -4,7 +4,7 @@ import {createAnimeGameRenderer,animeGameLayout,resolveAnimeGameDesign} from '..
 import {animePose} from '../src/anime-character.js';
 import {CHARACTER_CONCEPTS} from '../src/character-concepts.js';
 import {MOTIONS} from '../src/pixel-character.js';
-import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from '../src/court-venues.js';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from '../src/court-venues.js';
 function context(){let depth=0;return new Proxy({get depth(){return depth},getImageData(){return {data:new Uint8ClampedArray(144*144*4)}}},{get(target,key){if(key in target)return target[key];return (...args)=>{for(const n of args)if(typeof n==='number')assert.ok(Number.isFinite(n));if(key==='save')depth++;if(key==='restore')assert.ok(--depth>=0)}},set(){return true}})}
 test('game adapter draws both styles across the motion library without canvas leaks',()=>{
  const c=context();let allocated=0;const draw=createAnimeGameRenderer(()=>{allocated++;return {getContext:context}});
@@ -20,7 +20,7 @@ test('game adapter converts world contact into the same pose coordinates at each
  }
 });
 test('venue randomization avoids immediate repeats and preserves valid court colors',()=>{
- for(const venue of COURT_VENUES){for(const random of [0,.25,.5,.999])assert.notEqual(chooseCourtVenue(venue.id,()=>random).id,venue.id);for(const key of ['court','kitchen','outer','outerLight','apron','line','background'])assert.match(venue[key],/^#[0-9a-f]{6}$/i);const c=context();drawCourtVenue(c,venue,{x:-100,y:-200,width:1160,height:800});assert.equal(c.depth,0)}
+ for(const venue of COURT_VENUES){for(const random of [0,.25,.5,.999])assert.notEqual(chooseCourtVenue(venue.id,()=>random).id,venue.id);for(const key of ['court','kitchen','outer','outerLight','apron','line','background'])assert.match(venue[key],/^#[0-9a-f]{6}$/i);const c=context();drawCourtBackdrop(c,venue,{x:-100,y:-200,width:1160,height:800});assert.equal(c.depth,0)}
 });
 
 test('personal height and build affect appearance without mutating the selected preset',()=>{

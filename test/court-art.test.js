@@ -20,3 +20,10 @@ test('court art uses a coarse raster for retro style and preserves valid surface
  const canvases=[],draw=createCourtSurfaceRenderer((x,y)=>({x:480+(x-10)*(13+y*.21),y:204+y*8.5}),()=>{const canvas={getContext:context};canvases.push(canvas);return canvas}),c=context(),palette=COURT_VENUES[0];
  draw(c,palette,'painted');assert.equal(canvases[0].width,1920);draw(c,retroCourtPalette(palette),'retro');assert.equal(canvases[0].width,320);assert.equal(canvases.length,1);assert.equal(c.depth,0);
 });
+
+import {courtBackdropColor,drawCourtBackdrop} from '../src/court-venues.js';
+test('loading and no-background surrounds use only a court-derived flat color',()=>{
+ const blue={court:'#357282',kitchen:'#8f9799'},red={court:'#565d63',kitchen:'#a43b45'};
+ assert.notEqual(courtBackdropColor(blue),courtBackdropColor(red));assert.match(courtBackdropColor(blue),/^#[0-9a-f]{6}$/);
+ const c=context();drawCourtBackdrop(c,blue,{x:-700,y:-100,width:2400,height:800});assert.deepEqual(c.rects,[[-700,-100,2400,800]]);assert.equal(c.depth,0);
+});
