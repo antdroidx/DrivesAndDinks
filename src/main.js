@@ -1,10 +1,10 @@
-import {sampleMatchAnimation} from './match-animation.js?v=99';
-import {setupSelection} from './selection.js?v=99';
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=99';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=99';
-import {Game} from './game.js?v=99';
-import {selectShot,serveAim} from './core.js?v=99';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=99';
+import {sampleMatchAnimation} from './match-animation.js?v=100';
+import {setupSelection} from './selection.js?v=100';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=100';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=100';
+import {Game} from './game.js?v=100';
+import {selectShot,serveAim} from './core.js?v=100';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=100';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
