@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=108';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=108';
-import {legDimensions,plantFeet} from './detailed-character.js?v=108';
+import {sampleCharacterPose} from './pixel-character.js?v=109';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=109';
+import {legDimensions,plantFeet} from './detailed-character.js?v=109';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#302e35',width=.45){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -107,7 +107,8 @@ export function animeTorso(design,pose,warm=false){
  const crop=design.body==='female'&&design.outfit==='shorts',bottom=pose.hips.y-.5;
  return {crop,bottom,hem:bottom-(crop?5:0),shoulder:design.shoulder*(warm?.97:.91),waist:design.waist*(warm?1.04:.87),top:pose.neck.y+.2};
 }
-function trainer(c,f,d,ink){
+function trainer(c,f,d,ink,sole){
+ if(sole)path(c,sole,'#e5dfce',ink,.3);
  const w=.95+d.build*.18,px=(x,y)=>point(f.x+x*w,f.y+y);
  // Ribbed ankle sock, padded collar and tongue stay attached to the foot.
  path(c,[px(-1.3,-4.2),px(1.1,-4.2),px(1.2,-1.4),px(-1.5,-1.3)],'#e5dfce',ink,.3);
@@ -124,12 +125,13 @@ function trainer(c,f,d,ink){
 export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,options={}){
  const {look='sports'}=options;
  const d=design,p=animePose(d,mode,phase,view,options),{raw,neck:n,hips:h}=p,near=raw.view==='near',warm=look==='storybook',ink=warm?'#443b35':'#302e35',leg=legDimensions(d),body=animeBodyDimensions(d),skin=skinPalette(d.skin);
- const plant=options.plantWorld??{cx,baseline,scale};plantFeet(p,{...options,legLengths:p.legs.map(chain=>({upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(chain[2].x-chain[1].x,chain[2].y-chain[1].y)}))},raw,plant.cx,plant.baseline,plant.scale);
+ if(options.footTargets)p.legs.forEach((chain,i)=>{const target=options.footTargets[i].ankle,dx=target.x-chain[2].x,dy=target.y-chain[2].y;chain[1].x+=dx*.5;chain[1].y+=dy*.5;chain[2]={...target}});
+ const plant=options.plantWorld??{cx,baseline,scale};if(!options.footTargets)plantFeet(p,{...options,legLengths:p.legs.map(chain=>({upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(chain[2].x-chain[1].x,chain[2].y-chain[1].y)}))},raw,plant.cx,plant.baseline,plant.scale);
  c.save();c.translate(cx-24*scale+(raw.rootOffset||0)*scale,baseline-63*scale);c.scale(scale,scale);
  oval(c,24,64,10+d.build*2,1.8,'#07151a45');
  hairTail(c,d,n.x,animeHeadCenter(n).y,phase,near,ink);
- for(const chain of p.legs){ribbon(c,chain,[body.thigh,body.calf,body.ankle],d.skin,ink,skin);const f=chain[2];
-  trainer(c,f,d,ink);
+ for(const [index,chain] of p.legs.entries()){ribbon(c,chain,[body.thigh,body.calf,body.ankle],d.skin,ink,skin);const f=chain[2];
+  trainer(c,f,d,ink,options.footTargets?.[index].sole);
  }
  function arm(i){const a=p.arms[i],width=2.6+d.build*1.2;ribbon(c,a,[width,width*.85,width*.5],d.skin,ink,skin);
   if((d.body==='male'||d.outfit==='polo')&&d.outfit!=='shorts'){const end=point(a[0].x+(a[1].x-a[0].x)*.43,a[0].y+(a[1].y-a[0].y)*.43);ribbon(c,[a[0],end],[width+1.5,width+1],d.shirt,ink);line(c,[point(end.x-.7,end.y-.1),point(end.x+.8,end.y+.3)],d.trim,.55)}

@@ -1,7 +1,7 @@
-import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=108';
-import {matchDesign} from './detailed-character.js?v=108';
-import {conceptDimensions} from './character-concepts.js?v=108';
-import {animationRootOffset} from './pixel-character.js?v=108';
+import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=109';
+import {matchDesign} from './detailed-character.js?v=109';
+import {conceptDimensions} from './character-concepts.js?v=109';
+import {animationRootOffset} from './pixel-character.js?v=109';
 
 export function animeGameLayout(options,design){
  const scale=options.height/64,cx=options.x+options.width/2,baseline=options.y+63*scale;
@@ -20,7 +20,9 @@ export function createAnimeGameRenderer(createCanvas=()=>document.createElement(
   let d=resolveAnimeGameDesign(options);
   if(look==='storybook')for(const key of ['shirt','skin','hairColor','trim']){const rgb=d[key].slice(1).match(/../g).map(v=>parseInt(v,16));d[key]='#'+rgb.map((v,i)=>Math.round(v*.82+[210,187,140][i]*.18).toString(16).padStart(2,'0')).join('')}
   const layout=animeGameLayout({...options,mode,phase},d),{scale,cx,baseline,contact}=layout;
-  const renderOptions={...options,look,contact,contactWeight:options.alignStrength??0,plantWorld:{cx,baseline,scale}};
+  const root=animationRootOffset(mode,phase,options.travelSide??options.side??1),local=point=>({x:24+(point.x-cx)/scale-root,y:63+(point.y-baseline)/scale});
+  const footTargets=options.feet?.map(foot=>({ankle:{...local(foot.screen),y:local(foot.screen).y-1.3},sole:foot.sole.map(local)}));
+  const renderOptions={...options,footTargets,look,contact,contactWeight:options.alignStrength??0,plantWorld:{cx,baseline,scale}};
   if(style!=='anime-pixel'){drawAnimeAthlete(c,d,mode,phase,view,cx,baseline,scale,renderOptions);return true}
   let buffers=contexts.get(c);if(!buffers){buffers=new Map();contexts.set(c,buffers)}
   const key=characterId+'|'+designId+'|'+d.body;let buffer=buffers.get(key);

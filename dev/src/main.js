@@ -1,18 +1,20 @@
-import {drawCourtNet} from './court-net.js?v=108';
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=108';
-import {createAnimeGameRenderer} from './anime-game.js?v=108';
-import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=108';
-import {setupCourtDisplay} from './court-display.js?v=108';
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=108';
-import {courtCamera,courtAim} from './court-camera.js?v=108';
-import {movingStance} from './detailed-character.js?v=108';
-import {sampleMatchAnimation} from './match-animation.js?v=108';
-import {setupSelection} from './selection.js?v=108';
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=108';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=108';
-import {Game} from './game.js?v=108';
-import {selectShot,serveAim} from './core.js?v=108';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=108';
+import {playerFeet,footSole} from './player-feet.js?v=109';
+import {faultReplaySample,faultReplayCamera,drawFaultContact} from './fault-replay.js?v=109';
+import {drawCourtNet} from './court-net.js?v=109';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=109';
+import {createAnimeGameRenderer} from './anime-game.js?v=109';
+import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=109';
+import {setupCourtDisplay} from './court-display.js?v=109';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=109';
+import {courtCamera,courtAim} from './court-camera.js?v=109';
+import {movingStance} from './detailed-character.js?v=109';
+import {sampleMatchAnimation} from './match-animation.js?v=109';
+import {setupSelection} from './selection.js?v=109';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=109';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=109';
+import {Game} from './game.js?v=109';
+import {selectShot,serveAim} from './core.js?v=109';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=109';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
@@ -33,9 +35,9 @@ const drawAnimeGame=createAnimeGameRenderer();let activeVenue=null;
 function refreshVenue(){activeVenue=detailedArtAvailable?(artPreferences.venue==='random'?chooseCourtVenue(activeVenue?.id):COURT_VENUES.find(v=>v.id===artPreferences.venue)??null):null}refreshVenue();
 function saveArtPreferences(){try{localStorage.setItem('drives-dinks.dev-art.v1',JSON.stringify(artPreferences))}catch{}}
 const updateCourtHud=setupCourtDisplay();
-let displayCamera=courtCamera();
-new ResizeObserver(entries=>{const {width,height}=entries[0].contentRect;if(width&&height)displayCamera=courtCamera(width/height)}).observe(canvas);
-const currentCamera=()=>displayCamera;
+let displayCamera=courtCamera(),replayCamera=null;
+new ResizeObserver(entries=>{const {width,height}=entries[0].contentRect;if(width&&height){displayCamera=courtCamera(width/height);const density=Math.min(2,window.devicePixelRatio||1),w=Math.round(width*density),h=Math.round(height*density);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;ctx.imageSmoothingEnabled=false}}}).observe(canvas);
+const currentCamera=()=>replayCamera??displayCamera;
 const footPlants=new Map();let selectedDetailedDesign='';
 if(detailedArtAvailable){const label=document.createElement('label');label.textContent='DEV character design ';const select=document.createElement('select');select.id='detailed-model';select.setAttribute('aria-label','DEV character design');select.innerHTML='<option value="">Match athlete automatically</option>'+CHARACTER_CONCEPTS.map(d=>`<option value="${d.id}">${d.name}  /  ${d.height} cm  /  ${d.body}</option>`).join('');label.append(select);document.querySelector('#player-preview').after(label);select.onchange=()=>{selectedDetailedDesign=select.value;footPlants.clear();selectionUI?.refreshPreview()}}
 
@@ -94,7 +96,7 @@ function drawSprite(p,q,game){
  const alignStrength=animation?.alignStrength??0;
  ctx.save();ctx.translate(q.x,q.y);ctx.fillStyle='#0b171c66';ctx.beginPath();ctx.ellipse(0,0,16*scale,5*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
- drawPlayer(ctx,{personalize:p.id===0,designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth'});
+ drawPlayer(ctx,{feet:playerFeet(p).map(foot=>({...foot,screen:project(foot.x,foot.y,foot.z),sole:footSole(foot).map(([x,y])=>project(x,y,foot.z))})),personalize:p.id===0,designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth'});
  if(p.id===0&&game.mode==='play'){
  ctx.save();ctx.font='bold 9px monospace';ctx.textAlign='center';ctx.fillStyle='#10232ded';ctx.fillRect(q.x-65,q.y+9,130,16);ctx.fillStyle='#fff8df';ctx.fillText(game.canHumanHit()?'HIT: 1 / 2 / 3':game.feedbackTime>0?game.message:game.teamPlan?.receiverId===1?'PARTNER BALL':'YOU: AIM + TIME SHOT',q.x,q.y+20);ctx.restore();
  }
@@ -110,7 +112,7 @@ function drawPixelBall(x,y,radius,squashX=1,squashY=1){
 }
 const courtSpeckles=Array.from({length:190},(_,i)=>({x:((i*137)%1000)/1000*30-5,y:((i*269)%1000)/1000*48-2}));
 function drawNet(){const netL=project(-.5,22),netR=project(20.5,22),netHeight=3*14*(.9+22/125);drawCourtNet(ctx,netL,netR,netHeight,{retro:artPreferences.courtStyle==='retro'})}
-function render(game=liveGame){const camera=currentCamera(),sx=RENDER_SCALE*960/camera.width,sy=RENDER_SCALE*600/camera.height;ctx.setTransform(sx,0,0,sy,-camera.x*sx,-camera.y*sy);
+function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/camera.width,sy=canvas.height/camera.height;ctx.setTransform(sx,0,0,sy,-camera.x*sx,-camera.y*sy);
  const customPalette=COURT_PALETTES.find(item=>item.id===game.players[0]?.appearance?.court)??COURT_PALETTES[0],courtStyle=detailedArtAvailable?artPreferences.courtStyle:'painted',basePalette=artPreferences.courtColors==='custom'?customPalette:(activeVenue??customPalette),palette=courtStyle==='retro'&&artPreferences.courtColors!=='custom'?retroCourtPalette(basePalette):basePalette;
  const illustrated=activeVenue&&drawPaintedVenue?.(ctx,activeVenue,camera,courtStyle);
  if(!illustrated){if(activeVenue)drawCourtVenue(ctx,activeVenue,camera);else{ctx.fillStyle=palette.background;ctx.fillRect(camera.x,camera.y,camera.width,camera.height)}poly([[-6,-2.4],[26,-2.4],[26,47.1],[-6,47.1]],palette.outer,null);poly([[-5.7,-2.4],[25.7,-2.4],[25.7,46.4],[-5.7,46.4]],palette.outerLight,null);poly([[-5.4,-2],[25.4,-2],[25.4,46],[-5.4,46]],palette.apron,null)}
@@ -119,6 +121,7 @@ function render(game=liveGame){const camera=currentCamera(),sx=RENDER_SCALE*960/
  const ballSpeed=Math.hypot(game.ball.vx||0,game.ball.vy||0,game.ball.vz||0),contactPulse=game.contact?Math.max(0,1-game.contact.time/.12):0;
  if(game.phase==='rally'&&ballSpeed>27){ctx.fillStyle='#fff1a733';for(let i=Math.max(0,game.trail.length-6);i<game.trail.length;i+=1){const t=game.trail[i],q=project(t.x,t.y,t.z),fade=i/game.trail.length;ctx.fillRect(q.x-1-fade,q.y-1-fade,2+fade*2,2+fade*2)}}if(game.bounceMark?.time>0){const q=project(game.bounceMark.x,game.bounceMark.y);ctx.strokeStyle='#fff5ab';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,10+(1-game.bounceMark.time/.35)*8,4,0,0,Math.PI*2);ctx.stroke()}
  const entities=[{kind:'net',y:22},...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){if(e.kind==='net'){drawNet();continue}const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z),squash=contactPulse>.65?1+(contactPulse-.65)*.9:1;drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22),squash,1/squash);continue}drawSprite(p,q,game)}
+ if(game.faultFocus&&game.clock>=game.faultFocus.time)drawFaultContact(ctx,game.faultFocus,project);
  if(game.contact&&game.contact.time>0){const c=project(game.contact.x,game.contact.y,game.contact.z),age=1-game.contact.time/.12;ctx.save();ctx.globalAlpha=Math.max(0,(1-age)*.5);ctx.strokeStyle='#fff4b8';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(c.x,c.y,4+age*5,2+age*2,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
  updateCourtHud(game);
  if(game.paused||game.phase==='pause'||game.phase==='over'){const y=300;ctx.fillStyle='#1b2939ee';ctx.fillRect(235,y,490,65);ctx.textAlign='center';ctx.fillStyle='#fff8df';ctx.font='bold 16px monospace';ctx.fillText(game.paused?'MATCH PAUSED':game.result,480,y+25,465);ctx.fillStyle='#f9d46a';ctx.font='bold 14px monospace';ctx.fillText(game.paused?'TAP RESUME TO CONTINUE':game.outcome,480,y+49,465);ctx.textAlign='left'}
@@ -136,7 +139,7 @@ function beginReplay(clip,startedAt=performance.now(),automatic=false){
  if(automatic&&game.pointReplay)automaticallyReplayedPoints.add(game.pointReplay);
  replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`REPLAY · ${clip.label}`;replayBar.hidden=false;pointActions.hidden=true;return true;
 }
-function finishReplay(){replayPlayback=null;replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
+function finishReplay(){replayPlayback=null;replayCamera=null;replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
 function syncPointActions(){
  const available=game.phase==='pause'&&!automaticallyReplayedPoints.has(game.pointReplay)&&!replayPlayback&&!document.querySelector('#match-result')?.open&&game.pointReplay?.frames.length>15;
  pointActions.hidden=!available;
@@ -148,9 +151,10 @@ const replayToggle=document.createElement('button');replayToggle.textContent='RE
 function playReplay(t){
  if(!replayPlayback)return false;
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
- const frames=replayPlayback.frames,elapsed=(t-replayStarted)/1000*.75,index=Math.floor(elapsed*30);
- if(index>=frames.length){finishReplay();return false;}
- const snapshot=frames[index];render({...snapshot,score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
+ const elapsed=(t-replayStarted)/1000,snapshot=faultReplaySample(replayPlayback,elapsed);
+ if(!snapshot){finishReplay();return false;}
+ replayCamera=faultReplayCamera(displayCamera,replayPlayback.focus,project,snapshot.clock);
+ render({...snapshot,score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
 }
 window.addEventListener('keydown',event=>{if(replayPlayback){event.preventDefault();event.stopImmediatePropagation();if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
 let previousStatus='';function frame(t){if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
@@ -190,3 +194,12 @@ document.querySelector('#rematch').onclick=()=>{resultDialog.close();game.reset(
 document.querySelector('#return-selection').onclick=()=>{resultDialog.close();selectionUI.open()};
 
 const lesson=document.createElement("p");lesson.className="control-lesson";lesson.textContent="Movement is automatic | Aim with mouse or arrow keys | 1 Attack, 2 Soft, 3 Lob select AND hit | Space repeats shot | White ring = hit now";canvas.insertAdjacentElement("afterend",lesson);
+
+// Deterministic DEV visual regression: a grounded shoe enters the kitchen after a volley.
+if(detailedArtAvailable&&balanceQuery.get('test')==='kitchen-fault'){
+ document.querySelector('#match-setup').close();game.mode='watch';game.phase='rally';game.shots=4;
+ const offender=game.players[0];offender.x=7;offender.volleyMomentum=true;offender.vx=0;offender.vy=-.55;
+ game.players[1].y=35;game.players[2].y=10;game.players[3].y=8;
+ for(let i=0;i<=90;i++){game.clock=i/30;offender.y=31-i/90*1.7;game.replayTick=0;game.recordReplay()}
+ game.fault(0,'Kitchen momentum fault',offender);game.setPaused(true);beginReplay(game.replayClip,performance.now(),true);syncPauseButton();
+}
