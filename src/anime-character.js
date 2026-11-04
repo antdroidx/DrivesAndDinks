@@ -3,7 +3,7 @@ import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js';
 import {legDimensions,plantFeet} from './detailed-character.js';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
-function path(c,points,color,ink='#302e35',width=.45){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
+function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
 function oval(c,x,y,rx,ry,color){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=color;c.fill()}
 function line(c,points,color,width=.4){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.strokeStyle=color;c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.stroke()}
 const point=(x,y)=>({x,y});
@@ -12,7 +12,7 @@ export function skinPalette(hex){
  return {base:hex,light:color(rgb.map((v,i)=>v*.86+[255,228,193][i]*.14)),shadow:color(rgb.map((v,i)=>v*.78+[12,2,7][i])),deep:color(rgb.map((v,i)=>v*.61+[14,3,8][i]))};
 }
 export function animePixelPalette(d){
- const skin=skinPalette(d.skin),hexes=[...Object.values(skin),d.shirt,tone(d.shirt,-.2),tone(d.shirt,-.48),tone(d.shirt,.13),d.hairColor,tone(d.hairColor,-.25),tone(d.hairColor,.18),d.trim,tone(d.trim,-.12),'#302e35','#443b35','#1c2430','#e5dfce','#fff3df',tone(d.trim,-.55),tone('#e5dfce',-.15)];
+ const skin=skinPalette(d.skin),hexes=[...Object.values(skin),d.shirt,tone(d.shirt,-.2),tone(d.shirt,-.48),tone(d.shirt,.13),d.hairColor,tone(d.hairColor,-.25),tone(d.hairColor,.18),d.trim,tone(d.trim,-.12),'#4c453d','#483f35','#1c2430','#e5dfce','#fff3df',tone(d.trim,-.55),tone('#e5dfce',-.15)];
  return [...new Set(hexes)].map(hex=>hex.slice(1).match(/../g).map(v=>parseInt(v,16)));
 }
 export function animeHeadCenter(neck){return {x:neck.x,y:neck.y-6}}
@@ -50,7 +50,15 @@ function hairTail(c,d,x,y,phase,near,ink){
   for(const sign of [-1,1]){c.beginPath();c.moveTo(x+sign*4,y-4);c.quadraticCurveTo(x+sign*8,y-1,x+sign*(d.hair==='waves'?7.8:6.3),y+7);c.lineTo(x+sign*3.8,y+5.8);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke()}
  }
 }
-function animeHead(c,d,n,near,warm,phase,ink){
+function expressionShape(emotion){
+ const focused=emotion==='focus'||emotion==='effort',effort=emotion==='effort',reaction=emotion==='reaction',smile=emotion==='smile';
+ const eye={width:.8,height:1.06,pupil:.55,brow:.15,low:.06};
+ if(focused){eye.width=effort?.7:.85;eye.height=effort?1.2:1.06}
+ if(reaction){eye.width=1.04;eye.height=1.34;eye.low=-.18}
+ if(smile){eye.width=.76;eye.height=.72;eye.low=.16}
+ return eye;
+}
+function animeHead(c,d,n,near,warm,phase,ink,emotion){
  const {x,y}=animeHeadCenter(n),skin=d.skin,hair=d.hairColor,colors=skinPalette(skin);
  // Tapered jaw, small ears and a tiny implied nose replace the round toy face.
  c.beginPath();c.moveTo(x-4.9,y-3.6);c.quadraticCurveTo(x-6,y+1,x-3.5,y+4.4);c.quadraticCurveTo(x-1,y+6,x,y+6.1);c.quadraticCurveTo(x+2.3,y+5.3,x+4.1,y+3.5);c.quadraticCurveTo(x+5.6,y,x+4.8,y-3.8);c.quadraticCurveTo(x+3.3,y-6.8,x,y-6.6);c.quadraticCurveTo(x-3.7,y-6.8,x-4.9,y-3.6);c.closePath();c.fillStyle=skin;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke();
@@ -59,12 +67,16 @@ function animeHead(c,d,n,near,warm,phase,ink){
   path(c,[point(x-4.2,y-2.8),point(x+4.3,y-2.8),point(x+3.9,y-1.2),point(x+.6,y-1.8),point(x-2.6,y-1.1)],colors.shadow,null);
   path(c,[point(x-3.7,y+.8),point(x-2.8,y+2.8),point(x-1.5,y+3.8),point(x-2.6,y+2.7)],colors.light,null);
   path(c,[point(x+3.9,y-.2),point(x+4,y+2.5),point(x+1.4,y+5),point(x+.5,y+5.3),point(x+2.6,y+2)],colors.shadow,null);
-  for(const sign of [-1,1]){const ex=x+sign*2.1,ey=y+.4,eyeWidth=warm?1.03:1.28,eyeHeight=warm?1.2:1.36;
-   oval(c,ex,ey,eyeWidth,eyeHeight,'#fff3df');oval(c,ex+sign*.08,ey+.15,.66,1.02,warm?'#68513a':tone(hair,.2));oval(c,ex+sign*.08,ey+.27,.32,.73,ink);oval(c,ex-.2,ey-.27,.24,.32,'#fffdf2');
-   c.beginPath();c.moveTo(ex-eyeWidth,ey-.38);c.quadraticCurveTo(ex,ey-1.3,ex+eyeWidth,ey-.4);c.strokeStyle=ink;c.lineWidth=warm?.3:.48;c.stroke();
-   line(c,[point(ex-1,y-1.8),point(ex,y-2.05),point(ex+.9,y-1.8)],tone(hair,.04),.3);
+   const shape=expressionShape(near?'focus':emotion);
+   for(const sign of [-1,1]){const ex=x+sign*2.1,ey=y+.4+(shape.low*.35),eyeWidth=shape.width,eyeHeight=shape.height;
+   oval(c,ex,ey,eyeWidth,eyeHeight,'#fff3df');oval(c,ex+sign*.08,ey+.14,.52,shape.pupil,warm?'#6b5340':tone(hair,.22));oval(c,ex+sign*.08,ey+.26,.28,.6,tone(ink,.24));oval(c,ex-.18,ey-.27,.2,.26,'#fffdf2');
+   const browY=ey-.62+(emotion==='effort'?.2:emotion==='reaction'?.12:emotion==='smile'?.1:0);
+    c.beginPath();c.moveTo(ex-eyeWidth,browY);c.quadraticCurveTo(ex+sign*.3,browY-(emotion==='effort'?.36:emotion==='reaction'?.1:.22),ex+eyeWidth,browY+(emotion==='effort'?.22:0));c.strokeStyle=tone(ink,.16);c.lineWidth=.26;c.stroke();
+    line(c,[point(ex-.9,y-1.75),point(ex,y-1.95),point(ex+.8,y-1.75)],tone(hair,.06),.24);
   }
-  oval(c,x+.25,y+2.55,.22,.17,tone(skin,-.23));line(c,[point(x-.65,y+4),point(x+.2,y+4.12),point(x+.85,y+3.95)],tone(skin,-.36),.3);
+  oval(c,x+.25,y+2.55,.18,.14,tone(skin,-.22));
+   if(emotion==='smile'){c.beginPath();c.moveTo(x-.75,y+3.8);c.quadraticCurveTo(x+.15,y+4.45,x+.95,y+3.7);c.strokeStyle=tone(skin,-.35);c.lineWidth=.26;c.stroke()}
+   else{const mouthY=y+4+(emotion==='effort'?.28:emotion==='reaction'?.12:0);line(c,[point(x-.55,mouthY),point(x+.35,mouthY+(emotion==='effort'?-.16:0)),point(x+.85,mouthY)],tone(skin,-.34),.24)}
  }
  const spiky=['spiky','pixie'].includes(d.hair),buzz=d.hair==='buzz',bald=d.hair==='bald';
  if(bald){
@@ -123,8 +135,8 @@ function trainer(c,f,d,ink,sole){
  line(c,[px(-2.3,-1.2),px(-2.2,.3)],ink,.25);line(c,[px(2.4,.25),px(3.1,.3)],ink,.22);
 }
 export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,options={}){
- const {look='sports'}=options;
- const d=design,p=animePose(d,mode,phase,view,options),{raw,neck:n,hips:h}=p,near=raw.view==='near',warm=look==='storybook',ink=warm?'#443b35':'#302e35',leg=legDimensions(d),body=animeBodyDimensions(d),skin=skinPalette(d.skin);
+ const {look='sports',emotion='focus'}=options;
+ const d=design,p=animePose(d,mode,phase,view,options),{raw,neck:n,hips:h}=p,near=raw.view==='near',warm=look==='storybook',ink=warm?'#483f35':'#4c453d',leg=legDimensions(d),body=animeBodyDimensions(d),skin=skinPalette(d.skin);
  if(options.footTargets)p.legs.forEach((chain,i)=>{const target=options.footTargets[i].ankle,dx=target.x-chain[2].x,dy=target.y-chain[2].y;chain[1].x+=dx*.5;chain[1].y+=dy*.5;chain[2]={...target}});
  const plant=options.plantWorld??{cx,baseline,scale};if(!options.footTargets)plantFeet(p,{...options,legLengths:p.legs.map(chain=>({upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(chain[2].x-chain[1].x,chain[2].y-chain[1].y)}))},raw,plant.cx,plant.baseline,plant.scale);
  c.save();c.translate(cx-24*scale+(raw.rootOffset||0)*scale,baseline-63*scale);c.scale(scale,scale);
@@ -175,5 +187,6 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  }
  if(crop)line(c,[point(h.x-waist,hem),point(h.x+waist,hem)],d.trim,.65);
  line(c,[point(h.x-waist,h.y-1),point(h.x+waist,h.y-1)],tone(d.shirt,-.35),.8);
- animeHead(c,d,n,near,warm,phase,ink);layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
+ animeHead(c,d,n,near,warm,phase,ink,emotion);layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
 }
+
