@@ -1,6 +1,6 @@
 import {sampleCharacterPose} from './pixel-character.js';
 import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js';
-import {conceptLegs,legDimensions} from './detailed-character.js';
+import {conceptLegs,legDimensions,plantFeet} from './detailed-character.js';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#302e35',width=.45){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -29,8 +29,8 @@ function ribbon(c,chain,widths,color,ink,palette){
 }
 
 // Same motion/contact language, independently authored body and costume silhouettes.
-export function animePose(design,mode,phase,view){
- const raw=sampleCharacterPose({mode,phase,view,frame:phase*4}),convert=p=>conceptPoint(p,design);
+export function animePose(design,mode,phase,view,options={}){
+ const raw=sampleCharacterPose({...options,mode,phase,view,frame:options.frame??phase*4}),convert=p=>conceptPoint(p,design);
  const arms=raw.arms.map(chain=>chain.map(convert)),legs=conceptLegs(raw,design);
  return {raw,neck:convert(raw.neck),hips:convert(raw.hips),arms,legs,paddle:convert(raw.paddle),hand:arms[raw.gripSide][2]};
 }
@@ -114,8 +114,10 @@ function trainer(c,f,d,ink){
  for(let i=0;i<3;i++)line(c,[px(-.4+i*.3,-1.7+i*.4),px(.9+i*.25,-1.4+i*.4)],'#fff3df',.35);
  line(c,[px(-2.3,-1.2),px(-2.2,.3)],ink,.25);line(c,[px(2.4,.25),px(3.1,.3)],ink,.22);
 }
-export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,{look='sports'}={}){
- const d=design,p=animePose(d,mode,phase,view),{raw,neck:n,hips:h}=p,near=raw.view==='near',warm=look==='storybook',ink=warm?'#443b35':'#302e35',leg=legDimensions(d),skin=skinPalette(d.skin);
+export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,options={}){
+ const {look='sports'}=options;
+ const d=design,p=animePose(d,mode,phase,view,options),{raw,neck:n,hips:h}=p,near=raw.view==='near',warm=look==='storybook',ink=warm?'#443b35':'#302e35',leg=legDimensions(d),skin=skinPalette(d.skin);
+ const plant=options.plantWorld??{cx,baseline,scale};plantFeet(p,{...options,legLengths:leg},raw,plant.cx,plant.baseline,plant.scale);
  c.save();c.translate(cx-24*scale+(raw.rootOffset||0)*scale,baseline-63*scale);c.scale(scale,scale);
  oval(c,24,64,10+d.build*2,1.8,'#07151a45');
  hairTail(c,d,n.x,animeHeadCenter(n).y,phase,near,ink);
@@ -126,7 +128,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,{loo
   if((d.body==='male'||d.outfit==='polo')&&d.outfit!=='shorts'){const end=point(a[0].x+(a[1].x-a[0].x)*.43,a[0].y+(a[1].y-a[0].y)*.43);ribbon(c,[a[0],end],[width+1.5,width+1],d.shirt,ink);line(c,[point(end.x-.7,end.y-.1),point(end.x+.8,end.y+.3)],d.trim,.55)}
   oval(c,a[2].x,a[2].y,width*.36,width*.48,d.skin);line(c,[point(a[2].x-.7,a[2].y-1.7),point(a[2].x+.8,a[2].y-1.5)],d.trim,.8);
  }
- function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);oval(c,0,0,3.7,5,d.trim);oval(c,0,0,3.05,4.3,'#1c2430');line(c,[point(-1.7,-2.3),point(-.5,-3),point(.9,-2.8)],'#ffffff28',.4);c.restore()}
+ function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const wide=options.paddleShape==='wide'?1.15:options.paddleShape==='elongated'?.88:1,tall=options.paddleShape==='elongated'?1.14:1;oval(c,0,0,3.7*wide,5*tall,d.trim);oval(c,0,0,3.05*wide,4.3*tall,'#1c2430');line(c,[point(-1.7,-2.3),point(-.5,-3),point(.9,-2.8)],'#ffffff28',.4);c.restore()}
  const layers=raw.arms.map((chain,i)=>({i,back:chain[1].depth<raw.neck.depth}));layers.filter(a=>a.back).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
  ribbon(c,[point(n.x,n.y-.6),point(n.x,n.y+2.8)],[3.4,3.8],d.skin,ink,skin);
  path(c,[point(n.x-1.7,n.y-.3),point(n.x+1.7,n.y-.3),point(n.x+1.4,n.y+1.2),point(n.x-.9,n.y+.8)],skin.deep,null);
