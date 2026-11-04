@@ -198,3 +198,37 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
  #aim-pad strong{display:block;font-size:8px}#aim-pad small{font-size:7px}
  .game .point-actions{left:4%;right:4%;bottom:10%}
 }
+
+/* Court-first layout: sizing uses available space, including desktop-mode phones. */
+html:has(.court-app),body.court-app{height:100%;overflow:hidden}
+body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavior:none}
+.court-app main{width:100%;max-width:none!important;height:100%;min-height:0;margin:0;padding:max(3px,env(safe-area-inset-top)) max(3px,env(safe-area-inset-right)) max(3px,env(safe-area-inset-bottom)) max(3px,env(safe-area-inset-left));display:grid;grid-template-rows:auto minmax(0,1fr);gap:4px;overflow:hidden;background:#111c2a}
+.court-app header{position:relative;display:flex;flex-wrap:nowrap;min-width:0;gap:6px;min-height:38px;align-items:center}
+.court-app header h1{font-size:clamp(14px,2vw,22px);white-space:nowrap;margin:0;letter-spacing:0}
+.court-app .brand-meta{position:absolute;left:0;top:0}.court-app .brand-meta small{display:none}.court-app .build-label{font-size:7px;padding:0 3px}.court-app header>div:first-child{padding-top:8px}
+.court-app .header-actions{display:flex;flex-wrap:nowrap;margin-left:auto;width:auto;gap:4px}
+.court-app header button{font-size:10px;min-height:36px;padding:6px;white-space:nowrap}
+.court-app .header-actions>button:not(#fullscreen-button):not(#pause-button){display:none}
+.court-app .settings-open .header-actions{position:absolute;left:0;right:0;top:100%;z-index:30;background:#152c35;padding:8px;border:1px solid #80e0b5;display:flex;flex-wrap:wrap;justify-content:flex-end}
+.court-app .settings-open .header-actions>button{display:block!important}
+.court-app .playfield{grid-row:2;grid-column:1;width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:none;aspect-ratio:auto;position:relative;display:grid;grid-template-columns:minmax(0,1fr) var(--court-size) minmax(0,1fr);grid-template-rows:42px var(--court-size) minmax(0,1fr);gap:0;align-self:start;justify-self:stretch;align-content:start}
+.court-app #court-hud{grid-column:1/-1;grid-row:1;display:flex;align-items:center;justify-content:center;gap:16px;padding:3px 8px;color:#fff3d6;background:#1b2939;font:12px monospace;min-width:0}
+.court-app #court-hud strong{font-size:15px;white-space:nowrap}.court-app #court-hud span{color:#f9d46a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.court-app .game{grid-column:2;grid-row:2;width:var(--court-size);height:var(--court-size);aspect-ratio:1;max-height:none;margin:0;border:2px solid #e9bc68;overflow:hidden;box-shadow:none}
+.court-app .game #court{display:block;width:100%;height:100%;max-width:none;max-height:none;margin:0}
+.court-app .controls{position:absolute;inset:42px 0 auto;display:grid;grid-template-columns:minmax(0,1fr) var(--court-size) minmax(0,1fr);grid-template-rows:var(--court-size);width:100%;height:var(--court-size);margin:0;padding:0;gap:0;pointer-events:none;z-index:4}
+.court-app .controls>div:first-child{display:contents}.court-app .controls>.tip,.court-app .controls strong,.court-app footer{display:none}
+.court-app #shots{grid-column:3;grid-row:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;max-width:none;pointer-events:none;margin:0}
+.court-app #shots::before,.court-app #shots::after{display:none}
+.court-app #shots button{flex:0 0 auto;width:min(90%,150px);height:58px;min-height:44px;margin:0;padding:5px;font-size:12px;pointer-events:auto}
+.court-app #shots button small{display:block;font-size:9px;line-height:1.2;white-space:normal}
+.court-app #aim-pad{grid-column:1;grid-row:1;display:grid;position:relative;left:auto;top:auto;bottom:auto;transform:none;align-self:center;justify-self:center;width:min(90%,150px);height:110px;aspect-ratio:auto;padding:8px;pointer-events:auto}
+.court-app #aim-pad strong{display:block;font-size:9px}.court-app #aim-pad small{font-size:8px}
+.court-app main[data-court-layout="stacked"] .playfield{grid-template-columns:minmax(0,1fr) var(--court-size) minmax(0,1fr);grid-template-rows:42px var(--court-size) 82px minmax(0,1fr)}
+.court-app main[data-court-layout="stacked"] .controls{top:calc(42px + var(--court-size));height:82px;grid-template-columns:1fr 2.5fr;grid-template-rows:82px;gap:6px;padding-top:4px}
+.court-app main[data-court-layout="stacked"] #shots{grid-column:2;flex-direction:row;gap:4px}
+.court-app main[data-court-layout="stacked"] #shots button{flex:1;width:auto;height:74px;font-size:11px}
+.court-app main[data-court-layout="stacked"] #aim-pad{grid-column:1;width:100%;height:74px}
+.court-app main[data-court-layout="stacked"] #court-hud{gap:3px;flex-direction:column;font-size:10px}.court-app main[data-court-layout="stacked"] #court-hud strong{font-size:13px}
+.court-app #overlay{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);display:block}
+.court-app main:fullscreen{width:100vw;height:100dvh}.court-app main:-webkit-full-screen{width:100vw;height:100vh}

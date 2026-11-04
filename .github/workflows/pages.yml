@@ -53,7 +53,7 @@ jobs:
           node scripts/version-build.js 48 _site/prototype
 
           # Build DEV from the triggering development branch.
-          cp index.html style.css studio.html studio.css _site/dev/
+          cp index.html style.css studio.html studio.css manifest.webmanifest _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/
           if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi

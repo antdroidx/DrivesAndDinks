@@ -1,3 +1,4 @@
+import {setupCourtDisplay} from './court-display.js';
 import {CHARACTER_CONCEPTS} from './character-concepts.js';
 import {courtCamera,courtAim} from './court-camera.js';
 import {drawDetailedCharacter,movingStance} from './detailed-character.js';
@@ -13,8 +14,8 @@ const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.p
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 const detailedArtAvailable=location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname);
 let detailedArt=detailedArtAvailable&&balanceQuery.get('art')!=='current';
-const portraitCourt=matchMedia('(max-width:600px) and (orientation:portrait)');
-const currentCamera=()=>courtCamera(portraitCourt.matches);
+const updateCourtHud=setupCourtDisplay();
+const currentCamera=()=>courtCamera();
 const footPlants=new Map();let selectedDetailedDesign='';
 if(detailedArtAvailable){const label=document.createElement('label');label.textContent='DEV character design ';const select=document.createElement('select');select.id='detailed-model';select.setAttribute('aria-label','DEV character design');select.innerHTML='<option value="">Match athlete automatically</option>'+CHARACTER_CONCEPTS.map(d=>`<option value="${d.id}">${d.name}  /  ${d.height} cm  /  ${d.body}</option>`).join('');label.append(select);document.querySelector('#player-preview').after(label);select.onchange=()=>{selectedDetailedDesign=select.value;footPlants.clear();selectionUI?.refreshPreview()}}
 
@@ -85,12 +86,10 @@ function render(game=liveGame){const camera=currentCamera(),sx=RENDER_SCALE*960/
  if(game.phase==='rally'&&ballSpeed>27){ctx.fillStyle='#fff1a733';for(let i=Math.max(0,game.trail.length-6);i<game.trail.length;i+=1){const t=game.trail[i],q=project(t.x,t.y,t.z),fade=i/game.trail.length;ctx.fillRect(q.x-1-fade,q.y-1-fade,2+fade*2,2+fade*2)}}if(game.bounceMark?.time>0){const q=project(game.bounceMark.x,game.bounceMark.y);ctx.strokeStyle='#fff5ab';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,10+(1-game.bounceMark.time/.35)*8,4,0,0,Math.PI*2);ctx.stroke()}
  const entities=[{kind:'net',y:22},...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){if(e.kind==='net'){drawNet();continue}const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z),squash=contactPulse>.65?1+(contactPulse-.65)*.9:1;drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22),squash,1/squash);continue}drawSprite(p,q,game)}
  if(game.contact&&game.contact.time>0){const c=project(game.contact.x,game.contact.y,game.contact.z),age=1-game.contact.time/.12;ctx.save();ctx.globalAlpha=Math.max(0,(1-age)*.5);ctx.strokeStyle='#fff4b8';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(c.x,c.y,4+age*5,2+age*2,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
- if(portraitCourt.matches){
- const left=camera.x+8,top=camera.y+6;ctx.fillStyle='#1b2939ee';ctx.fillRect(left,top,camera.width-16,52);ctx.fillStyle='#fff8df';ctx.font='bold 17px monospace';ctx.textAlign='left';ctx.fillText(`YOU ${game.score.points[0]}  /  CPU ${game.score.points[1]}    ${game.mode.toUpperCase()}`,left+10,top+21);ctx.fillStyle='#f9d46a';ctx.font='bold 13px monospace';ctx.fillText(`SERVE ${game.score.call}  ${game.message}`,left+10,top+42,camera.width-36);
- if(game.paused||game.phase==='pause'||game.phase==='over'){const y=camera.y+camera.height*.48;ctx.fillStyle='#1b2939ee';ctx.fillRect(left,y,camera.width-16,62);ctx.textAlign='center';ctx.fillStyle='#fff8df';ctx.font='bold 16px monospace';ctx.fillText(game.paused?'MATCH PAUSED':game.result,480,y+24,camera.width-36);ctx.fillStyle='#f9d46a';ctx.font='bold 14px monospace';ctx.fillText(game.paused?'TAP RESUME TO CONTINUE':game.outcome,480,y+48,camera.width-36);ctx.textAlign='left'}
- }else{
- ctx.fillStyle='#1b2939';ctx.fillRect(20,15,500,85);ctx.fillStyle='#f9d46a';ctx.font='bold 17px monospace';ctx.fillText('DRIVES & DINKS  /  '+(game.mode==='play'?'PLAY':'WATCH')+' · '+game.difficulty.toUpperCase(),32,38);ctx.fillStyle='#fff8df';ctx.font='bold 20px monospace';ctx.fillText(`YOU ${game.score.points[0]}`,32,64);ctx.fillText(`CPU ${game.score.points[1]}`,270,64);ctx.font='bold 11px monospace';ctx.fillText(game.players.slice(0,2).map((p,i)=>p.name||`Player ${i+1}`).join(' / '),32,85,225);ctx.fillText(game.players.slice(2).map((p,i)=>p.name||`Player ${i+3}`).join(' / '),270,85,238);ctx.font='bold 16px monospace';ctx.fillStyle='#fff6d9';ctx.fillText(`SERVE ${game.score.team===0?'YOU':'CPU'}  ${game.score.call}`,560,35);ctx.fillStyle='#f9d46a';ctx.fillText(game.phase==='over'?(game.score.winner===0?'YOU WIN!':'CPU WINS!'):(game.canHumanHit()?'HIT NOW!':game.message),560,62);if(game.paused){ctx.fillStyle='#1b2939';ctx.fillRect(235,260,490,75);ctx.textAlign='center';ctx.fillStyle='#fff6d9';ctx.font='bold 19px monospace';ctx.fillText('MATCH PAUSED',480,288);ctx.fillStyle='#f9d46a';ctx.fillText('TAP RESUME TO CONTINUE',480,316);ctx.textAlign='start'}else if(game.phase==='pause'||game.phase==='over'){ctx.fillStyle='#1b2939';ctx.fillRect(235,260,490,75);ctx.textAlign='center';ctx.fillStyle='#fff6d9';ctx.font='bold 19px monospace';ctx.fillText(game.result,480,288);ctx.fillStyle='#f9d46a';ctx.fillText(game.outcome,480,316);ctx.textAlign='start'};ctx.fillStyle='#fff';ctx.font='13px monospace';ctx.fillText((game.phase==='serve'?'SERVE AIM: ':'TARGET: ')+(game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'),560,83)
- }}
+ updateCourtHud(game);
+ if(game.paused||game.phase==='pause'||game.phase==='over'){const y=300;ctx.fillStyle='#1b2939ee';ctx.fillRect(235,y,490,65);ctx.textAlign='center';ctx.fillStyle='#fff8df';ctx.font='bold 16px monospace';ctx.fillText(game.paused?'MATCH PAUSED':game.result,480,y+25,465);ctx.fillStyle='#f9d46a';ctx.font='bold 14px monospace';ctx.fillText(game.paused?'TAP RESUME TO CONTINUE':game.outcome,480,y+49,465);ctx.textAlign='left'}
+}
+
 const liveGame=game;
 let replayEnabled=true,replayPlayback=null,replayStarted=0;
 const automaticallyReplayedPoints=new WeakSet();
