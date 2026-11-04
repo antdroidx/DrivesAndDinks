@@ -132,3 +132,10 @@ The current character/court renderer and gameplay now run at both the public roo
 ## Singles and doubles
 
 Match setup offers Doubles (2 vs 2) and Singles (1 vs 1). Singles uses the full court, traditional side-out scoring to 11, win by two, a two-number score call and immediate side-out after the server loses a rally. The server starts on their right at an even score and left at an odd score. Both formats retain diagonal serves, mandatory return/third-shot bounces and kitchen rules. Singles has two active athletes in simulation/rendering/replays, center recovery and no partner poaching. Play and CPU demonstration support both formats. The active format survives rematches; select a different format in New Game to change it.
+
+
+## DEV practice and reports
+
+In New Game → Match mode, choose Deep return, Third-shot drop, or Kitchen reset under Practice. Each session supplies ten repeatable feeds and a visible target. Use the normal shot buttons and aim/depth controls; the two soft drills begin with a short depth setting. Repeat Drill repeats the feed sequence, while New Game returns to match setup.
+
+Settings → Download Report exports the current session as JSON. The completion screen also offers a report and a short summary. Reports include contacts, rally/fault outcomes, player/body/paddle attributes, and practice attempts; they remain separate from the sound/UI queue and are bounded in memory. Nothing is uploaded automatically or retained after a page reload.
