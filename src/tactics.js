@@ -33,7 +33,7 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   const owner=shots===1?serveReceiver:pair.reduce((a,b)=>Math.abs(lane(a)-landing.x)<=Math.abs(lane(b)-landing.x)?a:b);
   const available=contacts(pair,team,ball,shots,bounces);
   let selected=owner,point=available.get(owner.id),poach=false;
-  if(shots>2){
+  if(shots>2&&pair.length>1){
     const partner=pair.find(p=>p!==owner),chance=available.get(partner.id);
     const iq=partner.abilities?.courtIQ??1,volley=partner.abilities?.volley??1,aggression=partner.playstyle?.aggression??partner.abilities?.aggression??.7;
     const initiative=iq*.4+volley*.35+aggression*.25;
@@ -47,9 +47,14 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   return {shot:shots,receiverId:selected.id,point:point||landing,poach,created:clock,expires:clock+(point?.time??.65)+.2};
 }
 
-export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter}){
+export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false}){
   const home=lane(p),team=p.team;
   if(p.id===receiverId&&team===incoming)return {x:point.x,y:point.y,role:'receive'};
+  if(singles){
+   if(shots<=2&&team===servingTeam)return {x:10,y:team===0?41:3,role:'hold'};
+   const x=clamp(10+(ball.x-10)*.25,5,15),deep=lastShot==='lob';
+   return {x,y:team===0?(deep?39:shots<=2?35:32):(deep?5:shots<=2?9:12),role:'singles-recover'};
+  }
   // Hold the serve formations through the mandatory bounce sequence.
   if(shots<=2&&team===servingTeam)return {x:home,y:team===0?41:3,role:'hold'};
   if(shots===1)return {x:home,y:kitchen(team),role:'hold'};

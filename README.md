@@ -127,3 +127,8 @@ Low-contact difficulty also scales with stature: taller bodies need more prepara
 ## Current release promotion and frozen Build 122
 
 The current character/court renderer and gameplay now run at both the public root and `/dev/`. The prior public release is frozen under `/archive/build-122/`, copied verbatim from published-site commit `764e17c106be25cc4e75985246ce66fd6313efe0` (Main source `5d488a3187c6ef0857c11be44f47315a3c2a15ab`). The workflow preserves that snapshot on every deployment, including its original build label and cache keys. Build 15 and the Build 48 prototype remain available.
+
+
+## Singles and doubles
+
+Match setup offers Doubles (2 vs 2) and Singles (1 vs 1). Singles uses the full court, traditional side-out scoring to 11, win by two, a two-number score call and immediate side-out after the server loses a rally. The server starts on their right at an even score and left at an odd score. Both formats retain diagonal serves, mandatory return/third-shot bounces and kitchen rules. Singles has two active athletes in simulation/rendering/replays, center recovery and no partner poaching. Play and CPU demonstration support both formats. The active format survives rematches; select a different format in New Game to change it.

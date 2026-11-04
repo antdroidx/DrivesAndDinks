@@ -144,10 +144,10 @@ export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1){
 export function inBounds(x,y){return x>=0&&x<=20&&y>=0&&y<=44}
 export function legalVolley(team,y,bounces,shotCount){if(shotCount<=2&&bounces===0)return 'Two-bounce fault';if(bounces===0&&(team===0?y<=29:y>=15))return 'Kitchen volley fault';return null}
 export class Score {
- constructor(){this.points=[0,0];this.team=0;this.server=2;this.first=true;this.rightPlayer=[1,0];this.serverPlayer=1;this.winner=null}
- point(winner){if(winner===this.team){this.points[winner]++;this.rightPlayer[winner]=1-this.rightPlayer[winner];if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else if(this.first||this.server===2){this.team=1-this.team;this.server=1;this.first=false;this.serverPlayer=this.rightPlayer[this.team]}else{this.server=2;this.serverPlayer=1-this.serverPlayer}}
+ constructor(format='doubles'){this.format=format;this.points=[0,0];this.team=0;this.server=2;this.first=true;this.rightPlayer=[1,0];this.serverPlayer=1;this.winner=null}
+ point(winner){if(this.format==='singles'){if(winner===this.team){this.points[winner]++;if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else this.team=winner;return}if(winner===this.team){this.points[winner]++;this.rightPlayer[winner]=1-this.rightPlayer[winner];if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else if(this.first||this.server===2){this.team=1-this.team;this.server=1;this.first=false;this.serverPlayer=this.rightPlayer[this.team]}else{this.server=2;this.serverPlayer=1-this.serverPlayer}}
  get player(){return this.serverPlayer}
- get call(){return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
+ get call(){if(this.format==='singles')return `${this.points[this.team]} - ${this.points[1-this.team]}`;return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
 export function move(p,tx,ty,dt){
  p.stamina=Math.max(0,Math.min(1,p.stamina??1));const staminaScale=.82+.18*p.stamina,dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=(p.abilities?.speed??C.speed)*staminaScale,acceleration=(p.abilities?.acceleration??C.accel)*(.78+.22*p.stamina),contactLock=p.swing>(p.swingDuration||.36)*.82,recovering=(p.recoveryTimer||0)>0,settling=(p.splitStepTimer||0)>0;
