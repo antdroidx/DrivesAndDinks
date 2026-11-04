@@ -1,4 +1,4 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup} from './roster.js?v=111';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup} from './roster.js?v=112';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -25,21 +25,29 @@ export function setupSelection({game,onStart,drawPreview}){
   const designer=document.createElement('section');designer.id='character-designer';designer.hidden=true;
   const designButton=document.createElement('button');designButton.type='button';designButton.textContent='CHARACTER DESIGNER';designButton.className='designer-open';
   const back=document.createElement('button');back.type='button';back.textContent='DONE · BACK TO MATCH SETUP';
-  const advanced=document.createElement('details');advanced.innerHTML='<summary>Ratings & equipment</summary>';
+  const advanced=document.createElement('section');advanced.className='paddle-options';
+  const courts=document.createElement('section');courts.id='court-options';courts.innerHTML='<h3>Court options</h3>';
+  const venue=document.querySelector('#game-art-venue');if(venue)courts.append(venue.closest('label'));
+  courts.append(document.querySelector('#court-choices').closest('fieldset'));
+  document.querySelector('.equipment-panel').append(document.querySelector('#paddle-color-choices').closest('fieldset'));
+  const appearance=document.querySelector('#appearance-options');
+  const expanded=document.createElement('section');expanded.id=appearance.id;expanded.className=appearance.className;
+  while(appearance.firstChild)expanded.append(appearance.firstChild);appearance.replaceWith(expanded);
+
   const setDesigner=open=>{designer.hidden=!open;dialog.classList.toggle('designing',open);for(const node of [...scroll.children])if(node!==designer)node.hidden=open;footer.hidden=open;dialog.setAttribute('aria-label',open?'Character designer':'Match setup')};
   designButton.onclick=()=>setDesigner(true);back.onclick=()=>setDesigner(false);
   for(const node of [...scroll.children]){
    if(node.matches('#dev-art-options,#appearance-options'))designer.append(node);
-   else if(node.matches('.equipment-panel,.ratings-heading,#loadout-stats'))advanced.append(node);
+   else if(node.matches('.equipment-panel'))advanced.append(node);
   }
-  designer.prepend(back);designer.append(document.querySelector('.player-preview'));scroll.append(designButton,advanced,designer);
+  designer.prepend(back);designer.append(document.querySelector('.player-preview'));scroll.append(designButton,advanced,courts,designer);
 
   let draft=normalizeSelection(),started=false,previewLineup=[];
   try{draft=normalizeSelection(JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null'))}catch{}
   const generated=createLineup(draft)[2];draft=normalizeSelection({...draft,gender:generated.gender,...generated.appearance});
   function equipmentCards(items,name,detail){return items.map(item=>{const labels=Object.entries(item.ratingModifiers??{}).filter(([,delta])=>delta).map(([key,delta])=>`${RATING_LABELS[key]} ${delta>0?'+':''}${delta}`);if(item.spinModifier)labels.push(`Spin ${item.spinModifier>0?'+':''}${item.spinModifier}`);if(item.sweetSpot&&item.sweetSpot!==1)labels.push(`Sweet spot ${item.sweetSpot>1?'+':''}${Math.round((item.sweetSpot-1)*100)}%`);return `<label class="choice-card"><input type="radio" name="${name}" value="${item.id}"><span class="choice-title">${item.name}</span><span class="choice-style">${item.style}</span><span class="choice-description">${detail(item)} ${labels.join(' · ')}</span></label>`}).join('')}
   function paddleCards(){return equipmentCards(PADDLES,'paddle',item=>item.description)}
-  const swatches=(items,name)=>`<details class="color-menu" data-color="${name}"><summary><i></i><span></span></summary><div class="color-options">${items.map(item=>`<label><input type="radio" name="${name}" value="${item.id}"><i style="background:${item.color??item.court}"></i>${item.name}</label>`).join('')}</div></details>`;
+  const swatches=(items,name)=>`<${['court','paddleColor'].includes(name)?'details':'div'} class="color-menu" data-color="${name}"><summary><i></i><span></span></summary><div class="color-options">${items.map(item=>`<label><input type="radio" name="${name}" value="${item.id}"><i style="background:${item.color??item.court}"></i>${item.name}</label>`).join('')}</div></${['court','paddleColor'].includes(name)?'details':'div'}>`;
   dialog.querySelector('#character-choices').innerHTML=`<select name="character" aria-label="Player archetype">${CHARACTERS.map(c=>`<option value="${c.id}">${c.style}</option>`).join('')}</select><label>Character<select name="gender"><option value="male">Male</option><option value="female">Female</option></select></label><label>Name (optional)<input name="customName" maxlength="40" placeholder="Generate a name"></label><p id="player-description" aria-live="polite"></p>`;
   dialog.querySelector('#paddle-choices').innerHTML=paddleCards();
   dialog.querySelector('#paddle-shape-choices').innerHTML=equipmentCards(PADDLE_SHAPES,'paddleShape',item=>item.description);
