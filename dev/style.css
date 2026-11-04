@@ -301,3 +301,20 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 #match-setup[data-compact="true"] .start-match{grid-column:1/-1}
 
 #match-setup .stat-row>span{min-width:0;overflow-wrap:anywhere;line-height:1.3}
+
+/* Landscape thumb lanes are outside the rendered court, so fingers cannot hide players. */
+
+.court-app main[data-court-layout="wide"] .game #court{position:absolute;left:var(--control-lane);top:0;width:calc(100% - 2 * var(--control-lane));height:100%;margin:0}
+.court-app main[data-court-layout="wide"] .game #shots{right:12px;width:calc(var(--control-lane) - 24px)}
+.court-app main[data-court-layout="wide"] .game #aim-pad{left:12px;width:calc(var(--control-lane) - 24px);min-width:0}
+.court-app main[data-court-layout="wide"] #court-hud{left:calc(var(--control-lane) + 8px);right:calc(var(--control-lane) + 8px)}
+
+/* Portrait uses otherwise spare vertical room for a separate thumb strip. */
+.court-app main[data-court-layout="stacked"] .playfield{grid-template-rows:42px var(--court-height) minmax(0,1fr)}
+.court-app main[data-court-layout="stacked"] .game #court{position:absolute;left:0;top:0;width:100%;height:calc(100% - 116px);margin:0}
+.court-app main[data-court-layout="stacked"] .game .controls{top:calc(100% - 116px);bottom:0;height:116px;border-top:1px solid #638b8b;background:#10222d}
+.court-app main[data-court-layout="stacked"] .game #aim-pad{left:3%;top:50%;bottom:auto;transform:translateY(-50%);width:30%;min-width:100px;height:80px}
+.court-app main[data-court-layout="stacked"] .game #shots{right:3%;top:50%;bottom:auto;transform:translateY(-50%);display:flex;flex-direction:row;gap:12px;width:calc(64% - 12px);height:80px}
+.court-app main[data-court-layout="stacked"] .game #shots button{flex:1;width:0;min-width:44px;height:80px;padding:4px;font-size:clamp(10px,2.4cqw,14px)}
+
+.court-app .control-lesson{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
