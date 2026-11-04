@@ -33,3 +33,12 @@ test('Pages promotes main to the public root and preserves Build 48 and Build 15
 });
 test("DEV packages branch assets separately from public main",async()=>{const workflow=readFileSync(new URL("../.github/workflows/pages.yml",import.meta.url),"utf8");assert.match(workflow,/cp -R src assets _site\/dev\//);assert.match(workflow,/cp -R _release\/src _release\/assets _site\/\r?\n/)});
 
+
+test('promotion preserves the exact previous public build and enables the public renderer',()=>{
+ const workflow=read('.github/workflows/pages.yml'),main=read('src/main.js');
+ assert.match(workflow,/ref: 764e17c106be25cc4e75985246ce66fd6313efe0/);
+ assert.match(workflow,/_public122\/ _site\/archive\/build-122\//);
+ assert.doesNotMatch(workflow,/version-build\.js[^\n]*_site\/archive\/build-122/);
+ assert.match(main,/const detailedArtAvailable=true/);
+ assert.match(workflow,/_release\/style-lab\.html _site\//);
+});

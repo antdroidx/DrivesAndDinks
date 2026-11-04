@@ -36,7 +36,8 @@ const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.p
 
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 
-const detailedArtAvailable=location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname);
+// The promoted release and DEV share the current character and court renderer.
+const detailedArtAvailable=true;
 
 let artPreferences={style:'anime',look:'sports',outfit:'performance',venue:'random',courtStyle:'painted',courtColors:'venue',height:'',build:''};
 

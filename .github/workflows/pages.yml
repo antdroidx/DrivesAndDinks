@@ -39,12 +39,21 @@ jobs:
         with:
           ref: dd6eae74fc3ae3a32c2d2a15cb27a27e4629124e
           path: _prototype
+      - name: Check out frozen public Build 122
+        uses: actions/checkout@v4
+        with:
+          # Exact generated public release before the current DEV promotion.
+          ref: 764e17c106be25cc4e75985246ce66fd6313efe0
+          path: _public122
       - name: Test source
         run: node --test
       - name: Package public release, archives and dev
         run: |
-          mkdir -p _site/archive/build-15 _site/prototype _site/dev
+          mkdir -p _site/archive/build-15 _site/archive/build-122 _site/prototype _site/dev
           rsync -a --exclude=.git --exclude=dev --exclude=preview _archive15/ _site/archive/build-15/
+
+          # Preserve the deployed root verbatim, including its Build 122 cache keys.
+          rsync -a --exclude=.git --exclude=archive --exclude=prototype --exclude=dev --exclude=preview _public122/ _site/archive/build-122/
 
           # Keep the historical Build 48 playable and inspectable.
           cp _prototype/index.html _prototype/style.css _prototype/studio.html _prototype/studio.css _site/prototype/
@@ -64,7 +73,9 @@ jobs:
           cp _release/index.html _release/style.css _release/studio.html _release/studio.css _site/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
           cp -R _release/src _release/assets _site/
-          cp _release/sw.js _site/
+          cp _release/sw.js _release/manifest.webmanifest _site/
+          if [ -f _release/character-lab.html ]; then cp _release/character-lab.html _release/character-lab.css _site/; fi
+          if [ -f _release/style-lab.html ]; then cp _release/style-lab.html _site/; fi
           node scripts/version-build.js "${{ github.run_number }}" _site
           touch _site/.nojekyll
       - name: Publish GitHub Pages
