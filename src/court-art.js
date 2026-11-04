@@ -49,9 +49,13 @@ export function createCourtArtRenderer(createImage=()=>new Image(),createCanvas=
   // Extend the painted edges into unusually tall/wide viewports without scaling
   // the court independently or putting a new horizon through the playing area.
   c.imageSmoothingEnabled=style!=='retro';const source=style==='retro'&&scene.pixel?scene.pixel:scene.image;
-  if(camera.y<placement.y)c.drawImage(source,0,0,source.width,1,camera.x,camera.y,camera.width,placement.y-camera.y);
-  if(camera.x<0)c.drawImage(source,0,0,1,source.height,camera.x,placement.y,-camera.x,placement.height);
-  if(camera.x+camera.width>960)c.drawImage(source,source.width-1,0,1,source.height,960,placement.y,camera.x+camera.width-960,placement.height);
+  const top=Math.min(camera.y,placement.y),bottom=Math.max(camera.y+camera.height,placement.y+placement.height);
+  // Reflect entire scenery panels, never a single edge column. The live court stays in its original projection.
+  for(let tile=Math.floor(camera.x/960);tile<=Math.floor((camera.x+camera.width)/960);tile++){
+   if(tile===0)continue;
+   c.save();c.translate(tile*960+(Math.abs(tile)%2?960:0),0);c.scale(Math.abs(tile)%2?-1:1,1);
+   c.drawImage(source,0,top,960,bottom-top);c.restore();
+  }
   c.drawImage(source,placement.x,placement.y,placement.width,placement.height);c.restore();return true;
  };
 }
