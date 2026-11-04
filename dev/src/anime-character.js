@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=131';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=131';
-import {legDimensions,plantFeet} from './detailed-character.js?v=131';
+import {sampleCharacterPose} from './pixel-character.js?v=132';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=132';
+import {legDimensions,plantFeet} from './detailed-character.js?v=132';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -27,6 +27,7 @@ function ribbon(c,chain,widths,color,ink,palette){
   path(c,[...inset(sides[left],.16),...inset(sides[left],.38).toReversed()],palette.light,null);
  }else path(c,[...sides[1],...chain.toReversed()],tone(color,-.16),null);
 }
+export {ribbon as drawAnimeRibbon};
 
 export function animeBodyDimensions(d){
  const leg=legDimensions(d),waist=d.waist*.87,legScale=Math.min(1,(waist+1)/(d.hip+1));

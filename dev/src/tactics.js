@@ -1,5 +1,5 @@
-import {C,stepBall,side,move} from './core.js?v=131';
-import {kitchenContact} from './player-feet.js?v=131';
+import {C,stepBall,side,move} from './core.js?v=132';
+import {kitchenContact} from './player-feet.js?v=132';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;

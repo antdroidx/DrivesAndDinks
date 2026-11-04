@@ -1,14 +1,14 @@
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=131';
-import {MatchJournal} from './match-journal.js?v=131';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=131';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=131';
-import {seededRandom} from './competition.js?v=131';
-import {kitchenFootContact} from './core.js?v=131';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=131';
-import {strokeForContact} from './player-facing.js?v=131';
-import {planIncoming,formationTarget,separateTargets,chooseCpuPlacement,volleyBrakeTarget,safeVolleyRecovery} from './tactics.js?v=131';
-import {createLineup,applyPhysique} from './roster.js?v=131';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget} from './core.js?v=131';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=132';
+import {MatchJournal} from './match-journal.js?v=132';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=132';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=132';
+import {seededRandom} from './competition.js?v=132';
+import {kitchenFootContact} from './core.js?v=132';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=132';
+import {strokeForContact} from './player-facing.js?v=132';
+import {planIncoming,formationTarget,separateTargets,chooseCpuPlacement,volleyBrakeTarget,safeVolleyRecovery} from './tactics.js?v=132';
+import {createLineup,applyPhysique} from './roster.js?v=132';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget} from './core.js?v=132';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
@@ -98,7 +98,7 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.random=seed==
   this.ball.vx+=normal.x*closing*restitution;this.ball.vy+=normal.y*closing*restitution*.2;this.ball.vz+=normal.z*closing*restitution;
   if(shot==='erne'||shot==='atp')player.outsideTimer=1.25;if(wasPoach)this.tacticalStats.poachHits++;if(poor)this.tacticalStats.mishitHits++;
   for(const p of this.players)if(p.team!==player.team){p.reactionWait=p.abilities.reaction+(1-(p.stamina??1))*.12;p.splitStepTimer=.16;}
-  this.contact={x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z,time:.12};
+  this.contact={x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z,time:.12,quality,difficulty,sweetSpot:player.contactSweetSpot,playerId:player.id,shot};
   this.replayContacts.push({time:this.clock,x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z});if(this.replayContacts.length>16)this.replayContacts.shift();
   if(!poor&&(shot==='atp'||shot==='erne'))this.replayHighlights.push({time:this.clock,x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z,label:shot==='atp'?'AROUND THE POST':'ERNE'});
   this.stats.shots[shot]=(this.stats.shots[shot]||0)+1;this.stats.teams[player.team].hits++;if(poor)this.stats.teams[player.team].mishits++;
@@ -138,7 +138,7 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.random=seed==
   Object.assign(this.ball,this.serveContact,{z:startZ,vx:0,vy:0,vz:tossSpeed,spin:0,spinX:0,spinY:0,spinZ:0});this.serveToss={type,shot,target,time:0,duration,startZ,tossSpeed};this.message=`TOSS · ${type.toUpperCase()} SERVE`;return true;
  }
  releaseServe(){
-  const toss=this.serveToss,type=toss.type,shot=toss.shot,target=toss.target;this.stats.serves++;this.serveToss=null;Object.assign(this.ball,this.serveContact,{vx:0,vy:0,vz:0});this.server.contactPoint={...this.serveContact};this.server.contactGrip='one';this.server.stroke='serve';this.server.animationShot='serve';this.server.animationContactStart=true;this.server.swingDuration=strokeDuration(this.server,'serve');this.server.preparation=null;this.emit('rally-start',{});this.emit('hit',{shot,stroke:'serve',playerId:this.server.id,quality:1,position:{...this.serveContact}});this.server.swingSide=1;this.server.swing=this.server.swingDuration;this.contact={...this.serveContact,time:.12};this.serveX=this.server.x;launch(this.ball,target,this.server.team===0?8:36,shot,this.paddleFor(this.server,'serve'));this.ball.spinY=0;this.last=this.server.team;this.shots=1;this.bounces=0;this.phase='rally';this.message=type.toUpperCase()+' SERVE'
+  const toss=this.serveToss,type=toss.type,shot=toss.shot,target=toss.target;this.stats.serves++;this.serveToss=null;Object.assign(this.ball,this.serveContact,{vx:0,vy:0,vz:0});this.server.contactPoint={...this.serveContact};this.server.contactGrip='one';this.server.stroke='serve';this.server.animationShot='serve';this.server.animationContactStart=true;this.server.swingDuration=strokeDuration(this.server,'serve');this.server.preparation=null;this.emit('rally-start',{});this.emit('hit',{shot,stroke:'serve',playerId:this.server.id,quality:1,position:{...this.serveContact}});this.server.swingSide=1;this.server.swing=this.server.swingDuration;this.contact={...this.serveContact,time:.12,quality:1,difficulty:0,sweetSpot:1,playerId:this.server.id,shot:'serve'};this.serveX=this.server.x;launch(this.ball,target,this.server.team===0?8:36,shot,this.paddleFor(this.server,'serve'));this.ball.spinY=0;this.last=this.server.team;this.shots=1;this.bounces=0;this.phase='rally';this.message=type.toUpperCase()+' SERVE'
  }
 updateSurfaceEffects(dt){
   const dry=this.surfaceKind==='indoor'?0:1;
