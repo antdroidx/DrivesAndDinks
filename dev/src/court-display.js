@@ -1,12 +1,7 @@
-export function courtSize(width,height){
- // Touch controls share the court rather than reserving side/bottom space.
- return Math.max(1,Math.floor(Math.min(width,height-46)));
-}
 export function courtFrame(width,height,stacked){
- if(!stacked)return {width:Math.max(1,Math.floor(width)),height:Math.max(1,Math.floor(height))};
- const size=Math.max(1,Math.floor(Math.min(width,height-46-116)));return {width:size,height:size+116};
+ // Width belongs to the available screen; the camera fits the remaining height.
+ return {width:Math.max(1,Math.floor(width)),height:Math.max(1,Math.floor(height-(stacked?46:0)))};
 }
-export function controlLaneWidth(width){return Math.min(160,Math.max(144,width*.14))}
 export async function toggleFullscreen(doc,element){
  if(doc.fullscreenElement||doc.webkitFullscreenElement){const exit=doc.exitFullscreen??doc.webkitExitFullscreen;if(exit)await exit.call(doc);return false}
  const request=element.requestFullscreen??element.webkitRequestFullscreen;
@@ -28,7 +23,7 @@ export function setupCourtDisplay(){
  const sync=()=>{const active=!!(document.fullscreenElement||document.webkitFullscreenElement);full.textContent=active?'EXIT FULL SCREEN':'FULL SCREEN';full.setAttribute('aria-pressed',String(active))};
  full.onclick=async()=>{try{await toggleFullscreen(document,main);sync()}catch{help.showModal()}};
  document.addEventListener('fullscreenchange',sync);document.addEventListener('webkitfullscreenchange',sync);
- const resize=()=>{const box=field.getBoundingClientRect(),stacked=innerWidth/innerHeight<1.2;main.dataset.courtLayout=stacked?'stacked':'wide';const frame=courtFrame(box.width,box.height,stacked);field.style.setProperty('--control-lane',controlLaneWidth(box.width)+'px');field.style.setProperty('--court-size',Math.min(frame.width,frame.height)+'px');field.style.setProperty('--court-width',frame.width+'px');field.style.setProperty('--court-height',frame.height+'px')};
+ const resize=()=>{const box=field.getBoundingClientRect(),stacked=innerWidth/innerHeight<1.2;main.dataset.courtLayout=stacked?'stacked':'wide';const frame=courtFrame(box.width,box.height,stacked);field.style.setProperty('--court-size',frame.width+'px');field.style.setProperty('--court-width',frame.width+'px');field.style.setProperty('--court-height',frame.height+'px')};
  new ResizeObserver(resize).observe(field);window.addEventListener('resize',resize);window.visualViewport?.addEventListener('resize',resize);resize();sync();
  let previous='';return game=>{const key=[...game.score.points,game.mode,game.score.call,game.message].join('|');if(key===previous)return;previous=key;hud.replaceChildren();const score=document.createElement('strong');score.textContent=`YOU ${game.score.points[0]}  /  CPU ${game.score.points[1]}`;const status=document.createElement('span');status.textContent=`${game.mode.toUpperCase()} / SERVE ${game.score.call} / ${game.message}`;hud.append(score,status)};
 }
