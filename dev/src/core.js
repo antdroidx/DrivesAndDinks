@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=118';
-import {strokeForContact} from './player-facing.js?v=118';
+import {kitchenContact} from './player-feet.js?v=120';
+import {strokeForContact} from './player-facing.js?v=120';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -50,24 +50,34 @@ export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocit
   aimError:Math.max(-.65,Math.min(.65,tangent*edge*(.6/Math.max(.7,control))))
  };
 }
+export function scorpionOpportunity(p,b){
+ const scale=p.physique?.heightScale??1,behind=p.team===0?b.y-p.y:p.y-b.y;
+ return behind>.15&&behind<1.15&&Math.abs(b.x-p.x)<1.1&&b.z>=4.4*scale&&b.z<=6.4*scale&&(p.abilities?.volley??1)>=.85;
+}
+export function bodyContactDifficulty(p,b,shot){
+ if(!p.physique)return 0;
+ const stature=(p.physique.height-177)/33,low=Math.max(0,Math.min(1,(1.8-(b.z??1))/1.8));
+ // Getting low is harder for taller bodies; a reflex behind-shoulder block still carries risk.
+ return stature*.12*low+(shot==='overhead'&&scorpionOpportunity(p,b)?.09+stature*.04:0);
+}
 export function paddleContactTarget(p,b,shot='drive'){
  const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,side=b.x>=p.x?1:-1,netward=p.team===0?-.46:.46;
  if(shot==='tweener')return {x:p.x,y:p.y-netward*1.4,z:Math.max(.4,Math.min(1.8,b.z??1))};
- if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+netward*.55,z:Math.max(5.2,Math.min(7,b.z??5.8))};
- return {x:p.x+side*(.62+.2*reach),y:p.y+netward,z:Math.max(.35,Math.min(4.5,b.z??1.2))};
+ if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+(scorpionOpportunity(p,b)?-netward*.65:netward*.55),z:Math.max((scorpionOpportunity(p,b)?4.4:5.2)*(p.physique?.heightScale??1),Math.min(7*(p.physique?.heightScale??1),b.z??5.8))};
+ return {x:p.x+side*(.62+.2*reach),y:p.y+netward,z:Math.max(.35,Math.min(4.5*(p.physique?.heightScale??1),b.z??1.2))};
 }
 export function paddleContactAvailable(p,b,shot='drive'){
  const target=paddleContactTarget(p,b,shot),shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*gripModifiers(p,b,shot).reach*shape.reach;
- return b.z>=0&&b.z<=(shot==='overhead'?7.4:5.2)&&((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2<=1;
+ return b.z>=0&&b.z<=(shot==='overhead'?7.4:5.2)*(p.physique?.heightScale??1)&&((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2<=1;
 }
 export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
  const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach
  const paddle=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-paddle.x)/(.95*reach))**2+((b.y-paddle.y)/.9)**2+((b.z-paddle.z)/1.1)**2)
  const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed),fatigue=1-Math.max(0,Math.min(1,p.stamina??1))
  const shotDifficulty={tweener:1.8,serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
- const easy=difficulty==='easy',highContact=shot==='overhead'?7:4.5
+ const easy=difficulty==='easy',highContact=(shot==='overhead'?7:4.5)*(p.physique?.heightScale??1)
  let chance=.009+.064*radial**2+.035*radial**4+.034*motion**2+.029*Math.max(0,.9-(b.z??1))/.9+.022*Math.max(0,(b.z??1)-highContact)/.7
- chance*=shotDifficulty*(1+fatigue*2)
+ chance*=shotDifficulty*(1+fatigue*2)*(1+bodyContactDifficulty(p,b,shot)*3)
  if(easy)chance*=.62
  if(buffered)chance*=easy?.52:.84
  const specialReturn=b.shot==='atp'||b.shot==='erne'?1.55:1,control=Math.max(.55,(p.abilities?.control??1)*(p.paddle?.control??1)*shape.control*gripModifiers(p,b,shot).control),technique=Math.max(.72,shotSkill(p,shot)),defense=Math.max(.75,p.abilities?.defense??1)
@@ -79,8 +89,8 @@ export function contactQuality(p,b,shot,buffered=false,random=Math.random(),diff
  return {chance,mishit,quality:mishit?Math.max(easy?.65:.45,.74-chance*.55):1-Math.min(.12,chance*.2)}
 }
 export function contactDifficulty(p,b,shot='drive'){
- const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,target=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2),motion=Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed),height=shot==='overhead'?Math.abs((b.z??1)-6):Math.max(0,Math.abs((b.z??1)-1.6)-1.1)/2.4,special=b.shot==='atp'||b.shot==='erne'?.18:0;
- return Math.max(0,Math.min(1,radial*.5+motion*.32+height*.18+special));
+ const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,target=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2),motion=Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed),height=shot==='overhead'?Math.abs((b.z??1)-6*(p.physique?.heightScale??1)):Math.max(0,Math.abs((b.z??1)-1.6)-1.1)/2.4,special=b.shot==='atp'||b.shot==='erne'?.18:0;
+ return Math.max(0,Math.min(1,radial*.5+motion*.32+height*.18+special+bodyContactDifficulty(p,b,shot)));
 }
 export function netCrossingX(start,target){
  const dy=target.y-start.y;
@@ -146,7 +156,7 @@ export function move(p,tx,ty,dt){
  const turnFactor=(reversing?.62:1)*(0.85+Math.min(.25,Math.max(0,(acceleration-C.accel)/120))),maxDelta=acceleration*1.5*turnFactor*dt;
  let dvx=desiredVx-p.vx,dvy=desiredVy-p.vy,dv=Math.hypot(dvx,dvy);if(dv>maxDelta&&dv){dvx*=maxDelta/dv;dvy*=maxDelta/dv}
  p.vx+=dvx;p.vy+=dvy;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;
- const movingSpeed=Math.hypot(p.vx,p.vy),agility=Math.max(8,p.abilities?.speed??C.speed);if(movingSpeed>5)p.stamina=Math.max(0,p.stamina-dt*(movingSpeed-4)*.0045*(12/agility));else p.stamina=Math.min(1,p.stamina+dt*.009*(agility/12));if(!contactLock&&!recovering&&!settling&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
+ const movingSpeed=Math.hypot(p.vx,p.vy),agility=Math.max(8,p.abilities?.speed??C.speed);if(movingSpeed>5)p.stamina=Math.max(0,p.stamina-dt*(movingSpeed-4)*.0045*(12/agility)/Math.max(.5,p.abilities?.endurance??1));else p.stamina=Math.min(1,p.stamina+dt*.009*(agility/12));if(!contactLock&&!recovering&&!settling&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
  p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=settling?'splitStep':recovering?'recover':p.slideTimer>0?'slide':movingSpeed<.7?'ready':(p.team===0?p.vy>2:p.vy< -2)&&Math.abs(p.vy)>Math.abs(p.vx)?'backpedal':Math.abs(p.vx)>Math.abs(p.vy)*1.3?(d>4?'crossover':'shuffle'):'run';
  const outside=true;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));const deep=true;p.y=p.team===0?Math.max(23,Math.min(deep?47:44,p.y)):Math.max(deep?-3:0,Math.min(21,p.y));
 }
@@ -174,7 +184,7 @@ export function selectShot(p,b,desired,random=Math.random()){
  if(desired==='attack'||desired==='drive'){
   if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne'
   if((b.x<C.netPostLeft-C.ballRadius||b.x>C.netPostRight+C.ballRadius)&&nearSideline&&b.z<3.2){const cross=netCrossingX(b,{x:b.x<0?1:19,y:p.team===0?4:40});if(cross<C.netPostLeft-C.netPostRadius-C.ballRadius||cross>C.netPostRight+C.netPostRadius+C.ballRadius)return 'atp'}
-  return b.z>=5.2?'overhead':'drive'
+  return scorpionOpportunity(p,b)||b.z>=5.2*(p.physique?.heightScale??1)?'overhead':'drive'
  }
  return desired
 }

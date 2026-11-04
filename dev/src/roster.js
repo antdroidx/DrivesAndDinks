@@ -1,5 +1,5 @@
-import {competitionRecord} from './competition.js?v=118';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=118';
+import {competitionRecord} from './competition.js?v=120';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=120';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -233,4 +233,15 @@ export function levelLineup(level='demo',random=Math.random){
   const source=CHARACTERS.find(c=>c.id===character),attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,baseline+(source.ratings[key]-70)*.45))]));
   return buildProfile({character,shirtColor:['green','white','orange','purple'][index],paddleColor:['mint','blue','yellow','coral'][index]},{attributes,random});
  });
+}
+
+// Body modifiers layer over archetype abilities; repeat edits never compound.
+export function applyPhysique(player,appearance=player.appearance??{}){
+ const finite=(value,fallback)=>Number.isFinite(value)?value:fallback;
+ const height=Math.max(145,Math.min(210,finite(appearance.height,177))),build=Math.max(.05,Math.min(1.1,finite(appearance.build,.5225)));
+ const h=(height-177)/33,b=(build-.5225)/.5775;
+ const modifiers={reach:1+.09*h,power:1+.04*h+.10*b,speed:1-.04*h-.06*b,acceleration:1-.07*h-.12*b,endurance:1-.04*h-.08*b,volley:1-.03*h-.04*b};
+ const baseAbilities={...(player.baseAbilities??player.abilities)};
+ const abilities={...baseAbilities};for(const [key,multiplier] of Object.entries(modifiers))abilities[key]=(baseAbilities[key]??1)*multiplier;
+ return {...player,baseAbilities,abilities,appearance:{...appearance,height,build},physique:{height,build,heightScale:height/177,modifiers}};
 }

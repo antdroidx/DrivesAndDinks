@@ -1,36 +1,36 @@
-import {playerFeet,footSole} from './player-feet.js?v=118';
+import {playerFeet,footSole} from './player-feet.js?v=120';
 
-import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=118';
+import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=120';
 
-import {drawCourtNet} from './court-net.js?v=118';
+import {drawCourtNet} from './court-net.js?v=120';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=118';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=120';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=118';
+import {createAnimeGameRenderer} from './anime-game.js?v=120';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=118';
+import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=120';
 
-import {setupCourtDisplay} from './court-display.js?v=118';
+import {setupCourtDisplay} from './court-display.js?v=120';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=118';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=120';
 
-import {courtCamera,courtAim} from './court-camera.js?v=118';
+import {courtCamera,courtAim} from './court-camera.js?v=120';
 
-import {movingStance} from './detailed-character.js?v=118';
+import {movingStance} from './detailed-character.js?v=120';
 
-import {sampleMatchAnimation} from './match-animation.js?v=118';
+import {sampleMatchAnimation} from './match-animation.js?v=120';
 
-import {setupSelection} from './selection.js?v=118';
+import {setupSelection} from './selection.js?v=120';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=118';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=120';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=118';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=120';
 
-import {Game} from './game.js?v=118';
+import {Game} from './game.js?v=120';
 
-import {selectShot,serveAim} from './core.js?v=118';
+import {selectShot,serveAim} from './core.js?v=120';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=118';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=120';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -84,7 +84,7 @@ if(detailedArtAvailable){
 
  const panel=document.createElement('div');panel.id='dev-art-options';panel.style.cssText='display:grid;gap:8px;margin:10px 0';
 
- panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Height and build change appearance only.</small><a href="style-lab.html">Character motion viewer ↗</a>`;
+ panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower acceleration and harder low contacts. Broader: more power, slower movement and more fatigue. Leaner / shorter: quicker coverage. Shorter players handle low balls and behind-shoulder reflex blocks more easily.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
 
  document.querySelector('.setup-top').after(panel);
 
@@ -92,7 +92,7 @@ if(detailedArtAvailable){
 
  const sync=()=>{button.textContent='ART: '+(artPreferences.style==='anime'?'ANIME':'ANIME PIXEL');button.setAttribute('aria-label','Switch character art. Current style: '+(artPreferences.style==='anime'?'Anime':'Anime Pixel'));panel.querySelector('#game-art-style').value=artPreferences.style};
 
- for(const key of ['style','look','outfit','venue','height','build']){const select=panel.querySelector('#game-art-'+key);select.value=artPreferences[key]||(key==='height'?'177':key==='build'?'45':'');if(select.type==='range'){const value=document.createElement('output');const updateValue=()=>{const inches=Math.round(Number(select.value)/2.54);value.textContent=key==='height'?Math.floor(inches/12)+' ft '+(inches%12)+' in':select.value;select.setAttribute('aria-valuetext',value.textContent)};updateValue();select.after(value);select.oninput=()=>{select.onchange();updateValue()}}select.onchange=()=>{artPreferences[key]=select.value;if(key==='height'||key==='build'){const number=Number(select.value);artPreferences[key]=select.value!==''&&Number.isFinite(number)?String(Math.max(key==='height'?145:0,Math.min(key==='height'?210:100,number))):'';select.value=artPreferences[key]}if(key==='venue')refreshVenue();footPlants.clear();saveArtPreferences();sync();selectionUI?.refreshPreview()}}
+ for(const key of ['style','look','outfit','venue','height','build']){const select=panel.querySelector('#game-art-'+key);select.value=artPreferences[key]||(key==='height'?'177':key==='build'?'45':'');if(select.type==='range'){const value=document.createElement('output');const updateValue=()=>{const inches=Math.round(Number(select.value)/2.54);value.textContent=key==='height'?Math.floor(inches/12)+' ft '+(inches%12)+' in':select.value;select.setAttribute('aria-valuetext',value.textContent)};updateValue();select.after(value);select.oninput=()=>{select.onchange();updateValue()}}select.onchange=()=>{artPreferences[key]=select.value;if(key==='height'||key==='build'){const number=Number(select.value);artPreferences[key]=select.value!==''&&Number.isFinite(number)?String(Math.max(key==='height'?145:0,Math.min(key==='height'?210:100,number))):'';select.value=artPreferences[key]}if(key==='height'||key==='build')game.setPhysique({height:Number(panel.querySelector('#game-art-height').value),build:.05+Number(panel.querySelector('#game-art-build').value)*.0105});if(key==='venue')refreshVenue();footPlants.clear();saveArtPreferences();sync();selectionUI?.refreshPreview()}}
 
  document.querySelector('#match-setup form').addEventListener('change',event=>{if(event.target.name==='court'){artPreferences.courtColors='custom';saveArtPreferences()}});
 
@@ -375,7 +375,7 @@ function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
-selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,onStart:()=>{refreshVenue();if(balanceLevel){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
+selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,getPhysique:()=>({height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Number(artPreferences.build||document.querySelector('#game-art-build')?.value||45)*.0105}),onStart:()=>{refreshVenue();if(balanceLevel){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
 
 const scenarioParams=new URLSearchParams(location.search),scenarioType=scenarioParams.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(scenarioParams.get('speed'))||.65));
 
