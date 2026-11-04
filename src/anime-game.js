@@ -10,8 +10,8 @@ export function animeGameLayout(options,design){
 }
 export function resolveAnimeGameDesign(options){
  const base=matchDesign(options.appearance??{},options.characterId??'',options.designId??'');
- const height=Number.isFinite(options.customHeight)?Math.max(145,Math.min(210,options.customHeight)):base.height,build=Number.isFinite(options.customBuild)?Math.max(.05,Math.min(1.1,options.customBuild)):base.build;
- return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance'};
+ const height=Number.isFinite(options.customHeight)?Math.max(145,Math.min(210,options.customHeight)):(options.appearance?.height??base.height),build=Number.isFinite(options.customBuild)?Math.max(.05,Math.min(1.1,options.customBuild)):(options.appearance?.build??base.build);
+ return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance',hair:options.appearance?.hairStyle??base.hair,headwear:options.appearance?.headwear??'none'};
 }
 export function createAnimeGameRenderer(createCanvas=()=>document.createElement('canvas')){
  const contexts=new WeakMap(),palettes=new Map();

@@ -8,33 +8,10 @@ import {createCourtSurfaceRenderer} from '../src/court-art.js';
 function incoming(team=0){const b={x:18,y:team===0?12:32,z:2,vx:0,vy:0,vz:0,spin:0};launch(b,18,team===0?36:8,'drive');return b}
 function pair(team=0){return [0,1].map(id=>({...playerProfile(),id,team,x:id?13:4,y:team===0?38:6,lane:id?15:5,coverLane:id?15:5,vx:0,vy:0,reactionWait:0}))}
 
-test('human poach hands the next incoming ball to the partner with cover positioning',()=>{
- const players=pair(),ball=incoming();
- const plan=planIncoming({players,team:0,ball,shots:4,bounces:0,clock:0,requestedPoachId:0});
- assert.equal(plan.receiverId,0);
- assert.equal(plan.poach,true);
- assert.equal(formationTarget(players[0],{ball,incoming:0,receiverId:0,point:plan.point,shots:4,servingTeam:1,lastShot:'drive',lastHitter:2}).role,'receive');
- assert.equal(formationTarget(players[1],{ball,incoming:0,receiverId:0,point:plan.point,shots:4,servingTeam:1,lastShot:'drive',lastHitter:2}).role,'cover-middle');
-});
-
-test('human poach does not replace the mandatory first return',()=>{
- const players=pair(),ball=incoming();
- const plan=planIncoming({players,team:0,ball,shots:1,bounces:0,serveReceiver:players[0],clock:0,requestedPoachId:0});
- assert.equal(plan.receiverId,0);
- assert.equal(plan.poach,false);
-});
-
-test('game consumes a poach request after planning one incoming shot',()=>{
- const g=new Game({seed:7});g.mode='play';g.phase='rally';g.last=1;g.shots=4;g.bounces=0;
- Object.assign(g.players[0],{x:4,y:40,coverLane:5});
- Object.assign(g.players[1],{x:13,y:34,coverLane:15});
- g.ball=incoming();
- g.requestPoach();
- assert.equal(g.humanPoachRequest,0);
- g.update(C.dt);
- assert.equal(g.teamPlan.receiverId,0);
- assert.equal(g.teamPlan.poach,true);
- assert.equal(g.humanPoachRequest,null);
+test('automatic interceptions depend on IQ, volley and aggression',()=>{
+ const evaluate=(iq,volley,aggression)=>{const players=pair();Object.assign(players[0],{x:5,y:40});Object.assign(players[1],{x:13,y:30,abilities:{...players[1].abilities,courtIQ:iq,volley},playstyle:{aggression}});const ball={x:9,y:12,z:2};launch(ball,9,36,'drive');return planIncoming({players,team:0,ball,shots:4,bounces:0,clock:0})};
+ assert.equal(evaluate(1.1,1.1,.9).poach,true);assert.equal(evaluate(.6,.6,.2).poach,false);
+ const g=new Game();assert.equal(g.requestPoach,undefined);
 });
 
 test('outdoor hard stops make brief dust and indoor courts stay almost silent',()=>{

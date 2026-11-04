@@ -26,7 +26,7 @@ function contacts(players,team,ball,shots,bounces){
   return found;
 }
 
-export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0,requestedPoachId=null}){
+export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0}){
   const pair=players.filter(p=>p.team===team),flight={...ball};
   const landingTime=Math.max(0,(flight.vz+Math.sqrt(Math.max(0,flight.vz**2+2*C.gravity*flight.z)))/C.gravity);
   const landing={x:clamp(flight.x+flight.vx*landingTime,1,19),y:clamp(flight.y+flight.vy*landingTime,team===0?23:-3,team===0?47:21)};
@@ -35,15 +35,13 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   let selected=owner,point=available.get(owner.id),poach=false;
   if(shots>2){
     const partner=pair.find(p=>p!==owner),chance=available.get(partner.id);
+    const iq=partner.abilities?.courtIQ??1,volley=partner.abilities?.volley??1,aggression=partner.playstyle?.aggression??partner.abilities?.aggression??.7;
+    const initiative=iq*.4+volley*.35+aggression*.25;
     const nearLine=team===0?partner.y<=34:partner.y>=10;
-    const earlier=chance&&(!point||chance.time+.08<point.time);const middleAttack=chance&&chance.x>=7&&chance.x<=13&&(!point||chance.time<=point.time+.1)&&(partner.abilities?.courtIQ??1)>=.9;
-    if(chance&&chance.bounces===0&&(earlier||middleAttack)&&nearLine&&chance.x>=5&&chance.x<=15&&Math.abs(chance.x-partner.x)<6){
+    const earlier=chance&&(!point||chance.time+Math.max(.03,.3-initiative*.24)<point.time);const middleAttack=chance&&chance.x>=7&&chance.x<=13&&(!point||chance.time<=point.time+.1)&&(partner.abilities?.courtIQ??1)>=.9;
+    if(initiative>=.72&&iq>=.75&&volley>=.75&&chance&&chance.bounces===0&&(earlier||middleAttack)&&nearLine&&chance.x>=5&&chance.x<=15&&Math.abs(chance.x-partner.x)<6){
       selected=partner;point=chance;poach=true;
       }else if(!point&&chance){selected=partner;point=chance}
-  }
-  if(requestedPoachId!==null&&requestedPoachId!==selected.id&&!(shots<=2&&serveReceiver)){
-    const partner=pair.find(p=>p.id===requestedPoachId),requestedContact=partner&&available.get(partner.id);
-    if(partner){selected=partner;poach=true;if(requestedContact)point=requestedContact;else point=landing}
   }
   // A locked owner prevents both teammates chasing a continually changing nearest-ball estimate.
   return {shot:shots,receiverId:selected.id,point:point||landing,poach,created:clock,expires:clock+(point?.time??.65)+.2};

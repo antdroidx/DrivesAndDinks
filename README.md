@@ -37,7 +37,7 @@ At a real hit, the solid paddle face targets the recorded ball contact point and
 
 Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve solid-color guards remain independently selectable; all paddle faces stay black. Six court combinations are available, including the added Black / Gray, Violet / Blue, and Gray / Red palettes. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed.
 
-DEV preview adds a human poach control as an optional risk/reward action: arm the partner with 4 or the POACH button, still choose and time your shot, and accept extra mishit pressure. It also adds subtle court grit, softer anime edges, restrained expressions, surface-aware dust, and one deliberate contact-focused replay move. Side-view replays intentionally stay on the existing front/back character model for now.
+DEV uses automatic poaching weighted by Court IQ, volley ability and aggression. Character designer opens from setup; height/build sliders affect appearance only. Modern procedural venues fill wide screens without stretched image borders. Replays still use front/back characters with pan/zoom; true side profiles require additional rendering work.
 
 ## Match setup and controls
 
