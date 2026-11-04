@@ -1,27 +1,31 @@
-import {createAnimeGameRenderer} from './anime-game.js?v=106';
-import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=106';
-import {setupCourtDisplay} from './court-display.js?v=106';
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=106';
-import {courtCamera,courtAim} from './court-camera.js?v=106';
-import {movingStance} from './detailed-character.js?v=106';
-import {sampleMatchAnimation} from './match-animation.js?v=106';
-import {setupSelection} from './selection.js?v=106';
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=106';
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=106';
-import {Game} from './game.js?v=106';
-import {selectShot,serveAim} from './core.js?v=106';
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=106';
+import {drawCourtNet} from './court-net.js?v=107';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=107';
+import {createAnimeGameRenderer} from './anime-game.js?v=107';
+import {COURT_VENUES,chooseCourtVenue,drawCourtVenue} from './court-venues.js?v=107';
+import {setupCourtDisplay} from './court-display.js?v=107';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=107';
+import {courtCamera,courtAim} from './court-camera.js?v=107';
+import {movingStance} from './detailed-character.js?v=107';
+import {sampleMatchAnimation} from './match-animation.js?v=107';
+import {setupSelection} from './selection.js?v=107';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=107';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=107';
+import {Game} from './game.js?v=107';
+import {selectShot,serveAim} from './core.js?v=107';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=107';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2;ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 const detailedArtAvailable=location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname);
-let artPreferences={style:'anime',look:'sports',outfit:'performance',venue:'random'};
+let artPreferences={style:'anime',look:'sports',outfit:'performance',venue:'random',courtStyle:'painted'};
 try{const saved=JSON.parse(localStorage.getItem('drives-dinks.dev-art.v1')||'null');if(saved)for(const key of Object.keys(artPreferences))if(typeof saved[key]==='string')artPreferences[key]=saved[key]}catch{}
 if(!['anime','anime-pixel'].includes(artPreferences.style))artPreferences.style='anime';
 if(['anime','anime-pixel'].includes(balanceQuery.get('art')))artPreferences.style=balanceQuery.get('art');
 if(!['sports','storybook'].includes(artPreferences.look))artPreferences.look='sports';
 if(!['performance','polo','shorts'].includes(artPreferences.outfit))artPreferences.outfit='performance';
 if(!['random','custom',...COURT_VENUES.map(v=>v.id)].includes(artPreferences.venue))artPreferences.venue='random';
+if(!['painted','retro'].includes(artPreferences.courtStyle))artPreferences.courtStyle='painted';
+const drawPaintedVenue=detailedArtAvailable?createCourtArtRenderer():null,drawSurface=createCourtSurfaceRenderer((x,y)=>project(x,y));
 const drawAnimeGame=createAnimeGameRenderer();let activeVenue=null;
 function refreshVenue(){activeVenue=detailedArtAvailable?(artPreferences.venue==='random'?chooseCourtVenue(activeVenue?.id):COURT_VENUES.find(v=>v.id===artPreferences.venue)??null):null}refreshVenue();
 function saveArtPreferences(){try{localStorage.setItem('drives-dinks.dev-art.v1',JSON.stringify(artPreferences))}catch{}}
@@ -35,11 +39,11 @@ if(detailedArtAvailable){const label=document.createElement('label');label.textC
 function drawPlayer(c,options){return detailedArtAvailable?drawAnimeGame(c,{...options,style:artPreferences.style,look:artPreferences.look,outfit:artPreferences.outfit}):drawPixelCharacter(c,options)}
 if(detailedArtAvailable){
  const panel=document.createElement('div');panel.id='dev-art-options';panel.style.cssText='display:grid;gap:8px;margin:10px 0';
- panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless / crop top + shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}<option value="custom">Custom court colors</option></select></label><a href="style-lab.html">Character motion viewer ↗</a>`;
+ panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless / crop top + shorts</option></select></label><label>Court art<select id="game-art-courtStyle"><option value="painted">Ghibli-inspired</option><option value="retro">Retro Pixel</option></select></label><label>Court setting<select id="game-art-venue"><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}<option value="custom">Custom court colors</option></select></label><a href="style-lab.html">Character motion viewer ↗</a>`;
  document.querySelector('.setup-top').after(panel);
  const button=document.createElement('button');button.id='character-art';
  const sync=()=>{button.textContent='ART: '+(artPreferences.style==='anime'?'ANIME':'ANIME PIXEL');button.setAttribute('aria-label','Switch character art. Current style: '+(artPreferences.style==='anime'?'Anime':'Anime Pixel'));panel.querySelector('#game-art-style').value=artPreferences.style};
- for(const key of ['style','look','outfit','venue']){const select=panel.querySelector('#game-art-'+key);select.value=artPreferences[key];select.onchange=()=>{artPreferences[key]=select.value;if(key==='venue')refreshVenue();footPlants.clear();saveArtPreferences();sync();selectionUI?.refreshPreview()}}
+ for(const key of ['style','look','outfit','venue','courtStyle']){const select=panel.querySelector('#game-art-'+key);select.value=artPreferences[key];select.onchange=()=>{artPreferences[key]=select.value;if(key==='venue')refreshVenue();footPlants.clear();saveArtPreferences();sync();selectionUI?.refreshPreview()}}
  document.querySelector('#match-setup form').addEventListener('change',event=>{if(event.target.name==='court'){artPreferences.venue='custom';panel.querySelector('#game-art-venue').value='custom';refreshVenue();saveArtPreferences()}});
  sync();document.querySelector('.header-actions').append(button);button.onclick=()=>{artPreferences.style=artPreferences.style==='anime'?'anime-pixel':'anime';footPlants.clear();saveArtPreferences();sync();selectionUI?.refreshPreview()};
 }
@@ -102,8 +106,13 @@ function drawPixelBall(x,y,radius,squashX=1,squashY=1){
  ctx.fillStyle='#75672c';ctx.fillRect(Math.round(x-rx*.15),Math.round(y-ry),1,Math.max(2,Math.round(ry*.5)));ctx.fillRect(Math.round(x+rx*.55),Math.round(y-ry*.2),1,Math.max(2,Math.round(ry*.7)));
 }
 const courtSpeckles=Array.from({length:190},(_,i)=>({x:((i*137)%1000)/1000*30-5,y:((i*269)%1000)/1000*48-2}));
-function drawNet(){const netL=project(-.5,22),netR=project(20.5,22),netHeight=3*14*(.9+22/125);ctx.fillStyle='#25323c';ctx.fillRect(netL.x,netL.y-netHeight,netR.x-netL.x,netHeight);ctx.strokeStyle='#94a79e';ctx.lineWidth=1;for(let x=netL.x;x<netR.x;x+=10){ctx.beginPath();ctx.moveTo(x,netL.y-netHeight);ctx.lineTo(x,netL.y);ctx.stroke()}for(let y=netL.y-netHeight+6;y<netL.y;y+=7){ctx.beginPath();ctx.moveTo(netL.x,y);ctx.lineTo(netR.x,y);ctx.stroke()}ctx.fillStyle='#f9e6bd';ctx.fillRect(netL.x,netL.y-netHeight-2,netR.x-netL.x,5);ctx.fillStyle='#bdc8bf';ctx.fillRect(netL.x-3,netL.y-netHeight-6,5,netHeight+9);ctx.fillRect(netR.x-2,netR.y-netHeight-6,5,netHeight+9);}
-function render(game=liveGame){const camera=currentCamera(),sx=RENDER_SCALE*960/camera.width,sy=RENDER_SCALE*600/camera.height;ctx.setTransform(sx,0,0,sy,-camera.x*sx,-camera.y*sy);const customPalette=COURT_PALETTES.find(item=>item.id===game.players[0]?.appearance?.court)??COURT_PALETTES[0],palette=activeVenue??customPalette;if(activeVenue)drawCourtVenue(ctx,activeVenue,camera);else{ctx.fillStyle=palette.background;ctx.fillRect(camera.x,camera.y,camera.width,camera.height);ctx.fillStyle=palette.background;for(let i=0;i<960;i+=40)ctx.fillRect(i,110,20,490)}poly([[-6,-2.4],[26,-2.4],[26,47.1],[-6,47.1]],palette.outer,null);poly([[-5.7,-2.4],[25.7,-2.4],[25.7,46.4],[-5.7,46.4]],palette.outerLight,null);poly([[-5.4,-2],[25.4,-2],[25.4,46],[-5.4,46]],palette.apron,null);poly([[0,0],[20,0],[20,44],[0,44]],palette.court,palette.line);poly([[0,15],[20,15],[20,29],[0,29]],palette.kitchen,null,palette.line);ctx.fillStyle='#ffffff0b';for(const speck of courtSpeckles){const q=project(speck.x,speck.y);ctx.fillRect(q.x,q.y,2,1)}poly([[0,0],[20,0],[20,44],[0,44]],'transparent',palette.line,3);line([0,15],[20,15],palette.line);line([0,29],[20,29],palette.line);line([10,0],[10,15],palette.line);line([10,29],[10,44],palette.line);if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):previewShot==='dink'?14:previewShot==='drop'?12:previewShot==='slice'?6:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
+function drawNet(){const netL=project(-.5,22),netR=project(20.5,22),netHeight=3*14*(.9+22/125);drawCourtNet(ctx,netL,netR,netHeight,{retro:artPreferences.courtStyle==='retro'})}
+function render(game=liveGame){const camera=currentCamera(),sx=RENDER_SCALE*960/camera.width,sy=RENDER_SCALE*600/camera.height;ctx.setTransform(sx,0,0,sy,-camera.x*sx,-camera.y*sy);
+ const customPalette=COURT_PALETTES.find(item=>item.id===game.players[0]?.appearance?.court)??COURT_PALETTES[0],courtStyle=detailedArtAvailable?artPreferences.courtStyle:'painted',basePalette=activeVenue??customPalette,palette=courtStyle==='retro'?retroCourtPalette(basePalette):basePalette;
+ const illustrated=activeVenue&&drawPaintedVenue?.(ctx,activeVenue,camera,courtStyle);
+ if(!illustrated){if(activeVenue)drawCourtVenue(ctx,activeVenue,camera);else{ctx.fillStyle=palette.background;ctx.fillRect(camera.x,camera.y,camera.width,camera.height)}poly([[-6,-2.4],[26,-2.4],[26,47.1],[-6,47.1]],palette.outer,null);poly([[-5.7,-2.4],[25.7,-2.4],[25.7,46.4],[-5.7,46.4]],palette.outerLight,null);poly([[-5.4,-2],[25.4,-2],[25.4,46],[-5.4,46]],palette.apron,null)}
+ drawSurface(ctx,palette,courtStyle);
+ if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):previewShot==='dink'?14:previewShot==='drop'?12:previewShot==='slice'?6:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
  const ballSpeed=Math.hypot(game.ball.vx||0,game.ball.vy||0,game.ball.vz||0),contactPulse=game.contact?Math.max(0,1-game.contact.time/.12):0;
  if(game.phase==='rally'&&ballSpeed>27){ctx.fillStyle='#fff1a733';for(let i=Math.max(0,game.trail.length-6);i<game.trail.length;i+=1){const t=game.trail[i],q=project(t.x,t.y,t.z),fade=i/game.trail.length;ctx.fillRect(q.x-1-fade,q.y-1-fade,2+fade*2,2+fade*2)}}if(game.bounceMark?.time>0){const q=project(game.bounceMark.x,game.bounceMark.y);ctx.strokeStyle='#fff5ab';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,10+(1-game.bounceMark.time/.35)*8,4,0,0,Math.PI*2);ctx.stroke()}
  const entities=[{kind:'net',y:22},...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){if(e.kind==='net'){drawNet();continue}const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z),squash=contactPulse>.65?1+(contactPulse-.65)*.9:1;drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22),squash,1/squash);continue}drawSprite(p,q,game)}
