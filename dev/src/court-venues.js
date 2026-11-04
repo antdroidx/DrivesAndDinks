@@ -8,6 +8,16 @@ function polygon(c,points,color){c.beginPath();points.forEach(([x,y],i)=>i?c.lin
 function oval(c,x,y,rx,ry,color){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=color;c.fill()}
 export function drawCourtVenue(c,v,camera){
  c.save();c.fillStyle=v.background;c.fillRect(camera.x,camera.y,camera.width,camera.height);
+ // Modern recreation setting spans the full camera without image-edge stretching.
+ const left=Math.floor(camera.x/90)*90,right=camera.x+camera.width;
+ for(let x=left;x<right;x+=90){
+  c.fillStyle='#536f78';c.fillRect(x,158,2,80);c.fillRect(x,174,90,2);
+  if(v.id==='stadium'||x%270===0){
+   const skin=['#d9a37c','#986644','#edc9ab'][Math.abs(Math.floor(x/90))%3];
+   oval(c,x+30,181,4,5,skin);c.fillStyle=['#56a9b5','#ee9673','#657eb9'][Math.abs(Math.floor(x/90))%3];c.fillRect(x+25,187,10,14);
+   c.fillStyle='#374655';c.fillRect(x+25,201,4,10);c.fillRect(x+31,201,4,10);
+  }
+ }
  if(v.id==='indoor'){c.fillStyle='#b7ab96';c.fillRect(camera.x,camera.y,camera.width,Math.max(0,170-camera.y));c.restore();return}
  c.fillStyle=v.sky;c.fillRect(camera.x,camera.y,camera.width,Math.max(0,205-camera.y));
  oval(c,v.id==='sunset'?755:160,Math.max(camera.y+35,96),v.id==='sunset'?30:19,v.id==='sunset'?30:19,v.accent);

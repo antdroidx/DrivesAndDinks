@@ -1,7 +1,7 @@
-import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=110';
-import {matchDesign} from './detailed-character.js?v=110';
-import {conceptDimensions} from './character-concepts.js?v=110';
-import {animationRootOffset} from './pixel-character.js?v=110';
+import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=111';
+import {matchDesign} from './detailed-character.js?v=111';
+import {conceptDimensions} from './character-concepts.js?v=111';
+import {animationRootOffset} from './pixel-character.js?v=111';
 
 export function animeGameLayout(options,design){
  const scale=options.height/64,cx=options.x+options.width/2,baseline=options.y+63*scale;
@@ -10,8 +10,8 @@ export function animeGameLayout(options,design){
 }
 export function resolveAnimeGameDesign(options){
  const base=matchDesign(options.appearance??{},options.characterId??'',options.designId??'');
- const height=Number.isFinite(options.customHeight)?Math.max(145,Math.min(210,options.customHeight)):base.height,build=Number.isFinite(options.customBuild)?Math.max(.05,Math.min(1.1,options.customBuild)):base.build;
- return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance'};
+ const height=Number.isFinite(options.customHeight)?Math.max(145,Math.min(210,options.customHeight)):(options.appearance?.height??base.height),build=Number.isFinite(options.customBuild)?Math.max(.05,Math.min(1.1,options.customBuild)):(options.appearance?.build??base.build);
+ return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance',hair:options.appearance?.hairStyle??base.hair,headwear:options.appearance?.headwear??'none'};
 }
 export function createAnimeGameRenderer(createCanvas=()=>document.createElement('canvas')){
  const contexts=new WeakMap(),palettes=new Map();

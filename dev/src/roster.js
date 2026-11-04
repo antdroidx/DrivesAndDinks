@@ -1,5 +1,5 @@
-import {competitionRecord} from './competition.js?v=110';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=110';
+import {competitionRecord} from './competition.js?v=111';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=111';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -209,9 +209,9 @@ export function createLineup(input,{random=Math.random}={}){
   const characters=[player,...remaining.slice(0,3)];
   const cpuCultures=shuffle(CULTURE_IDS.filter(id=>id!==playerCulture),random).slice(0,3);
   return characters.map((character,index)=>{
-    if(index===0)return buildProfile(selected,{identity:playerIdentity});
+    if(index===0){const p=buildProfile(selected,{identity:playerIdentity});p.appearance.height=160+Math.floor(random()*34);p.appearance.build=.15+random()*.7;p.appearance.hairStyle=randomItem(['crop','sidePart','waves','ponytail','buzz'],random);return p;}
     const gender=random()<.5?'male':'female',identity=generateIdentity({gender,culture:cpuCultures[index-1],random,usedNames});
-    return buildProfile({...selected,character:character.id,gender,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});
+    const profile=buildProfile({...selected,character:character.id,gender,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});profile.appearance.height=160+Math.floor(random()*34);profile.appearance.build=.15+random()*.7;profile.appearance.hairStyle=randomItem(['crop','sidePart','waves','ponytail','buzz'],random);return profile;
   });
 }
 export function selectionStats(input){

@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=110';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=110';
-import {legDimensions,plantFeet} from './detailed-character.js?v=110';
+import {sampleCharacterPose} from './pixel-character.js?v=111';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=111';
+import {legDimensions,plantFeet} from './detailed-character.js?v=111';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -146,7 +146,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
   trainer(c,f,d,ink,options.footTargets?.[index].sole);
  }
  function arm(i){const a=p.arms[i],width=2.6+d.build*1.2;ribbon(c,a,[width,width*.85,width*.5],d.skin,ink,skin);
-  if((d.body==='male'||d.outfit==='polo')&&d.outfit!=='shorts'){const end=point(a[0].x+(a[1].x-a[0].x)*.43,a[0].y+(a[1].y-a[0].y)*.43);ribbon(c,[a[0],end],[width+1.5,width+1],d.shirt,ink);line(c,[point(end.x-.7,end.y-.1),point(end.x+.8,end.y+.3)],d.trim,.55)}
+  if((d.outfit==='polo')&&d.outfit!=='shorts'){const end=point(a[0].x+(a[1].x-a[0].x)*.43,a[0].y+(a[1].y-a[0].y)*.43);ribbon(c,[a[0],end],[width+1.5,width+1],d.shirt,ink);line(c,[point(end.x-.7,end.y-.1),point(end.x+.8,end.y+.3)],d.trim,.55)}
   oval(c,a[2].x,a[2].y,width*.36,width*.48,d.skin);line(c,[point(a[2].x-.7,a[2].y-1.7),point(a[2].x+.8,a[2].y-1.5)],d.trim,.8);
  }
  function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const wide=options.paddleShape==='wide'?1.15:options.paddleShape==='elongated'?.88:1,tall=options.paddleShape==='elongated'?1.14:1;oval(c,0,0,3.7*wide,5*tall,d.trim);oval(c,0,0,3.05*wide,4.3*tall,'#1c2430');line(c,[point(-1.7,-2.3),point(-.5,-3),point(.9,-2.8)],'#ffffff28',.4);c.restore()}
@@ -160,10 +160,10 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
   path(c,[point(h.x-waist,hem-.3),point(h.x+waist,hem-.3),point(h.x+waist,hem+.8),point(h.x-waist,hem+.4)],skin.shadow,null);
   line(c,[point(h.x+.2,bottom-1.7),point(h.x+.2,bottom-1.2)],skin.shadow,.25);
  }
- c.beginPath();c.moveTo(n.x-2.5,top);c.lineTo(n.x-shoulder,top+2.1);c.quadraticCurveTo(n.x-shoulder+.5,top+6,h.x-waist,hem);c.quadraticCurveTo(h.x,hem+1,h.x+waist,hem);c.quadraticCurveTo(n.x+shoulder-1,top+6,n.x+shoulder,top+2.1);c.lineTo(n.x+2.5,top);c.quadraticCurveTo(n.x,top+3.4,n.x-2.5,top);c.closePath();c.fillStyle=d.shirt;c.fill();c.strokeStyle=ink;c.lineWidth=.45;c.stroke();
+ c.beginPath();c.moveTo(n.x-2.5,top);c.lineTo(n.x-shoulder,top+2.1);c.quadraticCurveTo(n.x-shoulder+.5,top+6,h.x-waist,hem);c.quadraticCurveTo(h.x,hem+1,h.x+waist,hem);c.quadraticCurveTo(n.x+shoulder-1,top+6,n.x+shoulder,top+2.1);c.lineTo(n.x+2.5,top);c.quadraticCurveTo(n.x,top+3.4,n.x-2.5,top);c.closePath();const fabric=c.createLinearGradient(n.x-shoulder,0,n.x+shoulder,0);fabric?.addColorStop(0,tone(d.shirt,-.14));fabric?.addColorStop(.32,tone(d.shirt,.13));fabric?.addColorStop(.65,d.shirt);fabric?.addColorStop(1,tone(d.shirt,-.22));c.fillStyle=fabric??d.shirt;c.fill();c.strokeStyle=ink;c.lineWidth=.3;c.stroke();
  path(c,[point(n.x+shoulder-1.5,top+2.8),point(n.x+shoulder,top+2.2),point(h.x+waist,hem),point(h.x+waist-2,hem),point(h.x+waist-1.8,hem-6)],tone(d.shirt,-.2),null);
  path(c,[point(n.x-shoulder+1,top+3),point(n.x-shoulder+2.2,top+3.5),point(h.x-waist+1.8,hem),point(h.x-waist+.6,hem)],d.trim,null);
- if((d.body==='male'&&d.outfit!=='shorts')||d.outfit==='polo'){
+ if(d.outfit==='polo'){
   path(c,[point(n.x-2.4,top),point(n.x-.5,top+2),point(n.x-2.3,top+3.8),point(n.x-3.2,top+1.1)],tone(d.trim,.12),ink,.25);
   path(c,[point(n.x+2.4,top),point(n.x+.5,top+2),point(n.x+2.3,top+3.8),point(n.x+3.2,top+1.1)],tone(d.trim,-.1),ink,.25);
   line(c,[point(n.x,top+2),point(n.x,top+5.2)],tone(d.shirt,-.3),.3);oval(c,n.x,top+3.6,.2,.2,d.trim);
@@ -187,6 +187,8 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  }
  if(crop)line(c,[point(h.x-waist,hem),point(h.x+waist,hem)],d.trim,.65);
  line(c,[point(h.x-waist,h.y-1),point(h.x+waist,h.y-1)],tone(d.shirt,-.35),.8);
- animeHead(c,d,n,near,warm,phase,ink,emotion);layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
+ animeHead(c,d,n,near,warm,phase,ink,emotion);
+ if((options.sweat??0)>.14&&Math.sin((options.emotionClock??0)*3)>.2){const h=animeHeadCenter(n);for(const sign of [-1,1]){const drop=(options.emotionClock??0)*2%1;oval(c,h.x+sign*5.4,h.y+1+drop*3,.38,.65,'#b5e6ef');}}
+ layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
 }
 

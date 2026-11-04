@@ -13,7 +13,7 @@ export function setupCourtDisplay(){
  const main=document.querySelector('main'),field=document.querySelector('.playfield'),header=document.querySelector('header'),actions=document.querySelector('.header-actions');
  document.querySelector('.game').append(document.querySelector('.controls'));
  for(const [i,button] of [...document.querySelectorAll('#shots [data-shot]')].entries()){
- button.firstChild.textContent=button.dataset.shot.toUpperCase()+' ';
+ button.firstChild.textContent=(matchMedia('(pointer:fine)').matches?String(i+1)+' ':'')+button.dataset.shot.toUpperCase()+' ';
  button.setAttribute('aria-keyshortcuts',String(i+1));
  }
  const hud=document.createElement('div');hud.id='court-hud';hud.setAttribute('aria-live','off');field.prepend(hud);
