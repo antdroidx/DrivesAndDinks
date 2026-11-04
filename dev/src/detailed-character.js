@@ -1,5 +1,5 @@
-import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js?v=100';
-import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=100';
+import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js?v=101';
+import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=101';
 
 // Visual identities never alter the player's simulation abilities or hit range.
 export function matchDesign(appearance={},characterId='',designId=''){
@@ -46,7 +46,8 @@ export function drawDetailedCharacter(c,{appearance={},characterId='',mode='idle
  drawConceptAthlete(c,d,mode,phase,view,cx,baseline,scale,{...options,frame,contact,contactWeight:alignStrength});return true;
 }
 function shade(hex,f){const values=hex.slice(1).match(/../g).map(v=>parseInt(v,16));return '#'+values.map(v=>Math.max(0,Math.min(255,Math.round(f<0?v*(1+f):v+(255-v)*f))).toString(16).padStart(2,'0')).join('')}
-function gradient(c,color,x,y,width){const g=c.createLinearGradient(x-width,y-width,x+width,y+width);g.addColorStop(0,shade(color,.28));g.addColorStop(.42,color);g.addColorStop(1,shade(color,-.32));return g}
+const matteContexts=new WeakSet();
+function gradient(c,color,x,y,width){if(matteContexts.has(c))return color;const g=c.createLinearGradient(x-width,y-width,x+width,y+width);g.addColorStop(0,shade(color,.28));g.addColorStop(.42,color);g.addColorStop(1,shade(color,-.32));return g}
 function shape(c,points,fill,stroke='#182633',line=.65){c.beginPath();points.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=line;c.stroke()}}
 function limb(c,a,b,width,color){c.lineCap='round';c.strokeStyle='#182633';c.lineWidth=width+1;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.strokeStyle=gradient(c,color,(a.x+b.x)/2,(a.y+b.y)/2,width);c.lineWidth=width;c.stroke()}
 function contour(c,chain,widths,color){
@@ -76,16 +77,18 @@ function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='
  if(d.headwear==='visor'){limb(c,{x:x-5.7,y:y-2},{x:x+5.7,y:y-2},1.6,d.trim);if(!near){shape(c,[[x-5.7,y-1.5],[x+5.7,y-1.5],[x+8,y+.2],[x+3,y+1],[x-5,y+.2]],gradient(c,d.trim,x,y,6))}}
  if(d.headwear==='headband'){limb(c,{x:x-5.2,y:y-2},{x:x+5.2,y:y-2},2.1,d.trim);if(near){limb(c,{x:x+4,y:y-1},{x:x+6,y:y+3},1.3,d.trim)}}
 }
-export function drawConceptAthlete(c,design,mode,phase,view,cx,baseline,scale,options={}){const d=design,raw=sampleCharacterPose({...options,mode,phase,frame:options.frame??phase*4,view}),convert=p=>conceptPoint(p,d),pose={...raw,neck:convert(raw.neck),hips:convert(raw.hips),paddle:convert(raw.paddle),hand:convert(raw.hand)};view=raw.view;
+export function drawConceptAthlete(c,design,mode,phase,view,cx,baseline,scale,options={}){const matte=options.material==='matte',wasMatte=matteContexts.has(c);if(matte)matteContexts.add(c);const d=design,raw=sampleCharacterPose({...options,mode,phase,frame:options.frame??phase*4,view}),convert=p=>conceptPoint(p,d),pose={...raw,neck:convert(raw.neck),hips:convert(raw.hips),paddle:convert(raw.paddle),hand:convert(raw.hand)};view=raw.view;
  pose.arms=raw.arms.map(chain=>chain.map((p,i)=>{const q=convert(p),sign=chain[0].x<24?-1:1;return {...q,x:q.x+sign*(d.shoulder-6)*(1-i*.3)*(1-(options.contactWeight||0))}}));pose.paddle.x+=pose.arms[raw.gripSide][2].x-pose.hand.x;pose.paddle.y+=pose.arms[raw.gripSide][2].y-pose.hand.y;pose.hand=pose.arms[raw.gripSide][2];pose.legs=conceptLegs(raw,d);
  c.save();c.translate(cx+(raw.rootOffset||0)*scale-24*scale,baseline-63*scale);c.scale(scale,scale);const {hips:h,neck:n}=pose,skin=d.skin,w=2.3+d.build*1.3,leg=legDimensions(d);
+ const style=options.silhouette,compact=style==='compact'||style==='toy';
+ if(compact){const compress=p=>{p.x=24+(p.x-24)*.88;p.y=63+(p.y-63)*.72};for(const p of [pose.neck,pose.hips,pose.paddle,...pose.arms.flat(),...pose.legs.flat()])compress(p);pose.hand=pose.arms[raw.gripSide][2]}
  const groundY=63;ellipse(c,24,groundY+1,10+d.build*2,2,'#07151a55');
  plantFeet(pose,{...options,legLengths:leg},raw,cx,baseline,scale);
  c.save();
- for(const chain of pose.legs){const start=d.body==='female'?thighGarment(chain,leg.thigh+1).end:chain[0];contour(c,[start,chain[1],chain[2]],[leg.thigh,leg.calf,leg.ankle],skin);const f=chain[2];limb(c,{x:f.x,y:f.y-2.6},f,leg.ankle+.5,'#ede8db');shape(c,[[f.x-2.3*leg.shoe,f.y-.4],[f.x+1.8*leg.shoe,f.y-.7],[f.x+3.1*leg.shoe,f.y+1.2],[f.x+2.6*leg.shoe,f.y+2],[f.x-2.5*leg.shoe,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3));limb(c,{x:f.x-1.5,y:f.y+.8},{x:f.x+2,y:f.y+1},.6,d.trim)}
+ for(const chain of pose.legs){const start=d.body==='female'?thighGarment(chain,leg.thigh+1).end:chain[0];if(style!=='toy')contour(c,[start,chain[1],chain[2]],[leg.thigh,leg.calf,leg.ankle],skin);const f=chain[2];c.save();c.translate(f.x,f.y);c.scale(style==='toy'?1.8:compact?1.2:1,style==='toy'?1.5:1);c.translate(-f.x,-f.y);limb(c,{x:f.x,y:f.y-2.6},f,leg.ankle+.5,'#ede8db');shape(c,[[f.x-2.3*leg.shoe,f.y-.4],[f.x+1.8*leg.shoe,f.y-.7],[f.x+3.1*leg.shoe,f.y+1.2],[f.x+2.6*leg.shoe,f.y+2],[f.x-2.5*leg.shoe,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3));limb(c,{x:f.x-1.5,y:f.y+.8},{x:f.x+2,y:f.y+1},.6,d.trim);c.restore()}
  c.restore();
- if(['bob','waves'].includes(d.hair))hairBack(c,n.x,n.y-8,d,phase,view==='near');
- function arm(index){const a=pose.arms[index];contour(c,a,[w+.5,w*.85,w*.6],skin);if(d.body==='male'){limb(c,a[0],{x:a[0].x+(a[1].x-a[0].x)*.4,y:a[0].y+(a[1].y-a[0].y)*.4},w+1,d.shirt)}ellipse(c,a[2].x,a[2].y,w*.48,w*.55,shade(skin,.08));limb(c,{x:a[2].x-.8,y:a[2].y-1.6},{x:a[2].x+.8,y:a[2].y-1.6},.8,d.trim)}
+ if(['bob','waves'].includes(d.hair)){c.save();if(compact){c.translate(n.x,n.y-8);c.scale(style==='toy'?1.8:1.35,style==='toy'?1.55:1.2);c.translate(-n.x,-(n.y-8))}hairBack(c,n.x,n.y-8,d,phase,view==='near');c.restore()}
+ function arm(index){const a=pose.arms[index];if(style==='toy'){ellipse(c,a[2].x,a[2].y,3.6,3.6,skin);return}contour(c,a,[w+.5,w*.85,w*.6],skin);if(d.body==='male'){limb(c,a[0],{x:a[0].x+(a[1].x-a[0].x)*.4,y:a[0].y+(a[1].y-a[0].y)*.4},w+1,d.shirt)}ellipse(c,a[2].x,a[2].y,w*.48,w*.55,shade(skin,.08));limb(c,{x:a[2].x-.8,y:a[2].y-1.6},{x:a[2].x+.8,y:a[2].y-1.6},.8,d.trim)}
  function paddle(){const p=pose.paddle,hand=pose.hand;limb(c,p,hand,1.5,'#353239');c.save();c.translate(p.x,p.y);c.rotate(raw.angle);const wide=options.paddleShape==='wide'?1.15:options.paddleShape==='elongated'?.88:1,tall=options.paddleShape==='elongated'?1.14:1;ellipse(c,0,0,3.9*wide,5.3*tall,'#182633');ellipse(c,0,0,3.2*wide,4.6*tall,d.trim);ellipse(c,0,0,2.6*wide,4*tall,'#171b25');c.restore()}
  const behind=pose.arms.map((a,i)=>({i,depth:raw.arms[i][1].depth}));behind.filter(a=>a.depth<raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
  limb(c,{x:n.x,y:n.y-1},{x:n.x,y:n.y+3},3.8,skin);
@@ -103,5 +106,5 @@ export function drawConceptAthlete(c,design,mode,phase,view,cx,baseline,scale,op
   for(const chain of pose.legs){const panel=thighGarment(chain,leg.thigh+1.4);shape(c,panel.polygon,gradient(c,cloth,chain[0].x,hem+4,hip));const edge=panel.polygon;limb(c,{x:edge[1][0],y:edge[1][1]},{x:edge[2][0],y:edge[2][1]},.65,d.trim)}
   shape(c,[[h.x-hip,hem],[h.x+hip,hem],[h.x+hip,hem+3],[h.x,hem+4],[h.x-hip,hem+3]],gradient(c,cloth,h.x,hem+2,hip));
  }
- limb(c,{x:h.x-waist,y:hem},{x:h.x+waist,y:hem},1.1,shade(d.shirt,-.3));head(c,pose,d,view,phase);behind.filter(a=>a.depth>=raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
+ limb(c,{x:h.x-waist,y:hem},{x:h.x+waist,y:hem},1.1,shade(d.shirt,-.3));c.save();if(compact){c.translate(n.x,n.y-8);c.scale(style==='toy'?1.8:1.35,style==='toy'?1.55:1.2);c.translate(-n.x,-(n.y-8))}head(c,pose,d,view,phase);c.restore();behind.filter(a=>a.depth>=raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();if(matte&&!wasMatte)matteContexts.delete(c);
 }
