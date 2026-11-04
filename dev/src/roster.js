@@ -1,5 +1,5 @@
-import {competitionRecord} from './competition.js?v=130';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=130';
+import {competitionRecord} from './competition.js?v=131';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=131';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -240,7 +240,7 @@ export function applyPhysique(player,appearance=player.appearance??{}){
  const finite=(value,fallback)=>Number.isFinite(value)?value:fallback;
  const height=Math.max(145,Math.min(210,finite(appearance.height,177))),build=Math.max(.05,Math.min(1.1,finite(appearance.build,.5225)));
  const h=(height-177)/33,b=(build-.5225)/.5775;
- const modifiers={reach:1+.09*h,power:1+.04*h+.10*b,speed:1-.04*h-.06*b,acceleration:1-.07*h-.12*b,endurance:1-.04*h-.08*b,volley:1-.03*h-.04*b};
+ const modifiers={reach:1+.09*h,power:1+.04*h+.10*b,speed:1-.025*h-.025*b,acceleration:1-.045*h-.06*b,endurance:1-.02*h-.025*b,volley:1-.02*h-.02*b};
  const baseAbilities={...(player.baseAbilities??player.abilities)};
  const abilities={...baseAbilities};for(const [key,multiplier] of Object.entries(modifiers))abilities[key]=(baseAbilities[key]??1)*multiplier;
  return {...player,baseAbilities,abilities,appearance:{...appearance,height,build},physique:{height,build,heightScale:height/177,modifiers}};
