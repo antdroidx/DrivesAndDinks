@@ -23,3 +23,12 @@ test('ATP and Erne highlights both qualify for automatic replay',()=>{
   const g=rally(5);g.replayHighlights.push({time:2,label});g.fault(1,'Out');assert.ok(g.replayClip);assert.equal(g.replayClip.label,label);
  }
 });
+import {highlightReplayCamera} from '../src/fault-replay.js';
+test('highlight camera follows the ball through the recorded outcome',()=>{
+ const base={x:0,y:0,width:960,height:600},project=(x,y,z=0)=>({x:x*40,y:y*12-z*12});
+ const frames=Array.from({length:91},(_,i)=>({clock:i/30,ball:{x:2+i/6,y:10+i/4,z:Math.max(0,4-i/20)}}));
+ const clip={frames,focus:{x:2,y:10,time:0,reason:'ERNE'}};
+ const first=highlightReplayCamera(base,clip,project,frames[0]),last=highlightReplayCamera(base,clip,project,frames.at(-1));
+ assert.ok(last.width<first.width);assert.ok(last.x>first.x);
+ for(const snapshot of frames){const camera=highlightReplayCamera(base,clip,project,snapshot),ball=project(snapshot.ball.x,snapshot.ball.y,snapshot.ball.z);assert.ok(ball.x>camera.x&&ball.x<camera.x+camera.width);assert.ok(ball.y>camera.y&&ball.y<camera.y+camera.height)}
+});

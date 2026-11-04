@@ -21,6 +21,7 @@ export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.r
  fault(team,why,player=null){
   if(this.phase==='pause'||this.phase==='over')return;
   if(why.startsWith('Kitchen')&&player){const foot=kitchenContact(player);if(foot){this.faultFocus={...foot,time:this.clock,reason:why};this.recordReplay(true)}}
+  this.recordReplay(true);
   const servingTeam=this.score.team,winner=1-team;
   this.stats.rallies++;this.stats.faults[why]=(this.stats.faults[why]||0)+1;this.emit('rally-end',{winner,reason:why,shots:this.shots});this.score.point(winner);
   this.result=`${winner===0?'YOUR TEAM':'CPU'} WINS RALLY · ${why.toUpperCase()}`;
@@ -37,7 +38,7 @@ export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.r
     if(longRally)qualifiers.push(`${this.shots}-SHOT RALLY`);
     if(matchPoint)qualifiers.push('MATCH POINT WIN');
     const start=highlight?Math.max(0,highlight.time-2):Math.max(0,this.clock-(matchPoint?10:8));
-    const end=highlight?Math.min(this.clock,highlight.time+2):this.clock;
+    const end=this.clock;
     const frames=this.replayFrames.filter(f=>f.clock>=start&&f.clock<=end);
     this.pointReplay={label:qualifiers.join(' · ')||`${this.shots}-SHOT RALLY`,frames,...(focus?{focus}:{})};
     if(qualifiers.length&&frames.length>15)this.replayClip={...this.pointReplay};

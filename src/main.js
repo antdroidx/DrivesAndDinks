@@ -1,6 +1,6 @@
 import {playerFeet,footSole} from './player-feet.js';
 
-import {faultReplaySample,faultReplayCamera,drawFaultContact} from './fault-replay.js';
+import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js';
 
 import {drawCourtNet} from './court-net.js';
 
@@ -343,7 +343,7 @@ function playReplay(t){
 
  if(!snapshot){finishReplay();return false;}
 
- replayCamera=faultReplayCamera(displayCamera,replayPlayback.focus,project,snapshot.clock);
+ replayCamera=highlightReplayCamera(displayCamera,replayPlayback,project,snapshot);
 
  render({...snapshot,score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
 
