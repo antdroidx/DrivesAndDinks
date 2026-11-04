@@ -1,12 +1,12 @@
 import {kitchenContact} from './player-feet.js';
 import {seededRandom} from './competition.js';
-import {kitchenFootContact,chooseCpuTarget} from './core.js';
+import {kitchenFootContact} from './core.js';
 import {prepareReceiver,strokeDuration} from './match-animation.js';
 import {strokeForContact} from './player-facing.js';
-import {planIncoming,formationTarget,separateTargets} from './tactics.js';
+import {planIncoming,formationTarget,separateTargets,chooseCpuPlacement} from './tactics.js';
 import {createLineup,applyPhysique} from './roster.js';
 import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers} from './core.js';
-export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
+export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  setPhysique(appearance){
   for(const roster of [this.lineup,this.players])if(roster?.[0]){const p=roster[0],adjusted=applyPhysique(p,{...p.appearance,...appearance});Object.assign(p,{appearance:adjusted.appearance,abilities:adjusted.abilities,baseAbilities:adjusted.baseAbilities,physique:adjusted.physique})}
@@ -52,7 +52,7 @@ export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.r
     if(qualifiers.length&&frames.length>15)this.replayClip={...this.pointReplay};
   }
  }
- hit(player,shot,aim,quality=1){
+ hit(player,shot,aim,quality=1,placement=null){
   const err=this.volleyError(player);if(err){this.fault(player.team,err,player);return false}
   if(this.bounces>1){this.fault(player.team,'Double bounce');return false}
   const incomingVelocity={x:this.ball.vx||0,y:this.ball.vy||0,z:this.ball.vz||0},poor=quality<.8,wasPoach=!poor&&this.poachReservation?.shot===this.shots&&this.poachReservation.playerId===player.id;
@@ -67,6 +67,8 @@ export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.r
   if(shot==='atp')aim=this.ball.x<0?Math.min(1,aim):Math.max(19,aim);
   if(shot==='lob'||shot==='tweener'){const depth=1.8+(1-quality)*13+Math.max(0,1-technique)*7+this.random()*2;targetY=player.team===0?depth:44-depth;}
   if(shot==='overhead'){const depth=3+this.random()*9+(1-quality)*8+Math.max(0,1-technique)*5;targetY=player.team===0?depth:44-depth;}
+  if(placement&&['drive','drop','dink','slice','overhead'].includes(shot)&&Number.isFinite(placement.y))targetY=placement.y;
+  player.placementIntent=placement?.intent??'manual';
   player.stroke=strokeForContact(player,this.ball);player.contactType=this.bounces===0?'volley':'groundstroke';player.contactPoint={x:this.ball.x,y:this.ball.y,z:this.ball.z};player.contactPaddleTarget=paddleContactTarget(player,this.ball,shot);
   player.swingDuration=strokeDuration(player,shot);player.preparation=null;
   if(poor)aim+=(this.random()-.5)*4/quality;
@@ -136,7 +138,7 @@ updateSurfaceEffects(dt){
      const strength=Math.min(1,Math.max(0,(stop?oldSpeed-currentSpeed:currentSpeed)/10));
      this.dust.push({x:p.x,y:p.y,z:.08,life:.26,age:0,strength,direction:Math.sign((p.vx||0)||(p.fx||0)),count:strength>.42?2:1});
      if(this.dust.length>30)this.dust.shift();
-     p.dustCooldown=.22+this.random()*.08;
+     p.dustCooldown=.22+this.visualRandom()*.08;
     }
    }
    p.fx=p.vx||0;p.fy=p.vy||0;
@@ -166,7 +168,7 @@ updateSurfaceEffects(dt){
  }
  const r=this.players.find(p=>p.id===this.teamPlan.receiverId),targets=[];
  for(const p of this.players){
-   const target=formationTarget(p,{ball:b,incoming,receiverId:r.id,point:this.teamPlan.point,shots:this.shots,servingTeam:this.score.team,lastShot:this.lastShot,lastHitter:this.lastHitter,singles:this.format==='singles'});
+   const target=formationTarget(p,{ball:b,incoming,receiverId:r.id,point:this.teamPlan.point,shots:this.shots,servingTeam:this.score.team,lastShot:this.lastShot,lastHitter:this.lastHitter,singles:this.format==='singles',players:this.players});
    if(p===r){p.tacticalRole=this.teamPlan.poach?'poach':'receive';if(this.shots===1&&this.bounces===0&&(p.serveHold||0)>0)target.y=p.team===0?Math.max(44.5,target.y):Math.min(-.5,target.y)}else p.tacticalRole=target.role;
    targets.push({player:p,target});
  }
@@ -192,11 +194,11 @@ updateSurfaceEffects(dt){
   const attackSkill=((r.abilities.drive??1)+(r.abilities.smash??1)+(r.abilities.power??1))/3,softSkill=((r.abilities.drop??1)+(r.abilities.dink??1)+(r.abilities.defense??1))/3,shot=selectShot(r,b,'lob')==='tweener'?'lob':chooseCpuShot({shots:this.shots,team:r.team,y:r.y,height:b.z/(r.physique?.heightScale??1),opponentsAtKitchen,difficulty:contactDifficulty(r,b,'drive'),aggression:r.playstyle?.aggression??r.abilities.aggression,courtIQ:r.abilities.courtIQ,attackSkill,softSkill,random:this.random()}),chosen=selectShot(r,b,shot);
   if(!paddleContactAvailable(r,b,chosen)){ }
   else{
-   const middle=opponents.reduce((sum,p)=>sum+p.x,0)/opponents.length,attackMiddle=this.random()<.38;
-   const serveReturn=this.shots===1,target=serveReturn?(middle<10?16:4):attackMiddle?Math.max(6.5,Math.min(13.5,middle)):(shot==='drive'?(middle<10?18.2:1.8):(r.x<10?17.5:2.5));
+   const middle=opponents.reduce((sum,p)=>sum+p.x,0)/opponents.length;
+   const serveReturn=this.shots===1,placement=serveReturn?null:chooseCpuPlacement(r,opponents,chosen),target=serveReturn?(middle<10?16:4):placement.x;
    const pressure=contactDifficulty(r,b,chosen)*2+(1-(r.stamina??1))*3+Math.max(0,1-(r.abilities.courtIQ??1));
    const returnSafety=serveReturn?.55:1,error=(this.random()+this.random()+this.random()-1.5)*(shot==='drive'?2.5:2.2)*(1+pressure*.4)*returnSafety/(r.abilities.control*this.paddleFor(r,chosen).control*shotSkill(r,chosen)*(shot==='drop'||shot==='dink'?(r.abilities.defense??1):1));
-   const adjustedTarget=serveReturn?Math.max(3,Math.min(17,target+error)):chooseCpuTarget(r,opponents,chosen)+error,contact=contactQuality(r,b,chosen,false,this.random());this.hit(r,chosen,adjustedTarget,contact.quality);
+   const adjustedTarget=serveReturn?Math.max(3,Math.min(17,target+error)):target+error,contact=contactQuality(r,b,chosen,false,this.random());this.hit(r,chosen,adjustedTarget,contact.quality,placement);
   }
  }
  if(b.y< -5||b.y>49||b.x< -8||b.x>28)this.fault(this.bounces>0?1-this.last:this.last,this.bounces>0?'Unreturned':'Out')}

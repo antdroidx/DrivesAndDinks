@@ -29,3 +29,17 @@ The level harness runs mirrored archetypes and alternating starting service over
 DEV-only browser inspection: append `?level=beginner`, `?level=intermediate`, `?level=demo`, or `?level=advanced`, then start a match. The header labels the test profile. The setup preview remains the standard demo loadout; the test override is applied at match start. Omit the query for the ordinary demo.
 
 The public Pages root continues to package main; DEV packages this development branch. Nothing in this pass promotes DEV to main.
+
+## Interception and tactical placement
+
+DEV interception candidates now run a private athlete copy through the live fixed-step movement integrator. Forecasts include current velocity, acceleration, braking, reaction delay, stroke recovery, stamina, and body-adjusted abilities. A cheap maximum-travel bound rejects impossible candidates first. Contact selection still uses a simplified reach envelope; actual paddle contact and kitchen rules remain authoritative, so a predicted interception never guarantees a hit.
+
+CPU rally placement compares safe lateral lanes and selected low targets near opponents' feet. It considers defensive depth, available space, wrong-way movement, speed, and Court IQ anticipation. Drives also account for an opponent who can intercept the path before the intended landing point. The selected depth now reaches the launch model; manual shots retain their existing depth defaults, and serve returns retain their dedicated safe placement. This is a tactical approximation rather than a full opponent-response search.
+
+Doubles support advances within three feet of a deeper partner behind a drop. Existing middle coverage, lane swaps, and automatic risk-based poaching remain active. Singles baseline drive recovery keeps depth instead of automatically charging the kitchen; recovery still shades toward the next hitting angle.
+
+`Game.visualRandom` is independent from the match random stream. Outdoor dust and extra visual random draws cannot change seeded ball flight, player movement, contact outcomes, or scoring. Tests compare indoor/outdoor runs in both singles and doubles.
+
+Validation: 236 automated tests; 20 mixed watch/play roster matches completed, including 1,056 human-controlled contacts; all 108 level-matrix matches completed and stronger profiles won each mismatched pairing. The roster sample averaged 17.3 shots per rally (95th percentile 38). These samples establish regression behavior, not human playtest quality or real-world rating calibration.
+
+Next engine priorities are player-controlled shot depth, clearer explanations of contact errors, more varied opponent tendencies, and repeatable practice drills. Balance needs attention before career progression: the roster sample ended about 12% of rallies on kitchen momentum faults, while level mismatches strongly favored the higher profile. Movement forecasts also need testing on lower-powered mobile hardware. Backhand-specific targeting, deliberate opponent pattern memory, and full three-dimensional tactical search are not part of this pass.
