@@ -41,6 +41,11 @@ export function versionSite(root,version){
     writeFileSync(labPath,readFileSync(labPath,'utf8').replace('href="character-lab.css"',`href="character-lab.css?v=${version}"`).replace('src="src/character-lab.js"',`src="src/character-lab.js?v=${version}"`));
   }
 
+  if(readdirSync(site).includes('style-lab.html')){
+    const stylePath=path.join(site,'style-lab.html');
+    writeFileSync(stylePath,readFileSync(stylePath,'utf8').replace('href="character-lab.css"',`href="character-lab.css?v=${version}"`).replace('src="src/style-lab.js"',`src="src/style-lab.js?v=${version}"`));
+  }
+
   if(readdirSync(site).includes('art-directions.html')){
     const artPath=path.join(site,'art-directions.html');
     writeFileSync(artPath,readFileSync(artPath,'utf8')

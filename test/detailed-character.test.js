@@ -10,6 +10,20 @@ test('every proposed body draws all motions and both court views without invalid
 test('all six proposals can be selected for the match renderer without mutating their presets',()=>{
  for(const design of CHARACTER_CONCEPTS){const before=JSON.stringify(design),c=canvas();assert.equal(matchDesign({},'avery',design.id).id,design.id);assert.equal(drawDetailedCharacter(c,{designId:design.id,mode:'forehand',phase:.52,width:70.5,height:94,x:20,y:30,alignTo:{x:65,y:78},alignStrength:1,paddleShape:'elongated'}),true);assert.equal(c.depth,0);assert.equal(JSON.stringify(design),before)}
 });
+
+test('matte and stylized silhouettes render the full motion library without canvas leaks or preset mutation',()=>{
+ for(const design of CHARACTER_CONCEPTS)for(const silhouette of [undefined,'compact','toy'])for(const mode of ['idle',...MOTIONS])for(const view of ['near','far'])for(const phase of [0,.25,.52,.8,1]){
+  const before=JSON.stringify(design),c=canvas();drawConceptAthlete(c,design,mode,phase,view,120,270,2.9,{material:'matte',silhouette});assert.equal(c.depth,0);assert.equal(JSON.stringify(design),before);
+ }
+});
+
+test('matte rendering does not leave the following default character flat shaded',()=>{
+ let gradients=0;const c=canvas();
+ // Use a wrapper because the shared geometry mock deliberately ignores writes.
+ const wrapped=new Proxy(c,{get(target,key){if(key==='createLinearGradient')return ()=>{gradients++;return {addColorStop(){}}};return target[key]}});
+ drawConceptAthlete(wrapped,CHARACTER_CONCEPTS[0],'forehand',.52,'far',100,200,2,{material:'matte'});assert.equal(gradients,0);
+ drawConceptAthlete(wrapped,CHARACTER_CONCEPTS[0],'forehand',.52,'far',100,200,2);assert.ok(gradients>0);
+});
 test('automatic model selection respects body type and retains the selected kit colors',()=>{
  for(const body of ['male','female'])for(const id of ['avery','remy','jordan','sam']){const d=matchDesign({body,shirtColor:'white'},id);assert.equal(d.body,body);assert.match(d.shirt,/^#[0-9a-f]{6}$/i);assert.deepEqual(d,matchDesign({body,shirtColor:'white'},id))}
 });

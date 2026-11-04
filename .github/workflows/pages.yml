@@ -57,6 +57,7 @@ jobs:
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/
           if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
+          if [ -f style-lab.html ]; then cp style-lab.html _site/dev/; fi
           node scripts/version-build.js "${{ github.run_number }}" _site/dev
 
           # Current main is the public release at the Pages root.
