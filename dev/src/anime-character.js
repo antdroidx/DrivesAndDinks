@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=107';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=107';
-import {conceptLegs,legDimensions,plantFeet} from './detailed-character.js?v=107';
+import {sampleCharacterPose} from './pixel-character.js?v=108';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=108';
+import {legDimensions,plantFeet} from './detailed-character.js?v=108';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#302e35',width=.45){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -28,10 +28,17 @@ function ribbon(c,chain,widths,color,ink,palette){
  }else path(c,[...sides[1],...chain.toReversed()],tone(color,-.16),null);
 }
 
+export function animeBodyDimensions(d){
+ const leg=legDimensions(d),waist=d.waist*.87,legScale=Math.min(1,(waist+1)/(d.hip+1));
+ return {waist,hip:waist+.3,pelvis:waist*.62,stance:Math.min(1,d.shoulder*.91/6.4),thigh:leg.thigh*.83*legScale,calf:leg.calf*.88*legScale,ankle:leg.ankle*.86*legScale};
+}
 // Same motion/contact language, independently authored body and costume silhouettes.
 export function animePose(design,mode,phase,view,options={}){
  const raw=sampleCharacterPose({...options,mode,phase,view,frame:options.frame??phase*4}),convert=p=>conceptPoint(p,design);
- const arms=raw.arms.map(chain=>chain.map(convert)),legs=conceptLegs(raw,design);
+ const arms=raw.arms.map(chain=>chain.map(convert)),body=animeBodyDimensions(design),hips=convert(raw.hips),legs=raw.legs.map((chain,i)=>{
+  const points=chain.map(convert),shift=hips.x+(i?1:-1)*body.pelvis-points[0].x,footShift=(chain[2].x-raw.hips.x)*(body.stance-1);
+  return points.map((p,j)=>({...p,x:p.x+shift*(1-j/2)+footShift*(j/2)}));
+ });
  return {raw,neck:convert(raw.neck),hips:convert(raw.hips),arms,legs,paddle:convert(raw.paddle),hand:arms[raw.gripSide][2]};
 }
 function hairTail(c,d,x,y,phase,near,ink){
@@ -116,12 +123,12 @@ function trainer(c,f,d,ink){
 }
 export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,options={}){
  const {look='sports'}=options;
- const d=design,p=animePose(d,mode,phase,view,options),{raw,neck:n,hips:h}=p,near=raw.view==='near',warm=look==='storybook',ink=warm?'#443b35':'#302e35',leg=legDimensions(d),skin=skinPalette(d.skin);
- const plant=options.plantWorld??{cx,baseline,scale};plantFeet(p,{...options,legLengths:leg},raw,plant.cx,plant.baseline,plant.scale);
+ const d=design,p=animePose(d,mode,phase,view,options),{raw,neck:n,hips:h}=p,near=raw.view==='near',warm=look==='storybook',ink=warm?'#443b35':'#302e35',leg=legDimensions(d),body=animeBodyDimensions(d),skin=skinPalette(d.skin);
+ const plant=options.plantWorld??{cx,baseline,scale};plantFeet(p,{...options,legLengths:p.legs.map(chain=>({upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(chain[2].x-chain[1].x,chain[2].y-chain[1].y)}))},raw,plant.cx,plant.baseline,plant.scale);
  c.save();c.translate(cx-24*scale+(raw.rootOffset||0)*scale,baseline-63*scale);c.scale(scale,scale);
  oval(c,24,64,10+d.build*2,1.8,'#07151a45');
  hairTail(c,d,n.x,animeHeadCenter(n).y,phase,near,ink);
- for(const chain of p.legs){ribbon(c,chain,[leg.thigh*.83,leg.calf*.88,leg.ankle*.86],d.skin,ink,skin);const f=chain[2];
+ for(const chain of p.legs){ribbon(c,chain,[body.thigh,body.calf,body.ankle],d.skin,ink,skin);const f=chain[2];
   trainer(c,f,d,ink);
  }
  function arm(i){const a=p.arms[i],width=2.6+d.build*1.2;ribbon(c,a,[width,width*.85,width*.5],d.skin,ink,skin);
@@ -157,12 +164,12 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
 
  if(hem-top>8){if(!near){path(c,[point(n.x-1,top+5),point(n.x+1.4,top+5),point(n.x+.4,top+6.3),point(n.x+1.2,top+8),point(n.x-1,top+7.2)],d.trim,null)}else{line(c,[point(n.x-1.6,top+4),point(n.x+1.6,top+4)],d.trim,.6)}}
  if(d.body==='female'&&d.outfit!=='shorts'){
-  const skirt=skirtGarment(h,p.legs,d.hip,leg.thigh-1.2);path(c,skirt.polygon.map(([x,y])=>point(x,y)),tone(d.shirt,.1),ink);
-  for(const offset of [-.7,-.3,.3,.7]){const end=skirt.ends[offset<0?0:1],sx=h.x+d.hip*offset;path(c,[point(sx,h.y+.5),point(end.x+(offset<0?-1:1),end.y+.6),point(end.x+(offset<0?-2:2),end.y+.6)],tone(d.shirt,-.16),null)}
+  const skirt=skirtGarment(h,p.legs,body.hip-1,Math.max(1.5,body.thigh-.6));path(c,skirt.polygon.map(([x,y])=>point(x,y)),tone(d.shirt,.1),ink);
+  for(const offset of [-.7,-.3,.3,.7]){const end=skirt.ends[offset<0?0:1],sx=h.x+body.hip*offset;path(c,[point(sx,h.y+.5),point(end.x+(offset<0?-1:1),end.y+.6),point(end.x+(offset<0?-2:2),end.y+.6)],tone(d.shirt,-.16),null)}
   line(c,[point(skirt.left,skirt.ends[0].y+1),point(h.x,skirt.bottom),point(skirt.right,skirt.ends[1].y+1)],d.trim,.55);
  }else{
-  const shorts=tone(d.shirt,-.48);for(const chain of p.legs){const g=thighGarment(chain,leg.thigh+1);path(c,g.polygon.map(([x,y])=>point(x,y)),shorts,ink);line(c,[point(...g.polygon[1]),point(...g.polygon[2])],d.trim,.6)}
-  path(c,[point(h.x-d.hip,h.y-1),point(h.x+d.hip,h.y-1),point(h.x+d.hip,h.y+2),point(h.x,h.y+3),point(h.x-d.hip,h.y+2)],shorts,ink);
+  const shorts=tone(d.shirt,-.48);for(const chain of p.legs){const g=thighGarment(chain,body.thigh+1);path(c,g.polygon.map(([x,y])=>point(x,y)),shorts,ink);line(c,[point(...g.polygon[1]),point(...g.polygon[2])],d.trim,.6)}
+  path(c,[point(h.x-body.hip,h.y-1),point(h.x+body.hip,h.y-1),point(h.x+body.hip,h.y+2),point(h.x,h.y+3),point(h.x-body.hip,h.y+2)],shorts,ink);
  }
  if(crop)line(c,[point(h.x-waist,hem),point(h.x+waist,hem)],d.trim,.65);
  line(c,[point(h.x-waist,h.y-1),point(h.x+waist,h.y-1)],tone(d.shirt,-.35),.8);
