@@ -1,11 +1,11 @@
-import {kitchenContact} from './player-feet.js?v=128';
-import {seededRandom} from './competition.js?v=128';
-import {kitchenFootContact,chooseCpuTarget} from './core.js?v=128';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=128';
-import {strokeForContact} from './player-facing.js?v=128';
-import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=128';
-import {createLineup,applyPhysique} from './roster.js?v=128';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers} from './core.js?v=128';
+import {kitchenContact} from './player-feet.js?v=129';
+import {seededRandom} from './competition.js?v=129';
+import {kitchenFootContact,chooseCpuTarget} from './core.js?v=129';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=129';
+import {strokeForContact} from './player-facing.js?v=129';
+import {planIncoming,formationTarget,separateTargets} from './tactics.js?v=129';
+import {createLineup,applyPhysique} from './roster.js?v=129';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers} from './core.js?v=129';
 export class Game{constructor({seed}={}){this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  setPhysique(appearance){

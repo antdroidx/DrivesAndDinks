@@ -12,3 +12,14 @@ export function kitchenContact(player){
  return foot?{...foot,playerId:player.id,team:player.team,boundary}:null;
 }
 export function footSole(foot){return [[foot.x-foot.halfWidth,foot.y-foot.halfDepth],[foot.x+foot.halfWidth,foot.y-foot.halfDepth],[foot.x+foot.halfWidth,foot.y+foot.halfDepth],[foot.x-foot.halfWidth,foot.y+foot.halfDepth]];}
+
+// Check prohibited contact before releasing momentum. A lateral/rearward player
+// can regain control without coming to a complete stop in both axes.
+export function volleyMomentumFault(player){
+ if(!player.volleyMomentum)return false;
+ if(kitchenContact(player))return true;
+ const towardNet=(player.vy||0)*(player.team===0?-1:1),grounded=!(player.airborneTimer>0);
+ const followThrough=(player.swing||0)>(player.swingDuration||.36)*.45;
+ if(grounded&&(Math.hypot(player.vx||0,player.vy||0)<.8||towardNet<=.05&&!followThrough))player.volleyMomentum=false;
+ return false;
+}

@@ -1,36 +1,36 @@
-import {playerFeet,footSole} from './player-feet.js?v=128';
+import {playerFeet,footSole} from './player-feet.js?v=129';
 
-import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=128';
+import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=129';
 
-import {drawCourtNet} from './court-net.js?v=128';
+import {drawCourtNet} from './court-net.js?v=129';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=128';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=129';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=128';
+import {createAnimeGameRenderer} from './anime-game.js?v=129';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=128';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=129';
 
-import {setupCourtDisplay} from './court-display.js?v=128';
+import {setupCourtDisplay} from './court-display.js?v=129';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=128';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=129';
 
-import {courtCamera,courtAim} from './court-camera.js?v=128';
+import {courtCamera,courtAim,padControl} from './court-camera.js?v=129';
 
-import {movingStance} from './detailed-character.js?v=128';
+import {movingStance} from './detailed-character.js?v=129';
 
-import {sampleMatchAnimation} from './match-animation.js?v=128';
+import {sampleMatchAnimation} from './match-animation.js?v=129';
 
-import {setupSelection} from './selection.js?v=128';
+import {setupSelection} from './selection.js?v=129';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=128';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=129';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=128';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=129';
 
-import {Game} from './game.js?v=128';
+import {Game} from './game.js?v=129';
 
-import {selectShot,serveAim} from './core.js?v=128';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=129';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=128';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=129';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -274,7 +274,7 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
  drawSurface(ctx,palette,courtStyle,activeVenue?.id??'outdoor');
 
- if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):previewShot==='dink'?14:previewShot==='drop'?12:previewShot==='slice'?6:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
+ if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):shotDepthTarget(0,previewShot,game.depth??.5));ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
 
  const ballSpeed=Math.hypot(game.ball.vx||0,game.ball.vy||0,game.ball.vz||0),contactPulse=game.contact?Math.max(0,1-game.contact.time/.12):0;
 
@@ -352,13 +352,13 @@ function playReplay(t){
 
 window.addEventListener('keydown',event=>{if(replayPlayback){event.preventDefault();event.stopImmediatePropagation();if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
 
-let previousStatus='';function frame(t){if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+let previousStatus='';function frame(t){if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 
-const aimPad=document.querySelector('#aim-pad'),aimThumb=document.querySelector('#aim-pad .aim-pad-thumb');
+const aimPad=document.querySelector('#aim-pad'),aimTrack=aimPad.querySelector('.aim-pad-track'),aimThumb=aimPad.querySelector('.aim-pad-thumb'),depthLabel=document.querySelector('#depth-label');
 
-function syncAimPad(){const displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,percent=((displayAim-1)/18)*100;aimThumb.style.left=`${percent}%`;aimPad.setAttribute('aria-valuenow',String(Math.round(displayAim*10)/10))}
+function syncAimPad(){const displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,percent=((displayAim-1)/18)*100;const serving=game.phase==='serve',depth=serving?.5:game.depth,depthName=depth<.35?'SHORT':depth>.65?'DEEP':'NORMAL';aimThumb.style.left=`${percent}%`;aimThumb.style.top=`${(1-depth)*100}%`;aimPad.setAttribute('aria-valuenow',String(Math.round(displayAim*10)/10));aimPad.setAttribute('aria-valuetext',`Aim ${Math.round(displayAim)}, ${serving?'serve depth automatic':`${depthName.toLowerCase()} depth ${Math.round(depth*100)}%`}`);depthLabel.textContent=serving?'SERVE · AIM ONLY':`DEPTH ${depthName}`;aimPad.classList.toggle('serve-aim',serving)}
 
-function aimFromPad(event){const rect=aimPad.getBoundingClientRect();game.aim=Math.max(1,Math.min(19,1+(event.clientX-rect.left)/rect.width*18));syncAimPad()}
+function aimFromPad(event){const target=padControl(event.clientX,event.clientY,aimTrack.getBoundingClientRect());game.aim=target.aim;if(game.phase!=='serve')game.setDepth(target.depth);syncAimPad()}
 
 syncAimPad();
 
@@ -366,13 +366,13 @@ aimPad.addEventListener('pointerdown',event=>{if(game.paused)return;aimFromPad(e
 
 aimPad.addEventListener('pointermove',event=>{if(!game.paused&&aimPad.hasPointerCapture(event.pointerId))aimFromPad(event)});
 
-aimPad.addEventListener('keydown',event=>{if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;event.preventDefault();game.nudgeAim(event.key==='ArrowLeft'?-1:1,event.shiftKey);syncAimPad()});
+// Keyboard aim/depth is handled once by the shared window listener, including pad focus.
 
 const attackButton=document.querySelector('[data-shot="attack"]'),softButton=document.querySelector('[data-shot="soft"]'),lobButton=document.querySelector('[data-shot="lob"]');let previousHumanServe=null,previousPaused=null;
 
-function syncShotButtonsForPhase(){const humanServe=game.mode==='play'&&game.phase==='serve'&&game.server.id===0,paused=game.paused;if(humanServe===previousHumanServe&&paused===previousPaused)return;previousHumanServe=humanServe;previousPaused=paused;attackButton.querySelector('small').textContent=humanServe?'HARD SERVE':'DRIVE · HIGH';softButton.querySelector('small').textContent=humanServe?'SOFT SERVE':'DROP / DINK';lobButton.querySelector('small').textContent=humanServe?'NOT ON SERVE':'ANYWHERE';attackButton.disabled=paused;softButton.disabled=paused;lobButton.disabled=humanServe||paused}
+function syncShotButtonsForPhase(){syncAimPad();const humanServe=game.mode==='play'&&game.phase==='serve'&&game.server.id===0,paused=game.paused;if(humanServe===previousHumanServe&&paused===previousPaused)return;previousHumanServe=humanServe;previousPaused=paused;attackButton.querySelector('small').textContent=humanServe?'HARD SERVE':'DRIVE · HIGH';softButton.querySelector('small').textContent=humanServe?'SOFT SERVE':'DROP / DINK';lobButton.querySelector('small').textContent=humanServe?'NOT ON SERVE':'ANYWHERE';attackButton.disabled=paused;softButton.disabled=paused;lobButton.disabled=humanServe||paused}
 
-function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen())return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
+function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen())return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
@@ -414,7 +414,7 @@ document.querySelector('#rematch').onclick=()=>{resultDialog.close();game.reset(
 
 document.querySelector('#return-selection').onclick=()=>{resultDialog.close();selectionUI.open()};
 
-const lesson=document.createElement("p");lesson.className="control-lesson";lesson.textContent="Movement is automatic | Aim with mouse or arrow keys | 1 Attack, 2 Soft, 3 Lob select AND hit | Space repeats shot | White ring = hit now";canvas.insertAdjacentElement("afterend",lesson);
+const lesson=document.createElement("p");lesson.className="control-lesson";lesson.textContent="Movement is automatic | ← → aim · ↑ ↓ depth · Shift fine control | 1 Attack, 2 Soft, 3 Lob select AND hit | Space repeats shot | White ring = hit now";canvas.insertAdjacentElement("afterend",lesson);
 
 // Deterministic DEV visual regression: a grounded shoe enters the kitchen after a volley.
 
