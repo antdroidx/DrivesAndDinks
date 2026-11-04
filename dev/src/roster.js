@@ -1,5 +1,5 @@
-import {competitionRecord} from './competition.js?v=129';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=129';
+import {competitionRecord} from './competition.js?v=130';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=130';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.

@@ -1,6 +1,6 @@
-import {MOTIONS,sampleCharacterPose,drawPixelCharacter} from './pixel-character.js?v=129';
-import {CHARACTER_CONCEPTS,conceptDimensions,conceptPoint,HAIR_OPTIONS,conceptHair} from './character-concepts.js?v=129';
-import {drawConceptAthlete as athlete} from './detailed-character.js?v=129';
+import {MOTIONS,sampleCharacterPose,drawPixelCharacter} from './pixel-character.js?v=130';
+import {CHARACTER_CONCEPTS,conceptDimensions,conceptPoint,HAIR_OPTIONS,conceptHair} from './character-concepts.js?v=130';
+import {drawConceptAthlete as athlete} from './detailed-character.js?v=130';
 const $=id=>document.getElementById(id),motionNames={idle:'Ready stance',run:'Running',shuffle:'Side-step',volley:'Volley',forehand:'Forehand drive',backhand:'Backhand drive',forehandDink:'Forehand dink',backhandDink:'Backhand dink',forehandDrop:'Forehand drop',backhandDrop:'Backhand drop',overhead:'Overhead',lob:'Lob',twoBackhand:'Two-hand backhand',twoBackhandDink:'Two-hand dink',erne:'Erne',serve:'Serve',poachLunge:'Poach',slideReturn:'Sliding return',splitStep:'Split-step',resetBlock:'Reset block',counterVolley:'Counter volley',halfVolley:'Half-volley',wideForehand:'Wide forehand',wideBackhand:'Wide backhand',backpedal:'Backpedal',crossover:'Crossover',tweener:'Tweener'};
 $('motion').innerHTML=['idle',...MOTIONS].map(m=>`<option value="${m}">${motionNames[m]}</option>`).join('');$('motion').value='forehand';
 for(const body of ['male','female'])$(`${body}-hair`).innerHTML='<option value="design">As designed</option>'+HAIR_OPTIONS[body].map(item=>`<option value="${item.id}">${item.name}</option>`).join('');

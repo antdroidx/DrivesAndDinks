@@ -1,36 +1,36 @@
-import {playerFeet,footSole} from './player-feet.js?v=129';
+import {playerFeet,footSole} from './player-feet.js?v=130';
 
-import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=129';
+import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=130';
 
-import {drawCourtNet} from './court-net.js?v=129';
+import {drawCourtNet} from './court-net.js?v=130';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=129';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=130';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=129';
+import {createAnimeGameRenderer} from './anime-game.js?v=130';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=129';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=130';
 
-import {setupCourtDisplay} from './court-display.js?v=129';
+import {setupCourtDisplay} from './court-display.js?v=130';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=129';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=130';
 
-import {courtCamera,courtAim,padControl} from './court-camera.js?v=129';
+import {courtCamera,courtAim,padControl} from './court-camera.js?v=130';
 
-import {movingStance} from './detailed-character.js?v=129';
+import {movingStance} from './detailed-character.js?v=130';
 
-import {sampleMatchAnimation} from './match-animation.js?v=129';
+import {sampleMatchAnimation} from './match-animation.js?v=130';
 
-import {setupSelection} from './selection.js?v=129';
+import {setupSelection} from './selection.js?v=130';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=129';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=130';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=129';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=130';
 
-import {Game} from './game.js?v=129';
+import {Game} from './game.js?v=130';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=129';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=130';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=129';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=130';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -274,6 +274,8 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
  drawSurface(ctx,palette,courtStyle,activeVenue?.id??'outdoor');
 
+ if(game.practice){const z=game.practice.drill.target;poly([[z.left,z.top],[z.right,z.top],[z.right,z.bottom],[z.left,z.bottom]],'#69e8bc28','#9cf2cc');const label=project((z.left+z.right)/2,(z.top+z.bottom)/2);ctx.fillStyle='#e5fff2';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText('TARGET',label.x,label.y);ctx.textAlign='left'}
+
  if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):shotDepthTarget(0,previewShot,game.depth??.5));ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
 
  const ballSpeed=Math.hypot(game.ball.vx||0,game.ball.vy||0,game.ball.vz||0),contactPulse=game.contact?Math.max(0,1-game.contact.time/.12):0;
@@ -376,7 +378,7 @@ function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
-selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,getPhysique:()=>({height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Number(artPreferences.build||document.querySelector('#game-art-build')?.value||45)*.0105}),onStart:()=>{refreshVenue();if(balanceLevel){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
+selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,getPhysique:()=>({height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Number(artPreferences.build||document.querySelector('#game-art-build')?.value||45)*.0105}),onStart:()=>{refreshVenue();if(balanceLevel&&!game.practice){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=game.practice?game.practice.drill.instruction:`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot(game.practice&&game.practice.id!=='return'?'soft':'attack');document.querySelector('#mode').textContent='MODE: '+(game.practice?'PRACTICE':game.mode.toUpperCase());syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
 
 const scenarioParams=new URLSearchParams(location.search),scenarioType=scenarioParams.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(scenarioParams.get('speed'))||.65));
 
@@ -406,11 +408,19 @@ if(animationTestMode){
 
 const resultDialog=document.querySelector('#match-result');
 
-function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){document.querySelector('#match-winner').textContent=game.score.winner===0?'Your team wins!':'Opponents win!';document.querySelector('#match-score').textContent=`Your team ${game.score.points[0]} – ${game.score.points[1]} Opponents`;resultDialog.showModal()}}
+function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){
+ const practice=game.practice;resultDialog.querySelector('h2').textContent=practice?'Practice complete':'Match ended';document.querySelector('#rematch').textContent=practice?'REPEAT DRILL':'REMATCH';
+ document.querySelector('#match-winner').textContent=practice?practice.drill.name:game.score.winner===0?'Your team wins!':'Opponents win!';
+ document.querySelector('#match-score').textContent=practice?`${practice.successes} of ${practice.total} targets hit`:`Your team ${game.score.points[0]} – ${game.score.points[1]} Opponents`;
+ const contacts=game.stats.teams.reduce((n,t)=>n+t.hits,0),mishits=game.stats.teams.reduce((n,t)=>n+t.mishits,0);
+ document.querySelector('#match-analysis').textContent=practice?`${practice.results.filter(r=>r.shot).length} returns made · Repeat uses the same feed sequence. The report lists every attempt.`:`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Longest rally ${Math.max(0,...game.journal.rallies.map(r=>r.shots??0))} shots`;
+ resultDialog.showModal();}}
+function downloadReport(){const blob=new Blob([JSON.stringify(game.matchReport(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`drives-dinks-${game.practice?.id??game.format}-report.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+const reportButton=document.createElement('button');reportButton.id='export-report';reportButton.textContent='DOWNLOAD REPORT';reportButton.onclick=downloadReport;document.querySelector('.header-actions').append(reportButton);document.querySelector('#download-report').onclick=downloadReport;
 
 resultDialog.addEventListener('cancel',e=>e.preventDefault());
 
-document.querySelector('#rematch').onclick=()=>{resultDialog.close();game.reset();last=0;acc=0;setShot('attack');syncPauseButton()};
+document.querySelector('#rematch').onclick=()=>{resultDialog.close();if(game.practice){const {id,seed}=game.practice;game.startPractice(id,seed)}else game.reset();last=0;acc=0;setShot(game.practice&&game.practice.id!=='return'?'soft':'attack');syncPauseButton()};
 
 document.querySelector('#return-selection').onclick=()=>{resultDialog.close();selectionUI.open()};
 
@@ -442,6 +452,6 @@ window.addEventListener('keydown',e=>{if(!document.querySelector('dialog[open]')
 
 // Keep persistent play controls together, followed by setup, gameplay and presentation settings.
 const settingsActions=document.querySelector('.header-actions');
-for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','sound']){
+for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','export-report','sound']){
  const control=document.getElementById(id);if(control)settingsActions.append(control);
 }

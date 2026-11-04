@@ -1,4 +1,4 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=129';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=130';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -78,13 +78,14 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
     for(const [key,items] of [['shirtColor',CLOTHING_COLORS],['hairColor',HAIR_COLORS],['skinColor',SKIN_COLORS],['paddleColor',PADDLE_COLORS],['court',COURT_PALETTES]]){const item=items.find(i=>i.id===draft[key]),menu=form.querySelector(`[data-color="${key}"]`);menu.querySelector('summary i').style.background=item.color??item.court;menu.querySelector('summary span').textContent=item.name;}
     drawPreview(draft);
   }
-  form.addEventListener('change',event=>{
+  function syncSessionOptions(){const practice=form.elements.matchMode.value.startsWith('practice-');form.elements.format.disabled=practice;if(practice)form.elements.format.value='singles';dialog.querySelector('.start-match').textContent=practice?'START PRACTICE →':started?'START NEW MATCH →':'START MATCH →'}
+  form.addEventListener('change',event=>{syncSessionOptions();
     const menu=event.target.closest('.color-menu');if(menu)menu.open=false;
     const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),paddleColor:values.get('paddleColor'),hairColor:values.get('hairColor'),skinColor:values.get('skinColor'),court:values.get('court')});render();
   });
-  form.addEventListener('submit',e=>{e.preventDefault();game.configure({...draft,format:form.elements.format.value},previewLineup);game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify(draft));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});
+  form.addEventListener('submit',e=>{e.preventDefault();game.configure({...draft,format:form.elements.format.value},previewLineup);game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);if(game.mode.startsWith('practice-'))game.startPractice(game.mode.slice(9));started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify(draft));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});
   dialog.querySelector('#resume-match').onclick=()=>dialog.close();
   dialog.addEventListener('cancel',e=>{if(!started)e.preventDefault()});
-  function open(){dialog.querySelector('#resume-match').hidden=!started;dialog.querySelector('.start-match').textContent=started?'START NEW MATCH →':'START MATCH →';form.elements.format.value=game.format;form.elements.matchMode.value=game.mode;form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
+  function open(){dialog.querySelector('#resume-match').hidden=!started;dialog.querySelector('.start-match').textContent=started?'START NEW MATCH →':'START MATCH →';form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
   open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
 }
