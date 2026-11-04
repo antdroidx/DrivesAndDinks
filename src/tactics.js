@@ -1,7 +1,30 @@
 import {C,stepBall,side,move} from './core.js';
+import {kitchenContact} from './player-feet.js';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
+
+export function volleyBrakeTarget(player,target){
+ const towardNet=Math.max(0,(player.vy||0)*(player.team===0?-1:1));
+ const stamina=clamp(player.stamina??1,0,1),acceleration=(player.abilities?.acceleration??C.accel)*(.78+.22*stamina);
+ // Use conservative reversal braking from move(), with clearance for a shoe sole.
+ const braking=towardNet*towardNet/(2*acceleration*1.5*.62*.85);
+ const safeY=player.team===0?29.85+braking:14.15-braking;
+ return {...target,x:player.volleyMomentum&&towardNet>.8?player.x:target.x,y:player.team===0?Math.max(target.y,safeY):Math.min(target.y,safeY)};
+}
+
+export function safeVolleyRecovery(player,swingDuration=.36){
+ const p={...player,stamina:Math.max(0,(player.stamina??1)-.075/Math.max(.65,player.abilities?.endurance??1)),swing:swingDuration,volleyMomentum:true};
+ for(let tick=0;tick<120;tick++){
+   p.swing=Math.max(0,p.swing-C.dt);p.airborneTimer=Math.max(0,(p.airborneTimer||0)-C.dt);
+   const target=volleyBrakeTarget(p,{x:p.x,y:kitchen(p.team)});
+   move(p,target.x,target.y,C.dt);
+   if(kitchenContact(p))return false;
+   const towardNet=(p.vy||0)*(p.team===0?-1:1);
+   if(towardNet<=.05&&!p.airborneTimer&&p.swing<=swingDuration*.45)return true;
+ }
+ return false;
+}
 
 // Run a private copy through the live movement integrator. Planning must respect
 // momentum, reaction delay, stroke recovery, body abilities and current stamina.
@@ -34,8 +57,10 @@ export function chooseCpuPlacement(player,opponents,shot){
       gap=Math.min(gap,Math.abs(crossingX-px)+1.5);
     }
     const reversal=(target.x-o.x)*(o.vx||0)<0?Math.min(1.4,Math.abs(o.vx||0)*.16)*anticipation:0;
-    const feet=target.intent==='feet'&&Math.abs(target.x-o.x)<1.5?1.6:0;
-    return (gap+reversal+feet)/Math.max(.7,(o.abilities?.speed??C.speed)/C.speed);
+    const style=player.ratingStyle??'balanced',feet=target.intent==='feet'&&Math.abs(target.x-o.x)<1.5?(style==='net'?2.2:style==='banger'?1.9:1.6):0;
+    const crossCourt=style==='soft'?Math.abs(target.x-player.x)*.035:0;
+    const backhand=(target.x-o.x)*(o.team===0?1:-1)<0&&anticipation>.3?.2:0;
+    return (gap+reversal*(style==='speed'?1.4:1)+feet+crossCourt+backhand)/Math.max(.7,(o.abilities?.speed??C.speed)/C.speed);
   }));
   return candidates.reduce((best,target)=>value(target)>value(best)?target:best,candidates[0]);
 }
@@ -49,7 +74,7 @@ function contacts(players,team,ball,shots,bounces){
     if(tick%4||side(future.y)!==team||(shots<=2&&count===0))continue;
     for(const p of players){
       if(found.has(p.id)||future.z>7.4*(p.physique?.heightScale??1))continue;
-      const y=count===0?(team===0?Math.max(29.6,future.y):Math.min(14.4,future.y)):future.y;
+      const y=count===0?volleyBrakeTarget(p,future).y:future.y;
       if(Math.abs(future.y-y)>1.6)continue;
       if(count>0&&future.vz>3&&future.z<1.35)continue;
       if(future.z>3.4&&(future.z<5.2*(p.physique?.heightScale??1)||future.vz>0))continue;
