@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=149';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=149';
-import {legDimensions,plantFeet} from './detailed-character.js?v=149';
+import {sampleCharacterPose} from './pixel-character.js?v=150';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=150';
+import {legDimensions,plantFeet} from './detailed-character.js?v=150';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -149,9 +149,6 @@ function trainer(c,f,d,ink,sole){
  path(c,[px(-2.05,-1.75),px(-.65,-2.05),px(.15,-.35),px(-1.45,.35),px(-2.3,.05)],tone(d.trim,.16),null);
  path(c,[px(.55,-.55),px(3.15,.05),px(3.55,.55),px(2.4,.72),px(.65,.35)],tone('#e5dfce',-.13),null);
  path(c,[px(1.25,-1.85),px(3.25,-.55),px(3.55,.2),px(2.25,.12),px(1.45,-.75)],tone('#e5dfce',.12),null);
- path(c,[px(-2.5,.9),px(3.7,.9),px(3.9,1.7),px(2.6,2),px(-2.6,1.9)],tone(d.trim,-.55),ink,.25);
- path(c,[px(-2.5,.6),px(3.6,.6),px(3.7,1.1),px(-2.5,1.2)],'#fff3df',null);
- line(c,[px(-2.25,1.48),px(3.5,1.38)],'#fff3df',.28);
  path(c,[px(-2.1,-1.6),px(-.7,-1.9),px(.1,-.3),px(-1.6,.4),px(-2.4,.2)],tone(d.trim,-.12),null);
  path(c,[px(.4,-.2),px(1.5,-.8),px(3.3,.1),px(2.8,.5),px(.8,.4)],tone('#e5dfce',-.15),null);
  path(c,[px(-.6,-2.1),px(.9,-1.8),px(1.6,-.5),px(.2,-.3)],d.trim,ink,.2);

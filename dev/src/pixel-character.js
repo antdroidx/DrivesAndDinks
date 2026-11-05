@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=149';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=150';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -87,7 +87,7 @@ export function solveArm3D(shoulder,wrist,pole,lengths=ARM_LENGTHS){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=149';
+export {courtView,strokeForContact} from './player-facing.js?v=150';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,contact3D=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';
@@ -206,7 +206,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24+rootOffset,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;
- for(const [hip,knee,foot] of legs){taperedSegment(c,hip,knee,2.9,6,colors.outline);segment(c,knee,foot,5,colors.outline);taperedSegment(c,hip,knee,1.7,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-3.5},foot,4,colors.sock);segment(c,{x:foot.x,y:foot.y-2.5},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2);c.fillStyle=colors.accent;c.fillRect(Math.round(foot.x-1),Math.round(foot.y-3),3,1)}
+ for(const [hip,knee,foot] of legs){taperedSegment(c,hip,knee,2.9,6,colors.outline);segment(c,knee,foot,5,colors.outline);taperedSegment(c,hip,knee,1.7,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-3.5},foot,4,colors.sock);segment(c,{x:foot.x,y:foot.y-2.5},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+.8],[foot.x+4,foot.y+1.5],[foot.x-3,foot.y+1.5]],colors.shoe);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2);c.fillStyle=colors.accent;c.fillRect(Math.round(foot.x-1),Math.round(foot.y-3),3,1)}
  function armPart(index,part){
   const a=arms[index][part],d=arms[index][part+1];
   segment(c,a,d,part?4:5,colors.outline);segment(c,a,d,part?2:3,part?colors.skin:colors.skinDark);
