@@ -1,5 +1,6 @@
-import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js?v=145';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=145';
+import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js?v=146';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=146';
+import {stackLaneFor} from './stacking.js?v=146';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -106,8 +107,9 @@ function contacts(players,team,ball,shots,bounces){
   return found;
 }
 
-export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0}){
+export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0,stackPlan=null}){
   const pair=players.filter(p=>p.team===team),flight={...ball};
+ const stackLane=p=>stackLaneFor(p,stackPlan)??lane(p);
   const landingTime=Math.max(0,(flight.vz+Math.sqrt(Math.max(0,flight.vz**2+2*C.gravity*flight.z)))/C.gravity);
   const landing={x:clamp(flight.x+flight.vx*landingTime,1,19),y:clamp(flight.y+flight.vy*landingTime,team===0?23:-3,team===0?47:21)};
   // At the kitchen, own the approaching lane rather than the eventual landing
@@ -115,7 +117,7 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   const setAtNet=pair.length===2&&pair.every(p=>team===0?p.y<=33:p.y>=11);
   const receivingTime=Math.abs(flight.vy)>1e-6?clamp((kitchen(team)-flight.y)/flight.vy,0,landingTime):0;
   const ownershipX=setAtNet&&shots>2&&ball.shot!=='lob'?clamp(flight.x+flight.vx*receivingTime,0,20):landing.x;
-  const owner=shots===1?serveReceiver:pair.reduce((a,b)=>Math.abs(lane(a)-ownershipX)<=Math.abs(lane(b)-ownershipX)?a:b);
+  const owner=shots===1?serveReceiver:pair.reduce((a,b)=>Math.abs(stackLane(a)-ownershipX)<=Math.abs(stackLane(b)-ownershipX)?a:b);
   const available=contacts(pair,team,ball,shots,bounces);
   let selected=owner,point=available.get(owner.id),poach=false,rescue=false;
   if(shots>2&&pair.length>1){
@@ -191,8 +193,8 @@ export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHit
  return {x,y:near?(stayDeep?39:shots<=2?35:32):(stayDeep?5:shots<=2?9:12),role:'singles-recover'};
 }
 
-export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[],opponentContactIn=Infinity}){
-  const home=lane(p),team=p.team;
+export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[],opponentContactIn=Infinity,stackPlan=null}){
+  const home=stackLaneFor(p,stackPlan)??lane(p),team=p.team;
   if(p.id===receiverId&&team===incoming)return {x:point.x,y:point.y,role:'receive'};
   if(singles){
    return singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players,opponentContactIn});
@@ -236,7 +238,7 @@ export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingT
   return {x,y,role};
 }
 
-export function separateTargets(entries,team,receiverId){
+export function separateTargets(entries,team,receiverId,stackPlan=null){
   const pair=entries.filter(entry=>entry.player.team===team);if(pair.length<2)return;
   const [a,b]=pair,support=a.player.id===receiverId?b:a,active=support===a?b:a;
   // Reserve the hitter's destination and the approach segment before overlap.
@@ -244,7 +246,8 @@ export function separateTargets(entries,team,receiverId){
   const t=clamp(((support.target.x-start.x)*dx+(support.target.y-start.y)*dy)/(dx*dx+dy*dy||1),0,1);
   const closest={x:start.x+dx*t,y:start.y+dy*t};
   const gap=Math.hypot(support.target.x-closest.x,support.target.y-closest.y);
-  if(gap<3.8){
+  const minimumGap=stackPlan?.selected&&!stackPlan.activated?2.2:3.8;
+ if(gap<minimumGap){
     const direction=lane(support.player)<lane(active.player)?-1:1;
     support.target.x=clamp(closest.x+direction*3.9,.5,19.5);
     support.target.y=clamp(closest.y+(team===0?1.9:-1.9),team===0?23:0,team===0?47:21);
