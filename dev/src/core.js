@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=132';
-import {strokeForContact} from './player-facing.js?v=132';
+import {kitchenContact} from './player-feet.js?v=133';
+import {strokeForContact} from './player-facing.js?v=133';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -196,7 +196,7 @@ export function selectShot(p,b,desired){
  }
  return desired
 }
-export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7, random=Math.random()}){
+export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;
  const bias=Math.max(0,Math.min(1,Number(aggression)||.5));
  const relativeSkill=Math.max(-.12,Math.min(.12,(Number(attackSkill||1)-Number(softSkill||1))*.32-Math.max(0,Math.min(1,Number(difficulty)||0))*.3));
@@ -205,7 +205,7 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
  if(shots===1)return 'drive';
  if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
  if(difficulty>.82&&height<3.2)return 'lob';
- if(shots===2)return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop';
+ if(shots===2){if(singles)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop'}
  if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';if(difficulty>.9&&height<2.7)return 'dink';return height>3.1||(height>.8&&random<Math.max(.12,Math.min(.48,.24+attackBias)))?'drive':'dink'}
  return height>3.2&&random<Math.max(.2,Math.min(.72,.45+attackBias))?'drive':'drop';
 }

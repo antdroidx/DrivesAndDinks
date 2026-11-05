@@ -1,5 +1,5 @@
-import {C,stepBall,side,move} from './core.js?v=132';
-import {kitchenContact} from './player-feet.js?v=132';
+import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds} from './core.js?v=133';
+import {kitchenContact} from './player-feet.js?v=133';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -37,6 +37,19 @@ export function forecastMovement(player,target,time){
     move(p,p.reactionWait>0?p.x:target.x,p.reactionWait>0?p.y:target.y,dt);
   }
   return p;
+}
+
+export function waitForRisingContact(player,ball,target){
+ const preferred=.8*(player.physique?.heightScale??1);
+ if(ball.z>=preferred||ball.vz<=2||(player.abilities?.courtIQ??1)<.85)return false;
+ const future={...ball},difficulty=contactDifficulty(player,ball,'drive');
+ for(let tick=1;tick<=14;tick++){
+  const event=stepBall(future,C.dt);if(event||!inBounds(future.x,future.y))return false;
+  if(future.z<preferred)continue;
+  const projected=forecastMovement(player,target,tick*C.dt);
+  if(paddleContactAvailable(projected,future,'drive')&&contactDifficulty(projected,future,'drive')<difficulty-.03)return true;
+ }
+ return false;
 }
 
 export function chooseCpuPlacement(player,opponents,shot){
@@ -77,13 +90,14 @@ function contacts(players,team,ball,shots,bounces){
       const y=count===0?volleyBrakeTarget(p,future).y:future.y;
       if(Math.abs(future.y-y)>1.6)continue;
       if(count>0&&future.vz>3&&future.z<1.35)continue;
-      if(future.z>3.4&&(future.z<5.2*(p.physique?.heightScale??1)||future.vz>0))continue;
+      if(future.z>=5.2*(p.physique?.heightScale??1)&&future.vz>0)continue;
       const target={x:clamp(future.x,-3,23),y:clamp(y,team===0?23:-3,team===0?47:21)};
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
-      const reach=1.3*(p.abilities?.reach??1),speed=p.abilities?.speed??C.speed;
+      const reach=C.reach*(p.abilities?.reach??1),speed=p.abilities?.speed??C.speed;
       if(travel>time*Math.max(speed,Math.hypot(p.vx||0,p.vy||0))+reach)continue;
       const projected=forecastMovement(p,target,time);
-      if(Math.hypot(target.x-projected.x,target.y-projected.y)<=reach)found.set(p.id,{...target,z:future.z,time,bounces:count});
+      const shot=future.z>=5.2*(p.physique?.heightScale??1)?'overhead':'drive';
+      if(paddleContactAvailable(projected,future,shot)&&(count>0||!kitchenContact(projected)))found.set(p.id,{...target,z:future.z,time,bounces:count});
     }
     if(found.size===players.length)break;
   }
@@ -111,14 +125,27 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   return {shot:shots,receiverId:selected.id,point:point||landing,poach,created:clock,expires:clock+(point?.time??.65)+.2};
 }
 
+export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players=[]}){
+ const team=p.team,near=team===0,x=clamp(10+(ball.x-10)*.25,5,15);
+ if(shots<=2&&team===servingTeam)return {x:10,y:near?41:3,role:'hold'};
+ if(lastShot==='lob')return {x,y:near?39:5,role:'singles-recover'};
+ const baseline=near?p.y>35:p.y<9,quality=p.lastShotQuality??1,placement=p.lastShotPlacement;
+ const depth=placement?(near?22-placement.y:placement.y-22):0,opponent=players.find(other=>other.team!==team);
+ const opponentDeep=opponent&&(opponent.team===0?opponent.y>35:opponent.y<9);
+ const netStrength=(p.abilities?.reach??1)*(p.paddle?.shapeReach??1)*(p.abilities?.volley??1)*(p.paddle?.shapeHandSpeed??1)/Math.max(.7,(p.abilities?.speed??C.speed)/C.speed);
+ const prepared=p.id===lastHitter&&quality>=.8&&!p.mishit&&(p.stamina??1)>.35&&(p.abilities?.courtIQ??1)>=.85;
+ const deepReturn=shots===2&&team!==servingTeam&&depth>=12;
+ const pressureDrive=shots>2&&lastShot==='drive'&&depth>=14&&opponentDeep&&netStrength>=1.03;
+ if(prepared&&(deepReturn||pressureDrive))return {x,y:near?Math.max(31.3,p.y-3):Math.min(12.7,p.y+3),role:'singles-approach'};
+ const stayDeep=baseline&&lastShot==='drive';
+ return {x,y:near?(stayDeep?39:shots<=2?35:32):(stayDeep?5:shots<=2?9:12),role:'singles-recover'};
+}
+
 export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[]}){
   const home=lane(p),team=p.team;
   if(p.id===receiverId&&team===incoming)return {x:point.x,y:point.y,role:'receive'};
   if(singles){
-   if(shots<=2&&team===servingTeam)return {x:10,y:team===0?41:3,role:'hold'};
-   const x=clamp(10+(ball.x-10)*.25,5,15),deep=lastShot==='lob';
-   const baseline=team===0?p.y>35:p.y<9,stayDeep=deep||baseline&&lastShot==='drive';
-   return {x,y:team===0?(stayDeep?39:shots<=2?35:32):(stayDeep?5:shots<=2?9:12),role:'singles-recover'};
+   return singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players});
   }
   // Hold the serve formations through the mandatory bounce sequence.
   if(shots<=2&&team===servingTeam)return {x:home,y:team===0?41:3,role:'hold'};

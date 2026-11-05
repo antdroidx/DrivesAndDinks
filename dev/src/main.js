@@ -1,39 +1,39 @@
-import {seededRandom} from './competition.js?v=132';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=132';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=132';
-import {playerFeet,footSole} from './player-feet.js?v=132';
+import {seededRandom} from './competition.js?v=133';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=133';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=133';
+import {playerFeet,footSole} from './player-feet.js?v=133';
 
-import {ReplayClock,faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=132';
+import {ReplayClock,faultReplaySample,replayRateAt,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=133';
 
-import {drawCourtNet} from './court-net.js?v=132';
+import {drawCourtNet} from './court-net.js?v=133';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=132';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=133';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=132';
+import {createAnimeGameRenderer} from './anime-game.js?v=133';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=132';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=133';
 
-import {setupCourtDisplay} from './court-display.js?v=132';
+import {setupCourtDisplay} from './court-display.js?v=133';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=132';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=133';
 
-import {courtCamera,courtAim,padControl} from './court-camera.js?v=132';
+import {courtCamera,courtAim,padControl} from './court-camera.js?v=133';
 
-import {movingStance} from './detailed-character.js?v=132';
+import {movingStance} from './detailed-character.js?v=133';
 
-import {sampleMatchAnimation} from './match-animation.js?v=132';
+import {sampleMatchAnimation} from './match-animation.js?v=133';
 
-import {setupSelection} from './selection.js?v=132';
+import {setupSelection} from './selection.js?v=133';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=132';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=133';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=132';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=133';
 
-import {Game} from './game.js?v=132';
+import {Game} from './game.js?v=133';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=132';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=133';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=132';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=133';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -346,10 +346,11 @@ function playReplay(t){
 
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
 
- const replayProbe=balanceQuery.get('test')==='sideline-replay'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname));
+ const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get('play')!=='1'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname));
  const elapsed=replayProbe?Math.max(0,Number(balanceQuery.get('at'))||1.5):replayClock.elapsed(t),snapshot=faultReplaySample(replayPlayback,elapsed);
 
  if(!snapshot){finishReplay();return false;}
+ if(!replayProbe)replayLabel.textContent=`REPLAY · ${replayPlayback.label}${replayRateAt(replayPlayback,elapsed)<1?' · CLOSE CALL · SLOW-MO':''}`;
 
  if(replayAngle==='sideline'){
   replayCamera=null;const palette=COURT_PALETTES.find(item=>item.id===snapshot.players[0]?.appearance?.court)??COURT_PALETTES[0];
@@ -455,7 +456,7 @@ if(detailedArtAvailable&&balanceQuery.get('test')==='kitchen-fault'){
 if(balanceQuery.get('test')==='sideline-replay'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))){
  document.querySelector('#match-setup').close();game.random=seededRandom(37);game.configure({format:'singles'});game.mode='watch';
  for(let tick=0;tick<120*180;tick++){game.update(1/120);if(game.phase==='pause'&&game.pointReplay?.frames.length>15&&game.pointReplay.focus?.boundary===undefined)break;if(game.phase==='over')break}
- game.setPaused(true);if(game.pointReplay){beginReplay(game.pointReplay,performance.now(),true);replayLabel.textContent='REPLAY INSPECTOR · FROZEN FRAME'}
+ game.setPaused(true);if(game.pointReplay){beginReplay(game.pointReplay,performance.now(),true);if(balanceQuery.get('play')!=='1')replayLabel.textContent='REPLAY INSPECTOR · FROZEN FRAME'}
 }
 
 // Suppress game-surface browser gestures; dialogs retain normal scrolling.
