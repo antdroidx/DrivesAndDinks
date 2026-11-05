@@ -68,7 +68,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
     const body={...previewLineup[0].appearance,...getPhysique()};
     previewLineup[0]=applyPhysique(previewLineup[0],body);
     const player=previewLineup[0];
-    const effects=document.querySelector('#body-effects');if(effects)effects.textContent=Object.entries(player.physique.modifiers).map(([key,value])=>key+': '+((value-1)*100>=0?'+':'')+Math.round((value-1)*100)+'%').join(' · ');
+    const effects=document.querySelector('#body-effects');if(effects)effects.textContent=Object.entries(player.physique.modifiers).map(([key,value])=>key+': '+((value-1)*100>=0?'+':'')+Math.round((value-1)*100)+'%').join(' · ')+'. Power potential combines with shot technique and contact to determine pace.';
     dialog.querySelector('#appearance-summary').textContent=appearanceSummary(draft);
     dialog.querySelector('#player-description').textContent=`${player.name} · ${player.archetype}. Pros: ${player.strengths.join(', ')}. Tradeoff: ${player.tradeoffs.join(', ')}.`;
     const stats=selectionStats(draft),effective=effectiveRatings(draft),average=skillAverage(stats);

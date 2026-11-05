@@ -42,7 +42,7 @@ test('stature preserves reach, power and low-ball tradeoffs without taxing every
  const base=buildProfile({character:'avery'}),short=applyPhysique(base,{height:145,build:.5225}),tall=applyPhysique(base,{height:210,build:.5225}),broad=applyPhysique(base,{height:210,build:1.05});
  assert.equal(tall.abilities.speed,short.abilities.speed);assert.equal(tall.abilities.endurance,short.abilities.endurance);assert.equal(tall.abilities.volley,short.abilities.volley);
  assert.ok(tall.abilities.acceleration<short.abilities.acceleration);assert.ok(tall.abilities.reach>short.abilities.reach);assert.ok(tall.abilities.power>short.abilities.power);
- assert.ok(broad.abilities.power>tall.abilities.power);assert.ok(broad.abilities.speed<tall.abilities.speed);assert.ok(broad.abilities.acceleration<tall.abilities.acceleration);
+ assert.ok(broad.abilities.power>tall.abilities.power);assert.equal(broad.abilities.speed,tall.abilities.speed);assert.ok(broad.abilities.acceleration<tall.abilities.acceleration);
  assert.ok(bodyContactDifficulty(tall,{z:.4},'drive')>bodyContactDifficulty(short,{z:.4},'drive'));
 });
 test('a net-height singles attack uses court height for short and tall CPU players',()=>{

@@ -1,0 +1,113 @@
+{
+  "seedsPerSide": 8,
+  "seedStart": 1,
+  "filters": {
+    "format": "singles",
+    "body": "tall-strong"
+  },
+  "neutral": {
+    "height": 177,
+    "build": 0.5225
+  },
+  "bodies": [
+    {
+      "id": "short-lean",
+      "height": 145,
+      "build": 0.1
+    },
+    {
+      "id": "short-strong",
+      "height": 145,
+      "build": 1.05
+    },
+    {
+      "id": "tall-lean",
+      "height": 210,
+      "build": 0.1
+    },
+    {
+      "id": "tall-strong",
+      "height": 210,
+      "build": 1.05
+    }
+  ],
+  "results": [
+    {
+      "format": "singles",
+      "character": "avery",
+      "body": "tall-strong",
+      "games": 16,
+      "completed": 16,
+      "subjectWins": 1,
+      "points": [
+        110,
+        174
+      ],
+      "faults": {
+        "Unreturned": 801,
+        "Net fault": 102,
+        "Double bounce": 255,
+        "Out": 167
+      },
+      "patternReads": 3458,
+      "singlesApproaches": 1593,
+      "subjectWinRate": 0.0625,
+      "review": "larger sample recommended"
+    },
+    {
+      "format": "singles",
+      "character": "morgan",
+      "body": "tall-strong",
+      "games": 16,
+      "completed": 16,
+      "subjectWins": 1,
+      "points": [
+        86,
+        178
+      ],
+      "faults": {
+        "Double bounce": 326,
+        "Unreturned": 837,
+        "Out": 96,
+        "Net fault": 68
+      },
+      "patternReads": 3771,
+      "singlesApproaches": 1558,
+      "subjectWinRate": 0.0625,
+      "review": "larger sample recommended"
+    },
+    {
+      "format": "singles",
+      "character": "jordan",
+      "body": "tall-strong",
+      "games": 16,
+      "completed": 16,
+      "subjectWins": 1,
+      "points": [
+        118,
+        173
+      ],
+      "faults": {
+        "Unreturned": 1051,
+        "Out": 223,
+        "Net fault": 130,
+        "Double bounce": 108
+      },
+      "patternReads": 2392,
+      "singlesApproaches": 2534,
+      "subjectWinRate": 0.0625,
+      "review": "larger sample recommended"
+    }
+  ],
+  "bodySummary": [
+    {
+      "format": "singles",
+      "body": "tall-strong",
+      "games": 48,
+      "completed": 48,
+      "subjectWins": 3,
+      "subjectWinRate": 0.0625,
+      "review": "investigate across more seeds"
+    }
+  ]
+}

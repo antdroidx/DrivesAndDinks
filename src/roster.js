@@ -242,7 +242,7 @@ export function applyPhysique(player,appearance=player.appearance??{}){
  const h=(height-177)/33,b=(build-.5225)/.5775;
  // Stature changes reach and preparation; do not also charge it as a loss of
  // top running speed, endurance and hand skill. Mass mainly affects first steps.
- const modifiers={reach:1+.09*h,power:1+.04*h+.10*b,speed:1-.025*b,acceleration:1-.025*h-.04*b,endurance:1-.025*b,volley:1-.02*b};
+ const modifiers={reach:1+.09*h,power:1+.03*h+.06*b,speed:1,acceleration:1-.025*h-.03*b,endurance:1,volley:1};
  const baseAbilities={...(player.baseAbilities??player.abilities)};
  const abilities={...baseAbilities};for(const [key,multiplier] of Object.entries(modifiers))abilities[key]=(baseAbilities[key]??1)*multiplier;
  return {...player,baseAbilities,abilities,appearance:{...appearance,height,build},physique:{height,build,heightScale:height/177,modifiers}};

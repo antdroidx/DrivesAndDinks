@@ -13,10 +13,10 @@ test('body modifiers change actual movement and overhead coverage',()=>{
  const short=athlete(155),tall=athlete(205);for(let i=0;i<30;i++){move(short,18,35,1/120);move(tall,18,35,1/120)}assert.ok(short.x>tall.x);
  const ball={x:10.5,y:34.75,z:8};Object.assign(tall,{x:10,y:35});const target=paddleContactTarget(tall,ball,'overhead');Object.assign(ball,{x:target.x,y:target.y});assert.equal(paddleContactAvailable(tall,ball,'overhead'),true);assert.equal(paddleContactAvailable(short,ball,'overhead'),false);
 });
-test('broader bodies launch faster shots but expend more stamina at equal running speed',()=>{
+test('broader bodies retain strength but trade first-step acceleration instead of fitness or hands',()=>{
  const lean=athlete(177,.05),broad=athlete(177,1.1),a={x:10,y:35,z:2},b={...a};launch(a,10,6,'drive',{power:lean.abilities.power,spin:1},1);launch(b,10,6,'drive',{power:broad.abilities.power,spin:1},1);assert.ok(Math.abs(b.vy)>Math.abs(a.vy));
- // Hold identical speed abilities to isolate endurance from their speed tradeoff.
- broad.abilities.speed=lean.abilities.speed;lean.vx=broad.vx=8;lean.stamina=broad.stamina=1;move(lean,19,35,1/120);move(broad,19,35,1/120);assert.ok(broad.stamina<lean.stamina);
+ assert.equal(broad.abilities.speed,lean.abilities.speed);assert.equal(broad.abilities.endurance,lean.abilities.endurance);assert.equal(broad.abilities.volley,lean.abilities.volley);
+ for(let i=0;i<8;i++){move(lean,19,35,1/120);move(broad,19,35,1/120)}assert.ok(broad.x<lean.x);
 });
 test('edits and match resets preserve body effects without stacking multipliers',()=>{
  const g=new Game({seed:5});g.configure({});g.setPhysique({height:200,build:.9});const once=structuredClone(g.players[0].abilities);g.setPhysique({height:200,build:.9});assert.deepEqual(g.players[0].abilities,once);g.reset();assert.deepEqual(g.players[0].abilities,once);assert.equal(g.players[0].appearance.height,200);assert.ok(g.players.every(p=>p.physique));
