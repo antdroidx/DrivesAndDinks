@@ -6,9 +6,9 @@
     "team1": "adaptive"
   },
   "completed": 8,
-  "decisions": 452,
-  "selected": 82,
-  "selectedRate": 0.18141592920353983,
+  "decisions": 424,
+  "selected": 75,
+  "selectedRate": 0.17688679245283018,
   "selectionByTeamType": {
     "balanced": {
       "decisions": 79,
@@ -17,10 +17,10 @@
       "averageProbability": 0.30074590231428205
     },
     "pressure": {
-      "decisions": 329,
-      "selected": 61,
-      "selectedRate": 0.18541033434650456,
-      "averageProbability": 0.4048643232937277
+      "decisions": 301,
+      "selected": 54,
+      "selectedRate": 0.17940199335548174,
+      "averageProbability": 0.42131311701734964
     },
     "control": {
       "decisions": 17,
@@ -37,29 +37,29 @@
   },
   "selectionByHandPair": {
     "same": {
-      "decisions": 362,
-      "selected": 76,
-      "selectedRate": 0.20994475138121546,
-      "averageProbability": 0.411245881243373
+      "decisions": 372,
+      "selected": 73,
+      "selectedRate": 0.19623655913978494,
+      "averageProbability": 0.4115022483979581
     },
     "opposite": {
-      "decisions": 90,
-      "selected": 6,
-      "selectedRate": 0.06666666666666667,
-      "averageProbability": 0.28068103636363634
+      "decisions": 52,
+      "selected": 2,
+      "selectedRate": 0.038461538461538464,
+      "averageProbability": 0.28208368725718724
     }
   },
   "execution": {
-    "needed": 200,
-    "aligned": 252,
-    "crossPlanned": 79,
-    "crossed": 79,
+    "needed": 191,
+    "aligned": 233,
+    "crossPlanned": 73,
+    "crossed": 72,
     "stays": 0,
-    "fallbacks": 2
+    "fallbacks": 1
   },
-  "rallies": 222,
+  "rallies": 208,
   "maxRally": 44,
-  "elapsedMs": 7890,
+  "elapsedMs": 6097,
   "matches": [
     {
       "seed": 1,
@@ -88,22 +88,22 @@
       "completed": true,
       "points": [
         11,
-        5
+        2
       ],
-      "rallies": 37,
-      "maxRally": 44,
+      "rallies": 23,
+      "maxRally": 36,
       "teamTypes": [
         "pressure",
         "pressure"
       ],
-      "decisions": 76,
-      "needed": 33,
-      "aligned": 43,
-      "selected": 16,
-      "crossPlanned": 15,
-      "crossed": 15,
+      "decisions": 48,
+      "needed": 24,
+      "aligned": 24,
+      "selected": 9,
+      "crossPlanned": 9,
+      "crossed": 8,
       "stays": 0,
-      "fallbacks": 1
+      "fallbacks": 0
     },
     {
       "seed": 3,

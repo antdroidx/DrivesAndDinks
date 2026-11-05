@@ -46,7 +46,7 @@ export function createSideReplayRenderer(createCanvas){
    const mode=animation?.mode??(moving?'run':'idle'),phase=animation?.phase??0,d=applyAnimeLook(resolveAnimeGameDesign({appearance:p.appearance,characterId:p.characterId,outfit}),look),direction=p.team===0?-1:1,units=10.2,stature=d.height/177;
    const feet3D=playerFeet(p).map(foot=>({x:(foot.x-p.x)*units,y:63-(2+foot.z*units)/stature,z:(foot.y-p.y)*direction*units}));
    const contact3D=p.animationContactStart&&p.swing>0&&p.contactPoint?{x:(p.contactPoint.x-p.x)*units,y:63-p.contactPoint.z*units/stature,z:(p.contactPoint.y-p.y)*direction*units}:null;
-   c.fillStyle='#071c2740';c.beginPath();c.ellipse(q.x,q.y,scale*.7,scale*.14,0,0,Math.PI*2);c.fill();
+
    drawProfile(c,d,mode,phase,q.x,q.y,scale/units,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:(p.handedness==='left'||p.hand==='left'?-1:1)*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),handedness:p.handedness??'right',...(()=>{const state=playerEmotionState(p,{phase:'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:null});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
   }
   drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});

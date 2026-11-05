@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {strokeForContact} from '../src/player-facing.js';
 import {playerProfile} from '../src/core.js';
-import {DEFAULT_SELECTION,normalizeSelection,buildProfile,createLineup} from '../src/roster.js';
+import {DEFAULT_SELECTION,GENERATED_LEFT_HANDED_RATE,normalizeSelection,buildProfile,createLineup} from '../src/roster.js';
 import {createStackPlans,stackMetrics,stackProbability} from '../src/stacking.js';
 
 function athlete(id,team,handedness){
@@ -21,6 +21,7 @@ test('right- and left-handed players choose mirrored forehand sides',()=>{
 
 test('handedness is selectable, persisted in profiles, and generated for teammates',()=>{
  assert.equal(DEFAULT_SELECTION.handedness,'right');
+ assert.equal(GENERATED_LEFT_HANDED_RATE,.13);
  assert.equal(normalizeSelection({handedness:'left'}).handedness,'left');
  assert.equal(normalizeSelection({handedness:'invalid'}).handedness,'right');
  assert.equal(buildProfile({handedness:'left'}).handedness,'left');

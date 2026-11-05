@@ -47,7 +47,7 @@ The older checkout had staged tracked changes. Those were preserved in local sta
 | Replay presentation and contact readability | Yes | Sideline profiles, contact labels, close-call review tests | Physical-device review |
 | Rendered mobile performance and touch ergonomics | Harness ready | Browser frame/render/input probe and responsive input tests | Real low-powered phone/browser measurements |
 | Layout and CSS consolidation | Yes for current scope | Zoom-safe dialog tests, responsive geometry tests and invalid override removal | Physical-device visual review |
-| Career progression and persistence | No | Intentionally deferred | Later product expansion |
+| Career progression and persistence | No | Intentionally deferred; see `PRE-CAREER-AUDIT.md` | Close P0 rule, persistence, balance and device gates |
 | Varied shot trajectories and tactical patterns | Yes for current scope | Curve-aware serves and rally shots, pattern labels, high-dink speed-ups and bounded late-rally attacks | Human-calibrated tactical variety |
 | Optional doubles stacking | Yes on `codex/doubles-stacking` | `test/stacking.test.js`; score identity, cross/stay, adaptive, fallback, report and replay coverage | Human tuning of stack frequency, preferred sides and safety thresholds |
 

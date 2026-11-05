@@ -80,7 +80,7 @@ Keep every random draw inside the seeded gameplay stream and verify that present
 
 ## Later expansion
 
-Career scheduling, long-term progression, seasons and cloud persistence remain later product work. They should start only after human playtests establish that the core singles/doubles loop is stable and understandable.
+Career scheduling, long-term progression, seasons and cloud persistence remain later product work. Generated athletes use a 13% left-handed rate in the future career roster model. Start career implementation only after `PRE-CAREER-AUDIT.md` closes its P0 rule, persistence, balance and device gates.
 ## Implementation status after the post-143 pass
 
 1. **Core-loop validation:** reporting and scorecard tooling are complete. Human execution remains the release gate.

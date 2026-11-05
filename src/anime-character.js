@@ -76,6 +76,10 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
  const {x,y}=animeHeadCenter(n),skin=d.skin,hair=d.hairColor,colors=skinPalette(skin);
  // Tapered jaw, small ears and a tiny implied nose replace the round toy face.
  c.beginPath();c.moveTo(x-4.9,y-3.6);c.quadraticCurveTo(x-6,y+1,x-3.5,y+4.4);c.quadraticCurveTo(x-1,y+6,x,y+6.1);c.quadraticCurveTo(x+2.3,y+5.3,x+4.1,y+3.5);c.quadraticCurveTo(x+5.6,y,x+4.8,y-3.8);c.quadraticCurveTo(x+3.3,y-6.8,x,y-6.6);c.quadraticCurveTo(x-3.7,y-6.8,x-4.9,y-3.6);c.closePath();c.fillStyle=skin;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke();
+ path(c,[point(x-4.5,y-2.7),point(x-1.2,y-5.6),point(x-.55,y+3.8),point(x-3.35,y+4.45)],colors.light,null);
+ path(c,[point(x+2.35,y-3.5),point(x+4.7,y-.55),point(x+3.8,y+3.35),point(x+1.15,y+5.15),point(x+2,y+1.2)],colors.shadow,null);
+ line(c,[point(x+.1,y-.9),point(x+.7,y+1.55),point(x+.15,y+2.05)],tone(skin,-.18),.28);
+ path(c,[point(x-2.7,y+4.75),point(x+.15,y+6.05),point(x+2.7,y+4.5),point(x+.15,y+5.1)],tone(skin,-.12),null);
  for(const sign of [-1,1]){oval(c,x+sign*4.8,y+.6,.9,1.35,skin);line(c,[point(x+sign*4.8,y+.1),point(x+sign*5,y+1)],tone(skin,-.18),.3)}
  if(!near){
   path(c,[point(x-4.2,y-2.8),point(x+4.3,y-2.8),point(x+3.9,y-1.2),point(x+.6,y-1.8),point(x-2.6,y-1.1)],colors.shadow,null);
@@ -142,8 +146,12 @@ function trainer(c,f,d,ink,sole){
  path(c,[px(-1.3,-4.2),px(1.1,-4.2),px(1.2,-1.4),px(-1.5,-1.3)],'#e5dfce',ink,.3);
  line(c,[px(-1.2,-3.2),px(1.1,-3.2)],d.trim,.65);
  path(c,[px(-2.2,-2),px(-.9,-2.4),px(1.2,-2),px(2.1,-.8),px(3.6,.3),px(3.8,1.4),px(-2.6,1.4)],'#e5dfce',ink,.4);
+ path(c,[px(-2.05,-1.75),px(-.65,-2.05),px(.15,-.35),px(-1.45,.35),px(-2.3,.05)],tone(d.trim,.16),null);
+ path(c,[px(.55,-.55),px(3.15,.05),px(3.55,.55),px(2.4,.72),px(.65,.35)],tone('#e5dfce',-.13),null);
+ path(c,[px(1.25,-1.85),px(3.25,-.55),px(3.55,.2),px(2.25,.12),px(1.45,-.75)],tone('#e5dfce',.12),null);
  path(c,[px(-2.5,.9),px(3.7,.9),px(3.9,1.7),px(2.6,2),px(-2.6,1.9)],tone(d.trim,-.55),ink,.25);
  path(c,[px(-2.5,.6),px(3.6,.6),px(3.7,1.1),px(-2.5,1.2)],'#fff3df',null);
+ line(c,[px(-2.25,1.48),px(3.5,1.38)],'#fff3df',.28);
  path(c,[px(-2.1,-1.6),px(-.7,-1.9),px(.1,-.3),px(-1.6,.4),px(-2.4,.2)],tone(d.trim,-.12),null);
  path(c,[px(.4,-.2),px(1.5,-.8),px(3.3,.1),px(2.8,.5),px(.8,.4)],tone('#e5dfce',-.15),null);
  path(c,[px(-.6,-2.1),px(.9,-1.8),px(1.6,-.5),px(.2,-.3)],d.trim,ink,.2);
@@ -156,7 +164,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  if(options.footTargets)p.legs.forEach((chain,i)=>{const target=options.footTargets[i].ankle,dx=target.x-chain[2].x,dy=target.y-chain[2].y;chain[1].x+=dx*.5;chain[1].y+=dy*.5;chain[2]={...target}});
  const plant=options.plantWorld??{cx,baseline,scale};if(!options.footTargets)plantFeet(p,{...options,legLengths:p.legs.map(chain=>({upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(chain[2].x-chain[1].x,chain[2].y-chain[1].y)}))},raw,plant.cx,plant.baseline,plant.scale);
  c.save();c.translate(cx-24*scale+(raw.rootOffset||0)*scale,baseline-63*scale);c.scale(scale,scale);
- oval(c,24,64,10+d.build*2,1.8,'#07151a45');
+
  hairTail(c,d,n.x,animeHeadCenter(n).y,phase,near,ink);
  for(const [index,chain] of p.legs.entries()){ribbon(c,chain,[body.thigh,body.calf,body.ankle],d.skin,ink,skin);const f=chain[2];
   trainer(c,f,d,ink,options.footTargets?.[index].sole);
