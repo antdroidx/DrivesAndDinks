@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=133';
-import {strokeForContact} from './player-facing.js?v=133';
+import {kitchenContact} from './player-feet.js?v=134';
+import {strokeForContact} from './player-facing.js?v=134';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -157,9 +157,9 @@ export class Score {
  get player(){return this.serverPlayer}
  get call(){if(this.format==='singles')return `${this.points[this.team]} - ${this.points[1-this.team]}`;return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
-export function move(p,tx,ty,dt){
+export function move(p,tx,ty,dt,brake=false){
  p.stamina=Math.max(0,Math.min(1,p.stamina??1));const staminaScale=.82+.18*p.stamina,dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=(p.abilities?.speed??C.speed)*staminaScale,acceleration=(p.abilities?.acceleration??C.accel)*(.78+.22*p.stamina),contactLock=p.swing>(p.swingDuration||.36)*.82,recovering=(p.recoveryTimer||0)>0,settling=(p.splitStepTimer||0)>0;
- const desiredSpeed=recovering||d<.03?0:Math.min(maxSpeed*(contactLock?.72:1),Math.sqrt(Math.max(0,2*acceleration*d)));
+ const desiredSpeed=brake||recovering||d<.03?0:Math.min(maxSpeed*(contactLock?.72:1),Math.sqrt(Math.max(0,2*acceleration*d)));
  const desiredVx=d?dx/d*desiredSpeed:0,desiredVy=d?dy/d*desiredSpeed:0,reversing=p.vx*desiredVx+p.vy*desiredVy<0;
  const turnFactor=(reversing?.62:1)*(0.85+Math.min(.25,Math.max(0,(acceleration-C.accel)/120))),maxDelta=acceleration*1.5*turnFactor*dt;
  let dvx=desiredVx-p.vx,dvy=desiredVy-p.vy,dv=Math.hypot(dvx,dvy);if(dv>maxDelta&&dv){dvx*=maxDelta/dv;dvy*=maxDelta/dv}

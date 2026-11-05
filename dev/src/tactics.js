@@ -1,5 +1,5 @@
-import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds} from './core.js?v=133';
-import {kitchenContact} from './player-feet.js?v=133';
+import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds} from './core.js?v=134';
+import {kitchenContact} from './player-feet.js?v=134';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -125,9 +125,12 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   return {shot:shots,receiverId:selected.id,point:point||landing,poach,created:clock,expires:clock+(point?.time??.65)+.2};
 }
 
-export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players=[]}){
+export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players=[],opponentContactIn=Infinity}){
  const team=p.team,near=team===0,x=clamp(10+(ball.x-10)*.25,5,15);
  if(shots<=2&&team===servingTeam)return {x:10,y:near?41:3,role:'hold'};
+ const iq=p.abilities?.courtIQ??1,stamina=clamp(p.stamina??1,0,1),acceleration=(p.abilities?.acceleration??C.accel)*(.78+.22*stamina);
+ const stopTime=Math.hypot(p.vx||0,p.vy||0)/(acceleration*1.5*.85);
+ if(shots>=2&&iq>=.85&&opponentContactIn>=0&&opponentContactIn<=stopTime+.10*clamp(iq,.85,1.3))return {x:p.x,y:p.y,brake:true,role:'singles-set'};
  if(lastShot==='lob')return {x,y:near?39:5,role:'singles-recover'};
  const baseline=near?p.y>35:p.y<9,quality=p.lastShotQuality??1,placement=p.lastShotPlacement;
  const depth=placement?(near?22-placement.y:placement.y-22):0,opponent=players.find(other=>other.team!==team);
@@ -141,11 +144,11 @@ export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHit
  return {x,y:near?(stayDeep?39:shots<=2?35:32):(stayDeep?5:shots<=2?9:12),role:'singles-recover'};
 }
 
-export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[]}){
+export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[],opponentContactIn=Infinity}){
   const home=lane(p),team=p.team;
   if(p.id===receiverId&&team===incoming)return {x:point.x,y:point.y,role:'receive'};
   if(singles){
-   return singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players});
+   return singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players,opponentContactIn});
   }
   // Hold the serve formations through the mandatory bounce sequence.
   if(shots<=2&&team===servingTeam)return {x:home,y:team===0?41:3,role:'hold'};
