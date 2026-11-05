@@ -2,6 +2,8 @@
 
 Current branch: `codex/teamwork-serve-replay`. This combines the previously separate recovery and replay/transition work. Historical results remain in `ENGINE-NOTES.md` and `validation/previous-volley-pass/`; they are not results of the combined source.
 
+Published checkpoint: DEV Build 142 (`05195ee`), verified through successful source/Pages workflows, live asset checks and browser playback. All 351 tests pass. Main remains at `157f680`; the engine is not promoted there.
+
 Implemented in this cycle:
 - Receiver ownership and automatic poaching retain normal movement and manual human shot timing.
 - Recent hitters retain their recovery corridor. Partners cover the opening, weak transitions hold together, and off-ball players prepare to brake for opponent contact.

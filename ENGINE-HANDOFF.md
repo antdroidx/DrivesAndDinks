@@ -6,7 +6,11 @@ Work is consolidated in `codex/teamwork-serve-replay`. The other checkout was su
 
 The five requested work areas are implemented: doubles teamwork/recovery; continuous rendering-only replay interpolation; ability-based serve/return choices; contextual third/fifth/later transition decisions; and combined validation plus DEV deployment preparation. The earlier audit below is historical and describes the starting state, not outstanding implementation.
 
-Current validation and remaining balance/playtest priorities are tracked in `DEV-AUDIT.md`. New results use `validation/combined-*`; old evidence is kept under `validation/previous-volley-pass/`. Deployment status will be recorded after GitHub Pages verification. Main gameplay remains unchanged.
+Current validation and remaining balance/playtest priorities are tracked in `DEV-AUDIT.md`. New results use `validation/combined-*`; old evidence is kept under `validation/previous-volley-pass/`.
+
+**Published and verified: DEV Build 142**, from `05195ee5086f1c6d759a10ecd214a174713171bb`, at https://antdroidx.github.io/DrivesAndDinks/dev/. The source workflow https://github.com/antdroidx/DrivesAndDinks/actions/runs/41993739114 and Pages deployment https://github.com/antdroidx/DrivesAndDinks/actions/runs/41993795120 both succeeded. Live assets contain the combined serve, transition, replay and recovery changes; browser verification displayed Build 142 and working replay pause/resume without console errors. All 351 tests pass.
+
+Main remains at `157f680fd1adbced8cf67d0600ab131a0e4ff595`. The workflow repackages Main's existing gameplay source at the public root; it does not promote this DEV engine there. The other checkout's staging area remains intact. Future engine work should start from this combined branch, not reapply its archived recovery patch.
 
 ## Original audit
 
