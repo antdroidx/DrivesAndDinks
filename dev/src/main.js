@@ -1,39 +1,39 @@
-import {seededRandom} from './competition.js?v=134';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=134';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=134';
-import {playerFeet,footSole} from './player-feet.js?v=134';
+import {seededRandom} from './competition.js?v=135';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=135';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=135';
+import {playerFeet,footSole} from './player-feet.js?v=135';
 
-import {ReplayClock,faultReplaySample,replayRateAt,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=134';
+import {ReplayClock,faultReplaySample,replayRateAt,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=135';
 
-import {drawCourtNet} from './court-net.js?v=134';
+import {drawCourtNet} from './court-net.js?v=135';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=134';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=135';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=134';
+import {createAnimeGameRenderer} from './anime-game.js?v=135';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=134';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=135';
 
-import {setupCourtDisplay} from './court-display.js?v=134';
+import {setupCourtDisplay} from './court-display.js?v=135';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=134';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=135';
 
-import {courtCamera,courtAim,padControl} from './court-camera.js?v=134';
+import {courtCamera,courtAim,padControl} from './court-camera.js?v=135';
 
-import {movingStance} from './detailed-character.js?v=134';
+import {movingStance} from './detailed-character.js?v=135';
 
-import {sampleMatchAnimation} from './match-animation.js?v=134';
+import {sampleMatchAnimation} from './match-animation.js?v=135';
 
-import {setupSelection} from './selection.js?v=134';
+import {setupSelection} from './selection.js?v=135';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=134';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=135';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=134';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=135';
 
-import {Game} from './game.js?v=134';
+import {Game} from './game.js?v=135';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=134';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=135';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=134';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=135';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -88,7 +88,7 @@ if(detailedArtAvailable){
 
  const panel=document.createElement('div');panel.id='dev-art-options';panel.style.cssText='display:grid;gap:8px;margin:10px 0';
 
- panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="none">No background · court color theme</option><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower acceleration and harder low contacts. Broader: more power, slower movement and more fatigue. Leaner / shorter: quicker coverage. Shorter players handle low balls and behind-shoulder reflex blocks more easily.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
+ panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="none">No background · court color theme</option><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower first steps and harder rushed low contacts. Broader: more power potential, slower acceleration and braking. Leaner / shorter: quicker changes of direction. Shot technique, swing speed and clean contact also generate power. Fitness and hand skill come from ratings.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
 
  document.querySelector('.setup-top').after(panel);
 
