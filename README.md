@@ -156,7 +156,7 @@ The sideline scene uses the selected two-tone court colors and a clean surround.
 
 On DEV, `?test=sideline-replay` opens a frozen, simulated replay inspector. `&at=2` selects another playback time; `&art=anime-pixel` checks the pixel treatment. Use the ordinary DEV URL for animated gameplay and replays.
 
-Ordinary replays now run at normal speed. Only measured close line, kitchen-foot or net contacts slow briefly, with a CLOSE CALL / SLOW-MO indicator during that window. Camera tracking continues through the outcome. Add `&play=1` to the inspector to watch its simulated clip animate.
+Ordinary replays now run at normal speed. Only measured close line, kitchen-foot or net contacts slow briefly, with a CLOSE CALL / SLOW-MO indicator during that window. The camera remains stationary through the outcome. Add `&play=1` to the inspector to watch its simulated clip animate.
 
 Singles players can approach behind a clean deep return or a suitable deep pressure drive. Decisions use Court IQ, stamina, reach, volley ability, paddle shape and the opponent's position. CPU singles returns can select passing drives, and a reachable rising bounce can be given a brief preparation window. Interception forecasts now check the live paddle contact volume and grounded kitchen clearance, including mid-height forehand volleys.
 
@@ -177,3 +177,18 @@ Attacking shot power now combines strength potential with generated paddle speed
 Longer reach now helps forward interception as well as lateral coverage. Hit detection, contact difficulty and mishit calculations share one grip-aware contact volume. Kitchen and bounce rules still apply. Height/build chiefly trade reach and strength potential against acceleration/braking, with stature-related low-ball difficulty reduced by preparation. Fitness and hand skill remain rating-driven.
 
 Reports include attacking `mechanics` components and horizontal `pace` on hit events. These are normalized game factors, not measured biomechanics. Tall/broad singles improved from 9/48 to 16/48 wins in the paired sample and 11/48 to 14/48 in separate seeds. Further samples show 27/48 short/broad singles wins and 29/48 tall/broad doubles wins; body/archetype balance still needs human playtesting. Saved results and intermediate comparisons are in `validation/mechanics-*.json`.
+
+
+## DEV stationary replay framing
+
+Automatic and point replays now use one stable full-court view. Sideline and Overview remain selectable, but neither angle zooms toward the ball. Fault and contact markers appear in place, while close calls retain their brief normal slow-motion window. This is an accessibility/motion-comfort change; replay timing and scoring are unchanged.
+
+## DEV teamwork, serves, returns and replay motion
+
+CPU serves vary hard/soft pace, body/wide placement and depth with serve ability, Court IQ and aggression. Human serve buttons and aim retain manual control. CPU returns use shot-specific depth and open-court placement, adding depth margin under pressure. Both court ends use mirrored targets.
+
+Doubles third shots evaluate height, balance, pressure, opponent depth, partner readiness and attack/soft skills. Fifth and later serving-team transition shots can reset until both players can advance. Weak approaches hold teammates level with the deeper player; players prepare to brake before opponent contact. The recent hitter retains their recovery corridor, and the volley predictor uses the live braking/momentum rules.
+
+Replay playback interpolates positions, velocity, stride, swing/preparation and animation time between recorded frames. Contacts and ball events retain additional exact-time frames; hits, bounces, net and post impacts remain discrete. Render samples cannot mutate recordings or consume match randomness. Automatic and point replays remain stationary; Sideline/Overview stays selectable.
+
+`node scripts/validate-transitions.js` collects live serve/return landing depth, third/fifth decisions, support roles and rally outcomes. See `ENGINE-HANDOFF.md` for integration status and `validation/combined-*.json` for this batch's results. Prior recovery-pass evidence is preserved separately in `validation/previous-volley-pass/`.

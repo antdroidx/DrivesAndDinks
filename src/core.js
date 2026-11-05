@@ -209,16 +209,41 @@ export function selectShot(p,b,desired){
  }
  return desired
 }
-export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, random=Math.random()}){
+export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, partnerReady=true, balanced=true, opponentsDeep=false, transition=false, random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;
  const bias=Math.max(0,Math.min(1,Number(aggression)||.5));
  const relativeSkill=Math.max(-.12,Math.min(.12,(Number(attackSkill||1)-Number(softSkill||1))*.32-Math.max(0,Math.min(1,Number(difficulty)||0))*.3));
  const styleBias=({banger:.1,soft:-.1,speed:-.04,net:nearKitchen?.07:-.03})[tendency]??0;
  const attackBias=(bias-.5)*.24+(.95-Math.max(.7,Number(courtIQ)||1))*.14+relativeSkill+styleBias+(.7-Math.max(0,Math.min(1,patience)))*.12;
  if(shots===1)return 'drive';
+ // shots counts completed hits: 2 is the third shot, 4 the fifth.
+ // Later transition resets are opt-in so ordinary rallies keep their choices.
+ if(!singles&&(shots===2||(transition&&shots>=4))){
+  const pressure=Math.max(0,Math.min(1,Number(difficulty)||0));
+  const iq=Math.max(.7,Math.min(1.4,Number(courtIQ)||1));
+  const attack=Math.max(.4,Math.min(1.6,Number(attackSkill)||1));
+  const soft=Math.max(.4,Math.min(1.6,Number(softSkill)||1));
+  const reset=shots===2||!nearKitchen?'drop':'dink';
+  // Readiness is a feasibility gate, not a preference that aggression can override.
+  if(!balanced||pressure>.78||(!partnerReady&&shots>=4))return reset;
+  if(shots>=4&&opponentsAtKitchen&&(height<3.2||pressure>.55))return reset;
+  if(shots>=4&&height>=5.2&&height<=7.4)return 'drive';
+  const deep=opponentsDeep&&!opponentsAtKitchen;
+  const driveFloor=(deep?1.4:2.6)+Math.max(0,1-attack)*.5;
+  const driveFeasible=height>=driveFloor&&pressure<.72&&attack>=.65;
+  if(!driveFeasible)return reset;
+  // A deep pair leaves a useful drive; a set kitchen rewards a feasible drop.
+  const dropFeasible=soft>=.7&&pressure<.65;
+  const driveChance=Math.max(.05,Math.min(.9,.35+attackBias+
+   (deep?.22:opponentsAtKitchen?-.14:.05)+
+   Math.max(-.1,Math.min(.16,(height-3.3)*.1))+
+   (attack-soft)*.12-(iq-1)*(opponentsAtKitchen?.25:.1)+
+   (!partnerReady?-.2:0)+(dropFeasible?0:.16)-pressure*.18));
+  return random<driveChance?'drive':reset;
+ }
  if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
  if(difficulty>.82&&height<3.2)return 'lob';
- if(shots===2){if(singles)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop'}
+ if(shots===2)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';
  if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';if(difficulty>.9&&height<2.7)return 'dink';return height>3.1||(height>.8&&random<Math.max(.12,Math.min(.48,.24+attackBias)))?'drive':'dink'}
  return height>3.2&&random<Math.max(.2,Math.min(.72,.45+attackBias))?'drive':'drop';
 }

@@ -7,6 +7,7 @@ on:
       - codex/high-resolution-players
       - codex/dev-gameplay-polish
       - codex/character-design-viewer
+      - codex/teamwork-serve-replay
   workflow_dispatch:
 
 permissions:

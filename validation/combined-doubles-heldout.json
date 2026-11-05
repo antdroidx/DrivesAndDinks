@@ -1,0 +1,2373 @@
+{
+  "schemaVersion": 2,
+  "scope": "CPU self-play against the same archetype and neutral body; mirrored games share seeds and are correlated. Teams are ordered subject, neutral. Not human balance evidence.",
+  "seedsPerSide": 4,
+  "seedStart": 17,
+  "filters": {
+    "format": "doubles",
+    "body": "tall-strong",
+    "character": null
+  },
+  "characters": [
+    "avery",
+    "remy",
+    "morgan",
+    "jordan",
+    "selena"
+  ],
+  "neutral": {
+    "height": 177,
+    "build": 0.5225
+  },
+  "bodies": [
+    {
+      "id": "short-lean",
+      "height": 145,
+      "build": 0.1
+    },
+    {
+      "id": "short-strong",
+      "height": 145,
+      "build": 1.05
+    },
+    {
+      "id": "tall-lean",
+      "height": 210,
+      "build": 0.1
+    },
+    {
+      "id": "tall-strong",
+      "height": 210,
+      "build": 1.05
+    }
+  ],
+  "results": [
+    {
+      "format": "doubles",
+      "character": "avery",
+      "body": "tall-strong",
+      "games": 8,
+      "completed": 8,
+      "subjectWins": 7,
+      "points": [
+        82,
+        40
+      ],
+      "faults": {
+        "Unreturned": 148,
+        "Net fault": 101,
+        "Out": 17,
+        "Kitchen momentum fault": 6,
+        "Double bounce": 24
+      },
+      "patternReads": 8383,
+      "singlesApproaches": 0,
+      "matches": [
+        {
+          "seed": 17,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            1
+          ],
+          "teams": [
+            {
+              "contacts": 276,
+              "mishits": 5,
+              "lowContacts": 187,
+              "shots": {
+                "drive": 40,
+                "dink": 204,
+                "drop": 22,
+                "lob": 8,
+                "overhead": 2
+              },
+              "faults": {
+                "Net fault": 5,
+                "Unreturned": 5,
+                "Out": 1,
+                "Double bounce": 1
+              },
+              "ralliesWon": 22,
+              "meanQuality": 0.987966926884481,
+              "meanStamina": 0.6831732478037581,
+              "mishitRate": 0.018115942028985508
+            },
+            {
+              "contacts": 280,
+              "mishits": 15,
+              "lowContacts": 181,
+              "shots": {
+                "drop": 14,
+                "dink": 211,
+                "drive": 46,
+                "overhead": 5,
+                "lob": 4
+              },
+              "faults": {
+                "Unreturned": 11,
+                "Net fault": 9,
+                "Kitchen momentum fault": 1,
+                "Double bounce": 1
+              },
+              "ralliesWon": 12,
+              "meanQuality": 0.9779421009433059,
+              "meanStamina": 0.680379734841587,
+              "mishitRate": 0.05357142857142857
+            }
+          ]
+        },
+        {
+          "seed": 17,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            2
+          ],
+          "teams": [
+            {
+              "contacts": 261,
+              "mishits": 9,
+              "lowContacts": 177,
+              "shots": {
+                "drop": 24,
+                "dink": 188,
+                "overhead": 8,
+                "drive": 35,
+                "lob": 6
+              },
+              "faults": {
+                "Out": 1,
+                "Unreturned": 5,
+                "Net fault": 8
+              },
+              "ralliesWon": 23,
+              "meanQuality": 0.9841064509059712,
+              "meanStamina": 0.728273218809218,
+              "mishitRate": 0.034482758620689655
+            },
+            {
+              "contacts": 261,
+              "mishits": 12,
+              "lowContacts": 169,
+              "shots": {
+                "drive": 43,
+                "dink": 192,
+                "lob": 10,
+                "drop": 15,
+                "overhead": 1
+              },
+              "faults": {
+                "Unreturned": 12,
+                "Net fault": 8,
+                "Double bounce": 2,
+                "Out": 1
+              },
+              "ralliesWon": 14,
+              "meanQuality": 0.9802270000256997,
+              "meanStamina": 0.7675403761251851,
+              "mishitRate": 0.04597701149425287
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            0
+          ],
+          "teams": [
+            {
+              "contacts": 235,
+              "mishits": 3,
+              "lowContacts": 162,
+              "shots": {
+                "drop": 20,
+                "dink": 176,
+                "drive": 31,
+                "lob": 2,
+                "overhead": 6
+              },
+              "faults": {
+                "Out": 1,
+                "Net fault": 2,
+                "Unreturned": 3,
+                "Double bounce": 3
+              },
+              "ralliesWon": 21,
+              "meanQuality": 0.9895137537660845,
+              "meanStamina": 0.6742961436335474,
+              "mishitRate": 0.01276595744680851
+            },
+            {
+              "contacts": 238,
+              "mishits": 10,
+              "lowContacts": 160,
+              "shots": {
+                "drive": 38,
+                "dink": 181,
+                "drop": 12,
+                "lob": 7
+              },
+              "faults": {
+                "Unreturned": 13,
+                "Net fault": 6,
+                "Double bounce": 1,
+                "Out": 1
+              },
+              "ralliesWon": 9,
+              "meanQuality": 0.9809721228067155,
+              "meanStamina": 0.7145668514268754,
+              "mishitRate": 0.04201680672268908
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            9
+          ],
+          "teams": [
+            {
+              "contacts": 437,
+              "mishits": 12,
+              "lowContacts": 296,
+              "shots": {
+                "drive": 65,
+                "dink": 331,
+                "lob": 9,
+                "overhead": 7,
+                "drop": 25
+              },
+              "faults": {
+                "Unreturned": 14,
+                "Net fault": 8,
+                "Double bounce": 1
+              },
+              "ralliesWon": 26,
+              "meanQuality": 0.9854792468686272,
+              "meanStamina": 0.6658568007264263,
+              "mishitRate": 0.02745995423340961
+            },
+            {
+              "contacts": 436,
+              "mishits": 10,
+              "lowContacts": 293,
+              "shots": {
+                "drop": 28,
+                "dink": 330,
+                "overhead": 5,
+                "lob": 9,
+                "drive": 64
+              },
+              "faults": {
+                "Net fault": 5,
+                "Unreturned": 17,
+                "Out": 3,
+                "Double bounce": 1
+              },
+              "ralliesWon": 23,
+              "meanQuality": 0.9852369889129032,
+              "meanStamina": 0.5638010305424183,
+              "mishitRate": 0.022935779816513763
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            8
+          ],
+          "teams": [
+            {
+              "contacts": 348,
+              "mishits": 16,
+              "lowContacts": 244,
+              "shots": {
+                "drive": 55,
+                "dink": 259,
+                "drop": 23,
+                "lob": 8,
+                "overhead": 3
+              },
+              "faults": {
+                "Out": 2,
+                "Net fault": 8,
+                "Double bounce": 2,
+                "Unreturned": 8
+              },
+              "ralliesWon": 24,
+              "meanQuality": 0.9797448037741954,
+              "meanStamina": 0.6469466850540404,
+              "mishitRate": 0.04597701149425287
+            },
+            {
+              "contacts": 350,
+              "mishits": 11,
+              "lowContacts": 216,
+              "shots": {
+                "drop": 25,
+                "dink": 264,
+                "drive": 51,
+                "overhead": 7,
+                "lob": 3
+              },
+              "faults": {
+                "Net fault": 11,
+                "Unreturned": 9,
+                "Kitchen momentum fault": 1,
+                "Double bounce": 2,
+                "Out": 1
+              },
+              "ralliesWon": 20,
+              "meanQuality": 0.984353768386574,
+              "meanStamina": 0.720062631230903,
+              "mishitRate": 0.03142857142857143
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            5
+          ],
+          "teams": [
+            {
+              "contacts": 278,
+              "mishits": 11,
+              "lowContacts": 191,
+              "shots": {
+                "drop": 21,
+                "dink": 201,
+                "drive": 47,
+                "lob": 6,
+                "overhead": 3
+              },
+              "faults": {
+                "Double bounce": 3,
+                "Net fault": 5,
+                "Out": 1,
+                "Kitchen momentum fault": 2,
+                "Unreturned": 4
+              },
+              "ralliesWon": 21,
+              "meanQuality": 0.9819529602382597,
+              "meanStamina": 0.7143377599674993,
+              "mishitRate": 0.039568345323741004
+            },
+            {
+              "contacts": 275,
+              "mishits": 7,
+              "lowContacts": 183,
+              "shots": {
+                "drive": 45,
+                "dink": 204,
+                "overhead": 5,
+                "drop": 17,
+                "lob": 4
+              },
+              "faults": {
+                "Unreturned": 16,
+                "Net fault": 4,
+                "Out": 1
+              },
+              "ralliesWon": 15,
+              "meanQuality": 0.9860669115983262,
+              "meanStamina": 0.751425541340578,
+              "mishitRate": 0.025454545454545455
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            4
+          ],
+          "teams": [
+            {
+              "contacts": 283,
+              "mishits": 9,
+              "lowContacts": 192,
+              "shots": {
+                "drop": 21,
+                "dink": 200,
+                "drive": 46,
+                "lob": 9,
+                "overhead": 7
+              },
+              "faults": {
+                "Unreturned": 8,
+                "Double bounce": 2,
+                "Net fault": 3,
+                "Out": 1
+              },
+              "ralliesWon": 21,
+              "meanQuality": 0.984399845426528,
+              "meanStamina": 0.719381671138641,
+              "mishitRate": 0.03180212014134275
+            },
+            {
+              "contacts": 285,
+              "mishits": 8,
+              "lowContacts": 194,
+              "shots": {
+                "drive": 47,
+                "dink": 204,
+                "overhead": 8,
+                "drop": 15,
+                "lob": 11
+              },
+              "faults": {
+                "Unreturned": 15,
+                "Out": 1,
+                "Net fault": 5
+              },
+              "ralliesWon": 14,
+              "meanQuality": 0.9848805055222726,
+              "meanStamina": 0.7109054536291428,
+              "mishitRate": 0.028070175438596492
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            5,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 268,
+              "mishits": 12,
+              "lowContacts": 183,
+              "shots": {
+                "drive": 43,
+                "dink": 205,
+                "lob": 5,
+                "drop": 13,
+                "overhead": 2
+              },
+              "faults": {
+                "Net fault": 10,
+                "Double bounce": 4,
+                "Out": 2,
+                "Unreturned": 1,
+                "Kitchen momentum fault": 2
+              },
+              "ralliesWon": 12,
+              "meanQuality": 0.9798021765188613,
+              "meanStamina": 0.6159651400297746,
+              "mishitRate": 0.04477611940298507
+            },
+            {
+              "contacts": 259,
+              "mishits": 5,
+              "lowContacts": 163,
+              "shots": {
+                "drop": 21,
+                "dink": 201,
+                "drive": 31,
+                "overhead": 3,
+                "lob": 3
+              },
+              "faults": {
+                "Unreturned": 7,
+                "Net fault": 4,
+                "Double bounce": 1
+              },
+              "ralliesWon": 19,
+              "meanQuality": 0.9869749386116307,
+              "meanStamina": 0.6474411369824842,
+              "mishitRate": 0.019305019305019305
+            }
+          ]
+        }
+      ],
+      "subjectWinRate": 0.875,
+      "review": "larger sample recommended"
+    },
+    {
+      "format": "doubles",
+      "character": "remy",
+      "body": "tall-strong",
+      "games": 8,
+      "completed": 8,
+      "subjectWins": 3,
+      "points": [
+        78,
+        86
+      ],
+      "faults": {
+        "Net fault": 134,
+        "Unreturned": 220,
+        "Kitchen momentum fault": 3,
+        "Out": 33
+      },
+      "patternReads": 13004,
+      "singlesApproaches": 0,
+      "matches": [
+        {
+          "seed": 17,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            6,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 362,
+              "mishits": 13,
+              "lowContacts": 257,
+              "shots": {
+                "drive": 70,
+                "dink": 263,
+                "lob": 11,
+                "drop": 16,
+                "overhead": 2
+              },
+              "faults": {
+                "Unreturned": 11,
+                "Kitchen momentum fault": 1,
+                "Net fault": 9
+              },
+              "ralliesWon": 15,
+              "meanQuality": 0.9843149972742222,
+              "meanStamina": 0.7871383153206993,
+              "mishitRate": 0.03591160220994475
+            },
+            {
+              "contacts": 359,
+              "mishits": 9,
+              "lowContacts": 250,
+              "shots": {
+                "drop": 21,
+                "dink": 264,
+                "overhead": 9,
+                "drive": 61,
+                "lob": 4
+              },
+              "faults": {
+                "Net fault": 5,
+                "Unreturned": 9,
+                "Out": 1
+              },
+              "ralliesWon": 21,
+              "meanQuality": 0.9870623153038648,
+              "meanStamina": 0.8074213731797147,
+              "mishitRate": 0.025069637883008356
+            }
+          ]
+        },
+        {
+          "seed": 17,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            11,
+            13
+          ],
+          "teams": [
+            {
+              "contacts": 413,
+              "mishits": 15,
+              "lowContacts": 261,
+              "shots": {
+                "drop": 24,
+                "dink": 275,
+                "overhead": 11,
+                "drive": 93,
+                "lob": 10
+              },
+              "faults": {
+                "Unreturned": 15,
+                "Net fault": 9,
+                "Out": 2
+              },
+              "ralliesWon": 23,
+              "meanQuality": 0.9842796666168881,
+              "meanStamina": 0.8025338045565106,
+              "mishitRate": 0.03631961259079903
+            },
+            {
+              "contacts": 416,
+              "mishits": 17,
+              "lowContacts": 260,
+              "shots": {
+                "drive": 96,
+                "dink": 275,
+                "lob": 14,
+                "drop": 25,
+                "overhead": 6
+              },
+              "faults": {
+                "Out": 3,
+                "Unreturned": 10,
+                "Net fault": 10
+              },
+              "ralliesWon": 26,
+              "meanQuality": 0.9826421021939898,
+              "meanStamina": 0.8041489632589367,
+              "mishitRate": 0.040865384615384616
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            8
+          ],
+          "teams": [
+            {
+              "contacts": 549,
+              "mishits": 14,
+              "lowContacts": 374,
+              "shots": {
+                "drop": 27,
+                "dink": 383,
+                "overhead": 9,
+                "drive": 118,
+                "lob": 12
+              },
+              "faults": {
+                "Out": 1,
+                "Net fault": 10,
+                "Unreturned": 13
+              },
+              "ralliesWon": 27,
+              "meanQuality": 0.9867811503058374,
+              "meanStamina": 0.7499025978596591,
+              "mishitRate": 0.025500910746812388
+            },
+            {
+              "contacts": 549,
+              "mishits": 12,
+              "lowContacts": 364,
+              "shots": {
+                "drive": 124,
+                "dink": 381,
+                "lob": 13,
+                "drop": 24,
+                "overhead": 7
+              },
+              "faults": {
+                "Unreturned": 16,
+                "Net fault": 7,
+                "Out": 4
+              },
+              "ralliesWon": 24,
+              "meanQuality": 0.9872808157940494,
+              "meanStamina": 0.7638671132854202,
+              "mishitRate": 0.02185792349726776
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            13,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 607,
+              "mishits": 13,
+              "lowContacts": 386,
+              "shots": {
+                "drive": 160,
+                "dink": 388,
+                "lob": 17,
+                "overhead": 10,
+                "drop": 32
+              },
+              "faults": {
+                "Unreturned": 21,
+                "Net fault": 7,
+                "Out": 2
+              },
+              "ralliesWon": 32,
+              "meanQuality": 0.9879026667994238,
+              "meanStamina": 0.7876017263655921,
+              "mishitRate": 0.0214168039538715
+            },
+            {
+              "contacts": 617,
+              "mishits": 19,
+              "lowContacts": 381,
+              "shots": {
+                "drop": 30,
+                "dink": 397,
+                "overhead": 13,
+                "drive": 164,
+                "lob": 13
+              },
+              "faults": {
+                "Unreturned": 13,
+                "Net fault": 13,
+                "Out": 4,
+                "Kitchen momentum fault": 2
+              },
+              "ralliesWon": 30,
+              "meanQuality": 0.9850803925765443,
+              "meanStamina": 0.7944940627856862,
+              "mishitRate": 0.03079416531604538
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            10,
+            12
+          ],
+          "teams": [
+            {
+              "contacts": 435,
+              "mishits": 15,
+              "lowContacts": 303,
+              "shots": {
+                "drive": 91,
+                "drop": 22,
+                "dink": 308,
+                "overhead": 5,
+                "lob": 9
+              },
+              "faults": {
+                "Unreturned": 14,
+                "Out": 3,
+                "Net fault": 7
+              },
+              "ralliesWon": 22,
+              "meanQuality": 0.984349438371978,
+              "meanStamina": 0.7580308502394999,
+              "mishitRate": 0.034482758620689655
+            },
+            {
+              "contacts": 433,
+              "mishits": 11,
+              "lowContacts": 293,
+              "shots": {
+                "drop": 24,
+                "drive": 87,
+                "dink": 307,
+                "lob": 10,
+                "overhead": 5
+              },
+              "faults": {
+                "Unreturned": 14,
+                "Net fault": 8
+              },
+              "ralliesWon": 24,
+              "meanQuality": 0.9865185565569121,
+              "meanStamina": 0.763294403845508,
+              "mishitRate": 0.025404157043879907
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            8,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 334,
+              "mishits": 14,
+              "lowContacts": 218,
+              "shots": {
+                "drop": 17,
+                "drive": 74,
+                "dink": 228,
+                "lob": 10,
+                "overhead": 5
+              },
+              "faults": {
+                "Unreturned": 9,
+                "Net fault": 10,
+                "Out": 1
+              },
+              "ralliesWon": 16,
+              "meanQuality": 0.9826631910550366,
+              "meanStamina": 0.8049449879700715,
+              "mishitRate": 0.041916167664670656
+            },
+            {
+              "contacts": 333,
+              "mishits": 12,
+              "lowContacts": 215,
+              "shots": {
+                "drive": 75,
+                "drop": 19,
+                "dink": 227,
+                "overhead": 7,
+                "lob": 5
+              },
+              "faults": {
+                "Unreturned": 7,
+                "Net fault": 7,
+                "Out": 2
+              },
+              "ralliesWon": 20,
+              "meanQuality": 0.9836403041670806,
+              "meanStamina": 0.7972092191213935,
+              "mishitRate": 0.036036036036036036
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            8,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 478,
+              "mishits": 11,
+              "lowContacts": 312,
+              "shots": {
+                "drop": 25,
+                "dink": 316,
+                "drive": 116,
+                "lob": 13,
+                "overhead": 8
+              },
+              "faults": {
+                "Unreturned": 18,
+                "Out": 4,
+                "Net fault": 6
+              },
+              "ralliesWon": 24,
+              "meanQuality": 0.9877063751686717,
+              "meanStamina": 0.7951984394555814,
+              "mishitRate": 0.02301255230125523
+            },
+            {
+              "contacts": 480,
+              "mishits": 11,
+              "lowContacts": 304,
+              "shots": {
+                "drive": 115,
+                "dink": 320,
+                "overhead": 10,
+                "drop": 27,
+                "lob": 8
+              },
+              "faults": {
+                "Unreturned": 13,
+                "Out": 3,
+                "Net fault": 8
+              },
+              "ralliesWon": 28,
+              "meanQuality": 0.9870551655339649,
+              "meanStamina": 0.7810959770605005,
+              "mishitRate": 0.022916666666666665
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            9
+          ],
+          "teams": [
+            {
+              "contacts": 503,
+              "mishits": 12,
+              "lowContacts": 343,
+              "shots": {
+                "drive": 91,
+                "dink": 354,
+                "drop": 30,
+                "overhead": 11,
+                "lob": 17
+              },
+              "faults": {
+                "Unreturned": 15,
+                "Net fault": 10,
+                "Out": 3
+              },
+              "ralliesWon": 30,
+              "meanQuality": 0.9878900396320445,
+              "meanStamina": 0.8383142751240354,
+              "mishitRate": 0.02385685884691849
+            },
+            {
+              "contacts": 498,
+              "mishits": 12,
+              "lowContacts": 337,
+              "shots": {
+                "drop": 28,
+                "dink": 356,
+                "drive": 93,
+                "lob": 12,
+                "overhead": 9
+              },
+              "faults": {
+                "Unreturned": 22,
+                "Net fault": 8
+              },
+              "ralliesWon": 28,
+              "meanQuality": 0.9875206691584798,
+              "meanStamina": 0.8420518138828931,
+              "mishitRate": 0.024096385542168676
+            }
+          ]
+        }
+      ],
+      "subjectWinRate": 0.375,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "morgan",
+      "body": "tall-strong",
+      "games": 8,
+      "completed": 8,
+      "subjectWins": 7,
+      "points": [
+        85,
+        47
+      ],
+      "faults": {
+        "Net fault": 68,
+        "Unreturned": 149,
+        "Double bounce": 52,
+        "Out": 9
+      },
+      "patternReads": 7777,
+      "singlesApproaches": 0,
+      "matches": [
+        {
+          "seed": 17,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            4
+          ],
+          "teams": [
+            {
+              "contacts": 215,
+              "mishits": 6,
+              "lowContacts": 138,
+              "shots": {
+                "drive": 34,
+                "dink": 151,
+                "lob": 10,
+                "drop": 17,
+                "overhead": 3
+              },
+              "faults": {
+                "Net fault": 4,
+                "Unreturned": 3,
+                "Double bounce": 3
+              },
+              "ralliesWon": 18,
+              "meanQuality": 0.9877682535039415,
+              "meanStamina": 0.6858176093656374,
+              "mishitRate": 0.027906976744186046
+            },
+            {
+              "contacts": 213,
+              "mishits": 4,
+              "lowContacts": 132,
+              "shots": {
+                "drop": 14,
+                "dink": 156,
+                "overhead": 6,
+                "drive": 34,
+                "lob": 3
+              },
+              "faults": {
+                "Net fault": 3,
+                "Unreturned": 13,
+                "Double bounce": 2
+              },
+              "ralliesWon": 10,
+              "meanQuality": 0.9898348097435038,
+              "meanStamina": 0.6347686281701422,
+              "mishitRate": 0.018779342723004695
+            }
+          ]
+        },
+        {
+          "seed": 17,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            8,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 415,
+              "mishits": 11,
+              "lowContacts": 281,
+              "shots": {
+                "drop": 25,
+                "dink": 318,
+                "drive": 61,
+                "overhead": 5,
+                "lob": 6
+              },
+              "faults": {
+                "Double bounce": 5,
+                "Unreturned": 13,
+                "Net fault": 9,
+                "Out": 1
+              },
+              "ralliesWon": 25,
+              "meanQuality": 0.9882070937091183,
+              "meanStamina": 0.7006834938356026,
+              "mishitRate": 0.02650602409638554
+            },
+            {
+              "contacts": 414,
+              "mishits": 15,
+              "lowContacts": 254,
+              "shots": {
+                "drive": 59,
+                "dink": 308,
+                "lob": 8,
+                "drop": 35,
+                "overhead": 4
+              },
+              "faults": {
+                "Unreturned": 13,
+                "Net fault": 9,
+                "Double bounce": 3
+              },
+              "ralliesWon": 28,
+              "meanQuality": 0.9852719171163571,
+              "meanStamina": 0.6691725799372878,
+              "mishitRate": 0.036231884057971016
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            9
+          ],
+          "teams": [
+            {
+              "contacts": 314,
+              "mishits": 7,
+              "lowContacts": 216,
+              "shots": {
+                "drop": 20,
+                "dink": 232,
+                "drive": 48,
+                "overhead": 7,
+                "lob": 7
+              },
+              "faults": {
+                "Unreturned": 11,
+                "Net fault": 4,
+                "Out": 1,
+                "Double bounce": 2
+              },
+              "ralliesWon": 21,
+              "meanQuality": 0.9888884545325276,
+              "meanStamina": 0.6577261738409743,
+              "mishitRate": 0.022292993630573247
+            },
+            {
+              "contacts": 312,
+              "mishits": 5,
+              "lowContacts": 202,
+              "shots": {
+                "drive": 50,
+                "dink": 227,
+                "drop": 22,
+                "lob": 10,
+                "overhead": 3
+              },
+              "faults": {
+                "Unreturned": 15,
+                "Out": 1,
+                "Net fault": 3,
+                "Double bounce": 2
+              },
+              "ralliesWon": 18,
+              "meanQuality": 0.9903655643718151,
+              "meanStamina": 0.6612522109951136,
+              "mishitRate": 0.016025641025641024
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            1
+          ],
+          "teams": [
+            {
+              "contacts": 155,
+              "mishits": 1,
+              "lowContacts": 99,
+              "shots": {
+                "drive": 18,
+                "dink": 117,
+                "lob": 5,
+                "drop": 14,
+                "overhead": 1
+              },
+              "faults": {
+                "Unreturned": 3,
+                "Double bounce": 1
+              },
+              "ralliesWon": 14,
+              "meanQuality": 0.9927618831295432,
+              "meanStamina": 0.5257401163597154,
+              "mishitRate": 0.0064516129032258064
+            },
+            {
+              "contacts": 158,
+              "mishits": 4,
+              "lowContacts": 96,
+              "shots": {
+                "drop": 4,
+                "dink": 123,
+                "drive": 25,
+                "lob": 2,
+                "overhead": 4
+              },
+              "faults": {
+                "Unreturned": 8,
+                "Net fault": 3,
+                "Double bounce": 3
+              },
+              "ralliesWon": 4,
+              "meanQuality": 0.987696702229752,
+              "meanStamina": 0.5672219486327124,
+              "mishitRate": 0.02531645569620253
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            4
+          ],
+          "teams": [
+            {
+              "contacts": 264,
+              "mishits": 5,
+              "lowContacts": 176,
+              "shots": {
+                "drive": 41,
+                "dink": 193,
+                "drop": 20,
+                "lob": 8,
+                "overhead": 2
+              },
+              "faults": {
+                "Double bounce": 7,
+                "Net fault": 3,
+                "Out": 1,
+                "Unreturned": 2
+              },
+              "ralliesWon": 20,
+              "meanQuality": 0.9904747926569509,
+              "meanStamina": 0.6987846995090614,
+              "mishitRate": 0.01893939393939394
+            },
+            {
+              "contacts": 265,
+              "mishits": 8,
+              "lowContacts": 165,
+              "shots": {
+                "drop": 17,
+                "drive": 38,
+                "dink": 201,
+                "overhead": 6,
+                "lob": 3
+              },
+              "faults": {
+                "Unreturned": 15,
+                "Net fault": 5
+              },
+              "ralliesWon": 13,
+              "meanQuality": 0.9871095972963423,
+              "meanStamina": 0.6510218926057776,
+              "mishitRate": 0.03018867924528302
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            4
+          ],
+          "teams": [
+            {
+              "contacts": 269,
+              "mishits": 5,
+              "lowContacts": 169,
+              "shots": {
+                "drop": 19,
+                "dink": 194,
+                "drive": 45,
+                "overhead": 3,
+                "lob": 8
+              },
+              "faults": {
+                "Net fault": 3,
+                "Double bounce": 6,
+                "Unreturned": 2,
+                "Out": 1
+              },
+              "ralliesWon": 19,
+              "meanQuality": 0.9901091217854673,
+              "meanStamina": 0.6734118836391069,
+              "mishitRate": 0.01858736059479554
+            },
+            {
+              "contacts": 268,
+              "mishits": 7,
+              "lowContacts": 158,
+              "shots": {
+                "drive": 43,
+                "dink": 200,
+                "drop": 15,
+                "lob": 4,
+                "overhead": 6
+              },
+              "faults": {
+                "Unreturned": 13,
+                "Double bounce": 3,
+                "Net fault": 3
+              },
+              "ralliesWon": 12,
+              "meanQuality": 0.9874076703240746,
+              "meanStamina": 0.5932482216951236,
+              "mishitRate": 0.026119402985074626
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            8
+          ],
+          "teams": [
+            {
+              "contacts": 328,
+              "mishits": 7,
+              "lowContacts": 221,
+              "shots": {
+                "drop": 22,
+                "dink": 248,
+                "drive": 46,
+                "lob": 10,
+                "overhead": 2
+              },
+              "faults": {
+                "Unreturned": 9,
+                "Net fault": 6,
+                "Double bounce": 3,
+                "Out": 1
+              },
+              "ralliesWon": 23,
+              "meanQuality": 0.9897067223472695,
+              "meanStamina": 0.7024932391210491,
+              "mishitRate": 0.021341463414634148
+            },
+            {
+              "contacts": 327,
+              "mishits": 9,
+              "lowContacts": 221,
+              "shots": {
+                "drive": 47,
+                "dink": 248,
+                "overhead": 4,
+                "drop": 24,
+                "lob": 4
+              },
+              "faults": {
+                "Unreturned": 10,
+                "Net fault": 7,
+                "Double bounce": 6
+              },
+              "ralliesWon": 19,
+              "meanQuality": 0.9874504384287631,
+              "meanStamina": 0.6698577776690879,
+              "mishitRate": 0.027522935779816515
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            6
+          ],
+          "teams": [
+            {
+              "contacts": 289,
+              "mishits": 5,
+              "lowContacts": 179,
+              "shots": {
+                "drive": 50,
+                "dink": 207,
+                "lob": 7,
+                "drop": 19,
+                "overhead": 6
+              },
+              "faults": {
+                "Unreturned": 5,
+                "Net fault": 3,
+                "Double bounce": 5,
+                "Out": 1
+              },
+              "ralliesWon": 20,
+              "meanQuality": 0.9896511825158022,
+              "meanStamina": 0.5434528750237433,
+              "mishitRate": 0.01730103806228374
+            },
+            {
+              "contacts": 289,
+              "mishits": 5,
+              "lowContacts": 176,
+              "shots": {
+                "drop": 19,
+                "dink": 211,
+                "drive": 47,
+                "lob": 7,
+                "overhead": 5
+              },
+              "faults": {
+                "Unreturned": 14,
+                "Double bounce": 1,
+                "Out": 2,
+                "Net fault": 3
+              },
+              "ralliesWon": 14,
+              "meanQuality": 0.9894820955514755,
+              "meanStamina": 0.5495221258327875,
+              "mishitRate": 0.01730103806228374
+            }
+          ]
+        }
+      ],
+      "subjectWinRate": 0.875,
+      "review": "larger sample recommended"
+    },
+    {
+      "format": "doubles",
+      "character": "jordan",
+      "body": "tall-strong",
+      "games": 8,
+      "completed": 8,
+      "subjectWins": 6,
+      "points": [
+        78,
+        49
+      ],
+      "faults": {
+        "Unreturned": 146,
+        "Out": 26,
+        "Net fault": 75,
+        "Double bounce": 10,
+        "Kitchen momentum fault": 6
+      },
+      "patternReads": 4771,
+      "singlesApproaches": 0,
+      "matches": [
+        {
+          "seed": 17,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            5
+          ],
+          "teams": [
+            {
+              "contacts": 151,
+              "mishits": 5,
+              "lowContacts": 71,
+              "shots": {
+                "drive": 49,
+                "dink": 75,
+                "lob": 4,
+                "drop": 20,
+                "overhead": 3
+              },
+              "faults": {
+                "Unreturned": 7,
+                "Net fault": 3,
+                "Double bounce": 1,
+                "Kitchen momentum fault": 2,
+                "Out": 1
+              },
+              "ralliesWon": 20,
+              "meanQuality": 0.9839595424632597,
+              "meanStamina": 0.8958845959124049,
+              "mishitRate": 0.033112582781456956
+            },
+            {
+              "contacts": 154,
+              "mishits": 6,
+              "lowContacts": 71,
+              "shots": {
+                "drop": 14,
+                "drive": 56,
+                "dink": 77,
+                "overhead": 4,
+                "lob": 3
+              },
+              "faults": {
+                "Out": 2,
+                "Unreturned": 11,
+                "Net fault": 6,
+                "Kitchen momentum fault": 1
+              },
+              "ralliesWon": 14,
+              "meanQuality": 0.9822780782738879,
+              "meanStamina": 0.9128808861577306,
+              "mishitRate": 0.03896103896103896
+            }
+          ]
+        },
+        {
+          "seed": 17,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            5
+          ],
+          "teams": [
+            {
+              "contacts": 198,
+              "mishits": 5,
+              "lowContacts": 113,
+              "shots": {
+                "drop": 20,
+                "dink": 121,
+                "overhead": 5,
+                "drive": 48,
+                "lob": 4
+              },
+              "faults": {
+                "Unreturned": 6,
+                "Net fault": 5,
+                "Out": 1,
+                "Double bounce": 1
+              },
+              "ralliesWon": 19,
+              "meanQuality": 0.9848050545897117,
+              "meanStamina": 0.8289287689424762,
+              "mishitRate": 0.025252525252525252
+            },
+            {
+              "contacts": 201,
+              "mishits": 11,
+              "lowContacts": 107,
+              "shots": {
+                "drive": 55,
+                "dink": 123,
+                "lob": 5,
+                "drop": 15,
+                "overhead": 3
+              },
+              "faults": {
+                "Unreturned": 10,
+                "Out": 2,
+                "Net fault": 7
+              },
+              "ralliesWon": 13,
+              "meanQuality": 0.9766482432773504,
+              "meanStamina": 0.8388276417983037,
+              "mishitRate": 0.05472636815920398
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            8
+          ],
+          "teams": [
+            {
+              "contacts": 182,
+              "mishits": 13,
+              "lowContacts": 99,
+              "shots": {
+                "drop": 21,
+                "dink": 99,
+                "drive": 54,
+                "lob": 7,
+                "overhead": 1
+              },
+              "faults": {
+                "Out": 1,
+                "Unreturned": 7,
+                "Net fault": 8
+              },
+              "ralliesWon": 19,
+              "meanQuality": 0.9732078414554207,
+              "meanStamina": 0.8877370167911042,
+              "mishitRate": 0.07142857142857142
+            },
+            {
+              "contacts": 178,
+              "mishits": 4,
+              "lowContacts": 82,
+              "shots": {
+                "drive": 54,
+                "dink": 100,
+                "overhead": 4,
+                "drop": 17,
+                "lob": 3
+              },
+              "faults": {
+                "Net fault": 3,
+                "Unreturned": 14,
+                "Out": 2
+              },
+              "ralliesWon": 16,
+              "meanQuality": 0.98649682392542,
+              "meanStamina": 0.903041079435372,
+              "mishitRate": 0.02247191011235955
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            7,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 184,
+              "mishits": 8,
+              "lowContacts": 104,
+              "shots": {
+                "drive": 53,
+                "dink": 110,
+                "overhead": 4,
+                "drop": 15,
+                "lob": 2
+              },
+              "faults": {
+                "Net fault": 8,
+                "Unreturned": 9,
+                "Kitchen momentum fault": 1,
+                "Out": 1
+              },
+              "ralliesWon": 15,
+              "meanQuality": 0.9806681941731842,
+              "meanStamina": 0.877475528337677,
+              "mishitRate": 0.043478260869565216
+            },
+            {
+              "contacts": 177,
+              "mishits": 3,
+              "lowContacts": 86,
+              "shots": {
+                "drop": 20,
+                "dink": 100,
+                "drive": 52,
+                "lob": 4,
+                "overhead": 1
+              },
+              "faults": {
+                "Out": 2,
+                "Unreturned": 12,
+                "Net fault": 1
+              },
+              "ralliesWon": 19,
+              "meanQuality": 0.9873163177533141,
+              "meanStamina": 0.8920663450057035,
+              "mishitRate": 0.01694915254237288
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            3
+          ],
+          "teams": [
+            {
+              "contacts": 131,
+              "mishits": 3,
+              "lowContacts": 77,
+              "shots": {
+                "drive": 28,
+                "dink": 83,
+                "drop": 14,
+                "overhead": 4,
+                "lob": 2
+              },
+              "faults": {
+                "Kitchen momentum fault": 1,
+                "Net fault": 2,
+                "Unreturned": 2,
+                "Double bounce": 1,
+                "Out": 1
+              },
+              "ralliesWon": 16,
+              "meanQuality": 0.9856540655378572,
+              "meanStamina": 0.8480631293380863,
+              "mishitRate": 0.022900763358778626
+            },
+            {
+              "contacts": 133,
+              "mishits": 7,
+              "lowContacts": 72,
+              "shots": {
+                "drop": 9,
+                "dink": 83,
+                "drive": 36,
+                "lob": 4,
+                "overhead": 1
+              },
+              "faults": {
+                "Net fault": 5,
+                "Unreturned": 9,
+                "Out": 2
+              },
+              "ralliesWon": 7,
+              "meanQuality": 0.9775169556687264,
+              "meanStamina": 0.8472274979476033,
+              "mishitRate": 0.05263157894736842
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            3
+          ],
+          "teams": [
+            {
+              "contacts": 197,
+              "mishits": 7,
+              "lowContacts": 115,
+              "shots": {
+                "drop": 18,
+                "dink": 127,
+                "drive": 46,
+                "lob": 2,
+                "overhead": 4
+              },
+              "faults": {
+                "Unreturned": 5,
+                "Net fault": 3
+              },
+              "ralliesWon": 17,
+              "meanQuality": 0.9803272119372857,
+              "meanStamina": 0.7372146809082698,
+              "mishitRate": 0.03553299492385787
+            },
+            {
+              "contacts": 198,
+              "mishits": 7,
+              "lowContacts": 111,
+              "shots": {
+                "drive": 54,
+                "dink": 129,
+                "overhead": 2,
+                "drop": 9,
+                "lob": 4
+              },
+              "faults": {
+                "Unreturned": 12,
+                "Out": 2,
+                "Net fault": 3
+              },
+              "ralliesWon": 8,
+              "meanQuality": 0.9818854244644274,
+              "meanStamina": 0.8092567931086777,
+              "mishitRate": 0.03535353535353535
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            5,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 266,
+              "mishits": 14,
+              "lowContacts": 152,
+              "shots": {
+                "drop": 18,
+                "drive": 61,
+                "dink": 181,
+                "overhead": 4,
+                "lob": 2
+              },
+              "faults": {
+                "Double bounce": 3,
+                "Unreturned": 8,
+                "Net fault": 11,
+                "Kitchen momentum fault": 1,
+                "Out": 1
+              },
+              "ralliesWon": 17,
+              "meanQuality": 0.976346387961194,
+              "meanStamina": 0.7885782156454341,
+              "mishitRate": 0.05263157894736842
+            },
+            {
+              "contacts": 260,
+              "mishits": 6,
+              "lowContacts": 136,
+              "shots": {
+                "drive": 63,
+                "dink": 167,
+                "drop": 24,
+                "lob": 4,
+                "overhead": 1,
+                "atp": 1
+              },
+              "faults": {
+                "Unreturned": 9,
+                "Net fault": 5,
+                "Out": 1,
+                "Double bounce": 2
+              },
+              "ralliesWon": 24,
+              "meanQuality": 0.9849609659759212,
+              "meanStamina": 0.786585914624879,
+              "mishitRate": 0.023076923076923078
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            3
+          ],
+          "teams": [
+            {
+              "contacts": 269,
+              "mishits": 8,
+              "lowContacts": 145,
+              "shots": {
+                "drive": 73,
+                "dink": 162,
+                "drop": 23,
+                "lob": 5,
+                "overhead": 6
+              },
+              "faults": {
+                "Unreturned": 8,
+                "Out": 3,
+                "Net fault": 3,
+                "Double bounce": 1
+              },
+              "ralliesWon": 24,
+              "meanQuality": 0.9829825521679088,
+              "meanStamina": 0.7945061506226586,
+              "mishitRate": 0.02973977695167286
+            },
+            {
+              "contacts": 268,
+              "mishits": 7,
+              "lowContacts": 135,
+              "shots": {
+                "drop": 16,
+                "drive": 77,
+                "dink": 162,
+                "overhead": 4,
+                "lob": 9
+              },
+              "faults": {
+                "Double bounce": 1,
+                "Unreturned": 17,
+                "Out": 4,
+                "Net fault": 2
+              },
+              "ralliesWon": 15,
+              "meanQuality": 0.9842953870539581,
+              "meanStamina": 0.8001139153221161,
+              "mishitRate": 0.026119402985074626
+            }
+          ]
+        }
+      ],
+      "subjectWinRate": 0.75,
+      "review": "sample only"
+    },
+    {
+      "format": "doubles",
+      "character": "selena",
+      "body": "tall-strong",
+      "games": 8,
+      "completed": 8,
+      "subjectWins": 6,
+      "points": [
+        81,
+        67
+      ],
+      "faults": {
+        "Unreturned": 202,
+        "Out": 39,
+        "Net fault": 82,
+        "Double bounce": 4,
+        "Kitchen momentum fault": 4
+      },
+      "patternReads": 6973,
+      "singlesApproaches": 0,
+      "matches": [
+        {
+          "seed": 17,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            4
+          ],
+          "teams": [
+            {
+              "contacts": 197,
+              "mishits": 4,
+              "lowContacts": 112,
+              "shots": {
+                "drive": 58,
+                "dink": 112,
+                "lob": 4,
+                "drop": 19,
+                "overhead": 4
+              },
+              "faults": {
+                "Unreturned": 7,
+                "Net fault": 3,
+                "Out": 1,
+                "Double bounce": 1
+              },
+              "ralliesWon": 20,
+              "meanQuality": 0.9890412263763394,
+              "meanStamina": 0.8324077376808103,
+              "mishitRate": 0.02030456852791878
+            },
+            {
+              "contacts": 197,
+              "mishits": 8,
+              "lowContacts": 114,
+              "shots": {
+                "drop": 13,
+                "dink": 118,
+                "overhead": 1,
+                "drive": 61,
+                "lob": 4
+              },
+              "faults": {
+                "Out": 2,
+                "Unreturned": 15,
+                "Net fault": 3
+              },
+              "ralliesWon": 12,
+              "meanQuality": 0.9835122204303829,
+              "meanStamina": 0.8377397029167928,
+              "mishitRate": 0.04060913705583756
+            }
+          ]
+        },
+        {
+          "seed": 17,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            13,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 331,
+              "mishits": 10,
+              "lowContacts": 198,
+              "shots": {
+                "drop": 29,
+                "dink": 202,
+                "drive": 92,
+                "overhead": 3,
+                "lob": 5
+              },
+              "faults": {
+                "Unreturned": 16,
+                "Net fault": 8,
+                "Out": 1
+              },
+              "ralliesWon": 27,
+              "meanQuality": 0.9863640566640779,
+              "meanStamina": 0.8309113775180683,
+              "mishitRate": 0.030211480362537766
+            },
+            {
+              "contacts": 330,
+              "mishits": 12,
+              "lowContacts": 207,
+              "shots": {
+                "drive": 95,
+                "dink": 202,
+                "drop": 26,
+                "lob": 4,
+                "overhead": 3
+              },
+              "faults": {
+                "Unreturned": 19,
+                "Net fault": 5,
+                "Kitchen momentum fault": 1,
+                "Out": 2
+              },
+              "ralliesWon": 25,
+              "meanQuality": 0.9846749057951835,
+              "meanStamina": 0.8338186692408369,
+              "mishitRate": 0.03636363636363636
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            9
+          ],
+          "teams": [
+            {
+              "contacts": 297,
+              "mishits": 8,
+              "lowContacts": 181,
+              "shots": {
+                "drop": 20,
+                "dink": 186,
+                "overhead": 7,
+                "lob": 4,
+                "drive": 80
+              },
+              "faults": {
+                "Out": 3,
+                "Unreturned": 11,
+                "Net fault": 4
+              },
+              "ralliesWon": 21,
+              "meanQuality": 0.9861149079881554,
+              "meanStamina": 0.734186105237809,
+              "mishitRate": 0.026936026936026935
+            },
+            {
+              "contacts": 296,
+              "mishits": 8,
+              "lowContacts": 179,
+              "shots": {
+                "drive": 80,
+                "dink": 187,
+                "lob": 7,
+                "overhead": 3,
+                "drop": 19
+              },
+              "faults": {
+                "Unreturned": 14,
+                "Net fault": 5,
+                "Out": 2
+              },
+              "ralliesWon": 18,
+              "meanQuality": 0.9865450691054637,
+              "meanStamina": 0.7717315579721069,
+              "mishitRate": 0.02702702702702703
+            }
+          ]
+        },
+        {
+          "seed": 18,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            4
+          ],
+          "teams": [
+            {
+              "contacts": 196,
+              "mishits": 5,
+              "lowContacts": 116,
+              "shots": {
+                "drive": 59,
+                "dink": 112,
+                "lob": 6,
+                "drop": 17,
+                "overhead": 2
+              },
+              "faults": {
+                "Unreturned": 7,
+                "Net fault": 3
+              },
+              "ralliesWon": 18,
+              "meanQuality": 0.9865418442716934,
+              "meanStamina": 0.8098463078035152,
+              "mishitRate": 0.025510204081632654
+            },
+            {
+              "contacts": 202,
+              "mishits": 8,
+              "lowContacts": 119,
+              "shots": {
+                "drop": 11,
+                "dink": 123,
+                "overhead": 4,
+                "drive": 60,
+                "lob": 4
+              },
+              "faults": {
+                "Unreturned": 8,
+                "Net fault": 5,
+                "Out": 5
+              },
+              "ralliesWon": 10,
+              "meanQuality": 0.9842834394701347,
+              "meanStamina": 0.8530045276004368,
+              "mishitRate": 0.039603960396039604
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            11,
+            13
+          ],
+          "teams": [
+            {
+              "contacts": 441,
+              "mishits": 15,
+              "lowContacts": 290,
+              "shots": {
+                "drive": 91,
+                "dink": 304,
+                "drop": 31,
+                "lob": 12,
+                "overhead": 3
+              },
+              "faults": {
+                "Unreturned": 17,
+                "Net fault": 13,
+                "Out": 3
+              },
+              "ralliesWon": 31,
+              "meanQuality": 0.9849940996922181,
+              "meanStamina": 0.7853177686985661,
+              "mishitRate": 0.034013605442176874
+            },
+            {
+              "contacts": 436,
+              "mishits": 10,
+              "lowContacts": 284,
+              "shots": {
+                "drop": 38,
+                "dink": 299,
+                "drive": 90,
+                "overhead": 6,
+                "lob": 3
+              },
+              "faults": {
+                "Net fault": 5,
+                "Unreturned": 20,
+                "Out": 5,
+                "Kitchen momentum fault": 1
+              },
+              "ralliesWon": 33,
+              "meanQuality": 0.9878246799543824,
+              "meanStamina": 0.7561910100476072,
+              "mishitRate": 0.022935779816513763
+            }
+          ]
+        },
+        {
+          "seed": 19,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            8
+          ],
+          "teams": [
+            {
+              "contacts": 233,
+              "mishits": 7,
+              "lowContacts": 139,
+              "shots": {
+                "drop": 16,
+                "dink": 141,
+                "drive": 72,
+                "overhead": 3,
+                "lob": 1
+              },
+              "faults": {
+                "Unreturned": 5,
+                "Net fault": 6,
+                "Double bounce": 1,
+                "Out": 1
+              },
+              "ralliesWon": 17,
+              "meanQuality": 0.9847962479717879,
+              "meanStamina": 0.6841293502965631,
+              "mishitRate": 0.030042918454935622
+            },
+            {
+              "contacts": 231,
+              "mishits": 8,
+              "lowContacts": 134,
+              "shots": {
+                "drive": 70,
+                "dink": 144,
+                "lob": 3,
+                "drop": 14
+              },
+              "faults": {
+                "Unreturned": 11,
+                "Out": 2,
+                "Net fault": 4
+              },
+              "ralliesWon": 13,
+              "meanQuality": 0.9838043081276932,
+              "meanStamina": 0.72581052430255,
+              "mishitRate": 0.03463203463203463
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 0,
+          "completed": true,
+          "subjectWon": true,
+          "points": [
+            11,
+            7
+          ],
+          "teams": [
+            {
+              "contacts": 350,
+              "mishits": 7,
+              "lowContacts": 206,
+              "shots": {
+                "drop": 28,
+                "dink": 216,
+                "drive": 92,
+                "overhead": 8,
+                "lob": 6
+              },
+              "faults": {
+                "Out": 4,
+                "Net fault": 4,
+                "Unreturned": 12,
+                "Double bounce": 2,
+                "Kitchen momentum fault": 1
+              },
+              "ralliesWon": 27,
+              "meanQuality": 0.9887005024164234,
+              "meanStamina": 0.8037119735079787,
+              "mishitRate": 0.02
+            },
+            {
+              "contacts": 348,
+              "mishits": 10,
+              "lowContacts": 207,
+              "shots": {
+                "drive": 94,
+                "dink": 218,
+                "drop": 23,
+                "lob": 10,
+                "overhead": 3
+              },
+              "faults": {
+                "Unreturned": 20,
+                "Out": 2,
+                "Net fault": 5
+              },
+              "ralliesWon": 23,
+              "meanQuality": 0.9861368098926451,
+              "meanStamina": 0.7901581371525183,
+              "mishitRate": 0.028735632183908046
+            }
+          ]
+        },
+        {
+          "seed": 20,
+          "subjectTeam": 1,
+          "completed": true,
+          "subjectWon": false,
+          "points": [
+            2,
+            11
+          ],
+          "teams": [
+            {
+              "contacts": 249,
+              "mishits": 10,
+              "lowContacts": 158,
+              "shots": {
+                "drive": 66,
+                "dink": 165,
+                "drop": 14,
+                "lob": 4
+              },
+              "faults": {
+                "Unreturned": 13,
+                "Net fault": 8,
+                "Out": 2
+              },
+              "ralliesWon": 13,
+              "meanQuality": 0.9831236651395007,
+              "meanStamina": 0.8289993790738263,
+              "mishitRate": 0.040160642570281124
+            },
+            {
+              "contacts": 246,
+              "mishits": 5,
+              "lowContacts": 155,
+              "shots": {
+                "drop": 22,
+                "drive": 60,
+                "dink": 160,
+                "overhead": 4
+              },
+              "faults": {
+                "Out": 4,
+                "Net fault": 1,
+                "Unreturned": 7,
+                "Kitchen momentum fault": 1
+              },
+              "ralliesWon": 23,
+              "meanQuality": 0.9890986958826681,
+              "meanStamina": 0.8324456766092061,
+              "mishitRate": 0.02032520325203252
+            }
+          ]
+        }
+      ],
+      "subjectWinRate": 0.75,
+      "review": "sample only"
+    }
+  ],
+  "bodySummary": [
+    {
+      "format": "doubles",
+      "body": "tall-strong",
+      "games": 40,
+      "completed": 40,
+      "subjectWins": 29,
+      "subjectWinRate": 0.725,
+      "review": "sample only"
+    }
+  ]
+}

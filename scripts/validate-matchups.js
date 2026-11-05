@@ -5,26 +5,30 @@ import {seededRandom} from '../src/competition.js';
 import {mkdirSync,writeFileSync} from 'node:fs';
 import {dirname} from 'node:path';
 import {summarizeBodies} from './matchup-metrics.js';
+import {trackMatchup,summarizeContacts} from './matchup-diagnostics.js';
 
 const count=Number(process.argv[2]??2);
 if(!Number.isInteger(count)||count<1||count>20)throw new Error('Use 1–20 seeds per matchup');
-const outputIndex=process.argv.indexOf('--output'),output=outputIndex>=0?process.argv[outputIndex+1]:null;
-if(outputIndex>=0&&!output)throw new Error('--output needs a path');
 const bodies=[{id:'short-lean',height:145,build:.1},{id:'short-strong',height:145,build:1.05},{id:'tall-lean',height:210,build:.1},{id:'tall-strong',height:210,build:1.05}];
-const option=name=>{const index=process.argv.indexOf(name);return index<0?null:process.argv[index+1]};
+const option=name=>{const index=process.argv.indexOf(name);if(index<0)return null;if(!process.argv[index+1]||process.argv[index+1].startsWith('--'))throw new Error(`${name} needs a value`);return process.argv[index+1]};
+const output=option('--output');
 const formatFilter=option('--format'),bodyFilter=option('--body'),seedStart=Number(option('--seed-start')??1);
+const characters=process.argv.includes('--all-archetypes')?['avery','remy','morgan','jordan','selena']:['avery','morgan','jordan'];
+const characterFilter=option('--character');
+if(characterFilter&&!['avery','remy','morgan','jordan','selena'].includes(characterFilter))throw new Error('Unknown --character');
 if(formatFilter&&!['singles','doubles'].includes(formatFilter))throw new Error('Unknown --format');
 if(bodyFilter&&!bodies.some(body=>body.id===bodyFilter))throw new Error('Unknown --body');
 if(!Number.isInteger(seedStart)||seedStart<1)throw new Error('Invalid --seed-start');
 const neutral={height:177,build:.5225},results=[];
-for(const format of ['singles','doubles'].filter(value=>!formatFilter||value===formatFilter))for(const character of ['avery','morgan','jordan'])for(const body of bodies.filter(value=>!bodyFilter||value.id===bodyFilter)){
- const row={format,character,body:body.id,games:count*2,completed:0,subjectWins:0,points:[0,0],faults:{},patternReads:0,singlesApproaches:0};
+for(const format of ['singles','doubles'].filter(value=>!formatFilter||value===formatFilter))for(const character of characterFilter?[characterFilter]:characters)for(const body of bodies.filter(value=>!bodyFilter||value.id===bodyFilter)){
+ const row={format,character,body:body.id,games:count*2,completed:0,subjectWins:0,points:[0,0],faults:{},patternReads:0,singlesApproaches:0,matches:[]};
  for(let seed=seedStart;seed<seedStart+count;seed++)for(const subjectTeam of [0,1]){
   const rng=seededRandom(seed),lineup=Array.from({length:4},(_,id)=>{
    const profile=buildProfile({character},{random:rng}),shape=(id<2)===(subjectTeam===0)?body:neutral;
    return applyPhysique(profile,{...profile.appearance,...shape});
   });
   const g=new Game({seed});g.configure({format},lineup);g.mode='watch';g.recordReplay=()=>{};
+  const diagnostics=trackMatchup(g,subjectTeam);
   g.score.team=seed%2;g.score.serverPlayer=g.score.team===0?1:0;g.serveSetup();
   for(let tick=0;tick<120*2400&&g.phase!=='over';tick++){
    g.update(C.dt);
@@ -33,11 +37,12 @@ for(const format of ['singles','doubles'].filter(value=>!formatFilter||value===f
   if(g.phase==='over'){row.completed++;if(g.score.winner===subjectTeam)row.subjectWins++}
   row.points[0]+=g.score.points[subjectTeam];row.points[1]+=g.score.points[1-subjectTeam];row.patternReads+=g.tacticalStats.patternReads;row.singlesApproaches+=g.tacticalStats.singlesApproaches??0;
   for(const [reason,n] of Object.entries(g.stats.faults))row.faults[reason]=(row.faults[reason]??0)+n;
+  row.matches.push({seed,subjectTeam,completed:g.phase==='over',subjectWon:g.phase==='over'?g.score.winner===subjectTeam:null,points:[g.score.points[subjectTeam],g.score.points[1-subjectTeam]],teams:summarizeContacts(diagnostics)});
  }
  row.subjectWinRate=row.subjectWins/row.games;
  row.review=row.games>=8&&(row.subjectWinRate>=.875||row.subjectWinRate<=.125)?'larger sample recommended':'sample only';
- results.push(row);console.log(JSON.stringify(row));
+ results.push(row);const {matches,...summary}=row;console.log(JSON.stringify(summary));
 }
-const report={seedsPerSide:count,seedStart,filters:{format:formatFilter,body:bodyFilter},neutral,bodies,results,bodySummary:summarizeBodies(results)};
+const report={schemaVersion:2,scope:'CPU self-play against the same archetype and neutral body; mirrored games share seeds and are correlated. Teams are ordered subject, neutral. Not human balance evidence.',seedsPerSide:count,seedStart,filters:{format:formatFilter,body:bodyFilter,character:characterFilter},characters:characterFilter?[characterFilter]:characters,neutral,bodies,results,bodySummary:summarizeBodies(results)};
 if(output){mkdirSync(dirname(output),{recursive:true});writeFileSync(output,JSON.stringify(report,null,2)+'\n')}
 if(results.some(row=>row.completed!==row.games))process.exitCode=1;

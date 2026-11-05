@@ -38,10 +38,10 @@ test('world contact locks in 3D without stretching the shared arm rig',()=>{
  assert.ok(Math.abs(q.rig.paddle.z*cos-q.rig.paddle.x*sin-target.z)<1e-8);
 });
 
-test('sideline camera keeps lobs, ground position and final outcome in frame at phone and desktop sizes',()=>{
+test('sideline replay stays stationary while lobs and outcomes remain framed',()=>{
  for(const [width,height] of [[1920,1080],[390,800],[844,390]]){
   const frames=Array.from({length:91},(_,i)=>({clock:i/30,ball:{x:2+i/6,y:3+i*.45,z:Math.sin(i/90*Math.PI)*24}})),clip={frames};
-  for(const snapshot of frames){const camera=sideReplayCamera(width,height,clip,snapshot);for(const z of [0,snapshot.ball.z]){const q=camera.project(snapshot.ball.x,snapshot.ball.y,z);assert.ok(q.x>camera.x&&q.x<camera.x+camera.width);assert.ok(q.y>camera.y&&q.y<camera.y+camera.height)}}
+  for(const snapshot of frames){const camera=sideReplayCamera(width,height,clip,snapshot);assert.deepEqual({x:camera.x,y:camera.y,width:camera.width,height:camera.height},{x:0,y:0,width,height});for(const z of [0,snapshot.ball.z]){const q=camera.project(snapshot.ball.x,snapshot.ball.y,z);assert.ok(q.x>camera.x&&q.x<camera.x+camera.width);assert.ok(q.y>camera.y&&q.y<camera.y+camera.height)}}
  }
 });
 

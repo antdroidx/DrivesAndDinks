@@ -1,0 +1,243 @@
+{
+  "scope": "Paired CPU self-play. Mirrored sides share seeds; body/archetype balance remains provisional.",
+  "baselineCommit": "530288f02d0384acbbc3a942e8d6c8e70897d892",
+  "afterSourceHashes": {
+    "src/game.js": "174227fcb86f57fe9bebf55a7e47311d48ce768b523893f5ec72d3ce25e23479",
+    "src/tactics.js": "e501139210cd0cf72cc591a9a7b38700a780627ddfba19f67137e04db510a90a"
+  },
+  "finalValidationMatches": 624,
+  "comparisons": [
+    {
+      "beforeFile": "body-study-tall-broad-singles",
+      "afterFile": "volley-balance-singles",
+      "before": {
+        "games": 160,
+        "wins": 57,
+        "points": [
+          1259,
+          1544
+        ],
+        "rallies": 13282,
+        "kitchen": 0,
+        "kitchenFaultsPer100Rallies": 0
+      },
+      "after": {
+        "games": 160,
+        "wins": 57,
+        "points": [
+          1254,
+          1543
+        ],
+        "rallies": 11202,
+        "kitchen": 0,
+        "kitchenFaultsPer100Rallies": 0
+      },
+      "archetypes": [
+        {
+          "character": "avery",
+          "beforeWins": 9,
+          "afterWins": 12,
+          "games": 32
+        },
+        {
+          "character": "remy",
+          "beforeWins": 9,
+          "afterWins": 13,
+          "games": 32
+        },
+        {
+          "character": "morgan",
+          "beforeWins": 13,
+          "afterWins": 12,
+          "games": 32
+        },
+        {
+          "character": "jordan",
+          "beforeWins": 14,
+          "afterWins": 9,
+          "games": 32
+        },
+        {
+          "character": "selena",
+          "beforeWins": 12,
+          "afterWins": 11,
+          "games": 32
+        }
+      ]
+    },
+    {
+      "beforeFile": "body-study-tall-broad-heldout",
+      "afterFile": "volley-balance-singles-heldout",
+      "before": {
+        "games": 80,
+        "wins": 25,
+        "points": [
+          611,
+          805
+        ],
+        "rallies": 6611,
+        "kitchen": 0,
+        "kitchenFaultsPer100Rallies": 0
+      },
+      "after": {
+        "games": 80,
+        "wins": 31,
+        "points": [
+          640,
+          741
+        ],
+        "rallies": 5470,
+        "kitchen": 0,
+        "kitchenFaultsPer100Rallies": 0
+      },
+      "archetypes": [
+        {
+          "character": "avery",
+          "beforeWins": 8,
+          "afterWins": 7,
+          "games": 16
+        },
+        {
+          "character": "remy",
+          "beforeWins": 5,
+          "afterWins": 4,
+          "games": 16
+        },
+        {
+          "character": "morgan",
+          "beforeWins": 2,
+          "afterWins": 6,
+          "games": 16
+        },
+        {
+          "character": "jordan",
+          "beforeWins": 5,
+          "afterWins": 7,
+          "games": 16
+        },
+        {
+          "character": "selena",
+          "beforeWins": 5,
+          "afterWins": 7,
+          "games": 16
+        }
+      ]
+    },
+    {
+      "beforeFile": "body-study-tall-broad-doubles",
+      "afterFile": "volley-balance-doubles",
+      "before": {
+        "games": 80,
+        "wins": 35,
+        "points": [
+          634,
+          719
+        ],
+        "rallies": 2545,
+        "kitchen": 268,
+        "kitchenFaultsPer100Rallies": 10.530451866404714
+      },
+      "after": {
+        "games": 80,
+        "wins": 45,
+        "points": [
+          702,
+          623
+        ],
+        "rallies": 2548,
+        "kitchen": 56,
+        "kitchenFaultsPer100Rallies": 2.197802197802198
+      },
+      "archetypes": [
+        {
+          "character": "avery",
+          "beforeWins": 11,
+          "afterWins": 11,
+          "games": 16
+        },
+        {
+          "character": "remy",
+          "beforeWins": 1,
+          "afterWins": 8,
+          "games": 16
+        },
+        {
+          "character": "morgan",
+          "beforeWins": 8,
+          "afterWins": 11,
+          "games": 16
+        },
+        {
+          "character": "jordan",
+          "beforeWins": 6,
+          "afterWins": 5,
+          "games": 16
+        },
+        {
+          "character": "selena",
+          "beforeWins": 9,
+          "afterWins": 10,
+          "games": 16
+        }
+      ]
+    },
+    {
+      "beforeFile": "volley-balance-doubles-heldout-before",
+      "afterFile": "volley-balance-doubles-heldout",
+      "before": {
+        "games": 80,
+        "wins": 35,
+        "points": [
+          658,
+          708
+        ],
+        "rallies": 2593,
+        "kitchen": 295,
+        "kitchenFaultsPer100Rallies": 11.37678364828384
+      },
+      "after": {
+        "games": 80,
+        "wins": 43,
+        "points": [
+          710,
+          643
+        ],
+        "rallies": 2606,
+        "kitchen": 62,
+        "kitchenFaultsPer100Rallies": 2.379125095932464
+      },
+      "archetypes": [
+        {
+          "character": "avery",
+          "beforeWins": 10,
+          "afterWins": 7,
+          "games": 16
+        },
+        {
+          "character": "remy",
+          "beforeWins": 4,
+          "afterWins": 8,
+          "games": 16
+        },
+        {
+          "character": "morgan",
+          "beforeWins": 8,
+          "afterWins": 11,
+          "games": 16
+        },
+        {
+          "character": "jordan",
+          "beforeWins": 7,
+          "afterWins": 7,
+          "games": 16
+        },
+        {
+          "character": "selena",
+          "beforeWins": 6,
+          "afterWins": 10,
+          "games": 16
+        }
+      ]
+    }
+  ]
+}

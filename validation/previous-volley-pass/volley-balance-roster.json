@@ -1,0 +1,41 @@
+{
+  "games": 20,
+  "roster": true,
+  "completed": 20,
+  "rallies": 561,
+  "shots": 8939,
+  "maxRally": 96,
+  "humanHits": 729,
+  "humanMishitHits": 34,
+  "results": {
+    "Net fault": 204,
+    "Unreturned": 243,
+    "Out": 30,
+    "Double bounce": 39,
+    "Kitchen momentum fault": 45
+  },
+  "shotTypes": {
+    "drive": 1497,
+    "drop": 688,
+    "dink": 6360,
+    "lob": 205,
+    "overhead": 189
+  },
+  "tactics": {
+    "poachAttempts": 2681,
+    "poachHits": 2473,
+    "coverSwaps": 2339,
+    "offBallDistance": 100824.66006121736,
+    "mishitHits": 297
+  },
+  "contactQuality": {},
+  "placementIntents": {
+    "manual": 1228,
+    "open-court": 7673,
+    "feet": 38
+  },
+  "mishitHits": 297,
+  "elapsedMs": 33333,
+  "averageRally": 16.9,
+  "p95Rally": 41
+}

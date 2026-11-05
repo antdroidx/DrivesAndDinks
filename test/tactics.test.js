@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {planIncoming,formationTarget,separatePartners,separateTargets} from '../src/tactics.js';
-import {playerProfile,launch,legalVolley,move,C} from '../src/core.js';
+import {planIncoming,formationTarget,separatePartners,separateTargets,serveReturnTarget} from '../src/tactics.js';
+import {playerProfile,launch,legalVolley,move,C,shotDepthTarget} from '../src/core.js';
 import {selectShot} from '../src/core.js';
 import {Game} from '../src/game.js';
 function pair(team=0){return [0,1].map((id)=>({...playerProfile(),id,team,x:id?13:5,y:id?30:40,lane:id?15:5,coverLane:id?15:5,vx:0,vy:0,reactionWait:0}))}
@@ -33,4 +33,21 @@ test('attack and soft controls choose the right shot from ball height and court 
  assert.equal(selectShot(p,{x:10,y:30,z:1},'soft'),'drop');
  p.y=28;assert.equal(selectShot(p,{x:10,y:30,z:1},'soft'),'dink');
  assert.equal(selectShot(p,{x:.5,y:30,z:3.4},'lob'),'lob')
+});
+test('a serve return keeps controlled shot-specific depth while using the open court',()=>{
+ const p={...playerProfile(),id:0,team:0,x:15,y:-1,lane:15},opponents=[{id:2,team:1,x:4,y:18}];
+ const drive=serveReturnTarget(p,opponents,'drive'),drop=serveReturnTarget(p,opponents,'drop');
+ assert.equal(drive.intent,'serve-return');assert.ok(drive.y>=4&&drive.y<=17.5);
+ assert.equal(drive.x,drop.x);assert.ok(drop.y>drive.y);
+ assert.ok(shotDepthTarget(0,'drive',.5)<shotDepthTarget(0,'drop',.5));
+});
+test('serve return depth mirrors across court ends for every supported return shot',()=>{
+ for(const shot of ['drive','drop','slice']){
+  const near={...playerProfile(),id:0,team:0,x:15,y:41,lane:15};
+  const far={...near,team:1,y:3};
+  const a=serveReturnTarget(near,[{id:2,team:1,x:4,y:9}],shot);
+  const b=serveReturnTarget(far,[{id:2,team:0,x:4,y:35}],shot);
+  assert.equal(a.y+b.y,44,`${shot} return depths should mirror`);
+  assert.equal(b.y,shotDepthTarget(1,shot,.5));
+ }
 });

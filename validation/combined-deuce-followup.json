@@ -1,0 +1,52 @@
+{
+  "scope": "Follow-up of the two capped deuce games, identical engine and seeds, 7200-second diagnostic limit; no forced outcomes or gameplay edits.",
+  "results": [
+    {
+      "seed": 5,
+      "level": "advanced",
+      "checkpointAt2400": {
+        "points": [
+          12,
+          13
+        ],
+        "rallies": 86
+      },
+      "completed": true,
+      "simulatedSeconds": 2435.4083333333333,
+      "points": [
+        12,
+        14
+      ],
+      "rallies": 88,
+      "faults": {
+        "Unreturned": 60,
+        "Net fault": 26,
+        "Double bounce": 1,
+        "Kitchen momentum fault": 1
+      }
+    },
+    {
+      "seed": 22,
+      "level": "advanced",
+      "checkpointAt2400": {
+        "points": [
+          11,
+          11
+        ],
+        "rallies": 94
+      },
+      "completed": true,
+      "simulatedSeconds": 2717.675,
+      "points": [
+        14,
+        12
+      ],
+      "rallies": 108,
+      "faults": {
+        "Unreturned": 65,
+        "Net fault": 41,
+        "Out": 2
+      }
+    }
+  ]
+}

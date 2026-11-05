@@ -1,0 +1,294 @@
+{
+  "matchesPerPair": 12,
+  "results": [
+    {
+      "levels": [
+        "beginner",
+        "beginner"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        6,
+        6
+      ],
+      "points": [
+        103,
+        110
+      ],
+      "rallies": 479,
+      "shots": {
+        "drive": 490,
+        "drop": 293,
+        "dink": 560,
+        "lob": 21,
+        "overhead": 168
+      },
+      "faults": {
+        "Out": 91,
+        "Unreturned": 244,
+        "Net fault": 77,
+        "Double bounce": 67
+      },
+      "maxRally": 21
+    },
+    {
+      "levels": [
+        "intermediate",
+        "intermediate"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        8,
+        4
+      ],
+      "points": [
+        119,
+        99
+      ],
+      "rallies": 430,
+      "shots": {
+        "drive": 1955,
+        "drop": 916,
+        "dink": 2553,
+        "lob": 74,
+        "overhead": 232,
+        "atp": 2,
+        "erne": 1
+      },
+      "faults": {
+        "Out": 85,
+        "Net fault": 216,
+        "Unreturned": 124,
+        "Double bounce": 5
+      },
+      "maxRally": 50
+    },
+    {
+      "levels": [
+        "demo",
+        "demo"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        6,
+        6
+      ],
+      "points": [
+        107,
+        108
+      ],
+      "rallies": 406,
+      "shots": {
+        "drive": 1467,
+        "drop": 503,
+        "dink": 4350,
+        "lob": 131,
+        "overhead": 129,
+        "atp": 1
+      },
+      "faults": {
+        "Unreturned": 178,
+        "Net fault": 168,
+        "Out": 20,
+        "Double bounce": 20,
+        "Kitchen momentum fault": 20
+      },
+      "maxRally": 59
+    },
+    {
+      "levels": [
+        "advanced",
+        "advanced"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        4,
+        8
+      ],
+      "points": [
+        102,
+        101
+      ],
+      "rallies": 389,
+      "shots": {
+        "drive": 869,
+        "drop": 411,
+        "dink": 8532,
+        "lob": 224,
+        "overhead": 230,
+        "tweener": 6
+      },
+      "faults": {
+        "Unreturned": 216,
+        "Net fault": 152,
+        "Double bounce": 11,
+        "Out": 7,
+        "Kitchen momentum fault": 3
+      },
+      "maxRally": 134
+    },
+    {
+      "levels": [
+        "beginner",
+        "advanced"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        0,
+        12
+      ],
+      "points": [
+        0,
+        132
+      ],
+      "rallies": 147,
+      "shots": {
+        "drive": 179,
+        "drop": 149,
+        "dink": 404,
+        "lob": 18,
+        "overhead": 31
+      },
+      "faults": {
+        "Net fault": 53,
+        "Unreturned": 46,
+        "Out": 27,
+        "Double bounce": 21
+      },
+      "maxRally": 15
+    },
+    {
+      "levels": [
+        "intermediate",
+        "advanced"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        0,
+        12
+      ],
+      "points": [
+        1,
+        132
+      ],
+      "rallies": 170,
+      "shots": {
+        "drive": 243,
+        "drop": 227,
+        "dink": 1292,
+        "lob": 38,
+        "overhead": 56,
+        "atp": 1
+      },
+      "faults": {
+        "Unreturned": 73,
+        "Net fault": 79,
+        "Out": 16,
+        "Double bounce": 1,
+        "Kitchen momentum fault": 1
+      },
+      "maxRally": 33
+    },
+    {
+      "levels": [
+        "beginner",
+        "intermediate"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        0,
+        12
+      ],
+      "points": [
+        1,
+        132
+      ],
+      "rallies": 174,
+      "shots": {
+        "drive": 242,
+        "drop": 184,
+        "dink": 420,
+        "overhead": 71,
+        "lob": 15
+      },
+      "faults": {
+        "Out": 34,
+        "Net fault": 53,
+        "Unreturned": 62,
+        "Double bounce": 25
+      },
+      "maxRally": 21
+    },
+    {
+      "levels": [
+        "intermediate",
+        "demo"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        0,
+        12
+      ],
+      "points": [
+        15,
+        132
+      ],
+      "rallies": 213,
+      "shots": {
+        "drive": 453,
+        "drop": 294,
+        "dink": 1449,
+        "lob": 53,
+        "overhead": 81
+      },
+      "faults": {
+        "Unreturned": 97,
+        "Net fault": 95,
+        "Out": 16,
+        "Kitchen momentum fault": 3,
+        "Double bounce": 2
+      },
+      "maxRally": 47
+    },
+    {
+      "levels": [
+        "demo",
+        "advanced"
+      ],
+      "games": 12,
+      "completed": 12,
+      "wins": [
+        0,
+        12
+      ],
+      "points": [
+        10,
+        132
+      ],
+      "rallies": 195,
+      "shots": {
+        "drive": 385,
+        "drop": 201,
+        "dink": 2534,
+        "lob": 72,
+        "overhead": 70
+      },
+      "faults": {
+        "Unreturned": 102,
+        "Kitchen momentum fault": 8,
+        "Net fault": 76,
+        "Out": 7,
+        "Double bounce": 2
+      },
+      "maxRally": 71
+    }
+  ]
+}

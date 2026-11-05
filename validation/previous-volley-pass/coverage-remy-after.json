@@ -1,0 +1,16 @@
+{
+  "seed": 17,
+  "character": "remy",
+  "completed": true,
+  "score": [
+    11,
+    8
+  ],
+  "faults": {
+    "Unreturned": 28,
+    "Out": 6,
+    "Net fault": 15
+  },
+  "scope": "Kitchen fault histories; add --full to retain unreturned-ball histories too",
+  "traces": []
+}

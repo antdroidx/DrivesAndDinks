@@ -3,7 +3,7 @@ import {createSideReplayRenderer,replayAngleFor} from './side-replay.js';
 import {drawContactCue,replayContactAt} from './contact-cues.js';
 import {playerFeet,footSole} from './player-feet.js';
 
-import {ReplayClock,faultReplaySample,replayRateAt,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js';
 
 import {drawCourtNet} from './court-net.js';
 
@@ -347,7 +347,7 @@ function playReplay(t){
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
 
  const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get('play')!=='1'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname));
- const elapsed=replayProbe?Math.max(0,Number(balanceQuery.get('at'))||1.5):replayClock.elapsed(t),snapshot=faultReplaySample(replayPlayback,elapsed);
+ const elapsed=replayProbe?Math.max(0,Number(balanceQuery.get('at'))||1.5):replayClock.elapsed(t),snapshot=faultReplaySample(replayPlayback,elapsed,true);
 
  if(!snapshot){finishReplay();return false;}
  if(!replayProbe)replayLabel.textContent=`REPLAY · ${replayPlayback.label}${replayRateAt(replayPlayback,elapsed)<1?' · CLOSE CALL · SLOW-MO':''}`;

@@ -49,11 +49,10 @@ function shortRally(){
  for(let i=0;i<30;i++){g.clock=i/30;g.replayTick=0;g.recordReplay()}
  return g;
 }
-test('ordinary point replays focus one contact with a restrained camera move',()=>{
+test('ordinary point replays retain a stationary overview with a contact marker',()=>{
  const g=shortRally();g.replayContacts.push({time:g.clock-.2,x:10,y:32,z:2.1});g.fault(1,'Out');
  const clip=g.pointReplay;if(!clip)return;assert.ok(clip.focus.x===10&&clip.focus.y===32);
  const base={x:220,y:80,width:520,height:520};const project=(x,y)=>({x:x*24,y:204+y*9});
  const start=faultReplayCamera(base,clip.focus,project,clip.focus.time-1),end=faultReplayCamera(base,clip.focus,project,clip.focus.time+1);
- assert.ok(start.width>=base.width-1&&start.height>=base.height-1);
- assert.ok(end.width<base.width*.62&&end.width/end.height===base.width/base.height);
+ assert.deepEqual(start,base);assert.deepEqual(end,base);
 });
