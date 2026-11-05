@@ -112,10 +112,10 @@ export function drawConceptAthlete(c,design,mode,phase,view,cx,baseline,scale,op
 
  plantFeet(pose,{...options,legLengths:leg},raw,cx,baseline,scale);
  c.save();
- for(const chain of pose.legs){const start=d.body==='female'?thighGarment(chain,leg.thigh+1).end:chain[0];if(style!=='toy')contour(c,[start,chain[1],chain[2]],[leg.thigh,leg.calf,leg.ankle],skin);const f=chain[2];c.save();c.translate(f.x,f.y);c.scale(style==='toy'?1.8:compact?1.2:1,style==='toy'?1.5:1);c.translate(-f.x,-f.y);limb(c,{x:f.x,y:f.y-2.6},f,leg.ankle+.5,'#ede8db');shape(c,[[f.x-2.3*leg.shoe,f.y-.4],[f.x+1.8*leg.shoe,f.y-.7],[f.x+3.1*leg.shoe,f.y+1.2],[f.x+2.6*leg.shoe,f.y+2],[f.x-2.5*leg.shoe,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3));
+ for(const chain of pose.legs){const start=d.body==='female'?thighGarment(chain,leg.thigh+1).end:chain[0];if(style!=='toy')contour(c,[start,chain[1],chain[2]],[leg.thigh,leg.calf,leg.ankle],skin);const f=chain[2];c.save();c.translate(f.x,f.y);c.scale(style==='toy'?1.8:compact?1.2:1,style==='toy'?1.5:1);c.translate(-f.x,-f.y);limb(c,{x:f.x,y:f.y-2.6},f,leg.ankle+.5,'#ede8db');shape(c,[[f.x-2.3*leg.shoe,f.y-.4],[f.x+1.8*leg.shoe,f.y-.7],[f.x+3.1*leg.shoe,f.y+1.2],[f.x+2.6*leg.shoe,f.y+2],[f.x-2.5*leg.shoe,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3),null);
   shape(c,[[f.x-2.1*leg.shoe,f.y-.25],[f.x-.45*leg.shoe,f.y-.65],[f.x+.25*leg.shoe,f.y+.35],[f.x-1.3*leg.shoe,f.y+.75],[f.x-2.3*leg.shoe,f.y+.35]],shade('#e5dfd0',.2),null);
   shape(c,[[f.x+.65*leg.shoe,f.y-.45],[f.x+2.75*leg.shoe,f.y+.35],[f.x+2.5*leg.shoe,f.y+.95],[f.x+.7*leg.shoe,f.y+.55]],shade('#e5dfd0',-.16),null);
-  limb(c,{x:f.x-2.1*leg.shoe,y:f.y+1.45},{x:f.x+2.55*leg.shoe,y:f.y+1.55},.32,'#fff8ed');limb(c,{x:f.x-1.5,y:f.y+.8},{x:f.x+2,y:f.y+1},.6,d.trim);c.restore()}
+c.restore()}
  c.restore();
  if(['bob','waves'].includes(d.hair)){c.save();if(compact){c.translate(n.x,n.y-8);c.scale(style==='toy'?1.8:1.35,style==='toy'?1.55:1.2);c.translate(-n.x,-(n.y-8))}hairBack(c,n.x,n.y-8,d,phase,view==='near');c.restore()}
  function arm(index){const a=pose.arms[index];if(style==='toy'){ellipse(c,a[2].x,a[2].y,3.6,3.6,skin);return}contour(c,a,[w+.5,w*.85,w*.6],skin);if(d.body==='male'){limb(c,a[0],{x:a[0].x+(a[1].x-a[0].x)*.4,y:a[0].y+(a[1].y-a[0].y)*.4},w+1,d.shirt)}ellipse(c,a[2].x,a[2].y,w*.48,w*.55,shade(skin,.08));limb(c,{x:a[2].x-.8,y:a[2].y-1.6},{x:a[2].x+.8,y:a[2].y-1.6},.8,d.trim)}
