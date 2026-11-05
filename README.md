@@ -192,3 +192,7 @@ Doubles third shots evaluate height, balance, pressure, opponent depth, partner 
 Replay playback interpolates positions, velocity, stride, swing/preparation and animation time between recorded frames. Contacts and ball events retain additional exact-time frames; hits, bounces, net and post impacts remain discrete. Render samples cannot mutate recordings or consume match randomness. Automatic and point replays remain stationary; Sideline/Overview stays selectable.
 
 `node scripts/validate-transitions.js` collects live serve/return landing depth, third/fifth decisions, support roles and rally outcomes. See `ENGINE-HANDOFF.md` for integration status and `validation/combined-*.json` for this batch's results. Prior recovery-pass evidence is preserved separately in `validation/previous-volley-pass/`.
+
+## Doubles side ownership
+
+Partners hold their assigned sides through ordinary kitchen exchanges. A middle reach no longer automatically switches coverage. Poaches require a useful interception advantage and attacking opportunity, and actual side changes require a genuine crossing during a poach, lob recovery or emergency rescue. Recent switches discourage an immediate poach back. Each point restores the normal serving/receiving sides; stacking is not implemented. `node scripts/validate-doubles-sides.js 8` measures actual kitchen order changes separately from poach attempts.

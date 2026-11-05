@@ -1,0 +1,22 @@
+{
+  "scope": "Exact advanced/advanced skill-matrix continuation beyond40minute cap; no forced winner or engine changes.",
+  "results": [
+    {
+      "seed": 7,
+      "cappedAt2400": {
+        "points": [
+          11,
+          12
+        ],
+        "rallies": 77
+      },
+      "completed": true,
+      "seconds": 2876.0333333333333,
+      "points": [
+        15,
+        13
+      ],
+      "rallies": 88
+    }
+  ]
+}

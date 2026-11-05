@@ -1,0 +1,14 @@
+✔ routine low middle volleys keep their lane owner on both court ends (4.0509ms)
+✔ planned poaches and center reaches do not change coverage (0.6174ms)
+✔ diagonal volleys belong to the approaching kitchen lane rather than the landing lane (0.8737ms)
+✔ an actual poach crossing switches once without altering service order or position (0.2217ms)
+✔ lob and unreachable-ball recovery permit real side changes; ordinary shots and serves do not (0.1185ms)
+✔ a recent side change discourages an immediate poach back, and new points restore service sides (1.4991ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.6737

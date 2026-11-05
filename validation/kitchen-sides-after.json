@@ -1,0 +1,166 @@
+{
+  "scope": "Identical seeded demo doubles rosters, alternating starting service; 40-minute match cap. Actual order changes count when both partners are at the kitchen and separated by 2.5 feet; poach and coverage counts are engine diagnostics. No stacking or forced outcomes.",
+  "source": "current",
+  "games": 8,
+  "completed": 8,
+  "rallies": 332,
+  "kitchenPairSeconds": 8736.783333342724,
+  "orderChanges": 0,
+  "poachAttempts": 36,
+  "poachHits": 34,
+  "coverSwaps": 0,
+  "matches": [
+    {
+      "seed": 1,
+      "completed": true,
+      "points": [
+        11,
+        8
+      ],
+      "rallies": 39,
+      "kitchenPairSeconds": 826.1666666660797,
+      "orderChanges": 0,
+      "poachAttempts": 4,
+      "poachHits": 4,
+      "coverSwaps": 0,
+      "faults": {
+        "Unreturned": 11,
+        "Net fault": 27,
+        "Double bounce": 1
+      }
+    },
+    {
+      "seed": 2,
+      "completed": true,
+      "points": [
+        11,
+        7
+      ],
+      "rallies": 48,
+      "kitchenPairSeconds": 1315.6250000029463,
+      "orderChanges": 0,
+      "poachAttempts": 2,
+      "poachHits": 1,
+      "coverSwaps": 0,
+      "faults": {
+        "Unreturned": 17,
+        "Net fault": 25,
+        "Out": 6
+      }
+    },
+    {
+      "seed": 3,
+      "completed": true,
+      "points": [
+        1,
+        11
+      ],
+      "rallies": 26,
+      "kitchenPairSeconds": 690.0083333328702,
+      "orderChanges": 0,
+      "poachAttempts": 2,
+      "poachHits": 2,
+      "coverSwaps": 0,
+      "faults": {
+        "Unreturned": 11,
+        "Net fault": 14,
+        "Out": 1
+      }
+    },
+    {
+      "seed": 4,
+      "completed": true,
+      "points": [
+        6,
+        11
+      ],
+      "rallies": 44,
+      "kitchenPairSeconds": 1279.1666666691488,
+      "orderChanges": 0,
+      "poachAttempts": 9,
+      "poachHits": 9,
+      "coverSwaps": 0,
+      "faults": {
+        "Net fault": 26,
+        "Unreturned": 16,
+        "Out": 2
+      }
+    },
+    {
+      "seed": 5,
+      "completed": true,
+      "points": [
+        11,
+        7
+      ],
+      "rallies": 41,
+      "kitchenPairSeconds": 1033.9833333326935,
+      "orderChanges": 0,
+      "poachAttempts": 3,
+      "poachHits": 3,
+      "coverSwaps": 0,
+      "faults": {
+        "Net fault": 21,
+        "Unreturned": 19,
+        "Double bounce": 1
+      }
+    },
+    {
+      "seed": 6,
+      "completed": true,
+      "points": [
+        6,
+        11
+      ],
+      "rallies": 45,
+      "kitchenPairSeconds": 946.6666666659701,
+      "orderChanges": 0,
+      "poachAttempts": 5,
+      "poachHits": 5,
+      "coverSwaps": 0,
+      "faults": {
+        "Unreturned": 23,
+        "Net fault": 21,
+        "Out": 1
+      }
+    },
+    {
+      "seed": 7,
+      "completed": true,
+      "points": [
+        8,
+        11
+      ],
+      "rallies": 41,
+      "kitchenPairSeconds": 1003.5999999992516,
+      "orderChanges": 0,
+      "poachAttempts": 7,
+      "poachHits": 7,
+      "coverSwaps": 0,
+      "faults": {
+        "Unreturned": 13,
+        "Out": 3,
+        "Net fault": 25
+      }
+    },
+    {
+      "seed": 8,
+      "completed": true,
+      "points": [
+        9,
+        11
+      ],
+      "rallies": 48,
+      "kitchenPairSeconds": 1641.5666666737632,
+      "orderChanges": 0,
+      "poachAttempts": 4,
+      "poachHits": 3,
+      "coverSwaps": 0,
+      "faults": {
+        "Unreturned": 16,
+        "Net fault": 28,
+        "Out": 4
+      }
+    }
+  ]
+}

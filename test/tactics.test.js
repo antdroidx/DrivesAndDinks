@@ -18,7 +18,7 @@ test('partner separation adjusts targets without teleporting players',()=>{
  assert.deepEqual([players[0].x,players[1].x],before);
  assert.notDeepEqual(targets[1].target,{x:10.5,y:30});
 });
-test('planned receiver remains stable through successive physics ticks',()=>{const g=new Game();g.mode='watch';g.phase='rally';g.last=1;g.shots=4;g.bounces=0;g.ball=incoming();Object.assign(g.players[0],{x:5,y:40,coverLane:5});Object.assign(g.players[1],{x:13,y:30,coverLane:15});g.update(C.dt);const plan=g.teamPlan;assert.equal(plan.poach,true);for(let i=0;i<8;i++)g.update(C.dt);assert.equal(g.teamPlan,plan);assert.equal(g.players[0].coverLane,15);assert.equal(g.players[1].coverLane,5);assert.equal(g.score.rightPlayer[0],1)});
+test('planned receiver remains stable through successive physics ticks',()=>{const g=new Game();g.mode='watch';g.phase='rally';g.last=1;g.shots=4;g.bounces=0;g.ball=incoming();Object.assign(g.players[0],{x:5,y:40,coverLane:5});Object.assign(g.players[1],{x:11,y:30,coverLane:15});g.update(C.dt);const plan=g.teamPlan;assert.equal(plan.poach,true);for(let i=0;i<8;i++)g.update(C.dt);assert.equal(g.teamPlan,plan);assert.equal(g.players[0].coverLane,5);assert.equal(g.players[1].coverLane,15);assert.equal(g.score.rightPlayer[0],1)});
 
 test('poaching contacts remain legal on the opposite court end',()=>{const players=pair(1);players[0].y=4;players[1].y=14;const ball=incoming();ball.y=44-ball.y;ball.vy=-ball.vy;const plan=planIncoming({players,team:1,ball,shots:4,bounces:0});assert.equal(plan.poach,true);assert.equal(plan.receiverId,1);assert.equal(legalVolley(1,plan.point.y,0,4),null)});
 
