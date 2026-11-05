@@ -82,7 +82,7 @@ The actionable roadmap work is implemented on `codex/post-143-engine-audit`.
 - Live and replay characters show focused, effort, fatigue, surprise, aggression and happiness states. Sweat intensity follows stamina, effort and rally load.
 - `?test=performance` displays frame/render timing and exposes `window.__DRIVES_DINKS_PERFORMANCE__()` for frame, render, input, long-task and canvas-cost measurements.
 - Browser zoom remains available, dialogs retain scrolling, and the invalid nested media selector is removed.
-- Players are right- or left-handed, and optional doubles stacking is available per team with Off, Stack + cross, Stack + stay and Adaptive modes. The score-selected server and receiver remain locked to their legal service courts; partners stage outside the sideline on the active side and cross only after a legal serve or return. Unsafe lobs, poor contact, fatigue, volley momentum and collision risk fall back to holding formation. Reports and replays retain the stack plan and decision events.
+- Players are right- or left-handed, and optional doubles stacking is available per team with Off, Stack + cross, Stack + stay and Adaptive modes. The score-selected server and receiver remain locked to their legal service courts; partners stage outside the sideline only when the starting roles are off their hand-preferred lanes, then cross after a legal serve or return; aligned formations remain standard. Unsafe lobs, poor contact, fatigue, volley momentum and collision risk fall back to holding formation. Reports and replays retain the stack plan and decision events.
 
 Paired pacing evidence uses seeds 31–34 at Beginner, Intermediate, Demo and Advanced in doubles:
 

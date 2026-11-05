@@ -88,7 +88,7 @@ Career scheduling, long-term progression, seasons and cloud persistence remain l
 3. **Rendered mobile measurement:** the browser probe is complete. Physical low-end phone measurements remain external.
 4. **Shot shape and tactics:** curve, pattern labels, opponent-aware placement, high-dink speed-ups and bounded rally escalation are complete for this pass.
 5. **Practice and presentation:** moving, lob and transition drills are complete; responsive and zoom cleanup is complete for the current layout.
-6. **Doubles stacking:** right/left handed players and optional per-team Off, Stack + cross, Stack + stay and Adaptive modes are implemented. Score-controlled service identity remains unchanged; crossings happen only after legal serve/return triggers and unsafe situations fall back to hold. Reports and replays expose selection, crossing and fallback decisions. Human tuning of stacking frequency and safety thresholds remains.
+6. **Doubles stacking:** right/left handed players and optional per-team Off, Stack + cross, Stack + stay and Adaptive modes are implemented. Score-controlled service identity remains unchanged; aligned formations stay standard, mismatched hand-preferred lanes stack, crossings happen only after legal serve/return triggers, and unsafe situations fall back to hold. Reports and replays expose selection, crossing and fallback decisions. Human tuning of stacking frequency and safety thresholds remains.
 
 ## Recommended engine iteration after human playtests
 

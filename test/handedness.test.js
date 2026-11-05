@@ -37,8 +37,13 @@ test('hand pair changes adaptive stacking tendency and auto preferred side',()=>
  assert.equal(same.handPair,'same');
  assert.equal(opposite.handPair,'opposite');
  assert.ok(stackProbability(same,score)>stackProbability(opposite,score));
- const players=[rightA,leftB,...opponents],server=rightB,receiver=opponents[0];
+ const players=[rightA,leftB,...opponents],server=leftB,receiver=opponents[0];
  const plans=createStackPlans({players,server,receiver,score:{...score,team:0},config:{teams:[{mode:'cross',preferredSide:'auto'},{mode:'off',preferredSide:'auto'}]},random:()=>0});
  assert.equal(plans[0].handPair,'opposite');
- assert.equal(plans[0].preferredLane,15);
+ assert.equal(plans[0].stackRequired,false);
+ assert.equal(plans[0].targetLanes[rightA.id],5);
+ assert.equal(plans[0].targetLanes[leftB.id],15);
+ const sameHand=[athlete(0,0,'left'),athlete(1,0,'left'),...opponents];sameHand[1].ratings={volley:95,reach:90,power:90,courtIQ:90,aggression:90};
+ const samePlan=createStackPlans({players:sameHand,server:sameHand[0],receiver:opponents[0],score:{...score,team:0},config:{teams:[{mode:'cross',preferredSide:'auto'},{mode:'off',preferredSide:'auto'}]},random:()=>0})[0];
+ assert.equal(samePlan.targetLanes[samePlan.strongId],5);
 });

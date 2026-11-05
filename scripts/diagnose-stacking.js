@@ -23,13 +23,13 @@ for(let seed=1;seed<=games;seed++){
  for(let tick=0;tick<120*2400&&game.phase!=='over';tick++)game.update(C.dt);
  add(byTeamType,game.tacticalStats.stackByTeamType);
  add(byHandPair,game.tacticalStats.stackByHandPair);
- matches.push({seed,completed:game.phase==='over',points:[...game.score.points],rallies:game.stats.rallies,maxRally,teamTypes:game.stackPlans.map(plan=>plan.teamType),decisions:game.tacticalStats.stackDecisions,selected:game.tacticalStats.stackSelected,crossPlanned:game.tacticalStats.stackCrossPlanned,crossed:game.tacticalStats.stackCrossings,stays:game.tacticalStats.stackStays,fallbacks:game.tacticalStats.stackFallbacks});
+ matches.push({seed,completed:game.phase==='over',points:[...game.score.points],rallies:game.stats.rallies,maxRally,teamTypes:game.stackPlans.map(plan=>plan.teamType),decisions:game.tacticalStats.stackDecisions,needed:game.tacticalStats.stackNeeded,aligned:game.tacticalStats.stackAligned,selected:game.tacticalStats.stackSelected,crossPlanned:game.tacticalStats.stackCrossPlanned,crossed:game.tacticalStats.stackCrossings,stays:game.tacticalStats.stackStays,fallbacks:game.tacticalStats.stackFallbacks});
 }
 
 const rates=source=>Object.fromEntries(Object.entries(source).map(([name,row])=>[name,{decisions:row.decisions,selected:row.selected,selectedRate:row.decisions?row.selected/row.decisions:0,averageProbability:row.decisions?row.probabilitySum/row.decisions:0}]));
 const selectionByTeamType=rates(byTeamType),selectionByHandPair=rates(byHandPair);
 const sum=key=>matches.reduce((total,match)=>total+match[key],0);
-const report={scope:'Adaptive stacking frequency by generated doubles team type and hand pair. Preferred sides alternate deterministically; no forced outcomes.',games,teamModes:{team0,team1},completed:matches.filter(match=>match.completed).length,decisions:sum('decisions'),selected:sum('selected'),selectedRate:sum('decisions')?sum('selected')/sum('decisions'):0,selectionByTeamType,selectionByHandPair,execution:{crossPlanned:sum('crossPlanned'),crossed:sum('crossed'),stays:sum('stays'),fallbacks:sum('fallbacks')},rallies:sum('rallies'),maxRally:Math.max(0,...matches.map(match=>match.maxRally)),elapsedMs:Math.round(performance.now()-start),matches};
+const report={scope:'Adaptive stacking frequency by generated doubles team type and hand pair. Preferred sides alternate deterministically; no forced outcomes.',games,teamModes:{team0,team1},completed:matches.filter(match=>match.completed).length,decisions:sum('decisions'),selected:sum('selected'),selectedRate:sum('decisions')?sum('selected')/sum('decisions'):0,selectionByTeamType,selectionByHandPair,execution:{needed:sum('needed'),aligned:sum('aligned'),crossPlanned:sum('crossPlanned'),crossed:sum('crossed'),stays:sum('stays'),fallbacks:sum('fallbacks')},rallies:sum('rallies'),maxRally:Math.max(0,...matches.map(match=>match.maxRally)),elapsedMs:Math.round(performance.now()-start),matches};
 writeFileSync(output,JSON.stringify(report,null,2)+'\n');
 console.log(JSON.stringify({...report,matches:undefined},null,2));
 if(report.completed!==games)process.exitCode=1;
