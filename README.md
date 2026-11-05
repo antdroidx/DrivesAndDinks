@@ -155,3 +155,9 @@ Wide-screen ball replays now use a sideline camera with purpose-drawn anime prof
 The sideline scene uses the selected two-tone court colors and a clean surround. Anime Pixel retains palette-quantized, crisp character edges. Impact cues distinguish clean, pressured, off-center, and mishit contacts; replay labels last briefly for readability.
 
 On DEV, `?test=sideline-replay` opens a frozen, simulated replay inspector. `&at=2` selects another playback time; `&art=anime-pixel` checks the pixel treatment. Use the ordinary DEV URL for animated gameplay and replays.
+
+Ordinary replays now run at normal speed. Only measured close line, kitchen-foot or net contacts slow briefly, with a CLOSE CALL / SLOW-MO indicator during that window. Camera tracking continues through the outcome. Add `&play=1` to the inspector to watch its simulated clip animate.
+
+Singles players can approach behind a clean deep return or a suitable deep pressure drive. Decisions use Court IQ, stamina, reach, volley ability, paddle shape and the opponent's position. CPU singles returns can select passing drives, and a reachable rising bounce can be given a brief preparation window. Interception forecasts now check the live paddle contact volume and grounded kitchen clearance, including mid-height forehand volleys.
+
+The saved `validation/singles-tactics-*.json` samples compare tall/broad singles against neutral bodies and include separate validation seeds. Scoring improved in the paired sample, but tall/broad singles remains substantially disadvantaged. No further body-rating coefficients were changed in this batch. Actual mobile rendering performance and human balance testing remain outstanding.

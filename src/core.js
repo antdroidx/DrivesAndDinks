@@ -196,7 +196,7 @@ export function selectShot(p,b,desired){
  }
  return desired
 }
-export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7, random=Math.random()}){
+export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;
  const bias=Math.max(0,Math.min(1,Number(aggression)||.5));
  const relativeSkill=Math.max(-.12,Math.min(.12,(Number(attackSkill||1)-Number(softSkill||1))*.32-Math.max(0,Math.min(1,Number(difficulty)||0))*.3));
@@ -205,7 +205,7 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
  if(shots===1)return 'drive';
  if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
  if(difficulty>.82&&height<3.2)return 'lob';
- if(shots===2)return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop';
+ if(shots===2){if(singles)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop'}
  if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';if(difficulty>.9&&height<2.7)return 'dink';return height>3.1||(height>.8&&random<Math.max(.12,Math.min(.48,.24+attackBias)))?'drive':'dink'}
  return height>3.2&&random<Math.max(.2,Math.min(.72,.45+attackBias))?'drive':'drop';
 }
