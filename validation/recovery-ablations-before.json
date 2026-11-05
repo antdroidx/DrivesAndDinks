@@ -1,0 +1,223 @@
+{
+  "scope": "Diagnostic ability ablations, not production balance coefficients",
+  "seedsPerSide": 2,
+  "seedStart": 1,
+  "results": [
+    {
+      "mode": "current",
+      "games": 12,
+      "completed": 12,
+      "wins": 2,
+      "points": [
+        61,
+        125
+      ],
+      "faults": [
+        {
+          "Unreturned": 132,
+          "Out": 31,
+          "Double bounce": 64,
+          "Net fault": 25
+        },
+        {
+          "Unreturned": 91,
+          "Double bounce": 35,
+          "Out": 37,
+          "Net fault": 21
+        }
+      ],
+      "contacts": [
+        1276,
+        1282
+      ],
+      "meanQuality": [
+        0.9795485016042808,
+        0.9804975415342926
+      ],
+      "meanStamina": [
+        0.6591503411631152,
+        0.6971684921348512
+      ]
+    },
+    {
+      "mode": "speed",
+      "games": 12,
+      "completed": 12,
+      "wins": 0,
+      "points": [
+        53,
+        135
+      ],
+      "faults": [
+        {
+          "Unreturned": 137,
+          "Out": 46,
+          "Double bounce": 66,
+          "Net fault": 31
+        },
+        {
+          "Unreturned": 94,
+          "Net fault": 36,
+          "Double bounce": 37,
+          "Out": 25
+        }
+      ],
+      "contacts": [
+        1397,
+        1387
+      ],
+      "meanQuality": [
+        0.978176052890056,
+        0.9801794346586928
+      ],
+      "meanStamina": [
+        0.6658844727053022,
+        0.7120042459310358
+      ]
+    },
+    {
+      "mode": "acceleration",
+      "games": 12,
+      "completed": 12,
+      "wins": 2,
+      "points": [
+        61,
+        124
+      ],
+      "faults": [
+        {
+          "Double bounce": 56,
+          "Unreturned": 117,
+          "Net fault": 31,
+          "Out": 38
+        },
+        {
+          "Unreturned": 79,
+          "Out": 38,
+          "Double bounce": 37,
+          "Net fault": 21
+        }
+      ],
+      "contacts": [
+        1265,
+        1259
+      ],
+      "meanQuality": [
+        0.9748403387562148,
+        0.981624806587123
+      ],
+      "meanStamina": [
+        0.5753473786996648,
+        0.6679743043250417
+      ]
+    },
+    {
+      "mode": "endurance",
+      "games": 12,
+      "completed": 12,
+      "wins": 1,
+      "points": [
+        59,
+        129
+      ],
+      "faults": [
+        {
+          "Unreturned": 121,
+          "Double bounce": 64,
+          "Out": 39,
+          "Net fault": 31
+        },
+        {
+          "Unreturned": 85,
+          "Double bounce": 33,
+          "Out": 40,
+          "Net fault": 22
+        }
+      ],
+      "contacts": [
+        1299,
+        1296
+      ],
+      "meanQuality": [
+        0.9789567054678421,
+        0.9805227495187612
+      ],
+      "meanStamina": [
+        0.6914478892779948,
+        0.6685676839664928
+      ]
+    },
+    {
+      "mode": "volley",
+      "games": 12,
+      "completed": 12,
+      "wins": 2,
+      "points": [
+        61,
+        125
+      ],
+      "faults": [
+        {
+          "Unreturned": 132,
+          "Out": 31,
+          "Double bounce": 64,
+          "Net fault": 25
+        },
+        {
+          "Unreturned": 91,
+          "Double bounce": 35,
+          "Out": 37,
+          "Net fault": 21
+        }
+      ],
+      "contacts": [
+        1276,
+        1282
+      ],
+      "meanQuality": [
+        0.9795485016042808,
+        0.9804975415342926
+      ],
+      "meanStamina": [
+        0.6591503411631152,
+        0.6971684921348512
+      ]
+    },
+    {
+      "mode": "movement",
+      "games": 12,
+      "completed": 12,
+      "wins": 9,
+      "points": [
+        120,
+        82
+      ],
+      "faults": [
+        {
+          "Double bounce": 43,
+          "Unreturned": 97,
+          "Net fault": 31,
+          "Out": 41
+        },
+        {
+          "Unreturned": 119,
+          "Out": 38,
+          "Double bounce": 62,
+          "Net fault": 34
+        }
+      ],
+      "contacts": [
+        1424,
+        1421
+      ],
+      "meanQuality": [
+        0.9770269326912904,
+        0.9789207972220032
+      ],
+      "meanStamina": [
+        0.6450859020151288,
+        0.633096445324083
+      ]
+    }
+  ]
+}
