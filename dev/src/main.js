@@ -1,39 +1,39 @@
-import {seededRandom} from './competition.js?v=142';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=142';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=142';
-import {playerFeet,footSole} from './player-feet.js?v=142';
+import {seededRandom} from './competition.js?v=143';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=143';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=143';
+import {playerFeet,footSole} from './player-feet.js?v=143';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=142';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=143';
 
-import {drawCourtNet} from './court-net.js?v=142';
+import {drawCourtNet} from './court-net.js?v=143';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=142';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=143';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=142';
+import {createAnimeGameRenderer} from './anime-game.js?v=143';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=142';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=143';
 
-import {setupCourtDisplay} from './court-display.js?v=142';
+import {setupCourtDisplay} from './court-display.js?v=143';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=142';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=143';
 
-import {courtCamera,courtAim,padControl} from './court-camera.js?v=142';
+import {courtCamera,courtAim,padControl} from './court-camera.js?v=143';
 
-import {movingStance} from './detailed-character.js?v=142';
+import {movingStance} from './detailed-character.js?v=143';
 
-import {sampleMatchAnimation} from './match-animation.js?v=142';
+import {sampleMatchAnimation} from './match-animation.js?v=143';
 
-import {setupSelection} from './selection.js?v=142';
+import {setupSelection} from './selection.js?v=143';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=142';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=143';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=142';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=143';
 
-import {Game} from './game.js?v=142';
+import {Game} from './game.js?v=143';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=142';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=143';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=142';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=143';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
