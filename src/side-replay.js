@@ -4,7 +4,6 @@ import {sampleMatchAnimation} from './match-animation.js';
 import {playerFeet} from './player-feet.js';
 import {drawContactCue,replayContactAt} from './contact-cues.js';
 
-const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
 const MAX_REPLAY_Z=24;
 export function sideReplayProjection(width,height,maxZ=16){
  const scale=Math.min(width/56,height/Math.max(24,(maxZ+4)/.65)),project=(x,y,z=0)=>({x:width/2+(y-22)*scale+(x-10)*scale*.24,y:height*.73+(x-10)*scale*.38-z*scale});
