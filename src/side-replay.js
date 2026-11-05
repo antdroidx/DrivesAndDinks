@@ -4,20 +4,16 @@ import {sampleMatchAnimation} from './match-animation.js';
 import {playerFeet} from './player-feet.js';
 import {drawContactCue,replayContactAt} from './contact-cues.js';
 
-const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
-const envelopes=new WeakMap();
+const MAX_REPLAY_Z=24;
 export function sideReplayProjection(width,height,maxZ=16){
  const scale=Math.min(width/56,height/Math.max(24,(maxZ+4)/.65)),project=(x,y,z=0)=>({x:width/2+(y-22)*scale+(x-10)*scale*.24,y:height*.73+(x-10)*scale*.38-z*scale});
  return {project,scale};
 }
 export function sideReplayCamera(width,height,clip,snapshot){
- if(!envelopes.has(clip))envelopes.set(clip,Math.max(10,...clip.frames.map(f=>f.ball.z)));
- const maxZ=envelopes.get(clip),{project,scale}=sideReplayProjection(width,height,maxZ),start=clip.frames[0].clock,t=clamp((snapshot.clock-start)/.7,0,1),ease=t*t*(3-2*t),zoom=Math.min(1+(width/height<1.1?1:.18)*ease,height*.78/Math.max(1,maxZ*scale)),w=width/zoom,h=height/zoom;
- const nearby=clip.frames.filter(f=>Math.abs(f.clock-snapshot.clock)<.14),points=(nearby.length?nearby:[snapshot]).map(f=>project(f.ball.x,f.ball.y,f.ball.z));
- const target={x:points.reduce((n,p)=>n+p.x,0)/points.length,y:points.reduce((n,p)=>n+p.y,0)/points.length},ball=project(snapshot.ball.x,snapshot.ball.y,snapshot.ball.z),ground=project(snapshot.ball.x,snapshot.ball.y,0);
- let cx=width/2+(target.x-width/2)*ease*.65,cy=height/2+((target.y+ground.y)/2-height/2)*ease*.65;
- cx=clamp(cx,ball.x-w*.36,ball.x+w*.36);cy=clamp(cy,Math.max(ball.y,ground.y)-h*.4,Math.min(ball.y,ground.y)+h*.4);
- return {x:cx-w/2,y:cy-h/2,width:w,height:h,project,scale};
+ // A fixed high-lob envelope fits every recorded rally, so replay composition
+ // neither pans nor changes scale.
+ const {project,scale}=sideReplayProjection(width,height,MAX_REPLAY_Z);
+ return {x:0,y:0,width,height,project,scale};
 }
 export function replayAngleFor(clip,{aspect=1.5}={}){return clip.focus?.boundary!==undefined||aspect<1.1?'overview':'sideline'}
 
