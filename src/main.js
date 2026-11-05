@@ -1,36 +1,39 @@
-import {playerFeet,footSole} from './player-feet.js?v=143';
+import {seededRandom} from './competition.js?v=144';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=144';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=144';
+import {playerFeet,footSole} from './player-feet.js?v=144';
 
-import {faultReplaySample,faultReplayCamera,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=143';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=144';
 
-import {drawCourtNet} from './court-net.js?v=143';
+import {drawCourtNet} from './court-net.js?v=144';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=143';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=144';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=143';
+import {createAnimeGameRenderer} from './anime-game.js?v=144';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=143';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=144';
 
-import {setupCourtDisplay} from './court-display.js?v=143';
+import {setupCourtDisplay} from './court-display.js?v=144';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=143';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=144';
 
-import {courtCamera,courtAim} from './court-camera.js?v=143';
+import {courtCamera,courtAim,padControl} from './court-camera.js?v=144';
 
-import {movingStance} from './detailed-character.js?v=143';
+import {movingStance} from './detailed-character.js?v=144';
 
-import {sampleMatchAnimation} from './match-animation.js?v=143';
+import {sampleMatchAnimation} from './match-animation.js?v=144';
 
-import {setupSelection} from './selection.js?v=143';
+import {setupSelection} from './selection.js?v=144';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=143';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=144';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=143';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=144';
 
-import {Game} from './game.js?v=143';
+import {Game} from './game.js?v=144';
 
-import {selectShot,serveAim} from './core.js?v=143';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=144';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=143';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=144';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -85,7 +88,7 @@ if(detailedArtAvailable){
 
  const panel=document.createElement('div');panel.id='dev-art-options';panel.style.cssText='display:grid;gap:8px;margin:10px 0';
 
- panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="none">No background · court color theme</option><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower acceleration and harder low contacts. Broader: more power, slower movement and more fatigue. Leaner / shorter: quicker coverage. Shorter players handle low balls and behind-shoulder reflex blocks more easily.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
+ panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="none">No background · court color theme</option><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower first steps and harder rushed low contacts. Broader: more power potential, slower acceleration and braking. Leaner / shorter: quicker changes of direction. Shot technique, swing speed and clean contact also generate power. Fitness and hand skill come from ratings.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
 
  document.querySelector('.setup-top').after(panel);
 
@@ -115,11 +118,11 @@ let savedDifficulty='normal';try{savedDifficulty=localStorage.getItem(DIFFICULTY
 
 setDifficulty(savedDifficulty,false);difficultyButton.onclick=()=>setDifficulty(({easy:'normal',normal:'hard',hard:'easy'})[game.difficulty]);
 
-function syncPauseButton(){pauseButton.textContent=game.paused?'RESUME':'PAUSE';pauseButton.setAttribute('aria-pressed',String(game.paused));pauseButton.setAttribute('aria-label',game.paused?'Resume match':'Pause match');pauseButton.disabled=game.phase==='over'}
+function syncPauseButton(){const paused=replayPlayback?replayClock.paused:game.paused,subject=replayPlayback?'replay':'match';pauseButton.textContent=paused?'RESUME':'PAUSE';pauseButton.setAttribute('aria-pressed',String(paused));pauseButton.setAttribute('aria-label',`${paused?'Resume':'Pause'} ${subject}`);pauseButton.disabled=!replayPlayback&&game.phase==='over'}
 
-function setPaused(paused){game.setPaused(paused);last=0;acc=0;syncPauseButton();syncShotButtonsForPhase();render()}
+function setPaused(paused){if(replayPlayback){replayClock.setPaused(paused,performance.now());syncPauseButton();return}game.setPaused(paused);last=0;acc=0;syncPauseButton();syncShotButtonsForPhase();render()}
 
-pauseButton.onclick=()=>setPaused(!game.paused);
+pauseButton.onclick=()=>setPaused(replayPlayback?!replayClock.paused:!game.paused);
 
 for(const gesture of ['gesturestart','gesturechange','gestureend'])document.addEventListener(gesture,event=>event.preventDefault(),{passive:false});
 
@@ -274,7 +277,9 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
  drawSurface(ctx,palette,courtStyle,activeVenue?.id??'outdoor');
 
- if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):previewShot==='dink'?14:previewShot==='drop'?12:previewShot==='slice'?6:4);ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
+ if(game.practice){const z=game.practice.drill.target;poly([[z.left,z.top],[z.right,z.top],[z.right,z.bottom],[z.left,z.bottom]],'#69e8bc28','#9cf2cc');const label=project((z.left+z.right)/2,(z.top+z.bottom)/2);ctx.fillStyle='#e5fff2';ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillText('TARGET',label.x,label.y);ctx.textAlign='left'}
+
+ if(game.mode==='play'){const previewShot=game.phase==='serve'?'serve':selectShot(game.players[0],game.ball,game.shot),displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,target=project(displayAim,game.phase==='serve'?(game.server.team===0?8:36):shotDepthTarget(0,previewShot,game.depth??.5));ctx.strokeStyle='#39d9f5';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(target.x,target.y,13,6,0,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.moveTo(target.x-17,target.y);ctx.lineTo(target.x+17,target.y);ctx.moveTo(target.x,target.y-10);ctx.lineTo(target.x,target.y+10);ctx.stroke()}
 
  const ballSpeed=Math.hypot(game.ball.vx||0,game.ball.vy||0,game.ball.vz||0),contactPulse=game.contact?Math.max(0,1-game.contact.time/.12):0;
 
@@ -284,7 +289,7 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
  if(game.faultFocus&&game.clock>=game.faultFocus.time)drawFaultContact(ctx,game.faultFocus,project);
 
- if(game.contact&&game.contact.time>0){const c=project(game.contact.x,game.contact.y,game.contact.z),age=1-game.contact.time/.12;ctx.save();ctx.globalAlpha=Math.max(0,(1-age)*.5);ctx.strokeStyle='#fff4b8';ctx.lineWidth=1.5;ctx.beginPath();ctx.ellipse(c.x,c.y,4+age*5,2+age*2,0,0,Math.PI*2);ctx.stroke();ctx.restore()}
+ drawContactCue(ctx,game.contact,project,{labels:!!replayPlayback});
 
  updateCourtHud(game);
 
@@ -294,13 +299,14 @@ function render(game=liveGame){const camera=currentCamera(),sx=canvas.width/came
 
 const liveGame=game;
 
-let replayEnabled=true,replayPlayback=null,replayStarted=0;
+let replayEnabled=true,replayPlayback=null,replayStarted=0,replayAngle='overview';
+const drawSideReplay=createSideReplayRenderer(),replayClock=new ReplayClock();
 
 const automaticallyReplayedPoints=new WeakSet();
 
 const replayBar=document.createElement('div');replayBar.className='replay-banner';replayBar.hidden=true;
 
-const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button');skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,skipReplay);document.querySelector('.game').append(replayBar);
+const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button'),replayAngleButton=document.createElement('button');replayAngleButton.type='button';replayAngleButton.textContent='ANGLE: OVERVIEW';replayAngleButton.setAttribute('aria-label','Switch replay camera angle');replayAngleButton.onclick=()=>{replayAngle=replayAngle==='sideline'?'overview':'sideline';replayAngleButton.textContent='ANGLE: '+replayAngle.toUpperCase();replayAngleButton.setAttribute('aria-pressed',String(replayAngle==='sideline'))};skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,replayAngleButton,skipReplay);document.querySelector('.game').append(replayBar);
 
 const pointActions=document.querySelector('#point-actions'),pointReplayLabel=document.querySelector('#point-replay-label'),watchPointReplay=document.querySelector('#watch-point-replay');
 
@@ -312,11 +318,11 @@ function beginReplay(clip,startedAt=performance.now(),automatic=false){
 
  if(automatic&&game.pointReplay)automaticallyReplayedPoints.add(game.pointReplay);
 
- replayPlayback=clip;replayStarted=startedAt;replayLabel.textContent=`REPLAY · ${clip.label}`;replayBar.hidden=false;pointActions.hidden=true;return true;
+ replayAngle=replayAngleFor(clip,{aspect:canvas.width/canvas.height});replayAngleButton.textContent='ANGLE: '+replayAngle.toUpperCase();replayAngleButton.setAttribute('aria-pressed',String(replayAngle==='sideline'));replayPlayback=clip;replayStarted=startedAt;replayClock.start(startedAt);document.querySelector('.game').classList.add('replaying');syncPauseButton();replayLabel.textContent=`REPLAY · ${clip.label}`;replayBar.hidden=false;pointActions.hidden=true;return true;
 
 }
 
-function finishReplay(){replayPlayback=null;replayCamera=null;replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
+function finishReplay(){replayPlayback=null;replayCamera=null;document.querySelector('.game').classList.remove('replaying');syncPauseButton();replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
 
 function syncPointActions(){
 
@@ -340,25 +346,31 @@ function playReplay(t){
 
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
 
- const elapsed=(t-replayStarted)/1000,snapshot=faultReplaySample(replayPlayback,elapsed);
+ const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get('play')!=='1'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname));
+ const elapsed=replayProbe?Math.max(0,Number(balanceQuery.get('at'))||1.5):replayClock.elapsed(t),snapshot=faultReplaySample(replayPlayback,elapsed,true);
 
  if(!snapshot){finishReplay();return false;}
+ if(!replayProbe)replayLabel.textContent=`REPLAY · ${replayPlayback.label}${replayRateAt(replayPlayback,elapsed)<1?' · CLOSE CALL · SLOW-MO':''}`;
 
+ if(replayAngle==='sideline'){
+  replayCamera=null;const palette=COURT_PALETTES.find(item=>item.id===snapshot.players[0]?.appearance?.court)??COURT_PALETTES[0];
+  drawSideReplay(ctx,{width:canvas.width,height:canvas.height},snapshot,replayPlayback,{palette,style:artPreferences.style,look:artPreferences.look,outfit:artPreferences.outfit});updateCourtHud({...snapshot,score:{...snapshot.score,call:'REPLAY'}});last=t;acc=0;return true;
+ }
  replayCamera=highlightReplayCamera(displayCamera,replayPlayback,project,snapshot);
 
- render({...snapshot,score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
+ render({...snapshot,contact:replayContactAt(replayPlayback,snapshot.clock),score:{...snapshot.score,call:'REPLAY'},server:snapshot.players.find(p=>p.id===snapshot.serverId),canHumanHit:()=>false});last=t;acc=0;return true;
 
 }
 
-window.addEventListener('keydown',event=>{if(replayPlayback){event.preventDefault();event.stopImmediatePropagation();if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
+window.addEventListener('keydown',event=>{if(replayPlayback){if(event.key==='Tab'||(event.target===pauseButton||event.target.closest?.('.replay-banner button'))&&['Enter',' '].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(event.key==='p'||event.key==='P'){if(!event.repeat)setPaused(!replayClock.paused)}else if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
 
-let previousStatus='';function frame(t){if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+let previousStatus='';function frame(t){if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 
-const aimPad=document.querySelector('#aim-pad'),aimThumb=document.querySelector('#aim-pad .aim-pad-thumb');
+const aimPad=document.querySelector('#aim-pad'),aimTrack=aimPad.querySelector('.aim-pad-track'),aimThumb=aimPad.querySelector('.aim-pad-thumb'),depthLabel=document.querySelector('#depth-label');
 
-function syncAimPad(){const displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,percent=((displayAim-1)/18)*100;aimThumb.style.left=`${percent}%`;aimPad.setAttribute('aria-valuenow',String(Math.round(displayAim*10)/10))}
+function syncAimPad(){const displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,percent=((displayAim-1)/18)*100;const serving=game.phase==='serve',depth=serving?.5:game.depth,depthName=depth<.35?'SHORT':depth>.65?'DEEP':'NORMAL';aimThumb.style.left=`${percent}%`;aimThumb.style.top=`${(1-depth)*100}%`;aimPad.setAttribute('aria-valuenow',String(Math.round(displayAim*10)/10));aimPad.setAttribute('aria-valuetext',`Aim ${Math.round(displayAim)}, ${serving?'serve depth automatic':`${depthName.toLowerCase()} depth ${Math.round(depth*100)}%`}`);depthLabel.textContent=serving?'SERVE · AIM ONLY':`DEPTH ${depthName}`;aimPad.classList.toggle('serve-aim',serving)}
 
-function aimFromPad(event){const rect=aimPad.getBoundingClientRect();game.aim=Math.max(1,Math.min(19,1+(event.clientX-rect.left)/rect.width*18));syncAimPad()}
+function aimFromPad(event){const target=padControl(event.clientX,event.clientY,aimTrack.getBoundingClientRect());game.aim=target.aim;if(game.phase!=='serve')game.setDepth(target.depth);syncAimPad()}
 
 syncAimPad();
 
@@ -366,17 +378,17 @@ aimPad.addEventListener('pointerdown',event=>{if(game.paused)return;aimFromPad(e
 
 aimPad.addEventListener('pointermove',event=>{if(!game.paused&&aimPad.hasPointerCapture(event.pointerId))aimFromPad(event)});
 
-aimPad.addEventListener('keydown',event=>{if(event.key!=='ArrowLeft'&&event.key!=='ArrowRight')return;event.preventDefault();game.nudgeAim(event.key==='ArrowLeft'?-1:1,event.shiftKey);syncAimPad()});
+// Keyboard aim/depth is handled once by the shared window listener, including pad focus.
 
 const attackButton=document.querySelector('[data-shot="attack"]'),softButton=document.querySelector('[data-shot="soft"]'),lobButton=document.querySelector('[data-shot="lob"]');let previousHumanServe=null,previousPaused=null;
 
-function syncShotButtonsForPhase(){const humanServe=game.mode==='play'&&game.phase==='serve'&&game.server.id===0,paused=game.paused;if(humanServe===previousHumanServe&&paused===previousPaused)return;previousHumanServe=humanServe;previousPaused=paused;attackButton.querySelector('small').textContent=humanServe?'HARD SERVE':'DRIVE · HIGH';softButton.querySelector('small').textContent=humanServe?'SOFT SERVE':'DROP / DINK';lobButton.querySelector('small').textContent=humanServe?'NOT ON SERVE':'ANYWHERE';attackButton.disabled=paused;softButton.disabled=paused;lobButton.disabled=humanServe||paused}
+function syncShotButtonsForPhase(){syncAimPad();const humanServe=game.mode==='play'&&game.phase==='serve'&&game.server.id===0,paused=game.paused;if(humanServe===previousHumanServe&&paused===previousPaused)return;previousHumanServe=humanServe;previousPaused=paused;attackButton.querySelector('small').textContent=humanServe?'HARD SERVE':'DRIVE · HIGH';softButton.querySelector('small').textContent=humanServe?'SOFT SERVE':'DROP / DINK';lobButton.querySelector('small').textContent=humanServe?'NOT ON SERVE':'ANYWHERE';attackButton.disabled=paused;softButton.disabled=paused;lobButton.disabled=humanServe||paused}
 
-function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen())return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
+function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{if(selectionUI?.isOpen()||replayPlayback)return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
-selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,getPhysique:()=>({height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Number(artPreferences.build||document.querySelector('#game-art-build')?.value||45)*.0105}),onStart:()=>{refreshVenue();if(balanceLevel){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot('attack');document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
+selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,getPhysique:()=>({height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Number(artPreferences.build||document.querySelector('#game-art-build')?.value||45)*.0105}),onStart:()=>{refreshVenue();if(balanceLevel&&!game.practice){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=game.practice?game.practice.drill.instruction:`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot(game.practice&&game.practice.id!=='return'?'soft':'attack');document.querySelector('#mode').textContent='MODE: '+(game.practice?'PRACTICE':game.mode.toUpperCase());syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
 
 const scenarioParams=new URLSearchParams(location.search),scenarioType=scenarioParams.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(scenarioParams.get('speed'))||.65));
 
@@ -406,15 +418,23 @@ if(animationTestMode){
 
 const resultDialog=document.querySelector('#match-result');
 
-function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){document.querySelector('#match-winner').textContent=game.score.winner===0?'Your team wins!':'Opponents win!';document.querySelector('#match-score').textContent=`Your team ${game.score.points[0]} – ${game.score.points[1]} Opponents`;resultDialog.showModal()}}
+function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){
+ const practice=game.practice;resultDialog.querySelector('h2').textContent=practice?'Practice complete':'Match ended';document.querySelector('#rematch').textContent=practice?'REPEAT DRILL':'REMATCH';
+ document.querySelector('#match-winner').textContent=practice?practice.drill.name:game.score.winner===0?'Your team wins!':'Opponents win!';
+ document.querySelector('#match-score').textContent=practice?`${practice.successes} of ${practice.total} targets hit`:`Your team ${game.score.points[0]} – ${game.score.points[1]} Opponents`;
+ const contacts=game.stats.teams.reduce((n,t)=>n+t.hits,0),mishits=game.stats.teams.reduce((n,t)=>n+t.mishits,0);
+ document.querySelector('#match-analysis').textContent=practice?`${practice.results.filter(r=>r.shot).length} returns made · Repeat uses the same feed sequence. The report lists every attempt.`:`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Longest rally ${Math.max(0,...game.journal.rallies.map(r=>r.shots??0))} shots`;
+ resultDialog.showModal();}}
+function downloadReport(){const blob=new Blob([JSON.stringify(game.matchReport(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`drives-dinks-${game.practice?.id??game.format}-report.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+const reportButton=document.createElement('button');reportButton.id='export-report';reportButton.textContent='DOWNLOAD REPORT';reportButton.onclick=downloadReport;document.querySelector('.header-actions').append(reportButton);document.querySelector('#download-report').onclick=downloadReport;
 
 resultDialog.addEventListener('cancel',e=>e.preventDefault());
 
-document.querySelector('#rematch').onclick=()=>{resultDialog.close();game.reset();last=0;acc=0;setShot('attack');syncPauseButton()};
+document.querySelector('#rematch').onclick=()=>{resultDialog.close();if(game.practice){const {id,seed}=game.practice;game.startPractice(id,seed)}else game.reset();last=0;acc=0;setShot(game.practice&&game.practice.id!=='return'?'soft':'attack');syncPauseButton()};
 
 document.querySelector('#return-selection').onclick=()=>{resultDialog.close();selectionUI.open()};
 
-const lesson=document.createElement("p");lesson.className="control-lesson";lesson.textContent="Movement is automatic | Aim with mouse or arrow keys | 1 Attack, 2 Soft, 3 Lob select AND hit | Space repeats shot | White ring = hit now";canvas.insertAdjacentElement("afterend",lesson);
+const lesson=document.createElement("p");lesson.className="control-lesson";lesson.textContent="Movement is automatic | ← → aim · ↑ ↓ depth · Shift fine control | 1 Attack, 2 Soft, 3 Lob select AND hit | Space repeats shot | White ring = hit now";canvas.insertAdjacentElement("afterend",lesson);
 
 // Deterministic DEV visual regression: a grounded shoe enters the kitchen after a volley.
 
@@ -432,6 +452,13 @@ if(detailedArtAvailable&&balanceQuery.get('test')==='kitchen-fault'){
 
 }
 
+// A frozen, genuinely simulated replay for checking the new camera and artwork.
+if(balanceQuery.get('test')==='sideline-replay'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))){
+ document.querySelector('#match-setup').close();game.random=seededRandom(37);game.configure({format:'singles'});game.mode='watch';
+ for(let tick=0;tick<120*180;tick++){game.update(1/120);if(game.phase==='pause'&&game.pointReplay?.frames.length>15&&game.pointReplay.focus?.boundary===undefined)break;if(game.phase==='over')break}
+ game.setPaused(true);if(game.pointReplay){beginReplay(game.pointReplay,performance.now(),true);if(balanceQuery.get('play')!=='1')replayLabel.textContent='REPLAY INSPECTOR · FROZEN FRAME'}
+}
+
 // Suppress game-surface browser gestures; dialogs retain normal scrolling.
 
 canvas.addEventListener('wheel',e=>e.preventDefault(),{passive:false});
@@ -442,6 +469,6 @@ window.addEventListener('keydown',e=>{if(!document.querySelector('dialog[open]')
 
 // Keep persistent play controls together, followed by setup, gameplay and presentation settings.
 const settingsActions=document.querySelector('.header-actions');
-for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','sound']){
+for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','export-report','sound']){
  const control=document.getElementById(id);if(control)settingsActions.append(control);
 }

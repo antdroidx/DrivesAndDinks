@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=143';
-import {strokeForContact} from './player-facing.js?v=143';
+import {kitchenContact} from './player-feet.js?v=144';
+import {strokeForContact} from './player-facing.js?v=144';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -18,6 +18,12 @@ export function serveTarget(player,aim,type='hard',random=Math.random()){
  return serveAim(player,(Number(aim)||10)+(random-.5)*spread)
 }
 export function aimStep(player,fine=false){const placement=(player.abilities?.control??1)*(player.paddle?.control??1);return Math.max(1.5,Math.min(3.5,2.5/placement))*(fine?.25:1)}
+export function shotDepthTarget(team,shot,depth=.5){
+ const ranges={drive:[9,4,1.5],slice:[10,6,2.5],drop:[16,12,10],dink:[17,14,12],lob:[5,2.8,1.5],tweener:[5,2.8,1.5],overhead:[13,7.5,3]};
+ const [short,normal,deep]=ranges[shot]??ranges.drive,value=Math.max(0,Math.min(1,Number.isFinite(depth)?depth:.5));
+ const y=value<=.5?short+(normal-short)*value*2:normal+(deep-normal)*(value-.5)*2;
+ return team===0?y:44-y;
+}
 export function contactAvailable(p,b){const reach=p.abilities?.reach??1;return ((p.x-b.x)/(1.6*reach))**2+((p.y-b.y)/(1.9*reach))**2<=1&&b.z>=0&&b.z<=3.5}
 export function backhandGrip(p,b,shot='drive'){
  if(strokeForContact(p,b)!=='backhand'||['overhead','serve','lob'].includes(shot))return 'none';
@@ -36,6 +42,15 @@ export function shotSkill(player,shot='drive'){
  if(shot==='erne')return ((abilities.volley??1)+(abilities.courtIQ??1))/2;
  if(shot==='slice')return ((abilities.drive??1)+(abilities.control??1))/2;
  return abilities[shot]??abilities.drive??1;
+}
+// An arcade stroke model: technique and paddle speed can compensate for strength.
+// These are normalized gameplay factors, not a measured biomechanical solver.
+export function strokePower(player,shot='drive',quality=1,difficulty=0){
+ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const strength=clamp(player.abilities?.power??1,.55,1.6),technique=clamp(shotSkill(player,shot),.72,1.28),handSpeed=clamp(paddleShapeModifiers(player).handSpeed,.8,1.2);
+ const fatigue=1-clamp(player.stamina??1,0,1),fluidity=clamp(1-.09*clamp(difficulty,0,1)-.06*fatigue-.12*(1-clamp(quality,.45,1)),.78,1);
+ const swingSpeed=clamp(technique*(1+.35*(handSpeed-1))*fluidity,.6,1.5),power=clamp(.4*strength+.6*swingSpeed*swingSpeed,.6,1.8);
+ return {strength,technique,handSpeed,fluidity,swingSpeed,power};
 }
 export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocity={x:0,y:0,z:0},normal={x:0,y:-1,z:0},center,power=1,control=1,spin=1,quality=1,swingDirection=1,sweetSpotScale=1}){
  const dx=(ball.x??0)-(center?.x??0),dy=(ball.y??0)-(center?.y??0),dz=((ball.z??0)-(center?.z??0))*.55,offset=Math.hypot(dx,dy,dz),sweetSpot=Math.exp(-((offset/(.72*Math.max(.55,sweetSpotScale)))**2));
@@ -57,22 +72,26 @@ export function scorpionOpportunity(p,b){
 export function bodyContactDifficulty(p,b,shot){
  if(!p.physique)return 0;
  const stature=(p.physique.height-177)/33,low=Math.max(0,Math.min(1,(1.8-(b.z??1))/1.8));
+ const motion=Math.min(1,Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed)),fatigue=1-Math.max(0,Math.min(1,p.stamina??1));
+ const rushed=.35+.65*Math.min(1,motion+fatigue*.5);
  // Getting low is harder for taller bodies; a reflex behind-shoulder block still carries risk.
- return stature*.12*low+(shot==='overhead'&&scorpionOpportunity(p,b)?.09+stature*.04:0);
+ return stature*.12*low*rushed+(shot==='overhead'&&scorpionOpportunity(p,b)?.09+stature*.04:0);
 }
 export function paddleContactTarget(p,b,shot='drive'){
- const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,side=b.x>=p.x?1:-1,netward=p.team===0?-.46:.46;
+ const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,side=b.x>=p.x?1:-1,netward=(p.team===0?-.46:.46)*reach;
  if(shot==='tweener')return {x:p.x,y:p.y-netward*1.4,z:Math.max(.4,Math.min(1.8,b.z??1))};
  if(shot==='overhead')return {x:p.x+side*.42*reach,y:p.y+(scorpionOpportunity(p,b)?-netward*.65:netward*.55),z:Math.max((scorpionOpportunity(p,b)?4.4:5.2)*(p.physique?.heightScale??1),Math.min(7*(p.physique?.heightScale??1),b.z??5.8))};
  return {x:p.x+side*(.62+.2*reach),y:p.y+netward,z:Math.max(.35,Math.min(4.5*(p.physique?.heightScale??1),b.z??1.2))};
 }
-export function paddleContactAvailable(p,b,shot='drive'){
+export function paddleContactDistance(p,b,shot='drive'){
  const target=paddleContactTarget(p,b,shot),shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*gripModifiers(p,b,shot).reach*shape.reach;
- return b.z>=0&&b.z<=(shot==='overhead'?7.4:5.2)*(p.physique?.heightScale??1)&&((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2<=1;
+ return Math.sqrt(((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/(.9*reach))**2+((b.z-target.z)/1.1)**2);
+}
+export function paddleContactAvailable(p,b,shot='drive'){
+ return b.z>=0&&b.z<=(shot==='overhead'?7.4:5.2)*(p.physique?.heightScale??1)&&paddleContactDistance(p,b,shot)<=1;
 }
 export function contactQuality(p,b,shot,buffered=false,random=Math.random(),difficulty='normal'){
- const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach
- const paddle=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-paddle.x)/(.95*reach))**2+((b.y-paddle.y)/.9)**2+((b.z-paddle.z)/1.1)**2)
+ const shape=paddleShapeModifiers(p),radial=paddleContactDistance(p,b,shot)
  const motion=Math.hypot(p.vx??0,p.vy??0)/(p.abilities?.speed??C.speed),fatigue=1-Math.max(0,Math.min(1,p.stamina??1))
  const shotDifficulty={tweener:1.8,serve:.78,drive:1.08,drop:.92,dink:.68,lob:.94,slice:1.08}[shot] ?? .95
  const easy=difficulty==='easy',highContact=(shot==='overhead'?7:4.5)*(p.physique?.heightScale??1)
@@ -86,10 +105,12 @@ export function contactQuality(p,b,shot,buffered=false,random=Math.random(),diff
  chance*=specialReturn;chance/=Math.max(.55,control**2.2*technique*(shot==='dink'||shot==='drop'?defense:1))
  chance=Math.min(easy?.3:.42,Math.max(0,chance))
  const mishit=random<chance;
- return {chance,mishit,quality:mishit?Math.max(easy?.65:.45,.74-chance*.55):1-Math.min(.12,chance*.2)}
+ const pressures=[['REACHING',.064*radial**2+.035*radial**4],['ON THE MOVE',.034*motion**2],['FATIGUED',fatigue*.07],['LOW CONTACT',.029*Math.max(0,.9-(b.z??1))/.9],['HIGH CONTACT',.022*Math.max(0,(b.z??1)-highContact)/.7],['UNDER PACE',Math.hypot(b.vx??0,b.vy??0)>40?.035:0]];
+ const dominant=pressures.reduce((a,b)=>b[1]>a[1]?b:a);
+ return {chance,mishit,reason:dominant[1]>.018?dominant[0]:'CONTACT ERROR',quality:mishit?Math.max(easy?.65:.45,.74-chance*.55):1-Math.min(.12,chance*.2)}
 }
 export function contactDifficulty(p,b,shot='drive'){
- const shape=paddleShapeModifiers(p),reach=(p.abilities?.reach??1)*shape.reach,target=paddleContactTarget(p,b,shot),radial=Math.sqrt(((b.x-target.x)/(.95*reach))**2+((b.y-target.y)/.9)**2+((b.z-target.z)/1.1)**2),motion=Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed),height=shot==='overhead'?Math.abs((b.z??1)-6*(p.physique?.heightScale??1)):Math.max(0,Math.abs((b.z??1)-1.6)-1.1)/2.4,special=b.shot==='atp'||b.shot==='erne'?.18:0;
+ const radial=paddleContactDistance(p,b,shot),motion=Math.hypot(p.vx??0,p.vy??0)/Math.max(1,p.abilities?.speed??C.speed),height=shot==='overhead'?Math.abs((b.z??1)-6*(p.physique?.heightScale??1)):Math.max(0,Math.abs((b.z??1)-1.6)-1.1)/2.4,special=b.shot==='atp'||b.shot==='erne'?.18:0;
  return Math.max(0,Math.min(1,radial*.5+motion*.32+height*.18+special+bodyContactDifficulty(p,b,shot)));
 }
 export function netCrossingX(start,target){
@@ -144,14 +165,14 @@ export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1){
 export function inBounds(x,y){return x>=0&&x<=20&&y>=0&&y<=44}
 export function legalVolley(team,y,bounces,shotCount){if(shotCount<=2&&bounces===0)return 'Two-bounce fault';if(bounces===0&&(team===0?y<=29:y>=15))return 'Kitchen volley fault';return null}
 export class Score {
- constructor(){this.points=[0,0];this.team=0;this.server=2;this.first=true;this.rightPlayer=[1,0];this.serverPlayer=1;this.winner=null}
- point(winner){if(winner===this.team){this.points[winner]++;this.rightPlayer[winner]=1-this.rightPlayer[winner];if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else if(this.first||this.server===2){this.team=1-this.team;this.server=1;this.first=false;this.serverPlayer=this.rightPlayer[this.team]}else{this.server=2;this.serverPlayer=1-this.serverPlayer}}
+ constructor(format='doubles'){this.format=format;this.points=[0,0];this.team=0;this.server=2;this.first=true;this.rightPlayer=[1,0];this.serverPlayer=1;this.winner=null}
+ point(winner){if(this.format==='singles'){if(winner===this.team){this.points[winner]++;if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else this.team=winner;return}if(winner===this.team){this.points[winner]++;this.rightPlayer[winner]=1-this.rightPlayer[winner];if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else if(this.first||this.server===2){this.team=1-this.team;this.server=1;this.first=false;this.serverPlayer=this.rightPlayer[this.team]}else{this.server=2;this.serverPlayer=1-this.serverPlayer}}
  get player(){return this.serverPlayer}
- get call(){return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
+ get call(){if(this.format==='singles')return `${this.points[this.team]} - ${this.points[1-this.team]}`;return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
-export function move(p,tx,ty,dt){
+export function move(p,tx,ty,dt,brake=false){
  p.stamina=Math.max(0,Math.min(1,p.stamina??1));const staminaScale=.82+.18*p.stamina,dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=(p.abilities?.speed??C.speed)*staminaScale,acceleration=(p.abilities?.acceleration??C.accel)*(.78+.22*p.stamina),contactLock=p.swing>(p.swingDuration||.36)*.82,recovering=(p.recoveryTimer||0)>0,settling=(p.splitStepTimer||0)>0;
- const desiredSpeed=recovering||d<.03?0:Math.min(maxSpeed*(contactLock?.72:1),Math.sqrt(Math.max(0,2*acceleration*d)));
+ const desiredSpeed=brake||recovering||d<.03?0:Math.min(maxSpeed*(contactLock?.72:1),Math.sqrt(Math.max(0,2*acceleration*d)));
  const desiredVx=d?dx/d*desiredSpeed:0,desiredVy=d?dy/d*desiredSpeed:0,reversing=p.vx*desiredVx+p.vy*desiredVy<0;
  const turnFactor=(reversing?.62:1)*(0.85+Math.min(.25,Math.max(0,(acceleration-C.accel)/120))),maxDelta=acceleration*1.5*turnFactor*dt;
  let dvx=desiredVx-p.vx,dvy=desiredVy-p.vy,dv=Math.hypot(dvx,dvy);if(dv>maxDelta&&dv){dvx*=maxDelta/dv;dvy*=maxDelta/dv}
@@ -175,7 +196,7 @@ export function receiver(players,team,x,y){return players.filter(p=>p.team===tea
 
 
 // Tactical approximation: deep returns, third-shot transition, and kitchen exchanges.
-export function selectShot(p,b,desired,random=Math.random()){
+export function selectShot(p,b,desired){
  const nearSideline=p.x<=1.25||p.x>=18.75
  const wideBall=b.x<=.75||b.x>=19.25
  const kitchenSide=p.team===0?p.y<=31:p.y>=13
@@ -188,15 +209,41 @@ export function selectShot(p,b,desired,random=Math.random()){
  }
  return desired
 }
-export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, random=Math.random()}){
+export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, partnerReady=true, balanced=true, opponentsDeep=false, transition=false, random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;
  const bias=Math.max(0,Math.min(1,Number(aggression)||.5));
  const relativeSkill=Math.max(-.12,Math.min(.12,(Number(attackSkill||1)-Number(softSkill||1))*.32-Math.max(0,Math.min(1,Number(difficulty)||0))*.3));
- const attackBias=(bias-.5)*.24+(.95-Math.max(.7,Number(courtIQ)||1))*.14+relativeSkill;
+ const styleBias=({banger:.1,soft:-.1,speed:-.04,net:nearKitchen?.07:-.03})[tendency]??0;
+ const attackBias=(bias-.5)*.24+(.95-Math.max(.7,Number(courtIQ)||1))*.14+relativeSkill+styleBias+(.7-Math.max(0,Math.min(1,patience)))*.12;
  if(shots===1)return 'drive';
+ // shots counts completed hits: 2 is the third shot, 4 the fifth.
+ // Later transition resets are opt-in so ordinary rallies keep their choices.
+ if(!singles&&(shots===2||(transition&&shots>=4))){
+  const pressure=Math.max(0,Math.min(1,Number(difficulty)||0));
+  const iq=Math.max(.7,Math.min(1.4,Number(courtIQ)||1));
+  const attack=Math.max(.4,Math.min(1.6,Number(attackSkill)||1));
+  const soft=Math.max(.4,Math.min(1.6,Number(softSkill)||1));
+  const reset=shots===2||!nearKitchen?'drop':'dink';
+  // Readiness is a feasibility gate, not a preference that aggression can override.
+  if(!balanced||pressure>.78||(!partnerReady&&shots>=4))return reset;
+  if(shots>=4&&opponentsAtKitchen&&(height<3.2||pressure>.55))return reset;
+  if(shots>=4&&height>=5.2&&height<=7.4)return 'drive';
+  const deep=opponentsDeep&&!opponentsAtKitchen;
+  const driveFloor=(deep?1.4:2.6)+Math.max(0,1-attack)*.5;
+  const driveFeasible=height>=driveFloor&&pressure<.72&&attack>=.65;
+  if(!driveFeasible)return reset;
+  // A deep pair leaves a useful drive; a set kitchen rewards a feasible drop.
+  const dropFeasible=soft>=.7&&pressure<.65;
+  const driveChance=Math.max(.05,Math.min(.9,.35+attackBias+
+   (deep?.22:opponentsAtKitchen?-.14:.05)+
+   Math.max(-.1,Math.min(.16,(height-3.3)*.1))+
+   (attack-soft)*.12-(iq-1)*(opponentsAtKitchen?.25:.1)+
+   (!partnerReady?-.2:0)+(dropFeasible?0:.16)-pressure*.18));
+  return random<driveChance?'drive':reset;
+ }
  if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
  if(difficulty>.82&&height<3.2)return 'lob';
- if(shots===2)return height>3.3&&random<Math.max(.12,Math.min(.62,.35+attackBias))?'drive':'drop';
+ if(shots===2)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';
  if(nearKitchen){if(opponentsAtKitchen&&height<2&&random>.97)return 'lob';if(difficulty>.9&&height<2.7)return 'dink';return height>3.1||(height>.8&&random<Math.max(.12,Math.min(.48,.24+attackBias)))?'drive':'dink'}
  return height>3.2&&random<Math.max(.2,Math.min(.72,.45+attackBias))?'drive':'drop';
 }
