@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=144';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=144';
-import {thighGarment} from './character-concepts.js?v=144';
+import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=145';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=145';
+import {thighGarment} from './character-concepts.js?v=145';
 
 function polygon(c,points,color,ink='#4c453d'){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=.35;c.stroke()}
@@ -22,20 +22,25 @@ export function profilePose(design,mode,phase,options={}){
  return {raw,direction,neck:project(raw.rig.neck),hips:project(raw.rig.hips),arms,legs,paddle:project(raw.rig.paddle),hand:project(raw.rig.hand)};
 }
 
-function profileHead(c,d,neck,direction,emotion,sweat,clock){
+function profileHead(c,d,neck,direction,rawEmotion,sweat,clock){
+ const emotion=({smile:'happy',reaction:'surprise',neutral:'focus'})[rawEmotion]??rawEmotion??'focus';
  const y=neck.y-6,skin=skinPalette(d.skin),hair=d.hairColor,ink='#4c453d';
  c.save();c.translate(neck.x,y);c.scale(direction,1);
  if(['ponytail','braid','twinTails'].includes(d.hair)){
   const sway=Math.sin(clock*3)*.7;polygon(c,[{x:-4,y:-4},{x:-10,y:-5},{x:-12-sway,y:5},{x:-8,y:10},{x:-7,y:0}],hair);oval(c,-5,-3,1,1,d.trim);
  }
- // Authored half-profile: forehead, nose, lips, chin and one readable eye.
  polygon(c,[{x:-4.5,y:-4},{x:-1,y:-6.5},{x:2.8,y:-5.2},{x:3.7,y:-1.1},{x:5.5,y:.8},{x:3.7,y:1.4},{x:3.4,y:3.8},{x:1.1,y:5.8},{x:-2.8,y:4.7},{x:-4.6,y:1.7}],d.skin);
  polygon(c,[{x:-3.8,y:-3},{x:-2.6,y:2.8},{x:1,y:5.5},{x:-2.5,y:4.5},{x:-4.2,y:1.3}],skin.shadow,null);
- const eyeY=emotion==='reaction'?-.2:.1;
- oval(c,2,eyeY,.85,emotion==='smile'?.35:.8,'#fff3df');oval(c,2.25,eyeY,.36,.54,tone(hair,.14));
- line(c,[{x:.9,y:-1.5},{x:2.8,y:emotion==='effort'?-1:-1.7}],ink,.35);
- if(emotion==='reaction')oval(c,3.1,3.2,.45,.65,skin.deep);
- else line(c,[{x:2.2,y:3.6},{x:3.4,y:emotion==='smile'?3.15:3.5}],skin.deep,.3);
+ const eyeY=emotion==='surprise'?-.25:emotion==='fatigue'?.28:.1;
+ const eyeHeight=emotion==='surprise'?1.05:emotion==='happy'?.35:emotion==='fatigue'?.48:emotion==='aggression'?.65:.8;
+ oval(c,2,eyeY,.85,eyeHeight,'#fff3df');oval(c,2.25,eyeY,.36,emotion==='surprise'?.42:.54,tone(hair,.14));
+ const browEnd=emotion==='aggression'?-1:emotion==='fatigue'?-.65:emotion==='surprise'?-2.1:-1.7;
+ line(c,[{x:.9,y:emotion==='fatigue'?-1.3:-1.5},{x:2.8,y:browEnd}],ink,.35);
+ if(emotion==='surprise')oval(c,3.1,3.2,.52,.8,skin.deep);
+ else if(emotion==='happy')line(c,[{x:2.1,y:3.8},{x:3.35,y:3.15}],skin.deep,.38);
+ else if(emotion==='aggression'){line(c,[{x:2,y:3.55},{x:3.55,y:3.45}],skin.deep,.35);for(const dx of [2.25,2.7,3.15])line(c,[{x:dx,y:3.35},{x:dx,y:3.8}], '#fff3df',.14)}
+ else if(emotion==='fatigue')oval(c,2.8,3.55,.42,.58,skin.deep);
+ else line(c,[{x:2.2,y:3.6},{x:3.4,y:3.5}],skin.deep,.3);
  oval(c,-1.4,.9,.9,1.25,d.skin);line(c,[{x:-1.6,y:.3},{x:-.9,y:1.1}],skin.shadow,.3);
  if(d.hair!=='bald'){
   const buzz=d.hair==='buzz',spiky=['spiky','pixie'].includes(d.hair);
@@ -50,10 +55,19 @@ function profileHead(c,d,neck,direction,emotion,sweat,clock){
  else if(d.headwear==='visor')polygon(c,[{x:-4.8,y:-4},{x:3.9,y:-4},{x:7.5,y:-2.7},{x:2.4,y:-2.5},{x:-4.5,y:-2.7}],d.trim);
  else if(d.headwear==='headband')line(c,[{x:-5,y:-3.4},{x:3.2,y:-4}],d.trim,1.1);
  if(d.eyewear==='glasses'){c.strokeStyle=ink;c.lineWidth=.45;c.beginPath();c.ellipse(2,.2,1.5,1.5,0,0,Math.PI*2);c.stroke();line(c,[{x:-2.7,y:-.1},{x:.8,y:.1}],ink,.45)}
- if(sweat>.14&&Math.sin(clock*3)>.2)oval(c,-3.2,2+(clock*2%1)*2,.3,.65,'#b5e6ef');
- c.restore();
+ const sweatLevel=Math.max(0,Math.min(1,sweat));
+ if(sweatLevel>.1){
+  oval(c,-2.4,-5.2,1.1,.25,'#d8f3f4aa');
+  const drops=sweatLevel>.68?3:sweatLevel>.34?2:1;
+  for(let i=0;i<drops;i++){const drop=((clock||0)*(.7+i*.14)+i*.31)%1;oval(c,-3.2+i*3.2,2+drop*3,.32,.58+drop*.18,'#b5e6ef')}
+ }
+ c.globalAlpha=.72;
+ if(emotion==='surprise'){line(c,[{x:-7,y:-5},{x:-9,y:-7}], '#f6cc59',.35);line(c,[{x:0,y:-8},{x:0,y:-10.5}], '#f6cc59',.35);line(c,[{x:7,y:-5},{x:9,y:-7}], '#f6cc59',.35)}
+ if(emotion==='aggression'){line(c,[{x:-7,y:-3},{x:-4.5,y:-4}], '#ef8a4b',.4);line(c,[{x:4.5,y:-4},{x:7,y:-3}], '#ef8a4b',.4)}
+ if(emotion==='happy'){line(c,[{x:-7,y:-4},{x:-5.5,y:-5.5}], '#f6cc59',.34);line(c,[{x:5.5,y:-5.5},{x:7,y:-4}], '#f6cc59',.34)}
+ if(emotion==='fatigue'){c.strokeStyle='#b5e6ef';c.lineWidth=.28;c.beginPath();c.arc(5.5,3.5,1.3,-.8,.8);c.stroke()}
+ c.globalAlpha=1;c.restore();
 }
-
 export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  const p=profilePose(d,mode,phase,options),body=animeBodyDimensions(d),skin=skinPalette(d.skin),ink='#4c453d',n=p.neck,h=p.hips,dir=p.direction;
  c.save();c.translate(cx-24*scale,baseline-63*scale);c.scale(scale,scale);

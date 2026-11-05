@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=144';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=144';
-import {legDimensions,plantFeet} from './detailed-character.js?v=144';
+import {sampleCharacterPose} from './pixel-character.js?v=145';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=145';
+import {legDimensions,plantFeet} from './detailed-character.js?v=145';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -51,15 +51,28 @@ function hairTail(c,d,x,y,phase,near,ink){
   for(const sign of [-1,1]){c.beginPath();c.moveTo(x+sign*4,y-4);c.quadraticCurveTo(x+sign*8,y-1,x+sign*(d.hair==='waves'?7.8:6.3),y+7);c.lineTo(x+sign*3.8,y+5.8);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke()}
  }
 }
+function normalizeEmotion(emotion){return ({smile:'happy',reaction:'surprise',neutral:'focus'})[emotion]??emotion??'focus'}
 function expressionShape(emotion){
- const focused=emotion==='focus'||emotion==='effort',effort=emotion==='effort',reaction=emotion==='reaction',smile=emotion==='smile';
+ emotion=normalizeEmotion(emotion);
  const eye={width:.8,height:1.06,pupil:.55,brow:.15,low:.06};
- if(focused){eye.width=effort?.7:.85;eye.height=effort?1.2:1.06}
- if(reaction){eye.width=1.04;eye.height=1.34;eye.low=-.18}
- if(smile){eye.width=.76;eye.height=.72;eye.low=.16}
+ if(emotion==='focus'){eye.width=.85}
+ if(emotion==='effort'){eye.width=.7;eye.height=1.2}
+ if(emotion==='fatigue'){eye.width=.78;eye.height=.62;eye.pupil=.48;eye.low=.24}
+ if(emotion==='surprise'){eye.width=1.04;eye.height=1.48;eye.pupil=.4;eye.low=-.18}
+ if(emotion==='aggression'){eye.width=.62;eye.height=.88;eye.pupil=.44;eye.low=.02}
+ if(emotion==='happy'){eye.width=.76;eye.height=.72;eye.low=.16}
  return eye;
 }
-function animeHead(c,d,n,near,warm,phase,ink,emotion){
+function emotionMarks(c,emotion,intensity,head){
+ const alpha=Math.max(.35,Math.min(.9,intensity));c.save();c.globalAlpha=alpha;
+ if(emotion==='surprise'){for(const [x1,y1,x2,y2] of [[-7,-5,-9,-7],[0,-8,0,-10.5],[7,-5,9,-7]])line(c,[point(head.x+x1,head.y+y1),point(head.x+x2,head.y+y2)],'#f6cc59',.38)}
+ if(emotion==='aggression'){line(c,[point(head.x-7,head.y-3),point(head.x-4.5,head.y-4)],'#ef8a4b',.42);line(c,[point(head.x+4.5,head.y-4),point(head.x+7,head.y-3)],'#ef8a4b',.42)}
+ if(emotion==='happy'){line(c,[point(head.x-7,head.y-4),point(head.x-5.5,head.y-5.5)],'#f6cc59',.35);line(c,[point(head.x+5.5,head.y-5.5),point(head.x+7,head.y-4)],'#f6cc59',.35)}
+ if(emotion==='fatigue'){c.strokeStyle='#b5e6ef';c.lineWidth=.28;c.beginPath();c.arc(head.x+5.5,head.y+3.5,1.3,-.8,.8);c.stroke()}
+ c.restore();
+}
+function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
+ const emotion=normalizeEmotion(rawEmotion);
  const {x,y}=animeHeadCenter(n),skin=d.skin,hair=d.hairColor,colors=skinPalette(skin);
  // Tapered jaw, small ears and a tiny implied nose replace the round toy face.
  c.beginPath();c.moveTo(x-4.9,y-3.6);c.quadraticCurveTo(x-6,y+1,x-3.5,y+4.4);c.quadraticCurveTo(x-1,y+6,x,y+6.1);c.quadraticCurveTo(x+2.3,y+5.3,x+4.1,y+3.5);c.quadraticCurveTo(x+5.6,y,x+4.8,y-3.8);c.quadraticCurveTo(x+3.3,y-6.8,x,y-6.6);c.quadraticCurveTo(x-3.7,y-6.8,x-4.9,y-3.6);c.closePath();c.fillStyle=skin;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke();
@@ -68,17 +81,19 @@ function animeHead(c,d,n,near,warm,phase,ink,emotion){
   path(c,[point(x-4.2,y-2.8),point(x+4.3,y-2.8),point(x+3.9,y-1.2),point(x+.6,y-1.8),point(x-2.6,y-1.1)],colors.shadow,null);
   path(c,[point(x-3.7,y+.8),point(x-2.8,y+2.8),point(x-1.5,y+3.8),point(x-2.6,y+2.7)],colors.light,null);
   path(c,[point(x+3.9,y-.2),point(x+4,y+2.5),point(x+1.4,y+5),point(x+.5,y+5.3),point(x+2.6,y+2)],colors.shadow,null);
-   const shape=expressionShape(near?'focus':emotion);
+   const shape=expressionShape(emotion);
    for(const sign of [-1,1]){const ex=x+sign*2.1,ey=y+.4+(shape.low*.35),eyeWidth=shape.width,eyeHeight=shape.height;
-   oval(c,ex,ey,eyeWidth,eyeHeight,'#fff3df');oval(c,ex+sign*.08,ey+.14,.52,shape.pupil,warm?'#6b5340':tone(hair,.22));oval(c,ex+sign*.08,ey+.26,.28,.6,tone(ink,.24));oval(c,ex-.18,ey-.27,.2,.26,'#fffdf2');
-   const browY=ey-.62+(emotion==='effort'?.2:emotion==='reaction'?.12:emotion==='smile'?.1:0);
-    c.beginPath();c.moveTo(ex-eyeWidth,browY);c.quadraticCurveTo(ex+sign*.3,browY-(emotion==='effort'?.36:emotion==='reaction'?.1:.22),ex+eyeWidth,browY+(emotion==='effort'?.22:0));c.strokeStyle=tone(ink,.16);c.lineWidth=.26;c.stroke();
+    oval(c,ex,ey,eyeWidth,eyeHeight,'#fff3df');oval(c,ex+sign*.08,ey+.14,.52,shape.pupil,warm?'#6b5340':tone(hair,.22));oval(c,ex+sign*.08,ey+.26,.28,.6,tone(ink,.24));oval(c,ex-.18,ey-.27,.2,.26,'#fffdf2');
+    const browY=ey-.62+(emotion==='effort'?.2:emotion==='surprise'?.12:emotion==='happy'?.1:emotion==='fatigue'?.34:emotion==='aggression'?.18:0);
+    c.beginPath();c.moveTo(ex-eyeWidth,browY);c.quadraticCurveTo(ex+sign*.3,browY-(emotion==='effort'?.36:emotion==='surprise'?.16:.22)+(emotion==='fatigue'?.18:0),ex+eyeWidth,browY+(emotion==='effort'?.22:emotion==='aggression'?sign*.28:emotion==='fatigue'?.16:0));c.strokeStyle=tone(ink,.16);c.lineWidth=.26;c.stroke();
     line(c,[point(ex-.9,y-1.75),point(ex,y-1.95),point(ex+.8,y-1.75)],tone(hair,.06),.24);
+   }
+   oval(c,x+.25,y+2.55,.18,.14,tone(skin,-.22));
+   if(emotion==='happy'){c.beginPath();c.moveTo(x-.85,y+3.65);c.quadraticCurveTo(x+.15,y+4.65,x+1.05,y+3.55);c.strokeStyle=tone(skin,-.35);c.lineWidth=.28;c.stroke()}
+   else if(emotion==='surprise'){oval(c,x+.15,y+4.15,.58,.78,tone(skin,-.52));oval(c,x+.15,y+4.35,.3,.32,tone(skin,-.72))}
+   else if(emotion==='aggression'){line(c,[point(x-.8,y+3.8),point(x+.8,y+3.65)],tone(skin,-.4),.3);for(const dx of [-.45,0,.45])line(c,[point(x+dx,y+3.55),point(x+dx,y+4.05)],'#fff3df',.16)}
+   else{const mouthY=y+4+(emotion==='effort'?.28:emotion==='fatigue'?.34:0);if(emotion==='fatigue')oval(c,x+.15,mouthY,.42,.55,tone(skin,-.48));else line(c,[point(x-.55,mouthY),point(x+.35,mouthY+(emotion==='effort'?-.16:emotion==='fatigue'?.12:0)),point(x+.85,mouthY)],tone(skin,-.34),.24)}
   }
-  oval(c,x+.25,y+2.55,.18,.14,tone(skin,-.22));
-   if(emotion==='smile'){c.beginPath();c.moveTo(x-.75,y+3.8);c.quadraticCurveTo(x+.15,y+4.45,x+.95,y+3.7);c.strokeStyle=tone(skin,-.35);c.lineWidth=.26;c.stroke()}
-   else{const mouthY=y+4+(emotion==='effort'?.28:emotion==='reaction'?.12:0);line(c,[point(x-.55,mouthY),point(x+.35,mouthY+(emotion==='effort'?-.16:0)),point(x+.85,mouthY)],tone(skin,-.34),.24)}
- }
  const spiky=['spiky','pixie'].includes(d.hair),buzz=d.hair==='buzz',bald=d.hair==='bald';
  if(bald){
   path(c,[point(x-3.9,y-3.9),point(x-2.8,y-5.2),point(x-.4,y-5.7),point(x-1.3,y-4.6),point(x-3,y-3.5)],colors.light,null);
@@ -188,8 +203,6 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  }
  if(crop)line(c,[point(h.x-waist,hem),point(h.x+waist,hem)],d.trim,.65);
  line(c,[point(h.x-waist,h.y-1),point(h.x+waist,h.y-1)],tone(d.shirt,-.35),.8);
- animeHead(c,d,n,near,warm,phase,ink,emotion);
- if((options.sweat??0)>.14&&Math.sin((options.emotionClock??0)*3)>.2){const h=animeHeadCenter(n);for(const sign of [-1,1]){const drop=(options.emotionClock??0)*2%1;oval(c,h.x+sign*5.4,h.y+1+drop*3,.38,.65,'#b5e6ef');}}
+ const normalizedEmotion=normalizeEmotion(emotion);animeHead(c,d,n,near,warm,phase,ink,normalizedEmotion);const emotionHead=animeHeadCenter(n),sweat=Math.max(0,Math.min(1,options.sweat??0));emotionMarks(c,normalizedEmotion,options.emotionIntensity??.65,emotionHead);if(sweat>.1){oval(c,emotionHead.x-2.4,emotionHead.y-4.8,1.2,.28,'#d8f3f4aa');const drops=sweat>.68?3:sweat>.34?2:1;for(let i=0;i<drops;i++){const sign=i===0?-1:i===1?1:0,drop=((options.emotionClock??0)*(.7+i*.15)+i*.31)%1;oval(c,emotionHead.x+sign*5.4+(i===2?2.2:0),emotionHead.y+1+drop*3,.34+(i===2?.08:0),.58+drop*.18,'#b5e6ef')}}
  layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
 }
-
