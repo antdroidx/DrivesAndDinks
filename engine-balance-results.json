@@ -9,28 +9,28 @@
       "games": 12,
       "completed": 12,
       "wins": [
-        4,
-        8
+        5,
+        7
       ],
       "points": [
-        90,
-        123
+        96,
+        118
       ],
-      "rallies": 519,
+      "rallies": 466,
       "shots": {
-        "drive": 553,
-        "drop": 381,
-        "dink": 607,
-        "overhead": 138,
-        "lob": 24
+        "drive": 402,
+        "drop": 302,
+        "dink": 697,
+        "overhead": 51,
+        "lob": 17
       },
       "faults": {
-        "Out": 132,
-        "Unreturned": 182,
-        "Double bounce": 114,
-        "Net fault": 91
+        "Out": 116,
+        "Double bounce": 125,
+        "Unreturned": 224,
+        "Net fault": 1
       },
-      "maxRally": 16
+      "maxRally": 24
     },
     {
       "levels": [
@@ -44,25 +44,25 @@
         7
       ],
       "points": [
-        89,
-        110
+        118,
+        120
       ],
-      "rallies": 416,
+      "rallies": 559,
       "shots": {
-        "drive": 1722,
-        "drop": 799,
-        "dink": 2355,
-        "lob": 57,
-        "overhead": 181
+        "drive": 3102,
+        "drop": 1476,
+        "dink": 4244,
+        "lob": 148,
+        "overhead": 458,
+        "atp": 1
       },
       "faults": {
-        "Out": 86,
-        "Net fault": 185,
-        "Unreturned": 142,
-        "Kitchen momentum fault": 2,
-        "Double bounce": 1
+        "Unreturned": 347,
+        "Out": 200,
+        "Double bounce": 10,
+        "Net fault": 2
       },
-      "maxRally": 51
+      "maxRally": 52
     },
     {
       "levels": [
@@ -76,25 +76,23 @@
         6
       ],
       "points": [
-        103,
-        97
+        105,
+        108
       ],
-      "rallies": 378,
+      "rallies": 466,
       "shots": {
-        "drive": 1331,
-        "drop": 470,
-        "dink": 4157,
-        "lob": 119,
-        "overhead": 118
+        "drive": 3347,
+        "drop": 611,
+        "dink": 5308,
+        "lob": 174,
+        "overhead": 115
       },
       "faults": {
-        "Out": 28,
-        "Unreturned": 159,
-        "Net fault": 145,
-        "Double bounce": 13,
-        "Kitchen momentum fault": 33
+        "Unreturned": 395,
+        "Out": 70,
+        "Double bounce": 1
       },
-      "maxRally": 80
+      "maxRally": 57
     },
     {
       "levels": [
@@ -104,29 +102,26 @@
       "games": 12,
       "completed": 12,
       "wins": [
-        6,
-        6
+        1,
+        11
       ],
       "points": [
-        111,
-        105
+        58,
+        121
       ],
-      "rallies": 406,
+      "rallies": 455,
       "shots": {
-        "drive": 933,
-        "drop": 402,
-        "dink": 8732,
-        "lob": 261,
-        "overhead": 260,
-        "tweener": 2
+        "drive": 3232,
+        "drop": 463,
+        "dink": 6237,
+        "lob": 182,
+        "overhead": 111
       },
       "faults": {
-        "Unreturned": 234,
-        "Net fault": 155,
-        "Kitchen momentum fault": 8,
-        "Out": 9
+        "Unreturned": 440,
+        "Out": 15
       },
-      "maxRally": 108
+      "maxRally": 58
     },
     {
       "levels": [
@@ -143,19 +138,19 @@
         0,
         132
       ],
-      "rallies": 144,
+      "rallies": 138,
       "shots": {
-        "drive": 159,
-        "drop": 146,
-        "dink": 402,
-        "lob": 11,
-        "overhead": 23
+        "drive": 121,
+        "drop": 102,
+        "dink": 452,
+        "lob": 18,
+        "overhead": 27
       },
       "faults": {
-        "Out": 42,
-        "Double bounce": 32,
-        "Net fault": 47,
-        "Unreturned": 23
+        "Out": 31,
+        "Unreturned": 76,
+        "Double bounce": 30,
+        "Net fault": 1
       },
       "maxRally": 20
     },
@@ -171,25 +166,24 @@
         12
       ],
       "points": [
-        3,
+        0,
         132
       ],
-      "rallies": 178,
+      "rallies": 160,
       "shots": {
-        "drive": 254,
-        "drop": 229,
-        "dink": 1430,
-        "lob": 52,
-        "overhead": 67
+        "drive": 470,
+        "drop": 309,
+        "dink": 1509,
+        "lob": 57,
+        "overhead": 60,
+        "atp": 1
       },
       "faults": {
-        "Net fault": 85,
-        "Unreturned": 70,
-        "Kitchen momentum fault": 5,
-        "Out": 17,
-        "Double bounce": 1
+        "Unreturned": 140,
+        "Out": 19,
+        "Net fault": 1
       },
-      "maxRally": 55
+      "maxRally": 27
     },
     {
       "levels": [
@@ -206,21 +200,21 @@
         0,
         132
       ],
-      "rallies": 169,
+      "rallies": 174,
       "shots": {
-        "drive": 239,
-        "drop": 170,
-        "dink": 455,
-        "overhead": 66,
-        "lob": 17
+        "drive": 174,
+        "drop": 155,
+        "dink": 466,
+        "overhead": 39,
+        "lob": 10
       },
       "faults": {
-        "Out": 46,
-        "Net fault": 44,
-        "Unreturned": 51,
-        "Double bounce": 28
+        "Out": 37,
+        "Unreturned": 97,
+        "Double bounce": 39,
+        "Net fault": 1
       },
-      "maxRally": 20
+      "maxRally": 23
     },
     {
       "levels": [
@@ -234,24 +228,23 @@
         12
       ],
       "points": [
-        15,
+        0,
         132
       ],
-      "rallies": 220,
+      "rallies": 181,
       "shots": {
-        "drive": 414,
-        "drop": 307,
-        "dink": 1786,
+        "drive": 710,
+        "drop": 375,
+        "dink": 1661,
         "lob": 52,
-        "overhead": 79
+        "overhead": 65
       },
       "faults": {
-        "Out": 18,
-        "Unreturned": 97,
-        "Net fault": 102,
-        "Kitchen momentum fault": 3
+        "Out": 29,
+        "Unreturned": 151,
+        "Net fault": 1
       },
-      "maxRally": 48
+      "maxRally": 37
     },
     {
       "levels": [
@@ -265,25 +258,23 @@
         12
       ],
       "points": [
-        6,
+        0,
         132
       ],
-      "rallies": 195,
+      "rallies": 166,
       "shots": {
-        "drive": 388,
-        "drop": 205,
-        "dink": 2924,
-        "lob": 81,
-        "overhead": 80
+        "drive": 759,
+        "drop": 218,
+        "dink": 1872,
+        "lob": 67,
+        "overhead": 51
       },
       "faults": {
-        "Double bounce": 6,
-        "Unreturned": 96,
-        "Net fault": 77,
-        "Kitchen momentum fault": 9,
-        "Out": 7
+        "Unreturned": 153,
+        "Out": 12,
+        "Net fault": 1
       },
-      "maxRally": 75
+      "maxRally": 37
     }
   ]
 }

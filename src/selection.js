@@ -1,4 +1,5 @@
 import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js';
+import {normalizeStackingSelection} from './stacking.js';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -34,7 +35,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   const expanded=document.createElement('section');expanded.id=appearance.id;expanded.className=appearance.className;
   while(appearance.firstChild)expanded.append(appearance.firstChild);appearance.replaceWith(expanded);
 
-  const setDesigner=open=>{const preview=document.querySelector('.player-preview');if(open)designer.append(preview);else document.querySelector('.setup-top').prepend(preview);designer.hidden=!open;dialog.classList.toggle('designing',open);for(const node of [...scroll.children])if(node!==designer)node.hidden=open;footer.hidden=open;dialog.setAttribute('aria-label',open?'Character designer':'Match setup')};
+  const setDesigner=open=>{const preview=document.querySelector('.player-preview');if(open)designer.append(preview);else document.querySelector('.setup-top').prepend(preview);designer.hidden=!open;dialog.classList.toggle('designing',open);for(const node of [...scroll.children])if(node!==designer)node.hidden=open;footer.hidden=open;if(!open)syncSessionOptions();dialog.setAttribute('aria-label',open?'Character designer':'Match setup')};
   designButton.onclick=()=>setDesigner(true);back.onclick=()=>setDesigner(false);
   for(const node of [...scroll.children]){
    if(node.matches('#dev-art-options,#appearance-options'))designer.append(node);
@@ -42,8 +43,8 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   }
   designer.prepend(back);designer.append(document.querySelector('.player-preview'));scroll.append(designButton,advanced,courts,designer);
 
-  let draft=normalizeSelection(),started=false,previewLineup=[];
-  try{draft=normalizeSelection(JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null'))}catch{}
+  let draft=normalizeSelection(),stackingDraft=normalizeStackingSelection(),started=false,previewLineup=[];
+  try{const saved=JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null');draft=normalizeSelection(saved);stackingDraft=normalizeStackingSelection(saved?.stacking)}catch{}
   const generated=createLineup(draft)[2];draft=normalizeSelection({...draft,gender:generated.gender,...generated.appearance});
   function equipmentCards(items,name,detail){return items.map(item=>{const labels=Object.entries(item.ratingModifiers??{}).filter(([,delta])=>delta).map(([key,delta])=>`${RATING_LABELS[key]} ${delta>0?'+':''}${delta}`);if(item.spinModifier)labels.push(`Spin ${item.spinModifier>0?'+':''}${item.spinModifier}`);if(item.sweetSpot&&item.sweetSpot!==1)labels.push(`Sweet spot ${item.sweetSpot>1?'+':''}${Math.round((item.sweetSpot-1)*100)}%`);return `<label class="choice-card"><input type="radio" name="${name}" value="${item.id}"><span class="choice-title">${item.name}</span><span class="choice-style">${item.style}</span><span class="choice-description">${detail(item)} ${labels.join(' · ')}</span></label>`}).join('')}
   function paddleCards(){return equipmentCards(PADDLES,'paddle',item=>item.description)}
@@ -78,14 +79,15 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
     for(const [key,items] of [['shirtColor',CLOTHING_COLORS],['hairColor',HAIR_COLORS],['skinColor',SKIN_COLORS],['paddleColor',PADDLE_COLORS],['court',COURT_PALETTES]]){const item=items.find(i=>i.id===draft[key]),menu=form.querySelector(`[data-color="${key}"]`);menu.querySelector('summary i').style.background=item.color??item.court;menu.querySelector('summary span').textContent=item.name;}
     drawPreview(draft);
   }
-  function syncSessionOptions(){const practice=form.elements.matchMode.value.startsWith('practice-');form.elements.format.disabled=practice;if(practice)form.elements.format.value='singles';dialog.querySelector('.start-match').textContent=practice?'START PRACTICE →':started?'START NEW MATCH →':'START MATCH →'}
-  form.addEventListener('change',event=>{syncSessionOptions();
+  function syncStackingControls(){for(const [index,prefix] of [[0,'stack0'],[1,'stack1']]){form.elements[prefix].value=stackingDraft.teams[index].mode;form.elements[prefix+'Side'].value=stackingDraft.teams[index].preferredSide}}
+  function syncSessionOptions(){const practice=form.elements.matchMode.value.startsWith('practice-');form.elements.format.disabled=practice;if(practice)form.elements.format.value='singles';const stackingOptions=form.querySelector('#stacking-options'),doubles=form.elements.format.value==='doubles'&&!practice;stackingOptions.hidden=!doubles;for(const name of ['stack0','stack0Side','stack1','stack1Side'])form.elements[name].disabled=!doubles;syncStackingControls();dialog.querySelector('.start-match').textContent=practice?'START PRACTICE →':started?'START NEW MATCH →':'START MATCH →'}
+  form.addEventListener('change',event=>{stackingDraft={teams:[{mode:form.elements.stack0.value,preferredSide:form.elements.stack0Side.value},{mode:form.elements.stack1.value,preferredSide:form.elements.stack1Side.value}]};syncSessionOptions();
     const menu=event.target.closest('.color-menu');if(menu)menu.open=false;
     const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),paddleColor:values.get('paddleColor'),hairColor:values.get('hairColor'),skinColor:values.get('skinColor'),court:values.get('court')});render();
   });
-  form.addEventListener('submit',e=>{e.preventDefault();game.configure({...draft,format:form.elements.format.value},previewLineup);game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);if(game.mode.startsWith('practice-'))game.startPractice(game.mode.slice(9));started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify(draft));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});
+  form.addEventListener('submit',e=>{e.preventDefault();game.configure({...draft,stacking:stackingDraft,format:form.elements.format.value},previewLineup);game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);if(game.mode.startsWith('practice-'))game.startPractice(game.mode.slice(9));started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify({...draft,stacking:stackingDraft}));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});
   dialog.querySelector('#resume-match').onclick=()=>dialog.close();
   dialog.addEventListener('cancel',e=>{if(!started)e.preventDefault()});
-  function open(){dialog.querySelector('#resume-match').hidden=!started;dialog.querySelector('.start-match').textContent=started?'START NEW MATCH →':'START MATCH →';form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
+  function open(){dialog.querySelector('#resume-match').hidden=!started;dialog.querySelector('.start-match').textContent=started?'START NEW MATCH →':'START MATCH →';form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;syncStackingControls();setDesigner(false);render();fitDialog();dialog.showModal()}
   open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
 }

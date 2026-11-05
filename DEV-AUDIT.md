@@ -9,7 +9,7 @@ Audit date: 2026-11-05
 - GitHub Actions run [41998072636](https://github.com/antdroidx/DrivesAndDinks/actions/runs/41998072636) deployed successfully.
 - Pages labels the deployment **release 144** because the workflow uses the run number. The deployed source is still Build 143.
 - A clean checkout passed all **357 tests**.
-- The current audit branch is `codex/post-143-engine-audit`.
+- The original audit branch is `codex/post-143-engine-audit`; the stacking implementation is on `codex/doubles-stacking`.
 
 ## Branch disposition
 
@@ -49,6 +49,7 @@ The older checkout had staged tracked changes. Those were preserved in local sta
 | Layout and CSS consolidation | Yes for current scope | Zoom-safe dialog tests, responsive geometry tests and invalid override removal | Physical-device visual review |
 | Career progression and persistence | No | Intentionally deferred | Later product expansion |
 | Varied shot trajectories and tactical patterns | Yes for current scope | Curve-aware serves and rally shots, pattern labels, high-dink speed-ups and bounded late-rally attacks | Human-calibrated tactical variety |
+| Optional doubles stacking | Yes on `codex/doubles-stacking` | `test/stacking.test.js`; score identity, cross/stay, adaptive, fallback, report and replay coverage | Human tuning of stack frequency, preferred sides and safety thresholds |
 
 ## Current validation evidence
 
@@ -81,6 +82,7 @@ The actionable roadmap work is implemented on `codex/post-143-engine-audit`.
 - Live and replay characters show focused, effort, fatigue, surprise, aggression and happiness states. Sweat intensity follows stamina, effort and rally load.
 - `?test=performance` displays frame/render timing and exposes `window.__DRIVES_DINKS_PERFORMANCE__()` for frame, render, input, long-task and canvas-cost measurements.
 - Browser zoom remains available, dialogs retain scrolling, and the invalid nested media selector is removed.
+- Optional doubles stacking is available per team with Off, Stack + cross, Stack + stay and Adaptive modes. The score-selected server and receiver remain locked to their legal service courts; partners stack near the active side and cross only after a legal serve or return. Unsafe lobs, poor contact, fatigue, volley momentum and collision risk fall back to holding formation. Reports and replays retain the stack plan and decision events.
 
 Paired pacing evidence uses seeds 31–34 at Beginner, Intermediate, Demo and Advanced in doubles:
 

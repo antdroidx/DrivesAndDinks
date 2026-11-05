@@ -10,6 +10,7 @@
     "validate:levels": "node scripts/validate-levels.js 12",
     "validate:matchups": "node scripts/validate-matchups.js 2",
     "diagnose:pacing": "node scripts/diagnose-pacing.js",
+    "diagnose:stacking": "node scripts/diagnose-stacking.js",
     "profile:engine": "node scripts/profile-engine.js 60"
   }
 }

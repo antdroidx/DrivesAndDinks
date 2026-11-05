@@ -1,0 +1,209 @@
+{
+  "scope": "Adaptive stacking frequency by generated doubles team type. Preferred sides alternate deterministically; no forced outcomes.",
+  "games": 8,
+  "teamModes": {
+    "team0": "adaptive",
+    "team1": "adaptive"
+  },
+  "completed": 8,
+  "decisions": 612,
+  "selected": 202,
+  "selectedRate": 0.3300653594771242,
+  "selectionByTeamType": {
+    "balanced": {
+      "decisions": 91,
+      "selected": 20,
+      "selectedRate": 0.21978021978021978,
+      "averageProbability": 0.20896901565101567
+    },
+    "pressure": {
+      "decisions": 434,
+      "selected": 155,
+      "selectedRate": 0.35714285714285715,
+      "averageProbability": 0.3552948380579992
+    },
+    "control": {
+      "decisions": 49,
+      "selected": 8,
+      "selectedRate": 0.16326530612244897,
+      "averageProbability": 0.1379238627087198
+    },
+    "asymmetric": {
+      "decisions": 38,
+      "selected": 19,
+      "selectedRate": 0.5,
+      "averageProbability": 0.39776543965975547
+    }
+  },
+  "execution": {
+    "crossPlanned": 183,
+    "crossed": 177,
+    "stays": 0,
+    "fallbacks": 18
+  },
+  "rallies": 302,
+  "maxRally": 38,
+  "elapsedMs": 13715,
+  "matches": [
+    {
+      "seed": 1,
+      "completed": true,
+      "points": [
+        1,
+        11
+      ],
+      "rallies": 22,
+      "maxRally": 36,
+      "teamTypes": [
+        "balanced",
+        "pressure"
+      ],
+      "decisions": 44,
+      "selected": 13,
+      "crossPlanned": 12,
+      "crossed": 12,
+      "stays": 0,
+      "fallbacks": 1
+    },
+    {
+      "seed": 2,
+      "completed": true,
+      "points": [
+        11,
+        9
+      ],
+      "rallies": 53,
+      "maxRally": 38,
+      "teamTypes": [
+        "pressure",
+        "pressure"
+      ],
+      "decisions": 108,
+      "selected": 40,
+      "crossPlanned": 39,
+      "crossed": 36,
+      "stays": 0,
+      "fallbacks": 0
+    },
+    {
+      "seed": 3,
+      "completed": true,
+      "points": [
+        8,
+        11
+      ],
+      "rallies": 49,
+      "maxRally": 38,
+      "teamTypes": [
+        "control",
+        "pressure"
+      ],
+      "decisions": 98,
+      "selected": 28,
+      "crossPlanned": 28,
+      "crossed": 26,
+      "stays": 0,
+      "fallbacks": 2
+    },
+    {
+      "seed": 4,
+      "completed": true,
+      "points": [
+        11,
+        3
+      ],
+      "rallies": 39,
+      "maxRally": 29,
+      "teamTypes": [
+        "pressure",
+        "pressure"
+      ],
+      "decisions": 80,
+      "selected": 24,
+      "crossPlanned": 21,
+      "crossed": 21,
+      "stays": 0,
+      "fallbacks": 2
+    },
+    {
+      "seed": 5,
+      "completed": true,
+      "points": [
+        7,
+        11
+      ],
+      "rallies": 31,
+      "maxRally": 34,
+      "teamTypes": [
+        "pressure",
+        "balanced"
+      ],
+      "decisions": 62,
+      "selected": 15,
+      "crossPlanned": 12,
+      "crossed": 12,
+      "stays": 0,
+      "fallbacks": 3
+    },
+    {
+      "seed": 6,
+      "completed": true,
+      "points": [
+        11,
+        8
+      ],
+      "rallies": 37,
+      "maxRally": 35,
+      "teamTypes": [
+        "balanced",
+        "asymmetric"
+      ],
+      "decisions": 76,
+      "selected": 26,
+      "crossPlanned": 22,
+      "crossed": 21,
+      "stays": 0,
+      "fallbacks": 5
+    },
+    {
+      "seed": 7,
+      "completed": true,
+      "points": [
+        3,
+        11
+      ],
+      "rallies": 28,
+      "maxRally": 31,
+      "teamTypes": [
+        "pressure",
+        "pressure"
+      ],
+      "decisions": 56,
+      "selected": 22,
+      "crossPlanned": 20,
+      "crossed": 20,
+      "stays": 0,
+      "fallbacks": 2
+    },
+    {
+      "seed": 8,
+      "completed": true,
+      "points": [
+        4,
+        11
+      ],
+      "rallies": 43,
+      "maxRally": 33,
+      "teamTypes": [
+        "pressure",
+        "pressure"
+      ],
+      "decisions": 88,
+      "selected": 34,
+      "crossPlanned": 29,
+      "crossed": 29,
+      "stays": 0,
+      "fallbacks": 3
+    }
+  ]
+}
