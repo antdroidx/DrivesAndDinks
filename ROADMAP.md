@@ -81,3 +81,18 @@ Keep every random draw inside the seeded gameplay stream and verify that present
 ## Later expansion
 
 Career scheduling, long-term progression, seasons and cloud persistence remain later product work. They should start only after human playtests establish that the core singles/doubles loop is stable and understandable.
+## Implementation status after the post-143 pass
+
+1. **Core-loop validation:** reporting and scorecard tooling are complete. Human execution remains the release gate.
+2. **Pacing and dink economy:** diagnostic, high-dink float, safe speed-ups and late-rally commitment are complete. Paired CPU evidence meets the 40-minute completion target.
+3. **Rendered mobile measurement:** the browser probe is complete. Physical low-end phone measurements remain external.
+4. **Shot shape and tactics:** curve, pattern labels, opponent-aware placement, high-dink speed-ups and bounded rally escalation are complete for this pass.
+5. **Practice and presentation:** moving, lob and transition drills are complete; responsive and zoom cleanup is complete for the current layout.
+
+## Recommended engine iteration after human playtests
+
+- Tune serve/return and transition choices from human journals rather than adding more decision branches first.
+- Add compact two- or three-shot tactical plans for speed-up, counter-lob and poach traps, with observable plan IDs in reports.
+- Expand shot signatures with paddle-face angle and contact offset driving controlled side curve, while keeping seeded outcomes deterministic.
+- Add practice sequences for counter-lobs, ATP/Erne recovery and cross-pattern movement.
+- Build career progression only after the core match loop passes the human scorecard.

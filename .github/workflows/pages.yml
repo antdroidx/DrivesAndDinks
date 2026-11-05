@@ -58,7 +58,7 @@ jobs:
           printf 'globalThis.DRIVES_DINKS_BUILD = "48";\n' > _site/prototype/build-info.js
           node scripts/version-build.js 48 _site/prototype
 
-          # Build the DEV mirror from the current main source.
+          # Build the DEV mirror from the triggering source.
           cp index.html style.css studio.html studio.css manifest.webmanifest _site/dev/
           printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
           cp -R src assets _site/dev/

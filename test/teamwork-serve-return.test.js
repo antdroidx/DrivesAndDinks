@@ -16,7 +16,7 @@ test('CPU serve plans vary pace and placement with mirrored legal margins and ab
   const depth=team?44-plan.y:plan.y;assert.ok(depth>=4.5&&depth<=9);
   assert.ok(Math.abs(cpuServePlan({...p,team:1-team},{x:20-x},random).y+plan.y-44)<1e-10);
  }
- assert.deepEqual(new Set(plans.map(p=>p.type)),new Set(['hard','soft']));
+ assert.deepEqual(new Set(plans.map(p=>p.type)),new Set(['hard','soft']));assert.ok(plans.every(p=>['body','wide','crosscourt','depth'].includes(p.style)&&p.intent==='serve-'+p.style&&Number.isFinite(p.curve)));assert.equal(cpuServePlan(athlete(),{x:15},.42).style,'wide');assert.equal(cpuServePlan(athlete(1),{x:5},.42).curve,-cpuServePlan(athlete(),{x:15},.42).curve);
  const p=athlete();p.abilities.serve=1.4;const strong=cpuServePlan(p,{x:15},.5);p.abilities.serve=.6;
  assert.ok(strong.y<cpuServePlan(p,{x:15},.5).y);
 });

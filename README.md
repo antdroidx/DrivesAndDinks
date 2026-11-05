@@ -136,9 +136,9 @@ Match setup offers Doubles (2 vs 2) and Singles (1 vs 1). Singles uses the full 
 
 ## DEV practice and reports
 
-In New Game → Match mode, choose Deep return, Third-shot drop, or Kitchen reset under Practice. Each session supplies ten repeatable feeds and a visible target. Use the normal shot buttons and aim/depth controls; the two soft drills begin with a short depth setting. Repeat Drill repeats the feed sequence, while New Game returns to match setup.
+In New Game → Match mode, choose Deep return, Third-shot drop, Kitchen reset, Lob recovery, Moving target, or Transition sequence under Practice. Each session supplies ten repeatable attempts and visible targets. The Moving target lane travels slowly enough to read and lead; Transition sequence scores a drop followed by an attack. Repeat Drill repeats the same feed sequence, while New Game returns to match setup.
 
-Settings → Download Report exports the current session as JSON. The completion screen also offers a report and a short summary. Reports include contacts, rally/fault outcomes, player/body/paddle attributes, and practice attempts; they remain separate from the sound/UI queue and are bounded in memory. Nothing is uploaded automatically or retained after a page reload.
+Settings → Download Report exports the current session as JSON. The completion screen also offers a report and a short summary. Reports include contacts, rally/fault outcomes, player/body/paddle attributes, derived playtest metrics, and every practice step; they remain separate from the sound/UI queue and are bounded in memory. Nothing is uploaded automatically or retained after a page reload. `PLAYTEST.md` provides the human/device scorecard.
 
 
 ## DEV adaptive opponents and validation
@@ -196,3 +196,10 @@ Replay playback interpolates positions, velocity, stride, swing/preparation and 
 ## Doubles side ownership
 
 Partners hold their assigned sides through ordinary kitchen exchanges. A middle reach no longer automatically switches coverage. Poaches require a useful interception advantage and attacking opportunity, and actual side changes require a genuine crossing during a poach, lob recovery or emergency rescue. Recent switches discourage an immediate poach back. Each point restores the normal serving/receiving sides; stacking is not implemented. `node scripts/validate-doubles-sides.js 8` measures actual kitchen order changes separately from poach attempts.
+## Rally expression and browser performance
+
+Poor or rushed dinks can float higher instead of always dying into the net. High floating dinks are natural speed-up opportunities when contact pressure, balance and partner readiness allow an attack; ordinary high balls keep their existing attack rules. Shot reports record patterns such as `speed-up`, `crosscourt`, `short-angle`, `inside-out` and body/wide serve styles.
+
+Players react to the rally with focused, effort, fatigue, surprise, aggression and happy expressions. Sweat intensity follows stamina, recent effort and rally length. The same states appear in live play and sideline replays.
+
+Open `/dev/?test=performance` for a lightweight frame and render readout. The browser console exposes `window.__DRIVES_DINKS_PERFORMANCE__()` with frame, render, input-latency, long-task and canvas backing-store measurements.

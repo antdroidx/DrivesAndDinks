@@ -1,0 +1,1475 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-05T17:26:00.093Z",
+  "methodology": {
+    "format": "doubles",
+    "levels": [
+      "beginner",
+      "intermediate",
+      "demo",
+      "advanced"
+    ],
+    "gamesPerLevel": 4,
+    "seedStart": 31,
+    "maxSimulatedSecondsPerMatch": 2400,
+    "scope": "Seeded CPU watch matches with deterministic pacing instrumentation; no extra random draws."
+  },
+  "aggregate": {
+    "matches": 16,
+    "completed": 16,
+    "rallyDurations": {
+      "mean": 12.772140463054754,
+      "median": 10.203124999992081,
+      "p95": 27.012499999979813,
+      "max": 41.64375000002141
+    },
+    "rallyShots": {
+      "mean": 14.490973614415214,
+      "median": 11.25,
+      "p95": 31.75,
+      "max": 49.25
+    },
+    "shotsByType": {
+      "drive": 1354,
+      "drop": 730,
+      "dink": 6833,
+      "overhead": 182,
+      "lob": 214
+    },
+    "qualityByType": {
+      "drive": {
+        "contacts": 1354,
+        "meanQuality": 0.9597739456311166,
+        "meanDifficulty": 0.47037748450562866,
+        "meanNetMargin": 1.9191547882118754
+      },
+      "drop": {
+        "contacts": 730,
+        "meanQuality": 0.9656145692798908,
+        "meanDifficulty": 0.4070334521575508,
+        "meanNetMargin": 1.9137774941414893
+      },
+      "dink": {
+        "contacts": 6833,
+        "meanQuality": 0.9817895789488443,
+        "meanDifficulty": 0.3813691979334057,
+        "meanNetMargin": 0.4882645024724052
+      },
+      "overhead": {
+        "contacts": 182,
+        "meanQuality": 0.9777117450265335,
+        "meanDifficulty": 0.48244382826199034,
+        "meanNetMargin": 2.6266703705761447
+      },
+      "lob": {
+        "contacts": 214,
+        "meanQuality": 0.9727053616656929,
+        "meanDifficulty": 0.38315974002644887,
+        "meanNetMargin": 5.23119436056496
+      }
+    },
+    "faultsByReason": {
+      "Unreturned": 302,
+      "Double bounce": 40,
+      "Out": 92,
+      "Net fault": 251,
+      "Kitchen momentum fault": 1
+    },
+    "faultsByShot": {
+      "Unreturned / drive": 122,
+      "Double bounce / drop": 12,
+      "Out / dink": 19,
+      "Out / drop": 42,
+      "Double bounce / dink": 19,
+      "Net fault / dink": 249,
+      "Unreturned / no-contact": 31,
+      "Double bounce / drive": 8,
+      "Unreturned / overhead": 65,
+      "Unreturned / dink": 2,
+      "Kitchen momentum fault / dink": 1,
+      "Out / drive": 30,
+      "Unreturned / lob": 82,
+      "Out / overhead": 1,
+      "Double bounce / lob": 1,
+      "Net fault / drive": 2
+    },
+    "transitionByShot": {
+      "drop": 74,
+      "dink": 8
+    },
+    "kitchenSeconds": 8813.683333327946,
+    "bothTeamsKitchenSeconds": 6521.866666662907,
+    "transitionSeconds": 3136.3083333324585
+  },
+  "results": [
+    {
+      "level": "beginner",
+      "seed": 31,
+      "completed": true,
+      "points": [
+        5,
+        11
+      ],
+      "winner": 1,
+      "simulatedSeconds": 360.53333333316976,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 4.377182539680819,
+          "median": 3.566666666663423,
+          "p95": 8.333333333339965,
+          "max": 10.566666666675076
+        },
+        "rallyShots": {
+          "mean": 3.2857142857142856,
+          "median": 2,
+          "p95": 7,
+          "max": 10
+        },
+        "shotsByType": {
+          "drive": 42,
+          "drop": 25,
+          "dink": 23,
+          "overhead": 6
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 42,
+            "meanQuality": 0.8968101163253577,
+            "meanDifficulty": 0.6397493823473579,
+            "meanNetMargin": 4.884538713919473
+          },
+          "drop": {
+            "contacts": 25,
+            "meanQuality": 0.9120019804257277,
+            "meanDifficulty": 0.5022800137371697,
+            "meanNetMargin": 1.9164130923288325
+          },
+          "dink": {
+            "contacts": 23,
+            "meanQuality": 0.9304273199947622,
+            "meanDifficulty": 0.5718034470566009,
+            "meanNetMargin": 0.6697558014046373
+          },
+          "overhead": {
+            "contacts": 6,
+            "meanQuality": 0.8745616848034596,
+            "meanDifficulty": 0.4803388595593992,
+            "meanNetMargin": 3.993660267714144
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 24,
+          "Double bounce": 8,
+          "Out": 7,
+          "Net fault": 3
+        },
+        "faultsByShot": {
+          "Unreturned / drive": 16,
+          "Double bounce / drop": 5,
+          "Out / dink": 1,
+          "Out / drop": 6,
+          "Double bounce / dink": 2,
+          "Net fault / dink": 3,
+          "Unreturned / no-contact": 7,
+          "Double bounce / drive": 1,
+          "Unreturned / overhead": 1
+        },
+        "transitionByShot": {
+          "drop": 3
+        },
+        "kitchenSeconds": 183.8416666666638,
+        "bothTeamsKitchenSeconds": 41.958333333331595,
+        "transitionSeconds": 15.533333333333092
+      }
+    },
+    {
+      "level": "beginner",
+      "seed": 32,
+      "completed": true,
+      "points": [
+        3,
+        11
+      ],
+      "winner": 1,
+      "simulatedSeconds": 263.62499999992457,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 4.604444444443297,
+          "median": 4.100000000003263,
+          "p95": 7.874999999992838,
+          "max": 9.325000000000015
+        },
+        "rallyShots": {
+          "mean": 3.7333333333333334,
+          "median": 3,
+          "p95": 8,
+          "max": 8
+        },
+        "shotsByType": {
+          "drive": 27,
+          "drop": 21,
+          "dink": 33,
+          "overhead": 1
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 27,
+            "meanQuality": 0.9023259088690758,
+            "meanDifficulty": 0.5744701411827411,
+            "meanNetMargin": 4.636940905170454
+          },
+          "drop": {
+            "contacts": 21,
+            "meanQuality": 0.8900369788848527,
+            "meanDifficulty": 0.47204712852385267,
+            "meanNetMargin": 1.612710524929266
+          },
+          "dink": {
+            "contacts": 33,
+            "meanQuality": 0.9233591809729612,
+            "meanDifficulty": 0.5523273183301302,
+            "meanNetMargin": 0.5955060383599438
+          },
+          "overhead": {
+            "contacts": 1,
+            "meanQuality": 0.9721015602896861,
+            "meanDifficulty": 0.6280812869099026,
+            "meanNetMargin": 3.542547305659939
+          }
+        },
+        "faultsByReason": {
+          "Net fault": 5,
+          "Unreturned": 15,
+          "Out": 9,
+          "Double bounce": 1
+        },
+        "faultsByShot": {
+          "Net fault / dink": 5,
+          "Unreturned / drive": 8,
+          "Unreturned / dink": 1,
+          "Out / drop": 5,
+          "Out / dink": 4,
+          "Double bounce / dink": 1,
+          "Unreturned / no-contact": 6
+        },
+        "transitionByShot": {
+          "drop": 3
+        },
+        "kitchenSeconds": 138.13333333337204,
+        "bothTeamsKitchenSeconds": 37.8249999999985,
+        "transitionSeconds": 14.383333333333157
+      }
+    },
+    {
+      "level": "beginner",
+      "seed": 33,
+      "completed": true,
+      "points": [
+        10,
+        12
+      ],
+      "winner": 1,
+      "simulatedSeconds": 449.0083333330893,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 4.586601307186987,
+          "median": 3.8083333333298697,
+          "p95": 9.658333333332784,
+          "max": 12.116666666655647
+        },
+        "rallyShots": {
+          "mean": 3.588235294117647,
+          "median": 3,
+          "p95": 10,
+          "max": 11
+        },
+        "shotsByType": {
+          "drive": 45,
+          "drop": 34,
+          "dink": 50,
+          "overhead": 3
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 45,
+            "meanQuality": 0.8487964316372523,
+            "meanDifficulty": 0.6703595474633155,
+            "meanNetMargin": 5.152739810141695
+          },
+          "drop": {
+            "contacts": 34,
+            "meanQuality": 0.8987608097539057,
+            "meanDifficulty": 0.48283641171872155,
+            "meanNetMargin": 1.8357179747585766
+          },
+          "dink": {
+            "contacts": 50,
+            "meanQuality": 0.9179783801443017,
+            "meanDifficulty": 0.566793521291357,
+            "meanNetMargin": 0.664691642093155
+          },
+          "overhead": {
+            "contacts": 3,
+            "meanQuality": 0.9808947877612736,
+            "meanDifficulty": 0.36700265937935805,
+            "meanNetMargin": 3.1761579696181967
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 24,
+          "Out": 10,
+          "Net fault": 7,
+          "Double bounce": 10
+        },
+        "faultsByShot": {
+          "Unreturned / drive": 12,
+          "Out / drop": 7,
+          "Net fault / dink": 7,
+          "Unreturned / no-contact": 11,
+          "Double bounce / drop": 3,
+          "Double bounce / drive": 3,
+          "Double bounce / dink": 4,
+          "Out / dink": 3,
+          "Unreturned / dink": 1
+        },
+        "transitionByShot": {
+          "drop": 5
+        },
+        "kitchenSeconds": 233.91666666661826,
+        "bothTeamsKitchenSeconds": 60.39999999999721,
+        "transitionSeconds": 25.849999999999174
+      }
+    },
+    {
+      "level": "beginner",
+      "seed": 34,
+      "completed": true,
+      "points": [
+        7,
+        11
+      ],
+      "winner": 1,
+      "simulatedSeconds": 466.9416666664063,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 5.122333333330547,
+          "median": 4.1416666666629,
+          "p95": 8.741666666658716,
+          "max": 12.083333333333336
+        },
+        "rallyShots": {
+          "mean": 4.14,
+          "median": 3,
+          "p95": 8,
+          "max": 12
+        },
+        "shotsByType": {
+          "drive": 48,
+          "drop": 38,
+          "dink": 66,
+          "overhead": 4,
+          "lob": 1
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 48,
+            "meanQuality": 0.8510649586085938,
+            "meanDifficulty": 0.6736391499954896,
+            "meanNetMargin": 5.283894511989442
+          },
+          "drop": {
+            "contacts": 38,
+            "meanQuality": 0.9002180313208279,
+            "meanDifficulty": 0.47620732195036447,
+            "meanNetMargin": 1.7763680599293297
+          },
+          "dink": {
+            "contacts": 66,
+            "meanQuality": 0.9293820591676722,
+            "meanDifficulty": 0.5586674346570054,
+            "meanNetMargin": 0.6618412779610188
+          },
+          "overhead": {
+            "contacts": 4,
+            "meanQuality": 0.9936558572460283,
+            "meanDifficulty": 0.23417443139133542,
+            "meanNetMargin": 3.8069543559179424
+          },
+          "lob": {
+            "contacts": 1,
+            "meanQuality": 0.970288291708209,
+            "meanDifficulty": 0.518959967989068,
+            "meanNetMargin": 5.191314134737093
+          }
+        },
+        "faultsByReason": {
+          "Net fault": 8,
+          "Unreturned": 17,
+          "Double bounce": 12,
+          "Out": 13
+        },
+        "faultsByShot": {
+          "Net fault / dink": 8,
+          "Unreturned / no-contact": 5,
+          "Double bounce / drop": 2,
+          "Out / dink": 4,
+          "Unreturned / drive": 9,
+          "Unreturned / overhead": 3,
+          "Double bounce / dink": 6,
+          "Double bounce / drive": 4,
+          "Out / drop": 9
+        },
+        "transitionByShot": {
+          "drop": 5,
+          "dink": 1
+        },
+        "kitchenSeconds": 256.11666666659806,
+        "bothTeamsKitchenSeconds": 77.41666666667435,
+        "transitionSeconds": 31.46666666666552
+      }
+    },
+    {
+      "level": "intermediate",
+      "seed": 31,
+      "completed": true,
+      "points": [
+        4,
+        11
+      ],
+      "winner": 1,
+      "simulatedSeconds": 616.5749999996036,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 9.803409090902717,
+          "median": 7.79166666665958,
+          "p95": 22.541666666646165,
+          "max": 27.591666666641572
+        },
+        "rallyShots": {
+          "mean": 11.590909090909092,
+          "median": 9,
+          "p95": 27,
+          "max": 34
+        },
+        "shotsByType": {
+          "drive": 175,
+          "drop": 72,
+          "dink": 199,
+          "lob": 6,
+          "overhead": 14
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 175,
+            "meanQuality": 0.9591070313663232,
+            "meanDifficulty": 0.5312612551078595,
+            "meanNetMargin": 2.3858719965342705
+          },
+          "drop": {
+            "contacts": 72,
+            "meanQuality": 0.9755024665542076,
+            "meanDifficulty": 0.4765481562727769,
+            "meanNetMargin": 2.183310339290913
+          },
+          "dink": {
+            "contacts": 199,
+            "meanQuality": 0.948636499853866,
+            "meanDifficulty": 0.44367215591637926,
+            "meanNetMargin": 0.47788351596390627
+          },
+          "lob": {
+            "contacts": 6,
+            "meanQuality": 0.921958087920426,
+            "meanDifficulty": 0.43967286686359336,
+            "meanNetMargin": 6.162950907822996
+          },
+          "overhead": {
+            "contacts": 14,
+            "meanQuality": 0.9707815674525299,
+            "meanDifficulty": 0.4648868676044599,
+            "meanNetMargin": 2.7426938594453096
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 14,
+          "Kitchen momentum fault": 1,
+          "Net fault": 20,
+          "Out": 8,
+          "Double bounce": 1
+        },
+        "faultsByShot": {
+          "Unreturned / drive": 10,
+          "Kitchen momentum fault / dink": 1,
+          "Net fault / dink": 20,
+          "Out / drop": 3,
+          "Out / drive": 3,
+          "Unreturned / lob": 2,
+          "Unreturned / overhead": 2,
+          "Double bounce / drop": 1,
+          "Out / dink": 1,
+          "Out / overhead": 1
+        },
+        "transitionByShot": {
+          "dink": 3,
+          "drop": 16
+        },
+        "kitchenSeconds": 430.86666666643913,
+        "bothTeamsKitchenSeconds": 288.69999999990176,
+        "transitionSeconds": 130.78333333337872
+      }
+    },
+    {
+      "level": "intermediate",
+      "seed": 32,
+      "completed": true,
+      "points": [
+        2,
+        11
+      ],
+      "winner": 1,
+      "simulatedSeconds": 518.0749999996932,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 10.193981481475316,
+          "median": 8.933333333325209,
+          "p95": 19.991666666648484,
+          "max": 24.908333333310736
+        },
+        "rallyShots": {
+          "mean": 12.027777777777779,
+          "median": 10,
+          "p95": 24,
+          "max": 28
+        },
+        "shotsByType": {
+          "drive": 148,
+          "drop": 59,
+          "dink": 173,
+          "overhead": 13,
+          "lob": 4
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 148,
+            "meanQuality": 0.9590233950741223,
+            "meanDifficulty": 0.5415720668134317,
+            "meanNetMargin": 2.4224854809283514
+          },
+          "drop": {
+            "contacts": 59,
+            "meanQuality": 0.9533269539948592,
+            "meanDifficulty": 0.49109532993599087,
+            "meanNetMargin": 2.1273897588680994
+          },
+          "dink": {
+            "contacts": 173,
+            "meanQuality": 0.9637267098439114,
+            "meanDifficulty": 0.4370893007947647,
+            "meanNetMargin": 0.49703358070039705
+          },
+          "overhead": {
+            "contacts": 13,
+            "meanQuality": 0.9726292131207436,
+            "meanDifficulty": 0.39635291753353796,
+            "meanNetMargin": 2.1648064302521313
+          },
+          "lob": {
+            "contacts": 4,
+            "meanQuality": 0.9096264194815379,
+            "meanDifficulty": 0.40390824584891394,
+            "meanNetMargin": 5.691316868340438
+          }
+        },
+        "faultsByReason": {
+          "Net fault": 12,
+          "Out": 10,
+          "Unreturned": 14
+        },
+        "faultsByShot": {
+          "Net fault / dink": 12,
+          "Out / drop": 6,
+          "Unreturned / overhead": 6,
+          "Out / drive": 4,
+          "Unreturned / no-contact": 1,
+          "Unreturned / drive": 5,
+          "Unreturned / lob": 2
+        },
+        "transitionByShot": {
+          "drop": 11,
+          "dink": 2
+        },
+        "kitchenSeconds": 366.5916666664976,
+        "bothTeamsKitchenSeconds": 249.7833333332705,
+        "transitionSeconds": 116.45000000003874
+      }
+    },
+    {
+      "level": "intermediate",
+      "seed": 33,
+      "completed": true,
+      "points": [
+        11,
+        9
+      ],
+      "winner": 0,
+      "simulatedSeconds": 585.424999999632,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 9.095454545448899,
+          "median": 7.266666666660058,
+          "p95": 18.2499999999834,
+          "max": 28.816666666640458
+        },
+        "rallyShots": {
+          "mean": 10.090909090909092,
+          "median": 7,
+          "p95": 21,
+          "max": 36
+        },
+        "shotsByType": {
+          "drive": 107,
+          "drop": 59,
+          "dink": 209,
+          "overhead": 16,
+          "lob": 9
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 107,
+            "meanQuality": 0.9453383740037962,
+            "meanDifficulty": 0.5015664412299522,
+            "meanNetMargin": 2.488643476920948
+          },
+          "drop": {
+            "contacts": 59,
+            "meanQuality": 0.967898486758865,
+            "meanDifficulty": 0.5294577321289979,
+            "meanNetMargin": 2.1165941484528963
+          },
+          "dink": {
+            "contacts": 209,
+            "meanQuality": 0.9573048747955578,
+            "meanDifficulty": 0.4325278550518244,
+            "meanNetMargin": 0.4754727991931624
+          },
+          "overhead": {
+            "contacts": 16,
+            "meanQuality": 0.95967811885657,
+            "meanDifficulty": 0.3893803142492198,
+            "meanNetMargin": 2.2956331474932465
+          },
+          "lob": {
+            "contacts": 9,
+            "meanQuality": 0.9181964400698013,
+            "meanDifficulty": 0.44993890708481854,
+            "meanNetMargin": 6.021151468288398
+          }
+        },
+        "faultsByReason": {
+          "Net fault": 20,
+          "Unreturned": 14,
+          "Out": 6,
+          "Double bounce": 4
+        },
+        "faultsByShot": {
+          "Net fault / dink": 20,
+          "Unreturned / overhead": 5,
+          "Unreturned / drive": 4,
+          "Out / drop": 3,
+          "Double bounce / dink": 2,
+          "Out / drive": 3,
+          "Unreturned / lob": 5,
+          "Double bounce / drop": 1,
+          "Double bounce / lob": 1
+        },
+        "transitionByShot": {
+          "drop": 8
+        },
+        "kitchenSeconds": 400.19999999980035,
+        "bothTeamsKitchenSeconds": 253.3416666666006,
+        "transitionSeconds": 115.76666666670486
+      }
+    },
+    {
+      "level": "intermediate",
+      "seed": 34,
+      "completed": true,
+      "points": [
+        7,
+        11
+      ],
+      "winner": 1,
+      "simulatedSeconds": 479.7416666663947,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 10.346969696963896,
+          "median": 8.675000000006904,
+          "p95": 19.40833333331568,
+          "max": 23.099999999999234
+        },
+        "rallyShots": {
+          "mean": 11.696969696969697,
+          "median": 9,
+          "p95": 22,
+          "max": 30
+        },
+        "shotsByType": {
+          "drive": 93,
+          "drop": 48,
+          "dink": 195,
+          "lob": 7,
+          "overhead": 10
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 93,
+            "meanQuality": 0.951827703823268,
+            "meanDifficulty": 0.5432226851022095,
+            "meanNetMargin": 2.526382795447889
+          },
+          "drop": {
+            "contacts": 48,
+            "meanQuality": 0.948854232123007,
+            "meanDifficulty": 0.44134332200101656,
+            "meanNetMargin": 1.9286671280709262
+          },
+          "dink": {
+            "contacts": 195,
+            "meanQuality": 0.9589621419104866,
+            "meanDifficulty": 0.4435951559188148,
+            "meanNetMargin": 0.48124787307837896
+          },
+          "lob": {
+            "contacts": 7,
+            "meanQuality": 0.9785285921388123,
+            "meanDifficulty": 0.44273912414260147,
+            "meanNetMargin": 5.348427491714692
+          },
+          "overhead": {
+            "contacts": 10,
+            "meanQuality": 0.9372445147174961,
+            "meanDifficulty": 0.46658166692762276,
+            "meanNetMargin": 3.15063906271892
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 13,
+          "Net fault": 16,
+          "Out": 4
+        },
+        "faultsByShot": {
+          "Unreturned / overhead": 3,
+          "Net fault / dink": 16,
+          "Unreturned / drive": 8,
+          "Unreturned / no-contact": 1,
+          "Out / drop": 2,
+          "Out / drive": 2,
+          "Unreturned / lob": 1
+        },
+        "transitionByShot": {
+          "dink": 1,
+          "drop": 11
+        },
+        "kitchenSeconds": 341.4499999998538,
+        "bothTeamsKitchenSeconds": 231.51666666662044,
+        "transitionSeconds": 110.06666666670033
+      }
+    },
+    {
+      "level": "demo",
+      "seed": 31,
+      "completed": true,
+      "points": [
+        4,
+        11
+      ],
+      "winner": 1,
+      "simulatedSeconds": 906.2249999993402,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 16.386363636351636,
+          "median": 12.966666666654874,
+          "p95": 30.06666666663932,
+          "max": 61.19999999994434
+        },
+        "rallyShots": {
+          "mean": 19.09090909090909,
+          "median": 15,
+          "p95": 35,
+          "max": 72
+        },
+        "shotsByType": {
+          "drive": 78,
+          "drop": 47,
+          "dink": 655,
+          "lob": 11,
+          "overhead": 5
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 78,
+            "meanQuality": 0.9738068222315011,
+            "meanDifficulty": 0.3918276209354693,
+            "meanNetMargin": 1.0830285008764116
+          },
+          "drop": {
+            "contacts": 47,
+            "meanQuality": 0.9877726045864291,
+            "meanDifficulty": 0.3498547167922792,
+            "meanNetMargin": 1.5664439585849614
+          },
+          "dink": {
+            "contacts": 655,
+            "meanQuality": 0.9788080975771356,
+            "meanDifficulty": 0.4082873161552714,
+            "meanNetMargin": 0.4693428240183239
+          },
+          "lob": {
+            "contacts": 11,
+            "meanQuality": 0.9619790447729003,
+            "meanDifficulty": 0.4120482164693513,
+            "meanNetMargin": 5.407517271361372
+          },
+          "overhead": {
+            "contacts": 5,
+            "meanQuality": 0.9945711687558608,
+            "meanDifficulty": 0.5287664624685522,
+            "meanNetMargin": 2.868147563727528
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 11,
+          "Net fault": 29,
+          "Out": 2,
+          "Double bounce": 2
+        },
+        "faultsByShot": {
+          "Unreturned / lob": 6,
+          "Net fault / dink": 29,
+          "Unreturned / overhead": 2,
+          "Out / drive": 2,
+          "Unreturned / drive": 3,
+          "Double bounce / dink": 2
+        },
+        "transitionByShot": {
+          "drop": 2
+        },
+        "kitchenSeconds": 720.9999999995086,
+        "bothTeamsKitchenSeconds": 581.6499999996354,
+        "transitionSeconds": 278.2583333332446
+      }
+    },
+    {
+      "level": "demo",
+      "seed": 32,
+      "completed": true,
+      "points": [
+        11,
+        3
+      ],
+      "winner": 0,
+      "simulatedSeconds": 1160.9833333343106,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 15.453531073460196,
+          "median": 10.824999999990155,
+          "p95": 35.8833333333007,
+          "max": 56.65833333405476
+        },
+        "rallyShots": {
+          "mean": 17.88135593220339,
+          "median": 13,
+          "p95": 42,
+          "max": 66
+        },
+        "shotsByType": {
+          "drive": 114,
+          "drop": 68,
+          "dink": 776,
+          "lob": 27,
+          "overhead": 11
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 114,
+            "meanQuality": 0.9839850085610418,
+            "meanDifficulty": 0.4070784139266367,
+            "meanNetMargin": 1.013031735607461
+          },
+          "drop": {
+            "contacts": 68,
+            "meanQuality": 0.977852888825618,
+            "meanDifficulty": 0.3451433299193323,
+            "meanNetMargin": 1.5314842986417248
+          },
+          "dink": {
+            "contacts": 776,
+            "meanQuality": 0.9800583695010319,
+            "meanDifficulty": 0.4125497648043757,
+            "meanNetMargin": 0.4813005266810757
+          },
+          "lob": {
+            "contacts": 27,
+            "meanQuality": 0.9779514448801118,
+            "meanDifficulty": 0.41253105718932886,
+            "meanNetMargin": 5.138114442214758
+          },
+          "overhead": {
+            "contacts": 11,
+            "meanQuality": 0.9924447789149018,
+            "meanDifficulty": 0.5189938325908531,
+            "meanNetMargin": 2.847440608846558
+          }
+        },
+        "faultsByReason": {
+          "Net fault": 30,
+          "Unreturned": 21,
+          "Out": 7,
+          "Double bounce": 1
+        },
+        "faultsByShot": {
+          "Net fault / dink": 30,
+          "Unreturned / drive": 3,
+          "Unreturned / lob": 16,
+          "Unreturned / overhead": 2,
+          "Out / drop": 1,
+          "Out / drive": 5,
+          "Out / dink": 1,
+          "Double bounce / dink": 1
+        },
+        "transitionByShot": {
+          "drop": 6,
+          "dink": 1
+        },
+        "kitchenSeconds": 910.4499999993363,
+        "bothTeamsKitchenSeconds": 714.791666666181,
+        "transitionSeconds": 342.8499999998525
+      }
+    },
+    {
+      "level": "demo",
+      "seed": 33,
+      "completed": true,
+      "points": [
+        11,
+        9
+      ],
+      "winner": 0,
+      "simulatedSeconds": 947.8499999993023,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 17.332386363623637,
+          "median": 12.183333333322253,
+          "p95": 44.67499999995937,
+          "max": 75.34166666659814
+        },
+        "rallyShots": {
+          "mean": 20.477272727272727,
+          "median": 14,
+          "p95": 53,
+          "max": 90
+        },
+        "shotsByType": {
+          "drive": 100,
+          "drop": 46,
+          "dink": 675,
+          "lob": 21,
+          "overhead": 15
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 100,
+            "meanQuality": 0.9856723078819458,
+            "meanDifficulty": 0.42185881492844196,
+            "meanNetMargin": 1.0395138005726714
+          },
+          "drop": {
+            "contacts": 46,
+            "meanQuality": 0.9819462162045219,
+            "meanDifficulty": 0.34697360350325185,
+            "meanNetMargin": 1.477607253938911
+          },
+          "dink": {
+            "contacts": 675,
+            "meanQuality": 0.9813839735467104,
+            "meanDifficulty": 0.410033627389295,
+            "meanNetMargin": 0.4762493146903978
+          },
+          "lob": {
+            "contacts": 21,
+            "meanQuality": 0.9609981496292487,
+            "meanDifficulty": 0.41944459508429766,
+            "meanNetMargin": 5.585823867417604
+          },
+          "overhead": {
+            "contacts": 15,
+            "meanQuality": 0.9751811016794066,
+            "meanDifficulty": 0.5133621736708249,
+            "meanNetMargin": 2.7523527083862835
+          }
+        },
+        "faultsByReason": {
+          "Out": 5,
+          "Unreturned": 17,
+          "Net fault": 22
+        },
+        "faultsByShot": {
+          "Out / drive": 3,
+          "Unreturned / drive": 9,
+          "Unreturned / lob": 6,
+          "Net fault / dink": 22,
+          "Unreturned / overhead": 2,
+          "Out / dink": 2
+        },
+        "transitionByShot": {
+          "drop": 2
+        },
+        "kitchenSeconds": 762.6249999994708,
+        "bothTeamsKitchenSeconds": 615.9749999996042,
+        "transitionSeconds": 299.69999999989176
+      }
+    },
+    {
+      "level": "demo",
+      "seed": 34,
+      "completed": true,
+      "points": [
+        11,
+        9
+      ],
+      "winner": 0,
+      "simulatedSeconds": 862.6249999993798,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 16.834146341451188,
+          "median": 15.083333333319615,
+          "p95": 33.533333333302835,
+          "max": 38.258333333301735
+        },
+        "rallyShots": {
+          "mean": 20.146341463414632,
+          "median": 17,
+          "p95": 42,
+          "max": 47
+        },
+        "shotsByType": {
+          "drive": 96,
+          "drop": 43,
+          "dink": 604,
+          "lob": 22,
+          "overhead": 20
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 96,
+            "meanQuality": 0.9834394302843107,
+            "meanDifficulty": 0.4399415434338057,
+            "meanNetMargin": 1.0226788416341361
+          },
+          "drop": {
+            "contacts": 43,
+            "meanQuality": 0.9946094526648595,
+            "meanDifficulty": 0.3555147389692282,
+            "meanNetMargin": 1.5849462494263655
+          },
+          "dink": {
+            "contacts": 604,
+            "meanQuality": 0.9812500819642269,
+            "meanDifficulty": 0.41144277638534593,
+            "meanNetMargin": 0.47997712892619154
+          },
+          "lob": {
+            "contacts": 22,
+            "meanQuality": 0.9502325531423774,
+            "meanDifficulty": 0.41110266893468594,
+            "meanNetMargin": 5.152533549933943
+          },
+          "overhead": {
+            "contacts": 20,
+            "meanQuality": 0.9947125947411942,
+            "meanDifficulty": 0.5122226066321434,
+            "meanNetMargin": 2.8121833002761196
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 14,
+          "Net fault": 24,
+          "Out": 2,
+          "Double bounce": 1
+        },
+        "faultsByShot": {
+          "Unreturned / overhead": 5,
+          "Net fault / dink": 24,
+          "Out / drive": 2,
+          "Unreturned / lob": 2,
+          "Unreturned / drive": 7,
+          "Double bounce / dink": 1
+        },
+        "transitionByShot": {},
+        "kitchenSeconds": 690.1999999995367,
+        "bothTeamsKitchenSeconds": 563.0916666663189,
+        "transitionSeconds": 275.61666666658033
+      }
+    },
+    {
+      "level": "advanced",
+      "seed": 31,
+      "completed": true,
+      "points": [
+        11,
+        4
+      ],
+      "winner": 0,
+      "simulatedSeconds": 1197.0833333347703,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 19.72516666668699,
+          "median": 14.008333333320593,
+          "p95": 44.64999999995939,
+          "max": 54.26666666661731
+        },
+        "rallyShots": {
+          "mean": 23.34,
+          "median": 16,
+          "p95": 53,
+          "max": 65
+        },
+        "shotsByType": {
+          "drive": 91,
+          "drop": 49,
+          "dink": 920,
+          "lob": 33,
+          "overhead": 24
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 91,
+            "meanQuality": 0.9839826991695426,
+            "meanDifficulty": 0.3451070708886097,
+            "meanNetMargin": 0.3729103196425543
+          },
+          "drop": {
+            "contacts": 49,
+            "meanQuality": 0.9967140525097559,
+            "meanDifficulty": 0.3110154592741764,
+            "meanNetMargin": 1.862853575886565
+          },
+          "dink": {
+            "contacts": 920,
+            "meanQuality": 0.9921879458594417,
+            "meanDifficulty": 0.33677377969569616,
+            "meanNetMargin": 0.4921893890893045
+          },
+          "lob": {
+            "contacts": 33,
+            "meanQuality": 0.993970470511068,
+            "meanDifficulty": 0.3379397430953286,
+            "meanNetMargin": 4.938956699983804
+          },
+          "overhead": {
+            "contacts": 24,
+            "meanQuality": 0.9951249810071724,
+            "meanDifficulty": 0.5249344856320793,
+            "meanNetMargin": 2.328527721594315
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 30,
+          "Out": 4,
+          "Net fault": 16
+        },
+        "faultsByShot": {
+          "Unreturned / lob": 9,
+          "Unreturned / drive": 8,
+          "Out / drive": 3,
+          "Unreturned / overhead": 13,
+          "Net fault / dink": 15,
+          "Out / dink": 1,
+          "Net fault / drive": 1
+        },
+        "transitionByShot": {},
+        "kitchenSeconds": 986.2583333326007,
+        "bothTeamsKitchenSeconds": 819.2749999994193,
+        "transitionSeconds": 406.2666666664615
+      }
+    },
+    {
+      "level": "advanced",
+      "seed": 32,
+      "completed": true,
+      "points": [
+        11,
+        5
+      ],
+      "winner": 0,
+      "simulatedSeconds": 864.341666666045,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 18.54517543858343,
+          "median": 17.149999999984402,
+          "p95": 38.600000000012514,
+          "max": 40.96666666662941
+        },
+        "rallyShots": {
+          "mean": 21.63157894736842,
+          "median": 20,
+          "p95": 46,
+          "max": 49
+        },
+        "shotsByType": {
+          "drive": 54,
+          "drop": 38,
+          "dink": 651,
+          "lob": 25,
+          "overhead": 16
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 54,
+            "meanQuality": 0.991110730750631,
+            "meanDifficulty": 0.3189624410893479,
+            "meanNetMargin": 0.36665706248705615
+          },
+          "drop": {
+            "contacts": 38,
+            "meanQuality": 0.9969360363173586,
+            "meanDifficulty": 0.31108472681911403,
+            "meanNetMargin": 1.9024211509384013
+          },
+          "dink": {
+            "contacts": 651,
+            "meanQuality": 0.9920040179324054,
+            "meanDifficulty": 0.3269976083607952,
+            "meanNetMargin": 0.4875545770349031
+          },
+          "lob": {
+            "contacts": 25,
+            "meanQuality": 0.9946147353859695,
+            "meanDifficulty": 0.352260010762546,
+            "meanNetMargin": 4.733162032423534
+          },
+          "overhead": {
+            "contacts": 16,
+            "meanQuality": 0.9954641507115277,
+            "meanDifficulty": 0.5216293439863406,
+            "meanNetMargin": 2.3186307226765708
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 24,
+          "Net fault": 12,
+          "Out": 2
+        },
+        "faultsByShot": {
+          "Unreturned / overhead": 9,
+          "Net fault / dink": 12,
+          "Unreturned / lob": 9,
+          "Unreturned / drive": 6,
+          "Out / drive": 2
+        },
+        "transitionByShot": {},
+        "kitchenSeconds": 704.7166666661901,
+        "bothTeamsKitchenSeconds": 575.7333333329741,
+        "transitionSeconds": 282.83333333324043
+      }
+    },
+    {
+      "level": "advanced",
+      "seed": 33,
+      "completed": true,
+      "points": [
+        11,
+        3
+      ],
+      "winner": 0,
+      "simulatedSeconds": 828.9333333327438,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 20.187499999986,
+          "median": 16.924999999984607,
+          "p95": 40.341666666629976,
+          "max": 98.0500000000255
+        },
+        "rallyShots": {
+          "mean": 23.764705882352942,
+          "median": 20,
+          "p95": 50,
+          "max": 116
+        },
+        "shotsByType": {
+          "drive": 59,
+          "drop": 35,
+          "dink": 640,
+          "lob": 24,
+          "overhead": 16
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 59,
+            "meanQuality": 0.9911651609558378,
+            "meanDifficulty": 0.32104636948559195,
+            "meanNetMargin": 0.3597561570735964
+          },
+          "drop": {
+            "contacts": 35,
+            "meanQuality": 0.9891210540425123,
+            "meanDifficulty": 0.31744206683401527,
+            "meanNetMargin": 2.1943097782953633
+          },
+          "dink": {
+            "contacts": 640,
+            "meanQuality": 0.9914686746338385,
+            "meanDifficulty": 0.3384867230506892,
+            "meanNetMargin": 0.4948419827482106
+          },
+          "lob": {
+            "contacts": 24,
+            "meanQuality": 0.970338610751881,
+            "meanDifficulty": 0.3585264967276583,
+            "meanNetMargin": 5.274359884019611
+          },
+          "overhead": {
+            "contacts": 16,
+            "meanQuality": 0.9785296323018534,
+            "meanDifficulty": 0.5265899953922321,
+            "meanNetMargin": 2.296896971227098
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 20,
+          "Net fault": 12,
+          "Out": 2
+        },
+        "faultsByShot": {
+          "Unreturned / lob": 8,
+          "Net fault / dink": 12,
+          "Out / dink": 1,
+          "Unreturned / overhead": 8,
+          "Unreturned / drive": 4,
+          "Out / drive": 1
+        },
+        "transitionByShot": {
+          "drop": 1
+        },
+        "kitchenSeconds": 686.3749999995401,
+        "bothTeamsKitchenSeconds": 569.8333333329795,
+        "transitionSeconds": 280.31666666657605
+      }
+    },
+    {
+      "level": "advanced",
+      "seed": 34,
+      "completed": true,
+      "points": [
+        11,
+        6
+      ],
+      "winner": 0,
+      "simulatedSeconds": 1194.7000000014066,
+      "summary": {
+        "matches": 1,
+        "completed": true,
+        "rallyDurations": {
+          "mean": 21.759601449300508,
+          "median": 15.824999999985607,
+          "p95": 49.649999999954844,
+          "max": 93.04999999991537
+        },
+        "rallyShots": {
+          "mean": 25.369565217391305,
+          "median": 19,
+          "p95": 60,
+          "max": 114
+        },
+        "shotsByType": {
+          "drive": 77,
+          "drop": 48,
+          "dink": 964,
+          "lob": 24,
+          "overhead": 8
+        },
+        "qualityByType": {
+          "drive": {
+            "contacts": 77,
+            "meanQuality": 0.9916620298909724,
+            "meanDifficulty": 0.3342749156319594,
+            "meanNetMargin": 0.36809219082896394
+          },
+          "drop": {
+            "contacts": 48,
+            "meanQuality": 0.985611227849315,
+            "meanDifficulty": 0.31481769389955855,
+            "meanNetMargin": 2.7278211646263295
+          },
+          "dink": {
+            "contacts": 964,
+            "meanQuality": 0.9927182033276609,
+            "meanDifficulty": 0.328121751717013,
+            "meanNetMargin": 0.48842532005325967
+          },
+          "lob": {
+            "contacts": 24,
+            "meanQuality": 0.9949116836887658,
+            "meanDifficulty": 0.332846597043784,
+            "meanNetMargin": 5.255953003485483
+          },
+          "overhead": {
+            "contacts": 8,
+            "meanQuality": 0.9957155581776401,
+            "meanDifficulty": 0.5040580662844857,
+            "meanNetMargin": 2.261479877475661
+          }
+        },
+        "faultsByReason": {
+          "Unreturned": 30,
+          "Out": 1,
+          "Net fault": 15
+        },
+        "faultsByShot": {
+          "Unreturned / overhead": 4,
+          "Out / dink": 1,
+          "Net fault / dink": 14,
+          "Unreturned / lob": 16,
+          "Unreturned / drive": 10,
+          "Net fault / drive": 1
+        },
+        "transitionByShot": {
+          "drop": 1
+        },
+        "kitchenSeconds": 1000.9416666659207,
+        "bothTeamsKitchenSeconds": 840.5749999993999,
+        "transitionSeconds": 410.16666666645796
+      }
+    }
+  ]
+}

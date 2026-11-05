@@ -2,7 +2,7 @@ import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js';
 import {createProfileRenderer} from './profile-athlete.js';
 import {sampleMatchAnimation} from './match-animation.js';
 import {playerFeet} from './player-feet.js';
-import {drawContactCue,replayContactAt} from './contact-cues.js';
+import {drawContactCue,replayContactAt} from './contact-cues.js';import {playerEmotionState} from './player-emotion.js';
 
 const MAX_REPLAY_Z=24;
 export function sideReplayProjection(width,height,maxZ=16){
@@ -47,7 +47,7 @@ export function createSideReplayRenderer(createCanvas){
    const feet3D=playerFeet(p).map(foot=>({x:(foot.x-p.x)*units,y:63-(2+foot.z*units)/stature,z:(foot.y-p.y)*direction*units}));
    const contact3D=p.animationContactStart&&p.swing>0&&p.contactPoint?{x:(p.contactPoint.x-p.x)*units,y:63-p.contactPoint.z*units/stature,z:(p.contactPoint.y-p.y)*direction*units}:null;
    c.fillStyle='#071c2740';c.beginPath();c.ellipse(q.x,q.y,scale*.7,scale*.14,0,0,Math.PI*2);c.fill();
-   drawProfile(c,d,mode,phase,q.x,q.y,scale/units,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,emotion:p.mishit&&p.swing>0?'reaction':p.swing>0||moving?'effort':'focus',sweat:1-(p.stamina??1),emotionClock:snapshot.clock});
+   drawProfile(c,d,mode,phase,q.x,q.y,scale/units,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,...(()=>{const state=playerEmotionState(p,{phase:'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:null});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
   }
   drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});
   if(snapshot.bounceMark?.time>0){const p=project(snapshot.bounceMark.x,snapshot.bounceMark.y);c.strokeStyle='#fff6ba';c.lineWidth=scale*.05;c.beginPath();c.ellipse(p.x,p.y,scale*.45,scale*.15,0,0,Math.PI*2);c.stroke()}

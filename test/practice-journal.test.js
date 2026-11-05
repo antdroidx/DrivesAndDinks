@@ -7,8 +7,7 @@ import {PracticeSession,PRACTICE_DRILLS,finishPracticeFeed} from '../src/practic
 
 function practice(id='return',seed=17){const g=new Game({seed});g.configure({});g.startPractice(id);g.recordReplay=()=>{};return g}
 function complete(g,respond=false){
- g.shot=g.practice.id==='return'?'attack':'soft';
- for(let tick=0;tick<24000&&g.phase!=='over';tick++){if(respond&&g.canHumanHit())g.swing();g.update(C.dt)}
+ for(let tick=0;tick<24000&&g.phase!=='over';tick++){if(respond&&g.canHumanHit()){if(g.practice.id==='moving'){const z=g.practice.targetAt();g.aim=(z.left+z.right)/2}g.shot=g.practice.step.shot==='lob'?'lob':g.practice.step.shot==='drive'?'attack':'soft';g.swing()}g.update(C.dt)}
  assert.equal(g.phase,'over');assert.equal(g.practice.results.length,10);return g;
 }
 
@@ -20,9 +19,10 @@ test('every drill finishes ten missed feeds without awarding match points',()=>{
 
 test('practice feeds are reachable through normal movement and paddle contact',()=>{
  for(const id of Object.keys(PRACTICE_DRILLS)){
-  const g=complete(practice(id),true);assert.ok(g.practice.successes>=7,`${id}: ${g.practice.successes}`);
-  assert.equal(g.stats.shots[g.practice.drill.shot],10);assert.ok(g.practice.results.every(r=>r.landing));
-  if(id!=='return')for(const result of g.practice.results.filter(r=>r.success))assert.ok(result.landing.y>15&&result.landing.y<22);
+   const g=complete(practice(id),true),sequence=g.practice.drill.sequence;assert.ok(g.practice.successes>=7,`${id}: ${g.practice.successes}`);
+   for(const current of sequence)assert.equal(g.stats.shots[current.shot],10,`${id}/${current.shot}`);
+   assert.ok(g.practice.results.every(r=>r.landing&&r.steps.length===sequence.length));
+   for(const result of g.practice.results.filter(r=>r.success)){const finalStep=result.steps.at(-1),last=finalStep.landing,expected=finalStep.target;assert.ok(last.x>=expected.left&&last.x<=expected.right&&last.y>=expected.top&&last.y<=expected.bottom)}
  }
 });
 
@@ -73,4 +73,21 @@ test('finished practice report is serializable and includes each attempt without
  const g=complete(practice('reset'),true),report=JSON.parse(JSON.stringify(g.matchReport()));g.update(5);assert.equal(g.matchReport().elapsed,report.elapsed);
  assert.equal(report.schemaVersion,1);assert.equal(report.mode,'practice');assert.equal(report.complete,true);assert.equal(report.practice.completed,10);assert.equal(report.score.winner,null);assert.deepEqual(report.players.map(p=>p.id),[0,2]);assert.equal(report.journal.rallies.length,10);
  assert.ok(report.journal.events.some(e=>e.type==='hit'&&e.placement&&e.position));
+});
+
+test('moving target stays bounded while its lane changes over time',()=>{
+ const session=new PracticeSession('moving',4),first=session.targetAt(0),later=session.targetAt(.75);
+ assert.ok(first.left>=0&&first.right<=20);
+ assert.notEqual(first.left,later.left);
+ assert.ok(later.left>=0&&later.right<=20);
+ assert.deepEqual(session.targetAt(6),first);
+});
+
+test('transition drills score every step and only complete after the final landing',()=>{
+ const g=practice('transition',23);g.phase='rally';g.practice.state='feed';g.last=0;g.practice.returnedShot='drop';
+ g.ball={x:10,y:18,z:.126,vx:0,vy:0,vz:-1};g.update(C.dt);
+ assert.equal(g.practice.results.length,0);assert.equal(g.practice.sequenceIndex,1);assert.equal(g.practice.state,'between');
+ g.practice.state='feed';g.practice.returnedShot='drive';g.ball={x:10,y:5,z:.126,vx:0,vy:0,vz:-1};g.update(C.dt);
+ assert.equal(g.practice.results.length,1);assert.equal(g.practice.results[0].success,true);
+ assert.deepEqual(g.practice.results[0].steps.map(step=>step.expectedShot),['drop','drive']);
 });

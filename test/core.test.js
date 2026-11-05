@@ -31,7 +31,7 @@ test('CPU selects a deep return, a third-shot drop and kitchen dinks',()=>{asser
 test('serving team stays back while awaiting the return',()=>{const g=new Game();completeToss(g);const mate=g.players.find(p=>p.team===g.score.team&&p!==g.server);for(let i=0;i<30&&g.phase==='rally';i++)g.update(C.dt);assert.ok(mate.y>38)});
 
 
-test('seeded watch match reaches a legal winning score',()=>{const original=Math.random;let seed=123456;Math.random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};try{const g=new Game();g.mode='watch';let maxShots=0;for(let i=0;i<120*1200&&g.phase!=='over';i++){g.update(C.dt);maxShots=Math.max(maxShots,g.shots)}assert.equal(g.phase,'over');assert.ok(maxShots>=3);const [a,b]=g.score.points;assert.ok(Math.max(a,b)>=11&&Math.abs(a-b)>=2)}finally{Math.random=original}});
+test('seeded watch match reaches a legal winning score',()=>{const original=Math.random;let seed=123456;Math.random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};try{const g=new Game();g.mode='watch';let maxShots=0;for(let i=0;i<120*2400&&g.phase!=='over';i++){g.update(C.dt);maxShots=Math.max(maxShots,g.shots)}assert.equal(g.phase,'over');assert.ok(maxShots>=3);const [a,b]=g.score.points;assert.ok(Math.max(a,b)>=11&&Math.abs(a-b)>=2)}finally{Math.random=original}});
 
 
 test('serve returner starts behind the baseline and approaches the return',()=>{for(const team of [0,1]){const g=new Game();g.mode='watch';g.score.team=team;g.serveSetup();const r=g.serveReceiver,startY=r.y;assert.ok(r.team===0?startY>44:startY<0);completeToss(g);for(let i=0;i<110&&g.phase==='rally'&&g.bounces===0;i++){g.update(C.dt);assert.ok(r.y>=-3&&r.y<=47)}assert.ok(r.team===0?r.y<startY:r.y>startY)}});

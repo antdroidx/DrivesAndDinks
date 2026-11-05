@@ -54,10 +54,10 @@ export function waitForRisingContact(player,ball,target){
  return false;
 }
 
-export function chooseCpuPlacement(player,opponents,shot){
+export function chooseCpuPlacement(player,opponents,shot,{pattern=null,shots=0}={}){
   const soft=shot==='dink'||shot==='drop',near=player.team===0;
   const depth=shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4;
-  const candidates=[3,7,10,13,17].map(x=>({x,y:near?depth:44-depth,intent:'open-court'}));
+  const candidates=[3,7,10,13,17].map(x=>({x,y:near?depth:44-depth,intent:shot==='dink'&&Math.abs(x-player.x)>4?'short-angle':shot==='drive'?(Math.abs(x-player.x)>5?'inside-out':'crosscourt'):'open-court'}));
   if(['drive','overhead','dink'].includes(shot))for(const opponent of opponents){
     const y=near?clamp(opponent.y+.6,4,17):clamp(opponent.y-.6,27,40);
     if(!soft||Math.abs(y-(near?14:30))<2)candidates.push({x:clamp(opponent.x,3,17),y,intent:'feet'});
@@ -75,7 +75,7 @@ export function chooseCpuPlacement(player,opponents,shot){
     const style=player.ratingStyle??'balanced',feet=target.intent==='feet'&&Math.abs(target.x-o.x)<1.5?(style==='net'?2.2:style==='banger'?1.9:1.6):0;
     const crossCourt=style==='soft'?Math.abs(target.x-player.x)*.035:0;
     const backhand=(target.x-o.x)*(o.team===0?1:-1)<0&&anticipation>.3?.2:0;
-    return (gap+reversal*(style==='speed'?1.4:1)+feet+crossCourt+backhand)/Math.max(.7,(o.abilities?.speed??C.speed)/C.speed);
+    const wrongFoot=Math.abs(target.x-(pattern?.expectedX??target.x))*Math.max(0,Math.min(.85,pattern?.confidence??0))*.32;return (gap+reversal*(style==='speed'?1.4:1)+feet+crossCourt+backhand+wrongFoot)/Math.max(.7,(o.abilities?.speed??C.speed)/C.speed);
   }));
   return candidates.reduce((best,target)=>value(target)>value(best)?target:best,candidates[0]);
 }
@@ -159,13 +159,13 @@ export function cpuServePlan(player,receiver,random=.5){
  const laneChoice=random<.42?receiver.x:random<.72?center-2.2:center+2.2;
  const aim=clamp(laneChoice,center-5+margin,center+5-margin);
  const depth=clamp(6.5-(skill-1)*2-(iq-1)+ (type==='soft'?1:0),4.5,9);
- return {type,aim,y:player.team===0?depth:44-depth,intent:'serve-placement'};
+ const styleRoll=(random*3.17)%1,style=styleRoll<.25?'body':styleRoll<.5?'wide':styleRoll<.75?'crosscourt':'depth';const curve=(style==='crosscourt'?.9:style==='wide'?-.7:0)*clamp((skill-1)*.4+.55,.3,1)*(player.team===0?1:-1);return {type,style,aim,y:player.team===0?depth:44-depth,intent:'serve-'+style,curve};
 }
 
-export function serveReturnTarget(player,opponents,shot,{difficulty=0}={}){
+export function serveReturnTarget(player,opponents,shot,{difficulty=0,pattern=null,shots=0}={}){
  // Keep returns moving to the opposite-side gap while retaining a controlled,
  // shot-specific depth instead of using the generic rally placement model.
- const near=player.team===0,openCourt=chooseCpuPlacement(player,opponents,shot);
+ const near=player.team===0,openCourt=chooseCpuPlacement(player,opponents,shot,{pattern,shots});
  const control=player.abilities?.control??1,iq=player.abilities?.courtIQ??1;
  const depthControl=clamp(.5+(control-1)*.15+(iq-1)*.12-clamp(difficulty,0,1)*.25,.2,.65);
  const depth=shotDepthTarget(player.team,shot,depthControl);

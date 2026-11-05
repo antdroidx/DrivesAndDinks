@@ -20,7 +20,7 @@ test('profile athletes draw connected limbs through every shared motion and body
 });
 
 test('profile faces support the existing hairstyles, headwear and expressions',()=>{
- for(const d of CHARACTER_CONCEPTS)for(const hair of HAIR_OPTIONS[d.body])for(const headwear of ['none','cap','visor','headband'])for(const emotion of ['focus','effort','reaction','smile']){
+ for(const d of CHARACTER_CONCEPTS)for(const hair of HAIR_OPTIONS[d.body])for(const headwear of ['none','cap','visor','headband'])for(const emotion of ['focus','effort','fatigue','surprise','aggression','happy']){
   const c=context();drawProfileAthlete(c,{...d,hair:hair.id,headwear,eyewear:'glasses'},'forehand',.52,100,200,2,{direction:-1,emotion,sweat:.5,emotionClock:1});assert.equal(c.depth,0);
  }
 });

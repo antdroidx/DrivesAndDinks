@@ -43,12 +43,12 @@ The older checkout had staged tracked changes. Those were preserved in local sta
 | Opponent pattern memory | Yes | Match-local bounded memory and wrong-footing tests | Evaluate whether human opponents notice it and whether more tactical memory is useful |
 | Singles braking and approach decisions | Yes | Readiness, passing, interception-priority and bounce tests | Human playtests across body types and skill levels |
 | Body and physique tradeoffs | Yes | 96-match body matrix and 40 separate-seed doubles matches | Tall/broad singles calibration remains open; do not force parity without human evidence |
-| Repeatable practice drills | Partial | Deep return, third-shot drop, kitchen reset | Moving targets, lob recovery and multi-shot sequences |
+| Repeatable practice drills | Yes | Six deterministic drills, including moving target and two-contact transition sequences | Human teaching-quality review |
 | Replay presentation and contact readability | Yes | Sideline profiles, contact labels, close-call review tests | Physical-device review |
-| Rendered mobile performance and touch ergonomics | No | Viewport and input tests; desktop Node CPU profile only | Real low-powered phone/browser measurements |
-| Layout and CSS consolidation | Partial | Dialog, camera, portrait and landscape regression tests | Accumulated override cleanup and visual regression coverage |
+| Rendered mobile performance and touch ergonomics | Harness ready | Browser frame/render/input probe and responsive input tests | Real low-powered phone/browser measurements |
+| Layout and CSS consolidation | Yes for current scope | Zoom-safe dialog tests, responsive geometry tests and invalid override removal | Physical-device visual review |
 | Career progression and persistence | No | Intentionally deferred | Later product expansion |
-| Varied shot trajectories and tactical patterns | Partial | Several shot types and open-court placement | Gameplay currently creates mostly fixed arcs with vertical spin; CPU choices are probability-based |
+| Varied shot trajectories and tactical patterns | Yes for current scope | Curve-aware serves and rally shots, pattern labels, high-dink speed-ups and bounded late-rally attacks | Human-calibrated tactical variety |
 
 ## Current validation evidence
 
@@ -69,3 +69,28 @@ The older checkout had staged tracked changes. Those were preserved in local sta
 5. Add multi-shot practice and layout cleanup after the core match loop stops raising pacing or control concerns.
 
 See `ROADMAP.md` for sequencing and acceptance criteria.
+## Post-143 roadmap implementation
+
+The actionable roadmap work is implemented on `codex/post-143-engine-audit`.
+
+- Match reports now include a derived playtest summary, and `PLAYTEST.md` provides the human/device scorecard.
+- `scripts/diagnose-pacing.js` measures rally duration, shot share, contact quality, net margin, kitchen time, transition decisions and unreturned context without consuming gameplay randomness.
+- Dink height now varies with poor or rushed contact. High dinks can float visibly and become speed-up opportunities only when balance, pressure and partner readiness permit. Ordinary attackable high balls remain independent of that heuristic.
+- Serve and rally shots use bounded lateral curve and named patterns. Opponent-memory confidence affects placement and CPU choice.
+- Practice adds Lob recovery, Moving target and a two-contact Transition sequence alongside the original drills.
+- Live and replay characters show focused, effort, fatigue, surprise, aggression and happiness states. Sweat intensity follows stamina, effort and rally load.
+- `?test=performance` displays frame/render timing and exposes `window.__DRIVES_DINKS_PERFORMANCE__()` for frame, render, input, long-task and canvas-cost measurements.
+- Browser zoom remains available, dialogs retain scrolling, and the invalid nested media selector is removed.
+
+Paired pacing evidence uses seeds 31–34 at Beginner, Intermediate, Demo and Advanced in doubles:
+
+| Metric | Before | After |
+| --- | ---: | ---: |
+| Completed within 40 minutes | 16/16 | 16/16 |
+| Dink share | 73.4% | 56.2% |
+| Dink net faults | 251 | 6 |
+| Rally duration p95 | 27.0 s | 20.2 s |
+| Longest rally | 41.6 s | 23.8 s |
+| Rally shots p95 | 31.8 | 25.8 |
+
+These are correlated CPU samples. The remaining gates are human playtests from `PLAYTEST.md`, real low-powered phone measurements, broader independent body/archetype samples, and visual review of the new facial states. Career progression and persistence remain the later product expansion.

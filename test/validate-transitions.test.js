@@ -9,7 +9,7 @@ test('seed ranges are explicit, deduplicated and validated',()=>{
 
 test('instrumentation preserves complete seeded watch-match outcomes',async()=>{
  const engine=await loadEngine();
- const tracked=runMatch(engine,{seed:2,level:'demo'}),plain=runMatch(engine,{seed:2,level:'demo',instrument:false,maxSeconds:2400});
+ const tracked=runMatch(engine,{seed:2,level:'demo',maxSeconds:2400}),plain=runMatch(engine,{seed:2,level:'demo',instrument:false,maxSeconds:2400});
  assert.equal(tracked.completed,true);
  for(const key of ['points','winner','stats','tactics','simulatedSeconds'])assert.deepEqual(tracked[key],plain[key],key);
  assert.equal(tracked.rallies.length,tracked.stats.rallies);
