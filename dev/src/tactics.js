@@ -1,5 +1,5 @@
-import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds} from './core.js?v=141';
-import {kitchenContact} from './player-feet.js?v=141';
+import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js?v=142';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=142';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -10,31 +10,33 @@ export function volleyBrakeTarget(player,target){
  // Use conservative reversal braking from move(), with clearance for a shoe sole.
  const braking=towardNet*towardNet/(2*acceleration*1.5*.62*.85);
  const safeY=player.team===0?29.85+braking:14.15-braking;
- return {...target,x:player.volleyMomentum&&towardNet>.8?player.x:target.x,y:player.team===0?Math.max(target.y,safeY):Math.min(target.y,safeY)};
+ const settling=player.volleyMomentum&&(player.team===0?player.y<=safeY+1:player.y>=safeY-1);
+ return {...target,x:player.volleyMomentum&&(settling||towardNet>.8)?player.x:target.x,y:player.team===0?Math.max(target.y,safeY):Math.min(target.y,safeY),...(settling?{brake:true}:{})};
 }
 
 export function safeVolleyRecovery(player,swingDuration=.36){
- const p={...player,stamina:Math.max(0,(player.stamina??1)-.075/Math.max(.65,player.abilities?.endurance??1)),swing:swingDuration,volleyMomentum:true};
+ const p={...player,stamina:Math.max(0,(player.stamina??1)-.075/Math.max(.65,player.abilities?.endurance??1)),swing:swingDuration,swingDuration,volleyMomentum:true};
  for(let tick=0;tick<120;tick++){
    p.swing=Math.max(0,p.swing-C.dt);p.airborneTimer=Math.max(0,(p.airborneTimer||0)-C.dt);
    const target=volleyBrakeTarget(p,{x:p.x,y:kitchen(p.team)});
-   move(p,target.x,target.y,C.dt);
-   if(kitchenContact(p))return false;
-   const towardNet=(p.vy||0)*(p.team===0?-1:1);
-   if(towardNet<=.05&&!p.airborneTimer&&p.swing<=swingDuration*.45)return true;
+   move(p,target.x,target.y,C.dt,target.brake);
+   if(volleyMomentumFault(p))return false;
+   if(!p.volleyMomentum)return true;
  }
  return false;
 }
 
 // Run a private copy through the live movement integrator. Planning must respect
 // momentum, reaction delay, stroke recovery, body abilities and current stamina.
-export function forecastMovement(player,target,time){
+export function forecastMovement(player,target,time,{volley=false}={}){
   const p={...player,vx:player.vx||0,vy:player.vy||0};
   let remaining=time;
   while(remaining>1e-9){
     const dt=Math.min(C.dt,remaining);remaining-=dt;
-    for(const key of ['reactionWait','recoveryTimer','splitStepTimer','swing'])p[key]=Math.max(0,(p[key]||0)-dt);
-    move(p,p.reactionWait>0?p.x:target.x,p.reactionWait>0?p.y:target.y,dt);
+    for(const key of ['reactionWait','recoveryTimer','splitStepTimer','swing','airborneTimer'])p[key]=Math.max(0,(p[key]||0)-dt);
+    const destination=p.volleyMomentum||volley?volleyBrakeTarget(p,target):target;
+    move(p,p.reactionWait>0?p.x:destination.x,p.reactionWait>0?p.y:destination.y,dt,p.reactionWait>0?false:destination.brake);
+    volleyMomentumFault(p);
   }
   return p;
 }
@@ -95,7 +97,7 @@ function contacts(players,team,ball,shots,bounces){
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
       const reach=C.reach*(p.abilities?.reach??1),speed=p.abilities?.speed??C.speed;
       if(travel>time*Math.max(speed,Math.hypot(p.vx||0,p.vy||0))+reach)continue;
-      const projected=forecastMovement(p,target,time);
+      const projected=forecastMovement(p,target,time,{volley:count===0});
       const shot=future.z>=5.2*(p.physique?.heightScale??1)?'overhead':'drive';
       if(paddleContactAvailable(projected,future,shot)&&(count>0||!kitchenContact(projected)))found.set(p.id,{...target,z:future.z,time,bounces:count});
     }
@@ -125,6 +127,28 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   return {shot:shots,receiverId:selected.id,point:point||landing,poach,created:clock,expires:clock+(point?.time??.65)+.2};
 }
 
+export function cpuServePlan(player,receiver,random=.5){
+ const skill=clamp(player.abilities?.serve??1,.55,1.45),iq=clamp(player.abilities?.courtIQ??1,.55,1.45);
+ const aggression=clamp(player.playstyle?.aggression??player.abilities?.aggression??.7,0,1.3);
+ const type=random<clamp(.28+(1-skill)*.45-aggression*.12,.08,.5)?'soft':'hard';
+ const center=player.x<10?15:5,margin=clamp(2.4-(skill-1)*1.4,1.7,3);
+ // Deliberate body/wide variation stays within the diagonal service box.
+ const laneChoice=random<.42?receiver.x:random<.72?center-2.2:center+2.2;
+ const aim=clamp(laneChoice,center-5+margin,center+5-margin);
+ const depth=clamp(6.5-(skill-1)*2-(iq-1)+ (type==='soft'?1:0),4.5,9);
+ return {type,aim,y:player.team===0?depth:44-depth,intent:'serve-placement'};
+}
+
+export function serveReturnTarget(player,opponents,shot,{difficulty=0}={}){
+ // Keep returns moving to the opposite-side gap while retaining a controlled,
+ // shot-specific depth instead of using the generic rally placement model.
+ const near=player.team===0,openCourt=chooseCpuPlacement(player,opponents,shot);
+ const control=player.abilities?.control??1,iq=player.abilities?.courtIQ??1;
+ const depthControl=clamp(.5+(control-1)*.15+(iq-1)*.12-clamp(difficulty,0,1)*.25,.2,.65);
+ const depth=shotDepthTarget(player.team,shot,depthControl);
+ const y=near?clamp(depth,4,17.5):clamp(depth,26.5,40);
+ return {x:openCourt.x,y,intent:'serve-return'};
+}
 export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players=[],opponentContactIn=Infinity}){
  const team=p.team,near=team===0,x=clamp(10+(ball.x-10)*.25,5,15);
  if(shots<=2&&team===servingTeam)return {x:10,y:near?41:3,role:'hold'};
@@ -172,6 +196,19 @@ export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingT
       y=team===0?Math.max(y,partner.y-3):Math.min(y,partner.y+3);
       role='approach-together';
     }
+    const hitter=players.find(other=>other.id===lastHitter);
+    const transition=team===servingTeam&&shots>=3&&partner&&hitter&&[p,partner].some(other=>team===0?other.y>33:other.y<11);
+    if(transition&&((hitter.lastShotQuality??1)<.8||(hitter.contactDifficulty??0)>.7)){
+      // A weak approach buys no safe advance: recover level with the deeper
+      // teammate and reset on the next ball rather than charging independently.
+      y=team===0?Math.max(p.y,partner.y):Math.min(p.y,partner.y);
+      role='transition-hold';
+    }
+    const acceleration=(p.abilities?.acceleration??C.accel)*(.78+.22*(p.stamina??1));
+    const stopTime=Math.hypot(p.vx||0,p.vy||0)/(acceleration*1.5*.85);
+    if(opponentContactIn>=0&&opponentContactIn<=stopTime+.1&&intelligence>=.85){
+      return {x:p.x,y:p.y,brake:true,role:'doubles-set'};
+    }
   }
   return {x,y,role};
 }
@@ -184,13 +221,14 @@ export function separateTargets(entries,team,receiverId){
   const t=clamp(((support.target.x-start.x)*dx+(support.target.y-start.y)*dy)/(dx*dx+dy*dy||1),0,1);
   const closest={x:start.x+dx*t,y:start.y+dy*t};
   const gap=Math.hypot(support.target.x-closest.x,support.target.y-closest.y);
-  if(gap<3.6){
+  if(gap<3.8){
     const direction=lane(support.player)<lane(active.player)?-1:1;
-    support.target.x=clamp(closest.x+direction*3.6,.5,19.5);
-    support.target.y=clamp(closest.y+(team===0?1.6:-1.6),team===0?23:0,team===0?47:21);
-    support.target.role='yield-contact';
+    support.target.x=clamp(closest.x+direction*3.9,.5,19.5);
+    support.target.y=clamp(closest.y+(team===0?1.9:-1.9),team===0?23:0,team===0?47:21);
+    support.target.role='cover-open-court';
   }
 }
+
 
 export function separatePartners(players,team,receiverId){
   const pair=players.filter(p=>p.team===team),[a,b]=pair;

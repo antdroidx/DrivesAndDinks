@@ -1,4 +1,4 @@
-import {netHeightAt,C} from './core.js?v=141';
+import {netHeightAt,C} from './core.js?v=142';
 
 export class ReplayClock{
  constructor(){this.start(0)}
@@ -32,12 +32,52 @@ export function replayTiming(clip){
  return {start,end,review,slowStart,slowEnd,rate,lead,slow,hold,duration:lead+slow+end-slowEnd+hold};
 }
 export function replayRateAt(clip,elapsed){const t=replayTiming(clip);return t&&elapsed>=t.lead&&elapsed<t.lead+t.slow?t.rate:1}
-export function faultReplaySample(clip,elapsed){
+function renewedMarker(low,high){
+ return high&&(!low||high.time>low.time||['x','y','z','playerId','shot'].some(key=>high[key]!==low[key]));
+}
+function replayDiscontinuity(low,high){
+ // Older recordings omit the bounce counter. A new/renewed marker still
+ // identifies the impact, including a second bounce at the same location.
+ const a=low.ball,b=high.ball;
+ const netImpact=Boolean(a?.netContact)!==Boolean(b?.netContact);
+ // Posts have no persistent impact flag. stepBall reverses vy and stores the
+ // crossing x/z on the terminal frame, before Game records the fault.
+ const postImpact=a&&b&&a.vy*b.vy<0&&(a.y-C.net)*(b.y-C.net)<=0&&b.z<C.netPostHeight+(b.radius??C.ballRadius)&&[C.netPostLeft,C.netPostRight].some(x=>Math.abs(b.x-x)<=C.netPostRadius);
+ return low.shots!==high.shots||low.bounces!==high.bounces||netImpact||postImpact||renewedMarker(low.contact,high.contact)||renewedMarker(low.bounceMark,high.bounceMark);
+}
+function interpolateFields(target,next,keys,alpha){
+ for(const key of keys)if(Number.isFinite(target?.[key])&&Number.isFinite(next?.[key]))target[key]+=(next[key]-target[key])*alpha;
+}
+function interpolateSnapshot(low,high,clock){
+ // Rendering owns every nested value it receives, even at exact frames and
+ // during the final hold. Recorded snapshots remain immutable source data.
+ const sample=structuredClone(low);sample.clock=clock;
+ if(high&&!replayDiscontinuity(low,high)){
+  const alpha=Math.max(0,Math.min(1,(clock-low.clock)/(high.clock-low.clock)));
+  interpolateFields(sample.ball,high.ball,['x','y','z','vx','vy','vz'],alpha);
+  for(const [index,player] of (sample.players??[]).entries()){
+   const next=player.id===undefined?high.players?.[index]:high.players?.find(p=>p.id===player.id);
+   if(!next)continue;
+   interpolateFields(player,next,['x','y','vx','vy','fx','fy','stride','stamina'],alpha);
+   // Countdown resets and new preparation/stroke modes are discrete events.
+   for(const key of ['swing','windup','airborneTimer','splitStepTimer','recoveryTimer']){
+    if(next[key]<=player[key])interpolateFields(player,next,[key],alpha);
+   }
+   if(player.preparation&&next.preparation&&['shotNumber','shot','stroke'].every(key=>player.preparation[key]===next.preparation[key]))interpolateFields(player.preparation,next.preparation,['phase'],alpha);
+  }
+  interpolateFields(sample,high,['timer'],alpha);
+ }
+ // Age only the already-visible cue; never reveal the next impact early.
+ for(const key of ['contact','bounceMark'])if(Number.isFinite(sample[key]?.time))sample[key].time=Math.max(0,sample[key].time-(clock-low.clock));
+ return sample;
+}
+export function faultReplaySample(clip,elapsed,interpolate=false){
  const timing=replayTiming(clip);if(!timing||elapsed>timing.duration)return null;
  const {start,end,slowEnd,lead,slow,rate}=timing,clock=Math.min(end,elapsed<=lead?start+Math.max(0,elapsed):elapsed<lead+slow?start+lead+(elapsed-lead)*rate:slowEnd+elapsed-lead-slow);
  let low=0,high=clip.frames.length-1;
  while(low<high){const middle=Math.ceil((low+high)/2);if(clip.frames[middle].clock<=clock)low=middle;else high=middle-1}
- return clip.frames[low];
+ if(!interpolate)return clip.frames[low];
+ return interpolateSnapshot(clip.frames[low],clip.frames[low+1],clock);
 }
 // Stationary overview replay: fault markers identify the call without zooming.
 export function faultReplayCamera(base,project=null){
