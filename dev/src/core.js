@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=146';
-import {strokeForContact} from './player-facing.js?v=146';
+import {kitchenContact} from './player-feet.js?v=147';
+import {strokeForContact} from './player-facing.js?v=147';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:2.833,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -8,7 +8,7 @@ export function paddleShapeModifiers(playerOrPaddle={}){
  const paddle=playerOrPaddle?.paddle??playerOrPaddle??{};
  return {power:paddle.shapePower??1,control:paddle.shapeControl??1,reach:paddle.shapeReach??1,handSpeed:paddle.shapeHandSpeed??1,sweetSpot:paddle.shapeSweetSpot??1};
 }
-export function playerProfile(){return {abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',shirtColor:'green',paddleColor:'mint',court:'blue-gray'}}}
+export function playerProfile(){return {handedness:'right',abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',shirtColor:'green',paddleColor:'mint',court:'blue-gray'}}}
 export function serveAim(player,aim){
  const value=Math.max(1,Math.min(19,Number(aim)||10));
  return player.x<10?Math.max(10.8,value):Math.min(9.2,value)

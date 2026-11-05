@@ -1,5 +1,5 @@
-import {competitionRecord} from './competition.js?v=146';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=146';
+import {competitionRecord} from './competition.js?v=147';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=147';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -177,7 +177,7 @@ export function generateIdentity({gender='male',skinColor=null,culture=null,rand
   return {name,culture:selectedCulture,skinColor:resolvedSkin,hairColor:randomItem(HAIR_COLORS,random).id,shirtColor:randomItem(CLOTHING_COLORS,random).id,paddleColor:randomItem(PADDLE_COLORS,random).id};
 }
 
-export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',hairColor:'brown',skinColor:'medium',court:'blue-gray'});
+export const DEFAULT_SELECTION = Object.freeze({character:'avery',gender:'male',handedness:'right',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',hairColor:'brown',skinColor:'medium',court:'blue-gray'});
 const valid=(items,id)=>items.some(item=>item.id===id)?id:null;
 export function normalizeSelection(input={}){
   const character=CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character;
@@ -185,6 +185,7 @@ export function normalizeSelection(input={}){
   return {
     character,
     gender:input?.gender==='male'||input?.gender==='female'?input.gender:CHARACTERS.find(c=>c.id===character).gender,
+    handedness:input?.handedness==='left'||input?.handedness==='right'?input.handedness:(input?.hand==='left'||input?.hand==='right'?input.hand:DEFAULT_SELECTION.handedness),
     customName:String(input?.customName??'').trim().slice(0,40),
     paddle:valid(PADDLES,input?.paddle)??DEFAULT_SELECTION.paddle,
     paddleShape:valid(PADDLE_SHAPES,input?.paddleShape)??DEFAULT_SELECTION.paddleShape,
@@ -199,7 +200,7 @@ export function buildProfile(input, options={}){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),shape=PADDLE_SHAPES.find(item=>item.id===selection.paddleShape);
   const identity=options.identity??generateIdentity({gender:selection.gender,skinColor:selection.skinColor,random:options.random??Math.random});
   const attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,Number.isFinite(options.attributes?.[key])?options.attributes[key]:character.ratings[key]))])),abilities=abilitiesFromRatings(attributes);
-  return {...playerProfile(),attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
+  return {...playerProfile(),handedness:selection.handedness,attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
@@ -211,7 +212,8 @@ export function createLineup(input,{random=Math.random}={}){
   return characters.map((character,index)=>{
     if(index===0){const p=buildProfile(selected,{identity:playerIdentity});p.appearance.height=160+Math.floor(random()*34);p.appearance.build=.15+random()*.7;p.appearance.hairStyle=randomItem(['crop','sidePart','waves','ponytail','buzz'],random);return p;}
     const gender=random()<.5?'male':'female',identity=generateIdentity({gender,culture:cpuCultures[index-1],random,usedNames});
-    const profile=buildProfile({...selected,character:character.id,gender,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});profile.appearance.height=160+Math.floor(random()*34);profile.appearance.build=.15+random()*.7;profile.appearance.hairStyle=randomItem(['crop','sidePart','waves','ponytail','buzz'],random);return profile;
+    const handedness=random()<.82?'right':'left';
+    const profile=buildProfile({...selected,character:character.id,gender,handedness,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});profile.appearance.height=160+Math.floor(random()*34);profile.appearance.build=.15+random()*.7;profile.appearance.hairStyle=randomItem(['crop','sidePart','waves','ponytail','buzz'],random);return profile;
   });
 }
 export function selectionStats(input){
@@ -231,7 +233,7 @@ export function levelLineup(level='demo',random=Math.random){
  const baseline=SKILL_LEVELS[level];if(baseline===undefined)throw new Error('Unknown skill level');
  return ['avery','remy','jordan','selena'].map((character,index)=>{
   const source=CHARACTERS.find(c=>c.id===character),attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,baseline+(source.ratings[key]-70)*.45))]));
-  return buildProfile({character,shirtColor:['green','white','orange','purple'][index],paddleColor:['mint','blue','yellow','coral'][index]},{attributes,random});
+  return buildProfile({character,handedness:index%3===1?'left':'right',shirtColor:['green','white','orange','purple'][index],paddleColor:['mint','blue','yellow','coral'][index]},{attributes,random});
  });
 }
 

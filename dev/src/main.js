@@ -1,39 +1,39 @@
-import {seededRandom} from './competition.js?v=146';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=146';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=146';
-import {playerFeet,footSole} from './player-feet.js?v=146';
+import {seededRandom} from './competition.js?v=147';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=147';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=147';
+import {playerFeet,footSole} from './player-feet.js?v=147';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=146';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=147';
 
-import {drawCourtNet} from './court-net.js?v=146';
+import {drawCourtNet} from './court-net.js?v=147';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=146';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=147';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=146';
+import {createAnimeGameRenderer} from './anime-game.js?v=147';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=146';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=147';
 
-import {setupCourtDisplay} from './court-display.js?v=146';
+import {setupCourtDisplay} from './court-display.js?v=147';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=146';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=147';
 
-import {courtCamera,courtAim,padControl} from './court-camera.js?v=146';
+import {courtCamera,courtAim,padControl} from './court-camera.js?v=147';
 
-import {movingStance} from './detailed-character.js?v=146';
+import {movingStance} from './detailed-character.js?v=147';
 
-import {sampleMatchAnimation} from './match-animation.js?v=146';
+import {sampleMatchAnimation} from './match-animation.js?v=147';
 
-import {setupSelection} from './selection.js?v=146';
+import {setupSelection} from './selection.js?v=147';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=146';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=147';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=146';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=147';
 
-import {Game} from './game.js?v=146';
+import {Game} from './game.js?v=147';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=146';import {playerEmotionState} from './player-emotion.js?v=146';import {PerformanceMonitor} from './performance-monitor.js?v=146';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=147';import {playerEmotionState} from './player-emotion.js?v=147';import {PerformanceMonitor} from './performance-monitor.js?v=147';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=146';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=147';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -166,7 +166,7 @@ function drawLoadoutPreview(selection){
 
  for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
 
- try{const drawn=drawPlayer(x,{personalize:true,designId:selectedDetailedDesign,appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',paddleShape:selection.paddleShape??'hybrid',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
+ try{const drawn=drawPlayer(x,{personalize:true,designId:selectedDetailedDesign,appearance,characterId:selection.character,handedness:selection.handedness,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',side:selection.handedness==='left'?-1:1,paddleShape:selection.paddleShape??'hybrid',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
 
 }
 
@@ -216,7 +216,8 @@ function drawSprite(p,q,game){
 
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
 
- drawPlayer(ctx,{feet:playerFeet(p).map(foot=>({...foot,screen:project(foot.x,foot.y,foot.z),sole:footSole(foot).map(([x,y])=>project(x,y,foot.z))})),personalize:p.id===0,designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth',...playerPresentation(p,game,animation)});
+ const handSide=p.handedness==='left'||p.hand==='left'?-1:1;
+ drawPlayer(ctx,{feet:playerFeet(p).map(foot=>({...foot,screen:project(foot.x,foot.y,foot.z),sole:footSole(foot).map(([x,y])=>project(x,y,foot.z))})),personalize:p.id===0,designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,handedness:p.handedness??'right',mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:handSide*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth',...playerPresentation(p,game,animation)});
 
  if(p.id===0&&game.mode==='play'){
 

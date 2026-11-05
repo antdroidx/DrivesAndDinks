@@ -35,6 +35,8 @@ function rating(player,key){
 }
 
 function average(players,key){return players.reduce((sum,p)=>sum+rating(p,key),0)/Math.max(1,players.length)}
+function handOf(player){return player?.handedness==='left'||player?.hand==='left'?'left':'right'}
+function preferredLaneFor(player,team){const left=handOf(player)==='left';return team===0?(left?15:5):(left?5:15)}
 function netScore(player){return rating(player,'volley')*.38+rating(player,'reach')*.22+rating(player,'power')*.18+rating(player,'courtIQ')*.12+rating(player,'aggression')*.1}
 function teamType(pair,metrics){
  const styles=pair.map(p=>p?.ratingStyle);
@@ -48,8 +50,9 @@ function teamType(pair,metrics){
 export function summarizeStacking(journal,tactics={}){
  const decisions=(journal?.events??[]).filter(event=>event.type==='stack-decision');
  const groups=(key)=>{const result={};for(const decision of decisions){const name=String(decision[key]??'unknown'),row=result[name]??={decisions:0,selected:0,probabilitySum:0};row.decisions++;row.selected+=decision.selected?1:0;row.probabilitySum+=finite(decision.probability,0)}return Object.fromEntries(Object.entries(result).map(([name,row])=>[name,{decisions:row.decisions,selected:row.selected,selectedRate:row.decisions?row.selected/row.decisions:0,averageProbability:row.decisions?row.probabilitySum/row.decisions:0}]))};
- const typeStats=tactics.stackByTeamType??{},byTeamType=Object.fromEntries(Object.entries(typeStats).map(([name,row])=>[name,{decisions:row.decisions??0,selected:row.selected??0,selectedRate:row.decisions?row.selected/row.decisions:0,averageProbability:row.decisions?(row.probabilitySum??0)/row.decisions:0}]));
- return {schemaVersion:1,decisions:tactics.stackDecisions??decisions.length,selected:tactics.stackSelected??decisions.filter(decision=>decision.selected).length,selectedRate:(tactics.stackDecisions??decisions.length)?(tactics.stackSelected??decisions.filter(decision=>decision.selected).length)/(tactics.stackDecisions??decisions.length):0,byTeamType:Object.keys(byTeamType).length?byTeamType:groups('teamType'),byMode:groups('mode'),byTeam:groups('team'),execution:{crossPlanned:tactics.stackCrossPlanned??0,crossed:tactics.stackCrossings??0,stays:tactics.stackStays??0,fallbacks:tactics.stackFallbacks??0}};
+ const summarizeStats=(stats)=>Object.fromEntries(Object.entries(stats??{}).map(([name,row])=>[name,{decisions:row.decisions??0,selected:row.selected??0,selectedRate:row.decisions?row.selected/row.decisions:0,averageProbability:row.decisions?(row.probabilitySum??0)/row.decisions:0}]));
+ const byTeamType=summarizeStats(tactics.stackByTeamType),byHandPair=summarizeStats(tactics.stackByHandPair);
+ return {schemaVersion:1,decisions:tactics.stackDecisions??decisions.length,selected:tactics.stackSelected??decisions.filter(decision=>decision.selected).length,selectedRate:(tactics.stackDecisions??decisions.length)?(tactics.stackSelected??decisions.filter(decision=>decision.selected).length)/(tactics.stackDecisions??decisions.length):0,byTeamType:Object.keys(byTeamType).length?byTeamType:groups('teamType'),byHandPair:Object.keys(byHandPair).length?byHandPair:groups('handPair'),byMode:groups('mode'),byTeam:groups('team'),execution:{crossPlanned:tactics.stackCrossPlanned??0,crossed:tactics.stackCrossings??0,stays:tactics.stackStays??0,fallbacks:tactics.stackFallbacks??0}};
 }
 function stylePrior(pair){
  const styles=pair.map(p=>p?.ratingStyle);
@@ -68,6 +71,7 @@ export function stackMetrics(pair,opponents=[]){
   courtIQ:clamp(average(pair,'courtIQ')/100,0,1),
   aggression:clamp(average(pair,'aggression')/100,0,1),
   lobRisk:clamp((average(opponents,'lob')*.65+average(opponents,'smash')*.35)/100,0,1),
+  handPair:handOf(a)===handOf(b)?'same':'opposite',
   stylePrior:stylePrior(pair)
  };
 }
@@ -79,17 +83,12 @@ export function stackPressure(score){
 }
 
 export function stackProbability(metrics,score){
- return clamp(.08+.28*metrics.netMismatch+.18*metrics.netStrength+.12*metrics.mobility+.10*stackPressure(score)-.18*metrics.lobRisk+metrics.stylePrior,.05,.75);
+ return clamp(.08+.28*metrics.netMismatch+.18*metrics.netStrength+.12*metrics.mobility+.10*stackPressure(score)-.18*metrics.lobRisk+metrics.stylePrior+(metrics.handPair==='same'?.10:-.08),.05,.75);
 }
 
 function strongerPlayer(pair){
  const a=pair[0],b=pair[1],sa=netScore(a),sb=netScore(b);
  return sa===sb?(a.id<b.id?a:b):sa>sb?a:b;
-}
-
-function autoLane(random){
- const roll=typeof random==='function'?random():finite(random,.5);
- return roll<.5?5:15;
 }
 
 export function createStackPlans({players,server,receiver,score,config,random=Math.random}){
@@ -100,12 +99,13 @@ export function createStackPlans({players,server,receiver,score,config,random=Ma
   const settings=normalized.teams[team],metrics=stackMetrics(pair,opponents),probability=stackProbability(metrics,score);
   const roll=settings.mode==='adaptive'?(typeof random==='function'?random():finite(random,.5)):1;
   const selected=settings.mode==='cross'||settings.mode==='stay'||(settings.mode==='adaptive'&&roll<probability);
-  const activeLane=active.x<10?5:15,preferredSide=settings.preferredSide==='auto'?(selected?(autoLane(random)==5?'left':'right'):'auto'):settings.preferredSide;
-  const preferredLane=preferredSide==='left'?5:preferredSide==='right'?15:activeLane,strong=strongerPlayer(pair),weak=pair.find(p=>p!==strong);
+  const activeLane=active.x<10?5:15,strong=strongerPlayer(pair),weak=pair.find(p=>p!==strong);
+  const preferredSide=settings.preferredSide==='auto'?(selected?(preferredLaneFor(strong,team)===5?'left':'right'):'auto'):settings.preferredSide;
+  const preferredLane=preferredSide==='left'?5:preferredSide==='right'?15:preferredLaneFor(strong,team);
   const targetLanes={[strong.id]:preferredLane,[weak.id]:20-preferredLane},type=teamType(pair,metrics);
   const mover=targetLanes[partner.id]!==activeLane?partner:active;
   return {
-   team,mode:settings.mode,teamType:type,metrics:structuredClone(metrics),preferredSide,preferredLane,initialLane:activeLane,stackPartnerX:activeLane+(activeLane<10?1.6:-1.6),
+   team,mode:settings.mode,teamType:type,handPair:metrics.handPair,metrics:structuredClone(metrics),preferredSide,preferredLane,initialLane:activeLane,stackPartnerX:activeLane<10?-2.2:22.2,
    activeId:active.id,partnerId:partner.id,strongId:strong.id,weakId:weak.id,moverId:mover.id,targetLanes,
    selected,adaptiveProbability:probability,triggerRole:team===score.team?'serve':'return',triggerShot:team===score.team?0:1,
    activated:false,trigger:null,crossAfter:false,crossed:false,fallback:null
@@ -113,6 +113,10 @@ export function createStackPlans({players,server,receiver,score,config,random=Ma
  });
 }
 
+export function stackTargetXFor(player,plan){
+ if(!plan?.selected||player.id!==plan.partnerId||plan.activated)return null;
+ return plan.stackPartnerX;
+}
 export function stackLaneFor(player,plan){
  if(!plan?.selected)return null;
  if(plan.mode==='stay')return player.coverLane??plan.initialLane;
