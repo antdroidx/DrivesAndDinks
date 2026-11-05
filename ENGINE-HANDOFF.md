@@ -2,6 +2,10 @@
 
 ## Combined implementation checkpoint — 2026-11-05
 
+Latest verified release: **DEV Build 143**, source `e3e4fb1eff23b0639bfd7542581bf1f406d03bcb`. The doubles-side fix preserves ordinary kitchen lanes, requires a real crossing before reassigning coverage, and retains contextual poach/lob/rescue switches. Stacking is not implemented. All 357 tests pass; eight paired demo matches reduced measured kitchen order reversals from 2,107 to 0 while retaining 36 poach attempts. All 20 roster matches completed. The skill matrix completed 107/108 within 40 minutes; the remaining equal-advanced deuce game finished naturally at 47.9 minutes. Stronger profiles won every mismatched pairing. Evidence is in `validation/kitchen-sides-*`.
+
+Both deployment stages succeeded: https://github.com/antdroidx/DrivesAndDinks/actions/runs/41996221354 and https://github.com/antdroidx/DrivesAndDinks/actions/runs/41996286605. Live Build 143 assets were checked for approaching-lane ownership, actual-crossing coverage and poach-back cooldown. Main remains at `157f680`. The Build 142 checkpoint below is historical.
+
 Work is consolidated in `codex/teamwork-serve-replay`. The other checkout was subsequently accessible with approved read access; its recovery code, tests, diagnostic tools and historical reports have been integrated. Its original checkout and staging area were left intact. The stationary-camera changes from `530288f` are included in the combined source.
 
 The five requested work areas are implemented: doubles teamwork/recovery; continuous rendering-only replay interpolation; ability-based serve/return choices; contextual third/fifth/later transition decisions; and combined validation plus DEV deployment preparation. The earlier audit below is historical and describes the starting state, not outstanding implementation.

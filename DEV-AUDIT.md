@@ -2,7 +2,7 @@
 
 Current branch: `codex/teamwork-serve-replay`. This combines the previously separate recovery and replay/transition work. Historical results remain in `ENGINE-NOTES.md` and `validation/previous-volley-pass/`; they are not results of the combined source.
 
-Published checkpoint: DEV Build 142 (`05195ee`), verified through successful source/Pages workflows, live asset checks and browser playback. All 351 tests pass. Main remains at `157f680`; the engine is not promoted there.
+Published checkpoint: DEV Build 143 (`e3e4fb1`), verified through successful source/Pages workflows and live asset checks. All 357 tests pass. Ordinary kitchen exchanges now retain their sides; actual poach/lob/rescue crossings can switch coverage. Stacking is not implemented. See `validation/kitchen-sides-*` and the latest handoff for validation, including the capped advanced deuce-game follow-up. Main remains at `157f680`; the engine is not promoted there.
 
 Implemented in this cycle:
 - Receiver ownership and automatic poaching retain normal movement and manual human shot timing.
