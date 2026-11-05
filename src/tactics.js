@@ -1,6 +1,6 @@
 import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js';
 import {kitchenContact,volleyMomentumFault} from './player-feet.js';
-import {stackLaneFor} from './stacking.js';
+import {stackLaneFor,stackTargetXFor} from './stacking.js';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -194,14 +194,16 @@ export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHit
 }
 
 export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[],opponentContactIn=Infinity,stackPlan=null}){
-  const home=stackLaneFor(p,stackPlan)??lane(p),team=p.team;
+  const home=stackLaneFor(p,stackPlan)??lane(p),stackHoldX=stackTargetXFor(p,stackPlan),team=p.team;
   if(p.id===receiverId&&team===incoming)return {x:point.x,y:point.y,role:'receive'};
+
   if(singles){
    return singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players,opponentContactIn});
   }
   // Hold the serve formations through the mandatory bounce sequence.
-  if(shots<=2&&team===servingTeam)return {x:home,y:team===0?41:3,role:'hold'};
-  if(shots===1)return {x:home,y:kitchen(team),role:'hold'};
+  if(shots<=2&&team===servingTeam)return {x:stackHoldX??home,y:team===0?41:3,role:stackHoldX!==null?'stack-hold':'hold'};
+  if(shots===1)return {x:stackHoldX??home,y:kitchen(team),role:stackHoldX!==null?'stack-hold':'hold'};
+  if(stackHoldX!==null)return {x:stackHoldX,y:kitchen(team),role:'stack-hold'};
   const intelligence=Math.max(.5,Math.min(1.3,p.abilities?.courtIQ??1));
   const shade=clamp((ball.x-10)*.28*intelligence,-2.4,2.4);
   let x=clamp(home+shade,1.3,18.7),y=kitchen(team),role='shade';

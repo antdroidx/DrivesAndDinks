@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {Game} from '../src/game.js';
-import {commitStackingCoverage} from '../src/stacking.js';
+import {commitStackingCoverage,stackTargetXFor} from '../src/stacking.js';
 
 function stackingGame(modes=['off','off'],sides=['auto','auto']){
  const g=new Game({seed:24});
@@ -21,12 +21,14 @@ test('stacking is off by default and preserves normal partner sides',()=>{
  assert.equal(g.tacticalStats.stackSelected,0);
 });
 
-test('team-dependent stack cross starts together and keeps score-controlled server and receiver',()=>{
+test('server stack stages the partner outside the court and keeps score-controlled server identity',()=>{
  const g=stackingGame(['cross','off'],['left','auto']);
  const plan=g.stackPlans[0],active=g.players.find(p=>p.id===plan.activeId),partner=g.players.find(p=>p.id===plan.partnerId);
  assert.equal(plan.selected,true);
  assert.equal(plan.triggerRole,'serve');
- assert.equal(active.x<10,partner.x<10);
+ assert.ok(partner.x<0||partner.x>20);
+ assert.equal(partner.x<0,active.x<10);
+ assert.equal(stackTargetXFor(partner,plan),partner.x);
  assert.equal(g.server.id,g.score.team*2+g.score.player);
  assert.notEqual(g.server.x<10,g.serveReceiver.x<10);
  const serverId=g.server.id,receiverId=g.serveReceiver.id;
@@ -44,6 +46,15 @@ test('team-dependent stack cross starts together and keeps score-controlled serv
  assert.equal(plan.crossed,true);
 });
 
+test('return stack stages the non-returner outside the court clear of the return lane',()=>{
+ const g=stackingGame(['off','cross'],['auto','left']);
+ const plan=g.stackPlans[1],active=g.players.find(p=>p.id===plan.activeId),partner=g.players.find(p=>p.id===plan.partnerId);
+ assert.equal(plan.triggerRole,'return');
+ assert.equal(active.id,g.serveReceiver.id);
+ assert.ok(partner.x<0||partner.x>20);
+ assert.equal(partner.x<0,active.x<10);
+ assert.equal(stackTargetXFor(partner,plan),partner.x);
+});
 test('stack stay keeps the stacked lane and never commits an automatic crossing',()=>{
  const g=stackingGame(['stay','off'],['right','auto']);
  const plan=g.stackPlans[0],mover=g.players.find(p=>p.id===plan.moverId);
@@ -117,6 +128,7 @@ test('stacking policy and point plans are visible in reports and replays',()=>{
  assert.equal(report.tactics.stackSelected,2);
  assert.equal(report.stacking.summary.decisions,2);
  assert.ok(Object.keys(report.stacking.summary.byTeamType).length>0);
+ assert.ok(Object.keys(report.stacking.summary.byHandPair).length>0);
  assert.ok(report.journal.events.some(event=>event.type==='stack-decision'));
  assert.equal(frame.stacking.length,2);
  const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');

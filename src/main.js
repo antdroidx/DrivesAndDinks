@@ -166,7 +166,7 @@ function drawLoadoutPreview(selection){
 
  for(let px=5;px<c.width;px+=20){x.fillStyle='#eff3cf12';x.fillRect(px,178,10,42)}
 
- try{const drawn=drawPlayer(x,{personalize:true,designId:selectedDetailedDesign,appearance,characterId:selection.character,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',paddleShape:selection.paddleShape??'hybrid',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
+ try{const drawn=drawPlayer(x,{personalize:true,designId:selectedDetailedDesign,appearance,characterId:selection.character,handedness:selection.handedness,mode:'idle',frame:0,phase:0,x:6,y:22,width:168,height:168,view:'far',side:selection.handedness==='left'?-1:1,paddleShape:selection.paddleShape??'hybrid',lighting:'depth'});c.setAttribute('aria-label',drawn?'Selected player and paddle appearance':'Selected player preview waiting for sprites')}catch(error){c.setAttribute('aria-label',`Selected player preview error: ${error.message}`);console.error(error)}
 
 }
 
@@ -216,7 +216,8 @@ function drawSprite(p,q,game){
 
  if(p.id===0&&game.mode==='play'){ctx.strokeStyle=game.canHumanHit()?'#fff':'#39d9f5';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,20,7,0,0,Math.PI*2);ctx.stroke()}
 
- drawPlayer(ctx,{feet:playerFeet(p).map(foot=>({...foot,screen:project(foot.x,foot.y,foot.z),sole:footSole(foot).map(([x,y])=>project(x,y,foot.z))})),personalize:p.id===0,designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1,travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth',...playerPresentation(p,game,animation)});
+ const handSide=p.handedness==='left'||p.hand==='left'?-1:1;
+ drawPlayer(ctx,{feet:playerFeet(p).map(foot=>({...foot,screen:project(foot.x,foot.y,foot.z),sole:footSole(foot).map(([x,y])=>project(x,y,foot.z))})),personalize:p.id===0,designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,handedness:p.handedness??'right',mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:handSide*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth',...playerPresentation(p,game,animation)});
 
  if(p.id===0&&game.mode==='play'){
 

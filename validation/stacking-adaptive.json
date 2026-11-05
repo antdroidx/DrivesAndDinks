@@ -1,49 +1,63 @@
 {
-  "scope": "Adaptive stacking frequency by generated doubles team type. Preferred sides alternate deterministically; no forced outcomes.",
+  "scope": "Adaptive stacking frequency by generated doubles team type and hand pair. Preferred sides alternate deterministically; no forced outcomes.",
   "games": 8,
   "teamModes": {
     "team0": "adaptive",
     "team1": "adaptive"
   },
   "completed": 8,
-  "decisions": 612,
-  "selected": 202,
-  "selectedRate": 0.3300653594771242,
+  "decisions": 598,
+  "selected": 244,
+  "selectedRate": 0.4080267558528428,
   "selectionByTeamType": {
     "balanced": {
-      "decisions": 91,
-      "selected": 20,
-      "selectedRate": 0.21978021978021978,
-      "averageProbability": 0.20896901565101567
+      "decisions": 118,
+      "selected": 48,
+      "selectedRate": 0.4067796610169492,
+      "averageProbability": 0.3115621390172918
     },
     "pressure": {
-      "decisions": 434,
-      "selected": 155,
-      "selectedRate": 0.35714285714285715,
-      "averageProbability": 0.3552948380579992
+      "decisions": 414,
+      "selected": 164,
+      "selectedRate": 0.3961352657004831,
+      "averageProbability": 0.4044939216805741
     },
     "control": {
-      "decisions": 49,
+      "decisions": 22,
       "selected": 8,
-      "selectedRate": 0.16326530612244897,
-      "averageProbability": 0.1379238627087198
+      "selectedRate": 0.36363636363636365,
+      "averageProbability": 0.2367133719008265
     },
     "asymmetric": {
-      "decisions": 38,
-      "selected": 19,
-      "selectedRate": 0.5,
-      "averageProbability": 0.39776543965975547
+      "decisions": 44,
+      "selected": 24,
+      "selectedRate": 0.5454545454545454,
+      "averageProbability": 0.49141528741965107
+    }
+  },
+  "selectionByHandPair": {
+    "same": {
+      "decisions": 474,
+      "selected": 214,
+      "selectedRate": 0.45147679324894513,
+      "averageProbability": 0.4123394376251973
+    },
+    "opposite": {
+      "decisions": 124,
+      "selected": 30,
+      "selectedRate": 0.24193548387096775,
+      "averageProbability": 0.2871442691430433
     }
   },
   "execution": {
-    "crossPlanned": 183,
-    "crossed": 177,
+    "crossPlanned": 231,
+    "crossed": 130,
     "stays": 0,
-    "fallbacks": 18
+    "fallbacks": 99
   },
-  "rallies": 302,
-  "maxRally": 38,
-  "elapsedMs": 13715,
+  "rallies": 295,
+  "maxRally": 45,
+  "elapsedMs": 5500,
   "matches": [
     {
       "seed": 1,
@@ -52,156 +66,156 @@
         1,
         11
       ],
-      "rallies": 22,
-      "maxRally": 36,
+      "rallies": 18,
+      "maxRally": 39,
       "teamTypes": [
         "balanced",
         "pressure"
       ],
-      "decisions": 44,
-      "selected": 13,
-      "crossPlanned": 12,
-      "crossed": 12,
+      "decisions": 36,
+      "selected": 9,
+      "crossPlanned": 9,
+      "crossed": 4,
       "stays": 0,
-      "fallbacks": 1
+      "fallbacks": 5
     },
     {
       "seed": 2,
       "completed": true,
       "points": [
         11,
-        9
+        5
       ],
-      "rallies": 53,
-      "maxRally": 38,
+      "rallies": 49,
+      "maxRally": 33,
       "teamTypes": [
         "pressure",
         "pressure"
       ],
-      "decisions": 108,
-      "selected": 40,
-      "crossPlanned": 39,
-      "crossed": 36,
+      "decisions": 100,
+      "selected": 39,
+      "crossPlanned": 37,
+      "crossed": 18,
       "stays": 0,
-      "fallbacks": 0
+      "fallbacks": 17
     },
     {
       "seed": 3,
       "completed": true,
       "points": [
-        8,
+        2,
         11
       ],
-      "rallies": 49,
-      "maxRally": 38,
+      "rallies": 22,
+      "maxRally": 36,
       "teamTypes": [
         "control",
         "pressure"
       ],
-      "decisions": 98,
-      "selected": 28,
-      "crossPlanned": 28,
-      "crossed": 26,
+      "decisions": 44,
+      "selected": 17,
+      "crossPlanned": 16,
+      "crossed": 7,
       "stays": 0,
-      "fallbacks": 2
+      "fallbacks": 9
     },
     {
       "seed": 4,
       "completed": true,
       "points": [
         11,
-        3
+        8
       ],
-      "rallies": 39,
-      "maxRally": 29,
+      "rallies": 49,
+      "maxRally": 31,
       "teamTypes": [
         "pressure",
         "pressure"
       ],
-      "decisions": 80,
-      "selected": 24,
-      "crossPlanned": 21,
+      "decisions": 100,
+      "selected": 46,
+      "crossPlanned": 42,
       "crossed": 21,
       "stays": 0,
-      "fallbacks": 2
+      "fallbacks": 21
     },
     {
       "seed": 5,
       "completed": true,
       "points": [
-        7,
+        8,
         11
       ],
-      "rallies": 31,
-      "maxRally": 34,
+      "rallies": 56,
+      "maxRally": 45,
       "teamTypes": [
         "pressure",
         "balanced"
       ],
-      "decisions": 62,
-      "selected": 15,
-      "crossPlanned": 12,
-      "crossed": 12,
+      "decisions": 112,
+      "selected": 41,
+      "crossPlanned": 40,
+      "crossed": 21,
       "stays": 0,
-      "fallbacks": 3
+      "fallbacks": 19
     },
     {
       "seed": 6,
       "completed": true,
       "points": [
         11,
-        8
+        6
       ],
-      "rallies": 37,
-      "maxRally": 35,
+      "rallies": 43,
+      "maxRally": 39,
       "teamTypes": [
         "balanced",
         "asymmetric"
       ],
-      "decisions": 76,
-      "selected": 26,
-      "crossPlanned": 22,
-      "crossed": 21,
+      "decisions": 88,
+      "selected": 41,
+      "crossPlanned": 40,
+      "crossed": 20,
       "stays": 0,
-      "fallbacks": 5
+      "fallbacks": 19
     },
     {
       "seed": 7,
       "completed": true,
       "points": [
-        3,
+        0,
         11
       ],
-      "rallies": 28,
-      "maxRally": 31,
+      "rallies": 24,
+      "maxRally": 27,
       "teamTypes": [
         "pressure",
         "pressure"
       ],
-      "decisions": 56,
+      "decisions": 48,
       "selected": 22,
-      "crossPlanned": 20,
-      "crossed": 20,
+      "crossPlanned": 21,
+      "crossed": 16,
       "stays": 0,
-      "fallbacks": 2
+      "fallbacks": 6
     },
     {
       "seed": 8,
       "completed": true,
       "points": [
-        4,
+        3,
         11
       ],
-      "rallies": 43,
-      "maxRally": 33,
+      "rallies": 34,
+      "maxRally": 40,
       "teamTypes": [
         "pressure",
         "pressure"
       ],
-      "decisions": 88,
-      "selected": 34,
-      "crossPlanned": 29,
-      "crossed": 29,
+      "decisions": 70,
+      "selected": 29,
+      "crossPlanned": 26,
+      "crossed": 23,
       "stays": 0,
       "fallbacks": 3
     }
