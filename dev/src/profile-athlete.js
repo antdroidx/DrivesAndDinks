@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=148';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=148';
-import {thighGarment} from './character-concepts.js?v=148';
+import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=149';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=149';
+import {thighGarment} from './character-concepts.js?v=149';
 
 function polygon(c,points,color,ink='#4c453d'){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=.35;c.stroke()}
@@ -80,7 +80,10 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  for(const chain of p.legs.toSorted((a,b)=>a[0].depth-b[0].depth)){
   limb(c,chain,[body.thigh*.85,body.calf*.9,body.ankle*.9],d.skin,skin.shadow);const f=chain[2];
   polygon(c,[{x:f.x-1.2,y:f.y-2.8},{x:f.x+1.2,y:f.y-2.8},{x:f.x+1.3,y:f.y+.2},{x:f.x-1.3,y:f.y+.2}],'#e5dfce');
-  polygon(c,[{x:f.x-dir*2,y:f.y-.5},{x:f.x+dir*2,y:f.y-.5},{x:f.x+dir*4,y:f.y+1.1},{x:f.x+dir*4,y:f.y+2},{x:f.x-dir*2,y:f.y+2}],'#e5dfce');line(c,[{x:f.x-dir*1.8,y:f.y+1.6},{x:f.x+dir*3.7,y:f.y+1.6}],d.trim,.65);
+  polygon(c,[{x:f.x-dir*2,y:f.y-.5},{x:f.x+dir*2,y:f.y-.5},{x:f.x+dir*4,y:f.y+1.1},{x:f.x+dir*4,y:f.y+2},{x:f.x-dir*2,y:f.y+2}],'#e5dfce');
+  polygon(c,[{x:f.x-dir*1.8,y:f.y-.25},{x:f.x-dir*.2,y:f.y-.55},{x:f.x+dir*.5,y:f.y+.35},{x:f.x-dir*1.1,y:f.y+.65}],tone('#e5dfce',.18),null);
+  polygon(c,[{x:f.x+dir*.5,y:f.y-.35},{x:f.x+dir*3.5,y:f.y+.8},{x:f.x+dir*3.7,y:f.y+1.35},{x:f.x+dir*.7,y:f.y+.65}],tone('#e5dfce',-.14),null);
+  line(c,[{x:f.x-dir*1.6,y:f.y+1.85},{x:f.x+dir*3.45,y:f.y+1.85}],tone('#e5dfce',.22),.25);line(c,[{x:f.x-dir*1.8,y:f.y+1.6},{x:f.x+dir*3.7,y:f.y+1.6}],d.trim,.65);
  }
  const waist=body.waist*.7,shoulder=d.shoulder*.55,top=n.y+.8,hem=h.y-(d.body==='female'&&d.outfit==='shorts'?5:.5);
  line(c,[{x:n.x,y:n.y-1},{x:n.x,y:top+2}],d.skin,3.2);
