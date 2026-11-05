@@ -1,5 +1,6 @@
 # DEV engine foundation pass
 
+> Historical note: these entries progress chronologically. Statements before 2026-11-05 that Main was not promoted describe earlier checkpoints only. DEV Build 143 was subsequently promoted to `main`; current status is tracked in `DEV-AUDIT.md` and `ROADMAP.md`.
 The normal demonstration roster remains at its existing approximately 70 baseline. Character artwork, clothing, palettes and rig proportions remain unchanged.
 
 ## Profiles and competition
