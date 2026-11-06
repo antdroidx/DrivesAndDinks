@@ -25,7 +25,7 @@ export function skirtGarment(hips,legs,hipWidth,limbWidth){
 }
 
 export const HAIR_OPTIONS=Object.freeze({
- male:Object.freeze([{id:'crop',name:'Textured crop'},{id:'curls',name:'Soft curls'},{id:'spiky',name:'Spiky hair'},{id:'sidePart',name:'Swept side part'},{id:'buzz',name:'Close buzz cut'}]),
+ male:Object.freeze([{id:'crop',name:'Textured crop'},{id:'curls',name:'Soft curls'},{id:'spiky',name:'Spiky hair'},{id:'sidePart',name:'Swept side part'},{id:'buzz',name:'Close buzz cut'},{id:'bald',name:'Bald'}]),
  female:Object.freeze([{id:'bob',name:'Chin-length bob'},{id:'ponytail',name:'High ponytail'},{id:'braid',name:'Long braid'},{id:'pixie',name:'Feathered pixie'},{id:'waves',name:'Layered waves'},{id:'twinTails',name:'Twin tails'}])
 });
 export function conceptHair(body,selected,designed){return HAIR_OPTIONS[body]?.some(item=>item.id===selected)?selected:designed}
