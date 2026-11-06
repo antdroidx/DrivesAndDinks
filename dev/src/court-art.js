@@ -4,9 +4,9 @@ export const SCENE_LAYOUTS=Object.freeze({
  // 'far' is where the court baseline lands in the plate. It sits below the back
  // barrier so a strip of real ground shows behind the baseline and the players
  // at the far end stand on ground rather than on the barrier.
- outdoor:{file:'outdoor-modern-v4.png',far:.44,near:.97,edge:'#78767e'},
- indoor:{file:'indoor-modern-v3.png',far:.46,near:.97,edge:'#686b70'},
- stadium:{file:'stadium-modern-v3.png',far:.42,near:.97,edge:'#838490'}
+ outdoor:{file:'outdoor-modern-v7.png',far:.41,near:.95,edge:'#858693'},
+ indoor:{file:'indoor-modern-v6.png',far:.37,near:.963,edge:'#8e95a1'},
+ stadium:{file:'stadium-modern-v6.png',far:.326,near:.961,edge:'#6e7078'}
 });
 export function scenePlacement(layout){const height=374/(layout.near-layout.far);return {x:0,y:204-layout.far*height,width:960,height};}
 export function retroCourtPalette(palette){return {...palette,court:'#376e8c',kitchen:'#b97855',line:'#fff1bd'};}
@@ -69,3 +69,10 @@ export function createCourtArtRenderer(createImage=()=>new Image(),createCanvas=
   c.drawImage(source,placement.x,placement.y,placement.width,placement.height);c.restore();return true;
  };
 }
+
+
+
+
+
+
+
