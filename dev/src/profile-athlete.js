@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=163';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=163';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=163';
+import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=164';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=164';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=164';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -132,11 +132,9 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards
  }
  if(d.headwear==='cap'){
   polygon(c,[{x:-5.3,y:-3.3},{x:-4.8,y:-8},{x:0,y:-9},{x:4.3,y:-6},{x:4.6,y:-3}],d.trim,ink,.4);
-  const brim=(headwearBackwards?-1:1)*direction;
-  polygon(c,[{x:brim*1,y:-3.5},{x:brim*7.6,y:-2.7},{x:brim*8,y:-1.5},{x:brim*2,y:-2}],tone(d.trim,-.12),ink,.3);
-  line(c,[{x:0,y:-8},{x:.4,y:-4}],tone(d.trim,-.2),.3);
- }else if(d.headwear==='visor'){
-  polygon(c,[{x:-4.8,y:-4},{x:3.9,y:-4},{x:7.5,y:-2.7},{x:2.4,y:-2.5},{x:-4.5,y:-2.7}],d.trim,ink,.35);
+  if(!headwearBackwards){const brim=direction;polygon(c,[{x:brim*1,y:-3.5},{x:brim*7.6,y:-2.7},{x:brim*8,y:-1.5},{x:brim*2,y:-2}],tone(d.trim,-.12),ink,.3);line(c,[{x:0,y:-8},{x:.4,y:-4}],tone(d.trim,-.2),.3)}
+  else line(c,[{x:-2,y:-3.4},{x:2,y:-3.4}],tone(d.trim,-.2),.5);
+ }else if(d.headwear==='visor'){if(!headwearBackwards){polygon(c,[{x:-4.8,y:-4},{x:3.9,y:-4},{x:7.5,y:-2.7},{x:2.4,y:-2.5},{x:-4.5,y:-2.7}],d.trim,ink,.35)}else line(c,[{x:-4.8,y:-3.5},{x:4.8,y:-3.5}],tone(d.trim,-.1),.45)
  }else if(d.headwear==='headband'){
   line(c,[{x:-5,y:-3.4},{x:3.2,y:-4}],d.trim,1.25);
   line(c,[{x:-4.6,y:-3.65},{x:2.8,y:-4.25}],tone(d.trim,.2),.3);
