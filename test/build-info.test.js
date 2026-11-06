@@ -40,5 +40,15 @@ test('promotion preserves the exact previous public build and enables the public
  assert.match(workflow,/_public122\/ _site\/archive\/build-122\//);
  assert.doesNotMatch(workflow,/version-build\.js[^\n]*_site\/archive\/build-122/);
  assert.match(main,/const detailedArtAvailable=true/);
- assert.match(workflow,/_release\/style-lab\.html _site\//);
+ assert.match(workflow,/_release\/style-lab\.html _release\/style-lab\.css _site\//);
+});
+
+
+test('feature deployments preserve the public root and replace DEV only',()=>{
+ const workflow=read('.github/workflows/pages.yml');
+ assert.match(workflow,/ref: gh-pages/);
+ assert.match(workflow,/path: _published/);
+ assert.match(workflow,/rsync -a --exclude=\.git --exclude=dev --exclude=preview _published\/ _site\//);
+ assert.doesNotMatch(workflow,/rm -rf _site\/dev/);
+ assert.match(workflow,/Feature deployments replace DEV only/);
 });

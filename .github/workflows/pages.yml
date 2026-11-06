@@ -26,6 +26,12 @@ jobs:
         with:
           ref: main
           path: _release
+      - name: Check out current Pages tree
+        if: github.event_name == 'workflow_dispatch' && github.ref_name != 'main'
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: _published
       - name: Check out frozen Build 15
         uses: actions/checkout@v4
         with:
@@ -46,35 +52,41 @@ jobs:
         run: node --test
       - name: Package public release, archives and dev
         run: |
-          mkdir -p _site/archive/build-15 _site/archive/build-122 _site/prototype _site/dev
-          rsync -a --exclude=.git --exclude=dev --exclude=preview _archive15/ _site/archive/build-15/
-
-          # Preserve the deployed root verbatim, including its Build 122 cache keys.
-          rsync -a --exclude=.git --exclude=archive --exclude=prototype --exclude=dev --exclude=preview _public122/ _site/archive/build-122/
-
-          # Keep the historical Build 48 playable and inspectable.
-          cp _prototype/index.html _prototype/style.css _prototype/studio.html _prototype/studio.css _site/prototype/
-          cp -R _prototype/src _prototype/assets _site/prototype/
-          printf 'globalThis.DRIVES_DINKS_BUILD = "48";\n' > _site/prototype/build-info.js
-          node scripts/version-build.js 48 _site/prototype
-
-          # Build the DEV mirror from the triggering source.
-          cp index.html style.css studio.html studio.css manifest.webmanifest _site/dev/
-          printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
-          cp -R src assets _site/dev/
-          if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
-          if [ -f style-lab.html ]; then cp style-lab.html _site/dev/; fi
-          node scripts/version-build.js "${{ github.run_number }}" _site/dev
-
-          # Current main is the public release at the Pages root.
-          cp _release/index.html _release/style.css _release/studio.html _release/studio.css _site/
-          printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
-          cp -R _release/src _release/assets _site/
-          cp _release/sw.js _release/manifest.webmanifest _site/
-          if [ -f _release/character-lab.html ]; then cp _release/character-lab.html _release/character-lab.css _site/; fi
-          if [ -f _release/style-lab.html ]; then cp _release/style-lab.html _site/; fi
-          node scripts/version-build.js "${{ github.run_number }}" _site
-          touch _site/.nojekyll
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.ref_name }}" != "main" ]; then
+            # Feature deployments replace DEV only. Preserve the public root and archives.
+            mkdir -p _site/dev
+            rsync -a --exclude=.git --exclude=dev --exclude=preview _published/ _site/
+            cp index.html style.css studio.html studio.css manifest.webmanifest _site/dev/
+            printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
+            cp -R src assets _site/dev/
+            if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
+            if [ -f style-lab.html ]; then cp style-lab.html style-lab.css _site/dev/; fi
+            node scripts/version-build.js "${{ github.run_number }}" _site/dev
+            touch _site/.nojekyll
+          else
+            mkdir -p _site/archive/build-15 _site/archive/build-122 _site/prototype _site/dev
+            rsync -a --exclude=.git --exclude=dev --exclude=preview _archive15/ _site/archive/build-15/
+            rsync -a --exclude=.git --exclude=archive --exclude=prototype --exclude=dev --exclude=preview _public122/ _site/archive/build-122/
+            cp _prototype/index.html _prototype/style.css _prototype/studio.html _prototype/studio.css _site/prototype/
+            cp -R _prototype/src _prototype/assets _site/prototype/
+            printf 'globalThis.DRIVES_DINKS_BUILD = "48";\n' > _site/prototype/build-info.js
+            node scripts/version-build.js 48 _site/prototype
+            cp index.html style.css studio.html studio.css manifest.webmanifest _site/dev/
+            printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
+            cp -R src assets _site/dev/
+            if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
+            if [ -f style-lab.html ]; then cp style-lab.html style-lab.css _site/dev/; fi
+            node scripts/version-build.js "${{ github.run_number }}" _site/dev
+            # Current main is the public release at the Pages root.
+            cp _release/index.html _release/style.css _release/studio.html _release/studio.css _site/
+            printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
+            cp -R _release/src _release/assets _site/
+            cp _release/sw.js _release/manifest.webmanifest _site/
+            if [ -f _release/character-lab.html ]; then cp _release/character-lab.html _release/character-lab.css _site/; fi
+            if [ -f _release/style-lab.html ]; then cp _release/style-lab.html _release/style-lab.css _site/; fi
+            node scripts/version-build.js "${{ github.run_number }}" _site
+            touch _site/.nojekyll
+          fi
       - name: Publish GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
