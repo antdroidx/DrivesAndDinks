@@ -111,7 +111,8 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
   }
  const spiky=['spiky','pixie'].includes(d.hair),buzz=d.hair==='buzz',bald=d.hair==='bald';
  if(bald){
-  path(c,[point(x-3.9,y-3.9),point(x-2.8,y-5.2),point(x-.4,y-5.7),point(x-1.3,y-4.6),point(x-3,y-3.5)],colors.light,null);
+  if(!near)path(c,[point(x-3.9,y-3.9),point(x-2.8,y-5.2),point(x-.4,y-5.7),point(x-1.3,y-4.6),point(x-3,y-3.5)],colors.light,null);
+  else path(c,[point(x-3.2,y-5.4),point(x-1.8,y-6.3),point(x+.4,y-6.4),point(x+2.4,y-5.4),point(x+1.1,y-4.8),point(x-1.4,y-5)],colors.light,null);
  }else if(buzz){
   c.save();c.beginPath();c.moveTo(x-4.8,y-2.3);c.bezierCurveTo(x-5.2,y-5.5,x-2.6,y-6.9,x,y-6.9);c.bezierCurveTo(x+3.1,y-6.9,x+5.3,y-5.1,x+4.8,y-2.3);c.quadraticCurveTo(x,y-3.1,x-4.8,y-2.3);c.closePath();c.fillStyle=tone(hair,.09);c.fill();c.clip();
   path(c,[point(x+2,y-6.4),point(x+5.3,y-5.1),point(x+5.3,y-2),point(x+2.2,y-2.7)],tone(hair,-.12),null);
@@ -200,9 +201,14 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  path(c,[point(n.x+shoulder-1.5,top+2.8),point(n.x+shoulder,top+2.2),point(h.x+waist,hem),point(h.x+waist-2,hem),point(h.x+waist-1.8,hem-6)],tone(d.shirt,-.2),null);
  path(c,[point(n.x-shoulder+1,top+3),point(n.x-shoulder+2.2,top+3.5),point(h.x-waist+1.8,hem),point(h.x-waist+.6,hem)],d.trim,null);
  if(d.outfit==='polo'){
-  path(c,[point(n.x-2.4,top),point(n.x-.5,top+2),point(n.x-2.3,top+3.8),point(n.x-3.2,top+1.1)],tone(d.trim,.12),ink,.25);
-  path(c,[point(n.x+2.4,top),point(n.x+.5,top+2),point(n.x+2.3,top+3.8),point(n.x+3.2,top+1.1)],tone(d.trim,-.1),ink,.25);
-  line(c,[point(n.x,top+2),point(n.x,top+5.2)],tone(d.shirt,-.3),.3);oval(c,n.x,top+3.6,.2,.2,d.trim);
+  if(!near){
+   path(c,[point(n.x-2.4,top),point(n.x-.5,top+2),point(n.x-2.3,top+3.8),point(n.x-3.2,top+1.1)],tone(d.trim,.12),ink,.25);
+   path(c,[point(n.x+2.4,top),point(n.x+.5,top+2),point(n.x+2.3,top+3.8),point(n.x+3.2,top+1.1)],tone(d.trim,-.1),ink,.25);
+   line(c,[point(n.x,top+2),point(n.x,top+5.2)],tone(d.shirt,-.3),.3);oval(c,n.x,top+3.6,.2,.2,d.trim);
+  }else{
+   line(c,[point(n.x-2.8,top+.7),point(n.x+2.8,top+.7)],tone(d.trim,-.08),.7);
+   line(c,[point(n.x-2.2,top+1.45),point(n.x+2.2,top+1.45)],tone(d.shirt,-.2),.3);
+  }
  }else{
   line(c,[point(n.x-shoulder+.4,top+2),point(n.x-shoulder+1,top+5)],d.trim,.65);
   line(c,[point(n.x+shoulder-.4,top+2),point(n.x+shoulder-1,top+5)],d.trim,.65);
