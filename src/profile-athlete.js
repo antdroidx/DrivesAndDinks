@@ -26,12 +26,10 @@ function limb(c,chain,width,color,shadow){
  const widths=Array.isArray(width)?width:chain.map(()=>width);
  drawAnimeRibbon(c,chain,widths,color,'#4c453d',{shadow,light:tone(color,.1)});
  for(let i=0;i<chain.length-1;i++){
-  const a=chain[i],b=chain[i+1],t=i?.58:.42,m={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t},length=Math.hypot(b.x-a.x,b.y-a.y),angle=Math.atan2(b.y-a.y,b.x-a.x);
-  c.save();c.translate(m.x,m.y);c.rotate(angle);c.globalAlpha=.34;c.fillStyle=tone(color,.14);c.beginPath();c.ellipse(0,0,Math.max(.25,length*.18),Math.max(.3,widths[i]*.48),0,0,Math.PI*2);c.fill();c.restore();
+  const a=chain[i],b=chain[i+1],t=i?.58:.42,m={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};
   line(c,[{x:a.x+(m.x-a.x)*.35,y:a.y+(m.y-a.y)*.35},{x:m.x+(b.x-m.x)*.25,y:m.y+(b.y-m.y)*.25}],tone(color,.2),Math.max(.18,widths[i]*.1));
  }
 }
-function joint(c,point,r,color){oval(c,point.x,point.y,r,r,color,'#4c453d',.22)}
 function profileShoe(c,foot,dir,d,body){
  const x=foot.x,y=foot.y;
  c.save();c.globalAlpha=.18;oval(c,x+dir*.5,y+2.1,4.8,1.15,'#101820');c.restore();
@@ -61,7 +59,7 @@ export function profilePose(design,mode,phase,options={}){
  return {raw,direction,neck:project(raw.rig.neck),hips:project(raw.rig.hips),arms,legs,paddle:project(raw.rig.paddle),hand:project(raw.rig.hand)};
 }
 
-function profileHead(c,d,neck,direction,rawEmotion,sweat,clock){
+function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards=false){
  const emotion=({smile:'happy',reaction:'surprise',neutral:'focus',sad:'disappointment',calm:'relief'})[rawEmotion]??rawEmotion??'focus';
  const y=neck.y-6,skin=skinPalette(d.skin),hair=d.hairColor,ink='#4c453d';
  c.save();c.translate(neck.x,y);c.scale(direction,1);
@@ -134,7 +132,8 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock){
  }
  if(d.headwear==='cap'){
   polygon(c,[{x:-5.3,y:-3.3},{x:-4.8,y:-8},{x:0,y:-9},{x:4.3,y:-6},{x:4.6,y:-3}],d.trim,ink,.4);
-  polygon(c,[{x:1,y:-3.5},{x:7.6,y:-2.7},{x:8,y:-1.5},{x:2,y:-2}],tone(d.trim,-.12),ink,.3);
+  const brim=(headwearBackwards?-1:1)*direction;
+  polygon(c,[{x:brim*1,y:-3.5},{x:brim*7.6,y:-2.7},{x:brim*8,y:-1.5},{x:brim*2,y:-2}],tone(d.trim,-.12),ink,.3);
   line(c,[{x:0,y:-8},{x:.4,y:-4}],tone(d.trim,-.2),.3);
  }else if(d.headwear==='visor'){
   polygon(c,[{x:-4.8,y:-4},{x:3.9,y:-4},{x:7.5,y:-2.7},{x:2.4,y:-2.5},{x:-4.5,y:-2.7}],d.trim,ink,.35);
@@ -167,7 +166,6 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  c.save();c.translate(cx-24*scale,baseline-63*scale);c.scale(scale,scale);
  const arm=i=>{const chain=p.arms[i],width=4.15+d.build*1.45;
   limb(c,chain,[width,width*1.02,width*.76],d.skin,skin.deep);
-  joint(c,chain[1],width*.48,skin.shadow);
   if(d.outfit==='polo'||d.body==='male'&&d.outfit==='performance'){
    const end={x:chain[0].x+(chain[1].x-chain[0].x)*.43,y:chain[0].y+(chain[1].y-chain[0].y)*.43};
    limb(c,[chain[0],end],[width+1.2,width+1],d.shirt,tone(d.shirt,-.2));
@@ -190,7 +188,6 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  layers.filter(a=>a.back).forEach(a=>arm(a.i));if(p.paddle.depth<p.neck.depth)drawPaddle();
  for(const chain of p.legs.toSorted((a,b)=>a[0].depth-b[0].depth)){
   limb(c,chain,[body.thigh*1.34,body.calf*1.25,body.ankle*1.28],d.skin,skin.shadow);
-  joint(c,chain[1],body.calf*.48,skin.shadow);
   line(c,[{x:chain[0].x+(chain[1].x-chain[0].x)*.3,y:chain[0].y+(chain[1].y-chain[0].y)*.3},{x:chain[1].x+(chain[2].x-chain[1].x)*.12,y:chain[1].y+(chain[2].y-chain[1].y)*.12}],skin.light,.38);
   line(c,[{x:chain[1].x+(chain[2].x-chain[1].x)*.32,y:chain[1].y+(chain[2].y-chain[1].y)*.32},{x:chain[2].x,y:chain[2].y-1.2}],skin.shadow,.24);
   profileShoe(c,chain[2],dir,d,body);
@@ -213,8 +210,6 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  line(c,[{x:n.x-dir*shoulder*.35,y:top+5.1},{x:n.x+dir*waist*.42,y:top+7.2}],tone(d.shirt,.2),.28);
  line(c,[{x:n.x+dir*shoulder*.52,y:top+5.3},{x:h.x+dir*waist*.5,y:torso.shirtHem-3.4}],tone(d.shirt,-.2),.25);
  line(c,[{x:n.x-dir*1.8,y:top+.1},{x:n.x+dir*2,y:top+1.1}],d.trim,.75);
- joint(c,{x:n.x-dir*shoulder*.78,y:top+1.5},1.45,tone(d.shirt,-.12));
- joint(c,{x:n.x+dir*shoulder*.78,y:top+1.5},1.45,tone(d.shirt,.08));
  if(d.outfit==='polo')polygon(c,[{x:n.x-dir*1.7,y:top},{x:n.x+dir*1.7,y:top+.6},{x:n.x+dir*2.8,y:top+3.1},{x:n.x,y:top+1.8}],d.trim,ink,.3);
  if(torso.crop)line(c,[{x:h.x-waist,y:torso.shirtHem},{x:h.x+waist,y:torso.shirtHem}],d.trim,.65);
  if(d.body==='female'&&d.outfit!=='shorts'){
@@ -235,7 +230,7 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
   line(c,[{x:h.x-dir*shorts.hipWidth*.35,y:h.y+2.1},{x:h.x+dir*shorts.hipWidth*.2,y:h.y+2.5}],tone(shortsColor,-.16),.26);
  }
  line(c,[{x:h.x-waist,y:h.y-1},{x:h.x+waist,y:h.y-1}],tone(d.shirt,-.35),.65);
- profileHead(c,d,n,dir,options.emotion??'focus',options.sweat??0,options.emotionClock??0);
+ profileHead(c,d,n,dir,options.emotion??'focus',options.sweat??0,options.emotionClock??0,options.headwearBackwards??options.view==='near');
  layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(p.paddle.depth>=p.neck.depth)drawPaddle();c.restore();
  return p;
 }

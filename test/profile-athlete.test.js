@@ -3,7 +3,15 @@ import assert from 'assert/strict';
 import {CHARACTER_CONCEPTS} from '../src/character-concepts.js';
 import {animeBodyDimensions} from '../src/anime-character.js';
 import {profilePose,profileTorso,profileShorts} from '../src/profile-athlete.js';
-import {MOTIONS} from '../src/pixel-character.js';
+import {MOTIONS} from '../src/pixel-character.js';import {readFileSync} from 'node:fs';
+
+test('profile joints stay integrated and replay headwear follows live orientation',()=>{
+ const profileSource=readFileSync(new URL('../src/profile-athlete.js',import.meta.url),'utf8');
+ const replaySource=readFileSync(new URL('../src/side-replay.js',import.meta.url),'utf8');
+ assert.doesNotMatch(profileSource,/joint\(c,/);
+ assert.match(profileSource,/headwearBackwards/);
+ assert.match(replaySource,/headwearBackwards:p\.team===0/);
+});
 
 test('profile torsos retain a crop waist and never collapse their shirt hem',()=>{
  for(const base of CHARACTER_CONCEPTS)for(const outfit of ['performance','polo','shorts'])for(const mode of ['idle',...MOTIONS])for(const phase of [0,.25,.52,.8,1]){
