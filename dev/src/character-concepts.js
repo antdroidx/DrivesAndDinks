@@ -24,6 +24,8 @@ export function skirtGarment(hips,legs,hipWidth,limbWidth){
  return {left,right,bottom,ends,polygon:[[hips.x-hipWidth,hem],[hips.x+hipWidth,hem],[right,rightY],[hips.x+(right-hips.x)*.3,bottom],[hips.x-(hips.x-left)*.3,bottom],[left,leftY]]};
 }
 
+export const HEADWEAR_OPTIONS=Object.freeze([{id:'none',name:'No headwear'},{id:'cap',name:'Cap'},{id:'visor',name:'Visor'},{id:'headband',name:'Headband'}]);
+export const EYEWEAR_OPTIONS=Object.freeze([{id:'none',name:'No glasses'},{id:'glasses',name:'Glasses'}]);
 export const HAIR_OPTIONS=Object.freeze({
  male:Object.freeze([{id:'crop',name:'Textured crop'},{id:'curls',name:'Soft curls'},{id:'spiky',name:'Spiky hair'},{id:'sidePart',name:'Swept side part'},{id:'buzz',name:'Close buzz cut'},{id:'bald',name:'Bald'}]),
  female:Object.freeze([{id:'bob',name:'Chin-length bob'},{id:'ponytail',name:'High ponytail'},{id:'braid',name:'Long braid'},{id:'pixie',name:'Feathered pixie'},{id:'waves',name:'Layered waves'},{id:'twinTails',name:'Twin tails'}])
