@@ -9,7 +9,7 @@ const styles=[
 ];
 $('athlete').innerHTML=CHARACTER_CONCEPTS.map(d=>`<option value="${d.id}">${d.name} · ${d.body}</option>`).join('');
 $('motion').innerHTML=['idle',...MOTIONS].map(m=>`<option value="${m}">${m.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase())}</option>`).join('');$('motion').value='forehand';
-function updateHair(){const d=CHARACTER_CONCEPTS.find(d=>d.id===$('athlete').value);$('outfit').querySelector('[value=shorts]').textContent=d.body==='female'?'Crop top + shorts':'Sleeveless + shorts';$('hair').innerHTML='<option value="design">As designed</option>'+HAIR_OPTIONS[d.body].map(h=>`<option value="${h.id}">${h.name}</option>`).join('')+'<option value="bald">Bald</option>'}
+function updateHair(){const d=CHARACTER_CONCEPTS.find(d=>d.id===$('athlete').value);$('outfit').querySelector('[value=shorts]').textContent=d.body==='female'?'Crop top + shorts':'Sleeveless + shorts';$('hair').innerHTML='<option value="design">As designed</option>'+HAIR_OPTIONS[d.body].map(h=>`<option value="${h.id}">${h.name}</option>`).join('')}
 $('athlete').onchange=updateHair;updateHair();
 const cards=styles.map(style=>{const article=document.createElement('article');article.className='design';article.innerHTML=`<div class="card-head"><h3>${style.name}</h3><span>0${styles.indexOf(style)+1}</span></div><canvas width="960" height="774" aria-label="${style.name} synchronized animation"></canvas><div class="card-copy"><p>${style.note}</p></div>`;$('designs').append(article);const canvas=article.querySelector('canvas');if(style.id==='pixel')canvas.style.imageRendering='pixelated';return {...style,canvas}});
 const pixelBuffers=new Map();
