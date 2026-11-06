@@ -19,4 +19,8 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.doesNotMatch(css,/\.game #shots @media/);
  assert.match(html,/name="hairStyle"/);
  assert.match(html,/id="hair-style"/);
+ assert.match(html,/id="headwear"/);
+ assert.match(html,/id="eyewear"/);
+ assert.match(css,/\.score-team\{display:grid/);
+ assert.match(css,/\.score-meta\{grid-column:1\/-1/);
 });

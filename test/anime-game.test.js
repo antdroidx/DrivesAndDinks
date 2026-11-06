@@ -34,3 +34,8 @@ test('preview and gameplay resolve the same selected hair style',()=>{
  assert.equal(selected.hair,'twinTails');
  assert.equal(fallback.hair,designed.hair);
 });
+
+test('resolved game appearance carries headwear and eyewear',()=>{
+ const design=resolveAnimeGameDesign({appearance:{headwear:'cap',eyewear:'glasses'}});
+ assert.equal(design.headwear,'cap');assert.equal(design.eyewear,'glasses');
+});

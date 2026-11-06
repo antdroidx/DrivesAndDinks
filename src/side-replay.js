@@ -18,6 +18,10 @@ const COURT_LENGTH=C.length,COURT_WIDTH=C.width,PROFILE_BODY=PROFILE_CANONICAL_B
 // court, so the venue that matters is the far side, beyond the far sideline.
 const REPLAY_PLATE={file:'replay-sideline.png',boundary:.5,floor:'#93aac4'};
 
+function replayName(name){return String(name||'').split(/\s+/)[0]}
+function drawReplayName(c,name,x,y,scale){
+ const label=replayName(name);if(!label)return;c.save();c.font=`bold ${Math.max(8,Math.min(12,scale*.42))}px monospace`;c.textAlign='center';const width=Math.max(32,c.measureText(label).width+12);c.fillStyle='#10232de8';c.fillRect(x-width/2,y-15,width,14);c.fillStyle='#fff8df';c.fillText(label,x,y-5);c.restore();
+}
 const shade=(hex,t)=>'#'+hex.slice(1).match(/../g).map(v=>Math.round(parseInt(v,16)*(1-t)).toString(16).padStart(2,'0')).join(''),
  sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),
  dot=(a,b)=>a.x*b.x+a.y*b.y+a.z*b.z,
@@ -138,6 +142,7 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
    const contact3D=p.animationContactStart&&p.swing>0&&p.contactPoint?{x:(p.contactPoint.x-p.x)*units,y:63-p.contactPoint.z*zUnits/stature,z:(p.contactPoint.y-p.y)*direction*units}:null;
 
    drawProfile(c,d,mode,phase,q.x,q.y,figureScale,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D:footPose,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:(p.handedness==='left'||p.hand==='left'?-1:1)*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),handedness:p.handedness??'right',...(()=>{const state=playerEmotionState(p,{phase:'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:null});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
+   drawReplayName(c,p.name,q.x,q.y-figureScale*.84,scale);
   }
   drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});
   if(snapshot.bounceMark?.time>0){const p=project(snapshot.bounceMark.x,snapshot.bounceMark.y);c.strokeStyle='#fff6ba';c.lineWidth=Math.max(.6,scale*.05);c.beginPath();c.ellipse(p.x,p.y,Math.max(4,scale*.45),Math.max(2,scale*.15),0,0,Math.PI*2);c.stroke()}

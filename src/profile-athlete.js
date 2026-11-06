@@ -58,21 +58,20 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock){
    oval(c,side*4.4,-3,1.25,1,d.trim,ink,.22);
   }
  }
- polygon(c,[{x:-4.5,y:-4},{x:-1,y:-6.5},{x:2.8,y:-5.2},{x:3.7,y:-1.1},{x:5.5,y:.8},{x:3.7,y:1.4},{x:3.4,y:3.8},{x:1.1,y:5.8},{x:-2.8,y:4.7},{x:-4.6,y:1.7}],d.skin,ink,.5);
+ polygon(c,[{x:-4.5,y:-4},{x:-1,y:-6.5},{x:2.8,y:-5.2},{x:3.8,y:-1.1},{x:4.45,y:.45},{x:3.85,y:1.45},{x:3.25,y:3.8},{x:1.1,y:5.8},{x:-2.8,y:4.7},{x:-4.6,y:1.7}],d.skin,ink,.5);
  polygon(c,[{x:-3.8,y:-3},{x:-2.6,y:2.8},{x:1,y:5.5},{x:-2.5,y:4.5},{x:-4.2,y:1.3}],skin.shadow,null);
  oval(c,-3.9,.8,1.05,1.5,skin.base,ink,.25);
  line(c,[{x:-4.2,y:.5},{x:-3.4,y:1.1}],skin.deep,.3);
  const eyeY=emotion==='surprise'?-.3:emotion==='fatigue'?.3:.05;
- const eyeHeight=emotion==='surprise'?1.35:emotion==='happy'?.58:emotion==='fatigue'?.62:emotion==='aggression'?.82:1.08;
- polygon(c,[{x:.8,y:eyeY-eyeHeight*.6},{x:2.1,y:eyeY-eyeHeight*.9},{x:3.25,y:eyeY-eyeHeight*.25},{x:2.9,y:eyeY+eyeHeight*.65},{x:1.4,y:eyeY+eyeHeight*.8}], '#fff8ed',ink,.32);
- oval(c,2.35,eyeY+.1,.72,eyeHeight*.72,tone(hair,.22),ink,.2);
- oval(c,2.4,eyeY+.22,.33,eyeHeight*.5,'#202632');
- oval(c,2.1,eyeY-.22,.18,.24,'#fffdf4');
- line(c,[{x:.75,y:eyeY-eyeHeight*.75},{x:3.35,y:eyeY-eyeHeight*.35}],ink,.45);
- if(emotion==='aggression')line(c,[{x:.75,y:eyeY-1.5},{x:3.25,y:eyeY-.8}],ink,.55);
- else line(c,[{x:.95,y:eyeY-1.45},{x:3.15,y:eyeY-1.75}],ink,.42);
- oval(c,3.5,.95,.5,.7,skin.shadow);
- line(c,[{x:3.55,y:1.55},{x:3.2,y:2.15}],skin.deep,.18);
+ const eyeHeight=emotion==='surprise'?1.05:emotion==='happy'?.5:emotion==='fatigue'?.54:emotion==='aggression'?.72:.82;
+ polygon(c,[{x:1.05,y:eyeY-eyeHeight*.45},{x:2.2,y:eyeY-eyeHeight*.62},{x:3.05,y:eyeY-.08},{x:2.45,y:eyeY+eyeHeight*.62},{x:1.25,y:eyeY+eyeHeight*.5}], '#f4dfc8',null);
+ oval(c,2.3,eyeY+.08,.54,eyeHeight*.62,tone(hair,.18),'#76635c',.16);
+ oval(c,2.35,eyeY+.18,.23,eyeHeight*.36,'#3b3440');
+ oval(c,2.12,eyeY-.1,.12,.15,'#fff8ed');
+ line(c,[{x:1.05,y:eyeY-eyeHeight*.5},{x:2.95,y:eyeY-.18}],skin.deep,.24);
+ line(c,[{x:1.25,y:eyeY-eyeHeight*.72},{x:2.75,y:eyeY-eyeHeight*.42}],skin.deep,.18);
+ oval(c,3.45,1.05,.42,.58,skin.shadow);
+ line(c,[{x:3.25,y:1.7},{x:3.05,y:2.05}],skin.deep,.15);
  if(emotion==='surprise')oval(c,3.1,3.55,.48,.7,skin.deep,ink,.18);
  else if(emotion==='happy')line(c,[{x:2.25,y:3.7},{x:3.35,y:3.2}],skin.deep,.4);
  else if(emotion==='aggression')line(c,[{x:2.05,y:3.55},{x:3.55,y:3.45}],skin.deep,.4);
@@ -172,6 +171,8 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  joint(c,{x:n.x-dir*shoulder*.75,y:top+1.5},1.5,tone(d.shirt,-.12));
  joint(c,{x:n.x+dir*shoulder*.75,y:top+1.5},1.5,tone(d.shirt,-.12));
  polygon(c,[{x:n.x+dir*shoulder*.2,y:top+1.2},{x:n.x+dir*shoulder,y:top+2.2},{x:h.x+dir*waist*.7,y:hem-.3},{x:h.x+dir*waist*.15,y:hem-.3}],tone(d.shirt,-.16),null);
+ polygon(c,[{x:n.x-dir*shoulder*.45,y:top+1.8},{x:n.x-dir*shoulder*.05,y:top+1.3},{x:n.x+dir*waist*.15,y:hem-1.2},{x:n.x-dir*waist*.35,y:hem-.6}],tone(d.shirt,.16),null);
+ line(c,[{x:n.x-dir*shoulder*.2,y:top+3.2},{x:n.x+dir*waist*.15,y:hem-2.8}],tone(d.shirt,-.28),.35);
  line(c,[{x:n.x-dir*1.8,y:top+.1},{x:n.x+dir*2,y:top+1.2}],d.trim,.8);
  line(c,[{x:n.x-shoulder*.8,y:top+1.1},{x:n.x+shoulder*.8,y:top+1.5}],tone(d.shirt,.22),.45);
  line(c,[{x:n.x-waist,y:hem-1.2},{x:n.x+waist,y:hem-1.2}],d.trim,.6);
@@ -180,10 +181,12 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
   const skirt=skirtGarment(h,p.legs,body.hip-1,Math.max(1.5,body.thigh-.6));
   polygon(c,skirt.polygon.map(([x,y])=>({x,y})),tone(d.shirt,.08),ink,.45);
   line(c,[{x:skirt.left,y:skirt.ends[0].y+1},{x:h.x,y:skirt.bottom},{x:skirt.right,y:skirt.ends[1].y+1}],d.trim,.6);
+  for(const offset of [-.55,-.2,.2,.55])line(c,[{x:h.x+offset*body.hip,y:h.y+1},{x:h.x+offset*body.hip*1.35,y:skirt.bottom-1}],tone(d.shirt,-.18),.3);
  }else{
   for(const chain of p.legs){const g=thighGarment(chain,body.thigh*.85+1);polygon(c,g.polygon.map(([x,y])=>({x,y})),tone(d.shirt,-.48),ink,.35)}
   polygon(c,[{x:h.x-body.hip,y:h.y-1},{x:h.x+body.hip,y:h.y-1},{x:h.x+body.hip,y:h.y+2},{x:h.x,y:h.y+3},{x:h.x-body.hip,y:h.y+2}],tone(d.shirt,-.48),ink,.35);
   line(c,[{x:h.x-body.hip*.8,y:h.y+.2},{x:h.x+body.hip*.8,y:h.y+.2}],d.trim,.4);
+  line(c,[{x:h.x-body.hip*.65,y:h.y+.8},{x:h.x+body.hip*.65,y:h.y+.8}],tone(d.shirt,-.3),.3);
  }
  profileHead(c,d,n,dir,options.emotion??'focus',options.sweat??0,options.emotionClock??0);
  layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(p.paddle.depth>=p.neck.depth)drawPaddle();c.restore();

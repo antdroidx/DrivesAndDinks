@@ -1,4 +1,4 @@
-import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,contactAvailable,paddleContactAvailable,paddleContactTarget,contactQuality,serveTarget,serveAim,contactDifficulty,netCrossingX,paddleContactResponse} from '../src/core.js';import {Game} from '../src/game.js';
+import {test} from 'node:test';import assert from 'node:assert/strict';import {C,stepBall,launch,inBounds,legalVolley,Score,move,receiver,chooseCpuShot,playerProfile,venueConditions,contactAvailable,paddleContactAvailable,paddleContactTarget,contactQuality,serveTarget,serveAim,contactDifficulty,netCrossingX,paddleContactResponse} from '../src/core.js';import {Game} from '../src/game.js';
 function completeToss(g){g.serve();if(g.serveToss)g.update(g.serveToss.duration+.01);return g;}
 test('ball arcs and bounces',()=>{let b={x:5,y:40,z:1};launch(b,15,5,'lob');let high=0,event;for(let i=0;i<300&&!event;i++){event=stepBall(b);high=Math.max(high,b.z)}assert.equal(event,'bounce');assert.ok(high>5);assert.ok(b.vz>0);assert.ok(Math.abs(b.x-15)<1)});
 test('net and boundaries',()=>{let b={x:10,y:22.1,z:1,vx:0,vy:-10,vz:0};assert.equal(stepBall(b,.02),'net');assert.ok(inBounds(0,44));assert.ok(!inBounds(-.1,4))});
@@ -196,3 +196,9 @@ test('a net touch falls back to the hitter before the net fault is called',()=>{
 test('bounce friction transfers topspin forward and checks backspin',()=>{const top={x:10,y:10,z:C.ballRadius+.001,vx:10,vy:0,vz:-10,spin:2},back={...top,spin:-2};stepBall(top);stepBall(back);assert.ok(Math.hypot(top.vx,top.vy)>Math.hypot(back.vx,back.vy));assert.ok(Math.abs(top.spin)<2);});
 
 test('sprinting consumes stamina while recovery restores it',()=>{const p={...playerProfile(),team:0,x:0,y:35,vx:0,vy:0,stamina:1};let tiredSpeed=0;for(let i=0;i<240;i++){move(p,i<120?20:0,35,1/120);tiredSpeed=Math.max(tiredSpeed,Math.hypot(p.vx,p.vy))}assert.ok(p.stamina<.95);const tired=p.stamina;for(let i=0;i<180;i++)move(p,p.x,p.y,1/120);assert.ok(p.stamina>tired);assert.ok(tiredSpeed>0);});
+
+test('indoor conditions stay calm and outdoor conditions carry light wind and humidity',()=>{
+ const indoor=venueConditions('indoor');
+ assert.equal(indoor.wind,0);assert.equal(indoor.humidity,0);
+ for(let i=0;i<100;i++){const outdoor=venueConditions('outdoor',()=>i/100);assert.ok(outdoor.wind>0&&outdoor.wind<=.8);assert.ok(outdoor.humidity>=.46&&outdoor.humidity<=.8);assert.match(outdoor.label,/OUTDOOR · LIGHT WIND/)}
+});

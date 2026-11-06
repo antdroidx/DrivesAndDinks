@@ -1,6 +1,11 @@
 import {kitchenContact} from './player-feet.js';
 import {strokeForContact} from './player-facing.js';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:34/12,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
+export function venueConditions(surfaceKind='outdoor',random=Math.random){
+ if(surfaceKind==='indoor')return {type:'indoor',label:'INDOOR · CALM',wind:0,humidity:0};
+ const wind=.22+random()*.58,humidity=.46+random()*.34;
+ return {type:'outdoor',label:`OUTDOOR · LIGHT WIND · ${humidity>.68?'HUMID':'MILD'}`,wind:Number(wind.toFixed(3)),humidity:Number(humidity.toFixed(3))};
+}
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
 const DEFAULT_SHAPE_MODIFIERS=Object.freeze({power:1,control:1,reach:1,handSpeed:1,sweetSpot:1});
@@ -120,8 +125,8 @@ export function netCrossingX(start,target){
 export const side=y=>y>22?0:1;
 export function netHeightAt(x){return C.netCenterHeight+(C.netPostHeight-C.netCenterHeight)*Math.min(1,Math.abs(x-C.width/2)/(C.width/2))}
 export function stepBall(b,dt=C.dt){
- const oldY=b.y,oldZ=b.z,radius=b.radius??C.ballRadius,spin=b.spin||0,spinX=b.spinX||0,spinY=b.spinY||0,spinZ=b.spinZ||0,speed=Math.hypot(b.vx||0,b.vy||0,b.vz||0),drag=C.airDrag*speed;
- b.vx=(b.vx||0)*(1-drag*dt);
+ const oldY=b.y,oldZ=b.z,radius=b.radius??C.ballRadius,spin=b.spin||0,spinX=b.spinX||0,spinY=b.spinY||0,spinZ=b.spinZ||0,speed=Math.hypot(b.vx||0,b.vy||0,b.vz||0),drag=C.airDrag*speed,wind=b.wind||0,humidity=b.humidity||0;
+ b.vx=(b.vx||0)*(1-drag*dt)+wind*dt*2.2;
  b.vy=(b.vy||0)*(1-drag*dt);
  b.vz=(b.vz||0)*(1-drag*dt);
  // Spin is carried as a signed vertical component plus optional side-spin axes.
@@ -138,9 +143,9 @@ export function stepBall(b,dt=C.dt){
 }
  if(b.z<=radius&&b.vz<0){
   b.z=radius;
-  const impactSpeed=Math.abs(b.vz),restitution=Math.max(.58,C.bounce-Math.max(0,impactSpeed-22)*.003)+(spin>0?.025:spin<0?-.045:0);
+  const impactSpeed=Math.abs(b.vz),restitution=Math.max(.58,C.bounce-Math.max(0,impactSpeed-22)*.003)+(spin>0?.025:spin<0?-.045:0)-Math.max(0,humidity-.5)*.03;
   b.vz=-b.vz*restitution;
-  const surface=Math.max(.82,.91+(spin<0?.018:-.012));
+  const surface=Math.max(.82,.91+(spin<0?.018:-.012)-Math.max(0,humidity-.5)*.015);
   const spinTransfer=Math.max(-.12,Math.min(.12,spin*.022)),surfaceFriction=Math.max(.84,C.courtFriction+(spin<0?.012:-.008));
   b.vx*=surfaceFriction*(1+spinTransfer);b.vy*=surfaceFriction*(1+spinTransfer);
   b.spin=(b.spin||0)*.72;b.spinX=(b.spinX||0)*.82;b.spinY=(b.spinY||0)*.82;b.spinZ=(b.spinZ||0)*.82;

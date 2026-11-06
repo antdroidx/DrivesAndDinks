@@ -229,7 +229,12 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app main[data-court-layout="stacked"] #shots{grid-column:2;flex-direction:row;gap:4px}
 .court-app main[data-court-layout="stacked"] #shots button{flex:1;width:auto;height:74px;font-size:11px}
 .court-app main[data-court-layout="stacked"] #aim-pad{grid-column:1;width:100%;height:74px}
-.court-app main[data-court-layout="stacked"] #court-hud{gap:3px;flex-direction:column;font-size:10px}.court-app main[data-court-layout="stacked"] #court-hud strong{font-size:13px}
+.court-app #court-hud .score-team{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto;justify-items:center;min-width:0;width:100%}
+.court-app #court-hud .score-team small{font-size:8px;line-height:1;color:#f9d46a}
+.court-app #court-hud .score-team strong{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.1}
+.court-app #court-hud .score-core{display:grid;justify-items:center;gap:0}
+.court-app #court-hud .score-meta{grid-column:1/-1;grid-row:2;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:#f9d46a}
+.court-app main[data-court-layout="stacked"] #court-hud{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:auto auto;align-items:center;justify-items:center;gap:1px 8px;font-size:10px;min-height:50px}.court-app main[data-court-layout="stacked"] #court-hud .score-core strong{font-size:18px}.court-app main[data-court-layout="stacked"] #court-hud .score-team strong{font-size:11px}
 .court-app #overlay{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);display:block}
 .court-app main:fullscreen{width:100vw;height:100dvh}.court-app main:-webkit-full-screen{width:100vw;height:100vh}
 
@@ -262,8 +267,8 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app .game{width:var(--court-width);height:var(--court-height);aspect-ratio:auto}
 .court-app main[data-court-layout="wide"] .playfield{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr)}
 .court-app main[data-court-layout="wide"] .game{grid-column:1;grid-row:1;border-width:0}
-.court-app main[data-court-layout="wide"] #court-hud{position:absolute;top:3px;left:18%;right:18%;height:34px;z-index:6;border-radius:5px;background:#142936b3;pointer-events:none;font-size:11px;gap:12px}
-.court-app main[data-court-layout="wide"] #court-hud strong{font-size:14px}
+.court-app main[data-court-layout="wide"] #court-hud{position:absolute;top:3px;left:10%;right:10%;height:54px;z-index:6;border-radius:6px;background:#142936d9;pointer-events:none;display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:auto auto;align-items:center;justify-items:center;font-size:10px;gap:1px 16px;padding:4px 14px}
+.court-app main[data-court-layout="wide"] #court-hud .score-core strong{font-size:19px}.court-app main[data-court-layout="wide"] #court-hud .score-team strong{font-size:10px}
 .court-app main[data-court-layout="wide"] .game #shots{right:3%;top:50%;bottom:auto;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px;width:clamp(76px,11cqw,120px);height:auto}
 .court-app main[data-court-layout="wide"] .game #shots button{width:100%;height:clamp(48px,11vh,72px);min-height:44px;flex:none;font-size:13px}
 .court-app main[data-court-layout="wide"] .game #aim-pad{left:3%;top:50%;bottom:auto;transform:translateY(-50%);width:clamp(110px,15cqw,180px);height:clamp(80px,20vh,110px)}
@@ -317,7 +322,7 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 
 
 
-#character-designer[hidden]{display:none}#character-designer{display:grid;gap:16px}.designer-open{width:100%;margin:8px 0}#character-designer input[type=range]{width:100%;accent-color:#80e0b5}#character-designer output{color:#80e0b5}#match-setup .setup-note,#match-setup #team-preview,#match-setup .studio-link{display:none}#match-setup .setup-scroll>details{margin:8px 0}#character-designer>button{position:sticky;top:0;z-index:2}#match-setup .setup-scroll{overscroll-behavior:contain}
+#character-designer[hidden]{display:none}#character-designer{display:grid;gap:16px}.designer-open{width:auto;align-self:center;margin:6px 0 0;padding:7px 10px;font-size:10px}#character-designer input[type=range]{width:100%;accent-color:#80e0b5}#character-designer output{color:#80e0b5}#match-setup .setup-note,#match-setup #team-preview,#match-setup .studio-link{display:none}#match-setup .setup-scroll>details{margin:8px 0}#character-designer>button{position:sticky;top:0;z-index:2}#match-setup .setup-scroll{overscroll-behavior:contain}
 
 #match-setup:not(.designing) .setup-top{grid-template-columns:1fr}#character-designer .player-preview{justify-self:center}#match-setup.designing .setup-footer{display:none}
 

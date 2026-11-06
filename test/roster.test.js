@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,NAME_CULTURES,RATING_KEYS,PLAYTEST_BASE_RATING,normalizeSelection,buildProfile,createLineup,selectionStats,effectiveRatings,skillAverage,hairStylesFor} from '../src/roster.js';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,NAME_CULTURES,RATING_KEYS,PLAYTEST_BASE_RATING,normalizeSelection,buildProfile,createLineup,selectionStats,effectiveRatings,skillAverage,hairStylesFor,sampleAthleteBody} from '../src/roster.js';
 import {HAIR_OPTIONS} from '../src/character-concepts.js';
 import {statRating} from '../src/selection.js';
 import {appearancePalette,characterSpritesReady,onCharacterSpritesReady,characterFrame} from '../src/pixel-character.js';
@@ -88,4 +88,24 @@ test('hair style is selectable, body-safe and preserved in the match profile',()
  const lineup=createLineup({gender:'female',hairStyle:'twinTails'},{random});
  assert.equal(lineup[0].appearance.hairStyle,'twinTails');
  for(const player of lineup.slice(1))assert.ok(HAIR_OPTIONS[player.gender].some(item=>item.id===player.appearance.hairStyle));
+});
+
+test('generated bodies stay in realistic population ranges',()=>{
+ let seed=17;const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
+ for(const gender of ['male','female'])for(let i=0;i<500;i++){
+  const body=sampleAthleteBody(gender,random);
+  assert.ok(body.height>=(gender==='female'?150:158)&&body.height<=(gender==='female'?183:198));
+  assert.ok(body.build>=(gender==='female'?.2:.18)&&body.build<=(gender==='female'?.76:.84));
+ }
+ assert.equal(sampleAthleteBody('female',()=>.5).height,164);
+ assert.equal(sampleAthleteBody('male',()=>.5).height,177);
+ assert.equal(normalizeSelection({headwear:'cap',eyewear:'glasses'}).headwear,'cap');
+ assert.equal(normalizeSelection({headwear:'cap',eyewear:'glasses'}).eyewear,'glasses');
+ assert.equal(buildProfile({headwear:'visor',eyewear:'glasses'}).appearance.headwear,'visor');
+});
+
+test('custom user names remain customizable and survive the match profile',()=>{
+ const selection=normalizeSelection({customName:'  Alex Kim  '});
+ assert.equal(selection.customName,'Alex Kim');
+ assert.equal(buildProfile(selection).name,'Alex Kim');
 });
