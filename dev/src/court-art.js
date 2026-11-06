@@ -1,5 +1,5 @@
 // The source artwork contains neutral, unmarked ground with no court patch. Baselines are aligned to the
-import {C} from './core.js?v=175';
+import {C} from './core.js?v=176';
 // engine projection; all rules, line positions and collision geometry stay live.
 export const SCENE_LAYOUTS=Object.freeze({
  // 'far' is where the court baseline lands in the plate. It sits below the back
