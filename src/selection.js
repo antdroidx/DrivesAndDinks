@@ -76,7 +76,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
 
  mainIdentity.append(archetypeField,designButton,playerDescription);nameSlot.append(nameField);
  profileGrid.append(genderField,handField,hairStyleField,hairColorField,skinField,heightField,weightField,bodyInfo);
- outfitGrid.append(outfitField,shirtColorField,highlightColorField,headwearField,eyewearField,motionLink);
+ outfitField.style.gridColumn='1 / -1';`noutfitGrid.append(outfitField);`noutfitGrid.append(shirtColorField,highlightColorField);`noutfitGrid.append(headwearField,eyewearField);`noutfitGrid.append(motionLink);
  designer.append(back,preview,profileBox,outfitBox);
  const ratingsHeading=form.querySelector('.ratings-heading'),loadoutStats=form.querySelector('#loadout-stats');
  loadoutStats.after(designer);
@@ -123,3 +123,4 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
  function open(){if(started)previewLineup=[];dialog.querySelector('#resume-match').hidden=!started;form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
  open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
 }
+

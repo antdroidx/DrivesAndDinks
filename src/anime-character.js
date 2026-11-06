@@ -135,7 +135,7 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
   for(const [hx,hy] of [[-3.3,-4.8],[-1.5,-5.8],[.4,-5.9],[2.3,-5.2],[3.7,-3.8],[-2.2,-2.9],[1.4,-3.1]])oval(c,x+hx,y+hy,.16,.22,tone(d.trim,-.28));
   if(!near){
    path(c,[point(x-5.8,y-2),point(x+5.5,y-2.2),point(x+7.3,y-.4),point(x+1,y-.2)],tone(d.trim,-.12),ink);
-   line(c,[point(x,y-6.8),point(x+.3,y-2.8)],tone(d.trim,-.2),.3);
+   // line removed for cap orientation fix
   }else{
    path(c,[point(x-3.4,y-2.4),point(x+3.4,y-2.4),point(x+3,y-.3),point(x-3,y-.3)],tone(d.trim,-.12),ink,.3);
    line(c,[point(x-2.4,y-1.4),point(x+2.4,y-1.4)],ink,.28);
@@ -239,3 +239,4 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  const normalizedEmotion=normalizeEmotion(emotion);animeHead(c,d,n,near,warm,phase,ink,normalizedEmotion);const emotionHead=animeHeadCenter(n),sweat=Math.max(0,Math.min(1,options.sweat??0));emotionMarks(c,normalizedEmotion,options.emotionIntensity??.65,emotionHead);if(sweat>.1){oval(c,emotionHead.x-2.4,emotionHead.y-4.8,1.2,.28,'#d8f3f4aa');const drops=sweat>.68?3:sweat>.34?2:1;for(let i=0;i<drops;i++){const sign=i===0?-1:i===1?1:0,drop=((options.emotionClock??0)*(.7+i*.15)+i*.31)%1;oval(c,emotionHead.x+sign*5.4+(i===2?2.2:0),emotionHead.y+1+drop*3,.34+(i===2?.08:0),.58+drop*.18,'#b5e6ef')}}
  layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
 }
+

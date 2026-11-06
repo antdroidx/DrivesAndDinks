@@ -161,7 +161,7 @@ export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1,option
  if(['drive','overhead','atp','erne'].includes(shot))t=Math.max(.38,Math.hypot(x-b.x,y-b.y)/(48*(paddle.power??1)*technique*(shot==='overhead'?1.12:1)))*slow;
  const aggressive=['drive','overhead','atp','erne'].includes(shot);
  if(aggressive&&b.z<2.2)t*=1+(2.2-b.z)*.15;
- const f=(22-b.y)/(y-b.y);let clearance=['drive','overhead','atp','erne'].includes(shot)?Math.max(C.netCenterHeight+C.ballRadius+.25,(shot==='overhead'?3.35:3.65)/(paddle.power??1)):shot==='drop'?3.7:3.4+(shot==='dink'?Math.max(0,Math.min(2.4,Number(options.loftBonus)||0)):0);if(quality<.8)clearance*=1+(0.8-quality)*.35;
+ const f=(22-b.y)/(y-b.y);let clearance=['drive','overhead','atp','erne'].includes(shot)?Math.max(C.netCenterHeight+C.ballRadius+.25,(shot==='overhead'?3.35:3.65)/(paddle.power??1)):shot==='drop'?3.7:3.4+(shot==='dink'?Math.max(0,Math.min(2.4,Number(options.loftBonus)||0)):0); clearance=Math.max(0,clearance-0.3);if(quality<.8)clearance*=1+(0.8-quality)*.35;
  if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
  b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;
  // Poor contact can catch the net as well as float long; clean shots keep assistance.
@@ -261,7 +261,7 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
    (!partnerReady?-.2:0)+(dropFeasible?0:.16)-pressure*.18));
   return random<driveChance?'drive':reset;
  }
- if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
+ if(shots>2&&height>=5.2)return 'drive';
  if(difficulty>.82&&height<3.2)return 'lob';
  if(shots===2)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';
  if(nearKitchen){const readConfidence=Math.max(0,Math.min(.85,pattern?.confidence??0)),lobRead=Math.max(0,Math.min(.85,pattern?.lobConfidence??0));if(opponentsAtKitchen&&height<2&&random>(lobRead>.5?.92:.97))return 'lob';if(difficulty>.9&&height<2.7)return 'dink';const rallyEscalation=shots>=6?Math.min(.36,(shots-6)*.025):0;const attackChance=Math.max(.12,Math.min(.76,.22+attackBias+rallyEscalation+(height-1.4)*.08+readConfidence*.03));const speedupReady=balanced&&partnerReady&&difficulty<.78&&height>=2.15&&height<=5.2&&(opponentsAtKitchen||!opponentsDeep);if(height>=2.15){if(incomingShot==='dink')return speedupReady&&(height>2.85||random<attackChance+.22)?'drive':'dink';return height>3.05||random<attackChance?'drive':'dink'}if(shots>=18)return difficulty>.9?'lob':'drive';return height>1.25&&random<attackChance?'drive':'dink'}
@@ -275,3 +275,5 @@ export function chooseCpuTarget(player,opponents,shot){
   return value(x)>value(best)?x:best;
  },candidates[0]);
 }
+
+

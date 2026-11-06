@@ -199,7 +199,7 @@ export function normalizeSelection(input={}){
     character,
     gender,
     handedness:input?.handedness==='left'||input?.handedness==='right'?input.handedness:(input?.hand==='left'||input?.hand==='right'?input.hand:DEFAULT_SELECTION.handedness),
-    customName:String(input?.customName??'').trim().slice(0,40),
+    customName:String(input?.customName??'').slice(0,40),
     paddle:valid(PADDLES,input?.paddle)??DEFAULT_SELECTION.paddle,
     paddleShape:valid(PADDLE_SHAPES,input?.paddleShape)??DEFAULT_SELECTION.paddleShape,
     hairStyle:normalizeHairStyle(gender,input?.hairStyle??input?.hair),
@@ -268,3 +268,4 @@ export function applyPhysique(player,appearance=player.appearance??{}){
  const abilities={...baseAbilities};for(const [key,multiplier] of Object.entries(modifiers))abilities[key]=(baseAbilities[key]??1)*multiplier;
  return {...player,baseAbilities,abilities,appearance:{...appearance,height,build},physique:{height,build,heightScale:height/177,modifiers}};
 }
+
