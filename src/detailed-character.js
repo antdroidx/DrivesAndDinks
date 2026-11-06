@@ -1,10 +1,10 @@
 import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js';
-import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js';
+import {CHARACTER_CONCEPTS,conceptPoint,conceptHair,thighGarment,skirtGarment} from './character-concepts.js';
 
 // Visual identities never alter the player's simulation abilities or hit range.
 export function matchDesign(appearance={},characterId='',designId=''){
  const body=appearance.body==='female'?'female':'male',choices=CHARACTER_CONCEPTS.filter(d=>d.body===body),hash=[...characterId].reduce((n,c)=>n+c.charCodeAt(0),0),base=CHARACTER_CONCEPTS.find(d=>d.id===designId)??choices[hash%choices.length],palette=appearancePalette(appearance);
- return {...base,shirt:palette.shirt,skin:palette.skin,hairColor:palette.hair,trim:palette.paddle};
+ return {...base,hair:conceptHair(body,appearance.hairStyle,base.hair),shirt:palette.shirt,skin:palette.skin,hairColor:palette.hair,trim:palette.paddle};
 }
 // Limb mass and bone lengths are independent of the arm silhouette.
 export function legDimensions(design){

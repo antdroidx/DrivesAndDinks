@@ -26,3 +26,11 @@ test('venue randomization avoids immediate repeats and preserves valid court col
 test('personal height and build affect appearance without mutating the selected preset',()=>{
  for(const source of CHARACTER_CONCEPTS){const before=JSON.stringify(source),options={designId:source.id},base=resolveAnimeGameDesign(options),lean=resolveAnimeGameDesign({...options,customHeight:150,customBuild:.05}),broad=resolveAnimeGameDesign({...options,customHeight:205,customBuild:1.05});assert.equal(base.height,source.height);assert.equal(lean.height,150);assert.equal(broad.height,205);assert.ok(lean.waist<broad.waist);assert.equal(JSON.stringify(source),before)}
 });
+
+test('preview and gameplay resolve the same selected hair style',()=>{
+ const selected=resolveAnimeGameDesign({appearance:{body:'female',hairStyle:'twinTails'},characterId:'selena'});
+ const fallback=resolveAnimeGameDesign({appearance:{body:'female',hairStyle:'spiky'},characterId:'selena'});
+ const designed=resolveAnimeGameDesign({appearance:{body:'female'},characterId:'selena'});
+ assert.equal(selected.hair,'twinTails');
+ assert.equal(fallback.hair,designed.hair);
+});

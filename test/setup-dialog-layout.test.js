@@ -17,4 +17,6 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.match(css,/dialog\{touch-action:pan-y\}/);
  assert.match(css,/body:has\(dialog\[open\]\)\{overscroll-behavior:none\}/);
  assert.doesNotMatch(css,/\.game #shots @media/);
+ assert.match(html,/name="hairStyle"/);
+ assert.match(html,/id="hair-style"/);
 });

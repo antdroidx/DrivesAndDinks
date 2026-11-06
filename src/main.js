@@ -155,11 +155,11 @@ function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b)
 
 // separately for each end of the court.
 
-function drawLoadoutPreview(selection){
+function drawLoadoutPreview(selection,profile){
 
  const c=document.querySelector('#player-preview');if(!c)return;
 
- const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:selection.gender??character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor};
+ const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={...(profile?.appearance??{}),body:selection.gender??character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor};
 
  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(2,0,0,2,0,0);x.imageSmoothingEnabled=false;x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
 

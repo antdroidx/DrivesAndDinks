@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,NAME_CULTURES,RATING_KEYS,PLAYTEST_BASE_RATING,normalizeSelection,buildProfile,createLineup,selectionStats,effectiveRatings,skillAverage} from '../src/roster.js';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,NAME_CULTURES,RATING_KEYS,PLAYTEST_BASE_RATING,normalizeSelection,buildProfile,createLineup,selectionStats,effectiveRatings,skillAverage,hairStylesFor} from '../src/roster.js';
+import {HAIR_OPTIONS} from '../src/character-concepts.js';
 import {statRating} from '../src/selection.js';
 import {appearancePalette,characterSpritesReady,onCharacterSpritesReady,characterFrame} from '../src/pixel-character.js';
 import {Game} from '../src/game.js';
@@ -76,4 +77,15 @@ test('generated identities cover the requested name groups with coherent skin to
  assert.equal(first[0].appearance.shirtColor,'red');assert.equal(first[0].appearance.hairColor,'black');assert.equal(first[0].appearance.skinColor,'medium');
  assert.notDeepEqual(first.slice(1).map(player=>[player.name,player.appearance]),second.slice(1).map(player=>[player.name,player.appearance]));
  for(const player of first)assert.ok(['male','female'].includes(player.gender));
+});
+
+test('hair style is selectable, body-safe and preserved in the match profile',()=>{
+ assert.equal(normalizeSelection({gender:'female',hairStyle:'twinTails'}).hairStyle,'twinTails');
+ assert.equal(normalizeSelection({gender:'female',hairStyle:'spiky'}).hairStyle,'design');
+ assert.equal(buildProfile({gender:'female',hairStyle:'twinTails'}).appearance.hairStyle,'twinTails');
+ for(const body of ['male','female'])for(const style of hairStylesFor(body))assert.ok(HAIR_OPTIONS[body].some(item=>item.id===style.id));
+ let seed=17;const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
+ const lineup=createLineup({gender:'female',hairStyle:'twinTails'},{random});
+ assert.equal(lineup[0].appearance.hairStyle,'twinTails');
+ for(const player of lineup.slice(1))assert.ok(HAIR_OPTIONS[player.gender].some(item=>item.id===player.appearance.hairStyle));
 });
