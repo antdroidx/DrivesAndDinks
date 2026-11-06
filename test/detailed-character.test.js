@@ -11,6 +11,13 @@ test('all six proposals can be selected for the match renderer without mutating 
  for(const design of CHARACTER_CONCEPTS){const before=JSON.stringify(design),c=canvas();assert.equal(matchDesign({},'avery',design.id).id,design.id);assert.equal(drawDetailedCharacter(c,{designId:design.id,mode:'forehand',phase:.52,width:70.5,height:94,x:20,y:30,alignTo:{x:65,y:78},alignStrength:1,paddleShape:'elongated'}),true);assert.equal(c.depth,0);assert.equal(JSON.stringify(design),before)}
 });
 
+test('outfit highlight and paddle edge colors render independently',()=>{
+ const design=matchDesign({paddleColor:'mint',highlightColor:'yellow'},'avery');
+ assert.equal(design.paddleColor,'#4be3c2');
+ assert.equal(design.trim,'#f5cd55');
+ assert.notEqual(design.trim,design.paddleColor);
+});
+
 test('matte and stylized silhouettes render the full motion library without canvas leaks or preset mutation',()=>{
  for(const design of CHARACTER_CONCEPTS)for(const silhouette of [undefined,'compact','toy'])for(const mode of ['idle',...MOTIONS])for(const view of ['near','far'])for(const phase of [0,.25,.52,.8,1]){
   const before=JSON.stringify(design),c=canvas();drawConceptAthlete(c,design,mode,phase,view,120,270,2.9,{material:'matte',silhouette,faceStyle:silhouette==='toy'?'storybook':'anime',illustrated:true});assert.equal(c.depth,0);assert.equal(JSON.stringify(design),before);

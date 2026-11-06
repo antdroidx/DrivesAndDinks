@@ -46,6 +46,11 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.match(html,/id="footer-controls"|class="footer-controls"/);
  assert.match(main,/Weight \(lbs\)/);
  assert.match(main,/buildFromWeight/);
+ assert.match(selection,/paddleSelects\.append\(field\('Paddle family',paddleFamily\),field\('Paddle shape',paddleShape\),paddleColorField\)/);
+ assert.match(selection,/select\('highlightColor'/);
+ assert.match(selection,/highlightColorField/);
+ assert.match(selection,/outfitGrid\.append\(outfitField,shirtColorField,highlightColorField,/);
+ assert.doesNotMatch(selection,/outfitGrid\.append\(outfitField,shirtColorField,headwearField,eyewearField,paddleColorField/);
  assert.match(selection,/paddleDescription\.textContent/);
  assert.match(selection,/footerControls\.append/);
  assert.match(selection,/nameInput\.placeholder='Auto-generated name'/);

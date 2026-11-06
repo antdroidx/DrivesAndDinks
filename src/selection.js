@@ -64,7 +64,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
  const hairStyleSelect=select('hairStyle',[],'Hair style');const hairStyleField=field('Hair style',hairStyleSelect);
  const hairColorSelect=select('hairColor',options(HAIR_COLORS),'Hair color');const hairColorField=field('Hair color',hairColorSelect);
  const skinSelect=select('skinColor',options(SKIN_COLORS),'Skin tone');const skinField=field('Skin tone',skinSelect);
- const shirtColorSelect=select('shirtColor',options(CLOTHING_COLORS),'Outfit color');const shirtColorField=field('Outfit color',shirtColorSelect);
+ const shirtColorSelect=select('shirtColor',options(CLOTHING_COLORS),'Outfit color');const shirtColorField=field('Outfit color',shirtColorSelect);const highlightColorSelect=select('highlightColor',options(PADDLE_COLORS),'Outfit highlight');const highlightColorField=field('Outfit highlight',highlightColorSelect);
  const headwearSelect=select('headwear',options(HEADWEAR_OPTIONS),'Headwear');const headwearField=field('Headwear',headwearSelect);
  const eyewearSelect=select('eyewear',options(EYEWEAR_OPTIONS),'Eyewear');const eyewearField=field('Eyewear',eyewearSelect);
  const paddleColorSelect=select('paddleColor',options(PADDLE_COLORS),'Paddle color');const paddleColorField=field('Paddle color',paddleColorSelect);
@@ -72,11 +72,11 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
 
  const paddleBrief=document.querySelector('#paddle-brief'),paddleSelects=paddleBrief.querySelector('.paddle-selects'),paddleDescription=document.querySelector('#paddle-description');
  const paddleFamily=select('paddle',options(PADDLES),'Paddle family'),paddleShape=select('paddleShape',options(PADDLE_SHAPES),'Paddle shape');
- paddleSelects.append(field('Paddle family',paddleFamily),field('Paddle shape',paddleShape));
+ paddleSelects.append(field('Paddle family',paddleFamily),field('Paddle shape',paddleShape),paddleColorField);
 
  mainIdentity.append(archetypeField,designButton,playerDescription);nameSlot.append(nameField);
  profileGrid.append(genderField,handField,hairStyleField,hairColorField,skinField,heightField,weightField,bodyInfo);
- outfitGrid.append(outfitField,shirtColorField,headwearField,eyewearField,paddleColorField,motionLink);
+ outfitGrid.append(outfitField,shirtColorField,highlightColorField,headwearField,eyewearField,motionLink);
  designer.append(back,preview,profileBox,outfitBox);
  const ratingsHeading=form.querySelector('.ratings-heading'),loadoutStats=form.querySelector('#loadout-stats');
  loadoutStats.after(designer);
@@ -91,7 +91,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
  const optionLabel=(items,id)=>items.find(item=>item.id===id)?.name??items.find(item=>item.id===id)?.style??id;
  function hairStyleOptions(body){return [{id:'design',name:'As designed'},...(HAIR_OPTIONS[body]??HAIR_OPTIONS.male)]}
  function appearanceSummary(selectionValue){
-  return `${optionLabel(CLOTHING_COLORS,selectionValue.shirtColor)} outfit · ${optionLabel(PADDLE_COLORS,selectionValue.paddleColor)} paddle · ${optionLabel(HAIR_OPTIONS[selectionValue.gender]??HAIR_OPTIONS.male,selectionValue.hairStyle)} hair · ${optionLabel(HAIR_COLORS,selectionValue.hairColor)} color · ${optionLabel(SKIN_COLORS,selectionValue.skinColor)} skin · ${optionLabel(HEADWEAR_OPTIONS,selectionValue.headwear)} · ${optionLabel(EYEWEAR_OPTIONS,selectionValue.eyewear)}`;
+  return `${optionLabel(CLOTHING_COLORS,selectionValue.shirtColor)} outfit · ${optionLabel(PADDLE_COLORS,selectionValue.highlightColor)} highlight · ${optionLabel(PADDLE_COLORS,selectionValue.paddleColor)} paddle · ${optionLabel(HAIR_OPTIONS[selectionValue.gender]??HAIR_OPTIONS.male,selectionValue.hairStyle)} hair · ${optionLabel(HAIR_COLORS,selectionValue.hairColor)} color · ${optionLabel(SKIN_COLORS,selectionValue.skinColor)} skin · ${optionLabel(HEADWEAR_OPTIONS,selectionValue.headwear)} · ${optionLabel(EYEWEAR_OPTIONS,selectionValue.eyewear)}`;
  }
  function setOptions(control,items,value){control.replaceChildren(...items.map(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=item.label??item.name??item.id;return option}));control.value=String(value??'');if(!control.value&&control.options.length)control.value=control.options[0].value}
  function selected(name,value){form.querySelectorAll(`[name="${name}"]`).forEach(input=>{if(input.type==='checkbox')input.checked=Boolean(value);else input.tagName==='SELECT'||input.type==='text'?input.value=String(value):input.checked=input.value===String(value)})}
@@ -113,7 +113,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   drawPreview(draft,previewLineup[0]);
  }
  function syncSessionOptions(){const practice=form.elements.matchMode.value.startsWith('practice-');form.elements.format.disabled=practice;if(practice)form.elements.format.value='singles';form.querySelector('.start-match').textContent=practice?'START PRACTICE →':started?'START NEW MATCH →':'START MATCH →'}
- const updateDraft=event=>{syncSessionOptions();const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),handedness:values.get('handedness'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),paddleColor:values.get('paddleColor'),hairStyle:values.get('hairStyle'),hairColor:values.get('hairColor'),headwear:values.get('headwear'),eyewear:values.get('eyewear'),outfit:values.get('outfit'),showNameTags:game.showNameTags,skinColor:values.get('skinColor'),court:values.get('court')});render();};
+ const updateDraft=event=>{syncSessionOptions();const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),handedness:values.get('handedness'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),highlightColor:values.get('highlightColor'),paddleColor:values.get('paddleColor'),hairStyle:values.get('hairStyle'),hairColor:values.get('hairColor'),headwear:values.get('headwear'),eyewear:values.get('eyewear'),outfit:values.get('outfit'),showNameTags:game.showNameTags,skinColor:values.get('skinColor'),court:values.get('court')});render();};
  form.addEventListener('change',updateDraft);form.addEventListener('input',updateDraft);
  function setDesigner(open){if(open){designer.append(preview);profileGrid.prepend(nameField,archetypeField);nameField.classList.remove('preview-name-field')}else{setupTop.prepend(preview);nameField.classList.add('preview-name-field');nameSlot.append(nameField);mainIdentity.prepend(archetypeField,designButton,playerDescription)}designer.hidden=!open;dialog.classList.toggle('designing',open);for(const node of [...scroll.children])if(node!==designer)node.hidden=open;footer.hidden=open;if(!open)syncSessionOptions();dialog.setAttribute('aria-label',open?'Character designer':'Match setup')}
  designButton.onclick=()=>setDesigner(true);back.onclick=()=>setDesigner(false);

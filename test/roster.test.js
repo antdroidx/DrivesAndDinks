@@ -15,14 +15,14 @@ test('every requested appearance option is available',()=>{
 });
 test('invalid and legacy selections safely normalize',()=>{
  const fallback=normalizeSelection(null);
- assert.equal(fallback.shirtColor,'green');assert.equal(fallback.paddleColor,'mint');assert.equal(fallback.paddleShape,'hybrid');
+ assert.equal(fallback.shirtColor,'green');assert.equal(fallback.paddleColor,'mint');assert.equal(fallback.highlightColor,'yellow');assert.equal(fallback.paddleShape,'hybrid');
  const invalid=normalizeSelection({character:'nope',paddle:'nope',paddleShape:'nope',hair:'nope',skin:'nope',outfit:'dress',shirtColor:'nope',bottomColor:'nope',paddleColor:'nope',court:'nope'});
- assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');assert.equal(invalid.paddleShape,'hybrid');assert.equal(normalizeSelection({court:'red-white'}).court,'gray-red');assert.equal(normalizeSelection({court:'red-gray'}).court,'gray-red');
+ assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');assert.equal(invalid.paddleShape,'hybrid');assert.equal(normalizeSelection({highlightColor:'nope'}).highlightColor,'yellow');assert.equal(normalizeSelection({court:'red-white'}).court,'gray-red');assert.equal(normalizeSelection({court:'red-gray'}).court,'gray-red');
  assert.equal(invalid.hairColor,'brown');assert.equal(invalid.skinColor,'medium');
  assert.equal(invalid.outfit,'performance');assert.equal('bottomColor' in invalid,false);
 });
 test('every player and paddle combination produces an independent playable profile',()=>{
- for(const c of CHARACTERS)for(const p of PADDLES)for(const shape of PADDLE_SHAPES){const config={character:c.id,paddle:p.id,paddleShape:shape.id,shirtColor:'orange',paddleColor:'yellow',court:'pink-black'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.paddle.shapeId,shape.id);assert.equal(profile.appearance.shirtColor,'orange');assert.equal(profile.appearance.paddleColor,'yellow');profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}
+ for(const c of CHARACTERS)for(const p of PADDLES)for(const shape of PADDLE_SHAPES){const config={character:c.id,paddle:p.id,paddleShape:shape.id,shirtColor:'orange',paddleColor:'yellow',court:'pink-black'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.paddle.shapeId,shape.id);assert.equal(profile.appearance.shirtColor,'orange');assert.equal(profile.appearance.paddleColor,'yellow');assert.equal(profile.appearance.highlightColor,'yellow');profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}
 });
 test('each character has a meaningful strength and a tradeoff',()=>{const standard=selectionStats({});for(const c of CHARACTERS.filter(c=>c.id!=='avery')){const stats=selectionStats({character:c.id});assert.ok(Object.keys(stats).some(k=>stats[k]>standard[k]));assert.ok(Object.keys(stats).some(k=>stats[k]<standard[k]))}});
 test('playtest archetypes average around 70 and keep shot identities distinct',()=>{
@@ -64,6 +64,8 @@ test('pixel sprite palettes follow every appearance color choice',()=>{
  const first=appearancePalette({shirtColor:'blue',paddleColor:'coral'});
  const second=appearancePalette({shirtColor:'red',paddleColor:'yellow'});
  assert.notEqual(first.shirt,second.shirt);assert.notEqual(first.bottom,second.bottom);assert.notEqual(first.paddle,second.paddle);
+ const independent=appearancePalette({shirtColor:'blue',paddleColor:'mint',highlightColor:'yellow'});
+ assert.equal(independent.paddle,'#4be3c2');assert.equal(independent.highlight,'#f5cd55');assert.equal(independent.accent,'#f5cd55');assert.notEqual(independent.paddle,independent.highlight);
 });
 
 test('generated identities cover the requested name groups with coherent skin tones',()=>{

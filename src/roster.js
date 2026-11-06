@@ -176,11 +176,11 @@ export function generateIdentity({gender='male',skinColor=null,culture=null,rand
   }
   if(!name)name=`${randomItem(pool.first,random)} ${randomItem(pool.last,random)} ${usedNames.size+1}`;
   usedNames.add(name);
-  return {name,culture:selectedCulture,skinColor:resolvedSkin,hairColor:randomItem(HAIR_COLORS,random).id,shirtColor:randomItem(CLOTHING_COLORS,random).id,paddleColor:randomItem(PADDLE_COLORS,random).id};
+  return {name,culture:selectedCulture,skinColor:resolvedSkin,hairColor:randomItem(HAIR_COLORS,random).id,shirtColor:randomItem(CLOTHING_COLORS,random).id,paddleColor:randomItem(PADDLE_COLORS,random).id,highlightColor:randomItem(PADDLE_COLORS,random).id};
 }
 
 export const GENERATED_LEFT_HANDED_RATE=.13;
-export const DEFAULT_SELECTION = Object.freeze({character:'avery',gender:'male',handedness:'right',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',hairStyle:'design',hairColor:'brown',skinColor:'medium',headwear:'none',eyewear:'none',outfit:'performance',showNameTags:true,court:'blue-gray'});
+export const DEFAULT_SELECTION = Object.freeze({character:'avery',gender:'male',handedness:'right',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',highlightColor:'yellow',hairStyle:'design',hairColor:'brown',skinColor:'medium',headwear:'none',eyewear:'none',outfit:'performance',showNameTags:true,court:'blue-gray'});
 export function hairStylesFor(body){return HAIR_OPTIONS[body]??HAIR_OPTIONS.male}
 export function normalizeHairStyle(body,value){return value==='design'||value==null?'design':conceptHair(body,value,'design')}
 export function sampleAthleteBody(gender='male',random=Math.random){
@@ -209,6 +209,7 @@ export function normalizeSelection(input={}){
     showNameTags:input?.showNameTags!==false&&input?.showNameTags!=='false',
     shirtColor:valid(CLOTHING_COLORS,input?.shirtColor)??DEFAULT_SELECTION.shirtColor,
     paddleColor:valid(PADDLE_COLORS,legacyPaddleColor)??DEFAULT_SELECTION.paddleColor,
+    highlightColor:valid(PADDLE_COLORS,input?.highlightColor)??DEFAULT_SELECTION.highlightColor,
     hairColor:valid(HAIR_COLORS,input?.hairColor)??DEFAULT_SELECTION.hairColor,
     skinColor:valid(SKIN_COLORS,input?.skinColor)??DEFAULT_SELECTION.skinColor,
     court:valid(COURT_PALETTES,['red-white','red-gray'].includes(input?.court)?'gray-red':input?.court)??DEFAULT_SELECTION.court
@@ -218,7 +219,7 @@ export function buildProfile(input, options={}){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),shape=PADDLE_SHAPES.find(item=>item.id===selection.paddleShape);
   const identity=options.identity??generateIdentity({gender:selection.gender,skinColor:selection.skinColor,random:options.random??Math.random});
   const attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,Number.isFinite(options.attributes?.[key])?options.attributes[key]:character.ratings[key]))])),abilities=abilitiesFromRatings(attributes);
-  return {...playerProfile(),handedness:selection.handedness,attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor,headwear:selection.headwear,eyewear:selection.eyewear,outfit:selection.outfit,court:selection.court}};
+  return {...playerProfile(),handedness:selection.handedness,attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,highlightColor:selection.highlightColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor,headwear:selection.headwear,eyewear:selection.eyewear,outfit:selection.outfit,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
@@ -231,7 +232,7 @@ export function createLineup(input,{random=Math.random}={}){
     if(index===0){const p=buildProfile(selected,{identity:playerIdentity});const body=sampleAthleteBody(selected.gender,random);p.appearance.height=body.height;p.appearance.build=body.build;return p;}
     const gender=random()<.5?'male':'female',identity=generateIdentity({gender,culture:cpuCultures[index-1],random,usedNames});
     const handedness=random()<1-GENERATED_LEFT_HANDED_RATE?'right':'left';
-    const profile=buildProfile({...selected,character:character.id,gender,handedness,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor,headwear:randomAccessory(HEADWEAR_OPTIONS,random,.58),eyewear:randomAccessory(EYEWEAR_OPTIONS,random,.78),outfit:randomItem(OUTFIT_OPTIONS,random).id},{identity});const body=sampleAthleteBody(gender,random);profile.appearance.height=body.height;profile.appearance.build=body.build;profile.appearance.hairStyle=randomItem(hairStylesFor(gender),random).id;return profile;
+    const profile=buildProfile({...selected,character:character.id,gender,handedness,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,highlightColor:identity.highlightColor,hairColor:identity.hairColor,skinColor:identity.skinColor,headwear:randomAccessory(HEADWEAR_OPTIONS,random,.58),eyewear:randomAccessory(EYEWEAR_OPTIONS,random,.78),outfit:randomItem(OUTFIT_OPTIONS,random).id},{identity});const body=sampleAthleteBody(gender,random);profile.appearance.height=body.height;profile.appearance.build=body.build;profile.appearance.hairStyle=randomItem(hairStylesFor(gender),random).id;return profile;
   });
 }
 export function selectionStats(input){

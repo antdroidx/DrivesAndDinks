@@ -177,7 +177,7 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
   line(c,[p.hand,p.paddle],'#494047',1.35);
   c.save();c.translate(p.paddle.x,p.paddle.y);c.rotate(Math.atan2(-(p.hand.x-p.paddle.x),p.hand.y-p.paddle.y));
   const shape=paddleOutline(options.paddleShape??'hybrid'),scale=.72,drawFace=(factor,fill,stroke=null)=>{const points=shape.map(([x,y])=>({x:x*factor*scale,y:y*factor*scale}));roundedShape(c,points,fill,stroke,.35,.45)};
-  drawFace(1,tone(d.trim,-.18),ink);drawFace(.84,'#1c2430',ink);drawFace(.62,'#101722');
+  drawFace(1,tone(d.paddleColor??d.trim,-.18),ink);drawFace(.84,'#1c2430',ink);drawFace(.62,'#101722');
   line(c,[{x:-1.5*scale,y:-2.3*scale},{x:-.3*scale,y:-3*scale},{x:.9*scale,y:-2.8*scale}], '#ffffff28',.38);
   c.restore();
  };
