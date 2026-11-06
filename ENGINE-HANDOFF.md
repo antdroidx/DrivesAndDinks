@@ -2,7 +2,7 @@
 
 ## Venue, motion and replay checkpoint - 2026-11-06
 
-Published and verified: **DEV Build 151**, source `5bfa9b11d312b562449f241732f3e6033d98532d`, from `codex/doubles-stacking`. Workflow run https://github.com/antdroidx/DrivesAndDinks/actions/runs/42152135024 succeeded, and the live DEV site serves the three new venue plates. All 389 tests pass. A paired six-game roster simulation is identical to the pre-change commit `c0f80c4` (233 rallies, 4184 shots, max rally 45), so the visual work does not move the engine.
+Published and verified: **DEV Build 152**, source `7e1db4f7bbc37f1d5206e0fbba29729fc2f97a15`, from `codex/doubles-stacking`. Workflow run https://github.com/antdroidx/DrivesAndDinks/actions/runs/42154405409 succeeded, and the live DEV site serves the three new venue plates. Build 152 replaced the numbered back kit with a racket-wrist sweatband, because jersey numbers are not part of pickleball. All 389 tests pass. A paired six-game roster simulation is identical to the pre-change commit `c0f80c4` (233 rallies, 4184 shots, max rally 45), so the visual work does not move the engine.
 
 Three new character motions ship: a scorpion overhead, a point celebration and a fatigue recovery idle. The scorpion and celebration were first authored outside the arm reach envelope and had to be re-authored; `node scripts/rig-diagnostic.mjs` reports joint jumps and reach for any named motion. Contemporary venue plates replace the pastoral set, with the outdoor plate regenerated so its side fences recede to one vanishing point. `SCENE_LAYOUTS.far` is retuned per plate so the court baseline lands on open ground below the back barrier; `test/venue-layout.test.js` records the measured barrier heights.
 
