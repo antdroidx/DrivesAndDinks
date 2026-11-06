@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=157';
-import {strokeForContact} from './player-facing.js?v=157';
+import {kitchenContact} from './player-feet.js?v=158';
+import {strokeForContact} from './player-facing.js?v=158';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:34/12,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -196,18 +196,33 @@ export function receiver(players,team,x,y){return players.filter(p=>p.team===tea
 
 
 // Tactical approximation: deep returns, third-shot transition, and kitchen exchanges.
+export function atpTargetX(ballX){return ballX<0?.25:C.width-.25}
+export function atpOpportunity(p,b){
+ const left=b.x<0,right=b.x>C.width;
+ if(!left&&!right||b.z<0||b.z>3.2)return false;
+ const reach=Math.max(.8,p.abilities?.reach??1),speed=p.abilities?.speed??C.speed;
+ const nearBall=Math.hypot(p.x-b.x,p.y-b.y)<=3.2*reach;
+ const settled=(p.recoveryTimer??0)<=.15&&(p.splitStepTimer??0)<=0&&(p.airborneTimer??0)<=0;
+ const goodSpeed=Math.hypot(p.vx??0,p.vy??0)<=Math.max(4,speed*.75);
+ const nearLane=left?p.x<=4.25:p.x>=C.width-4.25;
+ const outsidePost=left?b.x<C.netPostLeft:b.x>C.netPostRight;
+ const cross=netCrossingX(b,{x:atpTargetX(b.x),y:p.team===0?4:C.length-4});
+ const crossOutside=left?cross<C.netPostLeft+.35:cross>C.netPostRight-.35;
+ const reachable=paddleContactAvailable(p,b,'atp')||(nearBall&&b.z<=2.8);
+ return nearBall&&settled&&goodSpeed&&nearLane&&(outsidePost||crossOutside)&&reachable;
+}
 export function selectShot(p,b,desired){
- const nearSideline=p.x<=1.25||p.x>=18.75
- const wideBall=b.x<=.75||b.x>=19.25
- const kitchenSide=p.team===0?p.y<=31:p.y>=13
- if(desired==='soft')return kitchenSide?'dink':'drop'
- if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>3:(p.vy||0)< -3)&&behind>.3&&behind<1.5&&b.z>.4&&b.z<1.8&&Math.hypot(p.vx||0,p.vy||0)>6&&(p.abilities?.lob??1)>1.1)return 'tweener';return 'lob'}
+ const nearSideline=p.x<=1.25||p.x>=18.75;
+ const wideBall=b.x<=.75||b.x>=19.25;
+ const kitchenSide=p.team===0?p.y<=31:p.y>=13;
+ if(desired==='soft')return kitchenSide?'dink':'drop';
+ if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>3:(p.vy||0)<-3)&&behind>.3&&behind<1.5&&b.z>.4&&b.z<1.8&&Math.hypot(p.vx||0,p.vy||0)>6&&(p.abilities?.lob??1)>1.1)return 'tweener';return 'lob'}
  if(desired==='attack'||desired==='drive'){
-  if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne'
-  if((b.x<C.netPostLeft-C.ballRadius||b.x>C.netPostRight+C.ballRadius)&&nearSideline&&b.z<3.2){const cross=netCrossingX(b,{x:b.x<0?1:19,y:p.team===0?4:40});if(cross<C.netPostLeft-C.netPostRadius-C.ballRadius||cross>C.netPostRight+C.netPostRadius+C.ballRadius)return 'atp'}
-  return scorpionOpportunity(p,b)||b.z>=5.2*(p.physique?.heightScale??1)?'overhead':'drive'
+  if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne';
+  if(atpOpportunity(p,b))return 'atp';
+  return scorpionOpportunity(p,b)||b.z>=5.2*(p.physique?.heightScale??1)?'overhead':'drive';
  }
- return desired
+ return desired;
 }
 export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, partnerReady=true, balanced=true, opponentsDeep=false, transition=false, pattern=null, incomingShot='dink', random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;

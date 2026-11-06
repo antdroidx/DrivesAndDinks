@@ -1,8 +1,8 @@
-import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=157';
-import {createProfileRenderer} from './profile-athlete.js?v=157';
-import {sampleMatchAnimation} from './match-animation.js?v=157';
-import {playerFeet} from './player-feet.js?v=157';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=157';
+import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=158';
+import {createProfileRenderer} from './profile-athlete.js?v=158';
+import {sampleMatchAnimation} from './match-animation.js?v=158';
+import {playerFeet} from './player-feet.js?v=158';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=158';
 
 const MAX_REPLAY_Z=24;
 export function sideReplayProjection(width,height,maxZ=16){

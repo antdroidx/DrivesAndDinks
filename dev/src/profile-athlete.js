@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=157';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=157';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=157';
+import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=158';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=158';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=158';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -16,6 +16,7 @@ function line(c,points,color,width=.4){
 function limb(c,chain,width,color,shadow){
  drawAnimeRibbon(c,chain,Array.isArray(width)?width:chain.map(()=>width),color,'#4c453d',{shadow,light:tone(color,.1)});
 }
+function joint(c,point,r,color){oval(c,point.x,point.y,r,r,color,'#4c453d',.22)}
 function profileShoe(c,foot,dir,d,body){
  const x=foot.x,y=foot.y;
  polygon(c,[{x:x-1.5,y:y-3.2},{x:x+1.5,y:y-3.2},{x:x+1.7,y:y-.4},{x:x-1.6,y:y-.4}],tone('#e5dfce',-.08),'#4c453d',.3);
@@ -70,8 +71,8 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock){
  line(c,[{x:.75,y:eyeY-eyeHeight*.75},{x:3.35,y:eyeY-eyeHeight*.35}],ink,.45);
  if(emotion==='aggression')line(c,[{x:.75,y:eyeY-1.5},{x:3.25,y:eyeY-.8}],ink,.55);
  else line(c,[{x:.95,y:eyeY-1.45},{x:3.15,y:eyeY-1.75}],ink,.42);
- polygon(c,[{x:3.4,y:-.2},{x:4.2,y:.8},{x:3.3,y:1.2}],skin.shadow,null);
- line(c,[{x:3.45,y:1.25},{x:3.05,y:2.7},{x:3.45,y:3.05}],skin.deep,.35);
+ oval(c,3.5,.95,.5,.7,skin.shadow);
+ line(c,[{x:3.55,y:1.55},{x:3.2,y:2.15}],skin.deep,.18);
  if(emotion==='surprise')oval(c,3.1,3.55,.48,.7,skin.deep,ink,.18);
  else if(emotion==='happy')line(c,[{x:2.25,y:3.7},{x:3.35,y:3.2}],skin.deep,.4);
  else if(emotion==='aggression')line(c,[{x:2.05,y:3.55},{x:3.55,y:3.45}],skin.deep,.4);
@@ -137,11 +138,12 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock){
 export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  const p=profilePose(d,mode,phase,options),body=animeBodyDimensions(d),skin=skinPalette(d.skin),ink='#4c453d',n=p.neck,h=p.hips,dir=p.direction;
  c.save();c.translate(cx-24*scale,baseline-63*scale);c.scale(scale,scale);
- const arm=i=>{const chain=p.arms[i],width=2.5+d.build;
-  limb(c,chain,[width,width*.85,width*.5],d.skin,skin.deep);
+ const arm=i=>{const chain=p.arms[i],width=3.2+d.build*1.1;
+  limb(c,chain,[width,width*.98,width*.68],d.skin,skin.deep);
+  joint(c,chain[1],width*.48,skin.shadow);
   if(d.outfit==='polo'||d.body==='male'&&d.outfit==='performance'){
    const end={x:chain[0].x+(chain[1].x-chain[0].x)*.43,y:chain[0].y+(chain[1].y-chain[0].y)*.43};
-   limb(c,[chain[0],end],[width+1,width+1],d.shirt,tone(d.shirt,-.2));
+   limb(c,[chain[0],end],[width+1.2,width+1],d.shirt,tone(d.shirt,-.2));
    line(c,[{x:end.x-1,y:end.y-.2},{x:end.x+1,y:end.y+.4}],d.trim,.45);
   }
   oval(c,chain[2].x,chain[2].y,.85,1.1,d.skin,ink,.25);
@@ -160,12 +162,15 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  const layers=p.arms.map((chain,i)=>({i,back:chain[1].depth<p.neck.depth}));
  layers.filter(a=>a.back).forEach(a=>arm(a.i));if(p.paddle.depth<p.neck.depth)drawPaddle();
  for(const chain of p.legs.toSorted((a,b)=>a[0].depth-b[0].depth)){
-  limb(c,chain,[body.thigh*.85,body.calf*.9,body.ankle*.9],d.skin,skin.shadow);
+  limb(c,chain,[body.thigh*1.05,body.calf*1.05,body.ankle*1.18],d.skin,skin.shadow);
+  joint(c,chain[1],body.calf*.48,skin.shadow);
   profileShoe(c,chain[2],dir,d,body);
  }
- const waist=body.waist*.7,shoulder=d.shoulder*.55,top=n.y+.8,hem=h.y-(d.body==='female'&&d.outfit==='shorts'?5:.5);
+ const waist=body.waist*.78,shoulder=d.shoulder*.62,top=n.y+.8,hem=h.y-(d.body==='female'&&d.outfit==='shorts'?5:.5);
  line(c,[{x:n.x,y:n.y-1},{x:n.x,y:top+2}],d.skin,3.2);
  polygon(c,[{x:n.x-shoulder,y:top},{x:n.x+shoulder,y:top+1.3},{x:h.x+waist,y:hem},{x:h.x-waist,y:hem}],d.shirt,ink,.45);
+ joint(c,{x:n.x-dir*shoulder*.75,y:top+1.5},1.5,tone(d.shirt,-.12));
+ joint(c,{x:n.x+dir*shoulder*.75,y:top+1.5},1.5,tone(d.shirt,-.12));
  polygon(c,[{x:n.x+dir*shoulder*.2,y:top+1.2},{x:n.x+dir*shoulder,y:top+2.2},{x:h.x+dir*waist*.7,y:hem-.3},{x:h.x+dir*waist*.15,y:hem-.3}],tone(d.shirt,-.16),null);
  line(c,[{x:n.x-dir*1.8,y:top+.1},{x:n.x+dir*2,y:top+1.2}],d.trim,.8);
  line(c,[{x:n.x-shoulder*.8,y:top+1.1},{x:n.x+shoulder*.8,y:top+1.5}],tone(d.shirt,.22),.45);
