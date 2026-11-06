@@ -137,12 +137,24 @@ export function stepBall(b,dt=C.dt){
  if((oldY-C.net)*(b.y-C.net)<=0&&oldY!==b.y){
   const f=(C.net-oldY)/(b.y-oldY),crossX=b.x-b.vx*dt*(1-f),crossZ=oldZ+(b.z-oldZ)*f,postHit=(Math.abs(crossX-C.netPostLeft)<=C.netPostRadius||Math.abs(crossX-C.netPostRight)<=C.netPostRadius)&&crossZ<C.netPostHeight+C.ballRadius;
   if(postHit){b.x=crossX;b.z=crossZ;b.vx*=-.2;b.vy*=-.2;b.vz*=-.15;return 'post'}
-  if(crossX>=0&&crossX<=C.width&&crossZ-radius<netHeightAt(crossX)){
-   const incomingSide=oldY<C.net? -1:1;b.y=C.net+incomingSide*radius;b.z=crossZ;b.vy=-b.vy*C.netRestitution;b.vx*=.52;b.vz*=.28;b.spin*=.6;b.spinX=(b.spinX||0)*.6;b.spinY=(b.spinY||0)*.6;b.spinZ=(b.spinZ||0)*.6;b.netContact=true;return 'net';
+  const netTop=netHeightAt(crossX);
+  if(crossX>=0&&crossX<=C.width&&crossZ-radius<netTop){
+   const incomingSide=oldY<C.net? -1:1,topTape=crossZ+radius>=netTop-.04,netCord=b.netPlay==='cord'||(b.netPlay!=='mesh'&&topTape);
+   if(netCord){
+    const travelDirection=Math.sign(b.vy||-incomingSide)||1;
+    b.x=crossX;b.y=C.net+travelDirection*radius;b.z=Math.max(netTop+radius*.7,crossZ+radius*.45);
+    b.vx*=.76;b.vy*=.64;b.vz=Math.max(1.8,b.vz*.22+1.5);
+    b.spin*=.72;b.spinX=(b.spinX||0)*.72;b.spinY=(b.spinY||0)*.72;b.spinZ=(b.spinZ||0)*.72;b.netCord=true;
+   }else{
+    b.x=crossX;b.y=C.net+incomingSide*radius;b.z=crossZ;
+    b.vy=-b.vy*C.netRestitution;b.vx*=.52;b.vz*=.28;
+    b.spin*=.6;b.spinX=(b.spinX||0)*.6;b.spinY=(b.spinY||0)*.6;b.spinZ=(b.spinZ||0)*.6;b.netCord=false;
+   }
+   b.netContact=true;b.netPlay=null;return 'net';
   }
 }
  if(b.z<=radius&&b.vz<0){
-  b.z=radius;
+   b.z=radius;b.netCord=false;
   const impactSpeed=Math.abs(b.vz),restitution=Math.max(.58,C.bounce-Math.max(0,impactSpeed-22)*.003)+(spin>0?.025:spin<0?-.045:0)-Math.max(0,humidity-.5)*.03;
   b.vz=-b.vz*restitution;
   const surface=Math.max(.82,.91+(spin<0?.018:-.012)-Math.max(0,humidity-.5)*.015);
@@ -161,11 +173,11 @@ export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1,option
  if(['drive','overhead','atp','erne'].includes(shot))t=Math.max(.38,Math.hypot(x-b.x,y-b.y)/(48*(paddle.power??1)*technique*(shot==='overhead'?1.12:1)))*slow;
  const aggressive=['drive','overhead','atp','erne'].includes(shot);
  if(aggressive&&b.z<2.2)t*=1+(2.2-b.z)*.15;
- const f=(22-b.y)/(y-b.y);let clearance=['drive','overhead','atp','erne'].includes(shot)?Math.max(C.netCenterHeight+C.ballRadius+.25,(shot==='overhead'?3.35:3.65)/(paddle.power??1)):shot==='drop'?3.7:3.4+(shot==='dink'?Math.max(0,Math.min(2.4,Number(options.loftBonus)||0)):0);if(quality<.8)clearance*=1+(0.8-quality)*.35;
+ const f=(22-b.y)/(y-b.y);let clearance=['drive','overhead','atp','erne'].includes(shot)?Math.max(C.netCenterHeight+C.ballRadius+.25,(shot==='overhead'?3.35:3.65)/(paddle.power??1)):shot==='drop'?3.7:3.4+(shot==='dink'?Math.max(0,Math.min(2.4,Number(options.loftBonus)||0)):0);const netPlay=['cord','mesh'].includes(options.netPlay)?options.netPlay:null;if(netPlay&&f>0&&f<1){const crossingX=b.x+(x-b.x)*f,netTop=netHeightAt(crossingX);clearance=netPlay==='cord'?netTop+C.ballRadius*.08:netTop-C.ballRadius*.28}if(quality<.8)clearance*=1+(0.8-quality)*.35;
  if(f>0&&f<1)t=Math.max(t,Math.sqrt(Math.max(0,2*(clearance-b.z*(1-f))/(C.gravity*f*(1-f)))));
  b.vx=(x-b.x)/t;b.vy=(y-b.y)/t;b.vz=(C.gravity*t*t/2-b.z)/t;
  // Poor contact can catch the net as well as float long; clean shots keep assistance.
- const dinkPenalty=4.2-Math.min(2.2,(Number(options.loftBonus)||0)*.8);if(quality<.8)b.vz-=(1-quality)*(shot==='dink'?dinkPenalty:shot==='drop'?5.4:7);b.spin=spin*(paddle.spin??1);b.spinX=0;b.spinY=Math.max(-4,Math.min(4,Number(options.sideSpin)||0));b.spinZ=shot==='slice'?Math.sign(options.sliceSpin ?? b.vy ?? -1)*.8:Math.max(-2,Math.min(2,Number(options.sliceSpin)||0));b.radius=C.ballRadius;b.shot=shot;b.shotShape=options.shape??'standard';
+ const dinkPenalty=4.2-Math.min(2.2,(Number(options.loftBonus)||0)*.8);if(quality<.8)b.vz-=(1-quality)*(shot==='dink'?dinkPenalty:shot==='drop'?5.4:7);b.spin=spin*(paddle.spin??1);b.spinX=0;b.spinY=Math.max(-4,Math.min(4,Number(options.sideSpin)||0));b.spinZ=shot==='slice'?Math.sign(options.sliceSpin ?? b.vy ?? -1)*.8:Math.max(-2,Math.min(2,Number(options.sliceSpin)||0));b.radius=C.ballRadius;b.shot=shot;b.shotShape=options.shape??'standard';b.netPlay=netPlay;b.netContact=false;b.netCord=false;
 }
 export function inBounds(x,y){return x>=0&&x<=20&&y>=0&&y<=44}
 export function legalVolley(team,y,bounces,shotCount){if(shotCount<=2&&bounces===0)return 'Two-bounce fault';if(bounces===0&&(team===0?y<=29:y>=15))return 'Kitchen volley fault';return null}
@@ -206,10 +218,10 @@ export function atpOpportunity(p,b){
  const left=b.x<0,right=b.x>C.width;
  if(!left&&!right||b.z<0||b.z>3.2)return false;
  const reach=Math.max(.8,p.abilities?.reach??1),speed=p.abilities?.speed??C.speed;
- const nearBall=Math.hypot(p.x-b.x,p.y-b.y)<=3.2*reach;
+ const nearBall=Math.hypot(p.x-b.x,p.y-b.y)<=3.6*reach;
  const settled=(p.recoveryTimer??0)<=.15&&(p.splitStepTimer??0)<=0&&(p.airborneTimer??0)<=0;
- const goodSpeed=Math.hypot(p.vx??0,p.vy??0)<=Math.max(4,speed*.75);
- const nearLane=left?p.x<=4.25:p.x>=C.width-4.25;
+ const goodSpeed=Math.hypot(p.vx??0,p.vy??0)<=Math.max(5,speed*.88);
+ const nearLane=left?p.x<=5:p.x>=C.width-5;
  const outsidePost=left?b.x<C.netPostLeft:b.x>C.netPostRight;
  const cross=netCrossingX(b,{x:atpTargetX(b.x),y:p.team===0?4:C.length-4});
  const crossOutside=left?cross<C.netPostLeft+.35:cross>C.netPostRight-.35;
@@ -221,7 +233,7 @@ export function selectShot(p,b,desired){
  const wideBall=b.x<=.75||b.x>=19.25;
  const kitchenSide=p.team===0?p.y<=31:p.y>=13;
  if(desired==='soft')return kitchenSide?'dink':'drop';
- if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>3:(p.vy||0)<-3)&&behind>.3&&behind<1.5&&b.z>.4&&b.z<1.8&&Math.hypot(p.vx||0,p.vy||0)>6&&(p.abilities?.lob??1)>1.1)return 'tweener';return 'lob'}
+ if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>3:(p.vy||0)<-3)&&behind>.05&&behind<2.4&&b.z>.2&&b.z<2.5&&Math.hypot(p.vx||0,p.vy||0)>4&&(Math.max(p.abilities?.lob??1,p.abilities?.defense??1)>1.05))return 'tweener';return 'lob'}
  if(desired==='attack'||desired==='drive'){
   if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne';
   if(atpOpportunity(p,b))return 'atp';
@@ -275,5 +287,4 @@ export function chooseCpuTarget(player,opponents,shot){
   return value(x)>value(best)?x:best;
  },candidates[0]);
 }
-
 

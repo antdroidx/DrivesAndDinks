@@ -65,3 +65,19 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.match(html,/id="match-intro-teams"/);
  assert.match(html,/id="begin-match"/);
 });
+
+
+test('focused name editor preserves a typed space until blur',()=>{
+ const selection=readFileSync(new URL('../src/selection.js',import.meta.url),'utf8');
+ assert.match(selection,/nameInput\.addEventListener\('focus'/);
+ assert.match(selection,/if\(input===nameInput&&editingName\)return/);
+ assert.match(selection,/if\(!editingName\)nameInput\.value=/);
+ assert.match(selection,/nameInput\.addEventListener\('blur'/);
+});
+
+test('design labs use the current anime renderer and roster colors',()=>{
+ const characterLab=readFileSync(new URL('../src/character-lab.js',import.meta.url),'utf8'),styleLab=readFileSync(new URL('../src/style-lab.js',import.meta.url),'utf8'),styleHtml=readFileSync(new URL('../style-lab.html',import.meta.url),'utf8');
+ assert.match(characterLab,/drawAnimeAthlete as athlete/);assert.match(characterLab,/look:'storybook'/);assert.match(characterLab,/appearancePalette/);
+ assert.match(styleLab,/CLOTHING_COLORS,HAIR_COLORS,PADDLE_COLORS,SKIN_COLORS/);assert.match(styleLab,/appearancePalette/);
+ for(const id of ['hair-color','highlight','paddle','skin','color'])assert.match(styleHtml,new RegExp(`id="${id}"`));
+});

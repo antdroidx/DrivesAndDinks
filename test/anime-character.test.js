@@ -56,3 +56,22 @@ test('female crop top has an exposed waist while other supported outfits retain 
 test('upper legs attach inside the torso silhouette for every body preset',()=>{
  for(const d of CHARACTER_CONCEPTS){const p=animePose(d,'idle',0,'far'),body=animeBodyDimensions(d);for(const leg of p.legs){const outer=Math.abs(leg[0].x-p.hips.x)+body.thigh/2;assert.ok(outer<=body.hip+.25,`${d.id}: upper leg outside pelvis`)}assert.ok(body.hip<d.shoulder*.97)}
 });
+
+
+test('live braids hang behind the head and capped pixie hair stays compact',()=>{
+ const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
+ assert.match(source,/const bx=x-4\.4\+Math\.sin/);
+ assert.match(source,/covered=d\.headwear==='cap'\|\|d\.headwear==='visor'/);
+ assert.match(source,/path\(c,covered\?\[\[-5,0\]/);
+});
+
+test('male textured, swept, curly and afro silhouettes use distinct render paths',()=>{
+ const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
+ assert.ok(source.includes("d.hair==='afro'"));
+ assert.ok(source.includes("d.hair==='curls'"));
+ assert.ok(source.includes("d.hair==='crop'"));
+ assert.ok(source.includes("d.hair==='sidePart'"));
+ assert.ok(source.includes("animeHairMass(c,x,y,hair,ink,near,false)"));
+ assert.ok(source.includes("[[-4,-3.1],[-3,-4.6]"));
+ assert.ok(source.includes("tone(hair,index%2?.2:-.1)"));
+});

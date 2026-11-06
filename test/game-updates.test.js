@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {Game} from '../src/game.js';
-import {backhandGrip,gripModifiers,chooseCpuShot,launch,C,netHeightAt,move,resolvePlayerCollisions,contactQuality,playerProfile} from '../src/core.js';
+import {backhandGrip,gripModifiers,chooseCpuShot,launch,stepBall,C,netHeightAt,move,resolvePlayerCollisions,contactQuality,playerProfile} from '../src/core.js';
 import {buildProfile} from '../src/roster.js';
 import {matchStrokeMode} from '../src/match-animation.js';
 test('three timing modes retain Normal as the default',()=>{const g=new Game();assert.equal(g.difficulty,'normal');for(const [mode,early,late] of [['easy',.6,.2],['normal',.3,.08],['hard',.15,0]]){g.setDifficulty(mode);assert.deepEqual(g.timingWindow(),{early,late});}g.setDifficulty('invalid');assert.equal(g.difficulty,'normal');});
@@ -27,4 +27,12 @@ test('players retain momentum and cannot overlap through collision',()=>{
 });
 test('special-shot returns carry extra mishit difficulty',()=>{
  const p={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0},ball={x:10.6,y:35.2,z:1.5,shot:'drive'};assert.ok(contactQuality(p,{...ball,shot:'atp'},'drive',false,.5).chance>contactQuality(p,ball,'drive',false,.5).chance);
+});
+
+
+test('top-tape net contacts carry forward while mesh contacts rebound',()=>{
+ const cord={x:10,y:21.99,z:netHeightAt(10)+.02,vx:2,vy:12,vz:0,spin:0,spinX:0,spinY:0,spinZ:0,radius:C.ballRadius,netPlay:'cord'};
+ assert.equal(stepBall(cord),'net');assert.equal(cord.netCord,true);assert.ok(cord.y>22);assert.ok(cord.vy>0);
+ const mesh={...cord,y:21.99,z:netHeightAt(10)-.05,vy:12,netPlay:'mesh'};
+ assert.equal(stepBall(mesh),'net');assert.equal(mesh.netCord,false);assert.ok(mesh.y<22);assert.ok(mesh.vy<0);
 });

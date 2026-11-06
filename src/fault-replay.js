@@ -22,7 +22,7 @@ export function footReplayReview(focus){
 }
 export function netReplayReview(ball,time){
  const margin=Math.abs(ball.z-(netHeightAt(ball.x)+(ball.radius??C.ballRadius)));
- return margin<=REPLAY_REVIEW_MARGIN?{kind:'net',x:ball.x,y:ball.y,z:ball.z,time,margin,label:'CLOSE NET CONTACT'}:null;
+ return margin<=REPLAY_REVIEW_MARGIN?{kind:'net',x:ball.x,y:ball.y,z:ball.z,time,margin,label:ball.netCord?'NET CORD':'CLOSE NET CONTACT'}:null;
 }
 export function replayTiming(clip){
  if(!clip.frames?.length)return null;

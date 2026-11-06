@@ -58,7 +58,7 @@ export function waitForRisingContact(player,ball,target){
 export function chooseCpuPlacement(player,opponents,shot,{pattern=null,shots=0}={}){
   const soft=shot==='dink'||shot==='drop',near=player.team===0;
   const depth=shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4;
-  const candidates=[3,7,10,13,17].map(x=>({x,y:near?depth:44-depth,intent:shot==='dink'&&Math.abs(x-player.x)>4?'short-angle':shot==='drive'?(Math.abs(x-player.x)>5?'inside-out':'crosscourt'):'open-court'}));
+  const atpSetup=['drive','slice','overhead'].includes(shot)&&shots>2&&shots%6===3,candidates=[3,7,10,13,17].map(x=>({x,y:near?depth:44-depth,intent:shot==='dink'&&Math.abs(x-player.x)>4?'short-angle':shot==='drive'?(Math.abs(x-player.x)>5?'inside-out':'crosscourt'):'open-court'}));
   if(['drive','overhead','dink'].includes(shot))for(const opponent of opponents){
     const y=near?clamp(opponent.y+.6,4,17):clamp(opponent.y-.6,27,40);
     if(!soft||Math.abs(y-(near?14:30))<2)candidates.push({x:clamp(opponent.x,3,17),y,intent:'feet'});
@@ -78,16 +78,18 @@ export function chooseCpuPlacement(player,opponents,shot,{pattern=null,shots=0}=
     const backhand=(target.x-o.x)*(o.team===0?1:-1)<0&&anticipation>.3?.2:0;
     const wrongFoot=Math.abs(target.x-(pattern?.expectedX??target.x))*Math.max(0,Math.min(.85,pattern?.confidence??0))*.32;return (gap+reversal*(style==='speed'?1.4:1)+feet+crossCourt+backhand+wrongFoot)/Math.max(.7,(o.abilities?.speed??C.speed)/C.speed);
   }));
-  return candidates.reduce((best,target)=>value(target)>value(best)?target:best,candidates[0]);
+  if(atpSetup){const wideX=player.x<10?19.65:.35;candidates.push({x:wideX,y:near?4:40,intent:'atp-setup'});}
+  const best=candidates.reduce((best,target)=>value(target)>value(best)?target:best,candidates[0]);
+  return atpSetup?candidates.at(-1):best;
 }
 
 // Forecast reachable contacts, including the first bounce, on the same fixed-step physics.
 function contacts(players,team,ball,shots,bounces){
   const future={...ball},found=new Map();let count=bounces;
-  for(let tick=1;tick<=216;tick++){
+  const horizon=['lob','tweener'].includes(ball.shot)?480:216,flightVz=ball.vz||0,landingTime=Math.max(0,(flightVz+Math.sqrt(Math.max(0,flightVz**2+2*C.gravity*(ball.z||0))))/C.gravity),lobLandingY=(ball.y||0)+(ball.vy||0)*landingTime,deepLob=['lob','tweener'].includes(ball.shot)&&(team===0?lobLandingY>36:lobLandingY<8);for(let tick=1;tick<=horizon;tick++){
     const event=stepBall(future,C.dt);if(event==='net')continue;
     if(event==='bounce'){count++;if(count>=2||future.x<0||future.x>20||future.y<0||future.y>44)break}
-    if(tick%4||side(future.y)!==team||(shots<=2&&count===0))continue;
+    if(deepLob&&count===0)continue;if(tick%4||side(future.y)!==team||(shots<=2&&count===0))continue;
     for(const p of players){
       if(found.has(p.id)||future.z>7.4*(p.physique?.heightScale??1))continue;
       const y=count===0?volleyBrakeTarget(p,future).y:future.y;
@@ -99,8 +101,8 @@ function contacts(players,team,ball,shots,bounces){
       const reach=C.reach*(p.abilities?.reach??1),speed=p.abilities?.speed??C.speed;
       if(travel>time*Math.max(speed,Math.hypot(p.vx||0,p.vy||0))+reach)continue;
       const projected=forecastMovement(p,target,time,{volley:count===0});
-      const shot=future.z>=5.2*(p.physique?.heightScale??1)?'overhead':'drive';
-      if(paddleContactAvailable(projected,future,shot)&&(count>0||!kitchenContact(projected)))found.set(p.id,{...target,z:future.z,time,bounces:count});
+      const scale=p.physique?.heightScale??1,behind=team===0?future.y-p.y:p.y-future.y,tweener=['lob','tweener'].includes(ball.shot)&&count>0&&behind>.05&&behind<2.4&&future.z>.2&&future.z<2.5,shot=future.z>=5.2*scale?'overhead':tweener?'tweener':'drive';
+      if(paddleContactAvailable(projected,future,shot)&&(count>0||!kitchenContact(projected)))found.set(p.id,{...target,z:future.z,time,bounces:count,shot});
     }
     if(found.size===players.length)break;
   }

@@ -61,3 +61,14 @@ test('ATP opens up for reachable low side bounces farther behind the net but sta
  assert.equal(selectShot(p,{...ball,z:3.5},'drive'),'drive');
  assert.equal(selectShot(p,{...ball,x:-.2},'drive'),'drive');
 });
+
+
+test('deep lob defense reaches the backcourt and counter-lobs or tweeners',()=>{
+ const game=new Game({seed:1});game.mode='watch';game.recordReplay=()=>{};game.phase='rally';game.shots=4;game.last=1;game.bounces=0;
+ game.ball={x:10,y:15,z:1.2,vx:0,vy:0,vz:0,spin:0,spinX:0,spinY:0,spinZ:0,radius:C.ballRadius};
+ launch(game.ball,10,43,'lob',{power:1,control:1,spin:1,skill:1},1,{shape:'open-court'});
+ Object.assign(game.players[0],{x:5,y:30});Object.assign(game.players[1],{x:15,y:30});
+ let response=null,maxReceiverY=30;const hit=game.hit.bind(game);game.hit=(player,shot,...args)=>{if(!response&&game.shots>=4)response={playerId:player.id,shot};return hit(player,shot,...args)};
+ for(let tick=0;tick<600&&game.phase==='rally';tick++){game.update(C.dt);const receiver=game.players.find(player=>player.id===game.teamPlan?.receiverId);if(receiver)maxReceiverY=Math.max(maxReceiverY,receiver.y)}
+ assert.ok(maxReceiverY>38);assert.ok(response);assert.ok(['lob','tweener'].includes(response.shot));
+});

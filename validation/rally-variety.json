@@ -1,0 +1,487 @@
+{
+  "schemaVersion": 1,
+  "methodology": {
+    "format": "doubles",
+    "mode": "watch",
+    "games": 20,
+    "secondsPerMatch": 180,
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+    ],
+    "deepLobScenarios": 8
+  },
+  "totals": {
+    "atp": 110,
+    "tweener": 18,
+    "lob": 157,
+    "netContacts": 86,
+    "netCords": 37,
+    "netMesh": 49,
+    "matchesWithAtp": 20,
+    "matchesWithTweener": 6,
+    "matchesWithNetContact": 19
+  },
+  "checks": {
+    "atpPresentInMostMatches": true,
+    "atpFrequency": true,
+    "netContactsVisible": true,
+    "occasionalTweeners": true,
+    "deepLobChases": true
+  },
+  "rows": [
+    {
+      "seed": 1,
+      "completed": false,
+      "points": [
+        3,
+        1
+      ],
+      "shots": {
+        "atp": 5,
+        "tweener": 2,
+        "lob": 13
+      },
+      "net": {
+        "contacts": 5,
+        "cords": 2,
+        "mesh": 3
+      }
+    },
+    {
+      "seed": 2,
+      "completed": false,
+      "points": [
+        2,
+        1
+      ],
+      "shots": {
+        "atp": 7,
+        "tweener": 0,
+        "lob": 0
+      },
+      "net": {
+        "contacts": 7,
+        "cords": 3,
+        "mesh": 4
+      }
+    },
+    {
+      "seed": 3,
+      "completed": false,
+      "points": [
+        2,
+        7
+      ],
+      "shots": {
+        "atp": 7,
+        "tweener": 0,
+        "lob": 1
+      },
+      "net": {
+        "contacts": 5,
+        "cords": 1,
+        "mesh": 4
+      }
+    },
+    {
+      "seed": 4,
+      "completed": false,
+      "points": [
+        3,
+        1
+      ],
+      "shots": {
+        "atp": 5,
+        "tweener": 0,
+        "lob": 8
+      },
+      "net": {
+        "contacts": 2,
+        "cords": 1,
+        "mesh": 1
+      }
+    },
+    {
+      "seed": 5,
+      "completed": false,
+      "points": [
+        2,
+        8
+      ],
+      "shots": {
+        "atp": 6,
+        "tweener": 5,
+        "lob": 11
+      },
+      "net": {
+        "contacts": 2,
+        "cords": 0,
+        "mesh": 2
+      }
+    },
+    {
+      "seed": 6,
+      "completed": false,
+      "points": [
+        5,
+        1
+      ],
+      "shots": {
+        "atp": 4,
+        "tweener": 0,
+        "lob": 0
+      },
+      "net": {
+        "contacts": 6,
+        "cords": 2,
+        "mesh": 4
+      }
+    },
+    {
+      "seed": 7,
+      "completed": false,
+      "points": [
+        2,
+        1
+      ],
+      "shots": {
+        "atp": 7,
+        "tweener": 0,
+        "lob": 0
+      },
+      "net": {
+        "contacts": 4,
+        "cords": 3,
+        "mesh": 1
+      }
+    },
+    {
+      "seed": 8,
+      "completed": false,
+      "points": [
+        3,
+        3
+      ],
+      "shots": {
+        "atp": 5,
+        "tweener": 2,
+        "lob": 29
+      },
+      "net": {
+        "contacts": 1,
+        "cords": 0,
+        "mesh": 1
+      }
+    },
+    {
+      "seed": 9,
+      "completed": false,
+      "points": [
+        7,
+        0
+      ],
+      "shots": {
+        "atp": 4,
+        "tweener": 5,
+        "lob": 7
+      },
+      "net": {
+        "contacts": 6,
+        "cords": 4,
+        "mesh": 2
+      }
+    },
+    {
+      "seed": 10,
+      "completed": false,
+      "points": [
+        3,
+        2
+      ],
+      "shots": {
+        "atp": 3,
+        "tweener": 0,
+        "lob": 17
+      },
+      "net": {
+        "contacts": 5,
+        "cords": 3,
+        "mesh": 2
+      }
+    },
+    {
+      "seed": 11,
+      "completed": false,
+      "points": [
+        5,
+        1
+      ],
+      "shots": {
+        "atp": 5,
+        "tweener": 0,
+        "lob": 8
+      },
+      "net": {
+        "contacts": 6,
+        "cords": 3,
+        "mesh": 3
+      }
+    },
+    {
+      "seed": 12,
+      "completed": false,
+      "points": [
+        4,
+        2
+      ],
+      "shots": {
+        "atp": 3,
+        "tweener": 0,
+        "lob": 2
+      },
+      "net": {
+        "contacts": 5,
+        "cords": 3,
+        "mesh": 2
+      }
+    },
+    {
+      "seed": 13,
+      "completed": false,
+      "points": [
+        1,
+        6
+      ],
+      "shots": {
+        "atp": 9,
+        "tweener": 3,
+        "lob": 4
+      },
+      "net": {
+        "contacts": 5,
+        "cords": 2,
+        "mesh": 3
+      }
+    },
+    {
+      "seed": 14,
+      "completed": false,
+      "points": [
+        2,
+        2
+      ],
+      "shots": {
+        "atp": 5,
+        "tweener": 0,
+        "lob": 15
+      },
+      "net": {
+        "contacts": 4,
+        "cords": 2,
+        "mesh": 2
+      }
+    },
+    {
+      "seed": 15,
+      "completed": false,
+      "points": [
+        0,
+        6
+      ],
+      "shots": {
+        "atp": 8,
+        "tweener": 0,
+        "lob": 0
+      },
+      "net": {
+        "contacts": 5,
+        "cords": 1,
+        "mesh": 4
+      }
+    },
+    {
+      "seed": 16,
+      "completed": false,
+      "points": [
+        3,
+        4
+      ],
+      "shots": {
+        "atp": 7,
+        "tweener": 0,
+        "lob": 3
+      },
+      "net": {
+        "contacts": 3,
+        "cords": 2,
+        "mesh": 1
+      }
+    },
+    {
+      "seed": 17,
+      "completed": false,
+      "points": [
+        4,
+        3
+      ],
+      "shots": {
+        "atp": 6,
+        "tweener": 0,
+        "lob": 1
+      },
+      "net": {
+        "contacts": 5,
+        "cords": 0,
+        "mesh": 5
+      }
+    },
+    {
+      "seed": 18,
+      "completed": false,
+      "points": [
+        0,
+        5
+      ],
+      "shots": {
+        "atp": 5,
+        "tweener": 1,
+        "lob": 16
+      },
+      "net": {
+        "contacts": 0,
+        "cords": 0,
+        "mesh": 0
+      }
+    },
+    {
+      "seed": 19,
+      "completed": false,
+      "points": [
+        4,
+        1
+      ],
+      "shots": {
+        "atp": 6,
+        "tweener": 0,
+        "lob": 7
+      },
+      "net": {
+        "contacts": 6,
+        "cords": 4,
+        "mesh": 2
+      }
+    },
+    {
+      "seed": 20,
+      "completed": false,
+      "points": [
+        1,
+        3
+      ],
+      "shots": {
+        "atp": 3,
+        "tweener": 0,
+        "lob": 15
+      },
+      "net": {
+        "contacts": 4,
+        "cords": 1,
+        "mesh": 3
+      }
+    }
+  ],
+  "deepLobRows": [
+    {
+      "seed": 1,
+      "maxReceiverY": 41.589,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    },
+    {
+      "seed": 2,
+      "maxReceiverY": 41.589,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    },
+    {
+      "seed": 3,
+      "maxReceiverY": 41.589,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    },
+    {
+      "seed": 4,
+      "maxReceiverY": 41.589,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    },
+    {
+      "seed": 5,
+      "maxReceiverY": 41.589,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    },
+    {
+      "seed": 6,
+      "maxReceiverY": 41.589,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    },
+    {
+      "seed": 7,
+      "maxReceiverY": 41.78,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    },
+    {
+      "seed": 8,
+      "maxReceiverY": 41.589,
+      "response": {
+        "playerId": 0,
+        "shot": "lob"
+      },
+      "fault": null
+    }
+  ],
+  "passed": true
+}

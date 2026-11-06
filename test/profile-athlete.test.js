@@ -12,7 +12,7 @@ test('profile joints stay integrated and replay headwear follows live orientatio
  assert.match(profileSource,/headwearBackwards/);
  assert.match(profileSource,/const brim=headwearBackwards\?-1:1/);
  assert.doesNotMatch(profileSource,/if\(!headwearBackwards\)\{const brim/);
- assert.match(replaySource,/headwearBackwards:p\.team===0/);
+ assert.match(replaySource,/headwearBackwards:false/);assert.doesNotMatch(replaySource,/headwearBackwards:p\.team===0/);
 });
 
 test('profile torsos retain a crop waist and never collapse their shirt hem',()=>{
@@ -32,4 +32,15 @@ test('profile shorts stay attached to hips and stop on the upper thigh',()=>{
  assert.ok(garment.hipWidth>=body.hip*.8);
  assert.ok(garment.waistband.every(([x,y])=>Number.isFinite(x)&&Number.isFinite(y)));
  }
+});
+
+
+test('profile long hair and bun use dedicated silhouettes',()=>{const source=readFileSync(new URL('../src/profile-athlete.js',import.meta.url),'utf8');assert.match(source,/d\.hair==='long'/);assert.match(source,/d\.hair==='bun'/);});
+
+test('profile braids and twin tails stay behind the face and pixie stays under hats',()=>{
+ const source=readFileSync(new URL('../src/profile-athlete.js',import.meta.url),'utf8');
+ assert.match(source,/for\(const \[offset,drift\] of \[\[0,-1\],\[1\.15,1\]\]\)/);
+ assert.match(source,/const covered=d\.headwear==='cap'\|\|d\.headwear==='visor'/);
+ assert.match(source,/if\(!covered\)roundedShape/);
+ assert.doesNotMatch(source,/for\(const side of \[-1,1\]\)\{\s*line\(c,\[\{x:side\*4/);
 });

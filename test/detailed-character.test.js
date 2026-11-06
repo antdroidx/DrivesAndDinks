@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {drawDetailedCharacter,drawConceptAthlete,matchDesign,plantFeet,legDimensions,conceptLegs,movingStance} from '../src/detailed-character.js';
-import {CHARACTER_CONCEPTS} from '../src/character-concepts.js';
+import {CHARACTER_CONCEPTS,HAIR_OPTIONS} from '../src/character-concepts.js';
 import {MOTIONS,sampleCharacterPose} from '../src/pixel-character.js';
 function canvas(){let depth=0,calls=0;const gradient={addColorStop(){}};return new Proxy({get depth(){return depth},get calls(){return calls}}, {get(target,key){if(key in target)return target[key];if(key==='createLinearGradient')return ()=>gradient;return (...args)=>{calls++;for(const n of args)if(typeof n==='number')assert.ok(Number.isFinite(n),`${key} received ${n}`);if(key==='save')depth++;if(key==='restore')assert.ok(--depth>=0)}},set(){return true}})}
 test('every proposed body draws all motions and both court views without invalid geometry or canvas leaks',()=>{
@@ -61,5 +61,13 @@ test('scaled legs keep stable anatomical bend poles across a full movement cycle
  for(const d of CHARACTER_CONCEPTS)for(const mode of ['idle','run','shuffle','forehand','slideReturn'])for(let n=0;n<80;n++){
  const raw=sampleCharacterPose({mode,phase:n/80,frame:n/20}),legs=conceptLegs(raw,d);
  for(const chain of legs)for(const p of chain)assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y));
+ }
+});
+
+
+test('style lab renders every male hair option without geometry leaks',()=>{
+ const design=CHARACTER_CONCEPTS.find(item=>item.body==='male');
+ for(const hair of HAIR_OPTIONS.male)for(const view of ['near','far']){
+  const c=canvas();drawConceptAthlete(c,{...design,hair:hair.id},'idle',.52,view,100,200,2);assert.equal(c.depth,0);assert.ok(c.calls>50);
  }
 });

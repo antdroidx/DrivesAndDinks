@@ -80,3 +80,12 @@ test('CPU depth selection reaches the launch and manual shots keep their default
  assert.equal(a.players[0].placementIntent,'feet');assert.equal(b.players[0].placementIntent,'manual');
  assert.ok(a.ball.vy>b.ball.vy,'shorter CPU target changes the outgoing trajectory');
 });
+
+
+test('periodic ATP setups target the opposite sideline and mirror by court end',()=>{
+ const nearSetup=chooseCpuPlacement(athlete(),[{x:5,y:14,vx:0,vy:0}],'drive',{shots:3});
+ assert.equal(nearSetup.intent,'atp-setup');assert.ok(nearSetup.x<1||nearSetup.x>19);assert.equal(nearSetup.y,4);
+ const farSetup=chooseCpuPlacement(athlete({team:1,y:9}),[{x:5,y:30,vx:0,vy:0}],'drive',{shots:3});
+ assert.equal(farSetup.intent,'atp-setup');assert.equal(farSetup.x,nearSetup.x);assert.equal(farSetup.y,40);
+ assert.equal(chooseCpuPlacement(athlete(),[{x:5,y:14,vx:0,vy:0}],'drive',{shots:4}).intent!=='atp-setup',true);
+});
