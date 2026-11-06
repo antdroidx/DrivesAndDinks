@@ -17,7 +17,8 @@ import {setupCourtDisplay} from './court-display.js';
 
 import {CHARACTER_CONCEPTS} from './character-concepts.js';
 
-import {courtCamera,courtAim,padControl} from './court-camera.js';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan} from './court-camera.js';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js';
 
 import {movingStance} from './detailed-character.js';
 
@@ -30,6 +31,7 @@ import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js';
 import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js';
 
 import {Game} from './game.js';
+import {C} from './core.js';
 
 import {selectShot,serveAim,shotDepthTarget} from './core.js';import {playerEmotionState} from './player-emotion.js';import {PerformanceMonitor} from './performance-monitor.js';
 
@@ -37,6 +39,7 @@ import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecia
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
+const project=gameProjection;
 const canvas=document.querySelector('canvas'),ctx=canvas.getContext('2d'),game=new Game(),RENDER_SCALE=2,performanceMonitor=new PerformanceMonitor({canvas});ctx.setTransform(RENDER_SCALE,0,0,RENDER_SCALE,0,0);ctx.imageSmoothingEnabled=false;let last=0,acc=0;let selectionUI=null;
 
 // The promoted release and DEV share the current character and court renderer.
@@ -144,8 +147,6 @@ soundButton.onclick=()=>{soundEnabled=!soundEnabled;soundButton.textContent=soun
 
 function playEffect(event){if(!['hit','bounce','net'].includes(event.type))return;if(!soundEnabled||audioContext?.state!=='running')return;const t=audioContext.currentTime,gain=audioContext.createGain(),osc=audioContext.createOscillator();const hit=event.type==='hit',net=event.type==='net';osc.type=net?'sawtooth':hit?'triangle':'sine';osc.frequency.setValueAtTime(net?125:hit?(event.shot==='drive'?760:540):220,t);osc.frequency.exponentialRampToValueAtTime(net?60:hit?180:85,t+.065);gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(hit?.075:.045,t+.004);gain.gain.exponentialRampToValueAtTime(.0001,t+.09);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t);osc.stop(t+.1)}
 
-const project=(x,y,z=0)=>({x:480+(x-10)*(13+y*.21),y:204+y*8.5-z*14*(.9+y/125)});
-
 function poly(points,fill,stroke='#f8edc7',width=2){ctx.beginPath();points.forEach(([x,y],i)=>{const p=project(x,y);i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)});ctx.closePath();ctx.fillStyle=fill;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=width;ctx.stroke()}}
 
 function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(q.x,q.y);ctx.stroke()}
@@ -196,19 +197,19 @@ function drawDust(dust){
 
 function drawSprite(p,q,game){
 
- const scale=.9+p.y/125,stance=footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id)),moving=movingStance(stance,Math.hypot(p.vx,p.vy));
+ const heightCm=p.appearance?.height??p.physique?.height??NEUTRAL_PLAYER_HEIGHT_CM,lift=gameLift(p.y),height=playerBoxHeight(heightCm,lift,ANIME_VISUAL_BODY_UNITS,ANIME_CANONICAL_BODY_UNITS),scale=height/94,stance=footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id)),moving=movingStance(stance,Math.hypot(p.vx,p.vy));
 
  const animation=sampleMatchAnimation(p,game);
 
  const mode=animation?.mode??(moving?(['backpedal','crossover'].includes(p.motion)?p.motion:p.motion==='run'?'run':'shuffle'):'idle'),phase=animation?.phase??0;
 
- const width=70.5*scale,height=94*scale,contact=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null;
+ const width=70.5*scale,contact=p.animationContactStart&&p.swing>0&&p.contactPoint?project(p.contactPoint.x,p.contactPoint.y,p.contactPoint.z):null;
 
  // Lock the face to the real impact location at phase .52. Release smoothly;
 
  // only the arm follows the contact, never the feet or the whole character.
 
- const contactDepth=contact?(p.team===0?-1:1)*(p.contactPoint.y-p.y)*8.5/(height/64*.4):null;
+ const contactDepth=contact?(p.team===0?-1:1)*(p.contactPoint.y-p.y)*gameGroundSpan(p.y)/(height/ANIME_CANONICAL_BODY_UNITS):null;
 
  const alignStrength=animation?.alignStrength??0;
 
@@ -247,7 +248,7 @@ function drawPixelBall(x,y,radius,squashX=1,squashY=1){
 
 const courtSpeckles=Array.from({length:190},(_,i)=>({x:((i*137)%1000)/1000*30-5,y:((i*269)%1000)/1000*48-2}));
 
-function drawNet(){const netL=project(-.5,22),netR=project(20.5,22),netHeight=3*14*(.9+22/125);drawCourtNet(ctx,netL,netR,netHeight,{retro:artPreferences.courtStyle==='retro'})}
+function drawNet(){const netY=C.net,netL=project(C.netPostLeft,netY),netR=project(C.netPostRight,netY),netPostHeight=Math.abs(project(C.netPostLeft,netY,C.netPostHeight).y-netL.y),netCenterHeight=Math.abs(project(C.width/2,netY,C.netCenterHeight).y-project(C.width/2,netY).y);drawCourtNet(ctx,netL,netR,netPostHeight,{centerHeight:netCenterHeight,retro:artPreferences.courtStyle==='retro'})}
 
 function render(game=liveGame){performanceMonitor.renderStart();try{return renderFrame(game)}finally{performanceMonitor.renderEnd()}}
 function renderFrame(game=liveGame){const camera=currentCamera(),sx=canvas.width/camera.width,sy=canvas.height/camera.height;ctx.setTransform(sx,0,0,sy,-camera.x*sx,-camera.y*sy);
@@ -268,7 +269,7 @@ function renderFrame(game=liveGame){const camera=currentCamera(),sx=canvas.width
 
  if(game.phase==='rally'&&ballSpeed>27){ctx.fillStyle='#fff1a733';for(let i=Math.max(0,game.trail.length-6);i<game.trail.length;i+=1){const t=game.trail[i],q=project(t.x,t.y,t.z),fade=i/game.trail.length;ctx.fillRect(q.x-1-fade,q.y-1-fade,2+fade*2,2+fade*2)}}if(game.bounceMark?.time>0){const q=project(game.bounceMark.x,game.bounceMark.y);ctx.strokeStyle='#fff5ab';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,10+(1-game.bounceMark.time/.35)*8,4,0,0,Math.PI*2);ctx.stroke()}
 
- const entities=[{kind:'net',y:22},...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){if(e.kind==='net'){drawDust(game.dust);drawNet();continue}const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z),squash=contactPulse>.65?1+(contactPulse-.65)*.9:1;drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22),squash,1/squash);continue}drawSprite(p,q,game)}
+ const entities=[{kind:'net',y:C.net},...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){if(e.kind==='net'){drawDust(game.dust);drawNet();continue}const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z),squash=contactPulse>.65?1+(contactPulse-.65)*.9:1;drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22),squash,1/squash);continue}drawSprite(p,q,game)}
 
  if(game.faultFocus&&game.clock>=game.faultFocus.time)drawFaultContact(ctx,game.faultFocus,project);
 

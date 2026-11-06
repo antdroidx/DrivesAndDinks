@@ -1,0 +1,11 @@
+# Local scratch and generated QA data
+.codex-attachments/
+.codex-remote-attachments/
+*.log
+*.tmp
+pr-body.md
+replay-static-camera.patch
+dev-*-simulation.json
+engine-*-simulation.json
+engine-roster-results.json
+validation/scale-*.png

@@ -6,6 +6,7 @@ import {drawProfileAthlete,profilePose,createProfileRenderer} from '../src/profi
 import {createSideReplayRenderer,sideReplayCamera,replayAngleFor,sideReplayProjection,MAX_REPLAY_Z} from '../src/side-replay.js';
 import {contactCue,replayContactAt,drawContactCue} from '../src/contact-cues.js';
 import {Game} from '../src/game.js';
+import {C} from '../src/core.js';
 import {ReplayClock} from '../src/fault-replay.js';
 
 function context(){let depth=0;return new Proxy({get depth(){return depth},getImageData(){return {data:new Uint8ClampedArray(144*144*4)}}},{get(target,key){if(key in target)return target[key];return (...args)=>{for(const arg of args)if(typeof arg==='number')assert.ok(Number.isFinite(arg),`${key}: invalid coordinate`);if(key==='save')depth++;if(key==='restore')assert.ok(--depth>=0)}},set(){return true}})}
@@ -85,7 +86,7 @@ test('the sideline replay draws a perspective court with real depth',()=>{
  assert.ok(Math.abs(farEnd.y-farNear.y)<courtHeight*.25,'far baseline is rotated in frame');
  assert.ok(Math.abs(nearEnd.y-nearNear.y)<courtHeight*.25,'near baseline is rotated in frame');
  // The net stands inside the court outline rather than outside it.
- const netTop=project(10,22,2.85),netBase=project(10,22,0);
+ const netTop=project(10,C.net,C.netCenterHeight),netBase=project(10,C.net,0);
  assert.ok(netBase.x>farNear.x&&netBase.x<nearEnd.x,'net is outside the court');
  assert.ok(netTop.y<netBase.y,'net height does not project upward');
  // The court keeps real-court proportions instead of collapsing to a strip.
