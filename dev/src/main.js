@@ -1,41 +1,41 @@
-import {seededRandom} from './competition.js?v=160';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=160';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=160';
-import {playerFeet,footSole} from './player-feet.js?v=160';
+import {seededRandom} from './competition.js?v=161';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=161';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=161';
+import {playerFeet,footSole} from './player-feet.js?v=161';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=160';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=161';
 
-import {drawCourtNet} from './court-net.js?v=160';
+import {drawCourtNet} from './court-net.js?v=161';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=160';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=161';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=160';
+import {createAnimeGameRenderer} from './anime-game.js?v=161';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=160';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=161';
 
-import {setupCourtDisplay} from './court-display.js?v=160';
+import {setupCourtDisplay} from './court-display.js?v=161';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=160';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=161';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan} from './court-camera.js?v=160';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=160';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan} from './court-camera.js?v=161';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=161';
 
-import {movingStance} from './detailed-character.js?v=160';
+import {movingStance} from './detailed-character.js?v=161';
 
-import {sampleMatchAnimation} from './match-animation.js?v=160';
+import {sampleMatchAnimation} from './match-animation.js?v=161';
 
-import {setupSelection} from './selection.js?v=160';
+import {setupSelection} from './selection.js?v=161';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=161';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=160';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=161';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=160';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=161';
 
-import {Game} from './game.js?v=160';
-import {C} from './core.js?v=160';
+import {Game} from './game.js?v=161';
+import {C} from './core.js?v=161';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=160';import {playerEmotionState} from './player-emotion.js?v=160';import {PerformanceMonitor} from './performance-monitor.js?v=160';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=161';import {playerEmotionState} from './player-emotion.js?v=161';import {PerformanceMonitor} from './performance-monitor.js?v=161';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=160';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=161';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -92,13 +92,38 @@ function drawPlayerNameplate(p,q,height){
  ctx.save();ctx.font='bold 9px monospace';ctx.textAlign='center';const width=Math.max(34,ctx.measureText(label).width+12),top=q.y-height-17;
  ctx.fillStyle='#10232de8';ctx.fillRect(q.x-width/2,top,width,14);ctx.fillStyle=p.id===0?'#fff8df':'#d8f0df';ctx.fillText(label,q.x,top+10);ctx.restore();
 }
-function drawPlayer(c,options){const custom=options.personalize?{customHeight:artPreferences.height===''?undefined:Number(artPreferences.height),customBuild:artPreferences.build===''?undefined:.05+Number(artPreferences.build)*.0105}:{};return detailedArtAvailable?drawAnimeGame(c,{...options,...custom,style:artPreferences.style,look:artPreferences.look,outfit:artPreferences.outfit}):drawPixelCharacter(c,options)}
+function drawPlayer(c,options){const custom=options.personalize?{customHeight:artPreferences.height===''?undefined:Number(artPreferences.height),customBuild:artPreferences.build===''?undefined:.05+Number(artPreferences.build)*.0105}:{};return detailedArtAvailable?drawAnimeGame(c,{...options,...custom,style:artPreferences.style,look:artPreferences.look,outfit:options.outfit??options.appearance?.outfit??artPreferences.outfit}):drawPixelCharacter(c,options)}
+
+const matchIntroDialog=document.querySelector('#match-intro'),matchIntroTeamsRoot=document.querySelector('#match-intro-teams'),beginMatchButton=document.querySelector('#begin-match');
+function showMatchIntro(players,onBegin){
+ matchIntroTeamsRoot.replaceChildren();
+ const introTeams=matchIntroTeams(players);for(const team of introTeams){
+  const section=document.createElement('section');section.className='intro-team';section.dataset.team=String(team.team);
+  const heading=document.createElement('h3');heading.textContent=team.label;section.append(heading);
+  for(const card of team.players){
+   const article=document.createElement('article');article.className='intro-player';
+   const portrait=document.createElement('canvas');portrait.width=264;portrait.height=316;portrait.setAttribute('aria-label',card.name+' character portrait');
+   const info=document.createElement('div'),name=document.createElement('h4'),archetype=document.createElement('p'),overall=document.createElement('div');
+   name.textContent=card.name;archetype.className='intro-archetype';archetype.textContent=card.archetype;overall.className='intro-overall';
+   const overallLabel=document.createElement('span'),overallValue=document.createElement('strong');overallLabel.textContent='OVERALL';overallValue.textContent=String(card.overall);overall.append(overallLabel,overallValue);
+   info.append(name,archetype,overall);
+   for(const key of INTRO_RATING_KEYS){const row=document.createElement('div');row.className='intro-rating';const label=document.createElement('span'),meter=document.createElement('span'),fill=document.createElement('i'),value=document.createElement('span');label.textContent=INTRO_RATING_LABELS[key];meter.className='intro-meter';fill.style.width=card.ratings[key]+'%';meter.append(fill);value.textContent=String(card.ratings[key]);row.append(label,meter,value);info.append(row)}
+   article.append(portrait,info);section.append(article);
+   try{const c=portrait.getContext('2d');c.setTransform(2,0,0,2,0,0);c.imageSmoothingEnabled=false;c.fillStyle='#173039';c.fillRect(0,0,132,158);drawPlayer(c,{personalize:card.id===0,designId:card.id===0?selectedDetailedDesign:'',appearance:card.appearance,characterId:card.characterId,handedness:card.handedness,mode:'idle',frame:0,phase:0,x:8,y:24,width:116,height:116,view:card.team===0?'near':'far',side:card.handedness==='left'?-1:1,paddleShape:card.paddleShape,lighting:'depth'})}catch(error){console.error(error)}
+  }
+  matchIntroTeamsRoot.append(section);
+  if(team.team===0&&introTeams.some(entry=>entry.team===1)){const versus=document.createElement('div');versus.className='intro-vs';versus.textContent='VS';matchIntroTeamsRoot.append(versus)}
+ }
+ matchIntroDialog.oncancel=event=>event.preventDefault();
+ beginMatchButton.onclick=()=>{matchIntroDialog.close();onBegin()};
+ matchIntroDialog.showModal();
+}
 
 if(detailedArtAvailable){
 
  const panel=document.createElement('div');panel.id='dev-art-options';panel.style.cssText='display:grid;gap:8px;margin:10px 0';
 
- panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="none">No background · court color theme</option><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower first steps and harder rushed low contacts. Broader: more power potential, slower acceleration and braking. Leaner / shorter: quicker changes of direction. Shot technique, swing speed and clean contact also generate power. Fitness and hand skill come from ratings.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
+ panel.innerHTML=`<label>Art style<select id="game-art-style"><option value="anime">Anime</option><option value="anime-pixel">Anime Pixel</option></select></label><label>Art direction<select id="game-art-look"><option value="sports">Sports anime</option><option value="storybook">Warm storybook</option></select></label><label>Outfit<select id="game-art-outfit" name="outfit"><option value="performance">Performance kit</option><option value="polo">Court polo</option><option value="shorts">Sleeveless + Shorts</option></select></label><label>Court setting<select id="game-art-venue"><option value="none">No background · court color theme</option><option value="random">Random each match</option>${COURT_VENUES.map(v=>`<option value="${v.id}">${v.name}</option>`).join('')}</select></label><label>Height (feet / inches)<input id="game-art-height" type="range" min="145" max="210" step="1" placeholder="Model default"></label><label>Build (0 lean – 100 broad)<input id="game-art-build" type="range" min="0" max="100" step="1" placeholder="Model default"></label><small style="grid-column:1/-1;color:#aac4be">Taller: more reach and overhead coverage, slower first steps and harder rushed low contacts. Broader: more power potential, slower acceleration and braking. Leaner / shorter: quicker changes of direction. Shot technique, swing speed and clean contact also generate power. Fitness and hand skill come from ratings.</small><output id="body-effects" aria-live="polite"></output><a href="style-lab.html">Character motion viewer ↗</a>`;
 
  document.querySelector('.setup-top').after(panel);
 
@@ -166,7 +191,7 @@ function drawLoadoutPreview(selection,profile){
 
  const c=document.querySelector('#player-preview');if(!c)return;
 
- const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={...(profile?.appearance??{}),body:selection.gender??character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor,headwear:selection.headwear,eyewear:selection.eyewear};
+ const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={...(profile?.appearance??{}),body:selection.gender??character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor,headwear:selection.headwear,eyewear:selection.eyewear,outfit:selection.outfit};
 
  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(2,0,0,2,0,0);x.imageSmoothingEnabled=false;x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
 
@@ -366,7 +391,7 @@ const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get
 window.addEventListener('keydown',event=>{if(replayPlayback){if(event.key==='Tab'||(event.target===pauseButton||event.target.closest?.('.replay-banner button'))&&['Enter',' '].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(event.key==='p'||event.key==='P'){if(!event.repeat)setPaused(!replayClock.paused)}else if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
 
 let previousStatus='',performancePanel=null,performanceRefresh=0;if(balanceQuery.get('test')==='performance'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))){performancePanel=document.createElement('output');performancePanel.id='performance-panel';performancePanel.setAttribute('aria-live','off');document.querySelector('.game').append(performancePanel)}window.__DRIVES_DINKS_PERFORMANCE__=()=>performanceMonitor.snapshot();
-function frame(t){performanceMonitor.frame(t);performanceMonitor.nextFrameAfterInput(t);if(performancePanel&&performanceRefresh++%120===0){const report=performanceMonitor.snapshot();performancePanel.textContent='PERF '+(report.fps?report.fps.toFixed(0):'--')+' FPS · RENDER '+(report.renderMs.p95?report.renderMs.p95.toFixed(1):'--')+' MS P95 · LONG '+report.longTasks.count}if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+function frame(t){performanceMonitor.frame(t);performanceMonitor.nextFrameAfterInput(t);if(performancePanel&&performanceRefresh++%120===0){const report=performanceMonitor.snapshot();performancePanel.textContent='PERF '+(report.fps?report.fps.toFixed(0):'--')+' FPS · RENDER '+(report.renderMs.p95?report.renderMs.p95.toFixed(1):'--')+' MS P95 · LONG '+report.longTasks.count}if(playReplay(t)){requestAnimationFrame(frame);return}if(matchIntroDialog.open){last=t;acc=0;render();requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 
 const aimPad=document.querySelector('#aim-pad'),aimTrack=aimPad.querySelector('.aim-pad-track'),aimThumb=aimPad.querySelector('.aim-pad-thumb'),depthLabel=document.querySelector('#depth-label');
 
@@ -390,7 +415,8 @@ function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
-selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,getPhysique:()=>({height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Number(artPreferences.build||document.querySelector('#game-art-build')?.value||45)*.0105}),onStart:()=>{refreshVenue();if(balanceLevel&&!game.practice){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=game.practice?game.practice.drill.instruction:`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot(game.practice?(game.practice.step.shot==='lob'?'lob':game.practice.step.shot==='drive'?'attack':'soft'):'attack');document.querySelector('#mode').textContent='MODE: '+(game.practice?'PRACTICE':game.mode.toUpperCase());syncDifficultyButton();syncPauseButton();last=0;acc=0}});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
+function beginConfiguredMatch(){refreshVenue();if(balanceLevel&&!game.practice){game.configure({},levelLineup(balanceLevel,game.random));buildLabel.textContent=`BUILD ${buildNumber} · ${balanceLevel.toUpperCase()} TEST`;}document.querySelector('#active-loadout').textContent=game.practice?game.practice.drill.instruction:`${game.players[0].name} · ${game.players[0].paddle.id==='power'?'Ignite':game.players[0].paddle.id==='control'?'Touch':'Allcourt'} · ${game.players[0].paddle.shapeName??'Hybrid'} shape · First to 11, win by 2`;setShot(game.practice?(game.practice.step.shot==='lob'?'lob':game.practice.step.shot==='drive'?'attack':'soft'):'attack');document.querySelector('#mode').textContent='MODE: '+(game.practice?'PRACTICE':game.mode.toUpperCase());syncDifficultyButton();syncPauseButton();last=0;acc=0}
+selectionUI=setupSelection({game,drawPreview:drawLoadoutPreview,getPhysique:()=>({height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Number(artPreferences.build||document.querySelector('#game-art-build')?.value||45)*.0105}),onStart:()=>game.practice?beginConfiguredMatch():showMatchIntro(game.players,beginConfiguredMatch)});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
 
 
 if(['erne','atp'].includes(scenarioType)){document.querySelector('#match-setup').close();game.configure();game.startScenario(scenarioType);document.querySelector('#active-loadout').textContent=`DEV SCENARIO · ${scenarioType.toUpperCase()} · ${Math.round(scenarioSpeed*100)}% SPEED · ADD ?speed=1 FOR REAL TIME`;document.querySelector('#mode').textContent='MODE: DEV SCENARIO';last=0;acc=0;syncPauseButton();}

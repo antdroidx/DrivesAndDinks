@@ -1,5 +1,5 @@
-import {selectShot,backhandGrip,strokePower,scorpionOpportunity} from './core.js?v=160';
-import {strokeForContact} from './player-facing.js?v=160';
+import {selectShot,backhandGrip,strokePower,scorpionOpportunity} from './core.js?v=161';
+import {strokeForContact} from './player-facing.js?v=161';import {RALLY_REACTIONS,REACTION_DURATION} from './player-emotion.js?v=161';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 export function matchStrokeMode(player,shot=player.animationShot,stroke=player.stroke){
@@ -41,6 +41,7 @@ export function prepareReceiver(player,game){
  player.preparation.phase=Math.max(player.preparation.phase,.5*clamp(1-eta/.26));
 }
 export function sampleMatchAnimation(player,game){
+ if(player.reactionTimer>0&&RALLY_REACTIONS.includes(player.reactionKind)&&player.swing<=0)return {mode:player.reactionKind,phase:clamp(1-player.reactionTimer/REACTION_DURATION),alignStrength:0};
  if(player.celebrateTimer>0&&player.swing<=0)return {mode:'celebrate',phase:clamp(1-player.celebrateTimer/1.25),alignStrength:0};
  if(game.phase==='pause'&&(player.stamina??1)<.35&&player.swing<=0)return {mode:'recoveryIdle',phase:(game.clock*1.2)%1,alignStrength:0};
  if((player.splitStepTimer||0)>0)return {mode:'splitStep',phase:1-player.splitStepTimer/.18,alignStrength:0};

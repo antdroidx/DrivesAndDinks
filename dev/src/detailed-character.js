@@ -1,5 +1,5 @@
-import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js?v=160';
-import {CHARACTER_CONCEPTS,conceptPoint,conceptHair,thighGarment,skirtGarment} from './character-concepts.js?v=160';
+import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js?v=161';
+import {CHARACTER_CONCEPTS,conceptPoint,conceptHair,thighGarment,skirtGarment} from './character-concepts.js?v=161';
 
 // Visual identities never alter the player's simulation abilities or hit range.
 export function matchDesign(appearance={},characterId='',designId=''){
@@ -80,7 +80,7 @@ function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='
  }
 
  const hair=gradient(c,d.hairColor,x,y-4,6);
- if(near&&d.hair!=='buzz'){ellipse(c,x,y-1,5.6,6,hair);shape(c,[[x-5,y],[x+5,y],[x+4,y+4],[x,y+5],[x-4,y+4]],hair,null)}else if(d.hair!=='buzz'){c.fillStyle=hair;c.beginPath();c.moveTo(x-5.5,y);c.quadraticCurveTo(x-6,y-7,x,y-7);c.quadraticCurveTo(x+6,y-7,x+5.5,y-1);c.lineTo(x+2,y-3);c.lineTo(x-1,y-2);c.lineTo(x-3,y-3);c.closePath();c.fill()}
+ if(near&&d.hair!=='buzz'&&d.hair!=='bald'){ellipse(c,x,y-1,5.6,6,hair);shape(c,[[x-5,y],[x+5,y],[x+4,y+4],[x,y+5],[x-4,y+4]],hair,null)}else if(d.hair!=='buzz'&&d.hair!=='bald'){c.fillStyle=hair;c.beginPath();c.moveTo(x-5.5,y);c.quadraticCurveTo(x-6,y-7,x,y-7);c.quadraticCurveTo(x+6,y-7,x+5.5,y-1);c.lineTo(x+2,y-3);c.lineTo(x-1,y-2);c.lineTo(x-3,y-3);c.closePath();c.fill()}
  if(d.hair==='curls'){for(let i=0;i<7;i++)ellipse(c,x-4.8+i*1.6,y-4.4-Math.sin(i/6*Math.PI)*2.6,1.7,1.7,shade(d.hairColor,i%2?.14:-.12))}if(['bob','waves'].includes(d.hair)){limb(c,{x:x-5,y:y-1},{x:x-5.5,y:y+(near?7:5)},2,d.hairColor);limb(c,{x:x+5,y:y-1},{x:x+5.5,y:y+(near?7:5)},2,d.hairColor)}
 
  if(d.hair==='spiky'&&d.headwear!=='cap'){
@@ -124,7 +124,7 @@ c.restore()}
  limb(c,{x:n.x,y:n.y-1},{x:n.x,y:n.y+3},3.8,skin);
  const shoulder=d.shoulder,waist=d.waist,hip=d.hip,top=n.y+1,hem=h.y-1;
  c.fillStyle=gradient(c,d.shirt,n.x,top+8,shoulder);c.strokeStyle='#182633';c.lineWidth=.8;c.beginPath();c.moveTo(n.x-3,top-1);c.lineTo(n.x-shoulder,top+2);c.quadraticCurveTo(n.x-shoulder-1,(top+hem)/2,h.x-waist,hem);c.quadraticCurveTo(h.x,hem+1,h.x+waist,hem);c.quadraticCurveTo(n.x+shoulder+1,(top+hem)/2,n.x+shoulder,top+2);c.lineTo(n.x+3,top-1);c.quadraticCurveTo(n.x,top+2,n.x-3,top-1);c.closePath();c.fill();c.stroke();
- shape(c,[[n.x+shoulder-2,top+3],[n.x+shoulder,top+3],[h.x+waist,hem],[h.x+waist-2,hem]],shade(d.shirt,-.2),null);limb(c,{x:n.x-2.8,y:top},{x:n.x,y:top+2},.75,d.trim);limb(c,{x:n.x,y:top+2},{x:n.x+2.8,y:top},.75,d.trim);
+ shape(c,[[n.x+shoulder-2,top+3],[n.x+shoulder,top+3],[h.x+waist,hem],[h.x+waist-2,hem]],shade(d.shirt,-.2),null);if(view==='far'){limb(c,{x:n.x-2.8,y:top},{x:n.x,y:top+2},.75,d.trim);limb(c,{x:n.x,y:top+2},{x:n.x+2.8,y:top},.75,d.trim)}else limb(c,{x:n.x-2.8,y:top+.7},{x:n.x+2.8,y:top+.7},.75,d.trim);
  c.strokeStyle=shade(d.shirt,-.27);c.lineWidth=.45;c.beginPath();c.moveTo(h.x-waist+1,hem-1);c.quadraticCurveTo(n.x-shoulder+2,top+9,n.x-shoulder+1,top+4);c.moveTo(h.x-2,hem-1);c.lineTo(h.x+1.5,hem-3);c.stroke();
  if(d.illustrated){
   shape(c,[[n.x-shoulder+1,top+3],[n.x-shoulder+2.5,top+3],[h.x-waist+2,hem-1],[h.x-waist+.7,hem-1]],shade(d.shirt,.13),null);

@@ -13,9 +13,9 @@ export function conceptDimensions(design,heightDelta=0,buildDelta=0){
 export function conceptPoint(p,design){const heightScale=design.height/177;return {x:24+(p.x-24),y:63+(p.y-63)*heightScale}}
 
 // Clothing follows the thigh rather than a fixed rectangle over moving legs.
-export function thighGarment(chain,width){
+export function thighGarment(chain,width,extent=.52){
  const [hip,knee]=chain,dx=knee.x-hip.x,dy=knee.y-hip.y,length=Math.hypot(dx,dy)||1,nx=-dy/length,ny=dx/length;
- const start={x:hip.x-dx/length,y:hip.y-dy/length},end={x:hip.x+dx*.52,y:hip.y+dy*.52},half=width/2;
+ const start={x:hip.x-dx/length,y:hip.y-dy/length},end={x:hip.x+dx*extent,y:hip.y+dy*extent},half=width/2;
  return {end,polygon:[[start.x+nx*half,start.y+ny*half],[end.x+nx*half,end.y+ny*half],[end.x-nx*half,end.y-ny*half],[start.x-nx*half,start.y-ny*half]]};
 }
 export function skirtGarment(hips,legs,hipWidth,limbWidth){
@@ -24,6 +24,7 @@ export function skirtGarment(hips,legs,hipWidth,limbWidth){
  return {left,right,bottom,ends,polygon:[[hips.x-hipWidth,hem],[hips.x+hipWidth,hem],[right,rightY],[hips.x+(right-hips.x)*.3,bottom],[hips.x-(hips.x-left)*.3,bottom],[left,leftY]]};
 }
 
+export const OUTFIT_OPTIONS=Object.freeze([{id:'performance',name:'Performance kit'},{id:'polo',name:'Court polo'},{id:'shorts',name:'Sleeveless + Shorts'}]);
 export const HEADWEAR_OPTIONS=Object.freeze([{id:'none',name:'No headwear'},{id:'cap',name:'Cap'},{id:'visor',name:'Visor'},{id:'headband',name:'Headband'}]);
 export const EYEWEAR_OPTIONS=Object.freeze([{id:'none',name:'No glasses'},{id:'glasses',name:'Glasses'}]);
 export const HAIR_OPTIONS=Object.freeze({
