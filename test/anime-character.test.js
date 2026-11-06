@@ -25,6 +25,8 @@ test('rear views suppress front collar and bald facial highlights',()=>{
  const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
  assert.match(source,/if\(d\.outfit==='polo'\)\{\s*if\(!near\)/);
  assert.match(source,/if\(bald\)\{\s*if\(!near\)/);
+ assert.doesNotMatch(source,/if\(sole\)path/);
+ assert.match(source,/else path\(c,\[point\(x\+5\.8,y-3\.2\)/);
 });
 
 test('shortened head placement keeps a compact chin-to-collar gap across bodies and motions',()=>{

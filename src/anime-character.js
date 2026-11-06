@@ -84,12 +84,10 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
  const {x,y}=animeHeadCenter(n),skin=d.skin,hair=d.hairColor,colors=skinPalette(skin);
  // Tapered jaw, small ears and a tiny implied nose replace the round toy face.
  c.beginPath();c.moveTo(x-4.9,y-3.6);c.quadraticCurveTo(x-6,y+1,x-3.5,y+4.4);c.quadraticCurveTo(x-1,y+6,x,y+6.1);c.quadraticCurveTo(x+2.3,y+5.3,x+4.1,y+3.5);c.quadraticCurveTo(x+5.6,y,x+4.8,y-3.8);c.quadraticCurveTo(x+3.3,y-6.8,x,y-6.6);c.quadraticCurveTo(x-3.7,y-6.8,x-4.9,y-3.6);c.closePath();c.fillStyle=skin;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke();
- path(c,[point(x-4.5,y-2.7),point(x-1.2,y-5.6),point(x-.55,y+3.8),point(x-3.35,y+4.45)],colors.light,null);
- path(c,[point(x+2.35,y-3.5),point(x+4.7,y-.55),point(x+3.8,y+3.35),point(x+1.15,y+5.15),point(x+2,y+1.2)],colors.shadow,null);
- line(c,[point(x+.1,y-.9),point(x+.7,y+1.55),point(x+.15,y+2.05)],tone(skin,-.18),.28);
- path(c,[point(x-2.7,y+4.75),point(x+.15,y+6.05),point(x+2.7,y+4.5),point(x+.15,y+5.1)],tone(skin,-.12),null);
  for(const sign of [-1,1]){oval(c,x+sign*4.8,y+.6,.9,1.35,skin);line(c,[point(x+sign*4.8,y+.1),point(x+sign*5,y+1)],tone(skin,-.18),.3)}
  if(!near){
+  path(c,[point(x-2.7,y+4.75),point(x+.15,y+6.05),point(x+2.7,y+4.5),point(x+.15,y+5.1)],tone(skin,-.12),null);
+  line(c,[point(x+.1,y-.9),point(x+.7,y+1.55),point(x+.15,y+2.05)],tone(skin,-.18),.28);
   path(c,[point(x-4.2,y-2.8),point(x+4.3,y-2.8),point(x+3.9,y-1.2),point(x+.6,y-1.8),point(x-2.6,y-1.1)],colors.shadow,null);
   path(c,[point(x-3.7,y+.8),point(x-2.8,y+2.8),point(x-1.5,y+3.8),point(x-2.6,y+2.7)],colors.light,null);
   path(c,[point(x+3.9,y-.2),point(x+4,y+2.5),point(x+1.4,y+5),point(x+.5,y+5.3),point(x+2.6,y+2)],colors.shadow,null);
@@ -134,7 +132,9 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
  }
  if(d.headwear==='cap'){
   c.beginPath();c.moveTo(x-6,y-3);c.quadraticCurveTo(x-5.5,y-10,x,y-9.2);c.quadraticCurveTo(x+6,y-9,x+6,y-3);c.closePath();c.fillStyle=d.trim;c.fill();c.strokeStyle=ink;c.lineWidth=.45;c.stroke();
-  path(c,[point(x-5.8,y-3.2),point(x+5.5,y-3.4),point(x+7.3,y-1.4),point(x+1,y-1.2)],tone(d.trim,-.12),ink);line(c,[point(x,y-8),point(x+.3,y-4)],tone(d.trim,-.2),.3);
+  if(!near)path(c,[point(x-5.8,y-3.2),point(x+5.5,y-3.4),point(x+7.3,y-1.4),point(x+1,y-1.2)],tone(d.trim,-.12),ink);
+  else path(c,[point(x+5.8,y-3.2),point(x-5.5,y-3.4),point(x-7.3,y-1.4),point(x-1,y-1.2)],tone(d.trim,-.12),ink);
+  line(c,[point(x,y-8),point(x+(near?-.3:.3),y-4)],tone(d.trim,-.2),.3);
  }else if(d.headwear==='visor'){path(c,[point(x-5.8,y-3.7),point(x+5.7,y-3.7),point(x+7.1,y-1.5),point(x-5.9,y-2)],d.trim,ink)}
  else if(d.headwear==='headband')line(c,[point(x-5,y-3),point(x+.2,y-3.6),point(x+5.2,y-3)],d.trim,1.3);
  if(d.eyewear==='glasses'){
@@ -152,7 +152,6 @@ export function animeTorso(design,pose,warm=false){
  return {crop,bottom,hem:bottom-(crop?5:0),shoulder:design.shoulder*(warm?.97:.91),waist:design.waist*(warm?1.04:.87),top:pose.neck.y+.2};
 }
 function trainer(c,f,d,ink,sole){
- if(sole)path(c,sole,'#e5dfce',ink,.3);
  const w=.95+d.build*.18,px=(x,y)=>point(f.x+x*w,f.y+y);
  // Ribbed ankle sock, padded collar and tongue stay attached to the foot.
  path(c,[px(-1.3,-4.2),px(1.1,-4.2),px(1.2,-1.4),px(-1.5,-1.3)],'#e5dfce',ink,.3);
