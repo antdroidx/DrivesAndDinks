@@ -1,15 +1,15 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=162';
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=162';
-import {MatchJournal} from './match-journal.js?v=162';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=162';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=162';
-import {seededRandom} from './competition.js?v=162';
-import {kitchenFootContact} from './core.js?v=162';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=162';
-import {strokeForContact} from './player-facing.js?v=162';
-import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=162';
-import {createLineup,applyPhysique} from './roster.js?v=162';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower} from './core.js?v=162';
+import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=163';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=163';
+import {MatchJournal} from './match-journal.js?v=163';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=163';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=163';
+import {seededRandom} from './competition.js?v=163';
+import {kitchenFootContact} from './core.js?v=163';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=163';
+import {strokeForContact} from './player-facing.js?v=163';
+import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=163';
+import {createLineup,applyPhysique} from './roster.js?v=163';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower} from './core.js?v=163';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
