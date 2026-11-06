@@ -114,7 +114,7 @@ Fatigue remains part of gameplay, but stamina bars are not displayed.
 
 ## DEV level and animation foundation
 
-See [ENGINE-NOTES.md](ENGINE-NOTES.md) for independent competitive ratings, attribute profiles, seeded validation, exertion/contact changes, and the expanded 26-motion studio. Run `npm run validate:levels` for the beginner-through-advanced matrix. The ordinary playable demo retains its approximately 70 baseline; optional DEV test profiles are documented in the notes.
+See [ENGINE-NOTES.md](ENGINE-NOTES.md) for independent competitive ratings, attribute profiles, seeded validation, exertion/contact changes, and the expanded 29-motion studio. Run `npm run validate:levels` for the beginner-through-advanced matrix. The ordinary playable demo retains its approximately 70 baseline; optional DEV test profiles are documented in the notes.
 
 
 ## Semi-3D character pass
@@ -209,7 +209,7 @@ Open `/dev/?test=performance` for a lightweight frame and render readout. The br
 
 ## Modern venues, new character motions and the overhead replay angle
 
-Three new character motions fill the gaps in the previous 26-state library: a scorpion overhead that reaches up and behind the head, a point celebration with a fist pump and hop, and a hands-heavy fatigue recovery idle. Each is wired into live play, the Motion Studio, the character lab and the style lab. The scorpion and celebration were first authored outside the arm's reach envelope, which made the inverse-kinematics solver saturate and snap the elbow; both are re-authored inside it, and `node scripts/rig-diagnostic.mjs` reports joint jumps and reach for any authored motion. Jersey numbers are printed on the back of the kit, assigned from the concept order so every design reads differently.
+Three new character motions fill the gaps in the previous 26-state library: a scorpion overhead that reaches up and behind the head, a point celebration with a fist pump and hop, and a hands-heavy fatigue recovery idle. Each is wired into live play, the Motion Studio, the character lab and the style lab. The scorpion and celebration were first authored outside the arm's reach envelope, which made the inverse-kinematics solver saturate and snap the elbow; both are re-authored inside it, and `node scripts/rig-diagnostic.mjs` reports joint jumps and reach for any authored motion. The costume carries a sweatband on the racket wrist, which is the kind of detail courts actually have.
 
 The three venue plates are contemporary: a blue-hour outdoor sports park, a modern indoor arena and a current-era championship stadium. The outdoor plate was regenerated once more so its side fences, curbs and light poles recede toward a single vanishing point and the court's sidelines continue them. The engine's `far` setting places the court baseline below the back barrier in each plate, so a strip of real ground shows behind the baseline and the far players stand on ground instead of on the fence.
 
