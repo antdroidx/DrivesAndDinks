@@ -129,7 +129,7 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards
    line(c,[{x:-2.6,y:-5.3},{x:-1.8,y:-7.5}],tone(hair,.25),.35);
   }else if(d.hair==='pixie'){
    roundedShape(c,[{x:-5,y:-1},{x:-5.2,y:-3.8},{x:-3.8,y:-5},{x:-3.5,y:-6.7},{x:-2,y:-5.5},{x:-.8,y:-7.3},{x:.3,y:-5.6},{x:1.6,y:-7.1},{x:2.6,y:-5.3},{x:4,y:-6.1},{x:4.3,y:-4.3},{x:5.2,y:-3.3},{x:5,y:-.5},{x:4,y:1.2},{x:2,y:1.8},{x:0,y:2},{x:-2,y:1.8},{x:-4,y:1.2}],hair,ink,.4,.75);
-   if(!accessorized)roundedShape(c,[{x:-4.5,y:-3.8},{x:-3.5,y:-6.4},{x:-2.2,y:-5.4},{x:-1,y:-7.4},{x:.3,y:-5.5},{x:1.8,y:-7},{x:2.8,y:-5.1},{x:4,y:-5.8}],tone(hair,.05),ink,.25,.35);
+   if(d.headwear!=='cap')roundedShape(c,[{x:-4.5,y:-3.8},{x:-3.5,y:-6.4},{x:-2.2,y:-5.4},{x:-1,y:-7.4},{x:.3,y:-5.5},{x:1.8,y:-7},{x:2.8,y:-5.1},{x:4,y:-5.8}],tone(hair,.05),ink,.25,.35);
    roundedShape(c,[{x:-4.7,y:-3},{x:4.7,y:-3},{x:4.2,y:-.7},{x:2,y:-1.5},{x:.3,y:-.5},{x:-1.8,y:-1.5},{x:-3.8,y:-.6}],tone(hair,-.08),ink,.25,.4);
   }else if(d.hair==='crewCut'){
    roundedShape(c,[{x:-5,y:-.4},{x:-5.1,y:-3.8},{x:-3.5,y:-5.4},{x:-1.2,y:-6},{x:1.2,y:-5.9},{x:3.5,y:-5.1},{x:5,y:-3.5},{x:4.8,y:-.5},{x:2,y:-1.8},{x:-1.8,y:-1.7}],hair,ink,.34,.8);
