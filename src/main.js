@@ -282,14 +282,14 @@ function renderFrame(game=liveGame){const camera=currentCamera(),sx=canvas.width
 
 const liveGame=game;
 
-let replayEnabled=true,replayPlayback=null,replayStarted=0,replayAngle='overview',replayTakeover=false;
+let replayEnabled=true,replayPlayback=null,replayStarted=0,replayAngle='overview';
 const drawSideReplay=createSideReplayRenderer(),replayClock=new ReplayClock();
 
 const automaticallyReplayedPoints=new WeakSet();
 
 const replayBar=document.createElement('div');replayBar.className='replay-banner';replayBar.hidden=true;
 
-const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button'),replayAngleButton=document.createElement('button');replayAngleButton.type='button';replayAngleButton.textContent='ANGLE: OVERVIEW';replayAngleButton.setAttribute('aria-label','Switch replay camera angle');replayAngleButton.onclick=()=>{replayAngle=replayAngle==='sideline'?'overview':'sideline';replayAngleButton.textContent='ANGLE: '+replayAngle.toUpperCase();replayAngleButton.setAttribute('aria-pressed',String(replayAngle==='sideline'))};skipReplay.textContent='SKIP REPLAY';const takeOverButton=document.createElement('button');takeOverButton.type='button';takeOverButton.textContent='TAKE OVER';takeOverButton.setAttribute('aria-label','Take over the replay and play the point');takeOverButton.onclick=()=>takeOverReplay();replayBar.append(replayLabel,replayAngleButton,takeOverButton,skipReplay);document.querySelector('.game').append(replayBar);
+const replayLabel=document.createElement('strong'),skipReplay=document.createElement('button'),replayAngleButton=document.createElement('button');replayAngleButton.type='button';replayAngleButton.textContent='ANGLE: OVERVIEW';replayAngleButton.setAttribute('aria-label','Switch replay camera angle');replayAngleButton.onclick=()=>{replayAngle=replayAngle==='sideline'?'overview':'sideline';replayAngleButton.textContent='ANGLE: '+replayAngle.toUpperCase();replayAngleButton.setAttribute('aria-pressed',String(replayAngle==='sideline'))};skipReplay.textContent='SKIP REPLAY';replayBar.append(replayLabel,replayAngleButton,skipReplay);document.querySelector('.game').append(replayBar);
 
 const pointActions=document.querySelector('#point-actions'),pointReplayLabel=document.querySelector('#point-replay-label'),watchPointReplay=document.querySelector('#watch-point-replay');
 
@@ -305,7 +305,7 @@ function beginReplay(clip,startedAt=performance.now(),automatic=false){
 
 }
 
-function finishReplay(){replayTakeover=false;replayPlayback=null;replayCamera=null;document.querySelector('.game').classList.remove('replaying');syncPauseButton();replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
+function finishReplay(){replayPlayback=null;replayCamera=null;document.querySelector('.game').classList.remove('replaying');syncPauseButton();replayBar.hidden=true;last=0;acc=0;game.hitBuffer=0;}
 
 function syncPointActions(){
 
@@ -323,55 +323,12 @@ skipReplay.onclick=finishReplay;
 
 const replayToggle=document.createElement('button');replayToggle.id='replay-toggle';replayToggle.textContent='REPLAYS: ON';document.querySelector('.header-actions').append(replayToggle);replayToggle.onclick=()=>{replayEnabled=!replayEnabled;replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;finishReplay()};
 
-function restorePoint(frame){
- const g=game;
- for(const key of ['points','team','server','serverPlayer','rightPlayer','first','winner','format'])if(frame.score?.[key]!==undefined)g.score[key]=frame.score[key];
- g.players=frame.players.map(player=>structuredClone(player));
- g.ball=structuredClone(frame.ball);
- g.clock=frame.clock;g.shots=frame.shots;g.bounces=frame.bounces;g.lastBounceAt=frame.lastBounceAt;
- g.aim=frame.aim;g.depth=frame.depth;g.shot=frame.shot;g.timer=frame.timer;
- g.server=g.players.find(player=>player.id===frame.serverId)??g.players[0];
- // The recording keeps the hitter only through the ball's travel direction, so
- // the side that last struck it has to be rebuilt for the fault checks.
- g.last=g.ball.vy<0?0:1;
- g.lastHitter=g.players.find(player=>player.team===g.last)?.id??null;
- g.lastShot=g.ball.shot??frame.shot??'serve';
- g.teamPlan??={point:{bounces:g.bounces},receiverId:g.players.find(player=>player.team!==g.last)?.id??0};
- g.serveReceiver=g.players.find(player=>player.team!==g.server.team);
- g.trail=structuredClone(frame.trail??[]);g.contact=null;g.bounceMark=null;g.hitBuffer=0;g.paused=false;g.phase='rally';g.pause=0;
-}
-
-function takeOverReplay(){
- if(!replayPlayback?.frames?.length||replayTakeover)return;
- const elapsed=replayClock.elapsed(performance.now()),frame=faultReplaySample(replayPlayback,elapsed,true);
- if(!frame)return;
- restorePoint(frame);replayTakeover=true;replayAngle='sideline';
- replayAngleButton.textContent='ANGLE: SIDELINE';replayAngleButton.setAttribute('aria-pressed','true');
- replayLabel.textContent='LIVE · PLAY THE POINT';
- last=0;acc=0;syncShotButtonsForPhase();
-}
-
 function playReplay(t){
 
  if(!replayPlayback)return false;
 
  if(selectionUI?.isOpen()||game.phase==='serve'){finishReplay();return false;}
 
- if(replayTakeover){
-  // The point is live again: the engine runs and the human plays it from the
-  // sideline camera, so the replay view becomes the match view.
-  if(!last)last=t;
-  acc+=Math.min(.1,(t-last)/1000);last=t;
-  while(acc>=1/120){game.update(1/120);acc-=1/120;}
-  if(game.phase==='over'||game.phase==='pause'){game.replayClip=null;finishReplay();return false;}
-  const livePalette=COURT_PALETTES.find(item=>item.id===game.players[0]?.appearance?.court)??COURT_PALETTES[0];
-  drawSideReplay(ctx,{width:canvas.width,height:canvas.height},game,replayPlayback,{palette:livePalette,style:artPreferences.style,look:artPreferences.look,outfit:artPreferences.outfit,live:true});
-  updateCourtHud({...game,score:{...game.score,call:'LIVE'}});
-  const liveStatus=`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | ${game.message}`;
-  if(liveStatus!==previousStatus){document.querySelector('#overlay').textContent=liveStatus;previousStatus=liveStatus}
-  syncShotButtonsForPhase();
-  return true;
- }
 const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get('play')!=='1'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname));
  const elapsed=replayProbe?Math.max(0,Number(balanceQuery.get('at'))||1.5):replayClock.elapsed(t),snapshot=faultReplaySample(replayPlayback,elapsed,true);
 
@@ -388,7 +345,7 @@ const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get
 
 }
 
-window.addEventListener('keydown',event=>{if(replayPlayback&&!replayTakeover){if(event.key==='Tab'||(event.target===pauseButton||event.target.closest?.('.replay-banner button'))&&['Enter',' '].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(event.key==='p'||event.key==='P'){if(!event.repeat)setPaused(!replayClock.paused)}else if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
+window.addEventListener('keydown',event=>{if(replayPlayback){if(event.key==='Tab'||(event.target===pauseButton||event.target.closest?.('.replay-banner button'))&&['Enter',' '].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(event.key==='p'||event.key==='P'){if(!event.repeat)setPaused(!replayClock.paused)}else if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
 
 let previousStatus='',performancePanel=null,performanceRefresh=0;if(balanceQuery.get('test')==='performance'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))){performancePanel=document.createElement('output');performancePanel.id='performance-panel';performancePanel.setAttribute('aria-live','off');document.querySelector('.game').append(performancePanel)}window.__DRIVES_DINKS_PERFORMANCE__=()=>performanceMonitor.snapshot();
 function frame(t){performanceMonitor.frame(t);performanceMonitor.nextFrameAfterInput(t);if(performancePanel&&performanceRefresh++%120===0){const report=performanceMonitor.snapshot();performancePanel.textContent='PERF '+(report.fps?report.fps.toFixed(0):'--')+' FPS · RENDER '+(report.renderMs.p95?report.renderMs.p95.toFixed(1):'--')+' MS P95 · LONG '+report.longTasks.count}if(playReplay(t)){requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();for(const event of game.events.splice(0))playEffect(event);render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
@@ -411,7 +368,7 @@ const attackButton=document.querySelector('[data-shot="attack"]'),softButton=doc
 
 function syncShotButtonsForPhase(){syncAimPad();const humanServe=game.mode==='play'&&game.phase==='serve'&&game.server.id===0,paused=game.paused;if(humanServe===previousHumanServe&&paused===previousPaused)return;previousHumanServe=humanServe;previousPaused=paused;attackButton.querySelector('small').textContent=humanServe?'HARD SERVE':'DRIVE · HIGH';softButton.querySelector('small').textContent=humanServe?'SOFT SERVE':'DROP / DINK';lobButton.querySelector('small').textContent=humanServe?'NOT ON SERVE':'ANYWHERE';attackButton.disabled=paused;softButton.disabled=paused;lobButton.disabled=humanServe||paused}
 
-function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||(replayPlayback&&!replayTakeover))return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();if(replayTakeover&&replayAngle==='sideline'){const across=1+(e.clientY-rect.top)/Math.max(1,rect.height)*18;game.aim=Math.max(1,Math.min(19,across));syncAimPad();return}game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{performanceMonitor.input(e.timeStamp);if(game.paused||(replayPlayback&&!replayTakeover))return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{performanceMonitor.input(e.timeStamp);if(selectionUI?.isOpen()||(replayPlayback&&!replayTakeover))return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
+function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{performanceMonitor.input(e.timeStamp);if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{performanceMonitor.input(e.timeStamp);if(selectionUI?.isOpen()||replayPlayback)return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 

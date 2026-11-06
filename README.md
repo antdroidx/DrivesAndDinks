@@ -158,8 +158,6 @@ Wide-screen ball replays now use a sideline camera with purpose-drawn anime prof
 The sideline scene uses the selected two-tone court colors and a clean surround. Anime Pixel retains palette-quantized, crisp character edges. Impact cues distinguish clean, pressured, off-center, and mishit contacts; replay labels last briefly for readability.
 The sideline scene stands in a real venue now. `assets/venues/replay-sideline.png` is drawn behind the court with its floor line on the camera horizon, so the arena reads as a room instead of a flat band. The court is drawn at true scale and the athletes and the ball are scaled to the live view's read, which keeps the kitchen from swallowing the players the way a metric broadside view does.
 
-TAKE OVER turns a replay into a live point. The recorded rally is restored onto the running game, the engine takes over from that frame, and the sideline camera keeps rendering it, so the replay view becomes the playable one. Because the sideline camera looks across the court rather than down it, the pointer's vertical position aims across the court and the usual shot buttons and arrow keys still apply. The point ends with the restored rally and the match continues from the restored score.
-
 On DEV, `?test=sideline-replay` opens a frozen, simulated replay inspector. `&at=2` selects another playback time; `&art=anime-pixel` checks the pixel treatment. Use the ordinary DEV URL for animated gameplay and replays.
 
 Ordinary replays now run at normal speed. Only measured close line, kitchen-foot or net contacts slow briefly, with a CLOSE CALL / SLOW-MO indicator during that window. The camera remains stationary through the outcome. Add `&play=1` to the inspector to watch its simulated clip animate.
