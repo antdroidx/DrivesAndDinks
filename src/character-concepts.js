@@ -28,7 +28,7 @@ export const OUTFIT_OPTIONS=Object.freeze([{id:'performance',name:'Performance k
 export const HEADWEAR_OPTIONS=Object.freeze([{id:'none',name:'No headwear'},{id:'cap',name:'Cap'},{id:'visor',name:'Visor'},{id:'headband',name:'Headband'}]);
 export const EYEWEAR_OPTIONS=Object.freeze([{id:'none',name:'No glasses'},{id:'glasses',name:'Glasses'}]);
 export const HAIR_OPTIONS=Object.freeze({
- male:Object.freeze([{id:'crop',name:'Textured crop'},{id:'sidePart',name:'Swept side part'},{id:'curls',name:'Soft curls'},{id:'afro',name:'Afro'},{id:'spiky',name:'Spiky hair'},{id:'buzz',name:'Close buzz cut'},{id:'bald',name:'Bald'}]),
- female:Object.freeze([{id:'bob',name:'Chin-length bob'},{id:'ponytail',name:'High ponytail'},{id:'braid',name:'Long braid'},{id:'pixie',name:'Feathered pixie'},{id:'waves',name:'Layered waves'},{id:'long',name:'Long hair'},{id:'bun',name:'Bun'},{id:'twinTails',name:'Twin tails'}])
+ male:Object.freeze([{id:'crop',name:'Textured Crop'},{id:'sidePart',name:'Side Swept'},{id:'curls',name:'Feathered Shag'},{id:'afro',name:'Afro'},{id:'spiky',name:'Spiky Hair'},{id:'crewCut',name:'Crew Cut'},{id:'buzz',name:'Close Buzz Cut'},{id:'bald',name:'Bald'}]),
+ female:Object.freeze([{id:'bob',name:'Chin-Length Bob'},{id:'ponytail',name:'High Ponytail'},{id:'braid',name:'Long Braid'},{id:'pixie',name:'Pixie'},{id:'waves',name:'Layered Waves'},{id:'long',name:'Long Hair'},{id:'bun',name:'Bun'},{id:'twinTails',name:'Twin Tails'}])
 });
 export function conceptHair(body,selected,designed){return HAIR_OPTIONS[body]?.some(item=>item.id===selected)?selected:designed}

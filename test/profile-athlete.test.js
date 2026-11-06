@@ -41,6 +41,6 @@ test('profile braids and twin tails stay behind the face and pixie stays under h
  const source=readFileSync(new URL('../src/profile-athlete.js',import.meta.url),'utf8');
  assert.match(source,/for\(const \[offset,drift\] of \[\[0,-1\],\[1\.15,1\]\]\)/);
  assert.match(source,/const covered=d\.headwear==='cap'\|\|d\.headwear==='visor'/);
- assert.match(source,/if\(!covered\)roundedShape/);
+ assert.match(source,/if\(!accessorized\)roundedShape/);assert.match(source,/const accessorized=d\.headwear!=='none'/);assert.match(source,/d\.hair==='crewCut'/);
  assert.doesNotMatch(source,/for\(const side of \[-1,1\]\)\{\s*line\(c,\[\{x:side\*4/);
 });

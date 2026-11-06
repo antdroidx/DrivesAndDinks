@@ -2,7 +2,7 @@ import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js';
 import {createProfileRenderer} from './profile-athlete.js';
 import {sampleMatchAnimation} from './match-animation.js';
 import {playerFeet} from './player-feet.js';
-import {drawContactCue,replayContactAt} from './contact-cues.js';
+import {drawContactCue,replayContactAt} from './contact-cues.js';import {drawNetContact} from './court-net.js';
 import {paintCourtTexture} from './court-art.js';import {playerEmotionState} from './player-emotion.js';
 import {C} from './core.js';
 import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js';
@@ -144,7 +144,7 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
    drawProfile(c,d,mode,phase,q.x,q.y,figureScale,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D:footPose,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:(p.handedness==='left'||p.hand==='left'?-1:1)*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),handedness:p.handedness??'right',headwearBackwards:false,...(()=>{const state=playerEmotionState(p,{phase:snapshot.phase??'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:snapshot.lastPointWinner});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
    if(showNameTags!==false)drawReplayName(c,p.name,q.x,q.y-figureScale*.84,scale);
   }
-  drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});
+  drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});drawNetContact(c,snapshot.netMark,project,{scale:Math.max(1,scale/12),labels:true});
   if(snapshot.bounceMark?.time>0){const p=project(snapshot.bounceMark.x,snapshot.bounceMark.y);c.strokeStyle='#fff6ba';c.lineWidth=Math.max(.6,scale*.05);c.beginPath();c.ellipse(p.x,p.y,Math.max(4,scale*.45),Math.max(2,scale*.15),0,0,Math.PI*2);c.stroke()}
   c.restore();
  };

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "methodology": {
     "format": "doubles",
     "mode": "watch",
@@ -27,42 +27,61 @@
       19,
       20
     ],
-    "deepLobScenarios": 8
+    "deepLobScenarios": 8,
+    "lobChainDefinition": "Consecutive lob/tweener returns after an incoming lob/tweener."
   },
   "totals": {
-    "atp": 110,
-    "tweener": 18,
-    "lob": 157,
-    "netContacts": 86,
-    "netCords": 37,
-    "netMesh": 49,
+    "atp": 116,
+    "tweener": 2,
+    "lob": 56,
+    "totalShots": 2512,
+    "maxLobChain": 1,
+    "lobResponses": {
+      "attacks": 26,
+      "counters": 20,
+      "tweeners": 2
+    },
+    "netContacts": 83,
+    "netCords": 32,
+    "netMesh": 51,
     "matchesWithAtp": 20,
-    "matchesWithTweener": 6,
-    "matchesWithNetContact": 19
+    "matchesWithTweener": 2,
+    "matchesWithNetContact": 19,
+    "lobShare": 0.0223
   },
   "checks": {
     "atpPresentInMostMatches": true,
     "atpFrequency": true,
     "netContactsVisible": true,
     "occasionalTweeners": true,
-    "deepLobChases": true
+    "deepLobChases": true,
+    "lobShareBounded": true,
+    "lobChainsBounded": true,
+    "lobAttacksDominate": true
   },
   "rows": [
     {
       "seed": 1,
       "completed": false,
       "points": [
-        3,
-        1
+        0,
+        5
       ],
+      "totalShots": 121,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 2,
+        "counters": 2,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 5,
-        "tweener": 2,
-        "lob": 13
+        "atp": 6,
+        "tweener": 0,
+        "lob": 5
       },
       "net": {
-        "contacts": 5,
-        "cords": 2,
+        "contacts": 4,
+        "cords": 1,
         "mesh": 3
       }
     },
@@ -73,6 +92,13 @@
         2,
         1
       ],
+      "totalShots": 133,
+      "maxLobChain": 0,
+      "lobResponses": {
+        "attacks": 0,
+        "counters": 0,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 7,
         "tweener": 0,
@@ -88,18 +114,25 @@
       "seed": 3,
       "completed": false,
       "points": [
-        2,
-        7
+        3,
+        8
       ],
+      "totalShots": 111,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 2,
+        "counters": 1,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 7,
+        "atp": 6,
         "tweener": 0,
-        "lob": 1
+        "lob": 3
       },
       "net": {
-        "contacts": 5,
+        "contacts": 6,
         "cords": 1,
-        "mesh": 4
+        "mesh": 5
       }
     },
     {
@@ -109,10 +142,17 @@
         3,
         1
       ],
+      "totalShots": 124,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 2,
+        "counters": 2,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 5,
         "tweener": 0,
-        "lob": 8
+        "lob": 4
       },
       "net": {
         "contacts": 2,
@@ -124,18 +164,25 @@
       "seed": 5,
       "completed": false,
       "points": [
-        2,
-        8
+        3,
+        1
       ],
+      "totalShots": 121,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 3,
+        "counters": 2,
+        "tweeners": 1
+      },
       "shots": {
-        "atp": 6,
-        "tweener": 5,
-        "lob": 11
+        "atp": 5,
+        "tweener": 1,
+        "lob": 5
       },
       "net": {
-        "contacts": 2,
-        "cords": 0,
-        "mesh": 2
+        "contacts": 5,
+        "cords": 2,
+        "mesh": 3
       }
     },
     {
@@ -145,6 +192,13 @@
         5,
         1
       ],
+      "totalShots": 131,
+      "maxLobChain": 0,
+      "lobResponses": {
+        "attacks": 0,
+        "counters": 0,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 4,
         "tweener": 0,
@@ -163,6 +217,13 @@
         2,
         1
       ],
+      "totalShots": 149,
+      "maxLobChain": 0,
+      "lobResponses": {
+        "attacks": 0,
+        "counters": 0,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 7,
         "tweener": 0,
@@ -178,13 +239,20 @@
       "seed": 8,
       "completed": false,
       "points": [
-        3,
-        3
+        1,
+        6
       ],
+      "totalShots": 118,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 3,
+        "counters": 3,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 5,
-        "tweener": 2,
-        "lob": 29
+        "atp": 8,
+        "tweener": 0,
+        "lob": 6
       },
       "net": {
         "contacts": 1,
@@ -199,14 +267,21 @@
         7,
         0
       ],
+      "totalShots": 130,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 1,
+        "counters": 1,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 4,
-        "tweener": 5,
-        "lob": 7
+        "tweener": 0,
+        "lob": 2
       },
       "net": {
-        "contacts": 6,
-        "cords": 4,
+        "contacts": 4,
+        "cords": 2,
         "mesh": 2
       }
     },
@@ -215,53 +290,74 @@
       "completed": false,
       "points": [
         3,
-        2
+        3
       ],
+      "totalShots": 122,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 2,
+        "counters": 2,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 3,
         "tweener": 0,
-        "lob": 17
+        "lob": 4
       },
       "net": {
-        "contacts": 5,
+        "contacts": 7,
         "cords": 3,
-        "mesh": 2
+        "mesh": 4
       }
     },
     {
       "seed": 11,
       "completed": false,
       "points": [
-        5,
+        2,
         1
       ],
+      "totalShots": 134,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 2,
+        "counters": 2,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 5,
+        "atp": 6,
         "tweener": 0,
-        "lob": 8
+        "lob": 4
       },
       "net": {
-        "contacts": 6,
-        "cords": 3,
-        "mesh": 3
+        "contacts": 4,
+        "cords": 2,
+        "mesh": 2
       }
     },
     {
       "seed": 12,
       "completed": false,
       "points": [
-        4,
-        2
+        5,
+        3
       ],
+      "totalShots": 111,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 1,
+        "counters": 1,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 3,
+        "atp": 5,
         "tweener": 0,
-        "lob": 2
+        "lob": 4
       },
       "net": {
-        "contacts": 5,
-        "cords": 3,
-        "mesh": 2
+        "contacts": 7,
+        "cords": 2,
+        "mesh": 5
       }
     },
     {
@@ -269,34 +365,48 @@
       "completed": false,
       "points": [
         1,
-        6
+        3
       ],
+      "totalShots": 124,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 2,
+        "counters": 1,
+        "tweeners": 1
+      },
       "shots": {
         "atp": 9,
-        "tweener": 3,
-        "lob": 4
+        "tweener": 1,
+        "lob": 5
       },
       "net": {
-        "contacts": 5,
-        "cords": 2,
-        "mesh": 3
+        "contacts": 2,
+        "cords": 0,
+        "mesh": 2
       }
     },
     {
       "seed": 14,
       "completed": false,
       "points": [
-        2,
-        2
+        5,
+        1
       ],
+      "totalShots": 111,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 1,
+        "counters": 1,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 5,
+        "atp": 6,
         "tweener": 0,
-        "lob": 15
+        "lob": 2
       },
       "net": {
-        "contacts": 4,
-        "cords": 2,
+        "contacts": 2,
+        "cords": 0,
         "mesh": 2
       }
     },
@@ -307,6 +417,13 @@
         0,
         6
       ],
+      "totalShots": 127,
+      "maxLobChain": 0,
+      "lobResponses": {
+        "attacks": 0,
+        "counters": 0,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 8,
         "tweener": 0,
@@ -323,35 +440,49 @@
       "completed": false,
       "points": [
         3,
-        4
+        2
       ],
+      "totalShots": 139,
+      "maxLobChain": 0,
+      "lobResponses": {
+        "attacks": 1,
+        "counters": 0,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 7,
         "tweener": 0,
-        "lob": 3
+        "lob": 1
       },
       "net": {
-        "contacts": 3,
+        "contacts": 4,
         "cords": 2,
-        "mesh": 1
+        "mesh": 2
       }
     },
     {
       "seed": 17,
       "completed": false,
       "points": [
-        4,
-        3
+        7,
+        1
       ],
+      "totalShots": 112,
+      "maxLobChain": 0,
+      "lobResponses": {
+        "attacks": 0,
+        "counters": 0,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 6,
+        "atp": 4,
         "tweener": 0,
         "lob": 1
       },
       "net": {
-        "contacts": 5,
-        "cords": 0,
-        "mesh": 5
+        "contacts": 7,
+        "cords": 3,
+        "mesh": 4
       }
     },
     {
@@ -359,12 +490,19 @@
       "completed": false,
       "points": [
         0,
-        5
+        4
       ],
+      "totalShots": 133,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 2,
+        "counters": 1,
+        "tweeners": 0
+      },
       "shots": {
         "atp": 5,
-        "tweener": 1,
-        "lob": 16
+        "tweener": 0,
+        "lob": 6
       },
       "net": {
         "contacts": 0,
@@ -377,42 +515,56 @@
       "completed": false,
       "points": [
         4,
-        1
+        2
       ],
+      "totalShots": 135,
+      "maxLobChain": 0,
+      "lobResponses": {
+        "attacks": 1,
+        "counters": 0,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 6,
+        "atp": 7,
         "tweener": 0,
-        "lob": 7
+        "lob": 2
       },
       "net": {
-        "contacts": 6,
-        "cords": 4,
-        "mesh": 2
+        "contacts": 3,
+        "cords": 3,
+        "mesh": 0
       }
     },
     {
       "seed": 20,
       "completed": false,
       "points": [
-        1,
+        4,
         3
       ],
+      "totalShots": 126,
+      "maxLobChain": 1,
+      "lobResponses": {
+        "attacks": 1,
+        "counters": 1,
+        "tweeners": 0
+      },
       "shots": {
-        "atp": 3,
+        "atp": 4,
         "tweener": 0,
-        "lob": 15
+        "lob": 2
       },
       "net": {
-        "contacts": 4,
+        "contacts": 3,
         "cords": 1,
-        "mesh": 3
+        "mesh": 2
       }
     }
   ],
   "deepLobRows": [
     {
       "seed": 1,
-      "maxReceiverY": 41.589,
+      "maxReceiverY": 41.593,
       "response": {
         "playerId": 0,
         "shot": "lob"
@@ -466,7 +618,7 @@
     },
     {
       "seed": 7,
-      "maxReceiverY": 41.78,
+      "maxReceiverY": 41.589,
       "response": {
         "playerId": 0,
         "shot": "lob"
@@ -483,5 +635,7 @@
       "fault": null
     }
   ],
+  "deepLobChases": 8,
+  "counterLobResponses": 8,
   "passed": true
 }

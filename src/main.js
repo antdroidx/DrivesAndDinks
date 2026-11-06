@@ -5,7 +5,7 @@ import {playerFeet,footSole} from './player-feet.js';
 
 import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js';
 
-import {drawCourtNet} from './court-net.js';
+import {drawCourtNet,drawNetContact} from './court-net.js';
 
 import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js';
 
@@ -323,7 +323,7 @@ function renderFrame(game=liveGame){setCourtSideSwitched(Boolean(game.sideSwitch
 
  if(game.faultFocus&&game.clock>=game.faultFocus.time)drawFaultContact(ctx,game.faultFocus,project);
 
- drawContactCue(ctx,game.contact,project,{labels:!!replayPlayback});
+ drawContactCue(ctx,game.contact,project,{labels:!!replayPlayback});drawNetContact(ctx,game.netMark,project,{scale:1,labels:true});
 
  updateCourtHud(game);
 

@@ -58,20 +58,17 @@ test('upper legs attach inside the torso silhouette for every body preset',()=>{
 });
 
 
-test('live braids hang behind the head and capped pixie hair stays compact',()=>{
+test('live braids hang behind the head and pixie stays covered beneath accessories',()=>{
  const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
- assert.match(source,/const bx=x-4\.4\+Math\.sin/);
- assert.match(source,/covered=d\.headwear==='cap'\|\|d\.headwear==='visor'/);
- assert.match(source,/path\(c,covered\?\[\[-5,0\]/);
+ assert.match(source,/const bx=near\?x\+Math\.sin/);
+ assert.match(source,/accessorized=d\.headwear!=='none'/);
+ assert.match(source,/point\(x-4\.8,y-3\.1\),point\(x\+4\.8,y-3\.1\)/);
+ assert.ok(source.includes('point(x,y+6.4)'));assert.ok(source.includes('point(x+2.2,y+6)'));assert.ok(source.includes('point(x-2.2,y+6)'));
 });
 
-test('male textured, swept, curly and afro silhouettes use distinct render paths',()=>{
+test('male crop, side sweep, feathered shag, crew cut and afro use distinct render paths',()=>{
  const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
- assert.ok(source.includes("d.hair==='afro'"));
- assert.ok(source.includes("d.hair==='curls'"));
- assert.ok(source.includes("d.hair==='crop'"));
- assert.ok(source.includes("d.hair==='sidePart'"));
- assert.ok(source.includes("animeHairMass(c,x,y,hair,ink,near,false)"));
- assert.ok(source.includes("[[-4,-3.1],[-3,-4.6]"));
- assert.ok(source.includes("tone(hair,index%2?.2:-.1)"));
+ for(const marker of ["d.hair==='afro'","d.hair==='curls'","d.hair==='crop'","d.hair==='sidePart'","d.hair==='crewCut'","style==='shag'","style==='sidePart'","style==='crewCut'","drawAnimeAfro","thinTail"])assert.ok(source.includes(marker),marker);
+ assert.ok(source.includes("animeHairMass(c,x,y,hair,ink,near,'crop')"));
+ assert.ok(source.includes("const back=style==='crewCut'?2.5:style==='shag'?3.8:3.2"));
 });

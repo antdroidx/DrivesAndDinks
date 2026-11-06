@@ -7,8 +7,8 @@ test('appearance adjustments leave authored designs immutable and feet grounded'
 test('all six body concepts retain finite joints throughout every existing motion',()=>{for(const design of CHARACTER_CONCEPTS)for(const view of ['near','far'])for(const mode of MOTIONS)for(const delta of [-12,12])for(let n=0;n<=20;n++){const pose=sampleCharacterPose({mode,view,phase:n/20,frame:n/5}),body=conceptDimensions(design,delta,delta/50);for(const point of [pose.neck,pose.hips,...pose.arms.flat(),...pose.legs.flat(),pose.paddle]){const p=conceptPoint(point,body);assert.ok(Number.isFinite(p.x)&&Number.isFinite(p.y))}}});
 
 
-test('female catalog adds long hair and a structured bun',()=>{assert.deepEqual(HAIR_OPTIONS.female.slice(-3).map(item=>[item.id,item.name]),[['long','Long hair'],['bun','Bun'],['twinTails','Twin tails']]);});
+test('female catalog adds long hair and a structured bun',()=>{assert.deepEqual(HAIR_OPTIONS.female.slice(-3).map(item=>[item.id,item.name]),[['long','Long Hair'],['bun','Bun'],['twinTails','Twin Tails']]);assert.equal(HAIR_OPTIONS.female.find(item=>item.id==='pixie').name,'Pixie');assert.equal(HAIR_OPTIONS.male.length,8);assert.equal(HAIR_OPTIONS.female.length,8);});
 
-test('male catalog separates textured crop, swept side part, curls and afro',()=>{
- assert.deepEqual(HAIR_OPTIONS.male.map(item=>[item.id,item.name]),[['crop','Textured crop'],['sidePart','Swept side part'],['curls','Soft curls'],['afro','Afro'],['spiky','Spiky hair'],['buzz','Close buzz cut'],['bald','Bald']]);
+test('male catalog separates crop, side sweep, feathered shag and crew cut',()=>{
+ assert.deepEqual(HAIR_OPTIONS.male.map(item=>[item.id,item.name]),[['crop','Textured Crop'],['sidePart','Side Swept'],['curls','Feathered Shag'],['afro','Afro'],['spiky','Spiky Hair'],['crewCut','Crew Cut'],['buzz','Close Buzz Cut'],['bald','Bald']]);
 });

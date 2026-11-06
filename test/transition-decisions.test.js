@@ -51,7 +51,8 @@ for(const team of [0,1]){
     }
    }
   }
-  assert.equal(choose({shots:5,height:2,difficulty:.9}),'lob');
+  assert.equal(choose({shots:5,height:2,difficulty:.9}),'drop');
+  assert.equal(choose({shots:5,y:team===0?30:14,height:1,difficulty:.98,opponentsAtKitchen:true,random:.8}),'lob');
   assert.equal(choose({shots:5,height:2,difficulty:.9,transition:true}),'drop');
   assert.equal(choose({shots:1,height:.6,difficulty:1,transition:true,balanced:false}),'drive');
  });
@@ -67,6 +68,6 @@ for(const team of [0,1]){
   }
   assert.equal(choose({singles:true,height:2,random:.5}),'drive');
   assert.equal(choose({singles:true,height:.6}),'drop');
-  assert.equal(choose({singles:true,height:1,difficulty:.95}),'lob');
+  assert.equal(choose({singles:true,y:team===0?30:14,height:1,difficulty:.98,opponentsAtKitchen:true,random:.8}),'lob');
  });
 }

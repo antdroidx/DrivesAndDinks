@@ -43,7 +43,7 @@ function replayDiscontinuity(low,high){
  // Posts have no persistent impact flag. stepBall reverses vy and stores the
  // crossing x/z on the terminal frame, before Game records the fault.
  const postImpact=a&&b&&a.vy*b.vy<0&&(a.y-C.net)*(b.y-C.net)<=0&&b.z<C.netPostHeight+(b.radius??C.ballRadius)&&[C.netPostLeft,C.netPostRight].some(x=>Math.abs(b.x-x)<=C.netPostRadius);
- return low.shots!==high.shots||low.bounces!==high.bounces||netImpact||postImpact||renewedMarker(low.contact,high.contact)||renewedMarker(low.bounceMark,high.bounceMark);
+ return low.shots!==high.shots||low.bounces!==high.bounces||netImpact||postImpact||renewedMarker(low.contact,high.contact)||renewedMarker(low.bounceMark,high.bounceMark)||renewedMarker(low.netMark,high.netMark);
 }
 function interpolateFields(target,next,keys,alpha){
  for(const key of keys)if(Number.isFinite(target?.[key])&&Number.isFinite(next?.[key]))target[key]+=(next[key]-target[key])*alpha;
@@ -68,7 +68,7 @@ function interpolateSnapshot(low,high,clock){
   interpolateFields(sample,high,['timer'],alpha);
  }
  // Age only the already-visible cue; never reveal the next impact early.
- for(const key of ['contact','bounceMark'])if(Number.isFinite(sample[key]?.time))sample[key].time=Math.max(0,sample[key].time-(clock-low.clock));
+ for(const key of ['contact','bounceMark','netMark'])if(Number.isFinite(sample[key]?.time))sample[key].time=Math.max(0,sample[key].time-(clock-low.clock));
  return sample;
 }
 export function faultReplaySample(clip,elapsed,interpolate=false){

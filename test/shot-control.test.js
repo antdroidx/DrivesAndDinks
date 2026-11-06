@@ -69,7 +69,8 @@ test('CPU tendencies alter attack frequency while respecting return and pressure
  assert.ok(frequency('banger')>frequency('balanced'));assert.ok(frequency('balanced')>frequency('soft'));assert.ok(frequency('net')>frequency('speed'));
  for(const tendency of ['balanced','banger','soft','net','speed']){
   assert.equal(chooseCpuShot({shots:1,team:0,y:40,height:.8,tendency,difficulty:1,random:0}),'drive');
-  assert.equal(chooseCpuShot({shots:5,team:0,y:31,height:1,tendency,difficulty:1,random:0}),'lob');
+  assert.equal(chooseCpuShot({shots:5,team:0,y:31,height:1,tendency,difficulty:1,random:0}),'dink');
+  assert.equal(chooseCpuShot({shots:5,team:0,y:31,height:1,tendency,difficulty:.9,incomingShot:'lob',random:0}),'drive');
  }
 });
 

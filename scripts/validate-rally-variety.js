@@ -10,8 +10,20 @@ if(!Number.isFinite(seconds)||seconds<60||seconds>600)throw new Error('Seconds p
 const rows=[];
 for(let seed=1;seed<=games;seed++){
  const game=new Game({seed});game.mode='watch';game.recordReplay=()=>{};
+ let totalShots=0,lobChain=0,maxLobChain=0;const lobResponses={attacks:0,counters:0,tweeners:0};
+ const baseHit=game.hit.bind(game);
+ game.hit=(player,shot,...args)=>{
+  const incoming=game.ball.shot??game.lastShot,result=baseHit(player,shot,...args);
+  if(result){
+   totalShots++;
+   const incomingLob=['lob','tweener'].includes(incoming),outgoingLob=['lob','tweener'].includes(shot);
+   lobChain=incomingLob&&outgoingLob?lobChain+1:0;maxLobChain=Math.max(maxLobChain,lobChain);
+   if(incomingLob)lobResponses[shot==='tweener'?'tweeners':['lob','tweener'].includes(shot)?'counters':'attacks']++;
+  }
+  return result;
+ };
  for(let tick=0;tick<seconds*120&&game.phase!=='over';tick++)game.update(C.dt);
- rows.push({seed,completed:game.phase==='over',points:[...game.score.points],shots:{atp:game.stats.shots.atp??0,tweener:game.stats.shots.tweener??0,lob:game.stats.shots.lob??0},net:{...game.stats.net}});
+ rows.push({seed,completed:game.phase==='over',points:[...game.score.points],totalShots,maxLobChain,lobResponses,shots:{atp:game.stats.shots.atp??0,tweener:game.stats.shots.tweener??0,lob:game.stats.shots.lob??0},net:{...game.stats.net}});
 }
 
 const deepLobRows=[];
@@ -27,20 +39,26 @@ for(let seed=1;seed<=8;seed++){
 }
 
 const totals=rows.reduce((sum,row)=>{
- sum.atp+=row.shots.atp;sum.tweener+=row.shots.tweener;sum.lob+=row.shots.lob;
+ sum.atp+=row.shots.atp;sum.tweener+=row.shots.tweener;sum.lob+=row.shots.lob;sum.totalShots+=row.totalShots;sum.maxLobChain=Math.max(sum.maxLobChain,row.maxLobChain);
+ sum.lobResponses.attacks+=row.lobResponses.attacks;sum.lobResponses.counters+=row.lobResponses.counters;sum.lobResponses.tweeners+=row.lobResponses.tweeners;
  sum.netContacts+=row.net.contacts;sum.netCords+=row.net.cords;sum.netMesh+=row.net.mesh;
  if(row.shots.atp)sum.matchesWithAtp++;if(row.shots.tweener)sum.matchesWithTweener++;if(row.net.contacts)sum.matchesWithNetContact++;
  return sum;
-},{atp:0,tweener:0,lob:0,netContacts:0,netCords:0,netMesh:0,matchesWithAtp:0,matchesWithTweener:0,matchesWithNetContact:0});
-const deepLobChases=deepLobRows.filter(row=>row.maxReceiverY>38&&['lob','tweener'].includes(row.response?.shot)).length;
+},{atp:0,tweener:0,lob:0,totalShots:0,maxLobChain:0,lobResponses:{attacks:0,counters:0,tweeners:0},netContacts:0,netCords:0,netMesh:0,matchesWithAtp:0,matchesWithTweener:0,matchesWithNetContact:0});
+totals.lobShare=Number((totals.lob/Math.max(1,totals.totalShots)).toFixed(4));
+const deepLobChases=deepLobRows.filter(row=>row.maxReceiverY>38&&row.response).length;
+const counterLobResponses=deepLobRows.filter(row=>['lob','tweener'].includes(row.response?.shot)).length;
 const checks={
  atpPresentInMostMatches:totals.matchesWithAtp>=Math.ceil(games*.7),
  atpFrequency:totals.atp>=games*2,
  netContactsVisible:totals.netContacts>=games*.5&&totals.netCords>0&&totals.netMesh>0,
  occasionalTweeners:totals.tweener>0&&totals.matchesWithTweener>0,
- deepLobChases:deepLobChases>=6
+ deepLobChases:deepLobChases>=6,
+ lobShareBounded:totals.lobShare<.18,
+ lobChainsBounded:totals.maxLobChain<=1,
+ lobAttacksDominate:totals.lobResponses.attacks>totals.lobResponses.counters
 };
-const report={schemaVersion:1,methodology:{format:'doubles',mode:'watch',games,secondsPerMatch:seconds,seeds:Array.from({length:games},(_,index)=>index+1),deepLobScenarios:deepLobRows.length},totals,checks,rows,deepLobRows,passed:Object.values(checks).every(Boolean)};
+const report={schemaVersion:2,methodology:{format:'doubles',mode:'watch',games,secondsPerMatch:seconds,seeds:Array.from({length:games},(_,index)=>index+1),deepLobScenarios:deepLobRows.length,lobChainDefinition:'Consecutive lob/tweener returns after an incoming lob/tweener.'},totals,checks,rows,deepLobRows,deepLobChases,counterLobResponses,passed:Object.values(checks).every(Boolean)};
 mkdirSync(dirname(output),{recursive:true});writeFileSync(output,JSON.stringify(report,null,2)+'\n');
-console.log(JSON.stringify({output,passed:report.passed,totals,checks,deepLobChases},null,2));
+console.log(JSON.stringify({output,passed:report.passed,totals,checks,deepLobChases,counterLobResponses},null,2));
 if(!report.passed)process.exitCode=1;

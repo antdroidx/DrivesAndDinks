@@ -172,7 +172,9 @@ test('return difficulty affects mishit pressure and safe shot selection',()=>{
  const p={...playerProfile(),team:0,x:10,y:35,vx:0,vy:0},ball={x:10.6,y:35.2,z:1.5},far={...ball,x:15,y:39,z:.3};
  assert.ok(contactDifficulty(p,far,'drive')>contactDifficulty(p,ball,'drive'));
  assert.ok(netCrossingX({x:-1.65,y:26.5},{x:2,y:4})<0);
- assert.equal(chooseCpuShot({shots:5,team:0,y:30,height:2,aggression:.8,courtIQ:1,difficulty:.9,random:.5}),'lob');
+ assert.equal(chooseCpuShot({shots:5,team:0,y:30,height:2,aggression:.8,courtIQ:1,difficulty:.95,opponentsAtKitchen:true,incomingShot:'dink',random:.99}),'lob');
+ assert.equal(chooseCpuShot({shots:5,team:0,y:30,height:1,aggression:.8,courtIQ:1,difficulty:.9,opponentsAtKitchen:true,incomingShot:'lob',random:.5}),'drive');
+ assert.notEqual(chooseCpuShot({shots:5,team:0,y:30,height:1,aggression:.8,courtIQ:1,difficulty:.9,opponentsAtKitchen:true,incomingShot:'lob',lobExchange:1,random:.99}),'lob');
 });
 
 test('serve returns remain drives even when return difficulty is severe',()=>{
