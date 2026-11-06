@@ -1,12 +1,25 @@
 // The source artwork contains neutral, unmarked ground with no court patch. Baselines are aligned to the
 // engine projection; all rules, line positions and collision geometry stay live.
 export const SCENE_LAYOUTS=Object.freeze({
- outdoor:{file:'outdoor-v2.png',far:.42,near:.97,edge:'#b9a58b'},
- indoor:{file:'indoor-v2.png',far:.47,near:.97,edge:'#a79987'},
- stadium:{file:'stadium-v2.png',far:.44,near:.97,edge:'#9ba38d'}
+ // 'far' is where the court baseline lands in the plate. It sits below the back
+ // barrier so a strip of real ground shows behind the baseline and the players
+ // at the far end stand on ground rather than on the barrier.
+ outdoor:{file:'outdoor-modern-v4.png',far:.44,near:.97,edge:'#78767e'},
+ indoor:{file:'indoor-modern-v3.png',far:.46,near:.97,edge:'#686b70'},
+ stadium:{file:'stadium-modern-v3.png',far:.42,near:.97,edge:'#838490'}
 });
 export function scenePlacement(layout){const height=374/(layout.near-layout.far);return {x:0,y:204-layout.far*height,width:960,height};}
 export function retroCourtPalette(palette){return {...palette,court:'#376e8c',kitchen:'#b97855',line:'#fff1bd'};}
+export function paintCourtTexture(paint,project,{count=10000,outdoors=true,dot=1.5,block=3}={}){
+ // The same speckle pattern for every court renderer, so a replay surface and the
+ // live surface are textured identically.
+ for(let i=0;i<count;i++){
+  const x=((Math.imul(i+1,1597334677)>>>0)/4294967296)*20,y=((Math.imul(i+17,3812015801)>>>0)/4294967296)*44,p=project(x,y);
+  paint.fillStyle=i%2?'#fff3db15':'#182e3715';paint.fillRect(Math.floor(p.x/block)*block,Math.floor(p.y/block)*block,dot,dot);
+  if(outdoors&&i%4===0){const q=project(x+.18,y+.11);paint.fillStyle=i%8?'#ffffff0c':'#0e2b3110';paint.fillRect(q.x,q.y,dot*1.6,dot*1.4)}
+  if(outdoors&&i%37===0){const q=project(x-.25,y-.18);paint.fillStyle='#00000005';paint.fillRect(q.x,q.y,dot*5,dot*3.4)}
+ }
+}
 export function createCourtSurfaceRenderer(project,createCanvas=()=>document.createElement('canvas')){
  let previous='',surface;
  return (c,palette,style='painted',surfaceType='outdoor')=>{
@@ -18,12 +31,9 @@ export function createCourtSurfaceRenderer(project,createCanvas=()=>document.cre
    poly([[0,0],[20,0],[20,44],[0,44]],palette.court);
    poly([[0,15],[20,15],[20,29],[0,29]],palette.kitchen);
    paint.save();poly([[0,0],[20,0],[20,44],[0,44]]);paint.clip();
-   const outdoors=surfaceType!=='indoor',count=outdoors?10000:1800;
-    for(let i=0;i<count;i++){const x=((Math.imul(i+1,1597334677)>>>0)/4294967296)*20,y=((Math.imul(i+17,3812015801)>>>0)/4294967296)*44,p=project(x,y);
-     paint.fillStyle=i%2?'#fff3db15':'#182e3715';paint.fillRect(Math.floor(p.x/3)*3,Math.floor(p.y/3)*3,style==='retro'?3:1.5,style==='retro'?3:1);
-     if(outdoors&&i%4===0){const q=project(x+.18,y+.11);paint.fillStyle=i%8?'#ffffff0c':'#0e2b3110';paint.fillRect(q.x,q.y,style==='retro'?4:2.4,style==='retro'?3:1.4)}
-     if(outdoors&&i%37===0){const q=project(x-.25,y-.18);paint.fillStyle='#00000005';paint.fillRect(q.x,q.y,style==='retro'?9:7.5,style==='retro'?7:5)}
-    }paint.restore();
+   const outdoors=surfaceType!=='indoor';
+    paintCourtTexture(paint,project,{count:outdoors?10000:1800,outdoors,dot:style==='retro'?3:1.5,block:style==='retro'?3:3});
+    paint.restore();
    if(style==='retro'){poly([[0,0],[20,0],[20,44],[0,44]],null,palette.line);
    for(const [a,b] of [[[0,15],[20,15]],[[0,29],[20,29]],[[10,0],[10,15]],[[10,29],[10,44]]]){const p=position(...a),q=position(...b);paint.beginPath();paint.moveTo(p.x,p.y);paint.lineTo(q.x,q.y);paint.strokeStyle=palette.line;paint.lineWidth=style==='retro'?3:2;paint.stroke()}
    }previous=key;

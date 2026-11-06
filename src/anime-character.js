@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=150';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=150';
-import {legDimensions,plantFeet} from './detailed-character.js?v=150';
+import {sampleCharacterPose} from './pixel-character.js?v=151';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=151';
+import {legDimensions,plantFeet} from './detailed-character.js?v=151';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
