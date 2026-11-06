@@ -35,7 +35,7 @@ test('profile shorts stay attached to hips and stop on the upper thigh',()=>{
 });
 
 
-test('profile long hair and bun use dedicated silhouettes',()=>{const source=readFileSync(new URL('../src/profile-athlete.js',import.meta.url),'utf8');assert.match(source,/d\.hair==='long'/);assert.match(source,/d\.hair==='bun'/);});
+test('profile long hair and bun use dedicated silhouettes',()=>{const source=readFileSync(new URL('../src/profile-athlete.js',import.meta.url),'utf8');assert.ok(source.indexOf("const covered=d.headwear")<source.indexOf("polygon(c,[{x:-4.5,y:-4}"));assert.match(source,/d\.hair==='long'/);assert.match(source,/d\.hair==='bun'/);});
 
 test('profile braids and twin tails stay behind the face and pixie stays under hats',()=>{
  const source=readFileSync(new URL('../src/profile-athlete.js',import.meta.url),'utf8');

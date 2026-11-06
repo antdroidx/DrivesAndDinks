@@ -22,7 +22,7 @@ test('anime hair and headwear combinations remain drawable in front and back vie
 });
 
 test('rear views suppress front collar and bald facial highlights',()=>{
- const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
+ const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');assert.match(source,/animeRearHairCap/);assert.ok(source.includes("tone(hair,-.58)"));
  assert.match(source,/if\(d\.outfit==='polo'\)\{\s*if\(!near\)/);
  assert.match(source,/if\(bald\)\{\s*if\(!near\)/);
  assert.match(source,/paddleOutline/);
