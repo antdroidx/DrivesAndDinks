@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=176';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=176';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=176';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=177';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=177';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=177';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -81,28 +81,8 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards
     line(c,[bend,end],tone(hair,.1),1.05);
     oval(c,root.x+.35,root.y,.9,.65,d.trim,ink,.2);
    }
-  }polygon(c,[{x:-4.5,y:-4},{x:-1,y:-6.5},{x:2.8,y:-5.2},{x:3.8,y:-1.1},{x:4.45,y:.45},{x:3.85,y:1.45},{x:3.25,y:3.8},{x:1.1,y:5.8},{x:-2.8,y:4.7},{x:-4.6,y:1.7}],d.skin,ink,.5);
- polygon(c,[{x:-3.8,y:-3},{x:-2.6,y:2.8},{x:1,y:5.5},{x:-2.5,y:4.5},{x:-4.2,y:1.3}],skin.shadow,null);
- oval(c,-3.9,.8,1.05,1.5,skin.base,ink,.25);
- line(c,[{x:-4.2,y:.5},{x:-3.4,y:1.1}],skin.deep,.3);
- const eyeY=emotion==='surprise'?-.3:emotion==='fatigue'?.3:.05;
- const eyeHeight=emotion==='surprise'?1.05:emotion==='happy'?.5:emotion==='fatigue'?.54:emotion==='aggression'?.72:emotion==='disappointment'?.48:emotion==='anger'?.68:emotion==='relief'?.3:.82;
- polygon(c,[{x:1.05,y:eyeY-eyeHeight*.45},{x:2.2,y:eyeY-eyeHeight*.62},{x:3.05,y:eyeY-.08},{x:2.45,y:eyeY+eyeHeight*.62},{x:1.25,y:eyeY+eyeHeight*.5}], '#f4dfc8',null);
- oval(c,2.3,eyeY+.08,.54,eyeHeight*.62,tone(hair,.18),'#76635c',.16);
- oval(c,2.35,eyeY+.18,.23,eyeHeight*.36,'#3b3440');
- oval(c,2.12,eyeY-.1,.12,.15,'#fff8ed');
- line(c,[{x:1.05,y:eyeY-eyeHeight*.5},{x:2.95,y:eyeY-.18}],skin.deep,.24);
- line(c,[{x:1.25,y:eyeY-eyeHeight*.72},{x:2.75,y:eyeY-eyeHeight*.42}],skin.deep,.18);
- oval(c,3.45,1.05,.42,.58,skin.shadow);
- line(c,[{x:3.25,y:1.7},{x:3.05,y:2.05}],skin.deep,.15);
- if(emotion==='surprise')oval(c,3.1,3.55,.48,.7,skin.deep,ink,.18);
- else if(emotion==='happy')line(c,[{x:2.25,y:3.7},{x:3.35,y:3.2}],skin.deep,.4);
- else if(emotion==='aggression'||emotion==='anger')line(c,[{x:2.05,y:3.55},{x:3.55,y:3.45}],skin.deep,.4);
- else if(emotion==='disappointment')line(c,[{x:2.1,y:3.35},{x:3.3,y:3.75}],skin.deep,.38);
- else if(emotion==='relief'){line(c,[{x:2.25,y:3.55},{x:3.2,y:3.65}],skin.deep,.3);oval(c,3.85,3.65,.5,.22,'#d8f3f4aa');}
- else if(emotion==='fatigue')line(c,[{x:2.3,y:3.5},{x:3.2,y:3.7}],skin.deep,.35);
- else line(c,[{x:2.2,y:3.55},{x:3.35,y:3.45}],skin.deep,.35);
- const covered=d.headwear==='cap'||d.headwear==='visor';
+  }
+  const covered=d.headwear==='cap'||d.headwear==='visor';
  const accessorized=d.headwear!=='none';
   if(d.hair==='bald'){
    roundedShape(c,[{x:-3.5,y:-3.6},{x:-2.6,y:-5.2},{x:-.5,y:-5.8},{x:-1.2,y:-4.4},{x:-2.7,y:-3.4}],skin.light,null,.2,.65);
@@ -147,7 +127,28 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards
   }else{
    roundedShape(c,[{x:-4.8,y:-1.5},{x:-4.7,y:-5},{x:-1.6,y:-7},{x:2.8,y:-5.5},{x:4.5,y:-2.4},{x:3.5,y:-2.5},{x:1.4,y:-3.3},{x:-1.8,y:-2.4}],hair,ink,.4,1);
   }
-  if(d.headwear==='cap'){
+  polygon(c,[{x:-4.5,y:-4},{x:-1,y:-6.5},{x:2.8,y:-5.2},{x:3.8,y:-1.1},{x:4.45,y:.45},{x:3.85,y:1.45},{x:3.25,y:3.8},{x:1.1,y:5.8},{x:-2.8,y:4.7},{x:-4.6,y:1.7}],d.skin,ink,.5);
+ polygon(c,[{x:-3.8,y:-3},{x:-2.6,y:2.8},{x:1,y:5.5},{x:-2.5,y:4.5},{x:-4.2,y:1.3}],skin.shadow,null);
+ oval(c,-3.9,.8,1.05,1.5,skin.base,ink,.25);
+ line(c,[{x:-4.2,y:.5},{x:-3.4,y:1.1}],skin.deep,.3);
+ const eyeY=emotion==='surprise'?-.3:emotion==='fatigue'?.3:.05;
+ const eyeHeight=emotion==='surprise'?1.05:emotion==='happy'?.5:emotion==='fatigue'?.54:emotion==='aggression'?.72:emotion==='disappointment'?.48:emotion==='anger'?.68:emotion==='relief'?.3:.82;
+ polygon(c,[{x:1.05,y:eyeY-eyeHeight*.45},{x:2.2,y:eyeY-eyeHeight*.62},{x:3.05,y:eyeY-.08},{x:2.45,y:eyeY+eyeHeight*.62},{x:1.25,y:eyeY+eyeHeight*.5}], '#f4dfc8',null);
+ oval(c,2.3,eyeY+.08,.54,eyeHeight*.62,tone(hair,.18),'#76635c',.16);
+ oval(c,2.35,eyeY+.18,.23,eyeHeight*.36,'#3b3440');
+ oval(c,2.12,eyeY-.1,.12,.15,'#fff8ed');
+ line(c,[{x:1.05,y:eyeY-eyeHeight*.5},{x:2.95,y:eyeY-.18}],skin.deep,.24);
+ line(c,[{x:1.25,y:eyeY-eyeHeight*.72},{x:2.75,y:eyeY-eyeHeight*.42}],skin.deep,.18);
+ oval(c,3.45,1.05,.42,.58,skin.shadow);
+ line(c,[{x:3.25,y:1.7},{x:3.05,y:2.05}],skin.deep,.15);
+ if(emotion==='surprise')oval(c,3.1,3.55,.48,.7,skin.deep,ink,.18);
+ else if(emotion==='happy')line(c,[{x:2.25,y:3.7},{x:3.35,y:3.2}],skin.deep,.4);
+ else if(emotion==='aggression'||emotion==='anger')line(c,[{x:2.05,y:3.55},{x:3.55,y:3.45}],skin.deep,.4);
+ else if(emotion==='disappointment')line(c,[{x:2.1,y:3.35},{x:3.3,y:3.75}],skin.deep,.38);
+ else if(emotion==='relief'){line(c,[{x:2.25,y:3.55},{x:3.2,y:3.65}],skin.deep,.3);oval(c,3.85,3.65,.5,.22,'#d8f3f4aa');}
+ else if(emotion==='fatigue')line(c,[{x:2.3,y:3.5},{x:3.2,y:3.7}],skin.deep,.35);
+ else line(c,[{x:2.2,y:3.55},{x:3.35,y:3.45}],skin.deep,.35);
+ if(d.headwear==='cap'){
   polygon(c,[{x:-5.3,y:-2.1},{x:-4.8,y:-6.8},{x:0,y:-7.8},{x:4.3,y:-4.8},{x:4.6,y:-1.8}],d.trim,ink,.4);
   for(const [hx,hy] of [[-3,-4],[-1.2,-5],[.8,-5.2],[2.6,-4.3],[3.5,-2.8]])oval(c,hx,hy,.14,.2,tone(d.trim,-.25));
   const brim=headwearBackwards?-1:1;polygon(c,[{x:brim*1,y:-2.4},{x:brim*7.6,y:-1.6},{x:brim*8,y:-.4},{x:brim*2,y:-.9}],tone(d.trim,-.12),ink,.3);

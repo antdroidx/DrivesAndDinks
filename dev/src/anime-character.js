@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=176';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=176';
-import {legDimensions,plantFeet} from './detailed-character.js?v=176';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=177';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=177';
+import {legDimensions,plantFeet} from './detailed-character.js?v=177';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -44,13 +44,19 @@ export function animePose(design,mode,phase,view,options={}){
  });
  return {raw,neck:convert(raw.neck),hips:convert(raw.hips),arms,legs,paddle:convert(raw.paddle),hand:arms[raw.gripSide][2]};
 }
+function animeRearHairCap(c,x,y,hair,ink,d){
+ const female=d.body==='female',style=d.hair,bob=['bob','waves'].includes(style),pixie=style==='pixie';
+ const bottom=pixie?4.8:female?(bob?7.1:4.8):(style==='shag'?3.8:style==='crewCut'?2.5:2.8);
+ path(c,[point(x-5.15,y-2.7),point(x-4.9,y-5.1),point(x-3.1,y-6.5),point(x-.6,y-7),point(x+1.8,y-6.7),point(x+3.8,y-5.7),point(x+5.1,y-3.7),point(x+5,y-.4),point(x+4.3,y+bottom-.7),point(x+2.4,y+bottom),point(x,y+bottom+.25),point(x-2.4,y+bottom),point(x-4.3,y+bottom-.7)],tone(hair,-.06),ink,.3);
+ if(style==='spiky')path(c,[point(x-4.6,y-3.7),point(x-4,y-6.2),point(x-2.7,y-5.1),point(x-2,y-7.5),point(x-.7,y-5.4),point(x+.4,y-8),point(x+1.5,y-5.4),point(x+3,y-7),point(x+3.2,y-4.8),point(x+4.5,y-5.7)],tone(hair,.04),ink,.2);
+}
 function animeHairMass(c,x,y,hair,ink,near,style='crop'){
  const back=style==='shag'?3.8:style==='crewCut'?2.5:2.65;
  c.beginPath();
  if(near){
   c.moveTo(x-5.2,y+1.1);c.bezierCurveTo(x-6.7,y-3,x-4.7,y-7.7,x,y-7.4);c.bezierCurveTo(x+5.4,y-7.8,x+6.6,y-2.7,x+5,y+1.2);c.lineTo(x+4.7,y+back-.15);c.quadraticCurveTo(x,y+back+1.05,x-5,y+back-.2);c.closePath();
  }else if(style==='sidePart'){
-  c.moveTo(x-5.5,y+1.6);c.bezierCurveTo(x-6.8,y-3,x-5.1,y-7.8,x-1.2,y-7.35);c.bezierCurveTo(x+2.4,y-7.8,x+4.2,y-5.4,x+4.1,y-2.5);c.lineTo(x+3.4,y-.35);c.lineTo(x+2.7,y-3.4);c.lineTo(x+.8,y-1.15);c.lineTo(x-.9,y-3.6);c.lineTo(x-2.8,y-.8);c.lineTo(x-3.6,y-2.8);c.closePath();
+  c.moveTo(x-5.6,y+1.4);c.bezierCurveTo(x-7,y-3,x-5.3,y-7.8,x-1.1,y-7.4);c.bezierCurveTo(x+1.8,y-7.7,x+3.3,y-6.4,x+3.1,y-4.4);c.lineTo(x+3.4,y-3.5);c.lineTo(x+2.5,y-3.8);c.lineTo(x+1.8,y-2);c.lineTo(x+.7,y-3.5);c.lineTo(x-.5,y-1.2);c.lineTo(x-2.2,y-3.1);c.lineTo(x-3.7,y-.8);c.lineTo(x-4.3,y-2.8);c.closePath();
  }else{
   c.moveTo(x-5.2,y+1.2);c.bezierCurveTo(x-6.8,y-3,x-4.7,y-7.7,x,y-7.4);c.bezierCurveTo(x+5.4,y-7.8,x+6.8,y-2.6,x+5,y+1.5);c.lineTo(x+4.1,y-2.5);c.quadraticCurveTo(x+3.6,y-.25,x+2.4,y+.1);c.lineTo(x+2.7,y-3.7);c.quadraticCurveTo(x+.6,y-.15,x-.8,y+.8);c.lineTo(x-.6,y-3);c.quadraticCurveTo(x-2,y+(style==='sidePart'?-1.2:.05),x-3.3,y+.5);c.lineTo(x-3.3,y-1.8);c.closePath();
  }
@@ -71,7 +77,7 @@ function animeHairTexture(c,x,y,hair,ink,near,style='crop'){
  }
  if(style==='sidePart'&&!near){
   path(c,[point(x-4.8,y-2.8),point(x-4.4,y-5.8),point(x-2.3,y-7.2),point(x-.3,y-6.3),point(x-1.1,y-3.7),point(x-2.6,y-1.3)],tone(hair,.13),ink,.18);
-  path(c,[point(x-2.1,y-5.7),point(x-1.3,y-2.4),point(x-.6,y-2.5),point(x-1.5,y-6)],tone(hair,-.55),ink,.16);
+  path(c,[point(x-2.1,y-5.7),point(x-1.3,y-2.4),point(x-.6,y-2.5),point(x-1.5,y-6)],tone(hair,-.55),ink,.16);line(c,[point(x-1.55,y-5.8),point(x-1.15,y-2.35)],tone(hair,-.58),.24);
   for(const [ax,ay,bx,by,cx,cy] of [[-4.1,-4.6,-3.5,-5.8,-2.6,-3.4],[-3.2,-5.4,-2.4,-6.6,-1.7,-3.8],[-2.2,-5.8,-1.3,-6.4,-.7,-3.5],[.3,-5.5,1.3,-5.8,1.1,-3.4]])path(c,[point(x+ax,y+ay),point(x+bx,y+by),point(x+cx,y+cy)],tone(hair,ax%2?.2:-.1),ink,.18);
   return;
  }
@@ -165,6 +171,7 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
    else{const mouthY=y+4+(emotion==='effort'?.28:emotion==='fatigue'?.34:0);if(emotion==='fatigue')oval(c,x+.15,mouthY,.42,.55,tone(skin,-.48));else line(c,[point(x-.55,mouthY),point(x+.35,mouthY+(emotion==='effort'?-.16:emotion==='fatigue'?.12:0)),point(x+.85,mouthY)],tone(skin,-.34),.24)}
   }
  const buzz=d.hair==='buzz',bald=d.hair==='bald',covered=d.headwear==='cap'||d.headwear==='visor',accessorized=d.headwear!=='none';
+  if(near&&!['bald','buzz','afro','curls'].includes(d.hair))animeRearHairCap(c,x,y,hair,ink,d);
  if(bald){
   if(!near)path(c,[point(x-3.9,y-3.9),point(x-2.8,y-5.2),point(x-.4,y-5.7),point(x-1.3,y-4.6),point(x-3,y-3.5)],colors.light,null);
   else path(c,[point(x-3.2,y-5.4),point(x-1.8,y-6.3),point(x+.4,y-6.4),point(x+2.4,y-5.4),point(x+1.1,y-4.8),point(x-1.4,y-5)],colors.light,null);
@@ -193,7 +200,7 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
   animeHairMass(c,x,y,hair,ink,near,'crewCut');animeHairTexture(c,x,y,hair,ink,near,'crewCut');
  }else if(d.hair==='sidePart'){
   animeHairMass(c,x,y,hair,ink,near,'sidePart');
-  if(!near)path(c,[point(x-2.3,y-5.5),point(x-.2,y-7.4),point(x+4.5,y-5.2),point(x+3.8,y-2.2),point(x+.6,y-3.2)],tone(hair,.05),ink,.22);
+  if(!near)path(c,[point(x-2.3,y-5.6),point(x-.3,y-7.5),point(x+3.3,y-6.2),point(x+2.3,y-3.8),point(x-.2,y-3.5)],tone(hair,.05),ink,.22);
   animeHairTexture(c,x,y,hair,ink,near,'sidePart');
  }else if(d.hair==='spiky'){
    if(near){

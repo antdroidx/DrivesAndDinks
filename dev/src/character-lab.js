@@ -1,7 +1,7 @@
-import {MOTIONS,sampleCharacterPose,drawPixelCharacter} from './pixel-character.js?v=176';
-import {CHARACTER_CONCEPTS,conceptDimensions,conceptPoint,HAIR_OPTIONS,conceptHair} from './character-concepts.js?v=176';
-import {drawAnimeAthlete as athlete} from './anime-character.js?v=176';
-import {appearancePalette} from './pixel-character.js?v=176';
+import {MOTIONS,sampleCharacterPose,drawPixelCharacter} from './pixel-character.js?v=177';
+import {CHARACTER_CONCEPTS,conceptDimensions,conceptPoint,HAIR_OPTIONS,conceptHair} from './character-concepts.js?v=177';
+import {drawAnimeAthlete as athlete} from './anime-character.js?v=177';
+import {appearancePalette} from './pixel-character.js?v=177';
 const $=id=>document.getElementById(id),motionNames={idle:'Ready stance',run:'Running',shuffle:'Side-step',volley:'Volley',forehand:'Forehand drive',backhand:'Backhand drive',forehandDink:'Forehand dink',backhandDink:'Backhand dink',forehandDrop:'Forehand drop',backhandDrop:'Backhand drop',overhead:'Overhead',lob:'Lob',twoBackhand:'Two-hand backhand',twoBackhandDink:'Two-hand dink',erne:'Erne',serve:'Serve',poachLunge:'Poach',slideReturn:'Sliding return',splitStep:'Split-step',resetBlock:'Reset block',counterVolley:'Counter volley',halfVolley:'Half-volley',wideForehand:'Wide forehand',wideBackhand:'Wide backhand',backpedal:'Backpedal',crossover:'Crossover',tweener:'Tweener',scorpion:'Scorpion overhead',celebrate:'Point celebration',disappointment:'Disappointed reaction',anger:'Angry reaction',relief:'Relieved reaction',recoveryIdle:'Fatigue recovery idle'};
 $('motion').innerHTML=['idle',...MOTIONS].map(m=>`<option value="${m}">${motionNames[m]}</option>`).join('');$('motion').value='forehand';
 for(const body of ['male','female'])$(`${body}-hair`).innerHTML='<option value="design">As designed</option>'+HAIR_OPTIONS[body].map(item=>`<option value="${item.id}">${item.name}</option>`).join('');
