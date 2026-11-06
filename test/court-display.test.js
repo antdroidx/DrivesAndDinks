@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {courtFrame,toggleFullscreen} from '../src/court-display.js';
 test('fullscreen requests browser chrome be hidden and supports exit',async()=>{
  const calls=[],doc={exitFullscreen:async()=>calls.push('exit')},element={requestFullscreen:async options=>calls.push(options)};
@@ -10,6 +11,14 @@ test('unsupported or blocked fullscreen rejects for the visible fallback',async(
 });
 test('prefixed fullscreen enters and exits through the browser methods',async()=>{
  const calls=[],element={webkitRequestFullscreen:async()=>calls.push('enter')},doc={webkitExitFullscreen:async()=>calls.push('exit')};await toggleFullscreen(doc,element);doc.webkitFullscreenElement=element;await toggleFullscreen(doc,element);assert.deepEqual(calls,['enter','exit']);
+});
+
+test('scorebug marks only the team currently serving with a pickleball icon',()=>{
+ const source=readFileSync(new URL('../src/court-display.js',import.meta.url),'utf8');
+ assert.match(source,/serve\.className='serve-ball'/);
+ assert.match(source,/servingTeam===0/);
+ assert.match(source,/servingTeam===1/);
+ assert.match(source,/game\.score\?\.team/);
 });
 
 test('all layouts use the full available width, even when portrait height is limited',()=>{

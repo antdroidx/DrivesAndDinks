@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {courtCamera,courtAim,gameProjection,gameLift,gameGroundSpan} from '../src/court-camera.js';
+import {courtCamera,courtAim,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched} from '../src/court-camera.js';
 import {C} from '../src/core.js';
 
 test('portrait camera enlarges the court while retaining both baselines',()=>{
@@ -12,6 +12,19 @@ test('pointer aim maps to the same court coordinate under either camera',()=>{
  for(const world of [273,365,480,595,687]){const screen=rect.left+(world-c.x)/c.width*rect.width;assert.ok(Math.abs(courtAim(screen,rect,c)-(world-250)/460*C.width)<1e-10)}
  assert.equal(courtAim(rect.left-1000,rect,c),1);assert.equal(courtAim(rect.left+2000,rect,c),19);
  }
+});
+
+test('side switching rotates the court and mirrors aim input',()=>{
+ const near={...gameProjection(0,0)},far={...gameProjection(20,44)},nearLift=gameLift(0),farLift=gameLift(44),camera=courtCamera(1),rect={left:0,width:960};
+ try{
+  setCourtSideSwitched(true);
+  const switchedNear=gameProjection(0,0),switchedFar=gameProjection(20,44);
+  assert.deepEqual(switchedNear,far);assert.deepEqual(switchedFar,near);
+  assert.equal(gameLift(0),farLift);assert.equal(gameLift(44),nearLift);
+  assert.equal(courtAim(480,rect,camera),10);
+  assert.ok(courtAim(300,rect,camera)>10);
+ }finally{setCourtSideSwitched(false)}
+ assert.deepEqual(gameProjection(0,0),near);
 });
 
 test('wide cameras preserve player proportions and frame both baselines',()=>{

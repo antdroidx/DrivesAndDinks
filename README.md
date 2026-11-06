@@ -134,7 +134,7 @@ The current character/court renderer and gameplay now run at both the public roo
 
 ## Singles and doubles
 
-Match setup offers Doubles (2 vs 2) and Singles (1 vs 1). Singles uses the full court, traditional side-out scoring to 11, win by two, a two-number score call and immediate side-out after the server loses a rally. The server starts on their right at an even score and left at an odd score. Both formats retain diagonal serves, mandatory return/third-shot bounces and kitchen rules. Singles has two active athletes in simulation/rendering/replays, center recovery and no partner poaching. Play and CPU demonstration support both formats. The active format survives rematches; select a different format in New Game to change it.
+Match setup offers Doubles (2 vs 2) and Singles (1 vs 1). Singles uses the full court, traditional side-out scoring to 11, win by two, a two-number score call and immediate side-out after the server loses a rally. The server starts on their right at an even score and left at an odd score. In games to 11, teams switch ends when either side reaches 6 points and a notice pauses play until the player continues. Both formats retain diagonal serves, mandatory return/third-shot bounces and kitchen rules. Singles has two active athletes in simulation/rendering/replays, center recovery and no partner poaching. Play and CPU demonstration support both formats. The active format survives rematches; select a different format in New Game to change it.
 
 
 ## DEV practice and reports

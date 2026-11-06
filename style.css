@@ -327,10 +327,10 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 #match-setup:not(.designing) .setup-top{grid-template-columns:1fr}#character-designer .player-preview{justify-self:center}#match-setup.designing .setup-footer{display:none}
 
 /* Setup keeps courts, paddles and visible ratings distinct from athlete appearance. */
-#court-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0;padding:14px;border:1px solid #3a5861;border-radius:8px}#court-options h3{grid-column:1/-1;margin:0;color:#d4e6dc;font:600 15px system-ui}#court-options label{display:grid;gap:8px;font:12px system-ui}#court-options select{width:100%;padding:10px;background:#213e48;color:#fff;border:1px solid #608080;border-radius:5px}#court-options fieldset{margin:0}
+
 #character-designer{grid-template-columns:220px minmax(0,1fr);align-items:start;gap:16px}#character-designer>button{grid-column:1/-1}#character-designer>.player-preview{grid-column:1;grid-row:2/4;position:sticky;top:54px;width:220px}#character-designer .player-preview canvas{width:220px;height:auto}#character-designer>#character-choices{grid-column:2;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border:1px solid #3a5861;border-radius:6px}#character-designer>#character-choices>select{grid-column:1/-1}#character-designer #dev-art-options{grid-column:2;grid-row:3}#character-designer #appearance-options{grid-column:2;grid-row:4}#character-designer #appearance-options>.summary,#character-designer #appearance-options>summary{cursor:default}#character-designer .appearance-grid{grid-template-columns:1fr;padding:10px}#character-designer .color-options{max-height:none;display:flex;flex-wrap:wrap;overflow:visible}#character-designer .color-options label{font-size:11px;min-height:36px}#character-designer .color-menu summary{display:none}#character-designer .appearance-panel>summary::before{display:none}#character-designer .appearance-panel>summary small{display:none}
 .paddle-options{margin:12px 0}#match-setup .ratings-heading{margin-top:18px}#match-setup #loadout-stats{display:grid}
-@media(max-width:600px){#character-designer{grid-template-columns:1fr}#character-designer>.player-preview{grid-column:1;grid-row:2;top:46px;width:100%;z-index:1;display:flex;background:#17333e}#character-designer .player-preview canvas{width:170px;max-height:210px;object-fit:contain}#character-designer>#character-choices{grid-column:1;grid-row:3}#character-designer #dev-art-options{grid-column:1;grid-row:4}#character-designer #appearance-options{grid-column:1;grid-row:5}#court-options{grid-template-columns:1fr}}
+
 
 /* The same live athlete preview appears in setup and follows the designer when opened. */
 #match-setup:not(.designing) .setup-top{grid-template-columns:190px minmax(0,1fr);align-items:center}#match-setup:not(.designing) .setup-top .player-preview{display:flex;width:190px;position:static}#match-setup:not(.designing) .setup-top .player-preview canvas{width:190px;height:auto}
@@ -383,3 +383,76 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 @media(max-width:440px){.intro-team{grid-template-columns:1fr}.intro-player{grid-template-columns:110px minmax(0,1fr);text-align:left}.intro-player canvas{width:110px;height:145px}}
 
 .body-effects-info{grid-column:1/-1;color:#aac4be;font:11px system-ui}.body-effects-info summary{cursor:pointer;color:#f4ca6a;font-weight:bold;width:22px;height:22px;display:grid;place-items:center;border:1px solid #608080;border-radius:50%;list-style:none}.body-effects-info summary::-webkit-details-marker{display:none}.body-effects-info>div{margin-top:7px;padding:9px;border:1px solid #496a70;border-radius:5px;background:#1a343d}.body-effects-info p{margin:0;line-height:1.45}.body-effects-info output{display:block;margin-top:7px;color:#80e0b5;line-height:1.4}
+
+
+/* Main setup and grouped character designer layout. */
+#main-identity{display:grid;gap:10px;align-content:center;min-width:0}
+#main-identity label{display:grid;gap:5px;color:#a8c5bd;font-size:11px}
+#main-identity select,.designer-grid select,.designer-grid input[type="text"],.designer-grid input:not([type]){width:100%;min-width:0;padding:10px;background:#213e48;color:#fff3da;border:1px solid #608080;border-radius:5px;font:inherit;font-size:12px}
+#main-identity .designer-open{justify-self:start;margin:0}
+#player-description{margin:0;color:#c6d8d1;font:12px/1.45 system-ui}
+.preview-name-field{display:block;margin-top:8px}
+.preview-name-field span{display:none}
+.preview-name-field input{width:100%;min-width:0;padding:8px 6px;background:transparent;color:#fff3da;border:1px solid #608080;border-radius:4px;text-align:center;font:600 12px system-ui}
+.preview-name-field input:focus{outline:2px solid #80e0b5;outline-offset:1px}
+
+#paddle-brief{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:14px 0;padding:12px;border:1px solid #3a5861;border-radius:6px;background:#19333c}
+#paddle-brief h3{grid-column:1/-1;margin:0;color:#f4ca6a;font:600 14px system-ui}
+.paddle-selects{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.paddle-selects label{display:grid;gap:5px;color:#a8c5bd;font-size:11px}
+.paddle-selects select{width:100%;min-width:0;padding:9px;background:#213e48;color:#fff3da;border:1px solid #608080;border-radius:4px;font:inherit;font-size:12px}
+#paddle-description{grid-column:1/-1;min-height:48px;padding:9px;border:1px solid #496a70;border-radius:4px;background:#152c35;color:#c6d8d1;font:12px/1.4 system-ui}
+
+.designer-box{min-width:0;padding:12px;border:1px solid #3a5861;border-radius:6px;background:#19333c}
+.designer-box h3{margin:0 0 10px;color:#f4ca6a;font:600 15px system-ui}
+.designer-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.designer-grid label{display:grid;gap:5px;min-width:0;color:#a8c5bd;font-size:11px}
+.designer-grid label span{color:#d4e6dc}
+.designer-grid .body-effects-info,.designer-grid a{grid-column:1/-1}
+.designer-grid .body-effects-info{margin-top:2px}
+.designer-grid a{color:#8fd8de;font-size:12px}
+
+#character-designer{grid-template-columns:220px minmax(0,1fr);align-items:start;gap:14px}
+#character-designer>.designer-back{grid-column:1/-1;position:sticky;top:0;z-index:2}
+#character-designer>.player-preview{grid-column:1;grid-row:2/4;position:sticky;top:54px;width:220px}
+#character-designer .player-preview canvas{width:220px;height:auto}
+#profile-options{grid-column:2;grid-row:2}
+#outfit-options{grid-column:2;grid-row:3}
+
+#match-setup .setup-footer{grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:12px}
+#match-setup .footer-controls{display:grid;grid-template-columns:repeat(5,minmax(82px,1fr));gap:8px;min-width:0}
+#match-setup .footer-controls label{display:grid;gap:4px;min-width:0;color:#a8c5bd;font-size:10px}
+#match-setup .footer-controls select{width:100%;min-width:0;overflow:hidden;text-overflow:ellipsis;min-height:42px;padding:8px;font-size:11px}
+#match-setup .start-match{width:auto;min-width:150px;margin:0;align-self:end}
+
+@media(max-width:650px){
+ #paddle-brief{grid-template-columns:1fr}
+ .paddle-selects{grid-template-columns:1fr}
+ #match-setup .setup-footer{grid-template-columns:1fr}
+ #match-setup .footer-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #match-setup .start-match{width:100%;min-width:0}
+}
+@media(max-width:600px){
+ #character-designer{grid-template-columns:1fr}
+ #character-designer>.player-preview{grid-column:1;grid-row:2;top:46px;width:100%;z-index:1;display:flex;background:#17333e}
+ #character-designer .player-preview canvas{width:170px;max-height:210px;object-fit:contain}
+ #profile-options{grid-column:1;grid-row:3}
+ #outfit-options{grid-column:1;grid-row:4}
+ .designer-grid{grid-template-columns:1fr}
+}
+
+
+/* Tournament side-switch notice pauses play until the player continues. */
+#side-switch-dialog{width:min(420px,calc(100vw - 28px));padding:0;border:1px solid #80e0b5;border-radius:10px;background:#152c35;color:#f8f3da;text-align:center}
+#side-switch-dialog::backdrop{background:#07141acc}
+.side-switch-card{padding:24px}
+.side-switch-card small{color:#80e0b5;font:700 10px system-ui;letter-spacing:2px}
+.side-switch-card h2{margin:8px 0 10px;color:#f4ca6a;font:800 28px/1.1 system-ui}
+.side-switch-card p{margin:0 0 20px;color:#c6d8d1;font:13px/1.5 system-ui}
+.side-switch-card button{min-width:150px;min-height:44px;border:0;border-radius:5px;background:#80e0b5;color:#132a31;font:800 12px system-ui}
+
+
+/* Pickleball serve marker sits below the active scorebug team name. */
+.court-app #court-hud .serve-ball{position:relative;display:block;width:10px;height:10px;margin-top:2px;border:1px solid #fff0a0;border-radius:50%;background:#f6d45e;box-shadow:0 0 5px #f6d45e88}
+.court-app #court-hud .serve-ball::before{content:'';position:absolute;top:2px;left:2px;width:2px;height:2px;border-radius:50%;background:#6e5614;box-shadow:4px 1px #6e5614,2px 5px #6e5614}
+.court-app #court-hud .serve-ball::after{content:'';position:absolute;top:1px;left:3px;width:3px;height:1px;border-radius:50%;background:#fff8c5}
