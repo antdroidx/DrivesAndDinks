@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=167';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=167';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=167';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=168';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=168';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=168';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -35,9 +35,9 @@ function profileShoe(c,foot,dir,d,body){
  c.save();c.globalAlpha=.18;oval(c,x+dir*.5,y+2.1,4.8,1.15,'#101820');c.restore();
  polygon(c,[{x:x-1.5,y:y-3.2},{x:x+1.5,y:y-3.2},{x:x+1.7,y:y-.4},{x:x-1.6,y:y-.4}],tone('#e5dfce',-.08),'#4c453d',.3);
  polygon(c,[{x:x-dir*2.1,y:y-.6},{x:x+dir*1.8,y:y-.8},{x:x+dir*4.2,y:y+.7},{x:x+dir*3.8,y:y+1.8},{x:x-dir*2.4,y:y+1.8}],d.trim,'#4c453d',.4);
- polygon(c,[{x:x-dir*2.2,y:y+1.25},{x:x+dir*3.9,y:y+1.25},{x:x+dir*3.7,y:y+1.9},{x:x-dir*2.4,y:y+1.9}],tone(d.trim,-.45),null);
- line(c,[{x:x-dir*1.4,y:y-.55},{x:x+dir*1.9,y:y-.25}],tone(d.trim,.28),.35);
- line(c,[{x:x-dir*.8,y:y+.1},{x:x+dir*1.5,y:y+.35}],tone(d.trim,.18),.28);
+ polygon(c,[{x:x-dir*2.2,y:y+1.25},{x:x+dir*3.9,y:y+1.25},{x:x+dir*3.7,y:y+1.9},{x:x-dir*2.4,y:y+1.9}],tone('#e5dfce',-.38),null);
+ line(c,[{x:x-dir*1.4,y:y-.55},{x:x+dir*1.9,y:y-.25}],tone('#e5dfce',.25),.35);
+ line(c,[{x:x-dir*.8,y:y+.1},{x:x+dir*1.5,y:y+.35}],tone('#e5dfce',-.18),.28);
  line(c,[{x:x-1.1,y:y-2.5},{x:x+1.1,y:y-2.5}],d.trim,.45);
 }
 export function profileTorso(design,pose){
@@ -131,10 +131,11 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards
   roundedShape(c,[{x:-4.8,y:-1.5},{x:-4.7,y:-5},{x:-1.6,y:-7},{x:2.8,y:-5.5},{x:4.5,y:-2.4},{x:3.5,y:-2.5},{x:1.4,y:-3.3},{x:-1.8,y:-2.4}],hair,ink,.4,1);
  }
  if(d.headwear==='cap'){
-  polygon(c,[{x:-5.3,y:-3.3},{x:-4.8,y:-8},{x:0,y:-9},{x:4.3,y:-6},{x:4.6,y:-3}],d.trim,ink,.4);
-  if(!headwearBackwards){const brim=direction;polygon(c,[{x:brim*1,y:-3.5},{x:brim*7.6,y:-2.7},{x:brim*8,y:-1.5},{x:brim*2,y:-2}],tone(d.trim,-.12),ink,.3);line(c,[{x:0,y:-8},{x:.4,y:-4}],tone(d.trim,-.2),.3)}
-  else line(c,[{x:-2,y:-3.4},{x:2,y:-3.4}],tone(d.trim,-.2),.5);
- }else if(d.headwear==='visor'){if(!headwearBackwards){polygon(c,[{x:-4.8,y:-4},{x:3.9,y:-4},{x:7.5,y:-2.7},{x:2.4,y:-2.5},{x:-4.5,y:-2.7}],d.trim,ink,.35)}else line(c,[{x:-4.8,y:-3.5},{x:4.8,y:-3.5}],tone(d.trim,-.1),.45)
+  polygon(c,[{x:-5.3,y:-2.1},{x:-4.8,y:-6.8},{x:0,y:-7.8},{x:4.3,y:-4.8},{x:4.6,y:-1.8}],d.trim,ink,.4);
+  for(const [hx,hy] of [[-3,-4],[-1.2,-5],[.8,-5.2],[2.6,-4.3],[3.5,-2.8]])oval(c,hx,hy,.14,.2,tone(d.trim,-.25));
+  const brim=headwearBackwards?-1:1;polygon(c,[{x:brim*1,y:-2.4},{x:brim*7.6,y:-1.6},{x:brim*8,y:-.4},{x:brim*2,y:-.9}],tone(d.trim,-.12),ink,.3);
+  line(c,[{x:0,y:-6.8},{x:.4,y:-2.8}],tone(d.trim,-.2),.3);
+ }else if(d.headwear==='visor'){const brim=headwearBackwards?-1:1;polygon(c,[{x:-4.8,y:-3},{x:brim*3.9,y:-3},{x:brim*7.5,y:-1.7},{x:brim*2.4,y:-1.5},{x:-4.5,y:-1.7}],d.trim,ink,.35)
  }else if(d.headwear==='headband'){
   line(c,[{x:-5,y:-3.4},{x:3.2,y:-4}],d.trim,1.25);
   line(c,[{x:-4.6,y:-3.65},{x:2.8,y:-4.25}],tone(d.trim,.2),.3);
@@ -175,13 +176,12 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  const drawPaddle=()=>{
   line(c,[p.hand,p.paddle],'#494047',1.35);
   c.save();c.translate(p.paddle.x,p.paddle.y);c.rotate(Math.atan2(-(p.hand.x-p.paddle.x),p.hand.y-p.paddle.y));
-  oval(c,0,0,options.paddleShape==='wide'?3.5:2.8,options.paddleShape==='elongated'?5.8:5.1,tone(d.trim,-.18),ink,.45);
-  oval(c,0,0,options.paddleShape==='wide'?2.85:2.2,options.paddleShape==='elongated'?5.05:4.35,'#1c2430',ink,.25);
-  oval(c,0,0,options.paddleShape==='wide'?2.3:1.75,options.paddleShape==='elongated'?4.45:3.8,'#101722');
-  line(c,[{x:-1.5,y:-3.1},{x:-.3,y:-3.8},{x:1.1,y:-3.3}], '#ffffff55',.38);
-  line(c,[{x:-1.4,y:3.4},{x:1.2,y:3.1}], tone(d.trim,.25),.3);
+  const shape=paddleOutline(options.paddleShape??'hybrid'),scale=.72,drawFace=(factor,fill,stroke=null)=>{const points=shape.map(([x,y])=>({x:x*factor*scale,y:y*factor*scale}));roundedShape(c,points,fill,stroke,.35,.45)};
+  drawFace(1,tone(d.trim,-.18),ink);drawFace(.84,'#1c2430',ink);drawFace(.62,'#101722');
+  line(c,[{x:-1.5*scale,y:-2.3*scale},{x:-.3*scale,y:-3*scale},{x:.9*scale,y:-2.8*scale}], '#ffffff28',.38);
   c.restore();
  };
+
  const layers=p.arms.map((chain,i)=>({i,back:chain[1].depth<p.neck.depth}));
  layers.filter(a=>a.back).forEach(a=>arm(a.i));if(p.paddle.depth<p.neck.depth)drawPaddle();
  for(const chain of p.legs.toSorted((a,b)=>a[0].depth-b[0].depth)){

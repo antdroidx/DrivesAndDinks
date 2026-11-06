@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=167';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=167';
-import {legDimensions,plantFeet} from './detailed-character.js?v=167';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=168';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=168';
+import {legDimensions,plantFeet} from './detailed-character.js?v=168';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -131,12 +131,15 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
   for(const sign of [-1,1]){c.beginPath();c.moveTo(x+sign*.6,y-6.4);c.quadraticCurveTo(x+sign*3.7,y-4.6,x+sign*4.4,y-1.2);c.strokeStyle=tone(hair,-.25);c.lineWidth=.3;c.stroke()}
  }
  if(d.headwear==='cap'){
-  c.beginPath();c.moveTo(x-6,y-3);c.quadraticCurveTo(x-5.5,y-10,x,y-9.2);c.quadraticCurveTo(x+6,y-9,x+6,y-3);c.closePath();c.fillStyle=d.trim;c.fill();c.strokeStyle=ink;c.lineWidth=.45;c.stroke();
+  c.beginPath();c.moveTo(x-6,y-1.8);c.quadraticCurveTo(x-5.5,y-8.6,x,y-7.8);c.quadraticCurveTo(x+6,y-8.4,x+6,y-1.8);c.closePath();c.fillStyle=d.trim;c.fill();c.strokeStyle=ink;c.lineWidth=.45;c.stroke();
+  for(const [hx,hy] of [[-3.3,-4.8],[-1.5,-5.8],[.4,-5.9],[2.3,-5.2],[3.7,-3.8],[-2.2,-2.9],[1.4,-3.1]])oval(c,x+hx,y+hy,.16,.22,tone(d.trim,-.28));
   if(!near){
-   path(c,[point(x-5.8,y-3.2),point(x+5.5,y-3.4),point(x+7.3,y-1.4),point(x+1,y-1.2)],tone(d.trim,-.12),ink);
-   line(c,[point(x,y-8),point(x+.3,y-4)],tone(d.trim,-.2),.3);
+   path(c,[point(x-5.8,y-2),point(x+5.5,y-2.2),point(x+7.3,y-.4),point(x+1,y-.2)],tone(d.trim,-.12),ink);
+   line(c,[point(x,y-6.8),point(x+.3,y-2.8)],tone(d.trim,-.2),.3);
   }else{
-   line(c,[point(x-2.2,y-3.3),point(x+2.2,y-3.3)],tone(d.trim,-.2),.55);
+   path(c,[point(x-3.4,y-2.4),point(x+3.4,y-2.4),point(x+3,y-.3),point(x-3,y-.3)],tone(d.trim,-.12),ink,.3);
+   line(c,[point(x-2.4,y-1.4),point(x+2.4,y-1.4)],ink,.28);
+   for(const hx of [-1.4,-.5,.5,1.4])oval(c,x+hx,y-1.35,.12,.12,ink);
   }
  }else if(d.headwear==='visor'){path(c,[point(x-5.8,y-3.7),point(x+5.7,y-3.7),point(x+7.1,y-1.5),point(x-5.9,y-2)],d.trim,ink)}
  else if(d.headwear==='headband')line(c,[point(x-5,y-3),point(x+.2,y-3.6),point(x+5.2,y-3)],d.trim,1.3);
@@ -152,7 +155,7 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
 }
 export function animeTorso(design,pose,warm=false){
  const crop=design.body==='female'&&design.outfit==='shorts',bottom=pose.hips.y-.5;
- return {crop,bottom,hem:bottom-(crop?5:0),shoulder:design.shoulder*(warm?.97:.91),waist:design.waist*(warm?1.04:.87),top:pose.neck.y+.2};
+ return {crop,bottom,hem:bottom-(crop?5:0),shoulder:design.shoulder*.91,waist:design.waist*.87,top:pose.neck.y+.2};
 }
 function trainer(c,f,d,ink,sole){
  const w=.95+d.build*.18,px=(x,y)=>point(f.x+x*w,f.y+y);
@@ -188,7 +191,8 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
    line(c,[point(cx+uy*half,cy-ux*half),point(cx-uy*half,cy+ux*half)],d.trim,1.7);
   }
  }
- function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const wide=options.paddleShape==='wide'?1.15:options.paddleShape==='elongated'?.88:1,tall=options.paddleShape==='elongated'?1.14:1;oval(c,0,0,3.7*wide,5*tall,d.trim);oval(c,0,0,3.05*wide,4.3*tall,'#1c2430');line(c,[point(-1.7,-2.3),point(-.5,-3),point(.9,-2.8)],'#ffffff28',.4);c.restore()}
+ function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const shape=paddleOutline(options.paddleShape??'hybrid'),scale=.76,drawFace=(factor,fill,stroke=null)=>{c.beginPath();shape.forEach(([x,y],index)=>{const point={x:x*factor*scale,y:y*factor*scale};index?c.lineTo(point.x,point.y):c.moveTo(point.x,point.y)});c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.38;c.lineJoin='round';c.stroke()}};drawFace(1,d.trim,ink);drawFace(.84,'#1c2430');drawFace(.62,'#101722');line(c,[point(-1.5*scale,-2.3*scale),point(-.3*scale,-3*scale),point(.9*scale,-2.8*scale)], '#ffffff28',.38);c.restore()}
+
  const layers=raw.arms.map((chain,i)=>({i,back:chain[1].depth<raw.neck.depth}));layers.filter(a=>a.back).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
  ribbon(c,[point(n.x,n.y-.6),point(n.x,n.y+2.8)],[3.4,3.8],d.skin,ink,skin);
  path(c,[point(n.x-1.7,n.y-.3),point(n.x+1.7,n.y-.3),point(n.x+1.4,n.y+1.2),point(n.x-.9,n.y+.8)],skin.deep,null);
