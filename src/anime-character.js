@@ -132,9 +132,12 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
  }
  if(d.headwear==='cap'){
   c.beginPath();c.moveTo(x-6,y-3);c.quadraticCurveTo(x-5.5,y-10,x,y-9.2);c.quadraticCurveTo(x+6,y-9,x+6,y-3);c.closePath();c.fillStyle=d.trim;c.fill();c.strokeStyle=ink;c.lineWidth=.45;c.stroke();
-  if(!near)path(c,[point(x-5.8,y-3.2),point(x+5.5,y-3.4),point(x+7.3,y-1.4),point(x+1,y-1.2)],tone(d.trim,-.12),ink);
-  else path(c,[point(x+5.8,y-3.2),point(x-5.5,y-3.4),point(x-7.3,y-1.4),point(x-1,y-1.2)],tone(d.trim,-.12),ink);
-  line(c,[point(x,y-8),point(x+(near?-.3:.3),y-4)],tone(d.trim,-.2),.3);
+  if(!near){
+   path(c,[point(x-5.8,y-3.2),point(x+5.5,y-3.4),point(x+7.3,y-1.4),point(x+1,y-1.2)],tone(d.trim,-.12),ink);
+   line(c,[point(x,y-8),point(x+.3,y-4)],tone(d.trim,-.2),.3);
+  }else{
+   line(c,[point(x-2.2,y-3.3),point(x+2.2,y-3.3)],tone(d.trim,-.2),.55);
+  }
  }else if(d.headwear==='visor'){path(c,[point(x-5.8,y-3.7),point(x+5.7,y-3.7),point(x+7.1,y-1.5),point(x-5.9,y-2)],d.trim,ink)}
  else if(d.headwear==='headband')line(c,[point(x-5,y-3),point(x+.2,y-3.6),point(x+5.2,y-3)],d.trim,1.3);
  if(d.eyewear==='glasses'){
