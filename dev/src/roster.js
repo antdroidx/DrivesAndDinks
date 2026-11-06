@@ -1,6 +1,6 @@
-import {competitionRecord} from './competition.js?v=159';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=159';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,conceptHair} from './character-concepts.js?v=159';
+import {competitionRecord} from './competition.js?v=160';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=160';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,conceptHair} from './character-concepts.js?v=160';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -179,7 +179,7 @@ export function generateIdentity({gender='male',skinColor=null,culture=null,rand
 }
 
 export const GENERATED_LEFT_HANDED_RATE=.13;
-export const DEFAULT_SELECTION = Object.freeze({character:'avery',gender:'male',handedness:'right',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',hairStyle:'design',hairColor:'brown',skinColor:'medium',headwear:'none',eyewear:'none',court:'blue-gray'});
+export const DEFAULT_SELECTION = Object.freeze({character:'avery',gender:'male',handedness:'right',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',hairStyle:'design',hairColor:'brown',skinColor:'medium',headwear:'none',eyewear:'none',showNameTags:true,court:'blue-gray'});
 export function hairStylesFor(body){return HAIR_OPTIONS[body]??HAIR_OPTIONS.male}
 export function normalizeHairStyle(body,value){return value==='design'||value==null?'design':conceptHair(body,value,'design')}
 export function sampleAthleteBody(gender='male',random=Math.random){
@@ -204,6 +204,7 @@ export function normalizeSelection(input={}){
     hairStyle:normalizeHairStyle(gender,input?.hairStyle??input?.hair),
     headwear:valid(HEADWEAR_OPTIONS,input?.headwear)??DEFAULT_SELECTION.headwear,
     eyewear:valid(EYEWEAR_OPTIONS,input?.eyewear)??DEFAULT_SELECTION.eyewear,
+    showNameTags:input?.showNameTags!==false&&input?.showNameTags!=='false',
     shirtColor:valid(CLOTHING_COLORS,input?.shirtColor)??DEFAULT_SELECTION.shirtColor,
     paddleColor:valid(PADDLE_COLORS,legacyPaddleColor)??DEFAULT_SELECTION.paddleColor,
     hairColor:valid(HAIR_COLORS,input?.hairColor)??DEFAULT_SELECTION.hairColor,

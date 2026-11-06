@@ -1,20 +1,20 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=159';
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=159';
-import {MatchJournal} from './match-journal.js?v=159';import {summarizePlaytest} from './playtest-summary.js?v=159';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=159';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=159';
-import {seededRandom} from './competition.js?v=159';
-import {kitchenFootContact} from './core.js?v=159';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=159';
-import {strokeForContact} from './player-facing.js?v=159';
-import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=159';
-import {createLineup,applyPhysique} from './roster.js?v=159';
-import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=159';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX} from './core.js?v=159';
-export class Game{constructor({seed}={}){this.seed=seed??null;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.reset()}
- configure(selection,lineup=null){if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
+import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=160';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=160';
+import {MatchJournal} from './match-journal.js?v=160';import {summarizePlaytest} from './playtest-summary.js?v=160';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=160';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=160';
+import {seededRandom} from './competition.js?v=160';
+import {kitchenFootContact} from './core.js?v=160';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=160';
+import {strokeForContact} from './player-facing.js?v=160';
+import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=160';
+import {createLineup,applyPhysique} from './roster.js?v=160';
+import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=160';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX} from './core.js?v=160';
+export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=true;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.reset()}
+ configure(selection,lineup=null){this.showNameTags=selection?.showNameTags!==false&&selection?.showNameTags!=='false';if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
- matchReport(){return {schemaVersion:1,build:globalThis.DRIVES_DINKS_BUILD??'dev',seed:this.seed,format:this.format,mode:this.practice?'practice':this.mode,difficulty:this.difficulty,elapsed:this.phase==='over'?(this.journal.rallies.at(-1)?.time??this.clock):this.clock,complete:this.phase==='over',score:structuredClone(this.score),players:this.players.map(p=>({id:p.id,team:p.team,name:p.name??`Player ${p.id+1}`,handedness:p.handedness??'right',archetype:p.archetype??p.ratingStyle??'balanced',attributes:structuredClone(p.attributes??{}),physique:structuredClone(p.physique??null),paddle:structuredClone(p.paddle)})),stats:structuredClone(this.stats),tactics:structuredClone(this.tacticalStats),journal:this.journal.snapshot(),playtest:summarizePlaytest(this.journal.snapshot(),this.stats,this.tacticalStats),learning:this.opponentMemory.snapshot(),practice:this.practice?.summary()??null,stacking:{config:structuredClone(this.stackingConfig),plans:structuredClone(this.stackPlans??[]),summary:summarizeStacking(this.journal.snapshot(),this.tacticalStats)}}}
+ matchReport(){return {schemaVersion:1,build:globalThis.DRIVES_DINKS_BUILD??'dev',seed:this.seed,format:this.format,mode:this.practice?'practice':this.mode,difficulty:this.difficulty,showNameTags:this.showNameTags!==false,elapsed:this.phase==='over'?(this.journal.rallies.at(-1)?.time??this.clock):this.clock,complete:this.phase==='over',score:structuredClone(this.score),players:this.players.map(p=>({id:p.id,team:p.team,name:p.name??`Player ${p.id+1}`,handedness:p.handedness??'right',archetype:p.archetype??p.ratingStyle??'balanced',attributes:structuredClone(p.attributes??{}),physique:structuredClone(p.physique??null),paddle:structuredClone(p.paddle)})),stats:structuredClone(this.stats),tactics:structuredClone(this.tacticalStats),journal:this.journal.snapshot(),playtest:summarizePlaytest(this.journal.snapshot(),this.stats,this.tacticalStats),learning:this.opponentMemory.snapshot(),practice:this.practice?.summary()??null,stacking:{config:structuredClone(this.stackingConfig),plans:structuredClone(this.stackPlans??[]),summary:summarizeStacking(this.journal.snapshot(),this.tacticalStats)}}}
  observeOpponentShot(){const shot=this.observedShot;if(!shot)return;this.observedShot=null;if(!this.practice&&side(this.ball.y)!==shot.team)this.opponentMemory.observe({...shot,x:this.ball.x,y:this.ball.y})}
  setPhysique(appearance){
   for(const roster of [this.lineup,this.players])if(roster?.[0]){const p=roster[0],adjusted=applyPhysique(p,{...p.appearance,...appearance});Object.assign(p,{appearance:adjusted.appearance,abilities:adjusted.abilities,baseAbilities:adjusted.baseAbilities,physique:adjusted.physique})}
