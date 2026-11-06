@@ -37,7 +37,7 @@ At a real hit, the solid paddle face targets the recorded ball contact point and
 
 Material palettes independently control clothing, hair, skin, and paddle edge guards. Twelve solid-color guards remain independently selectable; all paddle faces stay black. Six court combinations are available, including the added Black / Gray, Violet / Blue, and Gray / Red palettes. No source-image hue replacement or generated atlases are used. Retired dev sprite sheets and one-off repair scripts have been removed.
 
-DEV uses automatic poaching weighted by Court IQ, volley ability and aggression. Character designer opens from setup; height/build sliders affect appearance and gameplay. Modern procedural venues fill wide screens without stretched image borders. Replays still use front/back characters with pan/zoom; true side profiles require additional rendering work.
+DEV uses automatic poaching weighted by Court IQ, volley ability and aggression. Character designer opens from setup; height/build sliders affect appearance and gameplay. Modern venue plates fill wide screens without stretched image borders, and the court baseline lands on open ground so the far players stand on the apron rather than on the back barrier. Replays still use front/back characters; true side profiles require additional rendering work.
 
 ## Match setup and controls
 
@@ -51,7 +51,7 @@ Players move automatically. Aim with mouse, touch, or left/right arrows; hold Sh
 
 ## Verification and limitations
 
-`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all 26 motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
+`node --test` covers game rules, movement, tactics, player/paddle abilities, palette isolation, every motion's continuity, fixed limb counts, two-handed grip, contact constraints, and build versioning. `node scripts/simulate.js 20` runs deterministic match checks. Browser QA should cover both views, all 29 motions at slow speed, extreme material combinations, live contacts, and desktop/phone layouts.
 
 `src/core.js` handles physics and scoring; `src/game.js` manages matches; `src/tactics.js` plans doubles positioning; `src/main.js` renders and handles input. Simulation advances at 120 Hz. Ball flight now includes velocity-squared drag, Magnus curve, spin decay, radius-aware net contact, and speed-dependent bounce restitution. CPU shot selection uses aggression, Court IQ and relative attack/soft skill. Kitchen faults check the hitter at contact, not subsequent momentum; player collision separation is active. Physical-device touch performance and the final athletic feel still require human playtests.
 
@@ -124,7 +124,7 @@ Live and replay characters now use layered shading planes for the face, fabric, 
 
 Body effects multiply archetype abilities, independently of clothing and gender. The neutral body is 177 cm (about 5 ft 10 in), build slider 45. Height ranges from 145 to 210 cm; the UI shows feet/inches. Taller bodies gain up to 9% horizontal/forward reach and 3% power potential, with up to 2.5% slower acceleration and greater low-ball difficulty when rushed. Stature does not separately reduce top speed, endurance or volley skill. Overhead and ordinary contact ceilings scale with height / 177. Shorter bodies reverse these tradeoffs. Broader bodies add up to 6% power potential while losing up to 3% acceleration; leaner bodies reverse those effects. Build does not directly change top speed, endurance or volley skill. Effects combine, so neither extreme is a free upgrade. These are tunable game balance rules, not claims about real athletes. Archetype rating bars stay as the skill foundation; exact body modifiers appear in the designer. Body edits apply immediately and persist into resets and new configured matches.
 
-Low-contact difficulty also scales with stature and preparation: taller bodies need more preparation for ankle-height balls, while shorter bodies receive a modest low-contact advantage. Standing, rested players incur 35% of the stature-specific adjustment; movement and fatigue increase it. High balls just behind the shoulder can select a scorpion-style reflex overhead at a height-scaled threshold, with additional difficulty rather than guaranteed success. This reuses the overhead animation; a dedicated crouch-and-behind-head pose remains future work.
+Low-contact difficulty also scales with stature and preparation: taller bodies need more preparation for ankle-height balls, while shorter bodies receive a modest low-contact advantage. Standing, rested players incur 35% of the stature-specific adjustment; movement and fatigue increase it. High balls just behind the shoulder can select a scorpion-style reflex overhead at a height-scaled threshold, with additional difficulty rather than guaranteed success. This uses a dedicated scorpion pose that reaches up and behind the head; the ordinary overhead remains a separate motion.
 
 
 ## Current release promotion and frozen Build 122
@@ -206,3 +206,13 @@ Poor or rushed dinks can float higher instead of always dying into the net. High
 Players react to the rally with focused, effort, fatigue, surprise, aggression and happy expressions. Sweat intensity follows stamina, recent effort and rally length. The same states appear in live play and sideline replays.
 
 Open `/dev/?test=performance` for a lightweight frame and render readout. The browser console exposes `window.__DRIVES_DINKS_PERFORMANCE__()` with frame, render, input-latency, long-task and canvas backing-store measurements.
+
+## Modern venues, new character motions and the overhead replay angle
+
+Three new character motions fill the gaps in the previous 26-state library: a scorpion overhead that reaches up and behind the head, a point celebration with a fist pump and hop, and a hands-heavy fatigue recovery idle. Each is wired into live play, the Motion Studio, the character lab and the style lab. The scorpion and celebration were first authored outside the arm's reach envelope, which made the inverse-kinematics solver saturate and snap the elbow; both are re-authored inside it, and `node scripts/rig-diagnostic.mjs` reports joint jumps and reach for any authored motion. Jersey numbers are printed on the back of the kit, assigned from the concept order so every design reads differently.
+
+The three venue plates are contemporary: a blue-hour outdoor sports park, a modern indoor arena and a current-era championship stadium. The outdoor plate was regenerated once more so its side fences, curbs and light poles recede toward a single vanishing point and the court's sidelines continue them. The engine's `far` setting places the court baseline below the back barrier in each plate, so a strip of real ground shows behind the baseline and the far players stand on ground instead of on the fence.
+
+The sideline replay no longer rotates the court inside the image plane. It is now the overhead court angle: the camera sits above the side of the court, the length runs across the screen, the width recedes upward and the net stands down the middle of the frame, which is how a real overhead view of a pickleball court reads. The court surface keeps the same speckle texture as the live court, the surround runs to a horizon instead of ending in a hard rectangle, and the framing reserves headroom for the ball's measured ceiling of about seven feet rather than the twenty-four feet the old camera assumed.
+
+The local dev server was also repaired: it had drifted out of serving two modules that `src/main.js` imports, so the game could not load locally at all. Modules and venue plates are now resolved from disk on every request, so a new file never needs the server restarted.

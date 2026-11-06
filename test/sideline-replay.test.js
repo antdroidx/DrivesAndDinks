@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {CHARACTER_CONCEPTS,HAIR_OPTIONS} from '../src/character-concepts.js';
 import {MOTIONS,sampleCharacterPose,ARM_LENGTHS} from '../src/pixel-character.js';
 import {drawProfileAthlete,profilePose,createProfileRenderer} from '../src/profile-athlete.js';
-import {createSideReplayRenderer,sideReplayCamera,replayAngleFor} from '../src/side-replay.js';
+import {createSideReplayRenderer,sideReplayCamera,replayAngleFor,sideReplayProjection,MAX_REPLAY_Z} from '../src/side-replay.js';
 import {contactCue,replayContactAt,drawContactCue} from '../src/contact-cues.js';
 import {Game} from '../src/game.js';
 import {ReplayClock} from '../src/fault-replay.js';
@@ -40,7 +40,7 @@ test('world contact locks in 3D without stretching the shared arm rig',()=>{
 
 test('sideline replay stays stationary while lobs and outcomes remain framed',()=>{
  for(const [width,height] of [[1920,1080],[390,800],[844,390]]){
-  const frames=Array.from({length:91},(_,i)=>({clock:i/30,ball:{x:2+i/6,y:3+i*.45,z:Math.sin(i/90*Math.PI)*24}})),clip={frames};
+  const frames=Array.from({length:91},(_,i)=>({clock:i/30,ball:{x:2+i/6,y:3+i*.45,z:Math.sin(i/90*Math.PI)*MAX_REPLAY_Z}})),clip={frames};
   for(const snapshot of frames){const camera=sideReplayCamera(width,height,clip,snapshot);assert.deepEqual({x:camera.x,y:camera.y,width:camera.width,height:camera.height},{x:0,y:0,width,height});for(const z of [0,snapshot.ball.z]){const q=camera.project(snapshot.ball.x,snapshot.ball.y,z);assert.ok(q.x>camera.x&&q.x<camera.x+camera.width);assert.ok(q.y>camera.y&&q.y<camera.y+camera.height)}}
  }
 });
@@ -70,4 +70,17 @@ test('replay drawing does not mutate snapshots or draw from gameplay randomness'
 
 test('replay pause holds playback time and resumes without skipping ahead',()=>{
  const clock=new ReplayClock();clock.start(1000);assert.equal(clock.elapsed(2500),1.5);clock.setPaused(true,2500);assert.equal(clock.elapsed(10000),1.5);clock.setPaused(true,11000);assert.equal(clock.elapsed(12000),1.5);clock.setPaused(false,12000);assert.equal(clock.elapsed(13000),2.5);clock.start(15000);assert.equal(clock.paused,false);assert.equal(clock.elapsed(16000),1);
+});
+
+test('the sideline replay keeps the court level instead of rotating it in frame',()=>{
+ const {project}=sideReplayProjection(1920,1200,24);
+ const farStart=project(0,0),farEnd=project(0,44),nearStart=project(20,0),nearEnd=project(20,44);
+ // Both sidelines run level across the frame, so the court reads as a side elevation.
+ assert.equal(farStart.y,farEnd.y);
+ assert.equal(nearStart.y,nearEnd.y);
+ assert.ok(farEnd.x-farStart.x>700&&nearEnd.x-nearStart.x>700);
+ // The width axis recedes upward and only leans slightly, instead of rotating
+ // the whole court inside the image plane.
+ const lean=Math.atan2(Math.abs(nearStart.x-farStart.x),Math.abs(nearStart.y-farStart.y))*180/Math.PI;
+ assert.ok(lean<15,'court leans ' + lean.toFixed(1) + ' degrees');
 });

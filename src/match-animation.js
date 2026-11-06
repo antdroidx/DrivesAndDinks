@@ -1,4 +1,4 @@
-import {selectShot,backhandGrip,strokePower} from './core.js';
+import {selectShot,backhandGrip,strokePower,scorpionOpportunity} from './core.js';
 import {strokeForContact} from './player-facing.js';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
@@ -6,6 +6,7 @@ export function matchStrokeMode(player,shot=player.animationShot,stroke=player.s
  const back=stroke==='backhand',kitchen=player.team===0?player.y<=32:player.y>=12;
  if(shot==='tweener')return 'tweener';
  if(shot==='erne')return 'erne';
+ if(shot==='overhead'&&player.contactPoint&&scorpionOpportunity(player,player.contactPoint))return 'scorpion';
  if(['overhead','serve','lob'].includes(shot))return shot;
  if(shot==='drive'&&player.wasPoach&&(player.contactDifficulty??0)>.25)return 'poachLunge';
  if(shot==='drive'&&(player.contactMotion==='slide'||(player.contactSpeed??0)>9)&&(player.contactDifficulty??0)>.35)return 'slideReturn';
@@ -22,7 +23,7 @@ export function matchStrokeMode(player,shot=player.animationShot,stroke=player.s
  return back?(two?'twoBackhand':'backhand'):'forehand';
 }
 export function strokeDuration(player,shot=player.animationShot,{quality=1,difficulty=0}={}){
- const mode=matchStrokeMode(player,shot),base=mode==='resetBlock'?.48:mode==='counterVolley'?.52:mode==='halfVolley'?.62:mode==='tweener'?1:mode==='overhead'?.9:mode==='erne'?1.2:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8,handSpeed=Math.max(.8,Math.min(1.2,player.paddle?.shapeHandSpeed??1));
+ const mode=matchStrokeMode(player,shot),base=mode==='resetBlock'?.48:mode==='counterVolley'?.52:mode==='halfVolley'?.62:mode==='tweener'?1:mode==='scorpion'?.95:mode==='overhead'?.9:mode==='erne'?1.2:mode==='volley'?.5:mode.endsWith('Dink')?.58:mode.endsWith('Drop')?.74:mode==='serve'?.72:mode==='lob'?.84:.8,handSpeed=Math.max(.8,Math.min(1.2,player.paddle?.shapeHandSpeed??1));
  const speed=['drive','overhead','atp','erne'].includes(shot)?strokePower(player,shot,quality,difficulty).swingSpeed:handSpeed;
  return base/speed;
 }
@@ -40,6 +41,8 @@ export function prepareReceiver(player,game){
  player.preparation.phase=Math.max(player.preparation.phase,.5*clamp(1-eta/.26));
 }
 export function sampleMatchAnimation(player,game){
+ if(player.celebrateTimer>0&&player.swing<=0)return {mode:'celebrate',phase:clamp(1-player.celebrateTimer/1.25),alignStrength:0};
+ if(game.phase==='pause'&&(player.stamina??1)<.35&&player.swing<=0)return {mode:'recoveryIdle',phase:(game.clock*1.2)%1,alignStrength:0};
  if((player.splitStepTimer||0)>0)return {mode:'splitStep',phase:1-player.splitStepTimer/.18,alignStrength:0};
  if(player.swing>0){
   const progress=clamp(1-player.swing/(player.swingDuration||.8)),phase=player.animationContactStart?.52+.48*progress:progress;

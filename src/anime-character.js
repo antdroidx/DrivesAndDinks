@@ -1,5 +1,5 @@
 import {sampleCharacterPose} from './pixel-character.js';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js';
+import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js';
 import {legDimensions,plantFeet} from './detailed-character.js';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
@@ -34,6 +34,8 @@ export function animeBodyDimensions(d){
  return {waist,hip:waist+.3,pelvis:waist*.62,stance:Math.min(1,d.shoulder*.91/6.4),thigh:leg.thigh*.83*legScale,calf:leg.calf*.88*legScale,ankle:leg.ankle*.86*legScale};
 }
 // Same motion/contact language, independently authored body and costume silhouettes.
+// Roster jersey numbers are assigned from the concept order so every design reads differently.
+const JERSEY_NUMBERS=new Map(CHARACTER_CONCEPTS.map((concept,index)=>[concept.id,String(10+index*12)]));
 export function animePose(design,mode,phase,view,options={}){
  const raw=sampleCharacterPose({...options,mode,phase,view,frame:options.frame??phase*4}),convert=p=>conceptPoint(p,design);
  const arms=raw.arms.map(chain=>chain.map(convert)),body=animeBodyDimensions(design),hips=convert(raw.hips),legs=raw.legs.map((chain,i)=>{
@@ -195,6 +197,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  if(hem-top>7){path(c,[point(h.x-waist+.8,hem-4.5),point(h.x+2,hem-2.8),point(h.x-waist+1,hem-3.4)],tone(d.shirt,-.15),null);
  path(c,[point(h.x+waist-1,hem-6.5),point(h.x-1,hem-4.8),point(h.x+waist-.6,hem-5.6)],tone(d.shirt,.13),null)}
  line(c,[point(n.x-2.6,top+.1),point(n.x,top+2.2),point(n.x+2.5,top+.1)],d.trim,.75);
+ if(near){const digits=JERSEY_NUMBERS.get(d.id);if(digits){c.save();c.globalAlpha=.68;c.fillStyle=ink;c.font='bold 5px monospace';c.textAlign='center';c.fillText(digits,n.x,top+11);c.restore();}}
  for(let i=0;i<3;i++)line(c,[point(h.x+waist-3.2,hem-1.8-i*1.7),point(h.x+waist-1,hem-2.6-i*1.7)],tone(d.shirt,-.3),.35);
 
  if(hem-top>8){if(!near){path(c,[point(n.x-1,top+5),point(n.x+1.4,top+5),point(n.x+.4,top+6.3),point(n.x+1.2,top+8),point(n.x-1,top+7.2)],d.trim,null)}else{line(c,[point(n.x-1.6,top+4),point(n.x+1.6,top+4)],d.trim,.6)}}
