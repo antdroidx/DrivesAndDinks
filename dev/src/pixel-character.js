@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=168';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=169';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -94,7 +94,7 @@ export function solveArm3D(shoulder,wrist,pole,lengths=ARM_LENGTHS){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=168';
+export {courtView,strokeForContact} from './player-facing.js?v=169';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,contact3D=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';
@@ -202,7 +202,7 @@ function taperedSegment(c,a,b,startWidth,endWidth,color){
 const PADDLE_OUTLINES=Object.freeze({
  wide:Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.4,4.1],[1.8,4.8],[1.5,5.7],[-1.5,5.7],[-1.8,4.8],[-3.4,4.1],[-4.8,1.8]]),
  elongated:Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2],[2.4,4.5],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.4,4.5],[-3.8,2],[-3.7,-6.4]]),
- hybrid:Object.freeze([[-4,-5.7],[-3.2,-6.4],[0,-6.7],[3.2,-6.4],[4,-5.7],[4.2,1.7],[3,4.2],[1.8,4.8],[1.5,5.6],[-1.5,5.6],[-1.8,4.8],[-3,4.2],[-4.2,1.7]])
+ hybrid:Object.freeze([[-4,-5.2],[-3.6,-6],[-2.8,-6.8],[-1.5,-7.3],[0,-7.5],[1.5,-7.3],[2.8,-6.8],[3.6,-6],[4,-5.2],[4.2,1.7],[3,4.2],[1.8,4.8],[1.5,5.6],[-1.5,5.6],[-1.8,4.8],[-3,4.2],[-4.2,1.7]])
 });
 export function paddleOutline(shapeId='hybrid'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES.hybrid}
 let buffer;
