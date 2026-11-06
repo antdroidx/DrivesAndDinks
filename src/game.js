@@ -10,7 +10,7 @@ import {strokeForContact} from './player-facing.js';
 import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js';
 import {createLineup,applyPhysique} from './roster.js';
 import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower} from './core.js';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX} from './core.js';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
@@ -122,7 +122,7 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.random=seed==
   player.mishit=poor;this.lastShot=shot;player.animationShot=shot;player.animationContactStart=true;this.lastHitter=player.id;
   let targetY=player.team===0?(shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4):(shot==='dink'?30:shot==='drop'?32:shot==='slice'?38:40);
   const technique=shotSkill(player,shot),grip=gripModifiers(player,this.ball,shot),difficulty=contactDifficulty(player,this.ball,shot)+(this.poachReservation?.shot===this.shots&&this.poachReservation.playerId===player.id?.14:0);player.wasPoach=wasPoach;player.contactDifficulty=difficulty;player.contactSpeed=Math.hypot(player.vx||0,player.vy||0);player.contactMotion=player.motion;player.incomingSpeed=Math.hypot(incomingVelocity.x,incomingVelocity.y);player.contactBounces=this.bounces;player.contactAge=this.clock-(this.lastBounceAt??-Infinity);player.contactGrip=grip.grip;
-  if(shot==='atp')aim=this.ball.x<0?Math.min(1,aim):Math.max(19,aim);
+  if(shot==='atp')aim=atpTargetX(this.ball.x);
   if(shot==='lob'||shot==='tweener'){const depth=1.8+(1-quality)*13+Math.max(0,1-technique)*7+this.random()*2;targetY=player.team===0?depth:44-depth;}
   if(shot==='overhead'){const depth=3+this.random()*9+(1-quality)*8+Math.max(0,1-technique)*5;targetY=player.team===0?depth:44-depth;}
   if(placement&&['drive','drop','dink','slice','overhead'].includes(shot)&&Number.isFinite(placement.y))targetY=placement.y;

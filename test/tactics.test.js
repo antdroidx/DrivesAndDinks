@@ -51,3 +51,13 @@ test('serve return depth mirrors across court ends for every supported return sh
   assert.equal(b.y,shotDepthTarget(1,shot,.5));
  }
 });
+
+test('ATP opens up for reachable low side bounces farther behind the net but stays selective',()=>{
+ const p={...playerProfile(),team:0,x:.8,y:33.5,vx:0,vy:0};
+ const ball={x:-.7,y:31,z:.8,vx:0,vy:0};
+ assert.equal(selectShot(p,ball,'drive'),'atp');
+ assert.equal(selectShot({...p,x:6},ball,'drive'),'drive');
+ assert.equal(selectShot({...p,vx:12},ball,'drive'),'drive');
+ assert.equal(selectShot(p,{...ball,z:3.5},'drive'),'drive');
+ assert.equal(selectShot(p,{...ball,x:-.2},'drive'),'drive');
+});
