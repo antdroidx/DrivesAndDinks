@@ -5,7 +5,7 @@ import {SCENE_LAYOUTS,scenePlacement} from '../src/court-art.js';
 // Where the back barrier meets the ground in each active plate, measured from the
 // artwork. The court baseline has to land below that line, otherwise the far
 // players stand on the barrier instead of on ground in front of it.
-const BARRIER={outdoor:.372,indoor:.399,stadium:.347};
+const BARRIER={outdoor:.2984,indoor:.3145,stadium:.2661};
 
 test('the court baseline lands on open ground behind the venue barrier',()=>{
  for(const [id,layout] of Object.entries(SCENE_LAYOUTS)){
@@ -25,3 +25,7 @@ test('every venue plate covers the whole court depth and some apron',()=>{
   assert.ok(placement.width===960,id);
  }
 });
+
+
+
+

@@ -72,15 +72,24 @@ test('replay pause holds playback time and resumes without skipping ahead',()=>{
  const clock=new ReplayClock();clock.start(1000);assert.equal(clock.elapsed(2500),1.5);clock.setPaused(true,2500);assert.equal(clock.elapsed(10000),1.5);clock.setPaused(true,11000);assert.equal(clock.elapsed(12000),1.5);clock.setPaused(false,12000);assert.equal(clock.elapsed(13000),2.5);clock.start(15000);assert.equal(clock.paused,false);assert.equal(clock.elapsed(16000),1);
 });
 
-test('the sideline replay keeps the court level instead of rotating it in frame',()=>{
- const {project}=sideReplayProjection(1920,1200,24);
- const farStart=project(0,0),farEnd=project(0,44),nearStart=project(20,0),nearEnd=project(20,44);
- // Both sidelines run level across the frame, so the court reads as a side elevation.
- assert.equal(farStart.y,farEnd.y);
- assert.equal(nearStart.y,nearEnd.y);
- assert.ok(farEnd.x-farStart.x>700&&nearEnd.x-nearStart.x>700);
- // The width axis recedes upward and only leans slightly, instead of rotating
- // the whole court inside the image plane.
- const lean=Math.atan2(Math.abs(nearStart.x-farStart.x),Math.abs(nearStart.y-farStart.y))*180/Math.PI;
- assert.ok(lean<15,'court leans ' + lean.toFixed(1) + ' degrees');
+test('the sideline replay draws a perspective court with real depth',()=>{
+ const {project}=sideReplayProjection(1920,1244,MAX_REPLAY_Z);
+ const farNear=project(0,0),farEnd=project(0,44),nearNear=project(20,0),nearEnd=project(20,44);
+ const farSpan=Math.abs(farEnd.x-farNear.x),nearSpan=Math.abs(nearEnd.x-nearNear.x);
+ // The far baseline is foreshortened against the near one, which is what gives
+ // the court depth instead of a flat rectangle.
+ assert.ok(nearSpan>farSpan*1.15,'court has no depth');
+ // The sidelines stay close to level, so the court reads as a side view rather
+ // than a slab rotated inside the frame.
+ const courtHeight=Math.abs((nearNear.y+nearEnd.y)/2-(farNear.y+farEnd.y)/2);
+ assert.ok(Math.abs(farEnd.y-farNear.y)<courtHeight*.25,'far baseline is rotated in frame');
+ assert.ok(Math.abs(nearEnd.y-nearNear.y)<courtHeight*.25,'near baseline is rotated in frame');
+ // The net stands inside the court outline rather than outside it.
+ const netTop=project(10,22,2.85),netBase=project(10,22,0);
+ assert.ok(netBase.x>farNear.x&&netBase.x<nearEnd.x,'net is outside the court');
+ assert.ok(netTop.y<netBase.y,'net height does not project upward');
+ // The court keeps real-court proportions instead of collapsing to a strip.
+ const aspect=(farSpan+nearSpan)/2/courtHeight;
+ assert.ok(aspect>2.8&&aspect<4.2,'court aspect is '+aspect.toFixed(2));
+ assert.ok(courtHeight>1244*.28,'court is too small in frame');
 });

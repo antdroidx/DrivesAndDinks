@@ -11,6 +11,8 @@
     "validate:matchups": "node scripts/validate-matchups.js 2",
     "diagnose:pacing": "node scripts/diagnose-pacing.js",
     "diagnose:stacking": "node scripts/diagnose-stacking.js",
+    "venue:perspective": "node scripts/venue-perspective.js",
     "profile:engine": "node scripts/profile-engine.js 60"
   }
 }
+
