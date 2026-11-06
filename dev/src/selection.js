@@ -1,6 +1,6 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=173';
-import {normalizeStackingSelection} from './stacking.js?v=173';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=173';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=174';
+import {normalizeStackingSelection} from './stacking.js?v=174';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=174';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -86,7 +86,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
  for(const option of venueField.querySelector('select').options)option.textContent=({none:'No venue',random:'Random',outdoor:'Outdoor',indoor:'Indoor',stadium:'Stadium'})[option.value]??option.textContent;
  footerControls.append(formatField,difficultyField,matchModeField,venueField,courtField);
 
- let draft=normalizeSelection(),stackingDraft=normalizeStackingSelection(),started=false,previewLineup=[];
+ let draft=normalizeSelection(),stackingDraft=normalizeStackingSelection(),started=false,previewLineup=[],editingName=false;
  try{const saved=JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null');draft=normalizeSelection(saved);stackingDraft=normalizeStackingSelection()}catch{}
  const optionLabel=(items,id)=>items.find(item=>item.id===id)?.name??items.find(item=>item.id===id)?.style??id;
  function hairStyleOptions(body){return [{id:'design',name:'As designed'},...(HAIR_OPTIONS[body]??HAIR_OPTIONS.male)]}
@@ -94,7 +94,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   return `${optionLabel(CLOTHING_COLORS,selectionValue.shirtColor)} outfit · ${optionLabel(PADDLE_COLORS,selectionValue.highlightColor)} highlight · ${optionLabel(PADDLE_COLORS,selectionValue.paddleColor)} paddle · ${optionLabel(HAIR_OPTIONS[selectionValue.gender]??HAIR_OPTIONS.male,selectionValue.hairStyle)} hair · ${optionLabel(HAIR_COLORS,selectionValue.hairColor)} color · ${optionLabel(SKIN_COLORS,selectionValue.skinColor)} skin · ${optionLabel(HEADWEAR_OPTIONS,selectionValue.headwear)} · ${optionLabel(EYEWEAR_OPTIONS,selectionValue.eyewear)}`;
  }
  function setOptions(control,items,value){control.replaceChildren(...items.map(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=item.label??item.name??item.id;return option}));control.value=String(value??'');if(!control.value&&control.options.length)control.value=control.options[0].value}
- function selected(name,value){form.querySelectorAll(`[name="${name}"]`).forEach(input=>{if(input.type==='checkbox')input.checked=Boolean(value);else input.tagName==='SELECT'||input.type==='text'?input.value=String(value):input.checked=input.value===String(value)})}
+ function selected(name,value){form.querySelectorAll(`[name="${name}"]`).forEach(input=>{if(input===nameInput&&editingName)return;if(input.type==='checkbox')input.checked=Boolean(value);else input.tagName==='SELECT'||input.type==='text'?input.value=String(value):input.checked=input.value===String(value)})}
  function render(){
   setOptions(hairStyleSelect,hairStyleOptions(draft.gender),draft.hairStyle);setOptions(headwearSelect,options(HEADWEAR_OPTIONS),draft.headwear);setOptions(eyewearSelect,options(EYEWEAR_OPTIONS),draft.eyewear);
   for(const [key,value] of Object.entries(draft))selected(key,value);
@@ -102,7 +102,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   else {const appearance=previewLineup[0].appearance;previewLineup[0]=buildProfile(draft,{identity:previewLineup[0]});Object.assign(previewLineup[0].appearance,{height:appearance.height,build:appearance.build})}
   const body={...previewLineup[0].appearance,...getPhysique()};previewLineup[0]=applyPhysique(previewLineup[0],body);const player=previewLineup[0];
   if(!draft.customName&&player.name)draft.customName=player.name;
-  if(document.activeElement!==nameInput||!nameInput.value)nameInput.value=draft.customName||player.name;
+  if(!editingName)nameInput.value=draft.customName||player.name;
   const effects=document.querySelector('#body-effects');if(effects)effects.textContent=Object.entries(player.physique.modifiers).map(([key,value])=>key+': '+((value-1)*100>=0?'+':'')+Math.round((value-1)*100)+'%').join(' · ')+'. Power potential combines with shot technique and contact to determine pace.';
   playerDescription.textContent=`${player.name} · ${player.archetype} · ${player.gender==='female'?'Female':'Male'} · ${player.handedness==='left'?'Left-handed':'Right-handed'}. Pros: ${player.strengths.join(', ')}. Tradeoff: ${player.tradeoffs.join(', ')}.`;
   const paddle=PADDLES.find(item=>item.id===draft.paddle)??PADDLES[0],shape=PADDLE_SHAPES.find(item=>item.id===draft.paddleShape)??PADDLE_SHAPES[0];
@@ -114,6 +114,8 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
  }
  function syncSessionOptions(){const practice=form.elements.matchMode.value.startsWith('practice-');form.elements.format.disabled=practice;if(practice)form.elements.format.value='singles';form.querySelector('.start-match').textContent=practice?'START PRACTICE →':started?'START NEW MATCH →':'START MATCH →'}
  const updateDraft=event=>{syncSessionOptions();const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),handedness:values.get('handedness'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),highlightColor:values.get('highlightColor'),paddleColor:values.get('paddleColor'),hairStyle:values.get('hairStyle'),hairColor:values.get('hairColor'),headwear:values.get('headwear'),eyewear:values.get('eyewear'),outfit:values.get('outfit'),showNameTags:game.showNameTags,skinColor:values.get('skinColor'),court:values.get('court')});render();};
+ nameInput.addEventListener('focus',()=>{editingName=true});
+ nameInput.addEventListener('blur',()=>{editingName=false;updateDraft({target:nameInput})});
  form.addEventListener('change',updateDraft);form.addEventListener('input',updateDraft);
  function setDesigner(open){if(open){designer.append(preview);profileGrid.prepend(nameField,archetypeField);nameField.classList.remove('preview-name-field')}else{setupTop.prepend(preview);nameField.classList.add('preview-name-field');nameSlot.append(nameField);mainIdentity.prepend(archetypeField,designButton,playerDescription)}designer.hidden=!open;dialog.classList.toggle('designing',open);for(const node of [...scroll.children])if(node!==designer)node.hidden=open;footer.hidden=open;if(!open)syncSessionOptions();dialog.setAttribute('aria-label',open?'Character designer':'Match setup')}
  designButton.onclick=()=>setDesigner(true);back.onclick=()=>setDesigner(false);

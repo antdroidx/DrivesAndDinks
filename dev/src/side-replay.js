@@ -1,11 +1,11 @@
-import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=173';
-import {createProfileRenderer} from './profile-athlete.js?v=173';
-import {sampleMatchAnimation} from './match-animation.js?v=173';
-import {playerFeet} from './player-feet.js?v=173';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=173';
-import {paintCourtTexture} from './court-art.js?v=173';import {playerEmotionState} from './player-emotion.js?v=173';
-import {C} from './core.js?v=173';
-import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=173';
+import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=174';
+import {createProfileRenderer} from './profile-athlete.js?v=174';
+import {sampleMatchAnimation} from './match-animation.js?v=174';
+import {playerFeet} from './player-feet.js?v=174';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=174';
+import {paintCourtTexture} from './court-art.js?v=174';import {playerEmotionState} from './player-emotion.js?v=174';
+import {C} from './core.js?v=174';
+import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=174';
 
 // Measured ceiling of the ball in live play is about 7 feet, with the highest
 // overhead contact near 7.4. Eight feet leaves headroom without reserving space
@@ -141,7 +141,7 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
    const footPose=playerFeet(p).map(foot=>({x:(foot.x-p.x)*units,y:63-(2+foot.z*zUnits)/stature,z:(foot.y-p.y)*direction*units}));
    const contact3D=p.animationContactStart&&p.swing>0&&p.contactPoint?{x:(p.contactPoint.x-p.x)*units,y:63-p.contactPoint.z*zUnits/stature,z:(p.contactPoint.y-p.y)*direction*units}:null;
 
-   drawProfile(c,d,mode,phase,q.x,q.y,figureScale,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D:footPose,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:(p.handedness==='left'||p.hand==='left'?-1:1)*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),handedness:p.handedness??'right',headwearBackwards:p.team===0,...(()=>{const state=playerEmotionState(p,{phase:snapshot.phase??'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:snapshot.lastPointWinner});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
+   drawProfile(c,d,mode,phase,q.x,q.y,figureScale,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D:footPose,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:(p.handedness==='left'||p.hand==='left'?-1:1)*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),handedness:p.handedness??'right',headwearBackwards:false,...(()=>{const state=playerEmotionState(p,{phase:snapshot.phase??'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:snapshot.lastPointWinner});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
    if(showNameTags!==false)drawReplayName(c,p.name,q.x,q.y-figureScale*.84,scale);
   }
   drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});
