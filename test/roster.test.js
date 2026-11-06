@@ -102,6 +102,9 @@ test('generated bodies stay in realistic population ranges',()=>{
  assert.equal(normalizeSelection({headwear:'cap',eyewear:'glasses'}).headwear,'cap');
  assert.equal(normalizeSelection({headwear:'cap',eyewear:'glasses'}).eyewear,'glasses');
  assert.equal(buildProfile({headwear:'visor',eyewear:'glasses'}).appearance.headwear,'visor');
+ assert.equal(normalizeSelection({showNameTags:false}).showNameTags,false);
+ assert.equal(normalizeSelection().showNameTags,true);
+ const displayGame=new Game();displayGame.configure({showNameTags:false});assert.equal(displayGame.showNameTags,false);assert.equal(displayGame.matchReport().showNameTags,false);
 });
 
 test('custom user names remain customizable and survive the match profile',()=>{

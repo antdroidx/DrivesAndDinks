@@ -12,7 +12,7 @@ test('orientation change recomputes dialog dimensions rather than preserving the
  const portrait=setupDialogBounds({width:390,height:800}),landscape=setupDialogBounds({width:800,height:390});assert.equal(portrait.width,374);assert.equal(landscape.width,740);assert.equal(landscape.height,374);assert.ok(landscape.top+landscape.height<=390);
 });
 test('browser zoom remains available and dialogs keep their own scrolling',()=>{
- const html=readFileSync(new URL('../index.html',import.meta.url),'utf8'),css=readFileSync(new URL('../style.css',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8'),css=readFileSync(new URL('../style.css',import.meta.url),'utf8'),main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
  assert.doesNotMatch(html,/user-scalable=no|maximum-scale=1/);
  assert.match(css,/dialog\{touch-action:pan-y\}/);
  assert.match(css,/body:has\(dialog\[open\]\)\{overscroll-behavior:none\}/);
@@ -23,4 +23,7 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.match(html,/id="eyewear"/);
  assert.match(css,/\.score-team\{display:grid/);
  assert.match(css,/\.score-meta\{grid-column:1\/-1/);
+ assert.match(html,/name="showNameTags"/);
+ assert.doesNotMatch(html,/download-report|DOWNLOAD REPORT/);
+ assert.doesNotMatch(main,/downloadReport|export-report|DOWNLOAD REPORT/);
 });

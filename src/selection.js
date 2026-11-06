@@ -42,7 +42,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
    if(node.matches('#dev-art-options,#appearance-options'))designer.append(node);
    else if(node.matches('.equipment-panel'))advanced.append(node);
   }
-  const preview=document.querySelector('.player-preview');preview.append(designButton);designer.prepend(back);designer.append(preview);scroll.append(advanced,courts,designer,document.querySelector('#stacking-options'));
+  const preview=document.querySelector('.player-preview');preview.append(designButton);designer.prepend(back);designer.append(preview);scroll.append(advanced,courts,designer,document.querySelector('#stacking-options'),document.querySelector('#display-options'));
 
   let draft=normalizeSelection(),stackingDraft=normalizeStackingSelection(),started=false,previewLineup=[];
   try{const saved=JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null');draft=normalizeSelection(saved);stackingDraft=normalizeStackingSelection(saved?.stacking)}catch{}
@@ -57,7 +57,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   dialog.querySelector('#skin-choices').innerHTML=swatches(SKIN_COLORS,'skinColor');
   dialog.querySelector('#paddle-color-choices').innerHTML=swatches(PADDLE_COLORS,'paddleColor');
   dialog.querySelector('#court-choices').innerHTML=swatches(COURT_PALETTES,'court');
-  function selected(name,value){form.querySelectorAll(`[name="${name}"]`).forEach(input=>{input.tagName==='SELECT'||input.type==='text'?input.value=String(value):input.checked=input.value===String(value)})}
+  function selected(name,value){form.querySelectorAll(`[name="${name}"]`).forEach(input=>{if(input.type==='checkbox')input.checked=Boolean(value);else input.tagName==='SELECT'||input.type==='text'?input.value=String(value):input.checked=input.value===String(value)})}
   function hairStyleOptions(body){return [{id:'design',name:'As designed'},...(HAIR_OPTIONS[body]??HAIR_OPTIONS.male)]}
   const optionLabel=(items,id)=>items.find(item=>item.id===id)?.name??id;
   function appearanceSummary(selectionValue){
@@ -89,7 +89,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
   function syncSessionOptions(){const practice=form.elements.matchMode.value.startsWith('practice-');form.elements.format.disabled=practice;if(practice)form.elements.format.value='singles';const stackingOptions=form.querySelector('#stacking-options'),doubles=form.elements.format.value==='doubles'&&!practice;stackingOptions.hidden=!doubles;for(const name of ['stack0','stack0Side','stack1','stack1Side'])form.elements[name].disabled=!doubles;syncStackingControls();dialog.querySelector('.start-match').textContent=practice?'START PRACTICE →':started?'START NEW MATCH →':'START MATCH →'}
   const updateDraft=event=>{stackingDraft={teams:[{mode:form.elements.stack0.value,preferredSide:form.elements.stack0Side.value},{mode:form.elements.stack1.value,preferredSide:form.elements.stack1Side.value}]};syncSessionOptions();
     const menu=event.target.closest('.color-menu');if(menu)menu.open=false;
-    const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),handedness:values.get('handedness'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),paddleColor:values.get('paddleColor'),hairStyle:values.get('hairStyle'),hairColor:values.get('hairColor'),headwear:values.get('headwear'),eyewear:values.get('eyewear'),skinColor:values.get('skinColor'),court:values.get('court')});render();};
+    const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),handedness:values.get('handedness'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),paddleColor:values.get('paddleColor'),hairStyle:values.get('hairStyle'),hairColor:values.get('hairColor'),headwear:values.get('headwear'),eyewear:values.get('eyewear'),showNameTags:values.get('showNameTags')==='on',skinColor:values.get('skinColor'),court:values.get('court')});render();};
   form.addEventListener('change',updateDraft);form.addEventListener('input',updateDraft);
   const freshMatchLineup=()=>{const lineup=createLineup(draft,{random:game.random});const human=previewLineup[0];if(human){lineup[0]=buildProfile(draft,{identity:human});Object.assign(lineup[0].appearance,human.appearance)}return lineup};
   form.addEventListener('submit',e=>{e.preventDefault();game.configure({...draft,stacking:stackingDraft,format:form.elements.format.value},freshMatchLineup());game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);if(game.mode.startsWith('practice-'))game.startPractice(game.mode.slice(9));started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify({...draft,stacking:stackingDraft}));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});

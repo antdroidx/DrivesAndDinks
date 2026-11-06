@@ -234,7 +234,7 @@ function drawSprite(p,q,game){
 
  const handSide=p.handedness==='left'||p.hand==='left'?-1:1;
  drawPlayer(ctx,{feet:playerFeet(p).map(foot=>({...foot,screen:project(foot.x,foot.y,foot.z),sole:footSole(foot).map(([x,y])=>project(x,y,foot.z))})),personalize:p.id===0,designId:p.id===0?selectedDetailedDesign:'',plantState:replayPlayback?null:(footPlants.get(p.id)??(footPlants.set(p.id,{}),footPlants.get(p.id))),appearance:p.appearance,characterId:p.characterId,handedness:p.handedness??'right',mode,frame:(p.stride||0)*1.35,phase,moving,x:q.x-width/2,y:q.y-height+2,width,height,view:courtView(p.team),side:handSide*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),travelSide:Math.sign(p.vx)||(p.x<10?-1:1),alignTo:contact,alignStrength,contactDepth,paddleShape:p.paddle?.shapeId??'hybrid',lighting:'depth',...playerPresentation(p,game,animation)});
- drawPlayerNameplate(p,q,height);
+ if(game.showNameTags!==false)drawPlayerNameplate(p,q,height);
 
  if(p.id===0&&game.mode==='play'){
 
@@ -355,7 +355,7 @@ const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get
 
  if(replayAngle==='sideline'){
   replayCamera=null;const palette=COURT_PALETTES.find(item=>item.id===snapshot.players[0]?.appearance?.court)??COURT_PALETTES[0];
-  drawSideReplay(ctx,{width:canvas.width,height:canvas.height},snapshot,replayPlayback,{palette,style:artPreferences.style,look:artPreferences.look,outfit:artPreferences.outfit});updateCourtHud({...snapshot,score:{...snapshot.score,call:'REPLAY'}});last=t;acc=0;return true;
+  drawSideReplay(ctx,{width:canvas.width,height:canvas.height},snapshot,replayPlayback,{palette,style:artPreferences.style,look:artPreferences.look,outfit:artPreferences.outfit,showNameTags:game.showNameTags!==false});updateCourtHud({...snapshot,score:{...snapshot.score,call:'REPLAY'}});last=t;acc=0;return true;
  }
  replayCamera=highlightReplayCamera(displayCamera,replayPlayback,project,snapshot);
 
@@ -424,10 +424,8 @@ function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialo
  document.querySelector('#match-winner').textContent=practice?practice.drill.name:game.score.winner===0?'Your team wins!':'Opponents win!';
  document.querySelector('#match-score').textContent=practice?`${practice.successes} of ${practice.total} sequences hit`:`Your team ${game.score.points[0]} – ${game.score.points[1]} Opponents`;
  const contacts=game.stats.teams.reduce((n,t)=>n+t.hits,0),mishits=game.stats.teams.reduce((n,t)=>n+t.mishits,0);
- document.querySelector('#match-analysis').textContent=practice?`${practice.results.reduce((n,r)=>n+(r.steps?.length??(r.shot?1:0)),0)} scored contacts · ${practice.drill.sequence?.length??1}-contact sequences · Repeat uses the same feeds. The report lists every step.`:`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Longest rally ${Math.max(0,...game.journal.rallies.map(r=>r.shots??0))} shots`;
+ document.querySelector('#match-analysis').textContent=practice?`${practice.results.reduce((n,r)=>n+(r.steps?.length??(r.shot?1:0)),0)} scored contacts · ${practice.drill.sequence?.length??1}-contact sequences · Repeat uses the same feeds. The summary lists every step.`:`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Longest rally ${Math.max(0,...game.journal.rallies.map(r=>r.shots??0))} shots`;
  resultDialog.showModal();}}
-function downloadReport(){const blob=new Blob([JSON.stringify(game.matchReport(),null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=`drives-dinks-${game.practice?.id??game.format}-report.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
-const reportButton=document.createElement('button');reportButton.id='export-report';reportButton.textContent='DOWNLOAD REPORT';reportButton.onclick=downloadReport;document.querySelector('.header-actions').append(reportButton);document.querySelector('#download-report').onclick=downloadReport;
 
 resultDialog.addEventListener('cancel',e=>e.preventDefault());
 
@@ -470,6 +468,6 @@ window.addEventListener('keydown',e=>{if(!document.querySelector('dialog[open]')
 
 // Keep persistent play controls together, followed by setup, gameplay and presentation settings.
 const settingsActions=document.querySelector('.header-actions');
-for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','export-report','sound']){
+for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','character-art','replay-toggle','sound']){
  const control=document.getElementById(id);if(control)settingsActions.append(control);
 }
