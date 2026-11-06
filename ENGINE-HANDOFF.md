@@ -1,5 +1,17 @@
 # Engine status and next work
 
+## Venue, motion and replay checkpoint - 2026-11-06
+
+Published and verified: **DEV Build 151**, source `5bfa9b11d312b562449f241732f3e6033d98532d`, from `codex/doubles-stacking`. Workflow run https://github.com/antdroidx/DrivesAndDinks/actions/runs/42152135024 succeeded, and the live DEV site serves the three new venue plates. All 389 tests pass. A paired six-game roster simulation is identical to the pre-change commit `c0f80c4` (233 rallies, 4184 shots, max rally 45), so the visual work does not move the engine.
+
+Three new character motions ship: a scorpion overhead, a point celebration and a fatigue recovery idle. The scorpion and celebration were first authored outside the arm reach envelope and had to be re-authored; `node scripts/rig-diagnostic.mjs` reports joint jumps and reach for any named motion. Contemporary venue plates replace the pastoral set, with the outdoor plate regenerated so its side fences recede to one vanishing point. `SCENE_LAYOUTS.far` is retuned per plate so the court baseline lands on open ground below the back barrier; `test/venue-layout.test.js` records the measured barrier heights.
+
+The sideline replay is rebuilt as the overhead court angle: length across the screen, width receding upward, the net standing down the middle, the live court texture reused through a shared `paintCourtTexture` helper, and framing headroom sized to the ball's measured seven-foot ceiling instead of the old twenty-four-foot assumption.
+
+The local dev server was repaired as well. `scripts/serve.js` had drifted out of serving `src/player-emotion.js` and `src/performance-monitor.js`, so the game could not load locally at all; modules and venue plates are now resolved from disk per request.
+
+Main is unchanged at `94445f9`. The next work should continue from `codex/doubles-stacking`.
+
 ## Combined implementation checkpoint — 2026-11-05
 
 Latest verified source: **DEV Build 143**, engine commit `e3e4fb1eff23b0639bfd7542581bf1f406d03bcb`, promoted through documentation commit `94445f9b7cb3f5b85578174df7762b2def498b54`. The doubles-side fix preserves ordinary kitchen lanes, requires a real crossing before reassigning coverage, and retains contextual poach/lob/rescue switches. Optional stacking is implemented on `codex/doubles-stacking` with per-team Off, Stack + cross, Stack + stay and Adaptive modes; score/service identity remains unchanged. All 379 tests pass; eight paired demo matches reduced measured kitchen order reversals from 2,107 to 0 while retaining 36 poach attempts. All 20 roster matches completed. The skill matrix completed 107/108 within 40 minutes; the remaining equal-advanced deuce game finished naturally at 47.9 minutes. Stronger profiles won every mismatched pairing. Evidence is in `validation/kitchen-sides-*`.
