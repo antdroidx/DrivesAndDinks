@@ -25,6 +25,8 @@ test('rear views suppress front collar and bald facial highlights',()=>{
  const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
  assert.match(source,/if\(d\.outfit==='polo'\)\{\s*if\(!near\)/);
  assert.match(source,/if\(bald\)\{\s*if\(!near\)/);
+ assert.match(source,/paddleOutline/);
+ assert.match(source,/for\(const \[hx,hy\]/);
  assert.doesNotMatch(source,/if\(sole\)path/);
  assert.doesNotMatch(source,/else path\(c,\[point\(x\+5\.8,y-3\.2\)/);
 });
@@ -38,6 +40,10 @@ test('shortened head placement keeps a compact chin-to-collar gap across bodies 
 test('skin ramps preserve the selected base tone and ordered lighting in the pixel palette',()=>{
  const luminance=hex=>hex.slice(1).match(/../g).map(v=>parseInt(v,16)).reduce((a,b)=>a+b,0);
  for(const d of CHARACTER_CONCEPTS){const p=skinPalette(d.skin),palette=animePixelPalette(d);assert.equal(p.base,d.skin);assert.ok(luminance(p.light)>luminance(p.base));assert.ok(luminance(p.base)>luminance(p.shadow));assert.ok(luminance(p.shadow)>luminance(p.deep));assert.ok(palette.length<=20);for(const hex of Object.values(p)){const rgb=hex.slice(1).match(/../g).map(v=>parseInt(v,16));assert.ok(palette.some(color=>color.every((v,i)=>v===rgb[i])))} }
+});
+
+test('storybook and sports anime use the same torso widths',()=>{
+ for(const base of CHARACTER_CONCEPTS){const pose=animePose(base,'idle',0,'far'),sports=animeTorso(base,pose,false),storybook=animeTorso(base,pose,true);assert.equal(storybook.shoulder,sports.shoulder);assert.equal(storybook.waist,sports.waist)}
 });
 
 test('female crop top has an exposed waist while other supported outfits retain full torso coverage',()=>{

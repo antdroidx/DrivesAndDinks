@@ -65,7 +65,7 @@ export const PADDLES = Object.freeze([
 // for this tuning describes elongated paddles as higher swing-weight and
 // higher reach, while wide shapes prioritize forgiveness and quick hands.
 export const PADDLE_SHAPES = Object.freeze([
-  {id:'wide',name:'Wide',style:'Fast hands · forgiving',description:'A larger side-to-side sweet spot and quicker hands; slightly less reach and power.',reach:.96,power:.96,control:1.06,handSpeed:1.1,sweetSpot:1.15,ratingModifiers:{volley:6,power:-4,reach:-3}},
+  {id:'wide',name:'Widebody',style:'Fast hands · forgiving',description:'A larger side-to-side sweet spot and quicker hands; slightly less reach and power.',reach:.96,power:.96,control:1.06,handSpeed:1.1,sweetSpot:1.15,ratingModifiers:{volley:6,power:-4,reach:-3}},
   {id:'elongated',name:'Elongated',style:'Reach · power',description:'More leverage and reach; slower hands and a narrower side-to-side sweet spot.',reach:1.07,power:1.05,control:.97,handSpeed:.92,sweetSpot:.9,ratingModifiers:{power:6,reach:6,volley:-5}},
   {id:'hybrid',name:'Hybrid',style:'Balanced',description:'Balanced reach, power, sweet spot and hand speed.',reach:1,power:1,control:1,handSpeed:1,sweetSpot:1,ratingModifiers:{power:0,reach:0,volley:0}}
 ]);

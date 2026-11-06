@@ -200,9 +200,9 @@ function taperedSegment(c,a,b,startWidth,endWidth,color){
  polygon(c,[{x:a.x+nx*startWidth/2,y:a.y+ny*startWidth/2},{x:b.x+nx*endWidth/2,y:b.y+ny*endWidth/2},{x:b.x-nx*endWidth/2,y:b.y-ny*endWidth/2},{x:a.x-nx*startWidth/2,y:a.y-ny*startWidth/2}],color);
 }
 const PADDLE_OUTLINES=Object.freeze({
- wide:Object.freeze([[-4.5,-5],[3.5,-5],[5,-3],[5,2.5],[3.5,4.5],[-3.5,4.5],[-5,2.5],[-5,-3]]),
- elongated:Object.freeze([[-2.4,-8],[2.4,-8],[3.5,-6],[3.5,2],[2.4,4.5],[-2.4,4.5],[-3.5,2],[-3.5,-6]]),
- hybrid:Object.freeze([[-3,-6],[2,-6],[4,-4],[4,3],[2,5],[-2,5],[-4,3],[-4,-4]])
+ wide:Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.4,4.1],[1.8,4.8],[1.5,5.7],[-1.5,5.7],[-1.8,4.8],[-3.4,4.1],[-4.8,1.8]]),
+ elongated:Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2],[2.4,4.5],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.4,4.5],[-3.8,2],[-3.7,-6.4]]),
+ hybrid:Object.freeze([[-4,-5.7],[-3.2,-6.4],[0,-6.7],[3.2,-6.4],[4,-5.7],[4.2,1.7],[3,4.2],[1.8,4.8],[1.5,5.6],[-1.5,5.6],[-1.8,4.8],[-3,4.2],[-4.2,1.7]])
 });
 export function paddleOutline(shapeId='hybrid'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES.hybrid}
 let buffer;

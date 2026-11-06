@@ -12,7 +12,7 @@ test('orientation change recomputes dialog dimensions rather than preserving the
  const portrait=setupDialogBounds({width:390,height:800}),landscape=setupDialogBounds({width:800,height:390});assert.equal(portrait.width,374);assert.equal(landscape.width,740);assert.equal(landscape.height,374);assert.ok(landscape.top+landscape.height<=390);
 });
 test('browser zoom remains available and dialogs keep their own scrolling',()=>{
- const html=readFileSync(new URL('../index.html',import.meta.url),'utf8'),css=readFileSync(new URL('../style.css',import.meta.url),'utf8'),main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ const html=readFileSync(new URL('../index.html',import.meta.url),'utf8'),css=readFileSync(new URL('../style.css',import.meta.url),'utf8'),main=readFileSync(new URL('../src/main.js',import.meta.url),'utf8'),selection=readFileSync(new URL('../src/selection.js',import.meta.url),'utf8');
  assert.doesNotMatch(html,/user-scalable=no|maximum-scale=1/);
  assert.match(css,/dialog\{touch-action:pan-y\}/);
  assert.match(css,/body:has\(dialog\[open\]\)\{overscroll-behavior:none\}/);
@@ -24,8 +24,24 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.match(main,/game-art-outfit" name="outfit/);
  assert.match(css,/\.score-team\{display:grid/);
  assert.match(css,/\.score-meta\{grid-column:1\/-1/);
- assert.match(html,/name="showNameTags"/);
+ assert.doesNotMatch(html,/name="showNameTags"/);
+ assert.doesNotMatch(html,/id="stacking-options"/);
+ assert.doesNotMatch(html,/id="display-options"/);
+ assert.match(main,/nameTagsButton\.id='name-tags-button'/);
+ assert.match(main,/name-tags-button/);
+ assert.doesNotMatch(main,/game-art-style|game-art-look/);
+ assert.match(main,/body-effects-info/);
+ assert.match(main,/output id="body-effects"/);
+ assert.match(selection,/identityPanel\.append\(playerDescription\)/);
+ assert.match(selection,/designer\.append\(identity\)/);
+ assert.match(selection,/identityPanel\.querySelector\('legend'\)\.textContent='Selected player'/);
  assert.doesNotMatch(html,/download-report|DOWNLOAD REPORT/);
+ assert.match(selection,/name="gender"/);
+ assert.match(selection,/player\.gender==='female'\?'Female':'Male'/);
+ assert.match(selection,/player\.handedness==='left'\?'Left-handed':'Right-handed'/);
+ assert.match(main,/artPreferences\.style='anime'/);
+ assert.match(main,/artPreferences\.look='storybook'/);
+ assert.match(selection,/name="handedness"/);
  assert.doesNotMatch(main,/downloadReport|export-report|DOWNLOAD REPORT/);
  assert.match(html,/id="match-intro"/);
  assert.match(html,/id="match-intro-teams"/);

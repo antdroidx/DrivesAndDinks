@@ -328,9 +328,9 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 
 /* Setup keeps courts, paddles and visible ratings distinct from athlete appearance. */
 #court-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0;padding:14px;border:1px solid #3a5861;border-radius:8px}#court-options h3{grid-column:1/-1;margin:0;color:#d4e6dc;font:600 15px system-ui}#court-options label{display:grid;gap:8px;font:12px system-ui}#court-options select{width:100%;padding:10px;background:#213e48;color:#fff;border:1px solid #608080;border-radius:5px}#court-options fieldset{margin:0}
-#character-designer{grid-template-columns:220px minmax(0,1fr);align-items:start;gap:16px}#character-designer>button{grid-column:1/-1}#character-designer>.player-preview{grid-column:1;grid-row:2/4;position:sticky;top:54px;width:220px}#character-designer .player-preview canvas{width:220px;height:auto}#character-designer #dev-art-options,#character-designer #appearance-options{grid-column:2}#character-designer #appearance-options>.summary,#character-designer #appearance-options>summary{cursor:default}#character-designer .appearance-grid{grid-template-columns:1fr;padding:10px}#character-designer .color-options{max-height:none;display:flex;flex-wrap:wrap;overflow:visible}#character-designer .color-options label{font-size:11px;min-height:36px}#character-designer .color-menu summary{display:none}#character-designer .appearance-panel>summary::before{display:none}#character-designer .appearance-panel>summary small{display:none}
+#character-designer{grid-template-columns:220px minmax(0,1fr);align-items:start;gap:16px}#character-designer>button{grid-column:1/-1}#character-designer>.player-preview{grid-column:1;grid-row:2/4;position:sticky;top:54px;width:220px}#character-designer .player-preview canvas{width:220px;height:auto}#character-designer>#character-choices{grid-column:2;grid-row:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:12px;border:1px solid #3a5861;border-radius:6px}#character-designer>#character-choices>select{grid-column:1/-1}#character-designer #dev-art-options{grid-column:2;grid-row:3}#character-designer #appearance-options{grid-column:2;grid-row:4}#character-designer #appearance-options>.summary,#character-designer #appearance-options>summary{cursor:default}#character-designer .appearance-grid{grid-template-columns:1fr;padding:10px}#character-designer .color-options{max-height:none;display:flex;flex-wrap:wrap;overflow:visible}#character-designer .color-options label{font-size:11px;min-height:36px}#character-designer .color-menu summary{display:none}#character-designer .appearance-panel>summary::before{display:none}#character-designer .appearance-panel>summary small{display:none}
 .paddle-options{margin:12px 0}#match-setup .ratings-heading{margin-top:18px}#match-setup #loadout-stats{display:grid}
-@media(max-width:600px){#character-designer{grid-template-columns:1fr}#character-designer>.player-preview{grid-column:1;grid-row:2;top:46px;width:100%;z-index:1;display:flex;background:#17333e}#character-designer .player-preview canvas{width:170px;max-height:210px;object-fit:contain}#character-designer #dev-art-options,#character-designer #appearance-options{grid-column:1}#court-options{grid-template-columns:1fr}}
+@media(max-width:600px){#character-designer{grid-template-columns:1fr}#character-designer>.player-preview{grid-column:1;grid-row:2;top:46px;width:100%;z-index:1;display:flex;background:#17333e}#character-designer .player-preview canvas{width:170px;max-height:210px;object-fit:contain}#character-designer>#character-choices{grid-column:1;grid-row:3}#character-designer #dev-art-options{grid-column:1;grid-row:4}#character-designer #appearance-options{grid-column:1;grid-row:5}#court-options{grid-template-columns:1fr}}
 
 /* The same live athlete preview appears in setup and follows the designer when opened. */
 #match-setup:not(.designing) .setup-top{grid-template-columns:190px minmax(0,1fr);align-items:center}#match-setup:not(.designing) .setup-top .player-preview{display:flex;width:190px;position:static}#match-setup:not(.designing) .setup-top .player-preview canvas{width:190px;height:auto}
@@ -350,14 +350,6 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 
 .court-app .game.replaying .controls{visibility:hidden;pointer-events:none}
 .game #performance-panel{position:absolute;left:3%;top:3%;z-index:9;padding:5px 7px;border:1px solid #8fd9bd88;border-radius:4px;background:#102c35d9;color:#d9fff0;font:10px monospace;pointer-events:none}.game #performance-panel:empty{display:none}@media(max-width:650px){.game #performance-panel{font-size:8px;padding:3px 5px}}
-
-#stacking-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0;padding:14px;border:1px solid #3a5861;border-radius:8px}
-#stacking-options legend{grid-column:1/-1;color:#f4ca6a;font-weight:bold;font-size:13px}
-#stacking-options label{display:grid;gap:5px;font-size:11px;color:#a8c5bd}
-#stacking-options select{width:100%;min-width:0;padding:9px;background:#213e48;color:#fff3da;border:1px solid #496a70;border-radius:4px;font:inherit;font-size:11px}
-@media(max-width:650px){#stacking-options{grid-template-columns:1fr}}
-#match-setup[data-compact="true"] #stacking-options{grid-template-columns:1fr}
-
 
 /* Match preview presents both lineups before the first serve. */
 #match-intro{width:min(980px,96vw);max-height:94dvh;overflow:auto;padding:22px 24px 24px}
@@ -389,3 +381,5 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
  .intro-rating{grid-template-columns:42px 1fr 20px;text-align:left}
 }
 @media(max-width:440px){.intro-team{grid-template-columns:1fr}.intro-player{grid-template-columns:110px minmax(0,1fr);text-align:left}.intro-player canvas{width:110px;height:145px}}
+
+.body-effects-info{grid-column:1/-1;color:#aac4be;font:11px system-ui}.body-effects-info summary{cursor:pointer;color:#f4ca6a;font-weight:bold;width:22px;height:22px;display:grid;place-items:center;border:1px solid #608080;border-radius:50%;list-style:none}.body-effects-info summary::-webkit-details-marker{display:none}.body-effects-info>div{margin-top:7px;padding:9px;border:1px solid #496a70;border-radius:5px;background:#1a343d}.body-effects-info p{margin:0;line-height:1.45}.body-effects-info output{display:block;margin-top:7px;color:#80e0b5;line-height:1.4}

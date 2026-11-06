@@ -10,6 +10,8 @@ test('profile joints stay integrated and replay headwear follows live orientatio
  const replaySource=readFileSync(new URL('../src/side-replay.js',import.meta.url),'utf8');
  assert.doesNotMatch(profileSource,/joint\(c,/);
  assert.match(profileSource,/headwearBackwards/);
+ assert.match(profileSource,/const brim=headwearBackwards\?-1:1/);
+ assert.doesNotMatch(profileSource,/if\(!headwearBackwards\)\{const brim/);
  assert.match(replaySource,/headwearBackwards:p\.team===0/);
 });
 

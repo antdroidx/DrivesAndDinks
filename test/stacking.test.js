@@ -1,6 +1,5 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFileSync} from 'node:fs';
 import {Game} from '../src/game.js';
 import {playerProfile} from '../src/core.js';
 import {commitStackingCoverage,stackTargetXFor} from '../src/stacking.js';
@@ -161,8 +160,4 @@ test('stacking policy and point plans are visible in reports and replays',()=>{
  assert.ok(Object.keys(report.stacking.summary.byHandPair).length>0);
  assert.ok(report.journal.events.some(event=>event.type==='stack-decision'));
  assert.equal(frame.stacking.length,2);
- const html=readFileSync(new URL('../index.html',import.meta.url),'utf8');
- assert.match(html,/name="stack0"/);
- assert.match(html,/value="off">Off</);
- assert.match(html,/Adaptive/);
 });
