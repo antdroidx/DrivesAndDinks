@@ -1,8 +1,8 @@
-import {launch,stepBall,move,C} from './core.js?v=155';
-import {seededRandom} from './competition.js?v=155';
-import {planIncoming,volleyBrakeTarget} from './tactics.js?v=155';
-import {volleyMomentumFault} from './player-feet.js?v=155';
-import {prepareReceiver} from './match-animation.js?v=155';
+import {launch,stepBall,move,C} from './core.js?v=156';
+import {seededRandom} from './competition.js?v=156';
+import {planIncoming,volleyBrakeTarget} from './tactics.js?v=156';
+import {volleyMomentumFault} from './player-feet.js?v=156';
+import {prepareReceiver} from './match-animation.js?v=156';
 
 export const PRACTICE_DRILLS=Object.freeze({
  return:{name:'Deep return',instruction:'ATTACK after the bounce. Land in the deep target.',shot:'drive',shots:1,playerY:42,feedY:0,target:{left:2,right:18,top:1,bottom:10}},

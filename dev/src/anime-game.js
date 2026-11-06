@@ -1,7 +1,7 @@
-import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=155';
-import {matchDesign} from './detailed-character.js?v=155';
-import {conceptDimensions} from './character-concepts.js?v=155';
-import {animationRootOffset} from './pixel-character.js?v=155';
+import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=156';
+import {matchDesign} from './detailed-character.js?v=156';
+import {conceptDimensions} from './character-concepts.js?v=156';
+import {animationRootOffset} from './pixel-character.js?v=156';
 
 export function animeGameLayout(options,design){
  const scale=options.height/64,cx=options.x+options.width/2,baseline=options.y+63*scale;
@@ -11,7 +11,7 @@ export function animeGameLayout(options,design){
 export function resolveAnimeGameDesign(options){
  const base=matchDesign(options.appearance??{},options.characterId??'',options.designId??'');
  const height=Number.isFinite(options.customHeight)?Math.max(145,Math.min(210,options.customHeight)):(options.appearance?.height??base.height),build=Number.isFinite(options.customBuild)?Math.max(.05,Math.min(1.1,options.customBuild)):(options.appearance?.build??base.build);
- return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance',hair:options.appearance?.hairStyle??base.hair,headwear:options.appearance?.headwear??'none'};
+ return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance',hair:base.hair,headwear:options.appearance?.headwear??'none'};
 }
 export function applyAnimeLook(design,look){
  if(look!=='storybook')return design;const d={...design};

@@ -1,41 +1,41 @@
-import {seededRandom} from './competition.js?v=155';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=155';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=155';
-import {playerFeet,footSole} from './player-feet.js?v=155';
+import {seededRandom} from './competition.js?v=156';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=156';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=156';
+import {playerFeet,footSole} from './player-feet.js?v=156';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=155';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=156';
 
-import {drawCourtNet} from './court-net.js?v=155';
+import {drawCourtNet} from './court-net.js?v=156';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=155';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=156';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=155';
+import {createAnimeGameRenderer} from './anime-game.js?v=156';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=155';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=156';
 
-import {setupCourtDisplay} from './court-display.js?v=155';
+import {setupCourtDisplay} from './court-display.js?v=156';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=155';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=156';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan} from './court-camera.js?v=155';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=155';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan} from './court-camera.js?v=156';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=156';
 
-import {movingStance} from './detailed-character.js?v=155';
+import {movingStance} from './detailed-character.js?v=156';
 
-import {sampleMatchAnimation} from './match-animation.js?v=155';
+import {sampleMatchAnimation} from './match-animation.js?v=156';
 
-import {setupSelection} from './selection.js?v=155';
+import {setupSelection} from './selection.js?v=156';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=155';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=156';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=155';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=156';
 
-import {Game} from './game.js?v=155';
-import {C} from './core.js?v=155';
+import {Game} from './game.js?v=156';
+import {C} from './core.js?v=156';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=155';import {playerEmotionState} from './player-emotion.js?v=155';import {PerformanceMonitor} from './performance-monitor.js?v=155';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=156';import {playerEmotionState} from './player-emotion.js?v=156';import {PerformanceMonitor} from './performance-monitor.js?v=156';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=155';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=156';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 
@@ -155,11 +155,11 @@ function line(a,b,color='#f8edc7',width=3){const p=project(...a),q=project(...b)
 
 // separately for each end of the court.
 
-function drawLoadoutPreview(selection){
+function drawLoadoutPreview(selection,profile){
 
  const c=document.querySelector('#player-preview');if(!c)return;
 
- const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={body:selection.gender??character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor};
+ const x=c.getContext('2d'),character=CHARACTERS.find(item=>item.id===selection.character),appearance={...(profile?.appearance??{}),body:selection.gender??character.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor};
 
  x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,c.width,c.height);x.setTransform(2,0,0,2,0,0);x.imageSmoothingEnabled=false;x.fillStyle='#122f37';x.fillRect(0,0,c.width,c.height);
 

@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=155';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=155';
-import {thighGarment} from './character-concepts.js?v=155';
+import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=156';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=156';
+import {thighGarment} from './character-concepts.js?v=156';
 
 function polygon(c,points,color,ink='#4c453d'){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=.35;c.stroke()}
