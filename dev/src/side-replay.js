@@ -1,11 +1,11 @@
-import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=174';
-import {createProfileRenderer} from './profile-athlete.js?v=174';
-import {sampleMatchAnimation} from './match-animation.js?v=174';
-import {playerFeet} from './player-feet.js?v=174';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=174';
-import {paintCourtTexture} from './court-art.js?v=174';import {playerEmotionState} from './player-emotion.js?v=174';
-import {C} from './core.js?v=174';
-import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=174';
+import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=175';
+import {createProfileRenderer} from './profile-athlete.js?v=175';
+import {sampleMatchAnimation} from './match-animation.js?v=175';
+import {playerFeet} from './player-feet.js?v=175';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=175';import {drawNetContact} from './court-net.js?v=175';
+import {paintCourtTexture} from './court-art.js?v=175';import {playerEmotionState} from './player-emotion.js?v=175';
+import {C} from './core.js?v=175';
+import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=175';
 
 // Measured ceiling of the ball in live play is about 7 feet, with the highest
 // overhead contact near 7.4. Eight feet leaves headroom without reserving space
@@ -144,7 +144,7 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
    drawProfile(c,d,mode,phase,q.x,q.y,figureScale,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D:footPose,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:(p.handedness==='left'||p.hand==='left'?-1:1)*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),handedness:p.handedness??'right',headwearBackwards:false,...(()=>{const state=playerEmotionState(p,{phase:snapshot.phase??'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:snapshot.lastPointWinner});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
    if(showNameTags!==false)drawReplayName(c,p.name,q.x,q.y-figureScale*.84,scale);
   }
-  drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});
+  drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});drawNetContact(c,snapshot.netMark,project,{scale:Math.max(1,scale/12),labels:true});
   if(snapshot.bounceMark?.time>0){const p=project(snapshot.bounceMark.x,snapshot.bounceMark.y);c.strokeStyle='#fff6ba';c.lineWidth=Math.max(.6,scale*.05);c.beginPath();c.ellipse(p.x,p.y,Math.max(4,scale*.45),Math.max(2,scale*.15),0,0,Math.PI*2);c.stroke()}
   c.restore();
  };

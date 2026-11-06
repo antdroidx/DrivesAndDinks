@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=174';
-import {strokeForContact} from './player-facing.js?v=174';
+import {kitchenContact} from './player-feet.js?v=175';
+import {strokeForContact} from './player-facing.js?v=175';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:34/12,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export function venueConditions(surfaceKind='outdoor',random=Math.random){
  if(surfaceKind==='indoor')return {type:'indoor',label:'INDOOR · CALM',wind:0,humidity:0};
@@ -233,7 +233,7 @@ export function selectShot(p,b,desired){
  const wideBall=b.x<=.75||b.x>=19.25;
  const kitchenSide=p.team===0?p.y<=31:p.y>=13;
  if(desired==='soft')return kitchenSide?'dink':'drop';
- if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>3:(p.vy||0)<-3)&&behind>.05&&behind<2.4&&b.z>.2&&b.z<2.5&&Math.hypot(p.vx||0,p.vy||0)>4&&(Math.max(p.abilities?.lob??1,p.abilities?.defense??1)>1.05))return 'tweener';return 'lob'}
+ if(desired==='lob'){const behind=(p.team===0?b.y-p.y:p.y-b.y);if((p.team===0?(p.vy||0)>2.2:(p.vy||0)<-2.2)&&behind>.05&&behind<2.8&&b.z>.2&&b.z<2.5&&Math.hypot(p.vx||0,p.vy||0)>2.5&&(Math.max(p.abilities?.lob??1,p.abilities?.defense??1)>1.02))return 'tweener';return 'lob'}
  if(desired==='attack'||desired==='drive'){
   if(nearSideline&&wideBall&&(p.x<0||p.x>20)&&p.erneAirborne&&b.z>=3.2)return 'erne';
   if(atpOpportunity(p,b))return 'atp';
@@ -241,7 +241,7 @@ export function selectShot(p,b,desired){
  }
  return desired;
 }
-export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, partnerReady=true, balanced=true, opponentsDeep=false, transition=false, pattern=null, incomingShot='dink', random=Math.random()}){
+export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false, aggression=.5, courtIQ=1, attackSkill=1, softSkill=1, difficulty=0, tendency='balanced',patience=.7,singles=false, partnerReady=true, balanced=true, opponentsDeep=false, transition=false, pattern=null, incomingShot='dink', lobExchange=0, random=Math.random()}){
  const nearKitchen=team===0?y<33:y>11;
  const bias=Math.max(0,Math.min(1,Number(aggression)||.5));
  const relativeSkill=Math.max(-.12,Math.min(.12,(Number(attackSkill||1)-Number(softSkill||1))*.32-Math.max(0,Math.min(1,Number(difficulty)||0))*.3));
@@ -274,9 +274,11 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
   return random<driveChance?'drive':reset;
  }
  if(shots>2&&height>=5.2)return 'drive';
- if(difficulty>.82&&height<3.2)return 'lob';
+ const incomingLob=['lob','tweener'].includes(incomingShot),canLob=Number(lobExchange||0)<1;
+ if(incomingLob&&height>=.75&&(difficulty<.96||!opponentsAtKitchen))return 'drive';
+ if(canLob&&difficulty>.94&&height<2.4&&opponentsAtKitchen&&random>.55)return 'lob';
  if(shots===2)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';
- if(nearKitchen){const readConfidence=Math.max(0,Math.min(.85,pattern?.confidence??0)),lobRead=Math.max(0,Math.min(.85,pattern?.lobConfidence??0));if(opponentsAtKitchen&&height<2&&random>(lobRead>.5?.92:.97))return 'lob';if(difficulty>.9&&height<2.7)return 'dink';const rallyEscalation=shots>=6?Math.min(.36,(shots-6)*.025):0;const attackChance=Math.max(.12,Math.min(.76,.22+attackBias+rallyEscalation+(height-1.4)*.08+readConfidence*.03));const speedupReady=balanced&&partnerReady&&difficulty<.78&&height>=2.15&&height<=5.2&&(opponentsAtKitchen||!opponentsDeep);if(height>=2.15){if(incomingShot==='dink')return speedupReady&&(height>2.85||random<attackChance+.22)?'drive':'dink';return height>3.05||random<attackChance?'drive':'dink'}if(shots>=18)return difficulty>.9?'lob':'drive';return height>1.25&&random<attackChance?'drive':'dink'}
+ if(nearKitchen){const readConfidence=Math.max(0,Math.min(.85,pattern?.confidence??0)),lobRead=Math.max(0,Math.min(.85,pattern?.lobConfidence??0));if(canLob&&opponentsAtKitchen&&height<2&&random>(lobRead>.5?.92:.97))return 'lob';if(difficulty>.9&&height<2.7)return 'dink';const rallyEscalation=shots>=6?Math.min(.36,(shots-6)*.025):0;const attackChance=Math.max(.12,Math.min(.76,.22+attackBias+rallyEscalation+(height-1.4)*.08+readConfidence*.03));const speedupReady=balanced&&partnerReady&&difficulty<.78&&height>=2.15&&height<=5.2&&(opponentsAtKitchen||!opponentsDeep);if(height>=2.15){if(incomingShot==='dink')return speedupReady&&(height>2.85||random<attackChance+.22)?'drive':'dink';return height>3.05||random<attackChance?'drive':'dink'}if(shots>=18)return canLob&&difficulty>.94&&random>.55?'lob':'drive';return height>1.25&&random<attackChance?'drive':'dink'}
  return height>3.2&&random<Math.max(.2,Math.min(.72,.45+attackBias))?'drive':'drop';
 }
 export function kitchenFootContact(p){return kitchenContact(p)!==null}
