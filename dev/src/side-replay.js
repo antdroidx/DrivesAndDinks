@@ -1,9 +1,9 @@
-import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=153';
-import {createProfileRenderer} from './profile-athlete.js?v=153';
-import {sampleMatchAnimation} from './match-animation.js?v=153';
-import {playerFeet} from './player-feet.js?v=153';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=153';
-import {paintCourtTexture} from './court-art.js?v=153';import {playerEmotionState} from './player-emotion.js?v=153';
+import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=154';
+import {createProfileRenderer} from './profile-athlete.js?v=154';
+import {sampleMatchAnimation} from './match-animation.js?v=154';
+import {playerFeet} from './player-feet.js?v=154';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=154';
+import {paintCourtTexture} from './court-art.js?v=154';import {playerEmotionState} from './player-emotion.js?v=154';
 
 // Measured ceiling of the ball in live play is about 7 feet, with the highest
 // overhead contact near 7.4. Eight feet leaves headroom without reserving space
@@ -79,7 +79,7 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
   image.src=new URL('../assets/venues/'+REPLAY_PLATE.file,import.meta.url).href;
   return plate;
  };
- return (c,viewport,snapshot,clip,{palette,style='anime',look='sports',outfit='performance',live=false}={})=>{
+ return (c,viewport,snapshot,clip,{palette,style='anime',look='sports',outfit='performance'}={})=>{
   const {width,height}=viewport,camera=sideReplayCamera(width,height,clip,snapshot),{project,scale,horizon,depthOf,lift,span}=camera;
   // How much bigger than true scale an object is drawn, so the athletes and the
   // ball keep the proportions the live view gives them.
@@ -133,14 +133,14 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
     c.strokeStyle='#f3e99b66';c.lineWidth=Math.max(.6,scale*.045);c.beginPath();for(const [i,p] of (snapshot.trail??[]).entries()){const t=project(p.x,p.y,p.z);i?c.lineTo(t.x,t.y):c.moveTo(t.x,t.y)}c.stroke();
     c.fillStyle='#f4ea71';c.beginPath();c.ellipse(q.x,q.y,Math.max(2,bs*.125),Math.max(2,bs*.125),0,0,Math.PI*2);c.fill();continue;
    }
-   const p=entity.player,q=project(p.x,p.y),figureScale=sideReplayFigureHeight(camera,p.x,p.y)/PROFILE_BODY,units=PROFILE_BODY/(LIVE_PLAYER_OVER_LENGTH*COURT_LENGTH),zUnits=lift(p.x,p.y)/figureScale,animation=sampleMatchAnimation(p,{...snapshot,server:snapshot.players.find(player=>player.id===(snapshot.serverId??snapshot.server?.id))}),moving=Math.hypot(p.vx,p.vy)>1;
+   const p=entity.player,q=project(p.x,p.y),figureScale=sideReplayFigureHeight(camera,p.x,p.y)/PROFILE_BODY,units=PROFILE_BODY/(LIVE_PLAYER_OVER_LENGTH*COURT_LENGTH),zUnits=lift(p.x,p.y)/figureScale,animation=sampleMatchAnimation(p,{...snapshot,server:snapshot.players.find(player=>player.id===snapshot.serverId)}),moving=Math.hypot(p.vx,p.vy)>1;
    const mode=animation?.mode??(moving?'run':'idle'),phase=animation?.phase??0,d=applyAnimeLook(resolveAnimeGameDesign({appearance:p.appearance,characterId:p.characterId,outfit}),look),direction=p.team===0?-1:1,stature=d.height/177;
    const footPose=playerFeet(p).map(foot=>({x:(foot.x-p.x)*units,y:63-(2+foot.z*zUnits)/stature,z:(foot.y-p.y)*direction*units}));
    const contact3D=p.animationContactStart&&p.swing>0&&p.contactPoint?{x:(p.contactPoint.x-p.x)*units,y:63-p.contactPoint.z*zUnits/stature,z:(p.contactPoint.y-p.y)*direction*units}:null;
 
    drawProfile(c,d,mode,phase,q.x,q.y,figureScale,{style,look,direction,view:p.team===0?'near':'far',frame:(p.stride??0)*1.35,moving,feet3D:footPose,contact3D,alignStrength:animation?.alignStrength??0,paddleShape:p.paddle?.shapeId,side:(p.handedness==='left'||p.hand==='left'?-1:1)*(['resetBlock','counterVolley','halfVolley'].includes(mode)&&p.stroke==='backhand'?-1:1),handedness:p.handedness??'right',...(()=>{const state=playerEmotionState(p,{phase:'rally',rallyShots:snapshot.shots,incomingShot:snapshot.ball?.shot,lastPointWinner:null});return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:snapshot.clock}})()});
   }
-  drawContactCue(c,live?snapshot.contact:replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});
+  drawContactCue(c,replayContactAt(clip,snapshot.clock),project,{scale:Math.max(1,scale/12),labels:true});
   if(snapshot.bounceMark?.time>0){const p=project(snapshot.bounceMark.x,snapshot.bounceMark.y);c.strokeStyle='#fff6ba';c.lineWidth=Math.max(.6,scale*.05);c.beginPath();c.ellipse(p.x,p.y,Math.max(4,scale*.45),Math.max(2,scale*.15),0,0,Math.PI*2);c.stroke()}
   c.restore();
  };
