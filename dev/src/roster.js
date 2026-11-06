@@ -1,6 +1,6 @@
-import {competitionRecord} from './competition.js?v=170';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=170';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=170';
+import {competitionRecord} from './competition.js?v=173';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=173';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=173';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -268,3 +268,4 @@ export function applyPhysique(player,appearance=player.appearance??{}){
  const abilities={...baseAbilities};for(const [key,multiplier] of Object.entries(modifiers))abilities[key]=(baseAbilities[key]??1)*multiplier;
  return {...player,baseAbilities,abilities,appearance:{...appearance,height,build},physique:{height,build,heightScale:height/177,modifiers}};
 }
+

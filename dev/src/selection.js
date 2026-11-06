@@ -1,6 +1,6 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=170';
-import {normalizeStackingSelection} from './stacking.js?v=170';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=170';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=173';
+import {normalizeStackingSelection} from './stacking.js?v=173';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=173';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -76,7 +76,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
 
  mainIdentity.append(archetypeField,designButton,playerDescription);nameSlot.append(nameField);
  profileGrid.append(genderField,handField,hairStyleField,hairColorField,skinField,heightField,weightField,bodyInfo);
- outfitGrid.append(outfitField,shirtColorField,highlightColorField,headwearField,eyewearField,motionLink);
+ outfitField.style.gridColumn='1 / -1';outfitGrid.append(outfitField,shirtColorField,highlightColorField,headwearField,eyewearField,motionLink);
  designer.append(back,preview,profileBox,outfitBox);
  const ratingsHeading=form.querySelector('.ratings-heading'),loadoutStats=form.querySelector('#loadout-stats');
  loadoutStats.after(designer);
@@ -123,3 +123,4 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
  function open(){if(started)previewLineup=[];dialog.querySelector('#resume-match').hidden=!started;form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
  open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
 }
+

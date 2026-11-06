@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=170';
-import {strokeForContact} from './player-facing.js?v=170';
+import {kitchenContact} from './player-feet.js?v=173';
+import {strokeForContact} from './player-facing.js?v=173';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:34/12,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export function venueConditions(surfaceKind='outdoor',random=Math.random){
  if(surfaceKind==='indoor')return {type:'indoor',label:'INDOOR · CALM',wind:0,humidity:0};
@@ -261,7 +261,7 @@ export function chooseCpuShot({shots, team, y, height, opponentsAtKitchen=false,
    (!partnerReady?-.2:0)+(dropFeasible?0:.16)-pressure*.18));
   return random<driveChance?'drive':reset;
  }
- if(shots>2&&height>=5.2&&height<=7.4)return 'drive';
+ if(shots>2&&height>=5.2)return 'drive';
  if(difficulty>.82&&height<3.2)return 'lob';
  if(shots===2)return height>1.2&&difficulty<.75&&random<Math.max(.35,Math.min(.82,.62+attackBias))?'drive':'drop';
  if(nearKitchen){const readConfidence=Math.max(0,Math.min(.85,pattern?.confidence??0)),lobRead=Math.max(0,Math.min(.85,pattern?.lobConfidence??0));if(opponentsAtKitchen&&height<2&&random>(lobRead>.5?.92:.97))return 'lob';if(difficulty>.9&&height<2.7)return 'dink';const rallyEscalation=shots>=6?Math.min(.36,(shots-6)*.025):0;const attackChance=Math.max(.12,Math.min(.76,.22+attackBias+rallyEscalation+(height-1.4)*.08+readConfidence*.03));const speedupReady=balanced&&partnerReady&&difficulty<.78&&height>=2.15&&height<=5.2&&(opponentsAtKitchen||!opponentsDeep);if(height>=2.15){if(incomingShot==='dink')return speedupReady&&(height>2.85||random<attackChance+.22)?'drive':'dink';return height>3.05||random<attackChance?'drive':'dink'}if(shots>=18)return difficulty>.9?'lob':'drive';return height>1.25&&random<attackChance?'drive':'dink'}
@@ -275,3 +275,5 @@ export function chooseCpuTarget(player,opponents,shot){
   return value(x)>value(best)?x:best;
  },candidates[0]);
 }
+
+
