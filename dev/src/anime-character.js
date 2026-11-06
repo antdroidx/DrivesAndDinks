@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=169';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=169';
-import {legDimensions,plantFeet} from './detailed-character.js?v=169';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=170';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=170';
+import {legDimensions,plantFeet} from './detailed-character.js?v=170';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -12,7 +12,7 @@ export function skinPalette(hex){
  return {base:hex,light:color(rgb.map((v,i)=>v*.86+[255,228,193][i]*.14)),shadow:color(rgb.map((v,i)=>v*.78+[12,2,7][i])),deep:color(rgb.map((v,i)=>v*.61+[14,3,8][i]))};
 }
 export function animePixelPalette(d){
- const skin=skinPalette(d.skin),hexes=[...Object.values(skin),d.shirt,tone(d.shirt,-.2),tone(d.shirt,-.48),tone(d.shirt,.13),d.hairColor,tone(d.hairColor,-.25),tone(d.hairColor,.18),d.trim,tone(d.trim,-.12),'#4c453d','#483f35','#1c2430','#e5dfce','#fff3df',tone(d.trim,-.55),tone('#e5dfce',-.15)];
+ const skin=skinPalette(d.skin),hexes=[...Object.values(skin),d.shirt,tone(d.shirt,-.2),tone(d.shirt,-.48),tone(d.shirt,.13),d.hairColor,tone(d.hairColor,-.25),tone(d.hairColor,.18),d.trim,tone(d.trim,-.12),d.paddleColor??d.trim,tone(d.paddleColor??d.trim,-.12),'#4c453d','#483f35','#1c2430','#e5dfce','#fff3df',tone(d.trim,-.55),tone('#e5dfce',-.15)];
  return [...new Set(hexes)].map(hex=>hex.slice(1).match(/../g).map(v=>parseInt(v,16)));
 }
 export function animeHeadCenter(neck){return {x:neck.x,y:neck.y-6}}
@@ -191,7 +191,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
    line(c,[point(cx+uy*half,cy-ux*half),point(cx-uy*half,cy+ux*half)],d.trim,1.7);
   }
  }
- function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const shape=paddleOutline(options.paddleShape??'hybrid'),scale=.76,drawFace=(factor,fill,stroke=null)=>{c.beginPath();shape.forEach(([x,y],index)=>{const point={x:x*factor*scale,y:y*factor*scale};index?c.lineTo(point.x,point.y):c.moveTo(point.x,point.y)});c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.38;c.lineJoin='round';c.stroke()}};drawFace(1,d.trim,ink);drawFace(.84,'#1c2430');drawFace(.62,'#101722');line(c,[point(-1.5*scale,-2.3*scale),point(-.3*scale,-3*scale),point(.9*scale,-2.8*scale)], '#ffffff28',.38);c.restore()}
+ function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const shape=paddleOutline(options.paddleShape??'hybrid'),scale=.76,drawFace=(factor,fill,stroke=null)=>{c.beginPath();shape.forEach(([x,y],index)=>{const point={x:x*factor*scale,y:y*factor*scale};index?c.lineTo(point.x,point.y):c.moveTo(point.x,point.y)});c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.38;c.lineJoin='round';c.stroke()}};drawFace(1,d.paddleColor??d.trim,ink);drawFace(.84,'#1c2430');drawFace(.62,'#101722');line(c,[point(-1.5*scale,-2.3*scale),point(-.3*scale,-3*scale),point(.9*scale,-2.8*scale)], '#ffffff28',.38);c.restore()}
 
  const layers=raw.arms.map((chain,i)=>({i,back:chain[1].depth<raw.neck.depth}));layers.filter(a=>a.back).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
  ribbon(c,[point(n.x,n.y-.6),point(n.x,n.y+2.8)],[3.4,3.8],d.skin,ink,skin);
