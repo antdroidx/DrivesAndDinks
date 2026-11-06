@@ -40,7 +40,7 @@ test('promotion preserves the exact previous public build and enables the public
  assert.match(workflow,/_public122\/ _site\/archive\/build-122\//);
  assert.doesNotMatch(workflow,/version-build\.js[^\n]*_site\/archive\/build-122/);
  assert.match(main,/const detailedArtAvailable=true/);
- assert.match(workflow,/_release\/style-lab\.html _release\/style-lab\.css _site\//);
+ assert.match(workflow,/_release\/style-lab\.html _site\//);
 });
 
 

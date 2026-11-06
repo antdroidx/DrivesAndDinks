@@ -60,7 +60,7 @@ jobs:
             printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
             cp -R src assets _site/dev/
             if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
-            if [ -f style-lab.html ]; then cp style-lab.html style-lab.css _site/dev/; fi
+            if [ -f style-lab.html ]; then cp style-lab.html _site/dev/; fi
             node scripts/version-build.js "${{ github.run_number }}" _site/dev
             touch _site/.nojekyll
           else
@@ -83,7 +83,7 @@ jobs:
             cp -R _release/src _release/assets _site/
             cp _release/sw.js _release/manifest.webmanifest _site/
             if [ -f _release/character-lab.html ]; then cp _release/character-lab.html _release/character-lab.css _site/; fi
-            if [ -f _release/style-lab.html ]; then cp _release/style-lab.html _release/style-lab.css _site/; fi
+            if [ -f _release/style-lab.html ]; then cp _release/style-lab.html _site/; fi
             node scripts/version-build.js "${{ github.run_number }}" _site
             touch _site/.nojekyll
           fi
