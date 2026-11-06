@@ -76,7 +76,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
 
  mainIdentity.append(archetypeField,designButton,playerDescription);nameSlot.append(nameField);
  profileGrid.append(genderField,handField,hairStyleField,hairColorField,skinField,heightField,weightField,bodyInfo);
- outfitField.style.gridColumn='1 / -1';`noutfitGrid.append(outfitField);`noutfitGrid.append(shirtColorField,highlightColorField);`noutfitGrid.append(headwearField,eyewearField);`noutfitGrid.append(motionLink);
+ outfitField.style.gridColumn='1 / -1';outfitGrid.append(outfitField,shirtColorField,highlightColorField,headwearField,eyewearField,motionLink);
  designer.append(back,preview,profileBox,outfitBox);
  const ratingsHeading=form.querySelector('.ratings-heading'),loadoutStats=form.querySelector('#loadout-stats');
  loadoutStats.after(designer);
