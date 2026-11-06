@@ -19,7 +19,7 @@ test('invalid and legacy selections safely normalize',()=>{
  const invalid=normalizeSelection({character:'nope',paddle:'nope',paddleShape:'nope',hair:'nope',skin:'nope',outfit:'dress',shirtColor:'nope',bottomColor:'nope',paddleColor:'nope',court:'nope'});
  assert.equal(invalid.character,'avery');assert.equal(invalid.court,'blue-gray');assert.equal(invalid.paddleShape,'hybrid');assert.equal(normalizeSelection({court:'red-white'}).court,'gray-red');assert.equal(normalizeSelection({court:'red-gray'}).court,'gray-red');
  assert.equal(invalid.hairColor,'brown');assert.equal(invalid.skinColor,'medium');
- assert.equal('outfit' in invalid,false);assert.equal('bottomColor' in invalid,false);
+ assert.equal(invalid.outfit,'performance');assert.equal('bottomColor' in invalid,false);
 });
 test('every player and paddle combination produces an independent playable profile',()=>{
  for(const c of CHARACTERS)for(const p of PADDLES)for(const shape of PADDLE_SHAPES){const config={character:c.id,paddle:p.id,paddleShape:shape.id,shirtColor:'orange',paddleColor:'yellow',court:'pink-black'};const profile=buildProfile(config);assert.equal(profile.characterId,c.id);assert.equal(profile.paddle.id,p.id);assert.equal(profile.paddle.shapeId,shape.id);assert.equal(profile.appearance.shirtColor,'orange');assert.equal(profile.appearance.paddleColor,'yellow');profile.abilities.speed=0;assert.ok(buildProfile(config).abilities.speed>0)}
@@ -103,8 +103,18 @@ test('generated bodies stay in realistic population ranges',()=>{
  assert.equal(normalizeSelection({headwear:'cap',eyewear:'glasses'}).eyewear,'glasses');
  assert.equal(buildProfile({headwear:'visor',eyewear:'glasses'}).appearance.headwear,'visor');
  assert.equal(normalizeSelection({showNameTags:false}).showNameTags,false);
+ assert.equal(normalizeSelection({outfit:'shorts'}).outfit,'shorts');
  assert.equal(normalizeSelection().showNameTags,true);
  const displayGame=new Game();displayGame.configure({showNameTags:false});assert.equal(displayGame.showNameTags,false);assert.equal(displayGame.matchReport().showNameTags,false);
+});
+
+test('generated accessories do not inherit the user\'s headwear and eyewear',()=>{
+ let seed=91;const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296};
+ const lineup=createLineup({headwear:'cap',eyewear:'glasses',customName:'Alex Kim'},{random});
+ assert.equal(lineup[0].appearance.headwear,'cap');assert.equal(lineup[0].appearance.eyewear,'glasses');
+ const generated=lineup.slice(1);assert.ok(generated.some(player=>player.appearance.headwear!=='cap'));assert.ok(generated.some(player=>player.appearance.eyewear!=='glasses'));
+ const accessories=[];for(let i=0;i<40;i++){const next=createLineup({headwear:'cap',eyewear:'glasses'},{random});accessories.push(...next.slice(1).map(player=>[player.appearance.headwear,player.appearance.eyewear]))}
+ assert.ok(new Set(accessories.map(pair=>pair[0])).size>1);assert.ok(new Set(accessories.map(pair=>pair[1])).size>1);
 });
 
 test('custom user names remain customizable and survive the match profile',()=>{

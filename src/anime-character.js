@@ -53,7 +53,7 @@ function hairTail(c,d,x,y,phase,near,ink){
   for(const sign of [-1,1]){c.beginPath();c.moveTo(x+sign*4,y-4);c.quadraticCurveTo(x+sign*8,y-1,x+sign*(d.hair==='waves'?7.8:6.3),y+7);c.lineTo(x+sign*3.8,y+5.8);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke()}
  }
 }
-function normalizeEmotion(emotion){return ({smile:'happy',reaction:'surprise',neutral:'focus'})[emotion]??emotion??'focus'}
+function normalizeEmotion(emotion){return ({smile:'happy',reaction:'surprise',neutral:'focus',sad:'disappointment',calm:'relief'})[emotion]??emotion??'focus'}
 function expressionShape(emotion){
  emotion=normalizeEmotion(emotion);
  const eye={width:.8,height:1.06,pupil:.55,brow:.15,low:.06};
@@ -63,6 +63,9 @@ function expressionShape(emotion){
  if(emotion==='surprise'){eye.width=1.04;eye.height=1.48;eye.pupil=.4;eye.low=-.18}
  if(emotion==='aggression'){eye.width=.62;eye.height=.88;eye.pupil=.44;eye.low=.02}
  if(emotion==='happy'){eye.width=.76;eye.height=.72;eye.low=.16}
+ if(emotion==='disappointment'){eye.width=.74;eye.height=.5;eye.pupil=.5;eye.low=.28}
+ if(emotion==='anger'){eye.width=.55;eye.height=.78;eye.pupil=.42;eye.low=.05}
+ if(emotion==='relief'){eye.width=.5;eye.height=.3;eye.pupil=.45;eye.low=.2}
  return eye;
 }
 function emotionMarks(c,emotion,intensity,head){
@@ -71,6 +74,9 @@ function emotionMarks(c,emotion,intensity,head){
  if(emotion==='aggression'){line(c,[point(head.x-7,head.y-3),point(head.x-4.5,head.y-4)],'#ef8a4b',.42);line(c,[point(head.x+4.5,head.y-4),point(head.x+7,head.y-3)],'#ef8a4b',.42)}
  if(emotion==='happy'){line(c,[point(head.x-7,head.y-4),point(head.x-5.5,head.y-5.5)],'#f6cc59',.35);line(c,[point(head.x+5.5,head.y-5.5),point(head.x+7,head.y-4)],'#f6cc59',.35)}
  if(emotion==='fatigue'){c.strokeStyle='#b5e6ef';c.lineWidth=.28;c.beginPath();c.arc(head.x+5.5,head.y+3.5,1.3,-.8,.8);c.stroke()}
+ if(emotion==='disappointment'){line(c,[point(head.x-5.5,head.y-2.2),point(head.x-3.8,head.y-1.2)],'#77a9b5',.28)}
+ if(emotion==='anger'){line(c,[point(head.x-6,head.y-3.8),point(head.x-3.8,head.y-4.5)],'#ef8a4b',.38);line(c,[point(head.x+3.8,head.y-4.5),point(head.x+6,head.y-3.8)],'#ef8a4b',.38)}
+ if(emotion==='relief'){for(let i=0;i<2;i++)oval(c,head.x+3.2+i*1.2,head.y+4.2+i*.2,.55-i*.12,.24,'#d8f3f49c')}
  c.restore();
 }
 function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
@@ -90,12 +96,15 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
    const shape=expressionShape(emotion);
    for(const sign of [-1,1]){const ex=x+sign*2.1,ey=y+.4+(shape.low*.35),eyeWidth=shape.width,eyeHeight=shape.height;
     oval(c,ex,ey,eyeWidth,eyeHeight,'#fff3df');oval(c,ex+sign*.08,ey+.14,.52,shape.pupil,warm?'#6b5340':tone(hair,.22));oval(c,ex+sign*.08,ey+.26,.28,.6,tone(ink,.24));oval(c,ex-.18,ey-.27,.2,.26,'#fffdf2');
-    const browY=ey-.62+(emotion==='effort'?.2:emotion==='surprise'?.12:emotion==='happy'?.1:emotion==='fatigue'?.34:emotion==='aggression'?.18:0);
+    const browY=ey-.62+(emotion==='effort'?.2:emotion==='surprise'?.12:emotion==='happy'?.1:emotion==='fatigue'?.34:emotion==='aggression'?.18:emotion==='disappointment'?.32:emotion==='anger'?-.05:emotion==='relief'?.24:0);
     c.beginPath();c.moveTo(ex-eyeWidth,browY);c.quadraticCurveTo(ex+sign*.3,browY-(emotion==='effort'?.36:emotion==='surprise'?.16:.22)+(emotion==='fatigue'?.18:0),ex+eyeWidth,browY+(emotion==='effort'?.22:emotion==='aggression'?sign*.28:emotion==='fatigue'?.16:0));c.strokeStyle=tone(ink,.16);c.lineWidth=.26;c.stroke();
     line(c,[point(ex-.9,y-1.75),point(ex,y-1.95),point(ex+.8,y-1.75)],tone(hair,.06),.24);
    }
    oval(c,x+.25,y+2.55,.18,.14,tone(skin,-.22));
    if(emotion==='happy'){c.beginPath();c.moveTo(x-.85,y+3.65);c.quadraticCurveTo(x+.15,y+4.65,x+1.05,y+3.55);c.strokeStyle=tone(skin,-.35);c.lineWidth=.28;c.stroke()}
+   else if(emotion==='disappointment'){c.beginPath();c.moveTo(x-.75,y+4.05);c.quadraticCurveTo(x+.1,y+3.45,x+.9,y+3.95);c.strokeStyle=tone(skin,-.4);c.lineWidth=.28;c.stroke()}
+   else if(emotion==='anger'){line(c,[point(x-.8,y+3.75),point(x+.8,y+3.9)],tone(skin,-.48),.34);for(const dx of [-.4,.05,.5])line(c,[point(x+dx,y+3.65),point(x+dx,y+4.1)],'#fff3df',.14)}
+   else if(emotion==='relief'){c.beginPath();c.moveTo(x-.55,y+3.8);c.quadraticCurveTo(x+.1,y+4.35,x+.72,y+3.85);c.strokeStyle=tone(skin,-.34);c.lineWidth=.24;c.stroke();oval(c,x+2.1,y+3.9,.55,.25,'#d8f3f4a8')}
    else if(emotion==='surprise'){oval(c,x+.15,y+4.15,.58,.78,tone(skin,-.52));oval(c,x+.15,y+4.35,.3,.32,tone(skin,-.72))}
    else if(emotion==='aggression'){line(c,[point(x-.8,y+3.8),point(x+.8,y+3.65)],tone(skin,-.4),.3);for(const dx of [-.45,0,.45])line(c,[point(x+dx,y+3.55),point(x+dx,y+4.05)],'#fff3df',.16)}
    else{const mouthY=y+4+(emotion==='effort'?.28:emotion==='fatigue'?.34:0);if(emotion==='fatigue')oval(c,x+.15,mouthY,.42,.55,tone(skin,-.48));else line(c,[point(x-.55,mouthY),point(x+.35,mouthY+(emotion==='effort'?-.16:emotion==='fatigue'?.12:0)),point(x+.85,mouthY)],tone(skin,-.34),.24)}

@@ -11,7 +11,7 @@ export function animeGameLayout(options,design){
 export function resolveAnimeGameDesign(options){
  const base=matchDesign(options.appearance??{},options.characterId??'',options.designId??'');
  const height=Number.isFinite(options.customHeight)?Math.max(145,Math.min(210,options.customHeight)):(options.appearance?.height??base.height),build=Number.isFinite(options.customBuild)?Math.max(.05,Math.min(1.1,options.customBuild)):(options.appearance?.build??base.build);
- return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??'performance',hair:base.hair,headwear:options.appearance?.headwear??'none',eyewear:options.appearance?.eyewear??'none'};
+ return {...conceptDimensions(base,height-base.height,build-base.build),outfit:options.outfit??options.appearance?.outfit??'performance',hair:base.hair,headwear:options.appearance?.headwear??'none',eyewear:options.appearance?.eyewear??'none'};
 }
 export function applyAnimeLook(design,look){
  if(look!=='storybook')return design;const d={...design};

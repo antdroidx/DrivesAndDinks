@@ -49,6 +49,7 @@ test('scorpion, celebration and fatigue recovery use dedicated animation states'
  const scorpion={...playerProfile(),team:0,x:10,y:30,stroke:'forehand',animationShot:'overhead',contactType:'volley',contactPoint:{x:10,y:30.8,z:5.5}};
  assert.equal(matchStrokeMode(scorpion),'scorpion');
  assert.equal(sampleMatchAnimation({...scorpion,celebrateTimer:.6,swing:0},{phase:'pause',clock:2}).mode,'celebrate');
+ for(const kind of ['celebrate','disappointment','anger','relief'])assert.equal(sampleMatchAnimation({...scorpion,reactionKind:kind,reactionTimer:.7,celebrateTimer:0,swing:0},{phase:'pause',clock:2}).mode,kind);
  const tired={...playerProfile(),stamina:.2,celebrateTimer:0,swing:0};
  assert.equal(sampleMatchAnimation(tired,{phase:'pause',clock:3}).mode,'recoveryIdle');
 });

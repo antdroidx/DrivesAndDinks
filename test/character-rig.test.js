@@ -63,8 +63,8 @@ test('two-handed grip stays connected through the entire stroke on both sides',(
   assert.ok(pose.twoHanded);assert.ok(Math.hypot(pose.arms[0][2].x-pose.arms[1][2].x,pose.arms[0][2].y-pose.arms[1][2].y)<3);
  }
 });
-test('all stroke paths differ where authored and recover to the same ready position',()=>{
- const signatures=MOTIONS.slice(2).map(mode=>[.28,.52,.78].map(phase=>sampleCharacterPose({mode,phase}).paddle));
+test('all authored paths differ where designed and recover to the same ready position',()=>{
+ const signatures=MOTIONS.slice(2).map(mode=>[.28,.52,.78].map(phase=>{const pose=sampleCharacterPose({mode,phase});return {paddle:pose.paddle,arms:pose.arms,neck:pose.neck,hips:pose.hips,feet:pose.feet}}));
  assert.equal(new Set(signatures.map(p=>JSON.stringify(p))).size,MOTIONS.slice(2).length);
  for(const mode of MOTIONS.slice(2))assert.deepEqual(sampleCharacterPose({mode,phase:0}).paddle,sampleCharacterPose({mode,phase:1}).paddle);
 });

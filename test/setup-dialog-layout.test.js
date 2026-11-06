@@ -21,9 +21,13 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.match(html,/id="hair-style"/);
  assert.match(html,/id="headwear"/);
  assert.match(html,/id="eyewear"/);
+ assert.match(main,/game-art-outfit" name="outfit/);
  assert.match(css,/\.score-team\{display:grid/);
  assert.match(css,/\.score-meta\{grid-column:1\/-1/);
  assert.match(html,/name="showNameTags"/);
  assert.doesNotMatch(html,/download-report|DOWNLOAD REPORT/);
  assert.doesNotMatch(main,/downloadReport|export-report|DOWNLOAD REPORT/);
+ assert.match(html,/id="match-intro"/);
+ assert.match(html,/id="match-intro-teams"/);
+ assert.match(html,/id="begin-match"/);
 });

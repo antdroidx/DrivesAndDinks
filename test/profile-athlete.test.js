@@ -1,0 +1,23 @@
+import {test} from 'node:test';
+import assert from 'assert/strict';
+import {CHARACTER_CONCEPTS} from '../src/character-concepts.js';
+import {animeBodyDimensions} from '../src/anime-character.js';
+import {profilePose,profileTorso,profileShorts} from '../src/profile-athlete.js';
+import {MOTIONS} from '../src/pixel-character.js';
+
+test('profile torsos retain a crop waist and never collapse their shirt hem',()=>{
+ for(const base of CHARACTER_CONCEPTS)for(const outfit of ['performance','polo','shorts'])for(const mode of ['idle',...MOTIONS])for(const phase of [0,.25,.52,.8,1]){
+  const design={...base,outfit},pose=profilePose(design,mode,phase,{direction:-1}),torso=profileTorso(design,pose),crop=base.body==='female'&&outfit==='shorts';
+  assert.equal(torso.crop,crop);assert.ok(torso.shirtHem>torso.top+6.5);assert.ok(torso.shirtHem<torso.bottom);
+  if(crop)assert.ok(torso.bottom-torso.shirtHem>3&&torso.bottom-torso.shirtHem<7);
+ }
+});
+
+test('profile shorts stay attached to hips and stop on the upper thigh',()=>{
+ for(const base of CHARACTER_CONCEPTS)for(const mode of ['idle',...MOTIONS])for(const phase of [0,.25,.52,.8,1]){
+  const design={...base,outfit:'shorts'},pose=profilePose(design,mode,phase,{direction:1}),body=animeBodyDimensions(design),garment=profileShorts(pose.hips,pose.legs,body);
+  assert.equal(garment.pieces.length,2);
+  for(let i=0;i<2;i++){const chain=pose.legs[i],piece=garment.pieces[i],hip=chain[0],knee=chain[1],upper=Math.hypot(knee.x-hip.x,knee.y-hip.y),endDistance=Math.hypot(piece.end.x-hip.x,piece.end.y-hip.y);assert.ok(endDistance<=upper*.52+1e-6);assert.ok(Math.hypot(piece.polygon[0][0]-(hip.x-1),piece.polygon[0][1]-(hip.y-1))<body.thigh+2)}
+  assert.ok(garment.waistband.every(([x,y])=>Number.isFinite(x)&&Number.isFinite(y)));
+ }
+});
