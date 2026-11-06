@@ -1,6 +1,6 @@
-import {sampleCharacterPose} from './pixel-character.js?v=151';
-import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=151';
-import {legDimensions,plantFeet} from './detailed-character.js?v=151';
+import {sampleCharacterPose} from './pixel-character.js?v=152';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=152';
+import {legDimensions,plantFeet} from './detailed-character.js?v=152';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -34,8 +34,8 @@ export function animeBodyDimensions(d){
  return {waist,hip:waist+.3,pelvis:waist*.62,stance:Math.min(1,d.shoulder*.91/6.4),thigh:leg.thigh*.83*legScale,calf:leg.calf*.88*legScale,ankle:leg.ankle*.86*legScale};
 }
 // Same motion/contact language, independently authored body and costume silhouettes.
-// Roster jersey numbers are assigned from the concept order so every design reads differently.
-const JERSEY_NUMBERS=new Map(CHARACTER_CONCEPTS.map((concept,index)=>[concept.id,String(10+index*12)]));
+
+
 export function animePose(design,mode,phase,view,options={}){
  const raw=sampleCharacterPose({...options,mode,phase,view,frame:options.frame??phase*4}),convert=p=>conceptPoint(p,design);
  const arms=raw.arms.map(chain=>chain.map(convert)),body=animeBodyDimensions(design),hips=convert(raw.hips),legs=raw.legs.map((chain,i)=>{
@@ -171,6 +171,10 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  function arm(i){const a=p.arms[i],width=2.6+d.build*1.2;ribbon(c,a,[width,width*.85,width*.5],d.skin,ink,skin);
   if(d.outfit==='polo'||(d.body==='male'&&d.outfit==='performance')){const end=point(a[0].x+(a[1].x-a[0].x)*.43,a[0].y+(a[1].y-a[0].y)*.43);ribbon(c,[a[0],end],[width+1.5,width+1],d.shirt,ink);line(c,[point(end.x-.7,end.y-.1),point(end.x+.8,end.y+.3)],d.trim,.55)}
   oval(c,a[2].x,a[2].y,width*.36,width*.48,d.skin);line(c,[point(a[2].x-.7,a[2].y-1.7),point(a[2].x+.8,a[2].y-1.5)],d.trim,.8);
+  // A sweatband on the racket wrist, the detail courts actually carry.
+  if(i===raw.gripSide){const hand=a[2],elbow=a[1],dx=hand.x-elbow.x,dy=hand.y-elbow.y,len=Math.max(.001,Math.hypot(dx,dy)),ux=dx/len,uy=dy/len,half=1.4+d.build*.45,cx=hand.x-ux*2.1,cy=hand.y-uy*2.1;
+   line(c,[point(cx+uy*half,cy-ux*half),point(cx-uy*half,cy+ux*half)],d.trim,1.7);
+  }
  }
  function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const wide=options.paddleShape==='wide'?1.15:options.paddleShape==='elongated'?.88:1,tall=options.paddleShape==='elongated'?1.14:1;oval(c,0,0,3.7*wide,5*tall,d.trim);oval(c,0,0,3.05*wide,4.3*tall,'#1c2430');line(c,[point(-1.7,-2.3),point(-.5,-3),point(.9,-2.8)],'#ffffff28',.4);c.restore()}
  const layers=raw.arms.map((chain,i)=>({i,back:chain[1].depth<raw.neck.depth}));layers.filter(a=>a.back).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
@@ -197,7 +201,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  if(hem-top>7){path(c,[point(h.x-waist+.8,hem-4.5),point(h.x+2,hem-2.8),point(h.x-waist+1,hem-3.4)],tone(d.shirt,-.15),null);
  path(c,[point(h.x+waist-1,hem-6.5),point(h.x-1,hem-4.8),point(h.x+waist-.6,hem-5.6)],tone(d.shirt,.13),null)}
  line(c,[point(n.x-2.6,top+.1),point(n.x,top+2.2),point(n.x+2.5,top+.1)],d.trim,.75);
- if(near){const digits=JERSEY_NUMBERS.get(d.id);if(digits){c.save();c.globalAlpha=.68;c.fillStyle=ink;c.font='bold 5px monospace';c.textAlign='center';c.fillText(digits,n.x,top+11);c.restore();}}
+
  for(let i=0;i<3;i++)line(c,[point(h.x+waist-3.2,hem-1.8-i*1.7),point(h.x+waist-1,hem-2.6-i*1.7)],tone(d.shirt,-.3),.35);
 
  if(hem-top>8){if(!near){path(c,[point(n.x-1,top+5),point(n.x+1.4,top+5),point(n.x+.4,top+6.3),point(n.x+1.2,top+8),point(n.x-1,top+7.2)],d.trim,null)}else{line(c,[point(n.x-1.6,top+4),point(n.x+1.6,top+4)],d.trim,.6)}}
