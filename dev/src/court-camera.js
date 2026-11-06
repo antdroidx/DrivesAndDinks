@@ -1,8 +1,28 @@
+import {C} from './core.js?v=155';
+
 // Virtual court coordinates stay unchanged; only the visible camera changes.
-export function courtCamera(aspect=1){const ratio=typeof aspect==='number'&&Number.isFinite(aspect)&&aspect>0?aspect:1,width=520*Math.max(1,ratio),height=width/ratio;return {x:480-width/2,y:600-height,width,height}}
+// The game camera is a single perspective: the same depth term drives ground
+// compression, court width and upright height.
+const GAME_FAR_Y=204,GAME_NEAR_Y=578,GAME_CAMERA_DISTANCE=95,GAME_FOCAL=1250;
+const rawDepth=y=>1/(GAME_CAMERA_DISTANCE-y);
+const yScale=(GAME_NEAR_Y-GAME_FAR_Y)/(rawDepth(C.length)-rawDepth(0));
+const yOrigin=GAME_FAR_Y-yScale*rawDepth(0);
+
+export function gameProjection(x,y,z=0){
+ const depth=GAME_CAMERA_DISTANCE-y,perspective=GAME_FOCAL/depth;
+ return {x:480+(x-C.width/2)*perspective,y:yOrigin+yScale*rawDepth(y)-z*perspective};
+}
+export function gameLift(y){return GAME_FOCAL/(GAME_CAMERA_DISTANCE-y)}
+export function gameGroundSpan(y){const a=gameProjection(0,y),b=gameProjection(0,y+1);return Math.hypot(b.x-a.x,b.y-a.y)}
+
+export function courtCamera(aspect=1){
+ const ratio=typeof aspect==='number'&&Number.isFinite(aspect)&&aspect>0?aspect:1;
+ const width=520*Math.max(1,ratio),height=width/ratio;
+ return {x:480-width/2,y:600-height,width,height};
+}
 export function courtAim(clientX,rect,camera){
  const worldX=camera.x+(clientX-rect.left)/rect.width*camera.width;
- return Math.max(1,Math.min(19,(worldX-250)/460*20));
+ return Math.max(1,Math.min(19,(worldX-250)/460*C.width));
 }
 export function padControl(clientX,clientY,rect){
  const x=Math.max(0,Math.min(1,(clientX-rect.left)/Math.max(1,rect.width)));

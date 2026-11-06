@@ -1,21 +1,19 @@
-import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=154';
-import {createProfileRenderer} from './profile-athlete.js?v=154';
-import {sampleMatchAnimation} from './match-animation.js?v=154';
-import {playerFeet} from './player-feet.js?v=154';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=154';
-import {paintCourtTexture} from './court-art.js?v=154';import {playerEmotionState} from './player-emotion.js?v=154';
+import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=155';
+import {createProfileRenderer} from './profile-athlete.js?v=155';
+import {sampleMatchAnimation} from './match-animation.js?v=155';
+import {playerFeet} from './player-feet.js?v=155';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=155';
+import {paintCourtTexture} from './court-art.js?v=155';import {playerEmotionState} from './player-emotion.js?v=155';
+import {C} from './core.js?v=155';
+import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=155';
 
 // Measured ceiling of the ball in live play is about 7 feet, with the highest
 // overhead contact near 7.4. Eight feet leaves headroom without reserving space
 // for a lob the engine never produces.
 export const MAX_REPLAY_Z=8;
 
-const COURT_LENGTH=44,COURT_WIDTH=20;
-// The live view draws the court as a steeply foreshortened slab, so a player
-// covers a quarter of the court's on-screen length. A side-on camera sees the
-// court's full length instead, which leaves the figures looking far too small
-// against it, so the replay matches the live view's read instead.
-const LIVE_PLAYER_OVER_LENGTH=94/374,PROFILE_BODY=63;
+const COURT_LENGTH=C.length,COURT_WIDTH=C.width,PROFILE_BODY=PROFILE_CANONICAL_BODY_UNITS;
+
 // The replay backdrop is its own plate: the sideline camera looks across the
 // court, so the venue that matters is the far side, beyond the far sideline.
 const REPLAY_PLATE={file:'replay-sideline.png',boundary:.5,floor:'#93aac4'};
@@ -62,9 +60,8 @@ export function sideReplayCamera(width,height,clip,snapshot){
  const camera=sideReplayProjection(width,height,MAX_REPLAY_Z);
  return {x:0,y:0,width,height,...camera};
 }
-// The screen height of a player at a point, sized the way the live view sizes
-// them so both views read the same against the court.
-export function sideReplayFigureHeight(camera,x,y){return LIVE_PLAYER_OVER_LENGTH*COURT_LENGTH*camera.span(x,y);}
+// The screen height of a player at a point, calibrated to real court feet.
+export function sideReplayFigureHeight(camera,x,y,heightCm=NEUTRAL_PLAYER_HEIGHT_CM){const feet=playerHeightFeet(heightCm),base=camera.project(x,y,0),top=camera.project(x,y,feet);return Math.hypot(top.x-base.x,top.y-base.y)*PROFILE_CANONICAL_BODY_UNITS/PROFILE_VISUAL_BODY_UNITS}
 export function replayAngleFor(clip,{aspect=1.5}={}){return clip.focus?.boundary!==undefined||aspect<1.1?'overview':'sideline'}
 
 export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Image==='undefined'?null:new Image()){
@@ -80,10 +77,9 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
   return plate;
  };
  return (c,viewport,snapshot,clip,{palette,style='anime',look='sports',outfit='performance'}={})=>{
-  const {width,height}=viewport,camera=sideReplayCamera(width,height,clip,snapshot),{project,scale,horizon,depthOf,lift,span}=camera;
-  // How much bigger than true scale an object is drawn, so the athletes and the
-  // ball keep the proportions the live view gives them.
-  const artFactor=(x,y)=>(LIVE_PLAYER_OVER_LENGTH*COURT_LENGTH*span(x,y)/PROFILE_BODY)/(lift(x,y)/10.2);
+  const {width,height}=viewport,camera=sideReplayCamera(width,height,clip,snapshot),{project,scale,depthOf,lift}=camera;
+  // The ball uses the same world-foot scale as the court and athletes.
+  const ballScale=(x,y)=>lift(x,y);
   const line=(a,b,color='#f3f0de',weight=1)=>{const p=project(...a),q=project(...b);c.beginPath();c.moveTo(p.x,p.y);c.lineTo(q.x,q.y);c.strokeStyle=color;c.lineWidth=weight;c.stroke()};
   const polygon=(points,color)=>{c.beginPath();points.forEach((p,i)=>{const q=project(...p);i?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y)});c.closePath();c.fillStyle=color;c.fill()};
   const rectangle=(x1,y1,x2,y2,color)=>polygon([[x1,y1],[x2,y1],[x2,y2],[x1,y2]],color);
@@ -104,37 +100,40 @@ export function createSideReplayRenderer(createCanvas,createImage=()=>typeof Ima
   const apronTop=Math.max(0,venueFloor),apronSpan=height-apronTop;
   if(apronSpan>0)for(let i=0;i<8;i++){const t=i/7;c.fillStyle=shade(REPLAY_PLATE.floor,.16*(1-t));c.fillRect(0,apronTop+apronSpan*i/8,width,apronSpan/8+.5)}
   c.fillStyle='#0b1c2466';c.fillRect(0,venueFloor,width,Math.max(2,scale*.2));
-  rectangle(0,0,COURT_WIDTH,COURT_LENGTH,palette?.court??'#467482');rectangle(0,15,COURT_WIDTH,29,palette?.kitchen??'#8d9e94');
+  rectangle(0,0,COURT_WIDTH,COURT_LENGTH,palette?.court??'#467482');rectangle(0,C.net-C.kitchen,COURT_WIDTH,C.net+C.kitchen,palette?.kitchen??'#8d9e94');
   c.save();c.beginPath();
    [[0,0],[COURT_WIDTH,0],[COURT_WIDTH,COURT_LENGTH],[0,COURT_LENGTH]].forEach((p,i)=>{const q=project(...p);i?c.lineTo(q.x,q.y):c.moveTo(q.x,q.y)});
    c.closePath();c.clip();
    paintCourtTexture(c,project,{count:2600,outdoors:true,dot:Math.max(1,scale*.05),block:Math.max(1,scale*.05)});
    c.restore();
-  for(const [a,b] of [[[0,0],[COURT_WIDTH,0]],[[COURT_WIDTH,0],[COURT_WIDTH,COURT_LENGTH]],[[COURT_WIDTH,COURT_LENGTH],[0,COURT_LENGTH]],[[0,COURT_LENGTH],[0,0]],[[0,15],[COURT_WIDTH,15]],[[0,29],[COURT_WIDTH,29]],[[10,0],[10,15]],[[10,29],[10,COURT_LENGTH]]])line(a,b,'#f3f0de',scale*.08);
+  for(const [a,b] of [[[0,0],[COURT_WIDTH,0]],[[COURT_WIDTH,0],[COURT_WIDTH,COURT_LENGTH]],[[COURT_WIDTH,COURT_LENGTH],[0,COURT_LENGTH]],[[0,COURT_LENGTH],[0,0]],[[0,C.net-C.kitchen],[COURT_WIDTH,C.net-C.kitchen]],[[0,C.net+C.kitchen],[COURT_WIDTH,C.net+C.kitchen]],[[10,0],[10,C.net-C.kitchen]],[[10,C.net+C.kitchen],[10,COURT_LENGTH]]])line(a,b,'#f3f0de',scale*.08);
   const net=()=>{
-   // The net plane stands across the court; from the side it is a narrow band
-   // whose near post sits lower and larger than the far post.
-   const top=2.85;
+   // The regulation tape is 36 inches at the posts and 34 inches at center.
+   const left=C.netPostLeft,right=C.netPostRight,topPoints=[];
+   for(let x=left;x<=right+.001;x+=.5)topPoints.push([x,C.net,netTopHeight(x)]);
    c.save();c.globalAlpha=.7;
-   polygon([[-.5,22,0],[COURT_WIDTH+.5,22,0],[COURT_WIDTH+.5,22,top],[-.5,22,top]],'#122a34');
+   polygon([[left,C.net,0],[right,C.net,0],...topPoints.slice().reverse()],'#122a3422');
    c.restore();
-   for(let z=.4;z<top;z+=.4)line([-.5,22,z],[COURT_WIDTH+.5,22,z],'#2c4a5488',Math.max(.6,scale*.03));
-   for(let x=0;x<=COURT_WIDTH;x+=2)line([x,22,0],[x,22,top],'#2c4a5466',Math.max(.5,scale*.022));
-   line([-.5,22,top],[COURT_WIDTH+.5,22,top],'#f2edda',Math.max(1.4,scale*.07));
-   line([-.5,22,0],[-.5,22,top],'#243b43',Math.max(1.3,scale*.12));
-   line([COURT_WIDTH+.5,22,0],[COURT_WIDTH+.5,22,top],'#243b43',Math.max(1.3,scale*.12));
+   for(let z=.4;z<C.netPostHeight;z+=.4){
+    let previous=null;
+    for(const point of topPoints){if(z<=point[2]){if(previous)line(previous,point,'#2c4a5488',Math.max(.6,scale*.03));previous=point}else previous=null}
+   }
+   for(let x=0;x<=C.width;x+=2)line([x,C.net,0],[x,C.net,netTopHeight(x)],'#2c4a5466',Math.max(.5,scale*.022));
+   for(let i=0;i<topPoints.length-1;i++)line(topPoints[i],topPoints[i+1],'#f2edda',Math.max(1.4,scale*.07));
+   line([left,C.net,0],[left,C.net,C.netPostHeight],'#243b43',Math.max(1.3,scale*.12));
+   line([right,C.net,0],[right,C.net,C.netPostHeight],'#243b43',Math.max(1.3,scale*.12));
   };
-  const entities=[{kind:'net',depth:depthOf(10,22)},...snapshot.players.map(player=>({kind:'player',depth:depthOf(player.x,player.y),player})),{kind:'ball',depth:depthOf(snapshot.ball.x,snapshot.ball.y)}].sort((a,b)=>b.depth-a.depth);
+  const entities=[{kind:'net',depth:depthOf(C.width/2,C.net)},...snapshot.players.map(player=>({kind:'player',depth:depthOf(player.x,player.y),player})),{kind:'ball',depth:depthOf(snapshot.ball.x,snapshot.ball.y)}].sort((a,b)=>b.depth-a.depth);
   for(const entity of entities){
    if(entity.kind==='net'){net();continue}
    if(entity.kind==='ball'){
-    const b=snapshot.ball,q=project(b.x,b.y,b.z),ground=project(b.x,b.y,0),bs=Math.max(1,lift(b.x,b.y)*artFactor(b.x,b.y));
+    const b=snapshot.ball,q=project(b.x,b.y,b.z),ground=project(b.x,b.y,0),bs=Math.max(1,ballScale(b.x,b.y));
     c.fillStyle='#09202d44';c.beginPath();c.ellipse(ground.x,ground.y,bs*.24,bs*.07,0,0,Math.PI*2);c.fill();
     c.strokeStyle='#f3e99b66';c.lineWidth=Math.max(.6,scale*.045);c.beginPath();for(const [i,p] of (snapshot.trail??[]).entries()){const t=project(p.x,p.y,p.z);i?c.lineTo(t.x,t.y):c.moveTo(t.x,t.y)}c.stroke();
     c.fillStyle='#f4ea71';c.beginPath();c.ellipse(q.x,q.y,Math.max(2,bs*.125),Math.max(2,bs*.125),0,0,Math.PI*2);c.fill();continue;
    }
-   const p=entity.player,q=project(p.x,p.y),figureScale=sideReplayFigureHeight(camera,p.x,p.y)/PROFILE_BODY,units=PROFILE_BODY/(LIVE_PLAYER_OVER_LENGTH*COURT_LENGTH),zUnits=lift(p.x,p.y)/figureScale,animation=sampleMatchAnimation(p,{...snapshot,server:snapshot.players.find(player=>player.id===snapshot.serverId)}),moving=Math.hypot(p.vx,p.vy)>1;
-   const mode=animation?.mode??(moving?'run':'idle'),phase=animation?.phase??0,d=applyAnimeLook(resolveAnimeGameDesign({appearance:p.appearance,characterId:p.characterId,outfit}),look),direction=p.team===0?-1:1,stature=d.height/177;
+   const p=entity.player,q=project(p.x,p.y),d=applyAnimeLook(resolveAnimeGameDesign({appearance:p.appearance,characterId:p.characterId,outfit}),look),figureScale=sideReplayFigureHeight(camera,p.x,p.y,d.height)/PROFILE_BODY,units=lift(p.x,p.y)/figureScale,zUnits=units,animation=sampleMatchAnimation(p,{...snapshot,server:snapshot.players.find(player=>player.id===snapshot.serverId)}),moving=Math.hypot(p.vx,p.vy)>1;
+   const mode=animation?.mode??(moving?'run':'idle'),phase=animation?.phase??0,direction=p.team===0?-1:1,stature=d.height/177;
    const footPose=playerFeet(p).map(foot=>({x:(foot.x-p.x)*units,y:63-(2+foot.z*zUnits)/stature,z:(foot.y-p.y)*direction*units}));
    const contact3D=p.animationContactStart&&p.swing>0&&p.contactPoint?{x:(p.contactPoint.x-p.x)*units,y:63-p.contactPoint.z*zUnits/stature,z:(p.contactPoint.y-p.y)*direction*units}:null;
 
