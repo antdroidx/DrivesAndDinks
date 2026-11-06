@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=166';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=166';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=166';
+import {sampleCharacterPose,solveArm3D} from './pixel-character.js?v=167';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=167';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=167';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -45,7 +45,7 @@ export function profileTorso(design,pose){
  return {crop,top,bottom,shirtHem:crop?Math.max(minHem,hipY-4.8):hipY,shoulder:design.shoulder*.7,waist:Math.min(design.waist*.9,design.shoulder*.72-1),hipWidth:Math.min(design.hip*.8,design.waist*.92+1.15)};
 }
 export function profileShorts(hips,legs,body){
- const width=Math.max(3.1,body.thigh*.72),pieces=legs.map(chain=>thighGarment(chain,width,.46)),leftHip=legs[0]?.[0]??hips,rightHip=legs[1]?.[0]??hips,centerX=(leftHip.x+rightHip.x)/2,hipWidth=Math.max(2.2,body.hip*.72),top=Math.min(leftHip.y,rightHip.y)-1;
+ const width=Math.max(4.2,body.thigh*1.38+.5),pieces=legs.map(chain=>thighGarment(chain,width,.46)),leftHip=legs[0]?.[0]??hips,rightHip=legs[1]?.[0]??hips,centerX=(leftHip.x+rightHip.x)/2,hipWidth=Math.max(3.1,body.hip*.95+.65),top=Math.min(leftHip.y,rightHip.y)-1;
  return {width,hipWidth,pieces,waistband:[[centerX-hipWidth,top],[centerX+hipWidth,top],[rightHip.x+width*.42,rightHip.y+2.2],[centerX,top+3.2],[leftHip.x-width*.42,leftHip.y+2.2]]};
 }
 export function profilePose(design,mode,phase,options={}){

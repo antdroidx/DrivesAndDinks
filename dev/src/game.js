@@ -1,16 +1,16 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=166';
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=166';
-import {MatchJournal} from './match-journal.js?v=166';import {summarizePlaytest} from './playtest-summary.js?v=166';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=166';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=166';
-import {seededRandom} from './competition.js?v=166';
-import {kitchenFootContact} from './core.js?v=166';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=166';
-import {strokeForContact} from './player-facing.js?v=166';
-import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=166';
-import {createLineup,applyPhysique} from './roster.js?v=166';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=166';
-import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=166';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX} from './core.js?v=166';
+import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=167';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=167';
+import {MatchJournal} from './match-journal.js?v=167';import {summarizePlaytest} from './playtest-summary.js?v=167';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=167';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=167';
+import {seededRandom} from './competition.js?v=167';
+import {kitchenFootContact} from './core.js?v=167';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=167';
+import {strokeForContact} from './player-facing.js?v=167';
+import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=167';
+import {createLineup,applyPhysique} from './roster.js?v=167';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=167';
+import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=167';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX} from './core.js?v=167';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=true;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.reset()}
  configure(selection,lineup=null){this.showNameTags=selection?.showNameTags!==false&&selection?.showNameTags!=='false';if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
