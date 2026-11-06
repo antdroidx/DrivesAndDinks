@@ -1,5 +1,5 @@
-import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js?v=161';
-import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=161';
+import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js?v=162';
+import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=162';
 
 // Visual identities never alter the player's simulation abilities or hit range.
 export function matchDesign(appearance={},characterId='',designId=''){
