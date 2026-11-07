@@ -9,6 +9,6 @@ test('all six body concepts retain finite joints throughout every existing motio
 
 test('female catalog adds long hair and a structured bun',()=>{assert.deepEqual(HAIR_OPTIONS.female.slice(-3).map(item=>[item.id,item.name]),[['long','Long Hair'],['bun','Bun'],['twinTails','Twin Tails']]);assert.equal(HAIR_OPTIONS.female.find(item=>item.id==='pixie').name,'Pixie');assert.equal(HAIR_OPTIONS.male.length,8);assert.equal(HAIR_OPTIONS.female.length,8);});
 
-test('male catalog separates crop, side sweep, feathered shag and crew cut',()=>{
- assert.deepEqual(HAIR_OPTIONS.male.map(item=>[item.id,item.name]),[['crop','Textured Crop'],['sidePart','Side Swept'],['curls','Feathered Shag'],['afro','Afro'],['spiky','Spiky Hair'],['crewCut','Crew Cut'],['buzz','Close Buzz Cut'],['bald','Bald']]);
+test('male catalog reassigns the crew silhouette to textured crop and adds swept layers',()=>{
+ assert.deepEqual(HAIR_OPTIONS.male.map(item=>[item.id,item.name]),[['crop','Textured Crop'],['sidePart','Side Swept'],['curls','Feathered Shag'],['afro','Afro'],['spiky','Spiky Hair'],['crewCut','Swept Layers'],['buzz','Close Buzz Cut'],['bald','Bald']]);
 });

@@ -58,17 +58,33 @@ test('upper legs attach inside the torso silhouette for every body preset',()=>{
 });
 
 
-test('live braids hang behind the head and pixie keeps visible crown spikes',()=>{
+test('long hair is solid and textured while the braid is crown-rooted, tapered and bun-topped',()=>{
  const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
- assert.match(source,/const bx=near\?x\+Math\.sin/);
- assert.match(source,/accessorized=d\.headwear!=='none'/);
- assert.match(source,/point\(x-4\.8,y-3\.1\),point\(x\+4\.8,y-3\.1\)/);
- assert.ok(source.includes('point(x,y+4.9)'));assert.ok(source.includes("d.headwear!=='cap'"));assert.ok(source.includes("if(near)"));
+ assert.match(source,/function drawAnimeBraid/);
+ assert.ok(source.includes("oval(c,x-.15,y-7.2,2.25,1.85"));
+ assert.ok(source.includes('for(let i=0;i<12;i++)'));
+ assert.ok(source.includes('rx=2.05-t*1.2'));
+ assert.ok(source.indexOf("animeHead(c,d,n,near,warm,phase,ink,normalizedEmotion)")<source.indexOf("if(d.hair==='braid')drawAnimeBraid"));
+ assert.ok(source.includes("if(d.hair!=='long')for(const sign of [-1,1])"));
+ assert.ok(source.includes('point(x-7.6,y+2.5)'));
+ assert.ok(source.includes('point(x+7.6,y+2.5)'));
+ assert.ok(source.includes('point(x-2.4,y+19)'));
+ assert.match(source,/for\(const \[x1,y1,x2,y2\] of \[\[-5,-2\.8,-3\.7,13\.8\]/);
+ assert.doesNotMatch(source,/if\(d\.hair==='braid'&&!behind\)/);
+ assert.ok(source.includes("if(d.hair==='twinTails'&&behind)"));
+ assert.ok(source.includes("if(d.hair==='long'&&!behind)"));
+ assert.ok(source.includes('point(x,y+3)'));
+ assert.ok(source.includes("const bottom=pixie?2.35"));
 });
-
-test('male crop, side sweep, feathered shag, crew cut and afro use distinct render paths',()=>{
+test('textured crop, side sweep, feathered shag and swept layers use distinct render paths',()=>{
  const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
- for(const marker of ["d.hair==='afro'","d.hair==='curls'","d.hair==='crop'","d.hair==='sidePart'","d.hair==='crewCut'","style==='shag'","style==='sidePart'","style==='crewCut'","drawAnimeAfro","thinTail"])assert.ok(source.includes(marker),marker);
- assert.ok(source.includes("animeHairMass(c,x,y,hair,ink,near,'crop')"));
- assert.ok(source.includes("const back=style==='shag'?3.8:style==='crewCut'?2.5:2.65"));assert.ok(source.includes("point(x+4.3,y+3.1),point(x+2.4,y+4.5),point(x,y+4.9)"));
+ for(const marker of ["d.hair==='afro'","d.hair==='curls'","d.hair==='crop'","d.hair==='sidePart'","d.hair==='crewCut'","style==='shag'","drawAnimeSideSweep","drawAnimeSweptLayers","drawAnimeAfro","thinTail"])assert.ok(source.includes(marker),marker);
+ assert.ok(source.includes("animeHairMass(c,x,y,hair,ink,near,'crewCut')"));
+ assert.ok(source.includes('drawAnimeSideSweep(c,x,y,hair,ink,near)'));
+ assert.doesNotMatch(source,/point\(x\+3\.4,y-4\.8\),point\(x\+4\.8,y-2\.2\)/);
+ assert.match(source,/for\(const \[x1,y1,cx,cy,x2,y2\] of \[\[-4\.2,-4\.8/);
+ assert.ok(source.includes('drawAnimeSweptLayers(c,x,y,hair,ink,near)'));
+ assert.doesNotMatch(source,/point\(x-4\.9,y-2\.6\),point\(x-5\.5,y\+\.3\)/);
+ assert.doesNotMatch(source,/point\(x\+4\.7,y-2\.8\),point\(x\+5\.4,y\+\.2\)/);
+ assert.ok(source.indexOf('drawAnimeSweptLayers(c,x,y,hair,ink,near)')>source.indexOf('drawAnimeSideSweep(c,x,y,hair,ink,near)'));
 });

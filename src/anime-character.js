@@ -46,9 +46,14 @@ export function animePose(design,mode,phase,view,options={}){
 }
 function animeRearHairCap(c,x,y,hair,ink,d){
  const female=d.body==='female',style=d.hair,bob=['bob','waves'].includes(style),pixie=style==='pixie';
- const bottom=pixie?4.8:female?(bob?7.1:4.8):(style==='shag'?3.8:style==='crewCut'?2.5:2.8);
+ const bottom=pixie?2.35:female?(bob?6.8:style==='long'?5.2:4.45):(style==='curls'?4.15:style==='crewCut'?4.05:2.8);
  path(c,[point(x-5.15,y-2.7),point(x-4.9,y-5.1),point(x-3.1,y-6.5),point(x-.6,y-7),point(x+1.8,y-6.7),point(x+3.8,y-5.7),point(x+5.1,y-3.7),point(x+5,y-.4),point(x+4.3,y+bottom-.7),point(x+2.4,y+bottom),point(x,y+bottom+.25),point(x-2.4,y+bottom),point(x-4.3,y+bottom-.7)],tone(hair,-.06),ink,.3);
  if(style==='spiky')path(c,[point(x-4.6,y-3.7),point(x-4,y-6.2),point(x-2.7,y-5.1),point(x-2,y-7.5),point(x-.7,y-5.4),point(x+.4,y-8),point(x+1.5,y-5.4),point(x+3,y-7),point(x+3.2,y-4.8),point(x+4.5,y-5.7)],tone(hair,.04),ink,.2);
+ if(style==='crewCut'){
+  path(c,[point(x-4.8,y-.4),point(x-4.2,y+2.4),point(x-2.2,y+3.8),point(x-1.3,y+1.8)],tone(hair,-.14),ink,.2);
+  path(c,[point(x+4.8,y-.3),point(x+4.1,y+2.7),point(x+2.2,y+4),point(x+1.2,y+1.8)],tone(hair,-.1),ink,.2);
+  for(const [x1,y1,x2,y2] of [[-3.8,-4.8,-1.3,-5.9],[-2.4,-5.8,.2,-6.4],[-.5,-6.1,2.2,-5.5],[1.4,-5.7,3.8,-4.2]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(hair,.16),.26);
+ }
 }
 function animeHairMass(c,x,y,hair,ink,near,style='crop'){
  const back=style==='shag'?3.8:style==='crewCut'?2.5:2.65;
@@ -90,6 +95,34 @@ function animeHairTexture(c,x,y,hair,ink,near,style='crop'){
  const locks=near?[[-4.5,3.6,-3.8,-4.2,-2.4,3.9],[-2.7,4,-2,-5,-.7,3.9],[-.6,4,.3,-5,1.6,3.7],[1.5,3.7,2.5,-4.4,3.5,3.2]]:[[-4.4,-2,-3.8,-5.4,-2.3,-2.3],[-2.8,-2.1,-2.2,-5.8,-.9,-2.2],[-1,-2,-.2,-5.8,1,-2.1],[.9,-2,2.1,-5.3,3.2,-2.3],[2.5,-2,3.6,-4.5,4,-2.5]];
  for(const [index,[ax,ay,bx,by,cx,cy]] of locks.entries())path(c,[point(x+ax,y+ay),point(x+bx,y+by),point(x+cx,y+cy)],index%2?light:shadow,ink,.18);
  for(const [x1,y1,x2,y2] of near?[[-3.5,2.5,-2.8,-3.4],[-1.2,2.8,-.5,-3.8],[1,2.7,1.7,-3.5],[3,2.1,3.5,-2.8]]:[[-3.5,-2.5,-2.9,-4.6],[-1.8,-2.4,-1.2,-4.8],[0,-2.3,.6,-4.8],[1.8,-2.4,2.4,-4.4],[3.2,-2.5,3.6,-4]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],mid,.28);
+}
+function drawAnimeSideSweep(c,x,y,hair,ink,near){
+ if(near){
+  path(c,[point(x-5.2,y-.4),point(x-5.6,y-3.8),point(x-4.4,y-6),point(x-2,y-7.4),point(x+.5,y-7.5),point(x+3.1,y-6.4),point(x+5,y-4.2),point(x+5.3,y-1.5),point(x+5,y+.5),point(x+4.1,y+2.9),point(x+2.4,y+3.6),point(x,y+3),point(x-2.5,y+3.5),point(x-4.3,y+2.2)],tone(hair,-.04),ink,.4);
+  for(const [x1,y1,x2,y2,x3,y3] of [[-4.2,-4.8,-1.8,-6.4,.4,-6.1],[-3.2,-3.2,-.4,-5.4,2.4,-5.5],[-1.8,-2,1,-4.3,3.9,-3.8]])path(c,[point(x+x1,y+y1),point(x+x2,y+y2),point(x+x3,y+y3)],tone(hair,(x1<0?.14:.05)),ink,.16);
+  return;
+ }
+ path(c,[point(x-5.2,y-.3),point(x-5.7,y-3.8),point(x-4.5,y-6.2),point(x-2.3,y-7.7),point(x-.2,y-7.8),point(x+2.2,y-7),point(x+4.4,y-5.3),point(x+5.3,y-3.1),point(x+5,y-.4),point(x+4.4,y-1.2),point(x+3.7,y-3),point(x+2.6,y-2.4),point(x+1.1,y-3.5),point(x-.6,y-2.4),point(x-2.4,y-3.2),point(x-4,y-1.2)],hair,ink,.4);
+ path(c,[point(x-4.5,y-5.4),point(x-1.8,y-7),point(x+.8,y-6.6),point(x+3.8,y-4.4),point(x+2.4,y-2.8),point(x-.2,y-3.5),point(x-2.7,y-3)],tone(hair,.13),ink,.18);
+ for(const [x1,y1,x2,y2] of [[-3.8,-5,-1.2,-6.2],[-2.3,-6.1,.4,-6.4],[-.3,-6.4,2.2,-5.5],[1.5,-5.5,3.5,-4.1]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(hair,.22),.26);
+for(const [x1,y1,cx,cy,x2,y2] of [[-4.2,-4.8,-1.7,-6.3,1.2,-5.8],[-3.4,-3.8,-.5,-5.5,2.5,-4.7],[-2.5,-2.8,.4,-4.5,3.3,-3.5]]){c.beginPath();c.moveTo(x+x1,y+y1);c.quadraticCurveTo(x+cx,y+cy,x+x2,y+y2);c.strokeStyle=tone(hair,(x1<0?-.26:.2));c.lineWidth=.28;c.lineCap='round';c.stroke()}
+ c.beginPath();c.moveTo(x-3.6,y-4.8);c.quadraticCurveTo(x-.7,y-6.3,x+2.8,y-4.6);c.strokeStyle=tone(hair,-.3);c.lineWidth=.3;c.stroke();
+}
+function drawAnimeSweptLayers(c,x,y,hair,ink,near){
+ if(near){
+  path(c,[point(x-5.2,y-.3),point(x-5.8,y-3.4),point(x-5,y-6.2),point(x-2.8,y-8.2),point(x-.1,y-8.8),point(x+2.5,y-8),point(x+4.7,y-6),point(x+5.6,y-3.3),point(x+5.2,y-.2),point(x+4.5,y+2.8),point(x+3.2,y+4.5),point(x+1.6,y+3.4),point(x+.2,y+4.6),point(x-1.4,y+3.3),point(x-3.1,y+4.4),point(x-4.6,y+2.5)],tone(hair,-.04),ink,.42);
+  path(c,[point(x-4.8,y-1.4),point(x-4.5,y+.7),point(x-3.8,y+1.5),point(x-3.5,y+.1),point(x-4,y-1.5)],tone(hair,-.14),ink,.18);
+  path(c,[point(x+4.8,y-1.2),point(x+4.5,y+.8),point(x+3.8,y+1.6),point(x+3.5,y+.1),point(x+4,y-1.4)],tone(hair,-.1),ink,.18);
+  for(const [x1,y1,x2,y2,x3,y3] of [[-4.4,-5,-2.2,-7,.1,-7.5],[-3.2,-3.4,-.5,-6,2.3,-6.3],[-1.8,-2,.7,-4.6,3.8,-4.5]])path(c,[point(x+x1,y+y1),point(x+x2,y+y2),point(x+x3,y+y3)],tone(hair,(x1<0?.15:.03)),ink,.17);
+  return;
+ }
+ path(c,[point(x-5.2,y-.5),point(x-5.9,y-3.4),point(x-5.1,y-6.4),point(x-3.1,y-9),point(x-.2,y-10.1),point(x+2.5,y-9.1),point(x+4.8,y-6.7),point(x+5.7,y-3.5),point(x+5.2,y-.4),point(x+4.5,y-.8),point(x+4.1,y-2.9),point(x+2.8,y-3.6),point(x+1.2,y-2.8),point(x-.3,y-3.8),point(x-1.9,y-2.6),point(x-3.6,y-3.3),point(x-4.6,y-1.1)],tone(hair,-.02),ink,.42);
+ path(c,[point(x-4.9,y-4),point(x-3.5,y-7.1),point(x-.7,y-8.8),point(x+2.5,y-8),point(x+4.7,y-5.3),point(x+2.8,y-4.7),point(x+.6,y-5.8),point(x-1.5,y-4.7),point(x-3.5,y-3.2)],tone(hair,.13),ink,.18);
+ path(c,[point(x-4.9,y-2.5),point(x-5.2,y-.2),point(x-4.6,y+1.3),point(x-3.9,y+1.6),point(x-3.9,y-.2),point(x-4.2,y-1.8)],tone(hair,-.1),ink,.2);
+ path(c,[point(x+4.7,y-2.7),point(x+5.2,y-.1),point(x+4.6,y+1.4),point(x+3.9,y+1.7),point(x+3.9,y-.1),point(x+4.2,y-1.9)],tone(hair,-.06),ink,.2);
+ c.beginPath();c.moveTo(x+.1,y-7.6);c.quadraticCurveTo(x-.8,y-4.8,x-.25,y-2.2);c.strokeStyle=tone(hair,-.24);c.lineWidth=.36;c.lineCap='round';c.stroke();
+ c.beginPath();c.moveTo(x+2.2,y-6.9);c.quadraticCurveTo(x+3.5,y-4.1,x+3.15,y-1.2);c.strokeStyle=tone(hair,.2);c.lineWidth=.32;c.stroke();
+ for(const [x1,y1,x2,y2] of [[-3.8,-6.7,-1.8,-7.8],[-2.3,-7.5,.1,-8.2],[-.3,-8.1,2.1,-7.3],[1.4,-7.1,3.5,-5.5]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(hair,.2),.25);
 }function drawAnimeAfro(c,x,y,hair,ink,near){
  const base=near?[
   [-5.3,-.5],[-6,-1.8],[-5.8,-3.5],[-5.1,-5],[-3.8,-6.2],[-2.2,-6.8],[-.4,-7.1],[1.4,-6.9],[3.2,-6.2],[4.7,-5],[5.6,-3.4],[5.9,-1.6],[5.4,.1],[4.5,2.8],[2.8,4.2],[.4,4.8],[-2.2,4.3],[-4,3],[-5.1,1.3]
@@ -100,23 +133,25 @@ function animeHairTexture(c,x,y,hair,ink,near,style='crop'){
  for(const [x1,y1,x2,y2] of near?[[-4,-2.5,-2.5,-4.5],[-2,-4.8,-.2,-5.9],[.6,-5.4,2.7,-4.5],[2.8,-2.2,4.2,-1.3],[-3,1.5,-1,2.4]]:[[-4,-3,-2.5,-4.8],[-2,-5.2,-.2,-6],[.8,-5.8,2.8,-4.8],[3,-2.7,4.4,-1.8],[-3,-1.7,-1,-2.2]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(hair,.22),.3);
  path(c,[point(x-3.8,near?y-2.6:y-3.4),point(x-1.2,near?y-4.8:y-5.4),point(x+1.5,near?y-4.5:y-5.1),point(x+3.5,near?y-2.4:y-3.1)],tone(hair,.1),null);
 }
-function hairTail(c,d,x,y,phase,near,ink){
- const sway=Math.sin(phase*Math.PI*2)*1.1;
+function hairTail(c,d,x,y,phase,near,ink,layer='behind'){
+ const sway=Math.sin(phase*Math.PI*2)*1.1,behind=layer==='behind';
  function tail(sign){c.beginPath();c.moveTo(x+sign*4,y-3);c.bezierCurveTo(x+sign*(12+sway),y-7,x+sign*(15+sway),y+5,x+sign*9,y+12);c.quadraticCurveTo(x+sign*11,y+3,x+sign*6,y+2.5);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke();line(c,[point(x+sign*7,y-1),point(x+sign*(11+sway),y+3),point(x+sign*9,y+8)],tone(d.hairColor,.13),.55);oval(c,x+sign*5,y-2,1.15,.95,d.trim)}
- function thinTail(sign){const drift=sway*sign;c.beginPath();c.moveTo(x+sign*3.8,y-3);c.bezierCurveTo(x+sign*(6.3+drift),y-2.3,x+sign*(7.2+drift),y+3,x+sign*(6.1+drift),y+9.5);c.quadraticCurveTo(x+sign*5.4,y+4,x+sign*4.6,y+1.6);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.35;c.stroke();line(c,[point(x+sign*5,y-1),point(x+sign*(5.8+drift),y+4),point(x+sign*(5.5+drift),y+7.5)],tone(d.hairColor,.16),.38);oval(c,x+sign*4.4,y-2.7,1,.75,d.trim)}
- if(d.hair==='ponytail')tail(near?-1:1);
- if(d.hair==='twinTails'){thinTail(-1);thinTail(1)}
- if(d.hair==='braid'){const bx=near?x+Math.sin(phase*Math.PI*2)*.35:x-4.2+Math.sin(phase*Math.PI*2)*.35,startY=near?y-3.2:y+1.5;for(let i=0;i<8;i++){const by=startY+i*1.55;oval(c,bx+Math.sin(i*.7+phase*3)*.22,by,1.12-i*.045,1.02,tone(d.hairColor,i%2?-.12:.08))}oval(c,bx,near?y-3.4:y+1.2,.9,.6,d.trim)}
- if(d.hair==='long'){
-  if(near)path(c,[point(x-5,y-3.8),point(x-6,y+3),point(x-5.4,y+11),point(x-3.2,y+15),point(x,y+16),point(x+3.2,y+15),point(x+5.4,y+11),point(x+6,y+3),point(x+5,y-3.8)],tone(d.hairColor,-.08),ink,.35);
-  else for(const side of [-1,1]){const drift=Math.sin(phase*Math.PI*2+side)*.4;c.beginPath();c.moveTo(x+side*3.5,y-3.6);c.bezierCurveTo(x+side*(5.1+drift),y-.8,x+side*(5.4+drift),y+6,x+side*4.4,y+11.8);c.quadraticCurveTo(x+side*3.6,y+12.5,x+side*3.1,y+10.8);c.quadraticCurveTo(x+side*3.8,y+4.5,x+side*2.4,y-.8);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.38;c.stroke()}
+ function thinTail(sign){const drift=sway*sign;c.beginPath();c.moveTo(x+sign*4.3,y-3);c.bezierCurveTo(x+sign*(7.1+drift),y-2.3,x+sign*(8+drift),y+3.4,x+sign*(6.8+drift),y+10.8);c.quadraticCurveTo(x+sign*(5.8+drift),y+4.2,x+sign*5,y+1.4);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.35;c.stroke();line(c,[point(x+sign*5.3,y-1),point(x+sign*(6.5+drift),y+4),point(x+sign*(6.3+drift),y+8.5)],tone(d.hairColor,.16),.38);oval(c,x+sign*4.7,y-2.7,1,.75,d.trim)}
+ if(d.hair==='ponytail'&&behind)tail(near?-1:1);
+ if(d.hair==='twinTails'&&behind){thinTail(-1);thinTail(1)}
+if(d.hair==='long'&&!behind){
+if(near){
+   path(c,[point(x-6.8,y-3.8),point(x-7.6,y+2.5),point(x-7.2,y+10),point(x-5.2,y+16.8),point(x-2.4,y+19),point(x,y+19.6),point(x+2.4,y+19),point(x+5.2,y+16.8),point(x+7.2,y+10),point(x+7.6,y+2.5),point(x+6.8,y-3.8)],tone(d.hairColor,-.08),ink,.35);
+   for(const [x1,y1,x2,y2] of [[-5,-2.8,-3.7,13.8],[-3.4,-3.4,-2.2,16.8],[-1.6,-3.5,-.7,18],[.4,-3.5,.8,18],[2.2,-3.4,2.7,16.8],[4,-2.8,4.8,13.8]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(d.hairColor,(x1<0?.14:-.12)),.3);
+   for(const [x1,y1,x2,y2] of [[-5.7,1.2,-2.6,3.4],[-3.8,6.2,-.6,8.2],[-1.8,11.1,1.7,12.7],[1.6,4.2,4.8,6.1],[3.2,9.2,5.5,10.4]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(d.hairColor,.2),.22);
+  }
+  else for(const side of [-1,1]){const drift=Math.sin(phase*Math.PI*2+side)*.4;c.beginPath();c.moveTo(x+side*3.8,y-3.6);c.bezierCurveTo(x+side*(6+drift),y-.8,x+side*(6.4+drift),y+6,x+side*(5.4+drift),y+12.8);c.quadraticCurveTo(x+side*4.4,y+13.4,x+side*3.8,y+11.4);c.quadraticCurveTo(x+side*4.5,y+4.5,x+side*2.5,y-.8);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.38;c.stroke()}
  }
- if(['bob','waves'].includes(d.hair)){
-  if(near)path(c,[point(x-5.2,y-3.8),point(x-5.8,y+2.8),point(x-4.4,y+6.4),point(x,y+7.2),point(x+4.4,y+6.4),point(x+5.8,y+2.8),point(x+5.2,y-3.8)],d.hair==='waves'?tone(d.hairColor,-.04):d.hairColor,ink,.35);
+ if(['bob','waves'].includes(d.hair)&&(near?behind:!behind)){
+  if(!near)path(c,[point(x-5.2,y-3.8),point(x-5.8,y+2.8),point(x-4.4,y+6.4),point(x,y+7.2),point(x+4.4,y+6.4),point(x+5.8,y+2.8),point(x+5.2,y-3.8)],d.hair==='waves'?tone(d.hairColor,-.04):d.hairColor,ink,.35);
   else for(const side of [-1,1]){c.beginPath();c.moveTo(x+side*3.8,y-3.5);c.quadraticCurveTo(x+side*(d.hair==='waves'?6.4:5.8),y-.5,x+side*(d.hair==='waves'?5.7:5.1),y+5.8);c.lineTo(x+side*3.4,y+4.6);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.35;c.stroke()}
  }
-}
-function normalizeEmotion(emotion){return ({smile:'happy',reaction:'surprise',neutral:'focus',sad:'disappointment',calm:'relief'})[emotion]??emotion??'focus'}
+}function normalizeEmotion(emotion){return ({smile:'happy',reaction:'surprise',neutral:'focus',sad:'disappointment',calm:'relief'})[emotion]??emotion??'focus'}
 function expressionShape(emotion){
  emotion=normalizeEmotion(emotion);
  const eye={width:.8,height:1.06,pupil:.55,brow:.15,low:.06};
@@ -142,12 +177,26 @@ function emotionMarks(c,emotion,intensity,head){
  if(emotion==='relief'){for(let i=0;i<2;i++)oval(c,head.x+3.2+i*1.2,head.y+4.2+i*.2,.55-i*.12,.24,'#d8f3f49c')}
  c.restore();
 }
+function drawAnimeBraid(c,d,x,y,phase,near,ink){
+ const sway=Math.sin(phase*Math.PI*2)*.35,bx=x+(near?-.25:-.65)+sway*.12;
+ oval(c,x-.15,y-7.2,2.25,1.85,tone(d.hairColor,.05));
+ path(c,[point(x-2,y-7.2),point(x-1.1,y-8.8),point(x+.2,y-7.4),point(x+1.7,y-8.2),point(x+2,y-6.6),point(x+.6,y-5.9),point(x-.9,y-6.1)],tone(d.hairColor,.12),ink,.2);
+ line(c,[point(x-1.5,y-7.5),point(x+.2,y-8.2),point(x+1.4,y-7.1)],tone(d.hairColor,-.2),.28);
+ line(c,[point(x-.8,y-5.9),point(bx,y-4.6)],tone(d.hairColor,-.14),2.35);
+ for(let i=0;i<12;i++){
+  const t=i/11,by=y-5.5+i*1.65,rx=2.05-t*1.2,ry=1.45-t*.5,drift=Math.sin(i*.78+phase*3)*.18;
+  oval(c,bx+drift,by,rx,ry,tone(d.hairColor,i%2?-.14:.1));
+  line(c,[point(bx-rx*.65+drift,by-.2),point(bx+rx*.55+drift,by+.35)],tone(d.hairColor,i%2?.2:-.22),.25);
+ }
+ oval(c,bx,y+11.6,1.15,.62,d.trim);
+ path(c,[point(bx-.85,y+11.9),point(bx-.45,y+14.8),point(bx,y+16.2),point(bx+.5,y+14.7),point(bx+.8,y+11.9)],tone(d.hairColor,-.1),ink,.24);
+}
 function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
  const emotion=normalizeEmotion(rawEmotion);
  const {x,y}=animeHeadCenter(n),skin=d.skin,hair=d.hairColor,colors=skinPalette(skin);
  // Tapered jaw, small ears and a tiny implied nose replace the round toy face.
  c.beginPath();c.moveTo(x-4.9,y-3.6);c.quadraticCurveTo(x-6,y+1,x-3.5,y+4.4);c.quadraticCurveTo(x-1,y+6,x,y+6.1);c.quadraticCurveTo(x+2.3,y+5.3,x+4.1,y+3.5);c.quadraticCurveTo(x+5.6,y,x+4.8,y-3.8);c.quadraticCurveTo(x+3.3,y-6.8,x,y-6.6);c.quadraticCurveTo(x-3.7,y-6.8,x-4.9,y-3.6);c.closePath();c.fillStyle=skin;c.fill();c.strokeStyle=ink;c.lineWidth=.4;c.stroke();
- for(const sign of [-1,1]){oval(c,x+sign*4.8,y+.6,.9,1.35,skin);line(c,[point(x+sign*4.8,y+.1),point(x+sign*5,y+1)],tone(skin,-.18),.3)}
+ if(d.hair!=='long')for(const sign of [-1,1]){oval(c,x+sign*4.8,y+.6,.9,1.35,skin);line(c,[point(x+sign*4.8,y+.1),point(x+sign*5,y+1)],tone(skin,-.18),.3)}
  if(!near){
   path(c,[point(x-2.7,y+4.75),point(x+.15,y+6.05),point(x+2.7,y+4.5),point(x+.15,y+5.1)],tone(skin,-.12),null);
   line(c,[point(x+.1,y-.9),point(x+.7,y+1.55),point(x+.15,y+2.05)],tone(skin,-.18),.28);
@@ -183,25 +232,21 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
   drawAnimeAfro(c,x,y,hair,ink,near);
  }else if(d.hair==='pixie'){
    if(near){
-    path(c,[point(x-5,y-.5),point(x-5.3,y-3.8),point(x-4,y-4.7),point(x-3.7,y-6.4),point(x-2.2,y-5.3),point(x-1.4,y-7.2),point(x-.1,y-5.6),point(x+1.5,y-7),point(x+2.5,y-5.1),point(x+4,y-6),point(x+4.2,y-4.2),point(x+5.2,y-3.3),point(x+5,y-.3),point(x+4.3,y+3.1),point(x+2.4,y+4.5),point(x,y+4.9),point(x-2.4,y+4.5),point(x-4.3,y+3.1)],hair,ink,.4);
+    path(c,[point(x-5,y-.5),point(x-5.3,y-3.8),point(x-4,y-4.7),point(x-3.7,y-6.4),point(x-2.2,y-5.3),point(x-1.4,y-7.2),point(x-.1,y-5.6),point(x+1.5,y-7),point(x+2.5,y-5.1),point(x+4,y-6),point(x+4.2,y-4.2),point(x+5.2,y-3.3),point(x+5,y-.3),point(x+4.1,y+1.7),point(x+2.2,y+2.8),point(x,y+3),point(x-2.2,y+2.8),point(x-4.1,y+1.7)],hair,ink,.4);
    }else{
     path(c,[point(x-5,y-.2),point(x-5.2,y-3.8),point(x-3.5,y-5.8),point(x-1.4,y-6.8),point(x+1.3,y-6.6),point(x+3.6,y-5.5),point(x+5.1,y-3.5),point(x+5,y-.3),point(x+3.5,y-1.3),point(x+2.3,y-3),point(x+.5,y-1.3),point(x-1.5,y-3),point(x-3.3,y-1.1)],hair,ink,.4);
     if(d.headwear!=='cap')path(c,[point(x-4.7,y-3.7),point(x-4,y-6.3),point(x-2.8,y-5.2),point(x-1.8,y-7.6),point(x-.6,y-5.6),point(x+.7,y-7.9),point(x+1.7,y-5.5),point(x+3.2,y-7),point(x+3.5,y-4.7),point(x+4.7,y-5.2)],tone(hair,.04),ink,.28);
     path(c,[point(x-4.8,y-3.1),point(x+4.8,y-3.1),point(x+4.4,y-.7),point(x+2.2,y-1.5),point(x+.4,y-.5),point(x-1.7,y-1.5),point(x-3.7,y-.6)],tone(hair,-.08),ink,.24);
-    path(c,[point(x-5,y-1.4),point(x-5.4,y+1.8),point(x-4.4,y+3.2),point(x-3.7,y+1.2)],tone(hair,-.04),ink,.25);
-    path(c,[point(x+5,y-1.4),point(x+5.4,y+1.8),point(x+4.4,y+3.2),point(x+3.7,y+1.2)],tone(hair,-.04),ink,.25);
    }}else if(d.hair==='curls'){
   animeHairMass(c,x,y,hair,ink,near,'shag');
   if(!near){path(c,[point(x-5,y-1.4),point(x-5.8,y+1.8),point(x-4.5,y+3.7),point(x-3.2,y+.4)],tone(hair,-.04),ink,.28);path(c,[point(x+5,y-1.4),point(x+5.8,y+1.8),point(x+4.5,y+3.7),point(x+3.2,y+.4)],tone(hair,-.04),ink,.28)}
   animeHairTexture(c,x,y,hair,ink,near,'shag');
  }else if(d.hair==='crop'){
-  animeHairMass(c,x,y,hair,ink,near,'crop');animeHairTexture(c,x,y,hair,ink,near,'crop');
- }else if(d.hair==='crewCut'){
   animeHairMass(c,x,y,hair,ink,near,'crewCut');animeHairTexture(c,x,y,hair,ink,near,'crewCut');
+ }else if(d.hair==='crewCut'){
+  drawAnimeSweptLayers(c,x,y,hair,ink,near);
  }else if(d.hair==='sidePart'){
-  animeHairMass(c,x,y,hair,ink,near,'sidePart');
-  if(!near)path(c,[point(x-2.3,y-5.6),point(x-.3,y-7.5),point(x+3.3,y-6.2),point(x+2.3,y-3.8),point(x-.2,y-3.5)],tone(hair,.05),ink,.22);
-  animeHairTexture(c,x,y,hair,ink,near,'sidePart');
+  drawAnimeSideSweep(c,x,y,hair,ink,near);
  }else if(d.hair==='spiky'){
    if(near){
     path(c,[[-5,0],[-5.2,-2.7],[-4.2,-3.1],[-4.5,-5.8],[-2.8,-4.6],[-2.1,-7],[-.8,-5.1],[.2,-7.8],[1.3,-5.2],[3,-6.5],[3.1,-4.3],[4.5,-5.2],[4.1,-3],[5.1,-2.3],[5,0],[4.2,2.1],[2.1,2.7],[0,2.85],[-2.1,2.7],[-4.2,2.1]].map(([a,b])=>point(x+a,y+b)),hair,ink,.38);
@@ -211,7 +256,7 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
    if(near){
     path(c,[point(x-5.2,y-.3),point(x-5.5,y-3.8),point(x-3.7,y-6.1),point(x-1.1,y-7),point(x+1.3,y-6.9),point(x+3.8,y-5.8),point(x+5.3,y-3.5),point(x+5,y-.4),point(x+2.5,y-1.5),point(x,y-1.1),point(x-2.5,y-1.5)],tone(hair,-.05),ink,.38);
    }else{
-    path(c,[point(x-5.2,y-.3),point(x-5.5,y-4),point(x-3.8,y-6.3),point(x-1.4,y-7.2),point(x-.2,y-5.4),point(x+.2,y-7.1),point(x+1.6,y-5.3),point(x+4,y-5.8),point(x+5.4,y-3.5),point(x+5,y-.4),point(x+3.4,y-1.2),point(x+2.7,y-3.7),point(x+1.4,y-1.5),point(x+.2,y-4.2),point(x-.4,y-1.1),point(x-2,y-3.8),point(x-3.2,y-1.3)],hair,ink,.4);
+    path(c,[point(x-5.2,y-.3),point(x-5.5,y-4),point(x-3.8,y-6.3),point(x-1.5,y-7.3),point(x-.2,y-7.4),point(x+1.5,y-7.1),point(x+2.8,y-5.9),point(x+4,y-5.8),point(x+5.4,y-3.5),point(x+5,y-.4),point(x+3.4,y-1.2),point(x+2.7,y-3.7),point(x+1.4,y-1.5),point(x+.2,y-4.2),point(x-.4,y-1.1),point(x-2,y-3.8),point(x-3.2,y-1.3)],hair,ink,.4);
     path(c,[point(x-3.5,y-4.6),point(x-2.2,y-2.1),point(x-1.3,y-1.8),point(x-2.6,y-5.2)],tone(hair,-.16),null);path(c,[point(x+.4,y-4.8),point(x+1.4,y-1.8),point(x+2.4,y-2.1),point(x+2,y-5.2)],tone(hair,-.12),null);
    }}else if(['bob','waves'].includes(d.hair)){
   path(c,[point(x-5.2,y-.2),point(x-5.5,y-4),point(x-3.8,y-6.4),point(x-1,y-7.2),point(x+1.5,y-7),point(x+4,y-5.8),point(x+5.4,y-3.6),point(x+5.1,y-.2),point(x+3.8,y-1),point(x+3,y-3.5),point(x+1.4,y-1.4),point(x-.2,y-3.4),point(x-1.8,y-1.3),point(x-3.3,y-3.4)],hair,ink,.4);
@@ -274,7 +319,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  const plant=options.plantWorld??{cx,baseline,scale};if(!options.footTargets)plantFeet(p,{...options,legLengths:p.legs.map(chain=>({upper:Math.hypot(chain[1].x-chain[0].x,chain[1].y-chain[0].y),lower:Math.hypot(chain[2].x-chain[1].x,chain[2].y-chain[1].y)}))},raw,plant.cx,plant.baseline,plant.scale);
  c.save();c.translate(cx-24*scale+(raw.rootOffset||0)*scale,baseline-63*scale);c.scale(scale,scale);
 
- hairTail(c,d,n.x,animeHeadCenter(n).y,phase,near,ink);
+ hairTail(c,d,n.x,animeHeadCenter(n).y,phase,near,ink,'behind');
  for(const [index,chain] of p.legs.entries()){ribbon(c,chain,[body.thigh,body.calf,body.ankle],d.skin,ink,skin);const f=chain[2];
   trainer(c,f,d,ink,options.footTargets?.[index].sole);
  }
@@ -331,7 +376,8 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
  }
  if(crop)line(c,[point(h.x-waist,hem),point(h.x+waist,hem)],d.trim,.65);
  line(c,[point(h.x-waist,h.y-1),point(h.x+waist,h.y-1)],tone(d.shirt,-.35),.8);
- const normalizedEmotion=normalizeEmotion(emotion);animeHead(c,d,n,near,warm,phase,ink,normalizedEmotion);const emotionHead=animeHeadCenter(n),sweat=Math.max(0,Math.min(1,options.sweat??0));emotionMarks(c,normalizedEmotion,options.emotionIntensity??.65,emotionHead);if(sweat>.1){oval(c,emotionHead.x-2.4,emotionHead.y-4.8,1.2,.28,'#d8f3f4aa');const drops=sweat>.68?3:sweat>.34?2:1;for(let i=0;i<drops;i++){const sign=i===0?-1:i===1?1:0,drop=((options.emotionClock??0)*(.7+i*.15)+i*.31)%1;oval(c,emotionHead.x+sign*5.4+(i===2?2.2:0),emotionHead.y+1+drop*3,.34+(i===2?.08:0),.58+drop*.18,'#b5e6ef')}}
+ hairTail(c,d,n.x,animeHeadCenter(n).y,phase,near,ink,'front');
+ const normalizedEmotion=normalizeEmotion(emotion);animeHead(c,d,n,near,warm,phase,ink,normalizedEmotion);if(d.hair==='braid')drawAnimeBraid(c,d,n.x,animeHeadCenter(n).y,phase,near,ink);const emotionHead=animeHeadCenter(n),sweat=Math.max(0,Math.min(1,options.sweat??0));emotionMarks(c,normalizedEmotion,options.emotionIntensity??.65,emotionHead);if(sweat>.1){oval(c,emotionHead.x-2.4,emotionHead.y-4.8,1.2,.28,'#d8f3f4aa');const drops=sweat>.68?3:sweat>.34?2:1;for(let i=0;i<drops;i++){const sign=i===0?-1:i===1?1:0,drop=((options.emotionClock??0)*(.7+i*.15)+i*.31)%1;oval(c,emotionHead.x+sign*5.4+(i===2?2.2:0),emotionHead.y+1+drop*3,.34+(i===2?.08:0),.58+drop*.18,'#b5e6ef')}}
  layers.filter(a=>!a.back).forEach(a=>arm(a.i));if(raw.paddle.depth>=raw.neck.depth)paddle();c.restore();
 }
 
