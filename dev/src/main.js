@@ -1,41 +1,41 @@
-import {seededRandom} from './competition.js?v=183';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=183';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=183';
-import {playerFeet,footSole} from './player-feet.js?v=183';
+import {seededRandom} from './competition.js?v=184';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=184';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=184';
+import {playerFeet,footSole} from './player-feet.js?v=184';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=183';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=184';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=183';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=184';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=183';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=184';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=183';
+import {createAnimeGameRenderer} from './anime-game.js?v=184';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=183';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=184';
 
-import {setupCourtDisplay} from './court-display.js?v=183';
+import {setupCourtDisplay} from './court-display.js?v=184';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=183';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=184';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY} from './court-camera.js?v=183';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=183';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY} from './court-camera.js?v=184';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=184';
 
-import {movingStance} from './detailed-character.js?v=183';
+import {movingStance} from './detailed-character.js?v=184';
 
-import {sampleMatchAnimation} from './match-animation.js?v=183';
+import {sampleMatchAnimation} from './match-animation.js?v=184';
 
-import {setupSelection} from './selection.js?v=183';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=183';
+import {setupSelection} from './selection.js?v=184';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=184';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=183';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=184';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=183';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=184';
 
-import {Game} from './game.js?v=183';
-import {C} from './core.js?v=183';
+import {Game} from './game.js?v=184';
+import {C} from './core.js?v=184';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=183';import {playerEmotionState} from './player-emotion.js?v=183';import {PerformanceMonitor} from './performance-monitor.js?v=183';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=184';import {playerEmotionState} from './player-emotion.js?v=184';import {PerformanceMonitor} from './performance-monitor.js?v=184';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=183';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=184';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));

@@ -1,6 +1,6 @@
-import {competitionRecord} from './competition.js?v=183';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=183';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=183';
+import {competitionRecord} from './competition.js?v=184';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=184';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=184';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -65,9 +65,9 @@ export const PADDLES = Object.freeze([
 // for this tuning describes elongated paddles as higher swing-weight and
 // higher reach, while wide shapes prioritize forgiveness and quick hands.
 export const PADDLE_SHAPES = Object.freeze([
-  {id:'wide',name:'Widebody',style:'Fast hands · forgiving',description:'A larger side-to-side sweet spot and quicker hands; slightly less reach and power.',reach:.96,power:.96,control:1.06,handSpeed:1.1,sweetSpot:1.15,ratingModifiers:{volley:6,power:-4,reach:-3}},
-  {id:'elongated',name:'Elongated',style:'Reach · power',description:'More leverage and reach; slower hands and a narrower side-to-side sweet spot.',reach:1.07,power:1.05,control:.97,handSpeed:.92,sweetSpot:.9,ratingModifiers:{power:6,reach:6,volley:-5}},
-  {id:'hybrid',name:'Hybrid',style:'Balanced',description:'Balanced reach, power, sweet spot and hand speed.',reach:1,power:1,control:1,handSpeed:1,sweetSpot:1,ratingModifiers:{power:0,reach:0,volley:0}}
+  {id:'wide',name:'Widebody',style:'Fast hands · forgiving',description:'A large centered sweet spot and quicker hands; slightly less reach and power.',reach:.96,power:.96,control:1.06,handSpeed:1.1,sweetSpot:1.15,sweetSpotCenterX:0,sweetSpotCenterZ:0,sweetSpotRadiusX:1.2,sweetSpotRadiusZ:1,sweetSpotPowerGain:.96,sweetSpotControlGain:1.05,sweetSpotSpinGain:.96,sweetSpotEdgePenalty:.82,ratingModifiers:{volley:6,power:-4,reach:-3}},
+  {id:'elongated',name:'Elongated',style:'Reach · power',description:'A smaller, higher sweet spot with more center leverage and reach; slower hands and tighter sides.',reach:1.07,power:1.05,control:.97,handSpeed:.92,sweetSpot:.9,sweetSpotCenterX:0,sweetSpotCenterZ:.55,sweetSpotRadiusX:.8,sweetSpotRadiusZ:1.3,sweetSpotPowerGain:1.12,sweetSpotControlGain:.95,sweetSpotSpinGain:1.08,sweetSpotEdgePenalty:1.15,ratingModifiers:{power:6,reach:6,volley:-5}},
+  {id:'hybrid',name:'Hybrid',style:'Balanced',description:'A centered mixed sweet spot with balanced reach, power and hand speed.',reach:1,power:1,control:1,handSpeed:1,sweetSpot:1,sweetSpotCenterX:0,sweetSpotCenterZ:.1,sweetSpotRadiusX:1,sweetSpotRadiusZ:1.15,sweetSpotPowerGain:1.03,sweetSpotControlGain:1,sweetSpotSpinGain:1,sweetSpotEdgePenalty:1,ratingModifiers:{power:0,reach:0,volley:0}}
 ]);
 
 export const CLOTHING_COLORS = Object.freeze([
@@ -219,7 +219,7 @@ export function buildProfile(input, options={}){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),shape=PADDLE_SHAPES.find(item=>item.id===selection.paddleShape);
   const identity=options.identity??generateIdentity({gender:selection.gender,skinColor:selection.skinColor,random:options.random??Math.random});
   const attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,Number.isFinite(options.attributes?.[key])?options.attributes[key]:character.ratings[key]))])),abilities=abilitiesFromRatings(attributes);
-  return {...playerProfile(),handedness:selection.handedness,attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,highlightColor:selection.highlightColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor,headwear:selection.headwear,eyewear:selection.eyewear,outfit:selection.outfit,court:selection.court}};
+  return {...playerProfile(),handedness:selection.handedness,attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,sweetSpotCenterX:shape.sweetSpotCenterX,sweetSpotCenterZ:shape.sweetSpotCenterZ,sweetSpotRadiusX:shape.sweetSpotRadiusX,sweetSpotRadiusZ:shape.sweetSpotRadiusZ,sweetSpotPowerGain:shape.sweetSpotPowerGain,sweetSpotControlGain:shape.sweetSpotControlGain,sweetSpotSpinGain:shape.sweetSpotSpinGain,sweetSpotEdgePenalty:shape.sweetSpotEdgePenalty,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,highlightColor:selection.highlightColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor,headwear:selection.headwear,eyewear:selection.eyewear,outfit:selection.outfit,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
@@ -268,4 +268,3 @@ export function applyPhysique(player,appearance=player.appearance??{}){
  const abilities={...baseAbilities};for(const [key,multiplier] of Object.entries(modifiers))abilities[key]=(baseAbilities[key]??1)*multiplier;
  return {...player,baseAbilities,abilities,appearance:{...appearance,height,build},physique:{height,build,heightScale:height/177,modifiers}};
 }
-

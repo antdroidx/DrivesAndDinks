@@ -1,7 +1,7 @@
-import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=183';
-import {matchDesign} from './detailed-character.js?v=183';
-import {conceptDimensions} from './character-concepts.js?v=183';
-import {animationRootOffset} from './pixel-character.js?v=183';
+import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=184';
+import {matchDesign} from './detailed-character.js?v=184';
+import {conceptDimensions} from './character-concepts.js?v=184';
+import {animationRootOffset} from './pixel-character.js?v=184';
 
 export function animeGameLayout(options,design){
  const scale=options.height/64,cx=options.x+options.width/2,baseline=options.y+63*scale;

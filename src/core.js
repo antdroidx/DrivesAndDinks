@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=183';
-import {strokeForContact} from './player-facing.js?v=183';
+import {kitchenContact} from './player-feet.js?v=184';
+import {strokeForContact} from './player-facing.js?v=184';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:34/12,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export function venueConditions(surfaceKind='outdoor',random=Math.random){
  if(surfaceKind==='indoor')return {type:'indoor',label:'INDOOR · CALM',wind:0,humidity:0};
@@ -9,9 +9,16 @@ export function venueConditions(surfaceKind='outdoor',random=Math.random){
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
 const DEFAULT_SHAPE_MODIFIERS=Object.freeze({power:1,control:1,reach:1,handSpeed:1,sweetSpot:1});
+export const PADDLE_SWEET_SPOT_PROFILES=Object.freeze({
+ wide:Object.freeze({centerX:0,centerZ:0,radiusX:1.2,radiusZ:1,powerGain:.96,controlGain:1.05,spinGain:.96,edgePenalty:.82}),
+ elongated:Object.freeze({centerX:0,centerZ:.55,radiusX:.8,radiusZ:1.3,powerGain:1.12,controlGain:.95,spinGain:1.08,edgePenalty:1.15}),
+ hybrid:Object.freeze({centerX:0,centerZ:.1,radiusX:1,radiusZ:1.15,powerGain:1.03,controlGain:1,spinGain:1,edgePenalty:1})
+});
+export function paddleSweetSpotProfile(shapeId='hybrid'){return PADDLE_SWEET_SPOT_PROFILES[shapeId]??PADDLE_SWEET_SPOT_PROFILES.hybrid}
 export function paddleShapeModifiers(playerOrPaddle={}){
  const paddle=playerOrPaddle?.paddle??playerOrPaddle??{};
- return {power:paddle.shapePower??1,control:paddle.shapeControl??1,reach:paddle.shapeReach??1,handSpeed:paddle.shapeHandSpeed??1,sweetSpot:paddle.shapeSweetSpot??1};
+  const spot=paddleSweetSpotProfile(paddle.shapeId);
+  return {power:paddle.shapePower??1,control:paddle.shapeControl??1,reach:paddle.shapeReach??1,handSpeed:paddle.shapeHandSpeed??1,sweetSpot:paddle.shapeSweetSpot??1,centerX:paddle.sweetSpotCenterX??spot.centerX,centerZ:paddle.sweetSpotCenterZ??spot.centerZ,radiusX:paddle.sweetSpotRadiusX??spot.radiusX,radiusZ:paddle.sweetSpotRadiusZ??spot.radiusZ,powerGain:paddle.sweetSpotPowerGain??spot.powerGain,controlGain:paddle.sweetSpotControlGain??spot.controlGain,spinGain:paddle.sweetSpotSpinGain??spot.spinGain,edgePenalty:paddle.sweetSpotEdgePenalty??spot.edgePenalty};
 }
 export function playerProfile(){return {handedness:'right',abilities:{...DEFAULT_ABILITIES},paddle:{...DEFAULT_PADDLE},appearance:{body:'male',shirtColor:'green',paddleColor:'mint',highlightColor:'yellow',court:'blue-gray'}}}
 export function serveAim(player,aim){
@@ -57,17 +64,17 @@ export function strokePower(player,shot='drive',quality=1,difficulty=0){
  const swingSpeed=clamp(technique*(1+.35*(handSpeed-1))*fluidity,.6,1.5),power=clamp(.4*strength+.6*swingSpeed*swingSpeed,.6,1.8);
  return {strength,technique,handSpeed,fluidity,swingSpeed,power};
 }
-export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocity={x:0,y:0,z:0},normal={x:0,y:-1,z:0},center,power=1,control=1,spin=1,quality=1,swingDirection=1,sweetSpotScale=1}){
- const dx=(ball.x??0)-(center?.x??0),dy=(ball.y??0)-(center?.y??0),dz=((ball.z??0)-(center?.z??0))*.55,offset=Math.hypot(dx,dy,dz),sweetSpot=Math.exp(-((offset/(.72*Math.max(.55,sweetSpotScale)))**2));
+export function paddleContactResponse({ball,incoming={x:0,y:0,z:0},paddleVelocity={x:0,y:0,z:0},normal={x:0,y:-1,z:0},center,power=1,control=1,spin=1,quality=1,swingDirection=1,sweetSpotScale=1,sweetSpotShape=null}){
+ const profile=sweetSpotShape??paddleSweetSpotProfile(),widthScale=Math.max(.55,profile.sweetSpot??sweetSpotScale),faceX=(ball.x??0)-(center?.x??0)-(profile.centerX??0),faceZ=((ball.z??0)-(center?.z??0))-(profile.centerZ??0),depth=((ball.y??0)-(center?.y??0))*.35,offset=Math.hypot(faceX,faceZ,depth),sweetSpot=Math.exp(-((faceX/(profile.radiusX*widthScale))**2+(faceZ/(profile.radiusZ*widthScale))**2+(depth/1.45)**2));
  const relative={x:(incoming.x??0)-paddleVelocity.x,y:(incoming.y??0)-paddleVelocity.y,z:(incoming.z??0)-paddleVelocity.z};
  const closing=Math.max(0,-(relative.x*normal.x+relative.y*normal.y+relative.z*normal.z)+(paddleVelocity.x*normal.x+paddleVelocity.y*normal.y+paddleVelocity.z*normal.z));
- const closingPace=Math.max(0,Math.min(1,closing/34)),edge=1-sweetSpot,tangent=Math.hypot(dx,dy)*swingDirection;
+ const closingPace=Math.max(0,Math.min(1,closing/34)),edge=1-sweetSpot,edgePenalty=profile.edgePenalty??1,tangent=Math.hypot(faceX,faceZ)*swingDirection;
  return {
   sweetSpot,offset,closing,
-  paceScale:Math.max(.82,Math.min(1.12,(.88+closingPace*.09+Math.max(0,power-1)*.06+sweetSpot*.06)*Math.max(.72,quality))),
-  spinKick:Math.max(-1.8,Math.min(1.8,tangent*edge*.42*Math.max(.55,spin)*(swingDirection>=0?1:-1))),
-  twist:Math.max(-1,Math.min(1,tangent*edge*1.4)),
-  aimError:Math.max(-.65,Math.min(.65,tangent*edge*(.6/Math.max(.7,control))))
+   paceScale:Math.max(.82,Math.min(1.18,(.88+closingPace*.09+Math.max(0,power-1)*.06+sweetSpot*.06)*(1+((profile.powerGain??1)-1)*sweetSpot)*Math.max(.72,quality))),
+   spinKick:Math.max(-1.8,Math.min(1.8,tangent*edge*edgePenalty*.42*Math.max(.55,spin)*(profile.spinGain??1)*(swingDirection>=0?1:-1))),
+   twist:Math.max(-1,Math.min(1,tangent*edge*edgePenalty*1.4)),
+   aimError:Math.max(-.65,Math.min(.65,tangent*edge*edgePenalty*(.6/(Math.max(.7,control)*(profile.controlGain??1)))))
  };
 }
 export function scorpionOpportunity(p,b){

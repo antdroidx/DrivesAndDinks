@@ -1,16 +1,16 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=183';
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=183';
-import {MatchJournal} from './match-journal.js?v=183';import {summarizePlaytest} from './playtest-summary.js?v=183';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=183';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=183';
-import {seededRandom} from './competition.js?v=183';
-import {kitchenFootContact} from './core.js?v=183';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=183';
-import {strokeForContact} from './player-facing.js?v=183';
-import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=183';
-import {createLineup,applyPhysique} from './roster.js?v=183';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=183';
-import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=183';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=183';
+import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=184';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=184';
+import {MatchJournal} from './match-journal.js?v=184';import {summarizePlaytest} from './playtest-summary.js?v=184';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=184';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=184';
+import {seededRandom} from './competition.js?v=184';
+import {kitchenFootContact} from './core.js?v=184';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=184';
+import {strokeForContact} from './player-facing.js?v=184';
+import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=184';
+import {createLineup,applyPhysique} from './roster.js?v=184';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=184';
+import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=184';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=184';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=true;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.sideSwitched=false;this.sideSwitchThreshold=6;this.sideSwitchCount=0;this.reset()}
  configure(selection,lineup=null){this.showNameTags=selection?.showNameTags!==false&&selection?.showNameTags!=='false';if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
@@ -140,7 +140,7 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=
   const attacking=['drive','overhead','atp','erne'].includes(shot),mechanics=strokePower(player,shot,quality,difficulty),equipment=this.paddleFor(player,shot);
   const effectivePaddle={...equipment,power:attacking?(player.paddle?.power??1)*paddleShapeModifiers(player).power*mechanics.power*grip.power:equipment.power*grip.power*(1-difficulty*.13),skill:attacking?1:equipment.skill,spin:equipment.spin*grip.spin,loft:shot==='lob'?1+this.random()*.22:1};
   player.contactMechanics=attacking?mechanics:null;
-  const contactResponse=paddleContactResponse({ball:this.ball,incoming:incomingVelocity,paddleVelocity:{x:(player.vx||0)*.35+faceSide*7.5*(attacking?mechanics.swingSpeed:1),y:(player.vy||0)*.35+netward*2.2*(attacking?mechanics.swingSpeed:1),z:shot==='overhead'?-4:1.2},normal,center:player.contactPaddleTarget,power:effectivePaddle.power,control:effectivePaddle.control,spin:effectivePaddle.spin,quality,swingDirection:faceSide,sweetSpotScale:paddleShapeModifiers(player).sweetSpot});
+  const contactResponse=paddleContactResponse({ball:this.ball,incoming:incomingVelocity,paddleVelocity:{x:(player.vx||0)*.35+faceSide*7.5*(attacking?mechanics.swingSpeed:1),y:(player.vy||0)*.35+netward*2.2*(attacking?mechanics.swingSpeed:1),z:shot==='overhead'?-4:1.2},normal,center:player.contactPaddleTarget,power:effectivePaddle.power,control:effectivePaddle.control,spin:effectivePaddle.spin,quality,swingDirection:faceSide,sweetSpotShape:paddleShapeModifiers(player)});
   aim+=contactResponse.aimError;player.paddleTwist=contactResponse.twist;player.contactSweetSpot=contactResponse.sweetSpot;
   const patternCurve=(aim-this.ball.x)*.32+contactResponse.twist*1.2+(player.stroke==='backhand'?-1:1)*faceSide*.18,dinkLift=shot==='dink'?Math.max(0,Math.min(2.4,(1-quality)*2.2+Math.max(0,difficulty-.45)*1.15+Math.abs(contactResponse.twist)*.55)):0;
    const curveScale=shot==='dink'?.45:shot==='drop'?.55:shot==='slice'?1.15:1;
