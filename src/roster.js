@@ -1,5 +1,6 @@
-import {competitionRecord} from './competition.js?v=164';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=164';
+import {competitionRecord} from './competition.js?v=182';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=182';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=182';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -64,7 +65,7 @@ export const PADDLES = Object.freeze([
 // for this tuning describes elongated paddles as higher swing-weight and
 // higher reach, while wide shapes prioritize forgiveness and quick hands.
 export const PADDLE_SHAPES = Object.freeze([
-  {id:'wide',name:'Wide',style:'Fast hands · forgiving',description:'A larger side-to-side sweet spot and quicker hands; slightly less reach and power.',reach:.96,power:.96,control:1.06,handSpeed:1.1,sweetSpot:1.15,ratingModifiers:{volley:6,power:-4,reach:-3}},
+  {id:'wide',name:'Widebody',style:'Fast hands · forgiving',description:'A larger side-to-side sweet spot and quicker hands; slightly less reach and power.',reach:.96,power:.96,control:1.06,handSpeed:1.1,sweetSpot:1.15,ratingModifiers:{volley:6,power:-4,reach:-3}},
   {id:'elongated',name:'Elongated',style:'Reach · power',description:'More leverage and reach; slower hands and a narrower side-to-side sweet spot.',reach:1.07,power:1.05,control:.97,handSpeed:.92,sweetSpot:.9,ratingModifiers:{power:6,reach:6,volley:-5}},
   {id:'hybrid',name:'Hybrid',style:'Balanced',description:'Balanced reach, power, sweet spot and hand speed.',reach:1,power:1,control:1,handSpeed:1,sweetSpot:1,ratingModifiers:{power:0,reach:0,volley:0}}
 ]);
@@ -154,6 +155,7 @@ export const NAME_CULTURES = Object.freeze({
 });
 const CULTURE_IDS=Object.freeze(Object.keys(NAME_CULTURES));
 const randomItem=(items,random=Math.random)=>items[Math.min(items.length-1,Math.floor(random()*items.length))];
+function randomAccessory(items,random,noneWeight=.58){if(random()<noneWeight)return 'none';return randomItem(items.filter(item=>item.id!=='none'),random).id}
 function weightedPick(entries,random=Math.random){
   const total=entries.reduce((sum,[,weight])=>sum+weight,0);let target=random()*total;
   for(const [value,weight] of entries){target-=weight;if(target<=0)return value}
@@ -174,22 +176,40 @@ export function generateIdentity({gender='male',skinColor=null,culture=null,rand
   }
   if(!name)name=`${randomItem(pool.first,random)} ${randomItem(pool.last,random)} ${usedNames.size+1}`;
   usedNames.add(name);
-  return {name,culture:selectedCulture,skinColor:resolvedSkin,hairColor:randomItem(HAIR_COLORS,random).id,shirtColor:randomItem(CLOTHING_COLORS,random).id,paddleColor:randomItem(PADDLE_COLORS,random).id};
+  return {name,culture:selectedCulture,skinColor:resolvedSkin,hairColor:randomItem(HAIR_COLORS,random).id,shirtColor:randomItem(CLOTHING_COLORS,random).id,paddleColor:randomItem(PADDLE_COLORS,random).id,highlightColor:randomItem(PADDLE_COLORS,random).id};
 }
 
-export const DEFAULT_SELECTION = Object.freeze({character:'avery',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',hairColor:'brown',skinColor:'medium',court:'blue-gray'});
+export const GENERATED_LEFT_HANDED_RATE=.13;
+export const DEFAULT_SELECTION = Object.freeze({character:'avery',gender:'male',handedness:'right',paddle:'balanced',paddleShape:'hybrid',shirtColor:'green',paddleColor:'mint',highlightColor:'yellow',hairStyle:'design',hairColor:'brown',skinColor:'medium',headwear:'none',eyewear:'none',outfit:'performance',showNameTags:true,court:'blue-gray'});
+export function hairStylesFor(body){return HAIR_OPTIONS[body]??HAIR_OPTIONS.male}
+export function normalizeHairStyle(body,value){return value==='design'||value==null?'design':conceptHair(body,value,'design')}
+export function sampleAthleteBody(gender='male',random=Math.random){
+ const female=gender==='female',normal=()=>{let sum=0;for(let i=0;i<6;i++)sum+=random();return (sum-3)/Math.sqrt(.5)};
+ const heightMean=female?164:177,heightSd=female?6.2:7.2,buildMean=female?.43:.49,buildSd=female?.11:.14;
+ const height=Math.max(female?150:158,Math.min(female?183:198,heightMean+normal()*heightSd));
+ const build=Math.max(female?.2:.18,Math.min(female?.76:.84,buildMean+normal()*buildSd));
+ return {height:Math.round(height),build:Number(build.toFixed(3))};
+}
 const valid=(items,id)=>items.some(item=>item.id===id)?id:null;
 export function normalizeSelection(input={}){
   const character=CHARACTERS.some(c=>c.id===input?.character)?input.character:DEFAULT_SELECTION.character;
   const legacyPaddleColor=input?.paddleColor??(input?.design==='ocean'?'blue':input?.design);
+  const gender=input?.gender==='male'||input?.gender==='female'?input.gender:CHARACTERS.find(c=>c.id===character).gender;
   return {
     character,
-    gender:input?.gender==='male'||input?.gender==='female'?input.gender:CHARACTERS.find(c=>c.id===character).gender,
+    gender,
+    handedness:input?.handedness==='left'||input?.handedness==='right'?input.handedness:(input?.hand==='left'||input?.hand==='right'?input.hand:DEFAULT_SELECTION.handedness),
     customName:String(input?.customName??'').trim().slice(0,40),
     paddle:valid(PADDLES,input?.paddle)??DEFAULT_SELECTION.paddle,
     paddleShape:valid(PADDLE_SHAPES,input?.paddleShape)??DEFAULT_SELECTION.paddleShape,
+    hairStyle:normalizeHairStyle(gender,input?.hairStyle??input?.hair),
+    headwear:valid(HEADWEAR_OPTIONS,input?.headwear)??DEFAULT_SELECTION.headwear,
+    eyewear:valid(EYEWEAR_OPTIONS,input?.eyewear)??DEFAULT_SELECTION.eyewear,
+    outfit:valid(OUTFIT_OPTIONS,input?.outfit)??DEFAULT_SELECTION.outfit,
+    showNameTags:input?.showNameTags!==false&&input?.showNameTags!=='false',
     shirtColor:valid(CLOTHING_COLORS,input?.shirtColor)??DEFAULT_SELECTION.shirtColor,
     paddleColor:valid(PADDLE_COLORS,legacyPaddleColor)??DEFAULT_SELECTION.paddleColor,
+    highlightColor:valid(PADDLE_COLORS,input?.highlightColor)??DEFAULT_SELECTION.highlightColor,
     hairColor:valid(HAIR_COLORS,input?.hairColor)??DEFAULT_SELECTION.hairColor,
     skinColor:valid(SKIN_COLORS,input?.skinColor)??DEFAULT_SELECTION.skinColor,
     court:valid(COURT_PALETTES,['red-white','red-gray'].includes(input?.court)?'gray-red':input?.court)??DEFAULT_SELECTION.court
@@ -199,7 +219,7 @@ export function buildProfile(input, options={}){
   const selection=normalizeSelection(input),character=CHARACTERS.find(c=>c.id===selection.character),paddle=PADDLES.find(p=>p.id===selection.paddle),shape=PADDLE_SHAPES.find(item=>item.id===selection.paddleShape);
   const identity=options.identity??generateIdentity({gender:selection.gender,skinColor:selection.skinColor,random:options.random??Math.random});
   const attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,Number.isFinite(options.attributes?.[key])?options.attributes[key]:character.ratings[key]))])),abilities=abilitiesFromRatings(attributes);
-  return {...playerProfile(),attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,hairColor:selection.hairColor,skinColor:selection.skinColor,court:selection.court}};
+  return {...playerProfile(),handedness:selection.handedness,attributes,competition:competitionRecord(options.competitiveRating??3),playstyle:{aggression:attributes.aggression/100,patience:attributes.courtIQ/100},characterId:character.id,archetypeId:character.id,backhandStyle:({balanced:'mixed',speed:'one',soft:'mixed',banger:'two',net:'one'})[character.ratingStyle],ratingStyle:character.ratingStyle,archetype:character.style,name:selection.customName||identity.name,culture:identity.culture,gender:selection.gender,strengths:[...character.strengths],tradeoffs:[...character.tradeoffs],ratings:{...attributes},abilities,paddle:{id:paddle.id,power:paddle.power,control:paddle.control,spin:paddle.spin,ratingModifiers:{...paddle.ratingModifiers},spinModifier:paddle.spinModifier,shapeId:shape.id,shapeName:shape.name,shapePower:shape.power,shapeControl:shape.control,shapeReach:shape.reach,shapeHandSpeed:shape.handSpeed,shapeSweetSpot:shape.sweetSpot,shapeRatingModifiers:{...shape.ratingModifiers}},appearance:{body:selection.gender,shirtColor:selection.shirtColor,paddleColor:selection.paddleColor,highlightColor:selection.highlightColor,hairStyle:selection.hairStyle,hairColor:selection.hairColor,skinColor:selection.skinColor,headwear:selection.headwear,eyewear:selection.eyewear,outfit:selection.outfit,court:selection.court}};
 }
 export function createLineup(input,{random=Math.random}={}){
   const selected=normalizeSelection(input),player=CHARACTERS.find(c=>c.id===selected.character),usedNames=new Set();
@@ -209,9 +229,10 @@ export function createLineup(input,{random=Math.random}={}){
   const characters=[player,...remaining.slice(0,3)];
   const cpuCultures=shuffle(CULTURE_IDS.filter(id=>id!==playerCulture),random).slice(0,3);
   return characters.map((character,index)=>{
-    if(index===0){const p=buildProfile(selected,{identity:playerIdentity});p.appearance.height=160+Math.floor(random()*34);p.appearance.build=.15+random()*.7;p.appearance.hairStyle=randomItem(['crop','sidePart','waves','ponytail','buzz'],random);return p;}
+    if(index===0){const p=buildProfile(selected,{identity:playerIdentity});const body=sampleAthleteBody(selected.gender,random);p.appearance.height=body.height;p.appearance.build=body.build;return p;}
     const gender=random()<.5?'male':'female',identity=generateIdentity({gender,culture:cpuCultures[index-1],random,usedNames});
-    const profile=buildProfile({...selected,character:character.id,gender,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,hairColor:identity.hairColor,skinColor:identity.skinColor},{identity});profile.appearance.height=160+Math.floor(random()*34);profile.appearance.build=.15+random()*.7;profile.appearance.hairStyle=randomItem(['crop','sidePart','waves','ponytail','buzz'],random);return profile;
+    const handedness=random()<1-GENERATED_LEFT_HANDED_RATE?'right':'left';
+    const profile=buildProfile({...selected,character:character.id,gender,handedness,customName:'',paddle:randomItem(PADDLES,random).id,paddleShape:randomItem(PADDLE_SHAPES,random).id,shirtColor:index===1?(selected.shirtColor==='white'?'blue':'white'):identity.shirtColor,paddleColor:identity.paddleColor,highlightColor:identity.highlightColor,hairColor:identity.hairColor,skinColor:identity.skinColor,headwear:randomAccessory(HEADWEAR_OPTIONS,random,.58),eyewear:randomAccessory(EYEWEAR_OPTIONS,random,.78),outfit:randomItem(OUTFIT_OPTIONS,random).id},{identity});const body=sampleAthleteBody(gender,random);profile.appearance.height=body.height;profile.appearance.build=body.build;profile.appearance.hairStyle=randomItem(hairStylesFor(gender),random).id;return profile;
   });
 }
 export function selectionStats(input){
@@ -231,7 +252,7 @@ export function levelLineup(level='demo',random=Math.random){
  const baseline=SKILL_LEVELS[level];if(baseline===undefined)throw new Error('Unknown skill level');
  return ['avery','remy','jordan','selena'].map((character,index)=>{
   const source=CHARACTERS.find(c=>c.id===character),attributes=Object.fromEntries(RATING_KEYS.map(key=>[key,Math.max(10,Math.min(95,baseline+(source.ratings[key]-70)*.45))]));
-  return buildProfile({character,shirtColor:['green','white','orange','purple'][index],paddleColor:['mint','blue','yellow','coral'][index]},{attributes,random});
+  return buildProfile({character,handedness:index%3===1?'left':'right',shirtColor:['green','white','orange','purple'][index],paddleColor:['mint','blue','yellow','coral'][index]},{attributes,random});
  });
 }
 
@@ -247,3 +268,4 @@ export function applyPhysique(player,appearance=player.appearance??{}){
  const abilities={...baseAbilities};for(const [key,multiplier] of Object.entries(modifiers))abilities[key]=(baseAbilities[key]??1)*multiplier;
  return {...player,baseAbilities,abilities,appearance:{...appearance,height,build},physique:{height,build,heightScale:height/177,modifiers}};
 }
+

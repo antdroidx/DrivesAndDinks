@@ -1,10 +1,10 @@
-import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset} from './pixel-character.js?v=164';
-import {CHARACTER_CONCEPTS,conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=164';
+import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset,paddleOutline} from './pixel-character.js?v=182';
+import {CHARACTER_CONCEPTS,conceptPoint,conceptHair,thighGarment,skirtGarment} from './character-concepts.js?v=182';
 
 // Visual identities never alter the player's simulation abilities or hit range.
 export function matchDesign(appearance={},characterId='',designId=''){
  const body=appearance.body==='female'?'female':'male',choices=CHARACTER_CONCEPTS.filter(d=>d.body===body),hash=[...characterId].reduce((n,c)=>n+c.charCodeAt(0),0),base=CHARACTER_CONCEPTS.find(d=>d.id===designId)??choices[hash%choices.length],palette=appearancePalette(appearance);
- return {...base,shirt:palette.shirt,skin:palette.skin,hairColor:palette.hair,trim:palette.paddle};
+ return {...base,hair:conceptHair(body,appearance.hairStyle,base.hair),headwear:appearance.headwear??'none',eyewear:appearance.eyewear??'none',shirt:palette.shirt,skin:palette.skin,hairColor:palette.hair,trim:palette.highlight,paddleColor:palette.paddle};
 }
 // Limb mass and bone lengths are independent of the arm silhouette.
 export function legDimensions(design){
@@ -56,8 +56,14 @@ function contour(c,chain,widths,color){
  const points=[...edges[0],...edges[1].reverse()];c.lineJoin='round';shape(c,points,gradient(c,color,chain[1].x,chain[1].y,widths[0]));
 }
 function ellipse(c,x,y,rx,ry,fill){c.beginPath();c.ellipse(x,y,rx,ry,0,0,Math.PI*2);c.fillStyle=fill;c.fill()}
-function hairBack(c,x,y,d,phase,near){const hair=gradient(c,d.hairColor,x,y,7),sway=Math.sin(phase*Math.PI*2)*1.5;if(['bob','waves'].includes(d.hair)){c.fillStyle=hair;c.beginPath();c.ellipse(x,y+1,6.8,8,0,Math.PI,Math.PI*2);c.lineTo(x+7.2,y+9);c.quadraticCurveTo(x,y+12,x-7.2,y+9);c.closePath();c.fill()}if(d.hair==='ponytail'){limb(c,{x:x+4,y:y-2},{x:x+9+sway,y:y+7},3.5,d.hairColor);limb(c,{x:x+9+sway,y:y+7},{x:x+7+sway,y:y+13},2.7,d.hairColor);ellipse(c,x+4,y-2,1.7,1.3,d.trim)}if(d.hair==='braid'){for(let i=0;i<7;i++){const bx=x+(near?1:5)+Math.sin(i*.6+phase*6)*.7;ellipse(c,bx,y+3+i*1.7,1.7-i*.09,1.4,shade(d.hairColor,i%2?.12:-.1))}ellipse(c,x+(near?1:5),y+15,1.2,.65,d.trim)}}
-function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='near';if(!['bob','waves'].includes(d.hair))hairBack(c,x,y,d,phase,near);
+function hairBack(c,x,y,d,phase,near){const hair=gradient(c,d.hairColor,x,y,7),sway=Math.sin(phase*Math.PI*2)*1.2;
+ if(['bob','waves'].includes(d.hair)){c.fillStyle=hair;c.beginPath();c.ellipse(x,y+1,6.8,d.hair==='waves'?8.3:7.5,0,Math.PI,Math.PI*2);c.lineTo(x+7.2,y+8.8);c.quadraticCurveTo(x,y+11.8,x-7.2,y+8.8);c.closePath();c.fill()}
+ if(d.hair==='ponytail'){limb(c,{x:x+4,y:y-2},{x:x+9+sway,y:y+7},3.2,d.hairColor);limb(c,{x:x+9+sway,y:y+7},{x:x+7+sway,y:y+13},2.3,d.hairColor);ellipse(c,x+4,y-2,1.5,1.1,d.trim)}
+ if(d.hair==='long'){if(near)shape(c,[[x-5,y-3],[x-6,y+3],[x-5.5,y+12],[x-3.5,y+15],[x,x+16],[x+3.5,y+15],[x+5.5,y+12],[x+6,y+3],[x+5,y-3]],hair,null);else for(const side of [-1,1])shape(c,[[x+side*3.7,y-3],[x+side*6,y+1],[x+side*6.2,y+8],[x+side*5.2,y+13],[x+side*3.8,y+11],[x+side*4,y+3]],shade(d.hairColor,-.06),null)}
+ if(d.hair==='braid'){const bx=near?x-5.15+sway*.16:x-3.35+sway*.22,startY=y-2.8;limb(c,{x:x-3.8,y:y-3.4},{x:bx,y:y-1.8},1.5,shade(d.hairColor,-.16));for(let i=0;i<10;i++)ellipse(c,bx+Math.sin(i*.72+phase*6)*.28,startY+i*1.45,1.18-i*.055,1.08-i*.025,shade(d.hairColor,i%2?.12:-.1));ellipse(c,near?x-4.5:x-3.5,y-2.9,1.05,.68,d.trim)}
+ if(d.hair==='twinTails'){for(const sign of [-1,1]){const drift=sway*sign;limb(c,{x:x+sign*4.3,y:y-2.7},{x:x+sign*(7.1+drift),y:y+3.4},1.65,d.hairColor);limb(c,{x:x+sign*(7.1+drift),y:y+3.4},{x:x+sign*(6.5+drift),y:y+10.8},1.2,d.hairColor);ellipse(c,x+sign*4.7,y-2.8,.8,.55,d.trim)}}
+ if(d.hair==='pixie')shape(c,[[x-5,y-1],[x-5.2,y-4],[x-3.8,y-5],[x-3.5,y-6.7],[x-2,y-5.5],[x-1,y-7.1],[x+.3,y-5.7],[x+1.6,y-7],[x+2.6,y-5.4],[x+4,y-6.2],[x+4.3,y-4.5],[x+5.2,y-3.5],[x+5,y-.5],[x+4.1,y+1.7],[x+2.2,y+2.8],[x,y+3],[x-2.2,y+2.8],[x-4.1,y+1.7]],hair,null)
+}function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='near';
  ellipse(c,x,y,5.8,7.2,'#182633');ellipse(c,x,y,5.1,6.5,gradient(c,d.skin,x,y,5));ellipse(c,x-5,y+1,1.2,1.8,shade(d.skin,-.12));ellipse(c,x+5,y+1,1.2,1.8,shade(d.skin,-.16));
  if(!near){
   if(d.faceStyle==='anime'){
@@ -80,18 +86,16 @@ function head(c,pose,d,view,phase){const n=pose.neck,x=n.x,y=n.y-8,near=view==='
  }
 
  const hair=gradient(c,d.hairColor,x,y-4,6);
- if(near&&d.hair!=='buzz'){ellipse(c,x,y-1,5.6,6,hair);shape(c,[[x-5,y],[x+5,y],[x+4,y+4],[x,y+5],[x-4,y+4]],hair,null)}else if(d.hair!=='buzz'){c.fillStyle=hair;c.beginPath();c.moveTo(x-5.5,y);c.quadraticCurveTo(x-6,y-7,x,y-7);c.quadraticCurveTo(x+6,y-7,x+5.5,y-1);c.lineTo(x+2,y-3);c.lineTo(x-1,y-2);c.lineTo(x-3,y-3);c.closePath();c.fill()}
- if(d.hair==='curls'){for(let i=0;i<7;i++)ellipse(c,x-4.8+i*1.6,y-4.4-Math.sin(i/6*Math.PI)*2.6,1.7,1.7,shade(d.hairColor,i%2?.14:-.12))}if(['bob','waves'].includes(d.hair)){limb(c,{x:x-5,y:y-1},{x:x-5.5,y:y+(near?7:5)},2,d.hairColor);limb(c,{x:x+5,y:y-1},{x:x+5.5,y:y+(near?7:5)},2,d.hairColor)}
-
- if(d.hair==='spiky'&&d.headwear!=='cap'){
-  shape(c,[[x-5.4,y-1],[x-7,y-5],[x-3.9,y-4.5],[x-4.8,y-9],[x-1.6,y-6],[x+.3,y-11],[x+2,y-6],[x+5.4,y-9],[x+4.8,y-4.5],[x+7,y-6],[x+5.3,y-1],[x+2.5,y-3],[x,y-1.5],[x-2,y-3]],gradient(c,d.hairColor,x,y-4,7));
-  limb(c,{x:x-2.7,y:y-5.6},{x:x-.6,y:y-7.4},.65,shade(d.hairColor,.3));limb(c,{x:x+2,y:y-3.8},{x:x+4,y:y-6},.65,shade(d.hairColor,.22));
- }
- if(d.hair==='sidePart'){shape(c,[[x-5.6,y],[x-5,y-5],[x-1,y-7],[x+5,y-5],[x+6,y-2],[x+1,y-3],[x-3,y+.5]],gradient(c,d.hairColor,x,y-3,6),null);limb(c,{x:x+2,y:y-5.5},{x:x+3.7,y:y-2.7},.5,shade(d.hairColor,.3))}
- if(d.hair==='buzz'){ellipse(c,x,y-3.8,5.2,3.3,shade(d.hairColor,.08));for(let i=0;i<8;i++)ellipse(c,x-3.5+i,y-4.6+(i%2)*.8,.22,.22,shade(d.hairColor,.3))}
- if(d.hair==='pixie'){shape(c,[[x-5.4,y],[x-6,y-4],[x-3,y-3],[x-3,y-7],[x,y-5],[x+2.7,y-7],[x+5,y-4],[x+5.5,y],[x+1,y-2],[x-2,y-.5]],gradient(c,d.hairColor,x,y-3,6),null)}
- if(d.hair==='waves'){for(const sign of [-1,1]){for(let i=0;i<4;i++)ellipse(c,x+sign*(5.3+Math.sin(i*1.5)*.5),y-2+i*2.2,1.5,2,shade(d.hairColor,i%2?.13:-.06))}}
- if(d.hair==='twinTails'){for(const sign of [-1,1]){const sway=Math.sin(phase*Math.PI*2)*1.2;limb(c,{x:x+sign*5,y:y-3},{x:x+sign*(8+sway),y:y+4},2.8,d.hairColor);limb(c,{x:x+sign*(8+sway),y:y+4},{x:x+sign*7,y:y+10},2.1,d.hairColor);ellipse(c,x+sign*5,y-3,1.3,1.1,d.trim)}}
+ if(near&&d.hair!=='buzz'&&d.hair!=='bald'){const back=d.body==='male'&&!['afro','curls'].includes(d.hair)?2.7:d.hair==='pixie'?2.8:5;ellipse(c,x,y-1,5.6,6,hair);shape(c,[[x-5,y],[x+5,y],[x+4,y+back*.8],[x,y+back],[x-4,y+back*.8]],hair,null)}else if(d.hair!=='buzz'&&d.hair!=='bald'){c.fillStyle=hair;c.beginPath();c.moveTo(x-5.5,y);c.quadraticCurveTo(x-6,y-7,x,y-7);c.quadraticCurveTo(x+6,y-7,x+5.5,y-1);c.lineTo(x+2,y-3);c.lineTo(x-1,y-2);c.lineTo(x-3,y-3);c.closePath();c.fill()}
+ if(d.hair==='afro'){shape(c,[[x-5.4,y+.3],[x-6,y-1.4],[x-5.7,y-3.6],[x-4.6,y-5.5],[x-3,y-6.6],[x-1,y-7],[x+1,y-6.9],[x+3,y-6.3],[x+4.7,y-5],[x+5.7,y-3.1],[x+5.8,y-1],[x+5.2,y+.4],[x+3,y+1.2],[x,y+1.5],[x-3,y+1.2]],hair,null);for(const [x1,y1,x2,y2] of [[-4,-2.8,-2.5,-4.8],[-2,-5,-.2,-5.9],[.7,-5.6,2.7,-4.6],[3,-2.6,4.4,-1.5]])limb(c,{x:x+x1,y:y+y1},{x:x+x2,y:y+y2},.3,shade(d.hairColor,.2))}
+ if(d.hair==='curls'){shape(c,[[x-5,y-1],[x-5.5,y-3.5],[x-4.2,y-5.8],[x-2,y-6.8],[x,y-7],[x+2,y-6.5],[x+4.2,y-5.4],[x+5.4,y-3],[x+5,y-.5],[x+3.7,y+1.8],[x+2.2,y+.8],[x+1.5,y+2.6],[x,y+.8],[x-1.5,y+2.7],[x-2.4,y+.8],[x-4,y+1.8]],hair,null);for(const [x1,y1,x2,y2] of [[-3.7,-5,-2.3,-2],[-1.5,-6,-.3,-2.5],[.4,-6,1.4,-2.3],[2.5,-5.4,3.5,-2.2]])limb(c,{x:x+x1,y:y+y1},{x:x+x2,y:y+y2},.35,shade(d.hairColor,.2));for(const side of [-1,1])shape(c,[[x+side*3.7,y-4],[x+side*5.5,y-1.5],[x+side*5.2,y+2.2],[x+side*4.1,y+.4]],shade(d.hairColor,-.05),null)}
+ if(d.hair==='crop'){shape(c,[[x-5,y-.4],[x-5.1,y-3.8],[x-3.5,y-5.4],[x-1.2,y-6],[x+1.2,y-5.9],[x+3.5,y-5.1],[x+5,y-3.5],[x+4.8,y-.5],[x+2,y-1.8],[x-1.8,y-1.7]],gradient(c,d.hairColor,x,y-3,6),null);for(const [x1,y1,x2,y2] of [[-3.7,-4.3,-2.4,-2.7],[-1.8,-5,-.4,-3.1],[.2,-5.1,1.5,-3.1],[2,-4.6,3.2,-2.8]])limb(c,{x:x+x1,y:y+y1},{x:x+x2,y:y+y2},.28,shade(d.hairColor,.22));}
+if(d.hair==='sidePart'){shape(c,[[x-5.2,y-.3],[x-5.5,y-3.7],[x-4.4,y-5.8],[x-2.3,y-7.2],[x-.2,y-7.5],[x+2.1,y-6.8],[x+4.3,y-5.3],[x+5.3,y-3.2],[x+5,y-.4],[x+4.2,y-1.1],[x+3.6,y-2.8],[x+2.2,y-2.2],[x+.7,y-3.1],[x-.8,y-2.3],[x-2.4,y-3],[x-4,y-1.4]],gradient(c,d.hairColor,x,y-4,7),null);shape(c,[[x-4.3,y-5.2],[x-1.8,y-6.8],[x+.8,y-6.5],[x+3.8,y-4.4],[x+2.3,y-2.7],[x-.3,y-3.25],[x-2.7,y-2.8]],shade(d.hairColor,.1),null)}if(d.hair==='buzz'){ellipse(c,x,y-3.8,5.2,3.3,shade(d.hairColor,.08));for(let i=0;i<8;i++)ellipse(c,x-3.5+i,y-4.6+(i%2)*.8,.22,.22,shade(d.hairColor,.3))}
+ if(d.hair==='pixie'){shape(c,[[x-5.2,y-.3],[x-5.3,y-3.8],[x-3.7,y-5.5],[x-3.4,y-7],[x-2,y-5.6],[x-.8,y-7.4],[x+.3,y-5.6],[x+1.6,y-7.2],[x+2.6,y-5.3],[x+4,y-6.2],[x+4.3,y-4.3],[x+5.2,y-3.3],[x+5,y-.3],[x+3.8,y-1.1],[x+3,y-3.4],[x+1,y-1.4],[x-1.2,y-3.3],[x-3,y-1.1]],gradient(c,d.hairColor,x,y-3,6),null);shape(c,[[x-4.8,y-3],[x+4.8,y-3],[x+4.3,y-.7],[x+2,y-1.5],[x+.3,y-.5],[x-1.8,y-1.5],[x-3.8,y-.6]],shade(d.hairColor,-.08),null)}
+ if(d.hair==='crewCut'){shape(c,[[x-5.1,y-.4],[x-5.7,y-3.2],[x-4.8,y-5.8],[x-2.7,y-7.5],[x-.1,y-8.1],[x+2.5,y-7.3],[x+4.6,y-5.5],[x+5.5,y-3.1],[x+5.2,y-.4],[x+4.5,y-.8],[x+4.1,y-2.7],[x+2.7,y-3.4],[x+1.1,y-2.8],[x-.3,y-3.7],[x-1.8,y-2.6],[x-3.5,y-3.2],[x-4.5,y-1.2]],gradient(c,d.hairColor,x,y-4,7),null);shape(c,[[x-4.8,y-3.7],[x-3.6,y-6.2],[x-.8,y-7.5],[x+2.2,y-6.9],[x+4.5,y-4.8],[x+2.8,y-4.5],[x+.6,y-5.5],[x-1.5,y-4.7],[x-3.4,y-3.2]],shade(d.hairColor,.1),null);for(const [x1,y1,x2,y2] of [[-3.8,-5.8,-1.8,-6.8],[-2.3,-6.7,.1,-7.2],[-.3,-7.2,2.1,-6.5],[1.4,-6.5,3.5,-5.1]])limb(c,{x:x+x1,y:y+y1},{x:x+x2,y:y+y2},.28,shade(d.hairColor,.2))}if(d.hair==='long'){if(near){shape(c,[[x-5.2,y-.3],[x-5.5,y-3.8],[x-3.7,y-6.1],[x-1.1,y-7],[x+1.3,y-6.9],[x+3.8,y-5.8],[x+5.3,y-3.5],[x+5,y-.4],[x+2.5,y-1.5],[x,y-1.1],[x-2.5,y-1.5]],shade(d.hairColor,-.05),null)}else{shape(c,[[x-5.2,y-.2],[x-5.5,y-4],[x-3.8,y-6.3],[x-1.4,y-7.2],[x-.2,y-5.4],[x+.2,y-7.1],[x+1.6,y-5.3],[x+4,y-5.8],[x+5.4,y-3.5],[x+5,y-.4],[x+3.5,y-1.2],[x+2.7,y-3.7],[x+1.4,y-1.5],[x+.2,y-4.2],[x-.4,y-1.1],[x-2,y-3.8],[x-3.2,y-1.3]],hair,null);shape(c,[[x-3.5,y-4.6],[x-2.2,y-2],[x-1.2,y-1.8],[x-2.6,y-5.2]],shade(d.hairColor,-.15),null);shape(c,[[x+.4,y-4.8],[x+1.4,y-1.8],[x+2.4,y-2],[x+2,y-5.2]],shade(d.hairColor,-.1),null)}} if(d.hair==='bun'){ellipse(c,x-.5,y-7.1,2.4,2,shade(d.hairColor,.08));limb(c,{x:x-2,y:y-7.2},{x:x+.2,y:y-8.6},.45,shade(d.hairColor,.2));limb(c,{x:x+.2,y:y-8.6},{x:x+1.5,y:y-7},.4,shade(d.hairColor,-.12))}
+ if(d.hair==='waves')for(const sign of [-1,1])for(let i=0;i<4;i++)ellipse(c,x+sign*(5.3+Math.sin(i*1.5)*.5),y-2+i*2.2,1.35,1.8,shade(d.hairColor,i%2?.13:-.06));
+ if(d.hair==='bob'){shape(c,[[x-5.2,y-.2],[x-5.5,y-4],[x-3.8,y-6.4],[x-1,y-7.2],[x+1.5,y-7],[x+4,y-5.8],[x+5.4,y-3.6],[x+5.1,y-.2],[x+3.8,y-1],[x+3,y-3.5],[x+1.4,y-1.4],[x-.2,y-3.4],[x-1.8,y-1.3],[x-3.3,y-3.4]],hair,null);shape(c,[[x-4.7,y-3],[x+4.7,y-3],[x+4.2,y-.8],[x+2.5,y-1.5],[x+.7,y-.6],[x-1.2,y-1.5],[x-3.1,y-.7]],shade(d.hairColor,-.05),null)}
+ if(d.hair==='spiky'&&d.headwear!=='cap'){if(near){shape(c,[[x-5,y-1],[x-5.2,y-3.4],[x-4,y-4.6],[x-4.2,y-6.5],[x-2.7,y-5.1],[x-2,y-7.4],[x-.7,y-5.3],[x+.3,y-8],[x+1.3,y-5.4],[x+3,y-6.8],[x+3.1,y-4.6],[x+4.5,y-5.5],[x+4.1,y-3.3],[x+5,y-2.5],[x+4.8,y-.6],[x+2.5,y+.6],[x,y+.9],[x-2.5,y+.6],[x-4.8,y-.6]],gradient(c,d.hairColor,x,y-4,7))}else{shape(c,[[x-5.4,y-1],[x-7,y-5],[x-3.9,y-4.5],[x-4.8,y-9],[x-1.6,y-6],[x+.3,y-11],[x+2,y-6],[x+5.4,y-9],[x+4.8,y-4.5],[x+7,y-6],[x+5.3,y-1],[x+2.5,y-3],[x,y-1.5],[x-2,y-3]],gradient(c,d.hairColor,x,y-4,7));limb(c,{x:x-2.7,y:y-5.6},{x:x-.6,y:y-7.4},.65,shade(d.hairColor,.3));limb(c,{x:x+2,y:y-3.8},{x:x+4,y:y-6},.65,shade(d.hairColor,.22))}}
  if(d.illustrated&&d.hair!=='buzz'){
   // Broad lock silhouettes plus fine strands read at different display sizes.
   if(!near&&!['spiky','pixie'].includes(d.hair)){
@@ -109,19 +113,23 @@ export function drawConceptAthlete(c,design,mode,phase,view,cx,baseline,scale,op
  c.save();c.translate(cx+(raw.rootOffset||0)*scale-24*scale,baseline-63*scale);c.scale(scale,scale);const {hips:h,neck:n}=pose,skin=d.skin,w=2.3+d.build*1.3,leg=legDimensions(d);
  const style=options.silhouette,compact=style==='compact'||style==='toy';
  if(compact){const compress=p=>{p.x=24+(p.x-24)*.88;p.y=63+(p.y-63)*.72};for(const p of [pose.neck,pose.hips,pose.paddle,...pose.arms.flat(),...pose.legs.flat()])compress(p);pose.hand=pose.arms[raw.gripSide][2]}
- const groundY=63;ellipse(c,24,groundY+1,10+d.build*2,2,'#07151a55');
+
  plantFeet(pose,{...options,legLengths:leg},raw,cx,baseline,scale);
+ if(!['bob','waves'].includes(d.hair)){c.save();if(compact){c.translate(n.x,n.y-8);c.scale(style==='toy'?1.8:1.35,style==='toy'?1.55:1.2);c.translate(-n.x,-(n.y-8))}hairBack(c,n.x,n.y-8,d,phase,view==='near');c.restore()}
  c.save();
- for(const chain of pose.legs){const start=d.body==='female'?thighGarment(chain,leg.thigh+1).end:chain[0];if(style!=='toy')contour(c,[start,chain[1],chain[2]],[leg.thigh,leg.calf,leg.ankle],skin);const f=chain[2];c.save();c.translate(f.x,f.y);c.scale(style==='toy'?1.8:compact?1.2:1,style==='toy'?1.5:1);c.translate(-f.x,-f.y);limb(c,{x:f.x,y:f.y-2.6},f,leg.ankle+.5,'#ede8db');shape(c,[[f.x-2.3*leg.shoe,f.y-.4],[f.x+1.8*leg.shoe,f.y-.7],[f.x+3.1*leg.shoe,f.y+1.2],[f.x+2.6*leg.shoe,f.y+2],[f.x-2.5*leg.shoe,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3));limb(c,{x:f.x-1.5,y:f.y+.8},{x:f.x+2,y:f.y+1},.6,d.trim);c.restore()}
+ for(const chain of pose.legs){const start=d.body==='female'?thighGarment(chain,leg.thigh+1).end:chain[0];if(style!=='toy')contour(c,[start,chain[1],chain[2]],[leg.thigh,leg.calf,leg.ankle],skin);const f=chain[2];c.save();c.translate(f.x,f.y);c.scale(style==='toy'?1.8:compact?1.2:1,style==='toy'?1.5:1);c.translate(-f.x,-f.y);limb(c,{x:f.x,y:f.y-2.6},f,leg.ankle+.5,'#ede8db');shape(c,[[f.x-2.3*leg.shoe,f.y-.4],[f.x+1.8*leg.shoe,f.y-.7],[f.x+3.1*leg.shoe,f.y+1.2],[f.x+2.6*leg.shoe,f.y+2],[f.x-2.5*leg.shoe,f.y+1.8]],gradient(c,'#e5dfd0',f.x,f.y,3),null);
+  shape(c,[[f.x-2.1*leg.shoe,f.y-.25],[f.x-.45*leg.shoe,f.y-.65],[f.x+.25*leg.shoe,f.y+.35],[f.x-1.3*leg.shoe,f.y+.75],[f.x-2.3*leg.shoe,f.y+.35]],shade('#e5dfd0',.2),null);
+  shape(c,[[f.x+.65*leg.shoe,f.y-.45],[f.x+2.75*leg.shoe,f.y+.35],[f.x+2.5*leg.shoe,f.y+.95],[f.x+.7*leg.shoe,f.y+.55]],shade('#e5dfd0',-.16),null);
+c.restore()}
  c.restore();
  if(['bob','waves'].includes(d.hair)){c.save();if(compact){c.translate(n.x,n.y-8);c.scale(style==='toy'?1.8:1.35,style==='toy'?1.55:1.2);c.translate(-n.x,-(n.y-8))}hairBack(c,n.x,n.y-8,d,phase,view==='near');c.restore()}
  function arm(index){const a=pose.arms[index];if(style==='toy'){ellipse(c,a[2].x,a[2].y,3.6,3.6,skin);return}contour(c,a,[w+.5,w*.85,w*.6],skin);if(d.body==='male'){limb(c,a[0],{x:a[0].x+(a[1].x-a[0].x)*.4,y:a[0].y+(a[1].y-a[0].y)*.4},w+1,d.shirt)}ellipse(c,a[2].x,a[2].y,w*.48,w*.55,shade(skin,.08));limb(c,{x:a[2].x-.8,y:a[2].y-1.6},{x:a[2].x+.8,y:a[2].y-1.6},.8,d.trim)}
- function paddle(){const p=pose.paddle,hand=pose.hand;limb(c,p,hand,1.5,'#353239');c.save();c.translate(p.x,p.y);c.rotate(raw.angle);const wide=options.paddleShape==='wide'?1.15:options.paddleShape==='elongated'?.88:1,tall=options.paddleShape==='elongated'?1.14:1;ellipse(c,0,0,3.9*wide,5.3*tall,'#182633');ellipse(c,0,0,3.2*wide,4.6*tall,d.trim);ellipse(c,0,0,2.6*wide,4*tall,'#171b25');c.restore()}
+ function paddle(){const p=pose.paddle,hand=pose.hand;limb(c,p,hand,1.5,'#353239');c.save();c.translate(p.x,p.y);c.rotate(raw.angle);const outline=paddleOutline(options.paddleShape??'hybrid'),scale=.76;for(const [factor,fill] of [[1,'#182633'],[.84,d.paddleColor??d.trim],[.62,'#171b25']]){shape(c,outline.map(([x,y])=>[x*factor*scale,y*factor*scale]),fill)}c.restore()}
  const behind=pose.arms.map((a,i)=>({i,depth:raw.arms[i][1].depth}));behind.filter(a=>a.depth<raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
  limb(c,{x:n.x,y:n.y-1},{x:n.x,y:n.y+3},3.8,skin);
  const shoulder=d.shoulder,waist=d.waist,hip=d.hip,top=n.y+1,hem=h.y-1;
  c.fillStyle=gradient(c,d.shirt,n.x,top+8,shoulder);c.strokeStyle='#182633';c.lineWidth=.8;c.beginPath();c.moveTo(n.x-3,top-1);c.lineTo(n.x-shoulder,top+2);c.quadraticCurveTo(n.x-shoulder-1,(top+hem)/2,h.x-waist,hem);c.quadraticCurveTo(h.x,hem+1,h.x+waist,hem);c.quadraticCurveTo(n.x+shoulder+1,(top+hem)/2,n.x+shoulder,top+2);c.lineTo(n.x+3,top-1);c.quadraticCurveTo(n.x,top+2,n.x-3,top-1);c.closePath();c.fill();c.stroke();
- shape(c,[[n.x+shoulder-2,top+3],[n.x+shoulder,top+3],[h.x+waist,hem],[h.x+waist-2,hem]],shade(d.shirt,-.2),null);limb(c,{x:n.x-2.8,y:top},{x:n.x,y:top+2},.75,d.trim);limb(c,{x:n.x,y:top+2},{x:n.x+2.8,y:top},.75,d.trim);
+ shape(c,[[n.x+shoulder-2,top+3],[n.x+shoulder,top+3],[h.x+waist,hem],[h.x+waist-2,hem]],shade(d.shirt,-.2),null);if(view==='far'){limb(c,{x:n.x-2.8,y:top},{x:n.x,y:top+2},.75,d.trim);limb(c,{x:n.x,y:top+2},{x:n.x+2.8,y:top},.75,d.trim)}else limb(c,{x:n.x-2.8,y:top+.7},{x:n.x+2.8,y:top+.7},.75,d.trim);
  c.strokeStyle=shade(d.shirt,-.27);c.lineWidth=.45;c.beginPath();c.moveTo(h.x-waist+1,hem-1);c.quadraticCurveTo(n.x-shoulder+2,top+9,n.x-shoulder+1,top+4);c.moveTo(h.x-2,hem-1);c.lineTo(h.x+1.5,hem-3);c.stroke();
  if(d.illustrated){
   shape(c,[[n.x-shoulder+1,top+3],[n.x-shoulder+2.5,top+3],[h.x-waist+2,hem-1],[h.x-waist+.7,hem-1]],shade(d.shirt,.13),null);
@@ -133,7 +141,7 @@ export function drawConceptAthlete(c,design,mode,phase,view,cx,baseline,scale,op
  if(view==='far'){ellipse(c,n.x-2.4,top+5,.8,1,d.trim)}else{limb(c,{x:n.x-2,y:top+4},{x:n.x+2,y:top+4},.8,d.trim)}
  if(d.body==='female'){
   const skirt=skirtGarment(h,pose.legs,hip,leg.thigh-1);c.beginPath();const outline=skirt.polygon;outline.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.closePath();c.fillStyle=gradient(c,d.shirt,h.x,hem,hip);c.fill();c.strokeStyle='#182633';c.lineWidth=.65;c.stroke();
-  for(const offset of [-.7,-.25,.25,.7]){const side=offset<0?0:1,end=skirt.ends[side],x=h.x+hip*offset,toX=end.x+(offset-(side? .5:-.5))*hip;c.beginPath();c.moveTo(x,hem+1);c.quadraticCurveTo((x+toX)/2,hem+5,toX,end.y+1);c.strokeStyle=shade(d.shirt,-.25);c.lineWidth=.75;c.stroke();c.strokeStyle=shade(d.shirt,.19);c.lineWidth=.4;c.stroke()}
+  const pleats=d.outfit==='performance'?[-.86,-.67,-.48,-.29,-.1,.1,.29,.48,.67,.86]:[-.7,-.25,.25,.7];for(const [index,offset] of pleats.entries()){const side=offset<0?0:1,end=skirt.ends[side],x=h.x+hip*offset,toX=end.x+(offset-(side? .5:-.5))*hip;c.beginPath();c.moveTo(x,hem+1);c.quadraticCurveTo((x+toX)/2,hem+5,toX,end.y+1);c.strokeStyle=shade(d.shirt,index%2?-.25:.12);c.lineWidth=.65;c.stroke()}
   c.beginPath();c.moveTo(skirt.left,skirt.ends[0].y+1);c.quadraticCurveTo(h.x,skirt.bottom+1,skirt.right,skirt.ends[1].y+1);c.strokeStyle=d.trim;c.lineWidth=.65;c.stroke();
  }else{
   const cloth=shade(d.shirt,-.45);

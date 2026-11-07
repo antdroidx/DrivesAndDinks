@@ -1,8 +1,8 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=164';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=182';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
-export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne','serve','poachLunge','slideReturn','splitStep','resetBlock','counterVolley','halfVolley','wideForehand','wideBackhand','backpedal','crossover','tweener']);
+export const MOTIONS=Object.freeze(['run','shuffle','volley','forehand','backhand','forehandDink','backhandDink','forehandDrop','backhandDrop','overhead','lob','twoBackhand','twoBackhandDink','erne','serve','poachLunge','slideReturn','splitStep','resetBlock','counterVolley','halfVolley','wideForehand','wideBackhand','backpedal','crossover','tweener','scorpion','celebrate','disappointment','anger','relief','recoveryIdle']);
 export const CONTACT_PHASE=.52;
 export const PIXEL_DENSITY=3;
 export const CHARACTER_BUFFER={width:96*PIXEL_DENSITY,height:96*PIXEL_DENSITY};
@@ -14,8 +14,8 @@ const point=(a,b,t)=>({x:lerp(a.x,b.x,t),y:lerp(a.y,b.y,t)});
 const resolve=(items,id)=>items.find(item=>item.id===id)??items[0];
 function shade(hex,amount){return '#'+hex.slice(1).match(/../g).map(v=>Math.round(lerp(parseInt(v,16),amount>0?255:0,Math.abs(amount))).toString(16).padStart(2,'0')).join('')}
 export function appearancePalette(a={}){
- const shirt=resolve(CLOTHING_COLORS,a.shirtColor??'green').color,hair=resolve(HAIR_COLORS,a.hairColor??'brown').color,skin=resolve(SKIN_COLORS,a.skinColor??'medium').color,p=resolve(PADDLE_COLORS,a.paddleColor??'mint');
- return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7',sock:'#dbe3de',accent:shade(shirt,.55),grip:'#d9dde0'};
+ const shirt=resolve(CLOTHING_COLORS,a.shirtColor??'green').color,hair=resolve(HAIR_COLORS,a.hairColor??'brown').color,skin=resolve(SKIN_COLORS,a.skinColor??'medium').color,p=resolve(PADDLE_COLORS,a.paddleColor??'mint'),highlight=resolve(PADDLE_COLORS,a.highlightColor??a.paddleColor??'yellow').color;
+ return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7',sock:'#dbe3de',highlight,accent:a.highlightColor?highlight:shade(shirt,.55),grip:'#d9dde0'};
 }
 export function characterFrame(mode='idle',phase=0,frame=0){
  const row=Math.max(0,MOTIONS.indexOf(mode==='slide'?'shuffle':mode));
@@ -46,16 +46,23 @@ const paths={
  erne:[READY,[15,31,-2],[19,23,7],[7,22,13],READY],
  poachLunge:[READY,[10,27,5],[15,27,14],[11,25,15],READY],
  slideReturn:[READY,[16,38,-2],[22,31,15],[8,27,17],READY],
- splitStep:[READY,[8,29,7],[9,28,11],[7,27,9],READY]
+ splitStep:[READY,[8,29,7],[9,28,11],[7,27,9],READY],
+ scorpion:[READY,[0,13,-4],[-3,6,-8],[6,24,6],READY],
+ celebrate:[READY,[9,31,6],[8,22,12],[7,28,11],READY],
+ disappointment:[READY,[5,38,8],[4,42,8],[6,39,8],READY],
+ anger:[READY,[7,36,7],[8,39,7],[6,37,7],READY],
+ relief:[READY,[5,39,8],[4,42,7],[6,39,8],READY],
+ recoveryIdle:[READY,[5,32,7],[7,33,8],[5,32,8],READY]
 };
 const wristAngles={
  resetBlock:[0,.5,1.3,1,0],counterVolley:[0,.8,1.2,-.3,0],halfVolley:[0,2.5,2.7,2,0],wideForehand:[0,1.3,1.4,-.5,0],wideBackhand:[0,-1.1,-1.3,-.7,0],tweener:[0,2.7,3,2.7,0],
  volley:[0,.3,.65,.8,0],forehand:[0,1.3,1.3,-1.1,0],backhand:[0,-1.1,-1.3,1.1,0],
  forehandDink:[0,2.6,2.7,2,0],backhandDink:[0,-2.2,-2.25,-1.7,0],
  forehandDrop:[0,2.4,2.5,1.4,0],backhandDrop:[0,-2.2,-2.25,-1.2,0],
- overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,1.4,1.9,-.6,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0],poachLunge:[0,1.2,1.75,-.4,0],slideReturn:[0,1.5,1.9,-.25,0],splitStep:[0,.4,.65,.2,0]
+ overhead:[0,-.5,0,1.8,0],lob:[0,2.8,2.7,.2,0],serve:[0,1.4,1.9,-.6,0],twoBackhand:[0,-1.1,-1.3,-.4,0],erne:[0,1.1,1.65,-.35,0],poachLunge:[0,1.2,1.75,-.4,0],slideReturn:[0,1.5,1.9,-.25,0],splitStep:[0,.4,.65,.2,0],scorpion:[0,-.8,0,1.4,0],celebrate:[0,.4,1,.2,0],disappointment:[0,.2,.35,.15,0],anger:[0,.5,.8,.2,0],relief:[0,.15,.3,.2,0],recoveryIdle:[0,.25,.5,.35,0]
 };
 paths.twoBackhandDink=[READY,[-6,36,7],[-10,40,12],[-8,34,14],READY];wristAngles.twoBackhandDink=[0,-1.8,-2,-1.5,0];
+const reactionFreePaths={celebrate:[[7,34,6],[12,20,8],[7,13,9],[10,23,8],[7,34,6]],disappointment:[[7,34,6],[10,33,5],[11,30,4],[9,33,5],[7,34,6]],anger:[[7,34,6],[10,35,5],[11,31,4],[9,35,5],[7,34,6]],relief:[[7,34,6],[10,37,5],[11,39,4],[9,37,5],[7,34,6]]};
 const times=[0,.28,CONTACT_PHASE,.78,1];
 function samplePath(path,phase){
  let i=0;while(i<3&&phase>times[i+1])i++;
@@ -87,12 +94,12 @@ export function solveArm3D(shoulder,wrist,pole,lengths=ARM_LENGTHS){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=164';
+export {courtView,strokeForContact} from './player-facing.js?v=182';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,contact3D=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';
  phase=clamp(phase);const action=!!paths[mode],gait=frame*Math.PI/2,stepping=['run','shuffle','slide','backpedal','crossover'].includes(mode)||moving;
- const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0;
+ const stride=stepping?Math.sin(gait):0,bob=stepping?Math.cos(gait*2)*.6:0,weight=action?Math.sin(phase*Math.PI):0,load=weight;
  const back=mode==='wideBackhand'||mode.startsWith('back')||mode.startsWith('twoBackhand'),twoHanded=mode.startsWith('twoBackhand');
  const mirror=view==='near'?1:-1,facing=view==='near'?-1:1;
  const yaw=weight*(back?-.45:.35)*side,cos=Math.cos(yaw),sin=Math.sin(yaw),lean=weight*(back?-1:1)*1.2*side;
@@ -106,13 +113,13 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
   paddle3=mix3(paddle3,{x,y:contact.y-facing*.4*depth,z},clamp(contactWeight));
  }
  if(contact3D){const target={x:contact3D.x*cos-contact3D.z*sin,y:contact3D.y,z:contact3D.x*sin+contact3D.z*cos};paddle3=mix3(paddle3,target,clamp(contactWeight))}
- let gripAngle=action?samplePath(wristAngles[mode].map(v=>[v,0]),phase).x*side:0;
+ const reactionPose=!!reactionFreePaths[mode];let gripAngle=action&&!reactionPose?samplePath(wristAngles[mode].map(v=>[v,0]),phase).x*side:0;
  // At live impact the handle points back toward the shoulder, so a low
  // face cannot drag the wrist below the paddle or reverse the elbow.
- const crouch=authoredCrouch+(mode==='slideReturn'?7:mode==='poachLunge'?4:0),shoulderY=26+bob+crouch,forwardLean=crouch*.45;
+ const crouch=authoredCrouch+(mode==='slideReturn'?7:mode==='poachLunge'?4:0)+(mode==='disappointment'?load*1.2:mode==='relief'?load*1.6:0),shoulderY=26+bob+crouch,forwardLean=crouch*.45+(mode==='anger'?load*.5:mode==='disappointment'?load*.8:0);
  if(contact||contact3D){const toward=Math.atan2(paddle3.x-side*6,shoulderY-paddle3.y),difference=Math.atan2(Math.sin(toward-gripAngle),Math.cos(toward-gripAngle));gripAngle+=difference*clamp(contactWeight)}
  const shoulders=[{x:-6,y:shoulderY,z:forwardLean},{x:6,y:shoulderY,z:forwardLean}];
- let hand3={x:paddle3.x-Math.sin(gripAngle)*8,y:paddle3.y+Math.cos(gripAngle)*8,z:paddle3.z};
+ let hand3=reactionPose?{x:paddle3.x,y:paddle3.y+3,z:paddle3.z}:{x:paddle3.x-Math.sin(gripAngle)*8,y:paddle3.y+Math.cos(gripAngle)*8,z:paddle3.z};
  if(contact||contact3D){const towardShoulder=vsub(twoHanded?mix3(shoulders[0],shoulders[1],.5):shoulders[side<0?0:1],paddle3);hand3=mix3(hand3,vadd(paddle3,vmul(towardShoulder,8/Math.max(.001,length(towardShoulder)))),clamp(contactWeight))}
  const gripSide=side<0?0:1,freeSide=1-gripSide;
  let gripArm=solveArm3D(shoulders[gripSide],hand3,{x:side*7,y:9,z:-4});
@@ -121,13 +128,15 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  // grip for a two-hander. It always has its own natural downward elbow pole.
  const support={x:hand3.x-side*2,y:hand3.y-2,z:hand3.z};
  const balance={x:-side*(12+stride*.4),y:34+bob,z:6+weight*2};
- const freeHand=twoHanded?vadd(hand3,{x:0,y:1.6,z:0}):mix3(support,balance,weight);
+ const reactionFree=reactionPose?samplePath(reactionFreePaths[mode],phase):null;if(reactionFree)reactionFree.x*=side;
+ const freeHand=twoHanded?vadd(hand3,{x:0,y:1.6,z:0}):reactionFree??mix3(support,balance,weight);
  const arms3=[];arms3[gripSide]=gripArm;arms3[freeSide]=solveArm3D(shoulders[freeSide],freeHand,{x:-side*7,y:9,z:-4});
  const arms=arms3.map(chain=>chain.map(project)),paddle=project(paddle3),hand=project(hand3);
  const angle=Math.atan2(-(hand.x-paddle.x),hand.y-paddle.y);
- const load=action?Math.sin(Math.PI*phase):0,weightShift=load*(back?-1.4:1.7)*side;let stance=action?1.6+load*1.2:0;if(mode==='poachLunge')stance+=load*2.8;if(mode==='slideReturn')stance+=load*4.2;if(mode==='splitStep')stance+=load*2;
- const jump=mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0,lateralJump=mode==='erne'?side*jump*1.2:0,rootOffset=animationRootOffset(mode,phase,travelSide);
- const neck=project({x:0,y:23+bob+crouch-jump*3.2,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift+lateralJump,y:41+bob+crouch*.45-jump*3.2};
+ const weightShift=load*(back?-1.4:1.7)*side;let stance=action?1.6+load*1.2:0;if(mode==='poachLunge')stance+=load*2.8;if(mode==='slideReturn')stance+=load*4.2;if(mode==='splitStep')stance+=load*2;if(mode==='celebrate')stance+=load*.8;if(mode==='anger')stance+=load*1.7;if(mode==='disappointment')stance+=load*.7;if(mode==='relief')stance+=load*.4;
+ const jump=(mode==='erne'?Math.sin(Math.PI*clamp((phase-.16)/.68)):0)+(mode==='celebrate'?Math.sin(Math.PI*phase)*.55:0),lateralJump=mode==='erne'?side*jump*1.2:0,rootOffset=animationRootOffset(mode,phase,travelSide);
+ const reactionDrop=(mode==='disappointment'?1.25:mode==='relief'?1.5:mode==='anger'?-.35:mode==='celebrate'?-.7:0)*load;
+ const neck=project({x:0,y:23+bob+crouch-jump*3.2+reactionDrop,z:forwardLean}),hips={x:24+mirror*lean*.45+weightShift+lateralJump,y:41+bob+crouch*.45-jump*3.2+(mode==='disappointment'?load*.35:0)};
  let feet=mode==='run'?[{x:19+stride*4*travelSide,y:59-Math.max(0,stride)*5},{x:29-stride*4*travelSide,y:59-Math.max(0,-stride)*5}]:[
   {x:19-stance-stride*4,y:59-Math.max(0,stride)*2-Math.max(0,weightShift)*.9},
   {x:29+stance+stride*4,y:59-Math.max(0,-stride)*2-Math.max(0,-weightShift)*.9}
@@ -155,7 +164,7 @@ export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side
  if(mode==='splitStep')feet=feet.map(foot=>({...foot,y:foot.y-load*.8}));
  if(mode==='erne')feet=feet.map((foot,index)=>({x:foot.x+(index?1:-1)*side*jump*2,y:foot.y-jump*(index?7.2:5.6)}));
  const legs=feet.map((f,i)=>{const hip={x:hips.x+(i?4:-4),y:hips.y};return [hip,jointBetween(hip,f,9,9,i?-1:1),f]});
- const rig={yaw,neck:{x:0,y:23+bob+crouch-jump*3.2,z:forwardLean},hips:{x:weightShift+lateralJump,y:hips.y,z:forwardLean*.45},paddle:paddle3,hand:hand3};
+ const rig={yaw,neck:{x:0,y:23+bob+crouch-jump*3.2+reactionDrop,z:forwardLean},hips:{x:weightShift+lateralJump,y:hips.y,z:forwardLean*.45},paddle:paddle3,hand:hand3};
  return {mode,phase,view,hips,neck,feet,arms,arms3,legs,paddle,hand,rig,angle,twoHanded,bob:bob+crouch,gripSide,weightShift,jump,rootOffset,reachLimited:length(correction)>.01};
 }
 export function animationRootOffset(mode,phase,side=1){
@@ -191,9 +200,9 @@ function taperedSegment(c,a,b,startWidth,endWidth,color){
  polygon(c,[{x:a.x+nx*startWidth/2,y:a.y+ny*startWidth/2},{x:b.x+nx*endWidth/2,y:b.y+ny*endWidth/2},{x:b.x-nx*endWidth/2,y:b.y-ny*endWidth/2},{x:a.x-nx*startWidth/2,y:a.y-ny*startWidth/2}],color);
 }
 const PADDLE_OUTLINES=Object.freeze({
- wide:Object.freeze([[-4.5,-5],[3.5,-5],[5,-3],[5,2.5],[3.5,4.5],[-3.5,4.5],[-5,2.5],[-5,-3]]),
- elongated:Object.freeze([[-2.4,-8],[2.4,-8],[3.5,-6],[3.5,2],[2.4,4.5],[-2.4,4.5],[-3.5,2],[-3.5,-6]]),
- hybrid:Object.freeze([[-3,-6],[2,-6],[4,-4],[4,3],[2,5],[-2,5],[-4,3],[-4,-4]])
+ wide:Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.4,4.1],[1.8,4.8],[1.5,5.7],[-1.5,5.7],[-1.8,4.8],[-3.4,4.1],[-4.8,1.8]]),
+ elongated:Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2],[2.4,4.5],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.4,4.5],[-3.8,2],[-3.7,-6.4]]),
+ hybrid:Object.freeze([[-4,-5.2],[-3.6,-6],[-2.8,-6.8],[-1.5,-7.3],[0,-7.5],[1.5,-7.3],[2.8,-6.8],[3.6,-6],[4,-5.2],[4.2,1.7],[3,4.2],[1.8,4.8],[1.5,5.6],[-1.5,5.6],[-1.8,4.8],[-3,4.2],[-4.2,1.7]])
 });
 export function paddleOutline(shapeId='hybrid'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES.hybrid}
 let buffer;
@@ -206,7 +215,7 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
  c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,CHARACTER_BUFFER.width,CHARACTER_BUFFER.height);c.save();c.scale(PIXEL_DENSITY,PIXEL_DENSITY);c.translate(24+rootOffset,16);
  const {hips,neck,bob,arms,legs}=pose;
  const waist=hips.y-2,top=neck.y;
- for(const [hip,knee,foot] of legs){taperedSegment(c,hip,knee,2.9,6,colors.outline);segment(c,knee,foot,5,colors.outline);taperedSegment(c,hip,knee,1.7,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-3.5},foot,4,colors.sock);segment(c,{x:foot.x,y:foot.y-2.5},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+1],[foot.x+4,foot.y+3],[foot.x-3,foot.y+3]],colors.outline);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2);c.fillStyle=colors.accent;c.fillRect(Math.round(foot.x-1),Math.round(foot.y-3),3,1)}
+ for(const [hip,knee,foot] of legs){taperedSegment(c,hip,knee,2.9,6,colors.outline);segment(c,knee,foot,5,colors.outline);taperedSegment(c,hip,knee,1.7,4,colors.skinDark);segment(c,knee,foot,3,colors.skin);segment(c,{x:foot.x,y:foot.y-3.5},foot,4,colors.sock);segment(c,{x:foot.x,y:foot.y-2.5},foot,4,colors.shoe);poly(c,[[foot.x-3,foot.y-1],[foot.x+2,foot.y-1],[foot.x+4,foot.y+.8],[foot.x+4,foot.y+1.5],[foot.x-3,foot.y+1.5]],colors.shoe);c.fillStyle=colors.shoe;c.fillRect(Math.round(foot.x-2),Math.round(foot.y),5,2);c.fillStyle=colors.accent;c.fillRect(Math.round(foot.x-1),Math.round(foot.y-3),3,1)}
  function armPart(index,part){
   const a=arms[index][part],d=arms[index][part+1];
   segment(c,a,d,part?4:5,colors.outline);segment(c,a,d,part?2:3,part?colors.skin:colors.skinDark);
@@ -253,10 +262,13 @@ export function drawPixelCharacter(target,{appearance={},characterId='',mode='id
    for(const dx of [-3,2])c.fillRect(Math.round(hx+dx),Math.round(eyeY),1,Math.max(1,emotion==='reaction'?3:2));
    c.fillStyle=colors.skinDark;
    if(emotion==='smile'){c.fillRect(Math.round(hx-1),Math.round(mouthY),2,1);c.fillStyle=colors.outline;c.fillRect(Math.round(hx-2),Math.round(mouthY-1),1,1);c.fillRect(Math.round(hx+1),Math.round(mouthY-1),1,1)}
-   else c.fillRect(Math.round(hx-2),Math.round(mouthY+1),emotion==='effort'?3:2,1);
+   else if(emotion==='disappointment'){c.fillRect(Math.round(hx-2),Math.round(mouthY+1),3,1);c.fillStyle=colors.outline;c.fillRect(Math.round(hx-1),Math.round(mouthY),1,1)}
+ else if(emotion==='relief'){c.fillStyle=colors.outline;c.fillRect(Math.round(hx-1),Math.round(mouthY+1),2,1);c.fillStyle='#d8f3f4';c.fillRect(Math.round(hx+3),Math.round(mouthY),2,1)}
+ else c.fillRect(Math.round(hx-2),Math.round(mouthY+1),emotion==='effort'?3:2,1);
    c.fillStyle=colors.outline;
    if(emotion==='effort'){c.fillRect(Math.round(hx-3),Math.round(hy-1),2,1);c.fillRect(Math.round(hx+2),Math.round(hy-1),2,1)}
-   else if(emotion==='reaction'){c.fillRect(Math.round(hx-4),Math.round(hy),2,1);c.fillRect(Math.round(hx+3),Math.round(hy),2,1)}
+   else if(emotion==='reaction'||emotion==='anger'){c.fillRect(Math.round(hx-4),Math.round(hy),2,1);c.fillRect(Math.round(hx+3),Math.round(hy),2,1)}
+ else if(emotion==='disappointment'||emotion==='relief'){c.fillStyle=colors.outline;c.fillRect(Math.round(hx-3),Math.round(hy+1),2,1);c.fillRect(Math.round(hx+2),Math.round(hy+1),2,1)}
    else {c.fillStyle=colors.hairLight;c.fillRect(Math.round(hx-1),Math.round(hy+3),3,1)}
    c.fillStyle=colors.skinDark;c.fillRect(Math.round(hx),Math.round(hy+4+(emotion==='smile'?1:0)),2,1);
   }

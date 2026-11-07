@@ -1,5 +1,6 @@
-import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js?v=164';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=164';
+import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js?v=182';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=182';
+import {stackLaneFor,stackTargetXFor} from './stacking.js?v=182';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -54,10 +55,10 @@ export function waitForRisingContact(player,ball,target){
  return false;
 }
 
-export function chooseCpuPlacement(player,opponents,shot){
+export function chooseCpuPlacement(player,opponents,shot,{pattern=null,shots=0}={}){
   const soft=shot==='dink'||shot==='drop',near=player.team===0;
   const depth=shot==='dink'?14:shot==='drop'?12:shot==='slice'?6:4;
-  const candidates=[3,7,10,13,17].map(x=>({x,y:near?depth:44-depth,intent:'open-court'}));
+  const atpSetup=['drive','slice','overhead'].includes(shot)&&shots>2&&shots%6===3,candidates=[3,7,10,13,17].map(x=>({x,y:near?depth:44-depth,intent:shot==='dink'&&Math.abs(x-player.x)>4?'short-angle':shot==='drive'?(Math.abs(x-player.x)>5?'inside-out':'crosscourt'):'open-court'}));
   if(['drive','overhead','dink'].includes(shot))for(const opponent of opponents){
     const y=near?clamp(opponent.y+.6,4,17):clamp(opponent.y-.6,27,40);
     if(!soft||Math.abs(y-(near?14:30))<2)candidates.push({x:clamp(opponent.x,3,17),y,intent:'feet'});
@@ -75,18 +76,20 @@ export function chooseCpuPlacement(player,opponents,shot){
     const style=player.ratingStyle??'balanced',feet=target.intent==='feet'&&Math.abs(target.x-o.x)<1.5?(style==='net'?2.2:style==='banger'?1.9:1.6):0;
     const crossCourt=style==='soft'?Math.abs(target.x-player.x)*.035:0;
     const backhand=(target.x-o.x)*(o.team===0?1:-1)<0&&anticipation>.3?.2:0;
-    return (gap+reversal*(style==='speed'?1.4:1)+feet+crossCourt+backhand)/Math.max(.7,(o.abilities?.speed??C.speed)/C.speed);
+    const wrongFoot=Math.abs(target.x-(pattern?.expectedX??target.x))*Math.max(0,Math.min(.85,pattern?.confidence??0))*.32;return (gap+reversal*(style==='speed'?1.4:1)+feet+crossCourt+backhand+wrongFoot)/Math.max(.7,(o.abilities?.speed??C.speed)/C.speed);
   }));
-  return candidates.reduce((best,target)=>value(target)>value(best)?target:best,candidates[0]);
+  if(atpSetup){const wideX=player.x<10?19.65:.35;candidates.push({x:wideX,y:near?4:40,intent:'atp-setup'});}
+  const best=candidates.reduce((best,target)=>value(target)>value(best)?target:best,candidates[0]);
+  return atpSetup?candidates.at(-1):best;
 }
 
 // Forecast reachable contacts, including the first bounce, on the same fixed-step physics.
 function contacts(players,team,ball,shots,bounces){
   const future={...ball},found=new Map();let count=bounces;
-  for(let tick=1;tick<=216;tick++){
+  const horizon=['lob','tweener'].includes(ball.shot)?480:216,flightVz=ball.vz||0,landingTime=Math.max(0,(flightVz+Math.sqrt(Math.max(0,flightVz**2+2*C.gravity*(ball.z||0))))/C.gravity),lobLandingY=(ball.y||0)+(ball.vy||0)*landingTime,deepLob=['lob','tweener'].includes(ball.shot)&&(team===0?lobLandingY>36:lobLandingY<8);for(let tick=1;tick<=horizon;tick++){
     const event=stepBall(future,C.dt);if(event==='net')continue;
     if(event==='bounce'){count++;if(count>=2||future.x<0||future.x>20||future.y<0||future.y>44)break}
-    if(tick%4||side(future.y)!==team||(shots<=2&&count===0))continue;
+    if(deepLob&&count===0)continue;if(tick%4||side(future.y)!==team||(shots<=2&&count===0))continue;
     for(const p of players){
       if(found.has(p.id)||future.z>7.4*(p.physique?.heightScale??1))continue;
       const y=count===0?volleyBrakeTarget(p,future).y:future.y;
@@ -98,16 +101,17 @@ function contacts(players,team,ball,shots,bounces){
       const reach=C.reach*(p.abilities?.reach??1),speed=p.abilities?.speed??C.speed;
       if(travel>time*Math.max(speed,Math.hypot(p.vx||0,p.vy||0))+reach)continue;
       const projected=forecastMovement(p,target,time,{volley:count===0});
-      const shot=future.z>=5.2*(p.physique?.heightScale??1)?'overhead':'drive';
-      if(paddleContactAvailable(projected,future,shot)&&(count>0||!kitchenContact(projected)))found.set(p.id,{...target,z:future.z,time,bounces:count});
+      const scale=p.physique?.heightScale??1,behind=team===0?future.y-p.y:p.y-future.y,tweener=['lob','tweener'].includes(ball.shot)&&count>0&&behind>.05&&behind<2.4&&future.z>.2&&future.z<2.5,shot=future.z>=5.2*scale?'overhead':tweener?'tweener':'drive';
+      if(paddleContactAvailable(projected,future,shot)&&(count>0||!kitchenContact(projected)))found.set(p.id,{...target,z:future.z,time,bounces:count,shot});
     }
     if(found.size===players.length)break;
   }
   return found;
 }
 
-export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0}){
+export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0,stackPlan=null}){
   const pair=players.filter(p=>p.team===team),flight={...ball};
+ const stackLane=p=>stackLaneFor(p,stackPlan)??lane(p);
   const landingTime=Math.max(0,(flight.vz+Math.sqrt(Math.max(0,flight.vz**2+2*C.gravity*flight.z)))/C.gravity);
   const landing={x:clamp(flight.x+flight.vx*landingTime,1,19),y:clamp(flight.y+flight.vy*landingTime,team===0?23:-3,team===0?47:21)};
   // At the kitchen, own the approaching lane rather than the eventual landing
@@ -115,7 +119,7 @@ export function planIncoming({players,team,ball,shots,bounces,serveReceiver,cloc
   const setAtNet=pair.length===2&&pair.every(p=>team===0?p.y<=33:p.y>=11);
   const receivingTime=Math.abs(flight.vy)>1e-6?clamp((kitchen(team)-flight.y)/flight.vy,0,landingTime):0;
   const ownershipX=setAtNet&&shots>2&&ball.shot!=='lob'?clamp(flight.x+flight.vx*receivingTime,0,20):landing.x;
-  const owner=shots===1?serveReceiver:pair.reduce((a,b)=>Math.abs(lane(a)-ownershipX)<=Math.abs(lane(b)-ownershipX)?a:b);
+  const owner=shots===1?serveReceiver:pair.reduce((a,b)=>Math.abs(stackLane(a)-ownershipX)<=Math.abs(stackLane(b)-ownershipX)?a:b);
   const available=contacts(pair,team,ball,shots,bounces);
   let selected=owner,point=available.get(owner.id),poach=false,rescue=false;
   if(shots>2&&pair.length>1){
@@ -159,13 +163,13 @@ export function cpuServePlan(player,receiver,random=.5){
  const laneChoice=random<.42?receiver.x:random<.72?center-2.2:center+2.2;
  const aim=clamp(laneChoice,center-5+margin,center+5-margin);
  const depth=clamp(6.5-(skill-1)*2-(iq-1)+ (type==='soft'?1:0),4.5,9);
- return {type,aim,y:player.team===0?depth:44-depth,intent:'serve-placement'};
+ const styleRoll=(random*3.17)%1,style=styleRoll<.25?'body':styleRoll<.5?'wide':styleRoll<.75?'crosscourt':'depth';const curve=(style==='crosscourt'?.9:style==='wide'?-.7:0)*clamp((skill-1)*.4+.55,.3,1)*(player.team===0?1:-1);return {type,style,aim,y:player.team===0?depth:44-depth,intent:'serve-'+style,curve};
 }
 
-export function serveReturnTarget(player,opponents,shot,{difficulty=0}={}){
+export function serveReturnTarget(player,opponents,shot,{difficulty=0,pattern=null,shots=0}={}){
  // Keep returns moving to the opposite-side gap while retaining a controlled,
  // shot-specific depth instead of using the generic rally placement model.
- const near=player.team===0,openCourt=chooseCpuPlacement(player,opponents,shot);
+ const near=player.team===0,openCourt=chooseCpuPlacement(player,opponents,shot,{pattern,shots});
  const control=player.abilities?.control??1,iq=player.abilities?.courtIQ??1;
  const depthControl=clamp(.5+(control-1)*.15+(iq-1)*.12-clamp(difficulty,0,1)*.25,.2,.65);
  const depth=shotDepthTarget(player.team,shot,depthControl);
@@ -191,15 +195,17 @@ export function singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHit
  return {x,y:near?(stayDeep?39:shots<=2?35:32):(stayDeep?5:shots<=2?9:12),role:'singles-recover'};
 }
 
-export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[],opponentContactIn=Infinity}){
-  const home=lane(p),team=p.team;
+export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingTeam,lastShot,lastHitter,singles=false,players=[],opponentContactIn=Infinity,stackPlan=null}){
+  const home=stackLaneFor(p,stackPlan)??lane(p),stackHoldX=stackTargetXFor(p,stackPlan),team=p.team;
   if(p.id===receiverId&&team===incoming)return {x:point.x,y:point.y,role:'receive'};
+
   if(singles){
    return singlesRecoveryTarget(p,{ball,shots,servingTeam,lastShot,lastHitter,players,opponentContactIn});
   }
   // Hold the serve formations through the mandatory bounce sequence.
-  if(shots<=2&&team===servingTeam)return {x:home,y:team===0?41:3,role:'hold'};
-  if(shots===1)return {x:home,y:kitchen(team),role:'hold'};
+  if(shots<=2&&team===servingTeam)return {x:stackHoldX??home,y:team===0?41:3,role:stackHoldX!==null?'stack-hold':'hold'};
+  if(shots===1)return {x:stackHoldX??home,y:kitchen(team),role:stackHoldX!==null?'stack-hold':'hold'};
+  if(stackHoldX!==null)return {x:stackHoldX,y:kitchen(team),role:'stack-hold'};
   const intelligence=Math.max(.5,Math.min(1.3,p.abilities?.courtIQ??1));
   const shade=clamp((ball.x-10)*.28*intelligence,-2.4,2.4);
   let x=clamp(home+shade,1.3,18.7),y=kitchen(team),role='shade';
@@ -236,7 +242,7 @@ export function formationTarget(p,{ball,incoming,receiverId,point,shots,servingT
   return {x,y,role};
 }
 
-export function separateTargets(entries,team,receiverId){
+export function separateTargets(entries,team,receiverId,stackPlan=null){
   const pair=entries.filter(entry=>entry.player.team===team);if(pair.length<2)return;
   const [a,b]=pair,support=a.player.id===receiverId?b:a,active=support===a?b:a;
   // Reserve the hitter's destination and the approach segment before overlap.
@@ -244,7 +250,8 @@ export function separateTargets(entries,team,receiverId){
   const t=clamp(((support.target.x-start.x)*dx+(support.target.y-start.y)*dy)/(dx*dx+dy*dy||1),0,1);
   const closest={x:start.x+dx*t,y:start.y+dy*t};
   const gap=Math.hypot(support.target.x-closest.x,support.target.y-closest.y);
-  if(gap<3.8){
+  const minimumGap=stackPlan?.selected&&!stackPlan.activated?2.2:3.8;
+ if(gap<minimumGap){
     const direction=lane(support.player)<lane(active.player)?-1:1;
     support.target.x=clamp(closest.x+direction*3.9,.5,19.5);
     support.target.y=clamp(closest.y+(team===0?1.9:-1.9),team===0?23:0,team===0?47:21);
