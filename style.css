@@ -456,3 +456,54 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app #court-hud .serve-ball{position:relative;display:block;width:10px;height:10px;margin-top:2px;border:1px solid #fff0a0;border-radius:50%;background:#f6d45e;box-shadow:0 0 5px #f6d45e88}
 .court-app #court-hud .serve-ball::before{content:'';position:absolute;top:2px;left:2px;width:2px;height:2px;border-radius:50%;background:#6e5614;box-shadow:4px 1px #6e5614,2px 5px #6e5614}
 .court-app #court-hud .serve-ball::after{content:'';position:absolute;top:1px;left:3px;width:3px;height:1px;border-radius:50%;background:#fff8c5}
+
+
+/* Dedicated game start screen and its compact how-to-play popup. */
+.visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.game-start{position:fixed;inset:0;z-index:1000;display:grid;grid-template-rows:minmax(0,1fr) auto;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));overflow:hidden;background:#0b4a35;color:#fff;font-family:system-ui,sans-serif}
+.game-start[hidden]{display:none!important}
+.game-start::before{content:'';position:absolute;inset:7% 9%;border:3px solid #f3ca3f9c;box-shadow:0 0 0 1px #fff4cc33 inset;pointer-events:none}
+.game-start::after{content:'';position:absolute;left:50%;top:7%;bottom:7%;width:3px;background:#fff4cc55;transform:translateX(-50%);pointer-events:none}
+.game-start-court{position:absolute;left:9%;right:9%;top:50%;height:26%;border-top:2px solid #f3ca3f80;border-bottom:2px solid #f3ca3f80;transform:translateY(-50%);pointer-events:none}
+.game-start-content{position:relative;z-index:1;width:min(760px,100%);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vh,30px)}
+.game-logo{display:block;width:min(720px,88vw);max-height:54dvh;object-fit:contain;filter:drop-shadow(0 8px 0 #063b2b99)}
+.game-start-actions{width:min(390px,88vw);display:grid;gap:10px}
+.game-start-actions button{width:100%;min-height:50px;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border:2px solid #f7e9b7;border-radius:5px;background:#116444;color:#fff;font:800 14px/1 system-ui,sans-serif;letter-spacing:0;cursor:pointer;box-shadow:0 4px 0 #063b2b}
+.game-start-actions button:hover,.game-start-actions button:focus-visible{background:#177653;border-color:#fff;outline:none}
+.game-start-actions button:focus-visible{box-shadow:0 0 0 3px #f3ca3f,0 4px 0 #063b2b}
+.game-start-actions .start-play{background:#f3ca3f;color:#083f30;border-color:#fff3ae;font-size:16px}
+.game-start-actions .start-play:hover,.game-start-actions .start-play:focus-visible{background:#ffdc58;color:#063b2b}
+.game-version{position:relative;z-index:1;margin:0;color:#f8ebba;font:700 11px/1.2 ui-monospace,monospace;letter-spacing:0}
+#game-instructions{width:min(760px,94vw);max-height:90dvh;padding:24px;border:2px solid #f3ca3f;border-radius:8px;background:#103f34;color:#fff;font-family:system-ui,sans-serif;overflow:auto}
+#game-instructions::backdrop{background:#031d18d9}
+#game-instructions small{color:#f3ca3f;font-weight:800;letter-spacing:0}
+#game-instructions h2{margin:3px 0 20px;font-size:clamp(24px,5vw,34px);letter-spacing:0}
+.instruction-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.instruction-grid section{padding:16px;border:1px solid #89ad9f;border-radius:5px;background:#155643}
+.instruction-grid h3{margin:0 0 8px;color:#f3ca3f;font-size:13px;letter-spacing:0}
+.instruction-grid p{margin:0;color:#f3f2df;font-size:14px;line-height:1.5}
+.instruction-grid strong{color:#fff4ad}
+#game-instructions form{display:flex;justify-content:flex-end;margin-top:18px}
+.instructions-close{min-height:44px;padding:10px 24px;border:2px solid #fff3ae;border-radius:5px;background:#f3ca3f;color:#083f30;font-weight:800}
+@media(max-width:600px){
+ .game-start{padding-left:14px;padding-right:14px}
+ .game-start::before{inset:4% 5%}
+ .game-start::after{top:4%;bottom:4%}
+ .game-start-court{left:5%;right:5%;height:22%}
+ .game-logo{width:min(620px,94vw);max-height:47dvh}
+ .game-start-actions{width:min(390px,94vw)}
+ .instruction-grid{grid-template-columns:1fr}
+ #game-instructions{padding:18px}
+}
+@media(max-height:560px){
+ .game-start{padding-top:10px;padding-bottom:8px}
+ .game-start::before{inset:4% 5%}
+ .game-start::after{top:4%;bottom:4%}
+ .game-start-content{gap:8px}
+ .game-logo{width:min(500px,72vw);max-height:42dvh}
+ .game-start-actions{width:min(560px,94vw);grid-template-columns:1fr 1fr;gap:7px}
+ .game-start-actions button{min-height:42px;padding:8px 12px;font-size:11px}
+ .game-start-actions #start-fullscreen{grid-column:1/-1}
+ .game-start-actions .start-play{font-size:12px}
+ .game-version{font-size:9px}
+}
