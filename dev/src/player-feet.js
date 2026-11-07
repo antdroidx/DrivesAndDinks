@@ -6,9 +6,16 @@ export function playerFeet(player){
   return {index,x:(player.x??10)+sign*.48+(moving?(player.vx||0)/Math.max(1,speed)*cycle*sign*.18:0),y:player.y+sign*.08+(moving?(player.vy||0)/Math.max(1,speed)*cycle*sign*.18:0),z:lift,grounded:!airborne&&lift<.025,halfWidth:.22,halfDepth:.34};
  });
 }
+// Entry may use a lead foot; grounded soles remain authoritative for faults.
+function footCrossesKitchenLine(foot,team,boundary){
+ return foot.x+foot.halfWidth>=0&&foot.x-foot.halfWidth<=20&&(team===0?foot.y-foot.halfDepth<=boundary+1e-9:foot.y+foot.halfDepth>=boundary-1e-9);
+}
+export function kitchenEntryContact(player){
+ const boundary=player.team===0?29:15,foot=playerFeet(player).find(f=>footCrossesKitchenLine(f,player.team,boundary));
+ return foot?{...foot,playerId:player.id,team:player.team,boundary}:null;
+}
 export function kitchenContact(player){
- const boundary=player.team===0?29:15;
- const foot=playerFeet(player).find(f=>f.grounded&&f.x+f.halfWidth>=0&&f.x-f.halfWidth<=20&&(player.team===0?f.y-f.halfDepth<=boundary+1e-9:f.y+f.halfDepth>=boundary-1e-9));
+ const boundary=player.team===0?29:15,foot=playerFeet(player).find(f=>f.grounded&&footCrossesKitchenLine(f,player.team,boundary));
  return foot?{...foot,playerId:player.id,team:player.team,boundary}:null;
 }
 export function footSole(foot){return [[foot.x-foot.halfWidth,foot.y-foot.halfDepth],[foot.x+foot.halfWidth,foot.y-foot.halfDepth],[foot.x+foot.halfWidth,foot.y+foot.halfDepth],[foot.x-foot.halfWidth,foot.y+foot.halfDepth]];}

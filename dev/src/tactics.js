@@ -1,6 +1,6 @@
-import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js?v=188';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=188';
-import {stackLaneFor,stackTargetXFor} from './stacking.js?v=188';
+import {C,stepBall,side,move,paddleContactAvailable,contactDifficulty,inBounds,shotDepthTarget} from './core.js?v=189';
+import {kitchenContact,kitchenEntryContact,volleyMomentumFault} from './player-feet.js?v=189';
+import {stackLaneFor,stackTargetXFor} from './stacking.js?v=189';
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const lane=p=>p.coverLane??p.lane??(p.x<10?5:15);
 const kitchen=team=>team===0?30:14;
@@ -84,17 +84,26 @@ export function chooseCpuPlacement(player,opponents,shot,{pattern=null,shots=0}=
 }
 
 // Forecast reachable contacts, including the first bounce, on the same fixed-step physics.
+const inKitchen=(team,y)=>team===0?y<=29:y>=15,kitchenRecoveryStep=1;
 function contacts(players,team,ball,shots,bounces){
-  const future={...ball},found=new Map();let count=bounces;
-  const horizon=['lob','tweener'].includes(ball.shot)?480:216,flightVz=ball.vz||0,landingTime=Math.max(0,(flightVz+Math.sqrt(Math.max(0,flightVz**2+2*C.gravity*(ball.z||0))))/C.gravity),lobLandingY=(ball.y||0)+(ball.vy||0)*landingTime,deepLob=['lob','tweener'].includes(ball.shot)&&(team===0?lobLandingY>36:lobLandingY<8);for(let tick=1;tick<=horizon;tick++){
-    const event=stepBall(future,C.dt);if(event==='net')continue;
-    if(event==='bounce'){count++;if(count>=2||future.x<0||future.x>20||future.y<0||future.y>44)break}
+  const future={...ball},selected=new Map(),fallback=new Map();let count=bounces;
+  let shortRecovery=ball.shot==='dink'||ball.netContact||ball.netCord;
+  let kitchenBounce=bounces>0&&shortRecovery&&inKitchen(team,ball.y);
+  const horizon=['lob','tweener'].includes(ball.shot)?480:216,flightVz=ball.vz||0,landingTime=Math.max(0,(flightVz+Math.sqrt(Math.max(0,flightVz**2+2*C.gravity*(ball.z||0))))/C.gravity),lobLandingY=(ball.y||0)+(ball.vy||0)*landingTime,deepLob=['lob','tweener'].includes(ball.shot)&&(team===0?lobLandingY>36:lobLandingY<8);
+  for(let tick=1;tick<=horizon;tick++){
+    const event=stepBall(future,C.dt);if(event==='net'){if(future.netCord)shortRecovery=true;continue}
+    if(event==='bounce'){
+      count++;
+      if(shortRecovery&&inKitchen(team,future.y))kitchenBounce=true;
+      if(count>=2||future.x<0||future.x>20||future.y<0||future.y>44)break;
+    }
     if(deepLob&&count===0)continue;if(tick%4||side(future.y)!==team||(shots<=2&&count===0))continue;
+    const recoveryContact=count>0&&kitchenBounce&&(future.z<2.2||future.netContact);
     for(const p of players){
-      if(found.has(p.id)||future.z>7.4*(p.physique?.heightScale??1))continue;
-      const y=count===0?volleyBrakeTarget(p,future).y:future.y;
+      if(selected.has(p.id)||future.z>7.4*(p.physique?.heightScale??1))continue;
+      const y=count===0?volleyBrakeTarget(p,future).y:future.y+(recoveryContact?(team===0?-kitchenRecoveryStep:kitchenRecoveryStep):0);
       if(Math.abs(future.y-y)>1.6)continue;
-      if(count>0&&future.vz>3&&future.z<1.35)continue;
+      if(count>0&&future.vz>3&&future.z<1.35&&!recoveryContact)continue;
       if(future.z>=5.2*(p.physique?.heightScale??1)&&future.vz>0)continue;
       const target={x:clamp(future.x,-3,23),y:clamp(y,team===0?23:-3,team===0?47:21)};
       const travel=Math.hypot(target.x-p.x,target.y-p.y),time=tick*C.dt;
@@ -102,13 +111,16 @@ function contacts(players,team,ball,shots,bounces){
       if(travel>time*Math.max(speed,Math.hypot(p.vx||0,p.vy||0))+reach)continue;
       const projected=forecastMovement(p,target,time,{volley:count===0});
       const scale=p.physique?.heightScale??1,behind=team===0?future.y-p.y:p.y-future.y,tweener=['lob','tweener'].includes(ball.shot)&&count>0&&behind>.05&&behind<2.4&&future.z>.2&&future.z<2.5,shot=future.z>=5.2*scale?'overhead':tweener?'tweener':'drive';
-      if(paddleContactAvailable(projected,future,shot)&&(count>0||!kitchenContact(projected)))found.set(p.id,{...target,z:future.z,time,bounces:count,shot});
+      if(!paddleContactAvailable(projected,future,shot))continue;
+      const candidate={...target,z:future.z,time,bounces:count,shot};
+      if(recoveryContact&&!kitchenEntryContact(projected)){if(!fallback.has(p.id))fallback.set(p.id,candidate);continue}
+      if(!selected.has(p.id))selected.set(p.id,candidate);
     }
-    if(found.size===players.length)break;
+    if(selected.size===players.length)break;
   }
-  return found;
+  for(const p of players)if(!selected.has(p.id)&&fallback.has(p.id))selected.set(p.id,fallback.get(p.id));
+  return selected;
 }
-
 export function planIncoming({players,team,ball,shots,bounces,serveReceiver,clock=0,stackPlan=null}){
   const pair=players.filter(p=>p.team===team),flight={...ball};
  const stackLane=p=>stackLaneFor(p,stackPlan)??lane(p);
