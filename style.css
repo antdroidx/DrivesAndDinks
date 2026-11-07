@@ -363,7 +363,7 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .intro-player{display:grid;grid-template-columns:132px minmax(0,1fr);gap:12px;align-items:center;padding:10px;border:1px solid #3a5861;border-radius:8px;background:#19333c;min-width:0}
 .intro-player canvas{width:132px;height:158px;display:block;background:linear-gradient(#24434c,#173039);border-radius:5px}
 .intro-player h4{margin:0;font-size:17px;overflow-wrap:anywhere}
-.intro-player .intro-archetype{margin:3px 0 7px;color:#f2c665;font-size:11px}
+.intro-player .intro-archetype{margin:3px 0 4px;color:#f2c665;font-size:11px}.intro-player .intro-paddle{margin:0 0 7px;color:#d4e3d9;font-size:11px;font-weight:600}
 .intro-overall{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;color:#bad7cf;font-size:10px}
 .intro-overall strong{color:#fff3d6;font-size:21px}
 .intro-rating{display:grid;grid-template-columns:45px 1fr 22px;gap:5px;align-items:center;margin:4px 0;font-size:9px;color:#a9c5bd}

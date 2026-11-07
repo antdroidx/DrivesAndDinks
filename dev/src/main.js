@@ -1,41 +1,41 @@
-import {seededRandom} from './competition.js?v=184';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=184';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=184';
-import {playerFeet,footSole} from './player-feet.js?v=184';
+import {seededRandom} from './competition.js?v=185';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=185';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=185';
+import {playerFeet,footSole} from './player-feet.js?v=185';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=184';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=185';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=184';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=185';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=184';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=185';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=184';
+import {createAnimeGameRenderer} from './anime-game.js?v=185';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=184';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=185';
 
-import {setupCourtDisplay} from './court-display.js?v=184';
+import {setupCourtDisplay} from './court-display.js?v=185';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=184';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=185';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY} from './court-camera.js?v=184';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=184';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY} from './court-camera.js?v=185';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=185';
 
-import {movingStance} from './detailed-character.js?v=184';
+import {movingStance} from './detailed-character.js?v=185';
 
-import {sampleMatchAnimation} from './match-animation.js?v=184';
+import {sampleMatchAnimation} from './match-animation.js?v=185';
 
-import {setupSelection} from './selection.js?v=184';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=184';
+import {setupSelection} from './selection.js?v=185';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=185';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=184';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=185';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=184';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=185';
 
-import {Game} from './game.js?v=184';
-import {C} from './core.js?v=184';
+import {Game} from './game.js?v=185';
+import {C} from './core.js?v=185';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=184';import {playerEmotionState} from './player-emotion.js?v=184';import {PerformanceMonitor} from './performance-monitor.js?v=184';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=185';import {playerEmotionState} from './player-emotion.js?v=185';import {PerformanceMonitor} from './performance-monitor.js?v=185';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=184';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=185';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -103,10 +103,10 @@ function showMatchIntro(players,onBegin){
   for(const card of team.players){
    const article=document.createElement('article');article.className='intro-player';
    const portrait=document.createElement('canvas');portrait.width=264;portrait.height=316;portrait.setAttribute('aria-label',card.name+' character portrait');
-   const info=document.createElement('div'),name=document.createElement('h4'),archetype=document.createElement('p'),overall=document.createElement('div');
-   name.textContent=card.name;archetype.className='intro-archetype';archetype.textContent=card.archetype;overall.className='intro-overall';
+   const info=document.createElement('div'),name=document.createElement('h4'),archetype=document.createElement('p'),paddle=document.createElement('p'),overall=document.createElement('div');
+   name.textContent=card.name;archetype.className='intro-archetype';archetype.textContent=card.archetype;paddle.className='intro-paddle';paddle.textContent=card.paddleLabel;overall.className='intro-overall';
    const overallLabel=document.createElement('span'),overallValue=document.createElement('strong');overallLabel.textContent='OVERALL';overallValue.textContent=String(card.overall);overall.append(overallLabel,overallValue);
-   info.append(name,archetype,overall);
+   info.append(name,archetype,paddle,overall);
    for(const key of INTRO_RATING_KEYS){const row=document.createElement('div');row.className='intro-rating';const label=document.createElement('span'),meter=document.createElement('span'),fill=document.createElement('i'),value=document.createElement('span');label.textContent=INTRO_RATING_LABELS[key];meter.className='intro-meter';fill.style.width=card.ratings[key]+'%';meter.append(fill);value.textContent=String(card.ratings[key]);row.append(label,meter,value);info.append(row)}
    article.append(portrait,info);section.append(article);
    try{const c=portrait.getContext('2d');c.setTransform(2,0,0,2,0,0);c.imageSmoothingEnabled=false;c.fillStyle='#173039';c.fillRect(0,0,132,158);drawPlayer(c,{personalize:card.id===0,designId:card.id===0?selectedDetailedDesign:'',appearance:card.appearance,characterId:card.characterId,handedness:card.handedness,mode:'idle',frame:0,phase:0,x:8,y:24,width:116,height:116,view:'far',side:card.handedness==='left'?-1:1,paddleShape:card.paddleShape,lighting:'depth'})}catch(error){console.error(error)}
