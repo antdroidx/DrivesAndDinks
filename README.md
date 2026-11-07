@@ -106,7 +106,7 @@ The serve has a physical toss phase, with the ball rising and falling under grav
 
 Court bounces include surface friction, speed-dependent restitution, and spin decay. Topspin carries speed into the bounce, while backspin and slice check the ball. Player stamina falls during sustained sprinting, reduces speed and contact accuracy, and recovers when the player slows; Agility improves both fatigue resistance and recovery. Stamina partially recovers between points.
 
-Paddle shape is independent from paddle family and archetype. Widebody paddles shorten reach slightly while improving hand speed, control, and the side-to-side sweet spot. Elongated paddles increase reach and leverage but slow the swing and narrow the side-to-side sweet spot. Hybrid remains neutral. CPU players receive a random family and shape each match.
+Paddle shape is independent from paddle family and archetype. Widebody paddles use a large centered sweet spot with quicker hands and slightly less reach/power. Elongated paddles use a smaller, higher face zone with more center leverage and reach, but slower hands and tighter sides. Hybrid keeps a centered mixed profile between them. CPU players receive a random family and shape each match.
 
 Physics regression checks cover paddle sweet-spot behavior, physical serve toss, net deflection, post faults, net-fall faults, outside-post ATP clearance, bounce spin transfer, player momentum, player collision separation, and fatigue recovery.
 
