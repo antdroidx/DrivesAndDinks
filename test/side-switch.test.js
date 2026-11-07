@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {Game} from '../src/game.js';
 
 test('teams switch sides once either score reaches six points',()=>{
@@ -11,6 +12,10 @@ test('teams switch sides once either score reaches six points',()=>{
  assert.ok(g.events.some(event=>event.type==='side-switch'&&event.at===6));
  assert.equal(g.message,'SWITCH SIDES');
  assert.equal(g.matchReport().sideSwitched,true);
+});
+
+test('side-switched scene depth sorting follows visible camera depth',()=>{
+ const source=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');assert.match(source,/sort\(\(a,b\)=>visibleCourtY\(a\.y\)-visibleCourtY\(b\.y\)\)/);
 });
 
 test('side switching happens once and resets with the match',()=>{

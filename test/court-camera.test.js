@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {courtCamera,courtAim,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched} from '../src/court-camera.js';
+import {courtCamera,courtAim,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY} from '../src/court-camera.js';
 import {C} from '../src/core.js';
 
 test('portrait camera enlarges the court while retaining both baselines',()=>{
@@ -21,6 +21,7 @@ test('side switching rotates the court and mirrors aim input',()=>{
   const switchedNear=gameProjection(0,0),switchedFar=gameProjection(20,44);
   assert.deepEqual(switchedNear,far);assert.deepEqual(switchedFar,near);
   assert.equal(gameLift(0),farLift);assert.equal(gameLift(44),nearLift);
+  assert.equal(visibleCourtY(0),C.length);assert.equal(visibleCourtY(C.net),C.length-C.net);assert.equal(visibleCourtY(C.length),0);
   assert.equal(courtAim(480,rect,camera),10);
   assert.ok(courtAim(300,rect,camera)>10);
  }finally{setCourtSideSwitched(false)}
