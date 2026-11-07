@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=177';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=177';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=177';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=178';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=178';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=178';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -98,22 +98,24 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards
    roundedShape(c,[{x:-5,y:-1},{x:-5.7,y:1.5},{x:-5,y:3.4},{x:-4,y:1.1}],tone(hair,-.05),ink,.28,.55);
    roundedShape(c,[{x:5,y:-1},{x:5.7,y:1.5},{x:5,y:3.4},{x:4,y:1.1}],tone(hair,-.05),ink,.28,.55);
   }else if(d.hair==='crop'){
-   roundedShape(c,covered?[{x:-4.5,y:-1.5},{x:-4.7,y:-3.8},{x:-3,y:-5.2},{x:-.5,y:-5.7},{x:2.2,y:-5.1},{x:4,y:-3.7},{x:4.1,y:-1.5}]:[{x:-4.8,y:-1.5},{x:-5,y:-4},{x:-3.5,y:-5.5},{x:-2.6,y:-5},{x:-1.5,y:-6},{x:-.3,y:-5.3},{x:.8,y:-6.1},{x:1.9,y:-5.2},{x:3.2,y:-5.7},{x:4.5,y:-3.7},{x:4.2,y:-1.5},{x:1.5,y:-2.7},{x:-1.8,y:-2.1}],hair,ink,.38,.9);
-   for(const [x1,y1,x2,y2] of [[-3.4,-4.6,-2.7,-3.5],[-1.1,-5.1,-.5,-3.8],[1,-5.2,1.5,-3.8],[3,-4.8,3.4,-3.5]])line(c,[{x:x1,y:y1},{x:x2,y:y2}],tone(hair,.2),.25);
+   roundedShape(c,[{x:-5,y:-.4},{x:-5.1,y:-3.8},{x:-3.5,y:-5.4},{x:-1.2,y:-6},{x:1.2,y:-5.9},{x:3.5,y:-5.1},{x:5,y:-3.5},{x:4.8,y:-.5},{x:2,y:-1.8},{x:-1.8,y:-1.7}],hair,ink,.34,.8);
+   for(const [x1,y1,x2,y2] of [[-3.7,-4.3,-2.4,-2.7],[-1.8,-5,-.4,-3.1],[.2,-5.1,1.5,-3.1],[2,-4.6,3.2,-2.8]])line(c,[{x:x1,y:y1},{x:x2,y:y2}],tone(hair,.22),.24);
   }else if(d.hair==='sidePart'){
-   roundedShape(c,covered?[{x:-4.6,y:-1.5},{x:-4.7,y:-3.8},{x:-3.2,y:-5.3},{x:-.8,y:-5.8},{x:1.8,y:-5.5},{x:3.8,y:-4.3},{x:4.3,y:-1.8}]:[{x:-4.8,y:-1.4},{x:-5.1,y:-4},{x:-4,y:-5.7},{x:-2,y:-6.6},{x:-1.5,y:-7.5},{x:.4,y:-7},{x:3.8,y:-5.9},{x:5,y:-4},{x:5.1,y:-1.5},{x:4,y:-.5},{x:3.1,y:-3},{x:.7,y:-2.2},{x:-1.5,y:-3.2},{x:-3,y:-1.2}],hair,ink,.4,.95);
-   line(c,[{x:-2,y:covered?-4.4:-5.5},{x:-1.2,y:covered?-4.2:-2.3}],tone(hair,-.45),.28);
-   line(c,[{x:-1.5,y:covered?-4.8:-6.4},{x:2.8,y:covered?-4.7:-5.1},{x:3.7,y:-3.4}],tone(hair,.22),.4);
+   roundedShape(c,covered?[{x:-4.6,y:-1.5},{x:-4.7,y:-3.8},{x:-3.2,y:-5.3},{x:-.8,y:-5.8},{x:1.8,y:-5.5},{x:3.8,y:-4.3},{x:4.3,y:-1.8}]:[{x:-4.8,y:-1.4},{x:-5.1,y:-4},{x:-4,y:-5.7},{x:-2,y:-6.6},{x:-.6,y:-7.2},{x:1.2,y:-6.8},{x:3.5,y:-5.6},{x:5,y:-3.7},{x:5.1,y:-1.3},{x:4,y:-.5},{x:3.4,y:-2.8},{x:1.2,y:-2.4},{x:-1.2,y:-2.8},{x:-3,y:-1.2}],hair,ink,.4,.95);
+   line(c,[{x:-3.5,y:-4.7},{x:-.6,y:-5.9},{x:2.8,y:-4.8},{x:3.8,y:-3.1}],tone(hair,.2),.34);
+   line(c,[{x:-2,y:covered?-4.4:-5.3},{x:-1.1,y:covered?-4.1:-2.4}],tone(hair,-.4),.25);
   }else if(d.hair==='spiky'){
    roundedShape(c,[{x:-4.7,y:-1.4},{x:-5.1,y:-4},{x:-3.2,y:-5.2},{x:-3.5,y:-7.2},{x:-1.3,y:-5.8},{x:-.2,y:-7.9},{x:1.4,y:-5.9},{x:3.4,y:-6.8},{x:3.1,y:-4.7},{x:4.7,y:-5},{x:4.3,y:-1.8},{x:1.6,y:-3},{x:-1.8,y:-2.4}],hair,ink,.4,.34);
    line(c,[{x:-2.6,y:-5.3},{x:-1.8,y:-7.5}],tone(hair,.25),.35);
   }else if(d.hair==='pixie'){
-   roundedShape(c,[{x:-5,y:-1},{x:-5.2,y:-3.8},{x:-3.8,y:-5},{x:-3.5,y:-6.7},{x:-2,y:-5.5},{x:-.8,y:-7.3},{x:.3,y:-5.6},{x:1.6,y:-7.1},{x:2.6,y:-5.3},{x:4,y:-6.1},{x:4.3,y:-4.3},{x:5.2,y:-3.3},{x:5,y:-.5},{x:4,y:1.2},{x:2,y:1.8},{x:0,y:2},{x:-2,y:1.8},{x:-4,y:1.2}],hair,ink,.4,.75);
+   roundedShape(c,[{x:-5,y:-1},{x:-5.2,y:-3.8},{x:-3.8,y:-5},{x:-3.5,y:-6.7},{x:-2,y:-5.5},{x:-.8,y:-7.3},{x:.3,y:-5.6},{x:1.6,y:-7.1},{x:2.6,y:-5.3},{x:4,y:-6.1},{x:4.3,y:-4.3},{x:5.2,y:-3.3},{x:5,y:-.5},{x:3.8,y:.4},{x:2,y:1.1},{x:0,y:1.25},{x:-2,y:1.1},{x:-4,y:.4}],hair,ink,.4,.75);
    if(d.headwear!=='cap')roundedShape(c,[{x:-4.5,y:-3.8},{x:-3.5,y:-6.4},{x:-2.2,y:-5.4},{x:-1,y:-7.4},{x:.3,y:-5.5},{x:1.8,y:-7},{x:2.8,y:-5.1},{x:4,y:-5.8}],tone(hair,.05),ink,.25,.35);
-   roundedShape(c,[{x:-4.7,y:-3},{x:4.7,y:-3},{x:4.2,y:-.7},{x:2,y:-1.5},{x:.3,y:-.5},{x:-1.8,y:-1.5},{x:-3.8,y:-.6}],tone(hair,-.08),ink,.25,.4);
+   roundedShape(c,[{x:-4.4,y:-3},{x:4.4,y:-3},{x:3.8,y:-1},{x:1.8,y:-1.6},{x:.2,y:-.8},{x:-1.6,y:-1.6},{x:-3.4,y:-.9}],tone(hair,-.08),ink,.25,.4);
   }else if(d.hair==='crewCut'){
-   roundedShape(c,[{x:-5,y:-.4},{x:-5.1,y:-3.8},{x:-3.5,y:-5.4},{x:-1.2,y:-6},{x:1.2,y:-5.9},{x:3.5,y:-5.1},{x:5,y:-3.5},{x:4.8,y:-.5},{x:2,y:-1.8},{x:-1.8,y:-1.7}],hair,ink,.34,.8);
-   for(const [x1,y1,x2,y2] of [[-3.7,-4.3,-2.4,-2.7],[-1.8,-5,-.4,-3.1],[.2,-5.1,1.5,-3.1],[2,-4.6,3.2,-2.8]])line(c,[{x:x1,y:y1},{x:x2,y:y2}],tone(hair,.22),.24);
+   roundedShape(c,[{x:-5,y:-.6},{x:-5.5,y:-3.4},{x:-4.6,y:-5.7},{x:-2.4,y:-7.1},{x:.1,y:-7.6},{x:2.6,y:-6.7},{x:4.6,y:-5},{x:5.4,y:-2.8},{x:5,y:-.3},{x:4.1,y:.2},{x:4,y:-2.3},{x:2.4,y:-3.1},{x:.5,y:-2.7},{x:-1.4,y:-3.3},{x:-3.5,y:-1.6}],tone(hair,-.02),ink,.4,.9);
+   roundedShape(c,[{x:-4.8,y:-1.5},{x:-4.5,y:.3},{x:-3.8,y:1.3},{x:-3.4,y:.1},{x:-4,y:-1.3}],tone(hair,-.1),ink,.2,.4);
+   roundedShape(c,[{x:4.8,y:-1.2},{x:4.5,y:.4},{x:3.8,y:1.4},{x:3.4,y:.1},{x:4,y:-1.2}],tone(hair,-.06),ink,.2,.4);
+   for(const [x1,y1,x2,y2] of [[-3.7,-5.4,-1.7,-6.6],[-1.8,-6.5,.3,-7],[.2,-6.8,2.3,-6.1],[1.8,-6.1,3.7,-4.7]])line(c,[{x:x1,y:y1},{x:x2,y:y2}],tone(hair,.2),.25);
   }else if(d.hair==='long'){
    roundedShape(c,[{x:-5,y:-1.3},{x:-5.4,y:-4.7},{x:-3.7,y:-6.5},{x:0,y:-7.2},{x:3.8,y:-6.2},{x:5,y:-3.2},{x:4.6,y:-1.1},{x:3,y:-1.8},{x:2.2,y:-4},{x:1,y:-1.7},{x:0,y:-4.3},{x:-1.3,y:-1.6},{x:-2.5,y:-4},{x:-3.7,y:-1.5}],hair,ink,.4,1);
    for(const side of [-1,1])roundedShape(c,[{x:side*3.5,y:-3.8},{x:side*5.7,y:-1},{x:side*6.1,y:6},{x:side*5,y:13},{x:side*3.5,y:12},{x:side*4.1,y:5},{x:side*2.8,y:-1}],tone(hair,-.06),ink,.35,.85);

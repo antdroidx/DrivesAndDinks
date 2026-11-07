@@ -1,11 +1,11 @@
-import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=177';
-import {createProfileRenderer} from './profile-athlete.js?v=177';
-import {sampleMatchAnimation} from './match-animation.js?v=177';
-import {playerFeet} from './player-feet.js?v=177';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=177';import {drawNetContact} from './court-net.js?v=177';
-import {paintCourtTexture} from './court-art.js?v=177';import {playerEmotionState} from './player-emotion.js?v=177';
-import {C} from './core.js?v=177';
-import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=177';
+import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=178';
+import {createProfileRenderer} from './profile-athlete.js?v=178';
+import {sampleMatchAnimation} from './match-animation.js?v=178';
+import {playerFeet} from './player-feet.js?v=178';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=178';import {drawNetContact} from './court-net.js?v=178';
+import {paintCourtTexture} from './court-art.js?v=178';import {playerEmotionState} from './player-emotion.js?v=178';
+import {C} from './core.js?v=178';
+import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=178';
 
 // Measured ceiling of the ball in live play is about 7 feet, with the highest
 // overhead contact near 7.4. Eight feet leaves headroom without reserving space
