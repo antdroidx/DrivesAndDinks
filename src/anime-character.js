@@ -141,14 +141,14 @@ function hairTail(c,d,x,y,phase,near,ink,layer='behind'){
  if(d.hair==='twinTails'&&behind){thinTail(-1);thinTail(1)}
 if(d.hair==='long'&&!behind){
 if(near){
-   path(c,[point(x-5.5,y-3.8),point(x-6.1,y+2.5),point(x-5.8,y+10),point(x-4.4,y+16.2),point(x-2.1,y+18.2),point(x,y+18.8),point(x+2.1,y+18.2),point(x+4.4,y+16.2),point(x+5.8,y+10),point(x+6.1,y+2.5),point(x+5.5,y-3.8)],tone(d.hairColor,-.08),ink,.35);
-   for(const [x1,y1,x2,y2] of [[-4.4,-2.8,-3.3,13.2],[-2.9,-3.4,-1.9,15.8],[-1.3,-3.5,-.5,17],[.4,-3.5,.7,17],[2,-3.4,2.4,15.8],[3.5,-2.8,4.1,13.2]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(d.hairColor,(x1<0?.14:-.12)),.3);
-   for(const [x1,y1,x2,y2] of [[-4.8,1.2,-2.3,3.2],[-3.2,6.2,-.5,7.8],[-1.5,10.8,1.4,12.1],[1.4,4.2,4.1,5.8],[2.8,9,4.6,10],[-4.2,3.8,-1.8,5.3],[-2.5,8.4,.2,9.6],[.6,13.4,2.7,14.2]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(d.hairColor,(x1<0?.24:.2)),.24);
+   path(c,[point(x-5.7,y-5.2),point(x-6.1,y-1.6),point(x-6,y+3.8),point(x-5.5,y+10.2),point(x-4.3,y+15.8),point(x-2.1,y+18.3),point(x,y+19),point(x+2.1,y+18.3),point(x+4.3,y+15.8),point(x+5.5,y+10.2),point(x+6,y+3.8),point(x+6.1,y-1.6),point(x+5.7,y-5.2)],tone(d.hairColor,-.08),ink,.28);
+   for(const [x1,y1,x2,y2] of [[-4.5,-4.5,-4.1,17.2],[-3.2,-4.8,-2.9,18],[-1.8,-5,-1.5,18.6],[-.5,-5.1,-.3,19],[.7,-5.1,.5,19],[2,-5,1.8,18.6],[3.3,-4.8,3,18],[4.5,-4.5,4.1,17.2]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(d.hairColor,(x1<0?.06:-.04)),.18);
+   for(const [x1,y1,x2,y2] of [[-3.8,-4.6,-3.5,15.8],[-2.4,-4.8,-2.1,17.3],[-1,-5,-.8,18.2],[.2,-5,.1,18.6],[1.3,-5,1.1,18.2],[2.6,-4.8,2.3,17.3],[3.9,-4.6,3.6,15.8]])line(c,[point(x+x1,y+y1),point(x+x2,y+y2)],tone(d.hairColor,(x1<0?.08:.06)),.14);
   }
   else for(const side of [-1,1]){const drift=Math.sin(phase*Math.PI*2+side)*.4;c.beginPath();c.moveTo(x+side*3.8,y-3.6);c.bezierCurveTo(x+side*(6+drift),y-.8,x+side*(6.4+drift),y+6,x+side*(5.4+drift),y+12.8);c.quadraticCurveTo(x+side*4.4,y+13.4,x+side*3.8,y+11.4);c.quadraticCurveTo(x+side*4.5,y+4.5,x+side*2.5,y-.8);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.38;c.stroke()}
  }
  if(['bob','waves'].includes(d.hair)&&(near?behind:!behind)){
-  if(!near)path(c,[point(x-5.2,y-3.8),point(x-5.8,y+2.8),point(x-4.4,y+6.4),point(x,y+7.2),point(x+4.4,y+6.4),point(x+5.8,y+2.8),point(x+5.2,y-3.8)],d.hair==='waves'?tone(d.hairColor,-.04):d.hairColor,ink,.35);
+  if(near)path(c,[point(x-5.2,y-3.8),point(x-5.8,y+2.8),point(x-4.4,y+6.4),point(x,y+7.2),point(x+4.4,y+6.4),point(x+5.8,y+2.8),point(x+5.2,y-3.8)],d.hair==='waves'?tone(d.hairColor,-.04):d.hairColor,ink,.35);
   else for(const side of [-1,1]){c.beginPath();c.moveTo(x+side*3.8,y-3.5);c.quadraticCurveTo(x+side*(d.hair==='waves'?6.4:5.8),y-.5,x+side*(d.hair==='waves'?5.7:5.1),y+5.8);c.lineTo(x+side*3.4,y+4.6);c.closePath();c.fillStyle=d.hairColor;c.fill();c.strokeStyle=ink;c.lineWidth=.35;c.stroke()}
  }
 }function normalizeEmotion(emotion){return ({smile:'happy',reaction:'surprise',neutral:'focus',sad:'disappointment',calm:'relief'})[emotion]??emotion??'focus'}
@@ -266,7 +266,7 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
   animeHairMass(c,x,y,hair,ink,near,d.body==='male'?'crewCut':'crop');
  }
  if(d.hair==='bun'){const bx=x-.4,by=y-7.4;oval(c,bx,by,2.55,2.15,tone(hair,.05));path(c,[point(bx-2.3,by+.1),point(bx-1.4,by-1.8),point(bx-.4,by-2.1),point(bx+.2,by-.2),point(bx-.5,by+1.5)],tone(hair,.14),null);line(c,[point(bx-1.5,by+.2),point(bx-.3,by-1.5)],tone(hair,-.25),.3);line(c,[point(bx+.3,by-1.6),point(bx+1.5,by-.1)],tone(hair,.2),.28)}
- if(!buzz&&!bald){
+ if(!buzz&&!bald&&d.hair!=='long'){
   path(c,[point(x-4.3,y-3.6),point(x-3.3,y-5.5),point(x-1.6,y-5.9),point(x-2.6,y-3),point(x-3.1,y-1.5)],tone(hair,warm?.12:.18),null);
   path(c,[point(x+.4,y-6.1),point(x+2.5,y-5.4),point(x+3.8,y-3.2),point(x+2.7,y-3.8),point(x+1.4,y-4)],tone(hair,.1),null);
   if(!['pixie','long','bob','spiky'].includes(d.hair))for(const sign of [-1,1]){c.beginPath();c.moveTo(x+sign*.6,y-6.1);c.quadraticCurveTo(x+sign*3.5,y-4.4,x+sign*4.2,y-1.2);c.strokeStyle=tone(hair,-.25);c.lineWidth=.3;c.stroke()}

@@ -68,13 +68,16 @@ test('long hair is solid and textured while the braid is crown-rooted, tapered a
  assert.ok(source.includes("drawAnimeBraid(c,d,n.x,animeHeadCenter(n).y,phase,near,ink,near)"));
  assert.ok(source.includes("function drawAnimeBraid(c,d,x,y,phase,near,ink,showTail=true)"));
  assert.ok(source.includes("if(d.hair!=='long')for(const sign of [-1,1])"));
- assert.ok(source.includes('point(x-6.1,y+2.5)'));
- assert.ok(source.includes('point(x+6.1,y+2.5)'));
- assert.ok(source.includes('point(x-2.1,y+18.2)'));
- assert.ok(source.includes('for(const [x1,y1,x2,y2] of [[-4.4,-2.8,-3.3,13.2]'));
+ assert.ok(source.includes('point(x-6.1,y-1.6)'));
+ assert.ok(source.includes('point(x+6.1,y-1.6)'));
+ assert.ok(source.includes('point(x-2.1,y+18.3)'));
+ assert.ok(source.includes('for(const [x1,y1,x2,y2] of [[-4.5,-4.5,-4.1,17.2]'));
  assert.ok(source.includes("if(d.hair==='long'&&!behind)"));
  assert.ok(source.includes('point(x,y+3)'));
  assert.ok(source.includes("const bottom=pixie?2.35"));
+ assert.ok(source.includes("if(!buzz&&!bald&&d.hair!=='long')"));
+ assert.ok(source.includes("if(['bob','waves'].includes(d.hair)&&(near?behind:!behind))"));
+ assert.ok(source.includes("if(near)path(c,[point(x-5.2,y-3.8)"));
 });
 test('textured crop, side sweep, feathered shag and swept layers use distinct render paths',()=>{
  const source=readFileSync(new URL('../src/anime-character.js',import.meta.url),'utf8');
