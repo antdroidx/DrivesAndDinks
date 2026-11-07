@@ -152,6 +152,12 @@ test('high-speed impacts lose more bounce than slow impacts',()=>{
  assert.ok(slow.vz/Math.abs(-14)>fast.vz/Math.abs(-36));
 });
 
+test('ambient temperature changes ball drag and bounce liveliness',()=>{
+ const flight=temperature=>{const b={x:10,y:10,z:5,vx:30,vy:0,vz:-1,radius:C.ballRadius,temperature,humidity:.5};while(stepBall(b,C.dt)!=='bounce');return b};
+ const cold=flight(45),hot=flight(95);
+ assert.ok(hot.vz>cold.vz,'hot balls rebound higher');
+ assert.ok(Math.hypot(hot.vx,hot.vy)>Math.hypot(cold.vx,cold.vy),'hot balls retain more pace through the air');
+});
 test('side spin curves the ball laterally and decays over time',()=>{
  const straight={x:10,y:10,z:2,vx:12,vy:-10,vz:3,spin:0,radius:C.ballRadius};
  const curved={...straight,spinY:20};
@@ -199,8 +205,11 @@ test('bounce friction transfers topspin forward and checks backspin',()=>{const 
 
 test('sprinting consumes stamina while recovery restores it',()=>{const p={...playerProfile(),team:0,x:0,y:35,vx:0,vy:0,stamina:1};let tiredSpeed=0;for(let i=0;i<240;i++){move(p,i<120?20:0,35,1/120);tiredSpeed=Math.max(tiredSpeed,Math.hypot(p.vx,p.vy))}assert.ok(p.stamina<.95);const tired=p.stamina;for(let i=0;i<180;i++)move(p,p.x,p.y,1/120);assert.ok(p.stamina>tired);assert.ok(tiredSpeed>0);});
 
-test('indoor conditions stay calm and outdoor conditions carry light wind and humidity',()=>{
- const indoor=venueConditions('indoor');
- assert.equal(indoor.wind,0);assert.equal(indoor.humidity,0);
- for(let i=0;i<100;i++){const outdoor=venueConditions('outdoor',()=>i/100);assert.ok(outdoor.wind>0&&outdoor.wind<=.8);assert.ok(outdoor.humidity>=.46&&outdoor.humidity<=.8);assert.match(outdoor.label,/OUTDOOR · LIGHT WIND/)}
+test('hot conditions increase exertion cost',()=>{
+ const run=temperature=>{const p={...playerProfile(),team:0,x:0,y:35,vx:0,vy:0,stamina:1,temperature};for(let i=0;i<1200;i++)move(p,i%120<60?24:0,35,C.dt);return p.stamina};
+ assert.ok(run(100)<run(70));
+});
+test('indoor venues stay neutral and outdoor weather uses cold, fair and hot bands',()=>{
+ for(const venue of ['indoor','indoor-stadium']){const indoor=venueConditions(venue);assert.equal(indoor.temperature,70);assert.equal(indoor.temperatureBand,'fair');assert.equal(indoor.wind,0);assert.equal(indoor.humidity,0);assert.match(indoor.label,/70°F/)}
+ for(let i=0;i<100;i++){const outdoor=venueConditions('outdoor',()=>i/100);assert.ok(outdoor.temperature>=45&&outdoor.temperature<=100);assert.equal(outdoor.temperatureBand,outdoor.temperature<58?'cold':outdoor.temperature>=90?'hot':'fair');assert.ok(outdoor.wind>0&&outdoor.wind<=.8);assert.ok(outdoor.humidity>=.46&&outdoor.humidity<=.8);assert.match(outdoor.label,/OUTDOOR · LIGHT WIND/);assert.match(outdoor.label,/°F (COLD|FAIR|HOT)/)}
 });

@@ -83,7 +83,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({}),op
 
  const footerControls=footer.querySelector('.footer-controls');
  const formatField=form.querySelector('label[for="match-format"]'),difficultyField=form.querySelector('label[for="match-difficulty"]'),matchModeField=form.querySelector('label[for="match-mode"]');
- for(const option of venueField.querySelector('select').options)option.textContent=({none:'No venue',random:'Random',outdoor:'Outdoor',indoor:'Indoor',stadium:'Stadium'})[option.value]??option.textContent;
+ for(const option of venueField.querySelector('select').options)option.textContent=({none:'No venue',random:'Random',outdoor:'Outdoor',indoor:'Indoor Hall','indoor-stadium':'Indoor Stadium',stadium:'Stadium'})[option.value]??option.textContent;
  footerControls.append(formatField,difficultyField,matchModeField,venueField,courtField);
 
  let draft=normalizeSelection(),stackingDraft=normalizeStackingSelection(),started=false,previewLineup=[],editingName=false;

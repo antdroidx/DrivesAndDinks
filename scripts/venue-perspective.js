@@ -71,7 +71,7 @@ function solve(far,barrier){
 const root=new URL('../',import.meta.url);
 for(const [id,layout] of Object.entries(SCENE_LAYOUTS)){
  const image=decodePng(readFileSync(fileURLToPath(new URL('assets/venues/'+layout.file,root))));
- const barrier=measureBarrier(image);
+ const barrier=layout.barrier??measureBarrier(image);
  const placement=scenePlacement(layout);
  const strip=(layout.far-barrier)*placement.height;
  const backdrop=((BASELINE-strip)-STAGE_TOP)/placement.height;

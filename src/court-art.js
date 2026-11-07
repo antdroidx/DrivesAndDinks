@@ -5,9 +5,10 @@ export const SCENE_LAYOUTS=Object.freeze({
  // 'far' is where the court baseline lands in the plate. It sits below the back
  // barrier so a strip of real ground shows behind the baseline and the players
  // at the far end stand on ground rather than on the barrier.
- outdoor:{file:'outdoor-modern-v7.png',far:.41,near:.95,edge:'#858693'},
- indoor:{file:'indoor-modern-v6.png',far:.37,near:.963,edge:'#8e95a1'},
- stadium:{file:'stadium-modern-v6.png',far:.326,near:.961,edge:'#6e7078'}
+ outdoor:{file:'outdoor-modern-v7.png',far:.41,near:.95,barrier:.2984,edge:'#858693'},
+ indoor:{file:'indoor-modern-v6.png',far:.37,near:.963,barrier:.3145,edge:'#8e95a1'},
+ stadium:{file:'stadium-modern-v6.png',far:.326,near:.961,barrier:.2661,edge:'#6e7078'},
+ 'indoor-stadium':{file:'indoor-stadium-v1.png',far:.33,near:.961,barrier:.2661,edge:'#5d656d'}
 });
 export function scenePlacement(layout){const height=374/(layout.near-layout.far);return {x:0,y:204-layout.far*height,width:960,height};}
 export function retroCourtPalette(palette){return {...palette,court:'#376e8c',kitchen:'#b97855',line:'#fff1bd'};}
@@ -32,7 +33,7 @@ export function createCourtSurfaceRenderer(project,createCanvas=()=>document.cre
    poly([[0,0],[C.width,0],[C.width,C.length],[0,C.length]],palette.court);
    poly([[0,C.net-C.kitchen],[C.width,C.net-C.kitchen],[C.width,C.net+C.kitchen],[0,C.net+C.kitchen]],palette.kitchen);
    paint.save();poly([[0,0],[C.width,0],[C.width,C.length],[0,C.length]]);paint.clip();
-   const outdoors=surfaceType!=='indoor';
+   const outdoors=!surfaceType.startsWith('indoor');
     paintCourtTexture(paint,project,{count:outdoors?10000:1800,outdoors,dot:style==='retro'?3:1.5,block:style==='retro'?3:3});
     paint.restore();
    if(style==='retro'){poly([[0,0],[C.width,0],[C.width,C.length],[0,C.length]],null,palette.line);

@@ -2,9 +2,10 @@ import {kitchenContact} from './player-feet.js';
 import {strokeForContact} from './player-facing.js';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:34/12,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export function venueConditions(surfaceKind='outdoor',random=Math.random){
- if(surfaceKind==='indoor')return {type:'indoor',label:'INDOOR · CALM',wind:0,humidity:0};
- const wind=.22+random()*.58,humidity=.46+random()*.34;
- return {type:'outdoor',label:`OUTDOOR · LIGHT WIND · ${humidity>.68?'HUMID':'MILD'}`,wind:Number(wind.toFixed(3)),humidity:Number(humidity.toFixed(3))};
+ if(surfaceKind.startsWith('indoor'))return {type:'indoor',label:`${surfaceKind==='indoor-stadium'?'INDOOR STADIUM':'INDOOR HALL'} · 70°F · CALM`,temperature:70,temperatureBand:'fair',wind:0,humidity:0};
+ const wind=.22+random()*.58,humidity=.46+random()*.34,temperature=Math.round(45+random()*55);
+ const temperatureBand=temperature<58?'cold':temperature>=90?'hot':'fair';
+ return {type:'outdoor',label:`OUTDOOR · LIGHT WIND · ${temperature}°F ${temperatureBand.toUpperCase()} · ${humidity>.68?'HUMID':'MILD'}`,temperature,temperatureBand,wind:Number(wind.toFixed(3)),humidity:Number(humidity.toFixed(3))};
 }
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
 export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
@@ -132,7 +133,7 @@ export function netCrossingX(start,target){
 export const side=y=>y>22?0:1;
 export function netHeightAt(x){return C.netCenterHeight+(C.netPostHeight-C.netCenterHeight)*Math.min(1,Math.abs(x-C.width/2)/(C.width/2))}
 export function stepBall(b,dt=C.dt){
- const oldY=b.y,oldZ=b.z,radius=b.radius??C.ballRadius,spin=b.spin||0,spinX=b.spinX||0,spinY=b.spinY||0,spinZ=b.spinZ||0,speed=Math.hypot(b.vx||0,b.vy||0,b.vz||0),drag=C.airDrag*speed,wind=b.wind||0,humidity=b.humidity||0;
+ const oldY=b.y,oldZ=b.z,radius=b.radius??C.ballRadius,spin=b.spin||0,spinX=b.spinX||0,spinY=b.spinY||0,spinZ=b.spinZ||0,speed=Math.hypot(b.vx||0,b.vy||0,b.vz||0),wind=b.wind||0,humidity=b.humidity||0,temperature=b.temperature??70,tempDelta=temperature-70,drag=C.airDrag*speed*Math.max(.88,1-tempDelta*.0015);
  b.vx=(b.vx||0)*(1-drag*dt)+wind*dt*2.2;
  b.vy=(b.vy||0)*(1-drag*dt);
  b.vz=(b.vz||0)*(1-drag*dt);
@@ -162,7 +163,7 @@ export function stepBall(b,dt=C.dt){
 }
  if(b.z<=radius&&b.vz<0){
    b.z=radius;b.netCord=false;
-  const impactSpeed=Math.abs(b.vz),restitution=Math.max(.58,C.bounce-Math.max(0,impactSpeed-22)*.003)+(spin>0?.025:spin<0?-.045:0)-Math.max(0,humidity-.5)*.03;
+  const impactSpeed=Math.abs(b.vz),restitution=Math.max(.58,C.bounce-Math.max(0,impactSpeed-22)*.003)+(spin>0?.025:spin<0?-.045:0)-Math.max(0,humidity-.5)*.03+tempDelta*.0012;
   b.vz=-b.vz*restitution;
   const surface=Math.max(.82,.91+(spin<0?.018:-.012)-Math.max(0,humidity-.5)*.015);
   const spinTransfer=Math.max(-.12,Math.min(.12,spin*.022)),surfaceFriction=Math.max(.84,C.courtFriction+(spin<0?.012:-.008));
@@ -201,7 +202,7 @@ export function move(p,tx,ty,dt,brake=false){
  const turnFactor=(reversing?.62:1)*(0.85+Math.min(.25,Math.max(0,(acceleration-C.accel)/120))),maxDelta=acceleration*1.5*turnFactor*dt;
  let dvx=desiredVx-p.vx,dvy=desiredVy-p.vy,dv=Math.hypot(dvx,dvy);if(dv>maxDelta&&dv){dvx*=maxDelta/dv;dvy*=maxDelta/dv}
  p.vx+=dvx;p.vy+=dvy;p.x+=p.vx*dt;p.y+=p.vy*dt;p.stride=(p.stride||0)+Math.hypot(p.vx,p.vy)*dt;
- const movingSpeed=Math.hypot(p.vx,p.vy),agility=Math.max(8,p.abilities?.speed??C.speed);if(movingSpeed>5)p.stamina=Math.max(0,p.stamina-dt*(movingSpeed-4)*.0045*(12/agility)/Math.max(.5,p.abilities?.endurance??1));else p.stamina=Math.min(1,p.stamina+dt*.009*(agility/12));if(!contactLock&&!recovering&&!settling&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
+ const movingSpeed=Math.hypot(p.vx,p.vy),agility=Math.max(8,p.abilities?.speed??C.speed),heatStress=Math.max(0,Math.min(1,((p.temperature??70)-85)/15));if(movingSpeed>5)p.stamina=Math.max(0,p.stamina-dt*(movingSpeed-4)*.0045*(1+.35*heatStress)*(12/agility)/Math.max(.5,p.abilities?.endurance??1));else p.stamina=Math.min(1,p.stamina+dt*.009*(agility/12)/(1+.2*heatStress));if(!contactLock&&!recovering&&!settling&&(!p.slideTimer||p.slideTimer<=0)&&Math.abs(p.vx)>Math.abs(p.vy)*1.25&&Math.abs(p.vx)>=7.2)p.slideTimer=.16;
  p.slideTimer=Math.max(0,(p.slideTimer||0)-dt);p.motion=settling?'splitStep':recovering?'recover':p.slideTimer>0?'slide':movingSpeed<.7?'ready':(p.team===0?p.vy>2:p.vy< -2)&&Math.abs(p.vy)>Math.abs(p.vx)?'backpedal':Math.abs(p.vx)>Math.abs(p.vy)*1.3?(d>4?'crossover':'shuffle'):'run';
  const outside=true;p.x=Math.max(outside?-4:0,Math.min(outside?24:20,p.x));const deep=true;p.y=p.team===0?Math.max(23,Math.min(deep?47:44,p.y)):Math.max(deep?-3:0,Math.min(21,p.y));
 }
