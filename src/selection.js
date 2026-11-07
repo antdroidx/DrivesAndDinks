@@ -29,7 +29,7 @@ function select(name,items,ariaLabel){
 }
 function options(items,labeler=item=>item.name){return items.map(item=>({id:item.id,label:labeler(item)}))}
 
-export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
+export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({}),openOnStart=true}){
  const dialog=document.querySelector('#match-setup'),form=dialog.querySelector('form');
  const footer=form.querySelector('.setup-footer'),scroll=document.createElement('div');scroll.className='setup-scroll';
  for(const node of [...form.childNodes])if(node!==footer)scroll.append(node);form.prepend(scroll);
@@ -123,6 +123,6 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({})}){
  form.addEventListener('submit',e=>{e.preventDefault();game.configure({...draft,showNameTags:game.showNameTags,stacking:stackingDraft,format:form.elements.format.value},freshMatchLineup());game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);if(game.mode.startsWith('practice-'))game.startPractice(game.mode.slice(9));started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify({...draft,stacking:stackingDraft}));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});
  dialog.querySelector('#resume-match').onclick=()=>dialog.close();dialog.addEventListener('cancel',e=>{if(!started)e.preventDefault()});
  function open(){if(started)previewLineup=[];dialog.querySelector('#resume-match').hidden=!started;form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
- open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
+ if(openOnStart)open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
 }
 
