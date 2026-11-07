@@ -1,4 +1,4 @@
-import {C} from './core.js?v=186';
+import {C} from './core.js?v=187';
 
 // Virtual court coordinates stay unchanged; only the visible camera changes.
 // The game camera is a single perspective: the same depth term drives ground
