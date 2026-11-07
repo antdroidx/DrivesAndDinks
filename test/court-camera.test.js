@@ -1,7 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {courtCamera,courtAim,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY} from '../src/court-camera.js';
+import {courtCamera,courtAim,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from '../src/court-camera.js';
 import {C} from '../src/core.js';
+import {playerFeet} from '../src/player-feet.js';
 
 test('portrait camera enlarges the court while retaining both baselines',()=>{
  const c=courtCamera(true);assert.ok(c.width<960*.6);assert.ok(c.x<250&&c.x+c.width>710);assert.ok(c.y<130&&c.y+c.height>=600);
@@ -26,6 +27,22 @@ test('side switching rotates the court and mirrors aim input',()=>{
   assert.ok(courtAim(300,rect,camera)>10);
  }finally{setCourtSideSwitched(false)}
  assert.deepEqual(gameProjection(0,0),near);
+});
+
+test('mirrored camera keeps world feet attached to the matching visible rig legs',()=>{
+ const player={x:5,y:22,vx:2,vy:0},feet=playerFeet(player);
+ try{
+  setCourtSideSwitched(true);
+  assert.deepEqual(playerFeetForRig(feet).map(foot=>foot.index),[1,0]);
+  const screen=playerFeetForRig(feet).map(foot=>gameProjection(foot.x,foot.y,foot.z).x);
+  assert.ok(screen[0]<screen[1]);
+  assert.equal(visibleTravelSide(player),-1);
+  assert.equal(visibleTravelSide({...player,vx:-2}),1);
+  assert.equal(visibleTravelSide({...player,vx:0}),1);
+  assert.equal(visibleTravelSide({...player,x:15,vx:0}),-1);
+ }finally{setCourtSideSwitched(false)}
+ assert.deepEqual(playerFeetForRig(feet).map(foot=>foot.index),[0,1]);
+ assert.equal(visibleTravelSide(player),1);
 });
 
 test('wide cameras preserve player proportions and frame both baselines',()=>{

@@ -18,6 +18,12 @@ test('side-switched scene depth sorting follows visible camera depth',()=>{
  const source=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');assert.match(source,/sort\(\(a,b\)=>visibleCourtY\(a\.y\)-visibleCourtY\(b\.y\)\)/);
 });
 
+test('side-switched sprites use visible foot order and travel direction',()=>{
+ const source=readFileSync(new URL('../src/main.js',import.meta.url),'utf8');
+ assert.match(source,/playerFeetForRig\(playerFeet\(p\)\)/);
+ assert.match(source,/travelSide:visibleTravelSide\(p\)/);
+});
+
 test('side switching happens once and resets with the match',()=>{
  const g=new Game({seed:7});g.score.points=[5,5];g.score.team=0;g.serveSetup();g.phase='rally';g.last=1;g.shots=3;g.bounces=1;
  g.fault(1,'Out');assert.equal(g.sideSwitched,true);
