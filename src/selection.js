@@ -1,6 +1,6 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=182';
-import {normalizeStackingSelection} from './stacking.js?v=182';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=182';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=183';
+import {normalizeStackingSelection} from './stacking.js?v=183';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=183';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;

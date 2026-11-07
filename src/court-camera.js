@@ -1,4 +1,4 @@
-import {C} from './core.js?v=182';
+import {C} from './core.js?v=183';
 
 // Virtual court coordinates stay unchanged; only the visible camera changes.
 // The game camera is a single perspective: the same depth term drives ground
@@ -11,6 +11,7 @@ let sideSwitched=false;
 
 export function setCourtSideSwitched(value){sideSwitched=Boolean(value);return sideSwitched}
 const visibleX=x=>sideSwitched?C.width-x:x,visibleY=y=>sideSwitched?C.length-y:y;
+export function visibleCourtY(y){return visibleY(y)}
 
 export function gameProjection(x,y,z=0){
  const vx=visibleX(x),vy=visibleY(y),depth=GAME_CAMERA_DISTANCE-vy,perspective=GAME_FOCAL/depth;

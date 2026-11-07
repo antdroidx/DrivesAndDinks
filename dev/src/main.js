@@ -1,41 +1,41 @@
-import {seededRandom} from './competition.js?v=182';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=182';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=182';
-import {playerFeet,footSole} from './player-feet.js?v=182';
+import {seededRandom} from './competition.js?v=183';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=183';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=183';
+import {playerFeet,footSole} from './player-feet.js?v=183';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=182';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=183';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=182';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=183';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=182';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=183';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=182';
+import {createAnimeGameRenderer} from './anime-game.js?v=183';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=182';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=183';
 
-import {setupCourtDisplay} from './court-display.js?v=182';
+import {setupCourtDisplay} from './court-display.js?v=183';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=182';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=183';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched} from './court-camera.js?v=182';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=182';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY} from './court-camera.js?v=183';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=183';
 
-import {movingStance} from './detailed-character.js?v=182';
+import {movingStance} from './detailed-character.js?v=183';
 
-import {sampleMatchAnimation} from './match-animation.js?v=182';
+import {sampleMatchAnimation} from './match-animation.js?v=183';
 
-import {setupSelection} from './selection.js?v=182';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=182';
+import {setupSelection} from './selection.js?v=183';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=183';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=182';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=183';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=182';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=183';
 
-import {Game} from './game.js?v=182';
-import {C} from './core.js?v=182';
+import {Game} from './game.js?v=183';
+import {C} from './core.js?v=183';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=182';import {playerEmotionState} from './player-emotion.js?v=182';import {PerformanceMonitor} from './performance-monitor.js?v=182';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=183';import {playerEmotionState} from './player-emotion.js?v=183';import {PerformanceMonitor} from './performance-monitor.js?v=183';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=182';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=183';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -319,7 +319,7 @@ function renderFrame(game=liveGame){setCourtSideSwitched(Boolean(game.sideSwitch
 
  if(game.phase==='rally'&&ballSpeed>27){ctx.fillStyle='#fff1a733';for(let i=Math.max(0,game.trail.length-6);i<game.trail.length;i+=1){const t=game.trail[i],q=project(t.x,t.y,t.z),fade=i/game.trail.length;ctx.fillRect(q.x-1-fade,q.y-1-fade,2+fade*2,2+fade*2)}}if(game.bounceMark?.time>0){const q=project(game.bounceMark.x,game.bounceMark.y);ctx.strokeStyle='#fff5ab';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(q.x,q.y,10+(1-game.bounceMark.time/.35)*8,4,0,0,Math.PI*2);ctx.stroke()}
 
- const entities=[{kind:'net',y:C.net},...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>a.y-b.y);for(const e of entities){if(e.kind==='net'){drawDust(game.dust);drawNet();continue}const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z),squash=contactPulse>.65?1+(contactPulse-.65)*.9:1;drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22),squash,1/squash);continue}drawSprite(p,q,game)}
+ const entities=[{kind:'net',y:C.net},...game.players.map(p=>({kind:'player',y:p.y,p})),{kind:'ball',y:game.ball.y,p:game.ball}].sort((a,b)=>visibleCourtY(a.y)-visibleCourtY(b.y));for(const e of entities){if(e.kind==='net'){drawDust(game.dust);drawNet();continue}const p=e.p,q=project(p.x,p.y);if(e.kind==='ball'){ctx.fillStyle='#17312b88';ctx.beginPath();ctx.ellipse(q.x,q.y,Math.max(3,8-p.z*.35),Math.max(2,4-p.z*.1),0,0,7);ctx.fill();const b=project(p.x,p.y,p.z),squash=contactPulse>.65?1+(contactPulse-.65)*.9:1;drawPixelBall(b.x,b.y,Math.max(3,5.5-p.z*.22),squash,1/squash);continue}drawSprite(p,q,game)}
 
  if(game.faultFocus&&game.clock>=game.faultFocus.time)drawFaultContact(ctx,game.faultFocus,project);
 
