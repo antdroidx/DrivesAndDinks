@@ -103,10 +103,10 @@ function showMatchIntro(players,onBegin){
   for(const card of team.players){
    const article=document.createElement('article');article.className='intro-player';
    const portrait=document.createElement('canvas');portrait.width=264;portrait.height=316;portrait.setAttribute('aria-label',card.name+' character portrait');
-   const info=document.createElement('div'),name=document.createElement('h4'),archetype=document.createElement('p'),overall=document.createElement('div');
-   name.textContent=card.name;archetype.className='intro-archetype';archetype.textContent=card.archetype;overall.className='intro-overall';
+   const info=document.createElement('div'),name=document.createElement('h4'),archetype=document.createElement('p'),paddle=document.createElement('p'),overall=document.createElement('div');
+   name.textContent=card.name;archetype.className='intro-archetype';archetype.textContent=card.archetype;paddle.className='intro-paddle';paddle.textContent=card.paddleLabel;overall.className='intro-overall';
    const overallLabel=document.createElement('span'),overallValue=document.createElement('strong');overallLabel.textContent='OVERALL';overallValue.textContent=String(card.overall);overall.append(overallLabel,overallValue);
-   info.append(name,archetype,overall);
+   info.append(name,archetype,paddle,overall);
    for(const key of INTRO_RATING_KEYS){const row=document.createElement('div');row.className='intro-rating';const label=document.createElement('span'),meter=document.createElement('span'),fill=document.createElement('i'),value=document.createElement('span');label.textContent=INTRO_RATING_LABELS[key];meter.className='intro-meter';fill.style.width=card.ratings[key]+'%';meter.append(fill);value.textContent=String(card.ratings[key]);row.append(label,meter,value);info.append(row)}
    article.append(portrait,info);section.append(article);
    try{const c=portrait.getContext('2d');c.setTransform(2,0,0,2,0,0);c.imageSmoothingEnabled=false;c.fillStyle='#173039';c.fillRect(0,0,132,158);drawPlayer(c,{personalize:card.id===0,designId:card.id===0?selectedDetailedDesign:'',appearance:card.appearance,characterId:card.characterId,handedness:card.handedness,mode:'idle',frame:0,phase:0,x:8,y:24,width:116,height:116,view:'far',side:card.handedness==='left'?-1:1,paddleShape:card.paddleShape,lighting:'depth'})}catch(error){console.error(error)}
