@@ -1,4 +1,4 @@
-import {C} from './core.js?v=186';
+import {C} from './core.js?v=188';
 
 // Virtual court coordinates stay unchanged; only the visible camera changes.
 // The game camera is a single perspective: the same depth term drives ground
@@ -12,6 +12,13 @@ let sideSwitched=false;
 export function setCourtSideSwitched(value){sideSwitched=Boolean(value);return sideSwitched}
 const visibleX=x=>sideSwitched?C.width-x:x,visibleY=y=>sideSwitched?C.length-y:y;
 export function visibleCourtY(y){return visibleY(y)}
+// Character leg indices follow visible left/right order. A mirrored camera
+// swaps projected world feet relative to that render rig.
+export function playerFeetForRig(feet){return sideSwitched?feet.toReversed():feet}
+export function visibleTravelSide(player){
+ const travelSide=Math.sign(player.vx||0)||(player.x<10?-1:1);
+ return sideSwitched?-travelSide:travelSide;
+}
 
 export function gameProjection(x,y,z=0){
  const vx=visibleX(x),vy=visibleY(y),depth=GAME_CAMERA_DISTANCE-vy,perspective=GAME_FOCAL/depth;

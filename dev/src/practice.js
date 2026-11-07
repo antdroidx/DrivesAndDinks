@@ -1,8 +1,8 @@
-import {launch,stepBall,move,C} from './core.js?v=187';
-import {seededRandom} from './competition.js?v=187';
-import {planIncoming,volleyBrakeTarget} from './tactics.js?v=187';
-import {volleyMomentumFault} from './player-feet.js?v=187';
-import {prepareReceiver} from './match-animation.js?v=187';
+import {launch,stepBall,move,C} from './core.js?v=188';
+import {seededRandom} from './competition.js?v=188';
+import {planIncoming,volleyBrakeTarget} from './tactics.js?v=188';
+import {volleyMomentumFault} from './player-feet.js?v=188';
+import {prepareReceiver} from './match-animation.js?v=188';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const step=(shot,shots,playerY,feedY,feedTargetY,target,extra={})=>({shot,shots,playerY,feed:{fromY:feedY,toY:feedTargetY,shot:extra.feedShot??'drive'},target,...extra});
