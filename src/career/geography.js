@@ -161,10 +161,10 @@ export const COMPETITION_EVENTS = Object.freeze([
   {id:'regional-open',label:'Regional Open',scope:'area',brackets:['3.5','4.0','4.5','5.0+'],formats:['singles','doubles'],open:false,energy:30,skillFocus:'volley',matchType:'tournament',duration:1,months:null},
   {id:'mlp-amateur',label:'Amateur MLP',scope:'region',brackets:['3.5','4.0','4.5'],formats:['doubles'],open:false,energy:30,skillFocus:'defense',matchType:'league',duration:10,months:null},
   {id:'semi-pro',label:'Semi-Pro Circuit',scope:'region',brackets:['4.5','5.0+'],formats:['doubles'],open:false,energy:36,skillFocus:'defense',matchType:'league',duration:12,months:null},
-  {id:'national',label:'National Championship',scope:'nation',brackets:['5.0+'],formats:['singles','doubles','mixed'],open:false,energy:44,skillFocus:'courtIQ',matchType:'tournament',duration:1,months:null},
-  {id:'international',label:'International Series',scope:'world',brackets:['5.0+'],formats:['singles','doubles'],open:false,energy:52,skillFocus:'aggression',matchType:'tournament',duration:20,months:[0,1,2,3,4,5,6,7,8]},
-  {id:'pro-league',label:'Pro League',scope:'world',brackets:[],formats:['doubles'],qualification:'pro-tour',open:false,energy:64,skillFocus:'reach',matchType:'tournament',duration:26,months:[0,1,2,3,4,5,6,7,8]},
-  {id:'mlp',label:'MLP',scope:'world',brackets:['5.0+'],formats:['doubles'],qualification:'pro-tour',open:false,energy:58,skillFocus:'reach',matchType:'league',duration:14,months:[5,6,7,8]}
+  {id:'national',label:'National Championship',scope:'nation',brackets:['5.0+'],formats:['singles','doubles','mixed'],open:false,qualificationPoints:400,energy:44,skillFocus:'courtIQ',matchType:'tournament',duration:1,months:null},
+  {id:'international',label:'International Series',scope:'world',brackets:['5.0+'],formats:['singles','doubles'],open:false,qualificationPoints:900,energy:52,skillFocus:'aggression',matchType:'tournament',duration:20,months:[0,1,2,3,4,5,6,7,8]},
+  {id:'pro-league',label:'Pro League',scope:'world',brackets:[],formats:['doubles'],qualification:'pro-tour',qualificationPoints:1600,open:false,energy:64,skillFocus:'reach',matchType:'tournament',duration:26,months:[0,1,2,3,4,5,6,7,8]},
+  {id:'mlp',label:'MLP',scope:'world',brackets:['5.0+'],formats:['doubles'],qualification:'pro-tour',qualificationPoints:1400,open:false,energy:58,skillFocus:'reach',matchType:'league',duration:14,months:[5,6,7,8]}
 ]);
 
 // The pro league runs one open bracket rather than a ladder of them.

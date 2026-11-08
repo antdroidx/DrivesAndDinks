@@ -193,13 +193,30 @@ test('the pro league is locked until the player holds a tour standing',()=>{
   assert.equal(proEvent.eligible.ok,false,'a beginner cannot enter the tour');
   assert.match(proEvent.lockedReason,/rating/);
   // A rating that clears the board floor is not enough on its own.
-  state={...state,athlete:{...state.athlete,rating:5}};
+  state={...state,athlete:{...state.athlete,formats:{...state.athlete.formats,doubles:5,singles:5,mixed:5}}};
   const noPoints=currentEvents({...state,week:10}).find(entry=>entry.eventId==='pro-league');
   assert.equal(noPoints.eligible.ok,false);
   assert.match(noPoints.lockedReason,/tour points/);
-  // A rating and a tour standing together open it.
-  state={...state,athlete:{...state.athlete,tourPoints:100,tourPointsHistory:[{week:0,points:100}]}};
+  // A rating, a standing and the qualification points together open it.
+  state={...state,athlete:{...state.athlete,tourPoints:2000,tourPointsHistory:[{week:0,points:2000}]}};
   const open=currentEvents({...state,week:10}).find(entry=>entry.eventId==='pro-league');
+  assert.ok(open.eligible.ok,open.lockedReason);
+});
+
+test('the national rounds are earned with tour points',()=>{
+  const state=withClub(career());
+  const national=currentEvents({...state,week:6}).find(entry=>entry.eventId==='national');
+  assert.ok(national,'the national championship should run');
+  assert.equal(national.eligible.ok,false,'a player with no points is not qualified');
+  assert.match(national.lockedReason,/tour points/);
+  // Points alone are not enough: the national runs a 5.0+ bracket, and a
+  // player only reaches it by being within half a step of it.
+  const qualified={...state,athlete:{...state.athlete,tourPoints:500,tourPointsHistory:[{week:0,points:500}]}};
+  const stillLocked=currentEvents({...qualified,week:6}).find(entry=>entry.eventId==='national');
+  assert.equal(stillLocked.eligible.ok,false);
+  assert.match(stillLocked.lockedReason,/bracket only/);
+  const ready={...qualified,athlete:{...qualified.athlete,formats:{...qualified.athlete.formats,doubles:5,singles:5,mixed:5}}};
+  const open=currentEvents({...ready,week:6}).find(entry=>entry.eventId==='national');
   assert.ok(open.eligible.ok,open.lockedReason);
 });
 

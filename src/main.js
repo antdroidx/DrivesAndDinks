@@ -24,7 +24,8 @@ import {movingStance} from './detailed-character.js';
 
 import {sampleMatchAnimation} from './match-animation.js';
 
-import {setupSelection} from './selection.js';import {setupStartScreen} from './start-screen.js';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js';
+import {setupSelection} from './selection.js';
+import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM} from './career/handshake.js';import {setupStartScreen} from './start-screen.js';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js';
 
 import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js';
 
@@ -428,6 +429,21 @@ function beginConfiguredMatch(){refreshVenue();if(balanceLevel&&!game.practice){
 selectionUI=setupSelection({game,openOnStart:false,drawPreview:drawLoadoutPreview,getPhysique:()=>{const buildValue=Number(artPreferences.build===''?(Number(document.querySelector('#game-art-weight')?.value||179)-105)/1.65:artPreferences.build||45);return {height:Number(artPreferences.height||document.querySelector('#game-art-height')?.value||177),build:.05+Math.max(0,Math.min(100,buildValue))*.0105}},onStart:()=>game.practice?beginConfiguredMatch():showMatchIntro(game.players,beginConfiguredMatch)});document.querySelector('#setup-button').onclick=()=>selectionUI.open();onCharacterSpritesReady(()=>selectionUI?.refreshPreview());
 startScreen=setupStartScreen({onPlay:()=>selectionUI.open(),version:'0.1.0',build:buildNumber});
 
+// A career match arrives from the career mode with its field already drawn
+// and its lineup already built from the career athlete's own attributes.
+const careerMatch=readPendingMatch()&&new URLSearchParams(location.search).has(CAREER_MATCH_PARAM)?readPendingMatch():null;
+if(careerMatch){
+  const screen=document.querySelector('#game-start');
+  if(screen)screen.hidden=true;
+  document.querySelector('#match-setup').close();
+  game.configure({format:careerMatch.matchup.format,showNameTags:true},careerMatch.matchup.lineup);
+  game.mode='play';
+  game.setDifficulty('normal');
+  refreshVenue();
+  document.querySelector('#active-loadout').textContent='CAREER MATCH \u00b7 '+careerMatch.bracket+' '+careerMatch.format+' \u00b7 First to 11, win by 2';
+  last=0;acc=0;
+}
+
 
 if(['erne','atp'].includes(scenarioType)){document.querySelector('#match-setup').close();game.configure();game.startScenario(scenarioType);document.querySelector('#active-loadout').textContent=`DEV SCENARIO · ${scenarioType.toUpperCase()} · ${Math.round(scenarioSpeed*100)}% SPEED · ADD ?speed=1 FOR REAL TIME`;document.querySelector('#mode').textContent='MODE: DEV SCENARIO';last=0;acc=0;syncPauseButton();}
 
@@ -456,6 +472,7 @@ if(animationTestMode){
 const resultDialog=document.querySelector('#match-result');
 
 function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){
+  if(careerMatch){writeMatchResult(game.matchReport());clearPendingMatch();resultDialog.close();location.href='./career-mode/';return;}
  const practice=game.practice;resultDialog.querySelector('h2').textContent=practice?'Practice complete':'Match ended';document.querySelector('#rematch').textContent=practice?'REPEAT DRILL':'REMATCH';
  document.querySelector('#match-winner').textContent=practice?practice.drill.name:game.score.winner===0?'Your team wins!':'Opponents win!';
  document.querySelector('#match-score').textContent=practice?`${practice.successes} of ${practice.total} sequences hit`:`Your team ${game.score.points[0]} – ${game.score.points[1]} Opponents`;

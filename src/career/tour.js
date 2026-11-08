@@ -56,6 +56,15 @@ export function tourFor(gender){return gender==='female'?PRO_TOURS.women:PRO_TOU
 // curve is fitted to the published anchors: one player at the top rating,
 // and the whole board at the floor rating. A rating below the floor is not
 // on the board at all.
+// Where a rating sits in the world. Every rated player has a world rank,
+// whether or not they are on the tour.
+export function worldRank(rating,gender){
+  const tour=tourFor(gender);
+  const value=Number(rating)||0;
+  return Math.max(1,Math.round(Math.exp(tour.slope*(tour.topRating-value))));
+}
+
+// The place on the tour, or null when the rating is below the tour floor.
 export function tourRank(rating,gender){
   const tour=tourFor(gender);
   const value=Number(rating)||0;

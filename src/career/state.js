@@ -11,6 +11,7 @@ import {REGIONS,regionById,allCities,cityById,cityByIdAnywhere,citizenshipFor,EV
 import {pointsForEntry,addPoints,pointsInWindow} from './tour.js';
 import {buildClubIndex,findClub,mixSeed} from './population.js';
 import {generateWeekEvents,weekLabel,entryEligibility} from './calendar.js';
+import {findRival} from './standings.js';
 import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,FORMATS,divisionFor} from './rating.js';
 import {opponentsInBracket,advanceWorld} from './world.js';
 
@@ -28,7 +29,7 @@ export const INTERNATIONAL_TRAVEL_COST=20;
 export const HISTORY_LIMIT=60;
 export const LOG_LIMIT=14;
 
-const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+export const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
 export function startingCityId(regionId,seed){
   const major=allCities(regionId).filter(city=>city.tier==='major');
@@ -86,6 +87,14 @@ export function createCareer(options={}){
     seed,
     city
   });
+  // The rival is the player nearest to you on the board when you start.
+  const rival=findRival({
+    seed,
+    regionId,
+    week:0,
+    worldRatings:{},
+    athlete:{gender:options.gender==='female'?'female':'male',formats:{singles:NEW_PLAYER_RATING,doubles:NEW_PLAYER_RATING,mixed:NEW_PLAYER_RATING}}
+  },'doubles');
   return {
     seed,
     createdAt:new Date().toISOString(),
@@ -106,6 +115,8 @@ export function createCareer(options={}){
     stats:{weeks:0,sessions:0,entries:0,moves:0,matches:0},
     worldRatings:{},
     matches:[],
+    money:250,
+    rivalId:rival?.id??null,
     entered:[],
     lastEntry:null,
     lastActionWeek:-1,
@@ -161,12 +172,12 @@ function withAthlete(state,ratings){
   const athlete={...state.athlete,ratings,skillAverage:average};
   return {...state,athlete};
 }
-function pushHistory(state,note){
+export function pushHistory(state,note){
   const entry={week:state.week,label:weekLabel(state.week),note};
   const history=[...state.history,entry].slice(-HISTORY_LIMIT);
   return {...state,history};
 }
-function pushLog(state,text){
+export function pushLog(state,text){
   return {...state,log:[...state.log,{week:state.week,text}].slice(-LOG_LIMIT)};
 }
 

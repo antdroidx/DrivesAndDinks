@@ -120,15 +120,24 @@ export function entryOptions(state,event){
 // ranking inside the top 250.
 export function entryEligibility(state,event,enterable=null){
   if(event.scope==='club'&&!state.clubId)return {ok:false,reason:'Join a club first'};
+  // The tour standing is the more fundamental lock, so it is checked first.
   if(event.qualification==='pro-tour'){
     const tour=tourFor(state.athlete.gender);
-    const rank=tourRank(state.athlete.rating,state.athlete.gender);
-    if(rank===null)return {ok:false,reason:`${tour.label}'s tour needs a ${tour.floorRating.toFixed(2)} rating · you are ${formatRating(state.athlete.rating)}`};
+    const rating=bestFormatRating(state);
+    const rank=tourRank(rating,state.athlete.gender);
+    if(rank===null)return {ok:false,reason:tour.label+"'s tour needs a "+tour.floorRating.toFixed(2)+' rating · you are '+formatRating(rating)};
     if(!pointsInWindow(state.athlete.tourPointsHistory,state.week))return {ok:false,reason:'Earn tour points to hold a standing'};
+  }
+  // The rounds above the regional level are earned with tour points.
+  if(event.qualificationPoints){
+    const points=state.athlete.tourPoints??0;
+    if(points<event.qualificationPoints){
+      return {ok:false,reason:event.qualificationPoints+' tour points required · you have '+points};
+    }
   }
   if(enterable&&!enterable.length){
     const running=event.brackets.map(id=>RATING_BRACKETS.find(division=>division.id===id)?.label??id).join(', ');
-    return {ok:false,reason:`${running} bracket only · you are ${formatRating(state.athlete.rating)}`};
+    return {ok:false,reason:running+' bracket only · you are '+formatRating(bestFormatRating(state))};
   }
   return {ok:true,reason:null};
 }

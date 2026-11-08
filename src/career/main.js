@@ -12,6 +12,9 @@ import {
   currentEvents,canAct,trainingCost,trainingGain,INTERNATIONAL_TRAVEL_COST
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
+import {startCareerMatch,finishCareerMatch} from './career-match.js';
+import {writePendingMatch,readMatchResult,clearMatchResult} from './handshake.js';
+import {boardPosition,nearbyRivals,findRival,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
 
 const RATING_GROUPS=Object.freeze([
@@ -28,6 +31,7 @@ const app={
   draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:''},
   filters:{areaId:'',cityId:'',tier:'',query:''},
   move:{regionId:'',cityId:''},
+  standingsFormat:null,
   expandedClub:null,
   storage:careerStorage()
 };
@@ -65,7 +69,7 @@ function render(){
   resetButton.hidden=!hasCareer;
   if(hasCareer)renderStatus();
   for(const button of nav.querySelectorAll('button'))button.classList.toggle('active',button.dataset.view===app.view);
-  const renderer={home:renderHome,clubs:renderClubs,players:renderPlayers,calendar:renderCalendar}[app.view]??renderHome;
+  const renderer={home:renderHome,clubs:renderClubs,players:renderPlayers,calendar:renderCalendar,standings:renderStandings}[app.view]??renderHome;
   view.innerHTML=hasCareer?renderer():renderCreate();
 }
 
@@ -233,7 +237,7 @@ function renderHome(){
       ${career.matches.length?`<ul class="history">
         ${[...career.matches].reverse().slice(0,8).map(match=>`<li><span>${escapeHtml(match.bracket)}</span><strong>${escapeHtml(match.score)}</strong> vs ${escapeHtml(match.opponent)} <em class="${match.delta>=0?'up':'down'}">${match.delta>=0?'+':''}${match.delta.toFixed(3)}</em></li>`).join('')}
       </ul>`:'<p class="muted">No rated matches yet. Enter a bracket to earn your first rating.</p>'}
-      ${career.athlete.record.matches?`<p class="hint">${career.athlete.record.wins}W ${career.athlete.record.losses}L · rating ${formatRating(career.athlete.rating)}</p>`:''}
+      ${career.athlete.record.matches?`<p class="hint">${career.athlete.record.wins}W ${career.athlete.record.losses}L · best rating ${formatRating(Math.max(...Object.values(career.athlete.formats??{doubles:0})))}</p>`:''}
     </section>
     <section class="panel">
       <h2>RECENT</h2>
@@ -328,10 +332,68 @@ function clubRow(club,career){
     ${roster.map(athlete=>`<div class="player">
       <div class="body">
         <strong>${escapeHtml(athlete.name)}</strong>
-        <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.citizenship ?? '')} · ${athlete.age} · ${athlete.handedness}-handed · Rating ${formatRating(athlete.rating)}</small>
+        <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.citizenship ?? '')} · ${athlete.age} · ${athlete.handedness}-handed · Rating ${formatRating(athlete.formats?.doubles??0)}</small>
       </div>
     </div>`).join('')}
   </div>`:''}`;
+}
+
+function renderStandings(){
+  const career=app.career;
+  const format=app.standingsFormat??FORMATS[0];
+  const position=boardPosition(career,format);
+  const form=careerForm(career);
+  const rivals=nearbyRivals(career,format,6);
+  const rival=findRival(career,format);
+  const sponsors=sponsorsFor(career,format);
+  const formatTabs=FORMATS.map(entry=>`<button type="button" data-action="standings-format" data-format="${entry.id}" class="${entry.id===format?'active':''}">${escapeHtml(formatLabel(entry,career.athlete.gender))}</button>`).join('');
+  const qualification=Object.entries(QUALIFICATION_POINTS).map(([eventId,needed])=>{
+    const status=qualificationStatus(career,eventId);
+    return `<li><span>${escapeHtml(eventId.replace('-',' '))}</span><span class="need ${status.ok?'ok':''}">${status.ok?'Qualified':status.points+' / '+needed+' points'}</span></li>`;
+  }).join('');
+  return `
+  <section class="panel">
+    <h2>STANDINGS</h2>
+    <p>Your place in the world for each format, and who is next to you on the board.</p>
+    <div class="tabs">${formatTabs}</div>
+    <div class="board-head">
+      <div><small>YOUR RATING</small><strong>${formatRating(position.rating)}</strong></div>
+      <div><small>WORLD RANK</small><strong>${position.worldRank.toLocaleString('en-US')}</strong></div>
+      <div><small>TOUR</small><strong>${position.onTour?position.rank.toLocaleString('en-US')+' of '+position.size.toLocaleString('en-US'):'Outside the tour'}</strong></div>
+      <div><small>PRIZE MONEY</small><strong>${(career.money??0).toLocaleString('en-US')}</strong></div>
+    </div>
+    <p class="hint">The ${escapeHtml(position.label)} board holds ${position.size.toLocaleString('en-US')} players and the floor is a ${position.floor.toFixed(2)} rating.</p>
+  </section>
+
+  <div class="grid two">
+    <section class="panel">
+      <h2>FORM</h2>
+      <div class="form-line"><strong>${form.played}</strong><span>recent matches</span><small>${form.wins}W ${form.losses}L</small></div>
+      <div class="form-line"><strong>${form.streak}</strong><span>match streak</span><small>${form.streak?'unbeaten':'none'}</small></div>
+      ${form.form?`<p class="hint">${escapeHtml(form.form)}</p>`:'<p class="hint">No rated matches yet.</p>'}
+      <h3 style="margin-top:14px">QUALIFICATION</h3>
+      <ul class="history">${qualification}</ul>
+    </section>
+
+    <section class="panel">
+      <h2>YOUR RIVAL</h2>
+      ${rival?`<div class="rival"><strong>${escapeHtml(rival.name)}</strong><span>Rating ${formatRating(rival.rating)}</span><small>World rank ${rival.worldRank.toLocaleString('en-US')} · ${rival.gap.toFixed(3)} away</small></div>`:'<p class="muted">No rival yet.</p>'}
+      <h3 style="margin-top:14px">SPONSORS</h3>
+      ${sponsors.length?`<ul class="history">${sponsors.map(sponsor=>`<li><span>${escapeHtml(sponsor.label)}</span><small>+${Math.round(sponsor.bonus*100)}% of every purse</small></li>`).join('')}</ul>`:'<p class="muted">Sponsors arrive with a standing on the tour.</p>'}
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>ON THE BOARD</h2>
+    <p>The players nearest to you in ${escapeHtml(formatLabel(format,career.athlete.gender))}.</p>
+    ${rivals.map(entry=>`<div class="club">
+      <div class="body">
+        <strong>${escapeHtml(entry.name)}</strong>
+        <small>${escapeHtml(entry.citizenship)} · Rating ${formatRating(entry.rating)}</small>
+      </div>
+      <div class="actions"><span class="need">World ${entry.worldRank.toLocaleString('en-US')}</span></div>
+    </div>`).join('')}
+  </section>`;
 }
 
 function renderPlayers(){
@@ -357,7 +419,7 @@ function renderPlayers(){
       <div class="body">
         <strong>${escapeHtml(athlete.name)}</strong>
         <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.cityLabel)}, ${escapeHtml(athlete.citizenship ?? '')} · ${escapeHtml(athlete.clubName)}</small>
-        <small>Rating ${formatRating(athlete.rating)} · ${escapeHtml(ratingBand(athlete.rating).label)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
+        <small>Rating ${formatRating(athlete.formats?.doubles??0)} · ${escapeHtml(ratingBand(athlete.formats?.doubles??0).label)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
       </div>
     </div>`).join(''):'<p class="muted">No players matched that name.</p>'):'<p class="muted">Type a name to search the region.</p>'}
   </section>`;
@@ -432,6 +494,11 @@ document.addEventListener('click',event=>{
       return;
     }
     if(action==='advance'){apply(advanceWeek(app.career));return}
+    if(action==='standings-format'){
+      app.standingsFormat=trigger.dataset.format;
+      render();
+      return;
+    }
     if(action==='move'){
       const city=document.getElementById('move-city')?.value;
       apply(moveToCity(app.career,city));
@@ -441,7 +508,13 @@ document.addEventListener('click',event=>{
     if(action==='leave'){apply(leaveClub(app.career));return}
     if(action==='attend'){
       const picker=trigger.closest('.event')?.querySelector('select[data-division]');
-      apply(attendEvent(app.career,trigger.dataset.event,picker?.value??null));
+      const started=startCareerMatch(app.career,trigger.dataset.event,picker?.value??null);
+      if(!started.ok){toast(started.message,true);return}
+      app.career=started.state;
+      persist();
+      writePendingMatch(started.pending);
+      // The match is played on the engine page and the result comes back.
+      location.href='../?career-match=1';
       return;
     }
     if(action==='expand-club'){
@@ -498,6 +571,18 @@ if(buildLabel&&build)buildLabel.textContent=`BUILD ${build}`;
 const loaded=loadCareer(app.storage);
 if(loaded.state){app.career=loaded.state}
 if(loaded.reason)toast(loaded.reason,true);
+
+// A match played on the engine page comes back here to be scored.
+const playedResult=readMatchResult();
+if(playedResult&&app.career?.pendingMatch){
+  clearMatchResult();
+  const scored=finishCareerMatch(app.career,playedResult);
+  if(scored.ok){
+    app.career=scored.state;
+    persist();
+    toast(scored.message);
+  }else toast(scored.message,true);
+}
 render();
 
 if('serviceWorker' in navigator&&location.protocol!=='file:'){

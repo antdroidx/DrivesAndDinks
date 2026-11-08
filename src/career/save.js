@@ -10,7 +10,7 @@ import {NAME_CULTURES,RATING_KEYS,skillAverage} from '../roster.js';
 import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING,FORMATS} from './rating.js';
 import {REGIONS} from './geography.js';
 
-export const CAREER_SAVE_VERSION=7;
+export const CAREER_SAVE_VERSION=8;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -61,6 +61,12 @@ export const CAREER_MIGRATIONS=Object.freeze({
     if(!athlete.record?.matches)athlete.rating=NEW_PLAYER_RATING;
     return {...state,worldRatings:state.worldRatings??{},matches:state.matches??[],athlete};
   },
+  // v8 added prize money and the rival.
+  7:state=>({
+    ...state,
+    money:state.money??250,
+    rivalId:state.rivalId??null
+  }),
   // v7 split the rating per format and the world ratings per format.
   6:state=>{
     const athlete={...state.athlete};

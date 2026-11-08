@@ -288,34 +288,40 @@ The milestone this branch delivers.
 - [x] 92 automated tests across seven files (`test/career-*.test.js`), 533 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
-### M2 — Match play inside a career ⬜ next
+### M2 — Match play inside a career 🔶 in progress
 
-Turns scheduled events into real matches using the existing engine.
+A career event is now played by the real engine.
 
-- [ ] Launch the real match from a career event, with the opponent drawn from the bracket
-- [ ] Carry the career athlete's ratings into the match lineup
-- [ ] Use the real result in place of the simulated one when rating the match
-- [ ] Record the result as an immutable career record against the same event id
-- [ ] Keep the replay and the match report attached to that record
-- [ ] Award tour points from match results, with the points weighting the tour uses
-- [ ] Let the player's own opponents move through the world rating state
+- [x] Launch the real match from a career event, with the opponents drawn from the bracket
+- [x] Carry the career athlete's own attributes into the match lineup
+- [x] Use the real result in place of the simulated one when rating the match
+- [x] Record the result as an immutable career record against the same event id
+- [x] Keep the engine's own match report attached to that record
+- [x] Award tour points from the result, with the points weighting the tour uses
+- [x] Let the opponents the player faced move through the world rating state
+- [ ] Play the match inside the career page rather than handing off to the engine page
+- [ ] Take the difficulty from the career rather than always playing normal
+- [ ] Carry opponent memory from one career match into the next
 
-Career events already play a simulated match and rate it, so the loop runs
-end to end today. What is missing is the playable version and the seam where
-the real result replaces the simulated one.
+The handoff is a shared handshake: the career writes a pending match, the
+engine plays it with the lineup already built, and the engine's own match
+report comes back to be scored. `src/career/handshake.js` is the only thing
+the two pages share, so the handoff works either way round.
 
 Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
 
-### M3 — Ladder progression ⬜ planned
+### M3 — Ladder progression 🔶 in progress
 
 There are no seasons to model, so this milestone is about moving up the ladder
 rather than surviving a schedule.
 
-- [ ] Standings and a form summary
-- [ ] Promotion and relegation between ladder tiers
-- [ ] Qualification for the national rounds
-- [ ] A rival who also moves through the ladder
-- [ ] Sponsor and prize money as a career resource
+- [x] The world board and your place on it, for each format
+- [x] A form summary: recent matches, the record and the streak
+- [x] Qualification for the national rounds and above, earned with tour points
+- [x] A rival, the player nearest to you on the board, who moves as they do
+- [x] Prize money, and sponsors that arrive with a standing and pay into every purse
+- [ ] The composite world ranking, weighted across doubles, mixed and singles
+- [ ] Moving up the board as the thing the career is about
 
 ### M4 — Club life and opponents ⬜ planned
 
@@ -373,6 +379,10 @@ Travel between cities is done. What is left is making the calendar bite.
 | 2026-11-08 | Some events are completely open, and a gated event always accepts a bracket half a step above the player's own | Real events do not gate entry on a rating. Open events let an underrated player find stronger company; the half step up is how a player plays up. |
 | 2026-11-08 | There are no seasons. Tournaments run all year, leagues and the amateur MLP run one to three months, the pro tour runs nine months and the MLP is a summer circuit | That is how amateur and professional pickleball actually run. |
 | 2026-11-08 | A career can move to the other region, at a higher energy cost | The pro circuit is international. The question was never whether a player can go, only what it costs. |
+| 2026-11-08 | A career match is played by the real engine and rated on the real result | The rating has always been about performance against expectation. It is only honest if the performance is a real match. |
+| 2026-11-08 | The career and the engine share a handshake in local storage | One small module is all the two pages share, so the handoff can be a page change or a frame without either side knowing the difference. |
+| 2026-11-08 | The national rounds and above are qualified for with tour points | Ratings are not gates. What earns a place in a national field is a season of results. |
+| 2026-11-08 | Prize money and sponsors | A career needs a reason to keep going that is not a number on a board. Sponsors arrive with a standing and pay into every purse. |
 | 2026-11-08 | The rating is derived from the 14 skill ratings for now, and switches to result-driven in milestone 2 | DUPR is a results system. Deriving it from skills is a starting prior, not the final model. |
 
 ---
