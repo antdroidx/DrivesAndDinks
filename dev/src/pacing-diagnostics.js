@@ -1,4 +1,4 @@
-import {C,stepBall,netHeightAt,netCrossingX,inBounds,side} from './core.js?v=191';
+import {C,stepBall,netHeightAt,netCrossingX,inBounds,side} from './core.js?v=192';
 
 const mean=values=>values.length?values.reduce((sum,value)=>sum+value,0)/values.length:null;
 const percentile=(values,p)=>{const sorted=[...values].sort((a,b)=>a-b);return sorted.length?sorted[Math.min(sorted.length-1,Math.floor((sorted.length-1)*p))]:null};
