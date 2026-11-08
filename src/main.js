@@ -117,6 +117,7 @@ function showMatchIntro(players,onBegin){
  matchIntroDialog.oncancel=event=>event.preventDefault();
  beginMatchButton.onclick=()=>{matchIntroDialog.close();onBegin()};
  matchIntroDialog.showModal();
+  const introHeading=matchIntroDialog.querySelector('.intro-heading');introHeading.tabIndex=-1;introHeading.focus({preventScroll:true});matchIntroDialog.scrollTop=0;
 }
 
 if(detailedArtAvailable){
