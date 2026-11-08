@@ -1,6 +1,6 @@
-import {competitionRecord} from './competition.js?v=188';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=188';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=188';
+import {competitionRecord} from './competition.js?v=190';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=190';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=190';
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
