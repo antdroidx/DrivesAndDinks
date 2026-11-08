@@ -48,7 +48,7 @@ test('generated athletes are stable, fully rated and inside the rating band',()=
     for(const value of Object.values(athlete.ratings))assert.ok(value>=20&&value<=99,`${athlete.name} rating ${value}`);
     assert.ok(athlete.name.length>3);
     assert.ok(['left','right'].includes(athlete.handedness));
-    assert.ok(athlete.dupr>=2&&athlete.dupr<=8);
+    assert.ok(athlete.rating>=2&&athlete.rating<=8);
     assert.equal(athlete.clubId,club.id);
   }
 });
@@ -60,10 +60,17 @@ test('generated athletes use the 13 percent left handed rate',()=>{
   assert.ok(rate>0.08&&rate<0.19,`left handed rate was ${rate.toFixed(3)}`);
 });
 
-test('region culture weights drive the generated names',()=>{
-  const {athletes}=buildRegionRoster(SEED,'asia');
-  const asian=athletes.filter(athlete=>athlete.culture==='asian').length;
-  assert.ok(asian/athletes.length>0.35,'Asia should be mostly Asian-named athletes');
+test('citizenship comes from the region pool and mostly matches the city',()=>{
+  const {athletes}=buildRegionRoster(SEED,'north-america');
+  const american=athletes.filter(athlete=>athlete.citizenship==='United States').length;
+  const canadian=athletes.filter(athlete=>athlete.citizenship==='Canada').length;
+  assert.ok(american/athletes.length>0.6,'North America is mostly American or Canadian');
+  assert.ok(canadian/athletes.length>0.05,'and some Canadian');
+  for(const athlete of athletes)assert.ok(typeof athlete.citizenship==='string'&&athlete.citizenship.length>0);
+  const {athletes:asiaAthletes}=buildRegionRoster(SEED,'asia');
+  const southEast=['Singapore','Thailand','Malaysia','Indonesia','Philippines','Vietnam'];
+  const seAsian=asiaAthletes.filter(athlete=>southEast.includes(athlete.citizenship)).length;
+  assert.ok(seAsian/asiaAthletes.length>0.5,'Asia is mostly South East Asian');
 });
 
 test('athletes can be built one at a time by id',()=>{

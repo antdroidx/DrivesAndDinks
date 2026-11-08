@@ -5,9 +5,9 @@
 // athlete and club id is reproduced exactly on demand. That keeps saves small
 // and guarantees the stable ids a career needs across weeks and seasons.
 
-import {CHARACTERS,NAME_CULTURES,generateIdentity,skillAverage} from '../roster.js';
+import {CHARACTERS,generateIdentity,skillAverage} from '../roster.js';
 import {seededRandom} from '../competition.js';
-import {REGIONS,regionById,allCities,citiesForArea,duprRating} from './geography.js';
+import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js';
 
 export const CLUB_TIERS=Object.freeze([
   {id:'recreational',label:'Recreational',skill:52,weight:.48},
@@ -91,23 +91,32 @@ export function clubsForArea(clubs,areaId){return clubs.filter(club=>club.areaId
 export function findClub(clubs,id){return clubs.find(club=>club.id===id)??null}
 
 // A single athlete, reproduced exactly from its club id and index.
-export function buildAthlete(seed,club,index){
-  const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}`));
-  const region=regionById(club.regionId);
-  const weights=Object.entries(region?.cultureWeights??{white_american:1});
-  const culture=weightedPick(weights,random);
+// The identity and the skill are drawn from separate streams so that a
+// roster can be rebuilt for simulation without paying for names and
+// appearance that nobody looks at.
+export function buildAthleteSkill(seed,club,index){
+  const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}:skill`));
   const archetype=CHARACTERS[Math.floor(random()*CHARACTERS.length)];
-  const gender=pick(GENDERS,random);
-  const identity=generateIdentity({gender,culture,random});
   const levelDelta=club.skill-70;
   const ratings={};
   for(const key of Object.keys(archetype.ratings)){
     const base=archetype.ratings[key]??70;
     ratings[key]=clamp(Math.round(base+levelDelta+(random()-.5)*9),MIN_RATING,MAX_RATING);
   }
-  const average=skillAverage(ratings);
+  return {archetype,ratings,average:skillAverage(ratings)};
+}
+
+export function buildAthlete(seed,club,index){
+  const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}:identity`));
+  const region=regionById(club.regionId);
+  const weights=Object.entries(region?.cultureWeights??{white_american:1});
+  const culture=weightedPick(weights,random);
+  const gender=pick(GENDERS,random);
+  const identity=generateIdentity({gender,culture,random});
+  const citizenship=citizenshipFor(club.regionId,{country:club.country},random);
   const handedness=random()<.13?'left':'right';
   const age=MIN_AGE+Math.floor(random()*(MAX_AGE-MIN_AGE+1));
+  const {archetype,ratings,average}=buildAthleteSkill(seed,club,index);
   return {
     id:`${club.id}-a${index}`,
     clubId:club.id,
@@ -117,8 +126,7 @@ export function buildAthlete(seed,club,index){
     cityId:club.cityId,
     cityLabel:club.cityLabel,
     name:identity.name,
-    culture,
-    cultureLabel:NAME_CULTURES[culture]?.label??culture,
+    citizenship,
     gender,
     age,
     handedness,
@@ -126,10 +134,36 @@ export function buildAthlete(seed,club,index){
     archetypeLabel:archetype.style,
     ratings,
     skillAverage:average,
-    dupr:duprRating(average),
+    rating:ratingFromSkill(average),
+    baseRating:ratingFromSkill(average),
+    lastPlayed:0,
     potential:clamp(Math.round(average+(random()*14-2)),MIN_RATING,MAX_RATING),
     record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0}
   };
+}
+
+// A light roster for the world simulation. It carries ids and skill, not
+// names, so a whole region can be rated in a few milliseconds.
+export function buildRegionSkills(seed,regionId){
+  const clubs=buildClubIndex(seed,regionId);
+  const athletes=[];
+  for(const club of clubs){
+    for(let index=0;index<club.memberCount;index++){
+      const {ratings,average}=buildAthleteSkill(seed,club,index);
+      athletes.push({
+        id:`${club.id}-a${index}`,
+        clubId:club.id,
+        cityId:club.cityId,
+        areaId:club.areaId,
+        index,
+        club,
+        skill:average,
+        baseRating:ratingFromSkill(average),
+        lastPlayed:0
+      });
+    }
+  }
+  return athletes;
 }
 
 export function buildClubRoster(seed,club){

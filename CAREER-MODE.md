@@ -49,10 +49,13 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `career-mode/index.html` | Entry point shell. Loads only career assets. |
 | `career-mode/career.css` | Career styles, separate from `style.css`. |
 | `career-mode/sw.js` | Service worker. Precaches the shell and the shared engine so the game opens with no network. |
-| `src/career/geography.js` | Regions, areas, cities, the competition ladder, the career-rating curve. |
+| `src/career/geography.js` | Regions, areas, cities, citizenship, and the competition ladder of events and the brackets they field. |
+| `src/career/rating.js` | The rating system: scale, bands, precision, brackets, the expectation calculation and the half life. |
+| `src/career/tour.js` | The pro tour: the men's and women's boards, the tour floor and the rolling points window. |
+| `src/career/world.js` | The world simulation: the population plays, ratings move, idle players drift back. |
 | `src/career/population.js` | Deterministic club and athlete generation from a seed. |
 | `src/career/save.js` | Versioned save schema, migrations, validation, corruption recovery. |
-| `src/career/calendar.js` | Week arithmetic, event generation, eligibility. |
+| `src/career/calendar.js` | Week arithmetic, event generation, bracket choice and entry eligibility. |
 | `src/career/state.js` | Career state and every action a player can take. |
 | `src/career/main.js` | The user interface. |
 
@@ -104,46 +107,120 @@ North American and Asian regions carry different name-culture weightings, so a T
 
 ### The career rating
 
-The career rating follows the **DUPR** convention: a scale from **2.00 to 8.00**.
+The career rating runs from **2.000 to 8.000**, displayed to three decimals and stored at full precision, so there are no bucketed steps.
 
-- The number is **precise**, not bucketed. It is stored at full precision and rounded to two decimals only for display, so a single point of skill moves it by a small but visible amount. There are no quarter-point steps.
-- Bands label the number for the player: Beginner (2.00–2.99), Novice (3.00–3.49), Intermediate (3.50–3.99), Intermediate + (4.00–4.49), Advanced (4.50–5.49), Expert (5.50–6.99), Pro (7.00–8.00).
-- A **reliability** percentage accompanies the rating, exactly as DUPR publishes it. Reliability rises with matches played: 0 % before a player has any matches, around 63 % after twelve and 96 % after forty.
+The bands are the ones players already meet in published world rankings: **2.000–2.999 Novice**, **3.000–3.999 Intermediate**, **4.000–4.999 Advanced**, **5.000–8.000 Professional**. A **reliability** figure sits beside it, rising with the number of rated matches played: 0 % before the first match, about 63 % after twelve and 96 % after forty, labelled Low, Medium or High.
 
-Today the rating is derived from the 14 skill ratings, which is the only honest source available before career matches exist. From milestone 2 it should be driven by **results**, with the skill ratings acting as the starting prior — the same way DUPR itself works.
+A rating measures skill, not wins. **It moves on performance measured against an expectation**, which is the defining idea of the system.
 
-| Skill average | DUPR | Band |
+#### The expectation
+
+Expected margin in match points = rating gap × 4.5, clamped to ±11. Expected score = 9 ± margin ÷ 2, each side clamped to 0–11.
+
+| Pair | Expected |
+|---|---|
+| 4.5 against 3.0 | about 11–5.6, a comfortable win |
+| 4.0 against 4.5 | about 7.9–10.1, a close game |
+| 4.0 against 4.0 | 9–9 |
+
+#### The performance
+
+```
+performance = ((actualMine − expectedMine) − (actualTheirs − expectedTheirs)) ÷ 11
+            = (actual margin − expected margin) ÷ 11
+```
+
+| Situation | Performance | Rating |
 |---|---|---|
-| 30 | 2.00 | Beginner |
-| 43 | 3.13 | Novice |
-| 52 | 3.91 | Intermediate |
-| 63 | 4.87 | Advanced |
-| 74 | 5.83 | Expert |
-| 95 | 7.65 | Pro |
-| 99 | 8.00 | Pro |
+| 3.0 beats 4.5 11–3 | +1.216 | jumps up |
+| 3.0 beats 4.5 11–8 | +0.761 | still up |
+| 4.0 loses 9–11 to 4.5 | +0.023 | up slightly |
+| 5.5 beats 4.5 11–3 | +0.341 | up |
+
+Beating good people moves you a great deal. Losing narrowly to someone better still nudges you **up**, because you came closer than the ratings said you would.
+
+#### The change
+
+```
+delta = 0.35 × performance × typeWeight × recency × volumeDamping
+```
+
+| Weight | Rule |
+|---|---|
+| typeWeight | tournament 1.0, league 0.85, club 0.7, recreational 0.5 |
+| recency | `exp(−weeksAgo ÷ 26)`, so a match from half a year ago has half the pull |
+| volumeDamping | `1 ÷ √(1 + matches ÷ 10)`, so a thin history moves more per result |
+
+The two teams move equal and opposite, and in doubles each pair splits its team's change in proportion to their own ratings. Total rating is conserved.
+
+#### Where the actual score comes from
+
+The expectation is computed from ratings, but the score that is actually played is computed from **underlying skill**: `margin = skillGap × 1.1 + noise(±6)`. That is the engine of the system. A player whose skill is ahead of their rating over-performs and climbs; one whose skill has slipped behind under-performs and slides.
+
+#### Starting point and limits
+
+A career starts at **3.500**, because a new player has no rating. It can fall to **2.000** over a losing streak and climb quickly by beating good players, and it can reach **8.000** at the very top of the scale.
+
+#### The whole world is rated this way
+
+The rest of the region is not scenery. Every week the rated population plays, their results move their ratings through the same calculation the player uses, and everyone who does not play drifts back toward the middle of the scale on a **half life of 52 weeks**. Standing still costs you.
+
+Only ratings that have actually changed are stored. An athlete who has never played keeps their starting rating and the week it was set, so their current rating is that rating aged forward.
+
+### Brackets, not gates
+
+Events do not gate entry on a rating. They run **a bracket for each level of play**, and a bracket is named by the top of its range: the 3.5 bracket holds players rated 3.500 to 3.999. The player signs up for a bracket and is placed in it.
+
+| Bracket | Holds |
+|---|---|
+| 2.0 | 2.000 – 2.499 |
+| 2.5 | 2.500 – 2.999 |
+| 3.0 | 3.000 – 3.499 |
+| 3.5 | 3.500 – 3.999 |
+| 4.0 | 4.000 – 4.499 |
+| 4.5 | 4.500 – 4.999 |
+| 5.0+ | 5.000 – 8.000 |
+
+A player may enter their own bracket, one above it, or one below it. **Playing up is the fastest way to move a rating**, because the bar to beat is lower. Playing down risks a drop, because a narrow win is an underperformance.
 
 ### The competition ladder
 
-Each tier has a DUPR entry rating. The gates are placed so that the whole 2.00–8.00 range is used and no tier is skipped over.
+| Event | Scope | Brackets it fields | Energy |
+|---|---|---|---|
+| Club Night | your club | 2.0 – 3.5 | 12 |
+| Local League | your city | 2.5 – 4.0 | 18 |
+| City Open | your city | 3.0 – 4.5 | 24 |
+| Regional Open | your area | 3.5 – 5.0+ | 30 |
+| Semi-Pro Circuit | your region | 4.5 – 5.0+ | 36 |
+| National Championship | your nation | 5.0+ | 44 |
+| International Series | world | 5.0+ | 52 |
+| Pro League | the pro tour | open, by tour standing | 64 |
 
-| Tier | Scope | Entry DUPR | Energy | Focus |
-|---|---|---|---|---|
-| Club Night | your club | 2.00 | 20 | control |
-| Local League | your city | 3.50 | 15 | serve |
-| City Open | your city | 4.00 | 15 | drive |
-| Regional Open | your area | 4.50 | 20 | volley |
-| Semi-Pro Circuit | your region | 5.00 | 25 | defense |
-| National Championship | your nation | 5.75 | 30 | courtIQ |
-| International Series | world | 7.00 | 35 | aggression |
-| Pro League | world | 7.75 | 40 | reach |
+Larger events field fewer and higher brackets, which is how the ladder works in the real game: a club night reaches beginners, a national championship only runs the 5.0+ bracket, and the semi-pro circuit is where a 5.0+ player competes.
 
-A new career starts near DUPR 3.10, so the local league is the first visible goal and the pro league is a long climb. Locked tiers stay visible on the calendar with the reason they are locked, so the shape of the ladder is legible from week one.
+Solo **training costs 8 energy**, a fraction of any rated match. The calendar should make a player choose to compete rather than to grind.
+
+### The pro tour
+
+The pro league works differently from a rating system. Its world ranking is a composite of tour points earned over the last 52 weeks, weighted 50 percent doubles, 35 percent mixed doubles and 15 percent singles, and the men's and women's boards are ranked separately.
+
+In the published rankings the men's board had 1471 players with its last place at 4.89 and the women's had 829 with its last place at 3.89, which is low enough to look wrong next to the men's floor. It is a points cut, not a rating cut, and the rating only has to clear the bar.
+
+The game uses **one symmetric floor for both boards**: a top slice of the world population rather than a fixed number.
+
+| | Men | Women |
+|---|---|---|
+| Players on the tour | 1 200 | 1 200 |
+| Pro floor | 4.95 rating | 4.95 rating |
+| Top of the board | 7.047 | 6.999 |
+
+A player earns tour points from events, and points age out on the rolling 52 week window. Playing up a bracket is worth more than staying in their own, because the board rewards beating stronger opposition.
 
 ### The weekly loop
 
-One action per week. Either practise a focus rating or enter an event. Advancing the week restores 35 energy (cap 100) and rolls a fresh calendar.
+One action per week. Either train for 8 energy, or enter a rated event, which costs far more: 12 for club night, 18 for a local league, and up to 64 for the pro league. Advancing the week restores 35 energy (cap 100), rolls a fresh calendar and advances the world.
 
-Training gains taper with level — roughly +3 early, +1 near 90 — so the early career moves quickly and the late career does not grind flat.
+Training gains taper with level — roughly +3 early, +1 near 90 — so the early career moves quickly and the late career does not grind flat. Training develops the athlete; it does not move the standing. Only rated matches do that.
 
 ---
 
@@ -164,7 +241,13 @@ The milestone this branch delivers.
 - [x] Browse clubs, expand a roster, join a club, browse and search players
 - [x] Weekly calendar with the 8-tier ladder, eligibility gates and calendar advance
 - [x] Energy, one-action-per-week rule, training curve, travel and club membership
-- [x] DUPR career rating: precise 2.00–8.00 scale, bands, and a reliability percentage
+- [x] Career rating: a precise 2.000–8.000 scale, the published bands, and a reliability percentage
+- [x] The rating calculation itself: expected score, performance against expectation, match type, recency and volume
+- [x] A career starts at a provisional 3.500 and the first rated match sets it
+- [x] The whole population is dynamically rated, with a 52 week half life back to the middle
+- [x] Brackets instead of rating gates, with play up and play down
+- [x] The pro tour: separate men's and women's boards, one symmetric floor, and a rolling points window
+- [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
 - [x] 54 automated tests (`test/career-*.test.js`)
@@ -174,10 +257,11 @@ The milestone this branch delivers.
 
 Turns scheduled events into real matches using the existing engine.
 
-- [ ] Launch a match from a career event with a generated opponent drawn from the club roster
+- [ ] Launch the real match from a career event, with the opponent drawn from the bracket
 - [ ] Carry the career athlete's ratings into the match lineup
-- [ ] Write the result back as an immutable career record
-- [ ] Feed the result into `recordResult` so the DUPR rating moves from results rather than from skill ratings
+- [ ] Use the real result in place of the simulated one when rating the match
+- [ ] Record the result as an immutable career record with the replay
+- [ ] Award tour points from match results, with the points weighting the tour uses
 - [ ] Record match reports and replays against the same event id
 - [ ] Retire the "match play arrives in the next milestone" placeholder
 
@@ -229,7 +313,15 @@ Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
 | 2026-11-08 | The service worker is network-first with a cache fallback | A cache-first worker masked code changes. Offline still works; stale code cannot. |
 | 2026-11-08 | One action per week | Makes the calendar the pacing device, and leaves the energy cost of a real match meaningful. |
 | 2026-11-08 | Save schema version 2, with a v1 migration that repairs the culture label | The first migration was needed in practice, so the chain is proven rather than theoretical. |
-| 2026-11-08 | The career rating follows DUPR: a precise 2.00 to 8.00 scale with bands and a reliability percentage | Matches the rating convention pickleball players already know. Precise rather than bucketed, so progress is always visible. |
+| 2026-11-08 | The career rating is a precise 2.000 to 8.000 scale with the published bands and a reliability percentage | Matches the rating convention pickleball players already know. Precise rather than bucketed, so progress is always visible. |
+| 2026-11-08 | The rating calculation is implemented in full, including the cases where a win lowers a rating | A rating that only moves on wins is a points system, not a rating system. The calculation is the point. |
+| 2026-11-08 | A career starts at a provisional 3.500 and the first rated match sets it | A new player has no rating. The number they start on is a placeholder until real results arrive. |
+| 2026-11-08 | The whole population is rated dynamically, with a 52 week half life back to the middle | The world has to move, or a career is a museum. Standing still has to cost something. |
+| 2026-11-08 | The rating constants are hand tuned to reproduce published behaviour, not fitted to a proprietary algorithm | The real algorithm is not published. The behaviour is what matters and that is documented and tested. |
+| 2026-11-08 | Events carry brackets instead of rating gates | Real tournaments do not gate entry on a rating. They run a bracket per level and the player picks one. |
+| 2026-11-08 | The pro league is entered on a tour standing, with one symmetric 4.95 floor for both boards | The published floors are a points cut and differ oddly between the boards. One floor keeps a rating meaning the same thing on each. |
+| 2026-11-08 | Players are identified by city and citizenship, not ethnicity | Citizenship and city say where a player is from and what they play for, without labelling them. |
+| 2026-11-08 | Training costs 8 energy against 12 for the cheapest rated match | The calendar should make a player choose to compete rather than to grind. |
 | 2026-11-08 | The rating is derived from the 14 skill ratings for now, and switches to result-driven in milestone 2 | DUPR is a results system. Deriving it from skills is a starting prior, not the final model. |
 
 ---
@@ -240,6 +332,7 @@ Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
 2. **Season length.** A season is currently 52 weeks. Should a season be shorter, with an off-season, so careers have a rhythm rather than a continuous grind?
 3. **Practice as a separate verb.** Right now practice and event entry are the same action. Should training be something the player does *between* weeks for free, so the weekly action is only ever a match?
 4. **Region transfer.** Can a player move permanently to the other region mid-career, or is a career tied to its starting region?
+5. **Singles and doubles on one rating.** DUPR is a doubles rating and the PPA board blends doubles, mixed and singles. Should a career carry one rating across both formats, or a rating per format?
 
 ---
 

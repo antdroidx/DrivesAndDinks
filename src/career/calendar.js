@@ -2,10 +2,15 @@
 //
 // Career time is counted in weeks from a fixed Monday so that every save
 // reads the same date no matter when it was written. Each week generates the
-// events the player could enter: club practice nearby, then league and
-// tournament events that open up as the career rating climbs.
+// events running that week: club practice nearby, then league and tournament
+// events that open up as the career moves through the world.
+//
+// Events are not gated on a rating. They carry the brackets they field, and
+// the player picks the bracket they enter.
 
-import {COMPETITION_TIERS,TIER_BY_ID,duprRating,formatDupr} from './geography.js';
+import {COMPETITION_EVENTS,EVENT_BY_ID,PRO_LEAGUE_DIVISION,EVENT_SCOPE_LABELS} from './geography.js';
+import {RATING_BRACKETS,availableDivisions,divisionFor,formatRating} from './rating.js';
+import {tourFor,tourRank,pointsInWindow} from './tour.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 
@@ -26,9 +31,9 @@ export function weekShortLabel(week){
 export function careerYear(week){return 2026+Math.floor(week/52)}
 export function seasonLabel(week){return `Season ${careerYear(week)-2025}`}
 
-// How often each tier of the ladder comes around, and which week of the cycle
-// it lands on. Practice is weekly; the national and international rounds are
-// rare by design, so the ladder stays worth climbing toward.
+// How often each event comes around. Practice is weekly; the national and
+// international rounds are rare by design, so the ladder stays worth
+// climbing toward.
 const CADENCE=Object.freeze({
   'club-night':{every:1,on:0},
   'local-league':{every:2,on:0},
@@ -40,66 +45,96 @@ const CADENCE=Object.freeze({
   'pro-league':{every:20,on:10}
 });
 
-function tierTitle(tier,scopeLabel){
-  if(tier.id==='club-night')return `Club Night · ${scopeLabel}`;
-  if(tier.scope==='city')return `${tier.label} · ${scopeLabel}`;
-  return tier.label;
+function eventTitle(event,state,club){
+  if(event.scope==='club')return `${event.label} · ${club?.name??state.cityLabel}`;
+  if(event.scope==='city')return `${event.label} · ${state.cityLabel}`;
+  return event.label;
 }
-
-function tierVenue(tier,state,club){
-  if(tier.scope==='club')return club?.name??state.cityLabel;
-  if(tier.scope==='city')return `${state.cityLabel} Courts`;
-  if(tier.scope==='area')return `${state.areaLabel} Open`;
-  if(tier.scope==='region')return `${state.regionLabel} Circuit`;
-  if(tier.scope==='nation')return 'National Venue';
+function eventVenue(event,state,club){
+  if(event.scope==='club')return club?.name??state.cityLabel;
+  if(event.scope==='city')return `${state.cityLabel} Courts`;
+  if(event.scope==='area')return `${state.areaLabel} Open`;
+  if(event.scope==='region')return `${state.regionLabel} Circuit`;
+  if(event.scope==='nation')return 'National Venue';
   return 'International Venue';
 }
 
-// Builds the events for one week. The player rating decides what is open;
-// everything else stays visible but locked, so the ladder is legible from
-// the first week of a career.
+// The brackets an event is running that a player of this rating may enter.
+// A player may play up one bracket or down one bracket from their own.
+export function bracketsFor(state,event){
+  // The pro league runs one open bracket rather than a ladder of them. Its
+  // access rule is the world ranking, which is checked separately.
+  if(!event.brackets.length)return {running:[{...PRO_LEAGUE_DIVISION,isPlayer:false}],enterable:[PRO_LEAGUE_DIVISION.id]};
+  const own=divisionFor(state.athlete.rating);
+  const running=event.brackets
+    .map(id=>RATING_BRACKETS.find(division=>division.id===id))
+    .filter(Boolean)
+    .map(division=>({...division,isPlayer:division.id===own.id}));
+  const enterable=availableDivisions(state.athlete.rating,event.brackets).map(division=>division.id);
+  return {running,enterable};
+}
+
+// Whether a player may enter an event at all. This is about access, not
+// about skill: a club night needs a club, and the pro league needs a world
+// ranking inside the top 250.
+export function entryEligibility(state,event,enterable=null){
+  if(event.scope==='club'&&!state.clubId)return {ok:false,reason:'Join a club first'};
+  if(event.qualification==='pro-tour'){
+    const tour=tourFor(state.athlete.gender);
+    const rank=tourRank(state.athlete.rating,state.athlete.gender);
+    if(rank===null)return {ok:false,reason:`${tour.label}'s tour needs a ${tour.floorRating.toFixed(2)} rating · you are ${formatRating(state.athlete.rating)}`};
+    if(!pointsInWindow(state.athlete.tourPointsHistory,state.week))return {ok:false,reason:'Earn tour points to hold a standing'};
+  }
+  if(enterable&&!enterable.length){
+    const running=event.brackets.map(id=>RATING_BRACKETS.find(division=>division.id===id)?.label??id).join(', ');
+    return {ok:false,reason:`${running} bracket only · you are ${formatRating(state.athlete.rating)}`};
+  }
+  return {ok:true,reason:null};
+}
+
+// Builds the events for one week.
 export function generateWeekEvents(state,week){
-  const random=seededRandom(mixSeed(state.seed,`week:${week}`));
   const club=state.clubId?state.club:null;
   const events=[];
-  for(const tier of COMPETITION_TIERS){
-    const cadence=CADENCE[tier.id];
+  for(const event of COMPETITION_EVENTS){
+    const cadence=CADENCE[event.id];
     if(!cadence)continue;
     if(week%cadence.every!==cadence.on)continue;
-    if(tier.scope==='club'&&!club)continue;
-    const scopeLabel=tier.scope==='club'?club.name:state.cityLabel;
-    const eligible=eligibilityFor(tier,state);
-
+    if(event.scope==='club'&&!club)continue;
+    const {running,enterable}=bracketsFor(state,event);
+    const eligible=entryEligibility(state,event,enterable);
+    const own=divisionFor(state.athlete.rating);
+    const defaultDivision=running.find(division=>enterable.includes(division.id))??null;
     events.push({
-      id:`w${week}-${tier.id}`,
+      id:`w${week}-${event.id}`,
       week,
-      tierId:tier.id,
-      tierLabel:tier.label,
-      kind:tier.kind,
-      scope:tier.scope,
-      title:tierTitle(tier,scopeLabel),
-      venue:tierVenue(tier,state,club),
+      eventId:event.id,
+      label:event.label,
+      kind:event.id==='club-night'?'practice':'match',
+      scope:event.scope,
+      scopeLabel:EVENT_SCOPE_LABELS[event.scope],
+      title:eventTitle(event,state,club),
+      venue:eventVenue(event,state,club),
       regionId:state.regionId,
       areaId:state.areaId,
       cityId:state.cityId,
-      clubId:tier.scope==='club'?club?.id??null:null,
-      minRating:tier.minRating,
-      energyCost:tier.energy,
-      skillFocus:tier.skillFocus,
+      clubId:event.scope==='club'?club?.id??null:null,
+      energyCost:event.energy,
+      skillFocus:event.skillFocus,
+      matchType:event.matchType,
       dateLabel:weekShortLabel(week),
+      divisions:running,
+      enterable,
+      defaultDivisionId:defaultDivision?.id??null,
+      ownDivisionId:own.id,
+      qualification:event.qualification??null,
+      tour:event.qualification==='pro-tour'?tourFor(state.athlete.gender):null,
+      tourRank:event.qualification==='pro-tour'?tourRank(state.athlete.rating,state.athlete.gender):null,
       eligible,
       lockedReason:eligible.reason??null
     });
   }
-  return events.sort((a,b)=>a.minRating-b.minRating);
-}
-
-
-export function eligibilityFor(tier,state){
-  if(tier.scope==='club'&&!state.clubId)return {ok:false,reason:'Join a club first'};
-  if(state.athlete.dupr<tier.minRating)return {ok:false,reason:`Needs DUPR ${formatDupr(tier.minRating)}`};
-  if(state.energy<tier.energy)return {ok:false,reason:`Needs ${tier.energy} energy`};
-  return {ok:true,reason:null};
+  return events.sort((a,b)=>COMPETITION_EVENTS.findIndex(entry=>entry.id===a.eventId)-COMPETITION_EVENTS.findIndex(entry=>entry.id===b.eventId));
 }
 
 // The calendar view lists the current week and a run of weeks ahead.
@@ -112,7 +147,4 @@ export function upcomingWeeks(state,count=8){
   return weeks;
 }
 
-
-export {duprRating,TIER_BY_ID};
-
-
+export {RATING_BRACKETS,divisionFor,formatRating,EVENT_BY_ID};

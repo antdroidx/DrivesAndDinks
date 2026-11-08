@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {REGIONS,allCities,allAreas,cityById,areaById,COMPETITION_TIERS,TIER_BY_ID,duprRating,duprBand,formatDupr,reliabilityPercent,skillForDupr,DUPR_MIN,DUPR_MAX,majorCities} from '../src/career/geography.js';
+import {REGIONS,allCities,allAreas,cityById,areaById,COMPETITION_EVENTS,EVENT_BY_ID,PRO_LEAGUE_DIVISION,formatRating,RATING_MIN,RATING_MAX,RATING_BRACKETS,divisionFor,majorCities} from '../src/career/geography.js';
+import {TRAINING_COST} from '../src/career/state.js';
 
 test('career geography is limited to North America and Asia',()=>{
   assert.deepEqual(REGIONS.map(region=>region.id),['north-america','asia']);
@@ -27,66 +28,60 @@ test('cities resolve to their area and region',()=>{
   assert.ok(majorCities('asia').length>=10);
 });
 
-test('the competition ladder runs from club night to the pro league',()=>{
-  const ids=COMPETITION_TIERS.map(tier=>tier.id);
-  assert.deepEqual(ids,['club-night','local-league','city-open','regional-open','semi-pro','national','international','pro-league']);
-  for(let index=1;index<COMPETITION_TIERS.length;index++){
-    assert.ok(COMPETITION_TIERS[index].minRating>COMPETITION_TIERS[index-1].minRating,'ladder must ascend');
-  }
-  assert.equal(TIER_BY_ID['pro-league'].scope,'world');
-  assert.equal(TIER_BY_ID['semi-pro'].scope,'region');
-  assert.equal(TIER_BY_ID['club-night'].kind,'practice');
-  assert.ok(COMPETITION_TIERS.filter(tier=>tier.kind==='match').length>=6);
-});
-
-test('the career rating follows the DUPR scale from 2.00 to 8.00',()=>{
-  assert.equal(DUPR_MIN,2);
-  assert.equal(DUPR_MAX,8);
-  assert.equal(duprRating(30),2);
-  assert.equal(duprRating(99),8);
-  assert.ok(duprRating(30)<duprRating(50));
-  assert.ok(duprRating(50)<duprRating(90));
-  assert.ok(duprRating(0)>=DUPR_MIN);
-  assert.ok(duprRating(100)<=DUPR_MAX);
-  assert.equal(duprRating(70),duprRating(70));
-});
-
-test('the career rating is precise rather than bucketed',()=>{
-  assert.notEqual(duprRating(50),duprRating(51));
-  assert.ok(duprRating(50)-duprRating(49)<0.2,'one skill point is a small move');
-  assert.ok(duprRating(51)-duprRating(50)>0,'the rating always responds to improvement');
-  assert.equal(formatDupr(3.1267),'3.13');
-  assert.equal(formatDupr(3),'3.00');
-  assert.equal(formatDupr(8),'8.00');
-});
-
-test('the skill scale can be inverted back into a rating',()=>{
-  for(const rating of [2,3.5,4.87,7.65,8]){
-    assert.ok(Math.abs(duprRating(skillForDupr(rating))-rating)<0.02,`round trip for ${rating}`);
+test('the ladder runs from club night to the pro league',()=>{
+  assert.deepEqual(COMPETITION_EVENTS.map(event=>event.id),['club-night','local-league','city-open','regional-open','semi-pro','national','international','pro-league']);
+  assert.equal(EVENT_BY_ID['pro-league'].scope,'world');
+  assert.equal(EVENT_BY_ID['semi-pro'].scope,'region');
+  assert.equal(EVENT_BY_ID['club-night'].kind??'practice','practice');
+  for(const event of COMPETITION_EVENTS){
+    assert.ok(event.energy>0,`${event.id} needs an energy cost`);
+    assert.ok(event.skillFocus,`${event.id} needs a focus`);
   }
 });
 
-test('DUPR bands label the ladder',()=>{
-  assert.equal(duprBand(2.4).label,'Beginner');
-  assert.equal(duprBand(3.2).label,'Novice');
-  assert.equal(duprBand(4.2).label,'Intermediate +');
-  assert.equal(duprBand(3.6).label,'Intermediate');
-  assert.equal(duprBand(4.6).label,'Advanced');
-  assert.equal(duprBand(5.2).label,'Advanced');
-  assert.equal(duprBand(6.2).label,'Expert');
-  assert.equal(duprBand(7.5).label,'Pro');
-  assert.ok(duprBand(3.2).note.length>0);
+test('no event is gated on a rating, they run brackets instead',()=>{
+  for(const event of COMPETITION_EVENTS){
+    assert.equal(event.minRating,undefined,`${event.id} must not carry a rating gate`);
+  }
+  // Every event except the pro league fields brackets, and a bracket is one
+  // of the published rating levels.
+  const levelIds=RATING_BRACKETS.map(division=>division.id);
+  for(const event of COMPETITION_EVENTS.filter(entry=>entry.id!=='pro-league')){
+    assert.ok(event.brackets.length>0,`${event.id} should field brackets`);
+    for(const id of event.brackets)assert.ok(levelIds.includes(id),`${event.id} runs unknown bracket ${id}`);
+  }
 });
 
-test('reliability grows with matches played and stays under 100',()=>{
-  assert.equal(reliabilityPercent(0),0);
-  assert.ok(reliabilityPercent(12)>reliabilityPercent(2));
-  assert.ok(reliabilityPercent(40)>reliabilityPercent(12));
-  assert.ok(reliabilityPercent(1000)<=99);
+test('bigger events run fewer and higher brackets',()=>{
+  const club=EVENT_BY_ID['club-night'];
+  const national=EVENT_BY_ID['national'];
+  assert.ok(club.brackets.length>national.brackets.length);
+  const clubLevels=club.brackets.map(id=>divisionFor(id==='2.0'?2.2:id==='2.5'?2.7:id==='3.0'?3.2:id==='3.5'?3.7:4).level);
+  const nationalLevels=national.brackets.map(id=>divisionFor(id==='5.0+'?5.4:5).level);
+  assert.ok(Math.min(...clubLevels)<Math.min(...nationalLevels),'the club night reaches lower levels');
 });
 
-test('the ladder gates span the DUPR range',()=>{
-  assert.ok(COMPETITION_TIERS[0].minRating<=DUPR_MIN);
-  assert.ok(COMPETITION_TIERS.at(-1).minRating>=7.5);
-  assert.ok(COMPETITION_TIERS.every(tier=>tier.minRating>=DUPR_MIN&&tier.minRating<=DUPR_MAX));
+test('the semi-pro circuit runs the 5.0+ bracket and the pro league does not gate on rating',()=>{
+  assert.ok(EVENT_BY_ID['semi-pro'].brackets.includes('5.0+'));
+  assert.equal(EVENT_BY_ID['pro-league'].brackets.length,0);
+  assert.equal(EVENT_BY_ID['pro-league'].qualification,'pro-tour');
+  assert.equal(EVENT_BY_ID['pro-league'].rankingLimit,undefined);
+  assert.equal(PRO_LEAGUE_DIVISION.label,'Pro League Open');
+});
+
+test('the ladder reaches the whole published scale',()=>{
+  for(const event of COMPETITION_EVENTS.filter(entry=>entry.brackets.length)){
+    for(const id of event.brackets){
+      const division=RATING_BRACKETS.find(entry=>entry.id===id);
+      assert.ok(division.min>=RATING_MIN&&division.max<=RATING_MAX);
+    }
+  }
+});
+
+test('playing a rated match costs more than training, and bigger events cost more',()=>{
+  const costs=COMPETITION_EVENTS.map(event=>event.energy);
+  assert.ok(Math.min(...costs)>TRAINING_COST,'no rated match should be as cheap as training');
+  for(let index=1;index<COMPETITION_EVENTS.length;index++){
+    assert.ok(COMPETITION_EVENTS[index].energy>=COMPETITION_EVENTS[index-1].energy,COMPETITION_EVENTS[index].id+' should not be cheaper than the event below it');
+  }
 });

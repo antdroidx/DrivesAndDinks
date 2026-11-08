@@ -5,6 +5,14 @@
 // is data, not code, so later milestones can extend it without reshaping the
 // geography that already ships.
 
+// The citizenship pool for each region. A player almost always holds the
+// citizenship of the country they play in, and the rest of the pool is the
+// international traffic a professional circuit actually carries.
+export const CITIZENSHIP_POOLS=Object.freeze({
+  'north-america':Object.freeze(['United States','Canada']),
+  'asia':Object.freeze(['Singapore','Thailand','Malaysia','Indonesia','Philippines','Vietnam'])
+});
+
 export const REGIONS = Object.freeze([
   {
     id:'north-america',
@@ -132,20 +140,56 @@ export const REGIONS = Object.freeze([
 // The competition ladder, lowest rung first. Rating gates are the career
 // rating the player must hold to enter, and they only describe entry rules:
 // Milestone 1 schedules events, it does not resolve match results.
-export const COMPETITION_TIERS = Object.freeze([
-  {id:'club-night',label:'Club Night',scope:'club',minRating:2,kind:'practice',energy:20,skillFocus:'control'},
-  {id:'local-league',label:'Local League',scope:'city',minRating:3.5,kind:'match',energy:15,skillFocus:'serve'},
-  {id:'city-open',label:'City Open',scope:'city',minRating:4,kind:'match',energy:15,skillFocus:'drive'},
-  {id:'regional-open',label:'Regional Open',scope:'area',minRating:4.5,kind:'match',energy:20,skillFocus:'volley'},
-  {id:'semi-pro',label:'Semi-Pro Circuit',scope:'region',minRating:5,kind:'match',energy:25,skillFocus:'defense'},
-  {id:'national',label:'National Championship',scope:'nation',minRating:5.75,kind:'match',energy:30,skillFocus:'courtIQ'},
-  {id:'international',label:'International Series',scope:'world',minRating:7,kind:'match',energy:35,skillFocus:'aggression'},
-  {id:'pro-league',label:'Pro League',scope:'world',minRating:7.75,kind:'match',energy:40,skillFocus:'reach'}
+// The competition ladder.
+//
+// Real events do not gate entry on a rating, so nothing here carries an entry
+// threshold. Every event except the pro league runs a bracket for each level
+// of play, and the player chooses the bracket they enter. The pro league is
+// the exception: entry is by world ranking.
+// The competition ladder.
+//
+// Real events do not gate entry on a rating, so nothing here carries an entry
+// threshold. Every event runs the brackets it is large enough to field, and
+// the player chooses the bracket they enter. Larger events run fewer, higher
+// brackets: a club night fields beginners, a national championship fields
+// only the 5.0+ bracket, and the pro league is entered by world ranking
+// rather than by bracket.
+export const COMPETITION_EVENTS = Object.freeze([
+  {id:'club-night',label:'Club Night',scope:'club',brackets:['2.0','2.5','3.0','3.5'],energy:12,skillFocus:'control',matchType:'club'},
+  {id:'local-league',label:'Local League',scope:'city',brackets:['2.5','3.0','3.5','4.0'],energy:18,skillFocus:'serve',matchType:'league'},
+  {id:'city-open',label:'City Open',scope:'city',brackets:['3.0','3.5','4.0','4.5'],energy:24,skillFocus:'drive',matchType:'tournament'},
+  {id:'regional-open',label:'Regional Open',scope:'area',brackets:['3.5','4.0','4.5','5.0+'],energy:30,skillFocus:'volley',matchType:'tournament'},
+  {id:'semi-pro',label:'Semi-Pro Circuit',scope:'region',brackets:['4.5','5.0+'],energy:36,skillFocus:'defense',matchType:'league'},
+  {id:'national',label:'National Championship',scope:'nation',brackets:['5.0+'],energy:44,skillFocus:'courtIQ',matchType:'tournament'},
+  {id:'international',label:'International Series',scope:'world',brackets:['5.0+'],energy:52,skillFocus:'aggression',matchType:'tournament'},
+  {id:'pro-league',label:'Pro League',scope:'world',brackets:[],qualification:'pro-tour',energy:64,skillFocus:'reach',matchType:'tournament'}
 ]);
 
-export const TIER_BY_ID = Object.freeze(Object.fromEntries(COMPETITION_TIERS.map(tier=>[tier.id,tier])));
+// The pro league has one open bracket rather than a ladder of them.
+export const PRO_LEAGUE_DIVISION=Object.freeze({id:'pro-league',label:'Pro League Open',min:5.5,max:8,level:5.5});
+
+export const EVENT_SCOPE_LABELS=Object.freeze({
+  club:'your club',
+  city:'your city',
+  area:'your area',
+  region:'your region',
+  nation:'your nation',
+  world:'world'
+});
+
+export const EVENT_BY_ID = Object.freeze(Object.fromEntries(COMPETITION_EVENTS.map(event=>[event.id,event])));
 
 export function regionById(id){return REGIONS.find(region=>region.id===id)??null}
+
+// The passport a player holds. Cities in the pool are the usual case, and
+// the rest of the pool covers the players who come from elsewhere.
+export function citizenshipFor(regionId,city,random=Math.random){
+  const pool=CITIZENSHIP_POOLS[regionId]??[city?.country].filter(Boolean);
+  if(!pool.length)return city?.country??'';
+  if(pool.includes(city?.country)&&random()<0.78)return city.country;
+  const rest=pool.filter(country=>country!==city?.country);
+  return rest.length?rest[Math.floor(random()*rest.length)]:city?.country??pool[0];
+}
 export function regionIds(){return REGIONS.map(region=>region.id)}
 export function areaById(regionId,areaId){return regionById(regionId)?.areas.find(area=>area.id===areaId)??null}
 export function allAreas(regionId){return regionById(regionId)?.areas??[]}
@@ -160,64 +204,15 @@ export function allCities(regionId){return allAreas(regionId).flatMap(area=>area
 export function citiesForArea(regionId,areaId){return areaById(regionId,areaId)?.cities??[]}
 export function majorCities(regionId){return allCities(regionId).filter(city=>city.tier==='major')}
 
-// ---- career rating -------------------------------------------------------
-// The career rating follows the DUPR convention: a 2.00 to 5.50 scale in
-// quarter-point steps, where 4.00 is a solid advanced doubles player and
-// 5.00 is the threshold for the pro level. It is derived from the same 14
-// skill ratings the match engine simulates with, so a career athlete and a
-// match athlete are the same kind of object.
-//
-// Once career matches land (milestone 2) the rating should be driven by
-// results, with the skill ratings acting as the starting prior.
-export const DUPR_MIN=2;
-export const DUPR_MAX=8;
-// DUPR publishes a precise number rather than a banded one, so the rating is
-// stored at full precision and only rounded for display.
-export const DUPR_DISPLAY_STEP=0.01;
-export const DUPR_TOP_SKILL=99;
-export const DUPR_LABELS=Object.freeze({
-  beginner:{label:'Beginner',note:'Learning the game. Club nights and practice.'},
-  novice:{label:'Novice',note:'Getting the basics down and finding a club.'},
-  intermediate:{label:'Intermediate',note:'Reliable rallies. Local league ready.'},
-  intermediatePlus:{label:'Intermediate +',note:'Good read of the kitchen. City opens.'},
-  advanced:{label:'Advanced',note:'Pressure the net. Regional and semi-pro ready.'},
-  expert:{label:'Expert',note:'National and international level.'},
-  pro:{label:'Pro',note:'Top of the ladder. Pro league ready.'}
-});
-const DUPR_BANDS=Object.freeze([
-  {max:2.99,band:'beginner'},
-  {max:3.49,band:'novice'},
-  {max:3.99,band:'intermediate'},
-  {max:4.49,band:'intermediatePlus'},
-  {max:5.49,band:'advanced'},
-  {max:6.99,band:'expert'},
-  {max:DUPR_MAX,band:'pro'}
-]);
+// The career rating lives in its own module. It is re-exported here so the
+// world and the rating can be imported together.
+export {
+  RATING_MIN,RATING_MAX,RATING_ELITE,RATING_BANDS,RATING_LABELS,RATING_PRECISION,
+  ratingFromSkill,ratingBand,formatRating,skillForRating,reliability,divisionFor,
+  RATING_BRACKETS,MATCH_TYPES,expectedScore,matchPerformance,updateRating,rateMatch
+} from './rating.js';
 
-export function duprRating(skillAverage){
-  const skill=Math.max(0,Math.min(DUPR_TOP_SKILL,Number(skillAverage)||0));
-  const raw=DUPR_MIN+(skill-30)/(DUPR_TOP_SKILL-30)*(DUPR_MAX-DUPR_MIN);
-  return Math.max(DUPR_MIN,Math.min(DUPR_MAX,raw));
-}
-export function duprBand(rating){
-  const value=Number(rating)||DUPR_MIN;
-  const match=DUPR_BANDS.find(band=>value<=band.max)??DUPR_BANDS.at(-1);
-  return DUPR_LABELS[match.band];
-}
-export function formatDupr(rating){
-  const value=Math.max(DUPR_MIN,Math.min(DUPR_MAX,Number(rating)||DUPR_MIN));
-  return value.toFixed(2);
-}
-
-// DUPR publishes a reliability figure beside the rating: how much the number
-// can be trusted, which grows with matches played.
-export function reliabilityPercent(matches){
-  const count=Math.max(0,Number(matches)||0);
-  return Math.min(99,Math.round(100*(1-Math.exp(-count/12))));
-}
-// How much skill a player still needs for the next quarter point.
-export function skillForDupr(rating){
-  const target=Math.max(DUPR_MIN,Math.min(DUPR_MAX,Number(rating)||DUPR_MIN));
-  return 30+(target-DUPR_MIN)/(DUPR_MAX-DUPR_MIN)*(DUPR_TOP_SKILL-30);
-}
-
+export {
+  PRO_TOURS,tourFor,tourRank,onTheTour,pointsForEntry,pointsInWindow,addPoints,
+  EVENT_POINTS,TOUR_POINTS_WINDOW,PLAY_UP_MULTIPLIER
+} from './tour.js';

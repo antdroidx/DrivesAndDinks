@@ -74,7 +74,7 @@ test('a corrupt file with no backup is quarantined instead of silently reset',()
 
 test('a save with a broken state shape is rejected',()=>{
   const storage=memoryStorage();
-  storage.setItem(CAREER_SAVE_KEY,JSON.stringify({version:1,savedAt:'x',state:{seed:1,regionId:'north-america',week:0,energy:50,trainingFocus:'drive',history:[],athlete:{id:'p',name:'X',ratings:{},dupr:3.5,archetypeId:'avery'}}}));
+  storage.setItem(CAREER_SAVE_KEY,JSON.stringify({version:1,savedAt:'x',state:{seed:1,regionId:'north-america',week:0,energy:50,trainingFocus:'drive',history:[],athlete:{id:'p',name:'X',ratings:{},rating:3.5,archetypeId:'avery'}}}));
   const loaded=loadCareer(storage);
   assert.equal(loaded.state,null);
   assert.match(loaded.reason,/ratings are invalid/);

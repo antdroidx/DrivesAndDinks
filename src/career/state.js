@@ -5,15 +5,23 @@
 // a running history. Every club and every other athlete is reproduced from
 // the seed, so ids stay stable without storing the population.
 
-import {CHARACTERS,NAME_CULTURES,RATING_KEYS,generateIdentity,skillAverage} from '../roster.js';
+import {CHARACTERS,RATING_KEYS,generateIdentity,skillAverage} from '../roster.js';
 import {seededRandom} from '../competition.js';
-import {REGIONS,regionById,allCities,cityById,duprRating,TIER_BY_ID} from './geography.js';
+import {REGIONS,regionById,allCities,cityById,citizenshipFor,EVENT_BY_ID} from './geography.js';
+import {pointsForEntry,addPoints,pointsInWindow} from './tour.js';
 import {buildClubIndex,findClub,mixSeed} from './population.js';
-import {generateWeekEvents,weekLabel,eligibilityFor} from './calendar.js';
+import {generateWeekEvents,weekLabel,entryEligibility} from './calendar.js';
+import {NEW_PLAYER_RATING,simulateOutcome,rateMatch} from './rating.js';
+import {opponentInBracket,advanceWorld} from './world.js';
 
-export const STARTING_SKILL=40;
+// A career starts at a 3.500 rating, so the underlying skill starts where
+// that rating sits rather than at the bottom of the scale.
+export const STARTING_SKILL=51;
 export const MAX_ENERGY=100;
 export const WEEKLY_RECOVERY=35;
+// Solo training costs a fraction of a rated match. The calendar should make
+// a player choose to compete rather than to grind.
+export const TRAINING_COST=8;
 export const TRAVEL_COST=10;
 export const HISTORY_LIMIT=60;
 export const LOG_LIMIT=14;
@@ -27,7 +35,7 @@ export function startingCityId(regionId,seed){
   return pool[Math.floor(random()*pool.length)].id;
 }
 
-function buildPlayerAthlete({name,gender,archetypeId,regionId,seed}){
+function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city}){
   const archetype=CHARACTERS.find(character=>character.id===archetypeId)??CHARACTERS[0];
   const random=seededRandom(mixSeed(seed,`player:${regionId}:${archetype.id}`));
   const identity=generateIdentity({gender,random});
@@ -42,8 +50,7 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed}){
   return {
     id:`player-${seed}`,
     name:resolvedName,
-    culture:identity.culture,
-    cultureLabel:NAME_CULTURES[identity.culture]?.label??identity.culture,
+    citizenship:citizenshipFor(regionId,{country:city?.country},random),
     skinColor:identity.skinColor,
     hairColor:identity.hairColor,
     shirtColor:identity.shirtColor,
@@ -54,8 +61,12 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed}){
     archetypeLabel:archetype.style,
     ratings,
     skillAverage:average,
-    dupr:duprRating(average),
-    record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0}
+    // A career starts without a rating. The number is provisional until the
+    // first rated match sets it.
+    rating:NEW_PLAYER_RATING,
+    record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0},
+    tourPoints:0,
+    tourPointsHistory:[]
   };
 }
 
@@ -70,7 +81,8 @@ export function createCareer(options={}){
     gender:options.gender,
     archetypeId:options.archetypeId,
     regionId,
-    seed
+    seed,
+    city
   });
   return {
     seed,
@@ -89,7 +101,11 @@ export function createCareer(options={}){
     trainingFocus:'drive',
     athlete,
     history:[],
-    stats:{weeks:0,sessions:0,entries:0,moves:0},
+    stats:{weeks:0,sessions:0,entries:0,moves:0,matches:0},
+    worldRatings:{},
+    matches:[],
+    entered:[],
+    lastEntry:null,
     lastActionWeek:-1,
     log:[{week:0,text:`Career started in ${city.label}.`}]
   };
@@ -98,9 +114,7 @@ export function createCareer(options={}){
 // ---- training curve -------------------------------------------------------
 // Early gains are quick and later gains are slow, so a long career keeps
 // something to chase without a flat rate grind.
-export function trainingCost(state){
-  return 20+Math.round(clamp(state.athlete.skillAverage-40,0,60)/12);
-}
+export function trainingCost(){return TRAINING_COST}
 export function trainingGain(state,focus){
   const rating=state.athlete.ratings[focus]??50;
   return clamp(Math.round(1+2*(100-rating)/60),1,3);
@@ -109,7 +123,9 @@ export function canAct(state){return state.lastActionWeek!==state.week}
 
 function withAthlete(state,ratings){
   const average=skillAverage(ratings);
-  const athlete={...state.athlete,ratings,skillAverage:average,dupr:duprRating(average)};
+  // The rating is not touched here. It moves on rated matches, and training
+  // develops the athlete without moving the standing.
+  const athlete={...state.athlete,ratings,skillAverage:average};
   return {...state,athlete};
 }
 function pushHistory(state,note){
@@ -137,26 +153,101 @@ export function train(state,focus){
 
 export function currentEvents(state){return generateWeekEvents(state,state.week)}
 
-export function attendEvent(state,eventId){
+// Entering an event registers the player in a bracket. Which bracket they
+// choose matters: playing up raises the bar for a good result, and playing
+// down means a narrow win counts as an underperformance.
+export function attendEvent(state,eventId,divisionId=null){
   const event=currentEvents(state).find(entry=>entry.id===eventId);
   if(!event)return {ok:false,state,message:'That event is not on the calendar this week.'};
   if(!canAct(state))return {ok:false,state,message:'You have already used this week. Advance the calendar to continue.'};
-  const tier=TIER_BY_ID[event.tierId];
-  const eligible=eligibilityFor(tier,state);
+  const eligible=entryEligibility(state,EVENT_BY_ID[event.eventId]);
   if(!eligible.ok)return {ok:false,state,message:eligible.reason};
+  const division=event.divisions.find(entry=>entry.id===(divisionId??event.defaultDivisionId));
+  if(!division)return {ok:false,state,message:'That bracket is not running at this event.'};
   if(state.energy<event.energyCost)return {ok:false,state,message:`That event needs ${event.energyCost} energy. You have ${state.energy}.`};
   const ratings={...state.athlete.ratings};
   const gain=event.kind==='practice'?2:1;
   ratings[event.skillFocus]=clamp(ratings[event.skillFocus]+gain,0,99);
-  const next=withAthlete(state,ratings);
-  const note=event.kind==='practice'?`Club practice at ${event.venue}.`:`Entered ${event.title}.`;
-  const moved=pushHistory(pushLog(next,`${note} +${gain} ${event.skillFocus}.`),note);
+
+  // The match is played. The opponent comes from the bracket the player
+  // entered, so playing up means facing somebody a bracket stronger, and
+  // the rating moves on how the result compared with the expectation.
+  const opponent=opponentInBracket({
+    seed:state.seed,
+    regionId:state.regionId,
+    ratings:state.worldRatings,
+    week:state.week,
+    divisionId:division.id,
+    random:seededRandom(mixSeed(state.seed,`opponent:${state.week}:${event.eventId}:${division.id}`))
+  });
+  const myRating=state.athlete.rating;
+  const theirRating=opponent?.rating??myRating;
+  const outcome=simulateOutcome({
+    mySkill:state.athlete.skillAverage,
+    theirSkill:opponent?.skill??state.athlete.skillAverage,
+    myRating,
+    theirRating,
+    random:seededRandom(mixSeed(state.seed,`play:${state.week}:${event.eventId}:${division.id}`))
+  });
+  const rated=rateMatch({
+    players:[
+      {id:'player',rating:myRating,team:'mine',matchesPlayed:state.athlete.record.matches},
+      {id:opponent?.id??'opponent',rating:theirRating,team:'opponent',matchesPlayed:opponent?.matches??0}
+    ],
+    actualMyPoints:outcome.myPoints,
+    actualOpponentPoints:outcome.opponentPoints,
+    matchType:event.matchType,
+    weeksAgo:0
+  });
+  const newRating=rated.players[0].rating;
+  const won=outcome.myPoints>outcome.opponentPoints;
+  const delta=newRating-myRating;
+
+  const athlete={
+    ...state.athlete,
+    ratings,
+    rating:newRating,
+    record:{
+      ...state.athlete.record,
+      matches:state.athlete.record.matches+1,
+      wins:state.athlete.record.wins+(won?1:0),
+      losses:state.athlete.record.losses+(won?0:1)
+    }
+  };
+  const next={...state,athlete};
+  const score=`${outcome.myPoints}-${outcome.opponentPoints}`;
+  const note=`${event.title} · ${division.label} bracket · ${score} vs ${opponent?.name??'a local'}`;
+  const moved=pushHistory(pushLog(next,`${note}. Rating ${formatRating3(newRating)} (${delta>=0?'+':''}${delta.toFixed(3)}).`),note);
+  const entered=[...new Set([...(state.entered??[]),event.eventId])].slice(-16);
+  const earned=pointsForEntry(event.eventId,division.id,event.ownDivisionId);
+  const tourPointsHistory=addPoints(state.athlete.tourPointsHistory,state.week,earned);
+  const matchRecord={
+    week:state.week,
+    eventId:event.eventId,
+    bracket:division.label,
+    score,
+    opponent:opponent?.name??'a local',
+    won,
+    rating:newRating,
+    delta:Number(delta.toFixed(3))
+  };
   return {
     ok:true,
-    state:{...moved,energy:state.energy-event.energyCost,lastActionWeek:state.week,stats:{...state.stats,entries:state.stats.entries+1}},
-    message:event.kind==='practice'?`Practised at ${event.venue}. +${gain} ${event.skillFocus}.`:`Registered for ${event.title}. Match play arrives in the next milestone.`
+    state:{
+      ...moved,
+      athlete:{...moved.athlete,tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory},
+      energy:state.energy-event.energyCost,
+      lastActionWeek:state.week,
+      entered,
+      lastEntry:{week:state.week,eventId:event.eventId,divisionId:division.id,label:division.label},
+      matches:[...state.matches,matchRecord].slice(-40),
+      stats:{...state.stats,entries:state.stats.entries+1,matches:state.stats.matches+1}
+    },
+    message:`${won?'Won':'Lost'} ${score} in the ${division.label} bracket. Rating ${formatRating3(newRating)} (${delta>=0?'+':''}${delta.toFixed(3)}).`
   };
 }
+
+const formatRating3=value=>Math.round((Number(value)||0)*1000)/1000;
 
 export function joinClub(state,clubId){
   const clubs=buildClubIndex(state.seed,state.regionId);
@@ -190,8 +281,15 @@ export function moveToCity(state,cityId){
 export function advanceWeek(state){
   const week=state.week+1;
   const energy=clamp(state.energy+WEEKLY_RECOVERY,0,MAX_ENERGY);
-  const next=pushHistory({...state,week,energy,lastActionWeek:-1,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
-  return {ok:true,state:pushLog(next,`${weekLabel(week)}. Energy restored to ${energy}.`),message:`${weekLabel(week)}. Energy restored to ${energy}.`};
+  const world=advanceWorld({
+    seed:state.seed,
+    regionId:state.regionId,
+    week,
+    ratings:state.worldRatings
+  });
+  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
+  const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.`);
+  return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }
 
 export function setTrainingFocus(state,focus){

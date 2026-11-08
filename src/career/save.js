@@ -7,10 +7,10 @@
 // the unreadable payload is kept aside for recovery.
 
 import {NAME_CULTURES,RATING_KEYS,skillAverage} from '../roster.js';
-import {DUPR_MAX,DUPR_MIN,duprRating} from './geography.js';
+import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING} from './rating.js';
 import {REGIONS} from './geography.js';
 
-export const CAREER_SAVE_VERSION=3;
+export const CAREER_SAVE_VERSION=6;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -30,11 +30,36 @@ export const CAREER_MIGRATIONS=Object.freeze({
     }
   }),
   // v2 carried the career rating as a raw 0-5000 number under careerRating.
-  // v3 uses the DUPR scale and the field is named dupr.
+  // v3 moved the career rating onto the 2.000 to 8.000 scale.
   2:state=>{
     const athlete={...state.athlete};
     delete athlete.careerRating;
-    return {...state,athlete:{...athlete,dupr:duprRating(skillAverage(athlete.ratings??{}))}};
+    return {...state,athlete:{...athlete,rating:ratingFromSkill(skillAverage(athlete.ratings??{}))}};
+  },
+  // v4 added the tour standing: points earned and the rolling window.
+  3:state=>({
+    ...state,
+    athlete:{
+      ...state.athlete,
+      tourPoints:state.athlete?.tourPoints??0,
+      tourPointsHistory:state.athlete?.tourPointsHistory??[]
+    }
+  }),
+  // v5 renamed the athlete field from dupr to rating.
+  4:state=>{
+    const athlete={...state.athlete};
+    if(athlete.dupr!=null&&athlete.rating==null)athlete.rating=athlete.dupr;
+    delete athlete.dupr;
+    return {...state,athlete};
+  },
+  // v6 replaced the culture label with a citizenship and added the world's
+  // ratings and the player's match history.
+  5:state=>{
+    const athlete={...state.athlete,citizenship:state.athlete?.citizenship??state.country??''};
+    // A career with no rated matches is still provisional, so it starts on
+    // the provisional rating rather than anything derived from skill.
+    if(!athlete.record?.matches)athlete.rating=NEW_PLAYER_RATING;
+    return {...state,worldRatings:state.worldRatings??{},matches:state.matches??[],athlete};
   }
 });
 
@@ -99,8 +124,9 @@ export function validateCareer(state){
   if(typeof athlete.id!=='string'||!athlete.id)return {ok:false,reason:'Athlete id is missing'};
   if(typeof athlete.name!=='string'||!athlete.name.trim())return {ok:false,reason:'Athlete name is missing'};
   if(!isRatingMap(athlete.ratings))return {ok:false,reason:'Athlete ratings are invalid'};
-  if(!Number.isFinite(athlete.dupr)||athlete.dupr<DUPR_MIN||athlete.dupr>DUPR_MAX)return {ok:false,reason:'Athlete DUPR rating is invalid'};
+  if(!Number.isFinite(athlete.rating)||athlete.rating<RATING_MIN||athlete.rating>RATING_MAX)return {ok:false,reason:'Athlete rating is invalid'};
   if(typeof athlete.archetypeId!=='string'||!athlete.archetypeId)return {ok:false,reason:'Athlete archetype is missing'};
+  if(athlete.tourPoints!=null&&!Number.isFinite(athlete.tourPoints))return {ok:false,reason:'Tour points are invalid'};
   return {ok:true};
 }
 

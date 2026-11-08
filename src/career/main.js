@@ -5,7 +5,7 @@
 // costs progress.
 
 import {CHARACTERS,RATING_KEYS,RATING_LABELS} from '../roster.js';
-import {REGIONS,allCities,cityById,COMPETITION_TIERS,TIER_BY_ID,duprBand,formatDupr,reliabilityPercent} from './geography.js';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank} from './geography.js';
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
@@ -73,7 +73,7 @@ function renderStatus(){
   statusStrip.innerHTML=`
     <div><small>WEEK</small><strong>${career.week+1}</strong></div>
     <div><small>ENERGY</small><strong>${career.energy}</strong></div>
-    <div><small>DUPR</small><strong>${formatDupr(career.athlete.dupr)}</strong></div>
+    <div><small>RATING</small><strong>${formatRating(career.athlete.rating)}</strong></div>
     <div><small>LOCATION</small><strong>${escapeHtml(career.cityLabel)}</strong></div>`;
 }
 
@@ -125,11 +125,14 @@ function renderHome(){
   const career=app.career;
   const events=currentEvents(career);
   const actReady=canAct(career);
-  const band=duprBand(career.athlete.dupr);
-  const nextTier=COMPETITION_TIERS.find(tier=>tier.minRating>career.athlete.dupr)??null;
-  const reliability=career.athlete.record.matches
-    ? `${reliabilityPercent(career.athlete.record.matches)}% reliability`
-    : 'Unrated · no matches yet';
+  const band=ratingBand(career.athlete.rating);
+  const ownBracket=divisionFor(career.athlete.rating);
+  const entered=new Set(career.entered??[]);
+  const nextEvent=COMPETITION_EVENTS.find(event=>!entered.has(event.id))??null;
+  const reliabilityInfo=reliability(career.athlete.record.matches);
+  const reliabilityText=career.athlete.record.matches
+    ? `Reliability ${reliabilityInfo.percent}% · ${reliabilityInfo.label}`
+    : 'Provisional · no rated matches yet';
   const focusOptions=RATING_KEYS.map(key=>`<option value="${key}"${key===career.trainingFocus?' selected':''}>${escapeHtml(RATING_LABELS[key]??key)}</option>`).join('');
   const groups=RATING_GROUPS.map(group=>`
     <div class="rating-group">
@@ -140,12 +143,16 @@ function renderHome(){
       }).join('')}
     </div>`).join('');
 
-  const ladder=COMPETITION_TIERS.map((tier,index)=>{
-    const needsClub=tier.scope==='club'&&!career.clubId;
-    const reached=career.athlete.dupr>=tier.minRating&&!needsClub;
-    const next=!reached&&COMPETITION_TIERS.slice(0,index).every(earlier=>career.athlete.dupr>=earlier.minRating);
-    const need=needsClub?'Needs a club':reached?'Open':`${formatDupr(tier.minRating)} rating`;
-    return `<li class="${reached?'done':next?'next':'locked'}"><span class="mark">${reached?'✓':''}</span><span>${escapeHtml(tier.label)}</span><span class="need">${need}</span></li>`;
+  const tour=tourFor(career.athlete.gender);
+  const tourStanding=tourRank(career.athlete.rating,career.athlete.gender);
+  const highestEntered=COMPETITION_EVENTS.reduce((best,event,index)=>entered.has(event.id)?index:best,-1);
+  const ladder=COMPETITION_EVENTS.map((event,index)=>{
+    const done=entered.has(event.id);
+    const next=!done&&index===highestEntered+1;
+    const need=event.qualification==='pro-tour'
+      ?`${tour.label}'s tour · ${tour.size.toLocaleString('en-US')} players · ${tour.floorRating.toFixed(2)}+ rating`
+      :bracketSummary(event);
+    return `<li class="${done?'done':next?'next':'locked'}"><span class="mark">${done?'✓':''}</span><span>${escapeHtml(event.label)}</span><span class="need">${escapeHtml(need)}</span></li>`;
   }).join('');
 
   return `
@@ -153,7 +160,7 @@ function renderHome(){
     <div class="athlete-head">
       <div>
         <h1>${escapeHtml(career.athlete.name)}</h1>
-        <div class="athlete-meta">${escapeHtml(career.athlete.archetypeLabel)} · ${career.athlete.age} · ${escapeHtml(career.athlete.cultureLabel ?? career.athlete.culture)} · ${career.athlete.handedness}-handed</div>
+        <div class="athlete-meta">${escapeHtml(career.athlete.archetypeLabel)} · ${career.athlete.age} · ${escapeHtml(career.athlete.citizenship ?? '')} · ${career.athlete.handedness}-handed</div>
         <div class="tags">
           <span class="tag accent">${escapeHtml(career.regionLabel)}</span>
           <span class="tag">${escapeHtml(career.areaLabel)}</span>
@@ -163,10 +170,12 @@ function renderHome(){
       </div>
       <div style="text-align:right">
         <small class="muted">${escapeHtml(seasonLabel(career.week))}</small>
-        <div style="font-size:30px;font-weight:700">${formatDupr(career.athlete.dupr)}</div>
-        <small class="muted">DUPR · ${escapeHtml(band.label)}</small>
-        <div class="hint">${escapeHtml(reliability)}</div>
-        <div class="hint">Next: ${escapeHtml(nextTier?nextTier.label:'the pro league')} at ${formatDupr(nextTier?nextTier.minRating:5)}</div>
+        <div style="font-size:30px;font-weight:700">${formatRating(career.athlete.rating)}</div>
+        <small class="muted">Rating · ${escapeHtml(band.label)}</small>
+        <small class="muted">${escapeHtml(ownBracket.label)} bracket</small>
+        <small class="muted">${tourStanding?`Tour rank ${tourStanding.toLocaleString('en-US')} of ${tour.size.toLocaleString('en-US')}`:`Not on the ${tour.label}'s tour`}</small>
+        <div class="hint">${escapeHtml(reliabilityText)}</div>
+        <div class="hint">Next on the ladder: ${escapeHtml(nextEvent?nextEvent.label:'the pro league')}</div>
       </div>
     </div>
     <div class="energy-bar"><b style="width:${career.energy}%"></b></div>
@@ -199,6 +208,13 @@ function renderHome(){
       ${groups}
     </section>
     <section class="panel">
+      <h2>MATCHES</h2>
+      ${career.matches.length?`<ul class="history">
+        ${[...career.matches].reverse().slice(0,8).map(match=>`<li><span>${escapeHtml(match.bracket)}</span><strong>${escapeHtml(match.score)}</strong> vs ${escapeHtml(match.opponent)} <em class="${match.delta>=0?'up':'down'}">${match.delta>=0?'+':''}${match.delta.toFixed(3)}</em></li>`).join('')}
+      </ul>`:'<p class="muted">No rated matches yet. Enter a bracket to earn your first rating.</p>'}
+      ${career.athlete.record.matches?`<p class="hint">${career.athlete.record.wins}W ${career.athlete.record.losses}L · rating ${formatRating(career.athlete.rating)}</p>`:''}
+    </section>
+    <section class="panel">
       <h2>RECENT</h2>
       <ul class="history">
         ${[...career.log].reverse().slice(0,8).map(entry=>`<li><span>${escapeHtml(weekLabel(entry.week).split(' · ')[0])}</span>${escapeHtml(entry.text)}</li>`).join('')||'<li>Nothing yet.</li>'}
@@ -207,13 +223,33 @@ function renderHome(){
   </div>`;
 }
 
+function bracketSummary(event){
+  if(!event.brackets.length)return 'open bracket';
+  if(event.brackets.length===1)return `${event.brackets[0]} bracket`;
+  return `${event.brackets[0]} – ${event.brackets.at(-1)} brackets`;
+}
+
+// The brackets an event is running, with the player's own bracket marked and
+// the one above it offered as a deliberate step up.
+function bracketOptions(event){
+  return event.enterable.map(id=>{
+    const division=event.divisions.find(entry=>entry.id===id);
+    if(!division)return '';
+    const own=division.isPlayer?' · your bracket':'';
+    const up=division.level>event.divisions.find(entry=>entry.isPlayer)?.level?' · play up':'';
+    return `<option value="${division.id}"${division.id===event.defaultDivisionId?' selected':''}>${escapeHtml(division.label+own+up)}</option>`;
+  }).join('');
+}
+
 function eventRow(event,actReady){
   const locked=!event.eligible.ok;
+  const running=event.divisions.map(division=>division.label).join(' · ');
   return `<div class="event">
     <div class="body">
       <strong>${escapeHtml(event.title)}</strong>
       <small>${escapeHtml(event.venue)} · ${event.energyCost} energy${event.kind==='practice'?'':' · match'}</small>
-      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:''}
+      <small>Brackets: ${escapeHtml(running)}</small>
+      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:`<select class="bracket" data-division="${event.id}" ${actReady?'':'disabled'}>${bracketOptions(event)}</select>`}
     </div>
     ${locked?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${actReady?'':'disabled'}>${event.kind==='practice'?'PRACTISE':'ENTER'}</button>`}
   </div>`;
@@ -266,7 +302,7 @@ function clubRow(club,career){
     ${roster.map(athlete=>`<div class="player">
       <div class="body">
         <strong>${escapeHtml(athlete.name)}</strong>
-        <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.cultureLabel)} · ${athlete.age} · ${athlete.handedness}-handed · DUPR ${formatDupr(athlete.dupr)}</small>
+        <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.citizenship ?? '')} · ${athlete.age} · ${athlete.handedness}-handed · Rating ${formatRating(athlete.rating)}</small>
       </div>
     </div>`).join('')}
   </div>`:''}`;
@@ -294,8 +330,8 @@ function renderPlayers(){
     ${term?(athletes.length?athletes.map(athlete=>`<div class="player">
       <div class="body">
         <strong>${escapeHtml(athlete.name)}</strong>
-        <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.cultureLabel)} · ${escapeHtml(athlete.cityLabel)} · ${escapeHtml(athlete.clubName)}</small>
-        <small>DUPR ${formatDupr(athlete.dupr)} · ${escapeHtml(duprBand(athlete.dupr).label)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
+        <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.cityLabel)}, ${escapeHtml(athlete.citizenship ?? '')} · ${escapeHtml(athlete.clubName)}</small>
+        <small>Rating ${formatRating(athlete.rating)} · ${escapeHtml(ratingBand(athlete.rating).label)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
       </div>
     </div>`).join(''):'<p class="muted">No players matched that name.</p>'):'<p class="muted">Type a name to search the region.</p>'}
   </section>`;
@@ -372,7 +408,11 @@ document.addEventListener('click',event=>{
     if(action==='advance'){apply(advanceWeek(app.career));return}
     if(action==='join'){apply(joinClub(app.career,trigger.dataset.club));return}
     if(action==='leave'){apply(leaveClub(app.career));return}
-    if(action==='attend'){apply(attendEvent(app.career,trigger.dataset.event));return}
+    if(action==='attend'){
+      const picker=trigger.closest('.event')?.querySelector('select[data-division]');
+      apply(attendEvent(app.career,trigger.dataset.event,picker?.value??null));
+      return;
+    }
     if(action==='expand-club'){
       app.expandedClub=app.expandedClub===trigger.dataset.club?null:trigger.dataset.club;
       render();

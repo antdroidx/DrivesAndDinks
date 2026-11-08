@@ -131,6 +131,11 @@ button.secondary:disabled{opacity:.45;cursor:not-allowed}
 .event strong{display:block;font-size:13px}
 .event small{color:var(--muted);font-size:11px}
 .event .lock{color:var(--coral);font-size:11px}
+.event select.bracket{
+  margin-top:6px;background:var(--panel);color:var(--text);border:1px solid var(--line);
+  border-radius:7px;padding:6px 8px;font:inherit;font-size:11px;max-width:100%;
+}
+.event select.bracket:focus{outline:2px solid var(--accent);outline-offset:1px}
 .event button{flex:0 0 auto}
 
 .club,.player{
@@ -161,6 +166,10 @@ button.secondary:disabled{opacity:.45;cursor:not-allowed}
 .history li{padding:7px 0;border-bottom:1px solid var(--line);font-size:12px;display:flex;gap:10px}
 .history li:last-child{border-bottom:0}
 .history li span{color:var(--muted);flex:0 0 88px;font-size:11px}
+.history li strong{color:var(--text);font-size:12px}
+.history li em{font-style:normal;font-size:11px;margin-left:4px}
+.history li em.up{color:var(--green)}
+.history li em.down{color:var(--coral)}
 
 .toast{
   position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:50;
