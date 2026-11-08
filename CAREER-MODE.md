@@ -435,7 +435,7 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | The career and the engine share a handshake in local storage | One small module is all the two pages share, so the handoff can be a page change or a frame without either side knowing the difference. |
 | 2026-11-08 | The national rounds and above are qualified for with tour points | Ratings are not gates. What earns a place in a national field is a season of results. |
 | 2026-11-08 | Prize money and sponsors | A career needs a reason to keep going that is not a number on a board. Sponsors arrive with a standing and pay into every purse. |
-| 2026-11-08 | The rating is derived from the 14 skill ratings for now, and switches to result-driven in milestone 2 | DUPR is a results system. Deriving it from skills is a starting prior, not the final model. |
+| 2026-11-08 | The rating is derived from the 14 skill ratings only until the first rated match, then moves on results | DUPR is a results system. Deriving it from skills is a starting prior, not the final model, and the prior expires the moment there is a result. |
 | 2026-11-08 | The seven competition shapes are templates, and a competition is generated rather than authored | A tournament's shape is a set of rules, not a piece of content. Encoding them as data means an organiser can vary the points and the format, and the same seed always produces the same field. |
 | 2026-11-08 | The pro league is a career stage, not the endpoint. Retirement is the endpoint | A career that stops at the top is a ladder climb. A career that can decline and end is a career, and it makes falling out of the pro league a normal part of one. |
 | 2026-11-08 | The pro tour is modelled on the real PPA rather than invented | Rankings, tiers, contracts, the obligation rule and the route back in are all taken from the published tour. Inventing them would have produced something that felt like a generic sports game. |
@@ -448,11 +448,13 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 
 ## 6. Open questions
 
-1. **Ranking inside a region.** Is a career rating one number for the player, or a separate rating per tournament class? One number is simpler; per-class ratings would stop a doubles specialist being punished at singles events.
-2. **Season length.** A season is currently 52 weeks. Should a season be shorter, with an off-season, so careers have a rhythm rather than a continuous grind?
-3. **Practice as a separate verb.** Training is now repeatable inside a week and costs energy, so it competes with competing for the budget rather than with the week itself. Should training ever be free, done between weeks, so that the week's only real decision is which event to enter?
+1. **Regional against world standing.** Ratings are per format and rankings will be per division. What is still open is whether a player's place in a regional board is their world place or a local one. A local board lets a mid-level player be competitive at home while still far down the world board.
+2. **Season rhythm.** A season is 52 weeks. Should it be shorter, with an off-season, so careers have a rhythm rather than one continuous grind?
+3. **Practice as a separate verb.** Training is repeatable inside a week and costs energy, so it competes with competing for the budget. Should any training be free?
 4. **Region transfer.** Can a player move permanently to the other region mid-career, or is a career tied to its starting region?
-5. **Singles and doubles on one rating.** DUPR is a doubles rating and the PPA board blends doubles, mixed and singles. Should a career carry one rating across both formats, or a rating per format?
+5. **Career length.** How many seasons should a career last before the age curve makes retirement the right choice? The tour design suggests fifteen to twenty. A shorter career is easier to finish and easier to replay.
+
+The tour and career-arc questions — season length, declining a contract, the age curve against the rating's half-life, the recommendation route, the league and how much of the ranked population is simulated — are in [`PRO-TOUR.md`](PRO-TOUR.md).
 
 ---
 
