@@ -233,13 +233,13 @@ Checkboxes are updated as work lands on this branch.
 The milestone this branch delivers.
 
 - [x] Isolated `/career-mode/` entry point; root prototype untouched and still publishing unchanged
-- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 3`, two migrations in place)
+- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 6`, five migrations in place)
 - [x] Corruption recovery: a damaged file falls back to the last verified save, and an unreadable file with no backup is quarantined rather than silently reset
 - [x] Stable ids for athletes, clubs and events, guaranteed by seed derivation
 - [x] North America and Asia, split into 14 areas and 74 cities
 - [x] Generated population: clubs, rosters, names, archetypes, ratings, 13 % left-handed rate
 - [x] Browse clubs, expand a roster, join a club, browse and search players
-- [x] Weekly calendar with the 8-tier ladder, eligibility gates and calendar advance
+- [x] Weekly calendar with the 8-event ladder, bracket choice and calendar advance
 - [x] Energy, one-action-per-week rule, training curve, travel and club membership
 - [x] Career rating: a precise 2.000–8.000 scale, the published bands, and a reliability percentage
 - [x] The rating calculation itself: expected score, performance against expectation, match type, recency and volume
@@ -250,8 +250,8 @@ The milestone this branch delivers.
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 54 automated tests (`test/career-*.test.js`)
-- [x] Verified in the built-in browser: create, train, advance, browse, roster, search, reload-persistence
+- [x] 90 automated tests across seven files (`test/career-*.test.js`), 531 in the suite overall
+- [x] Verified in the built-in browser: create, train, enter a bracket, play a rated match, advance, browse, roster, search, reload-persistence
 
 ### M2 — Match play inside a career ⬜ next
 
@@ -260,10 +260,14 @@ Turns scheduled events into real matches using the existing engine.
 - [ ] Launch the real match from a career event, with the opponent drawn from the bracket
 - [ ] Carry the career athlete's ratings into the match lineup
 - [ ] Use the real result in place of the simulated one when rating the match
-- [ ] Record the result as an immutable career record with the replay
+- [ ] Record the result as an immutable career record against the same event id
+- [ ] Keep the replay and the match report attached to that record
 - [ ] Award tour points from match results, with the points weighting the tour uses
-- [ ] Record match reports and replays against the same event id
-- [ ] Retire the "match play arrives in the next milestone" placeholder
+- [ ] Let the player's own opponents move through the world rating state
+
+Career events already play a simulated match and rate it, so the loop runs
+end to end today. What is missing is the playable version and the seam where
+the real result replaces the simulated one.
 
 Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
 
@@ -293,7 +297,7 @@ Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
 
 - [ ] Regions beyond North America and Asia, if the two-region model holds up
 - [ ] International series with real venues
-- [ ] The pro league as a career endpoint
+- [ ] The pro league as a career endpoint, reachable through tour points
 
 ### M7 — Packaging ⬜ planned
 
