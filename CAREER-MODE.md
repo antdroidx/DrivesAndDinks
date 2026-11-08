@@ -10,7 +10,7 @@ It lives at its own entry point, **`/career-mode/`**. The gameplay prototype at 
 | Entry point | `career-mode/index.html` → `https://antdroidx.github.io/DrivesAndDinks/career-mode/` |
 | Engine modules | `src/career/` |
 | Local run | `npm start` → `http://127.0.0.1:8768/career-mode/` |
-| Current milestone | **M2/M3 — in progress; M5 competition shapes landed** |
+| Current milestone | **M2 and M3 — in progress; the competition shapes are built** |
 | Last updated | 2026-11-08 |
 
 ---
@@ -169,22 +169,6 @@ The rest of the region is not scenery. Every week the rated population plays, th
 
 Only ratings that have actually changed are stored. An athlete who has never played keeps their starting rating and the week it was set, so their current rating is that rating aged forward.
 
-### Brackets, not gates
-
-Events do not gate entry on a rating. They run **a bracket for each level of play**, and a bracket is named by the top of its range: the 3.5 bracket holds players rated 3.500 to 3.999. The player signs up for a bracket and is placed in it.
-
-| Bracket | Holds |
-|---|---|
-| 2.0 | 2.000 – 2.499 |
-| 2.5 | 2.500 – 2.999 |
-| 3.0 | 3.000 – 3.499 |
-| 3.5 | 3.500 – 3.999 |
-| 4.0 | 4.000 – 4.499 |
-| 4.5 | 4.500 – 4.999 |
-| 5.0+ | 5.000 – 8.000 |
-
-A player may enter their own bracket, one above it, or one below it. **Playing up is the fastest way to move a rating**, because the bar to beat is lower. Playing down risks a drop, because a narrow win is an underperformance.
-
 ### Formats
 
 A player is rated separately in each format, and each format has its own ranking:
@@ -197,9 +181,9 @@ The three diverge because the games reward different things. Doubles leans on th
 
 The player's card shows all three ratings, the band each one sits in, and the tour standing each one earns.
 
-### Brackets, not gates
+### Brackets and gates
 
-Events do not gate entry on a rating. They run **a bracket for each level of play**, and a bracket is named by the top of its range: the 3.5 bracket holds players rated 3.500 to 3.999. The player signs up for a bracket and is placed in it.
+Events are organised by bracket first. Each one runs **a bracket for each level of play**, and a bracket is named by the top of its range: the 3.5 bracket holds players rated 3.500 to 3.999. The player signs up for a bracket and is placed in it.
 
 | Bracket | Holds |
 |---|---|
@@ -214,6 +198,15 @@ Events do not gate entry on a rating. They run **a bracket for each level of pla
 **Some events are completely open**, with no rating gates at all. Ladder events are the usual case, and an open tournament works just as well. An open event takes any bracket it runs, which is what lets a player who feels underrated go and play better company — and lets anyone drop into a lower bracket to grind.
 
 A **gated** event only takes players whose rating sits in the bracket, with one allowance: a bracket half a step above their own is always open to them. A 3.3 player can enter a 3.5 tournament.
+
+**What the gate reads.** A gate reads the rating for the division being entered, and nothing else. A doubles gate reads the doubles rating, a mixed gate reads the mixed rating, and a singles gate reads the singles rating. **The mixed rating is never used to gate a doubles event.** It is carried for reference and for the mixed divisions.
+
+An event also chooses how it reads a team:
+
+- **Highest player**, the normal case. A 5.0 player may enter a 5.0 gate with a 3.0 partner, because the strongest player on the team is 5.0. This is what stops a strong player from dropping into a low gate with a weak partner.
+- **Combined**, for events that want the teams level rather than the strongest player to set the bar. A combined 4.0 gate takes a 5.0 and a 3.0, and it takes a 4.2 and a 3.8.
+
+A solo entry is gated on the player's own rating, where the two rules are the same thing. The highest-player rule becomes live when the player can choose or keep a partner; today a partner is drawn inside the bracket, so the rule cannot be violated.
 
 ### The competition ladder
 
@@ -295,6 +288,8 @@ Advancing the week restores the recovery, rolls a fresh calendar and advances th
 
 Checkboxes are updated as work lands on this branch.
 
+The order is a dependency chain. A ranking measures the rounds a player reached, so competitions come before ranking. A contract is granted on a ranking, so ranking comes before contracts. Retirement is the end of a career, so it comes after the things a career passes through. The design behind the tour, the contracts and the career arc is in [`PRO-TOUR.md`](PRO-TOUR.md).
+
 ### M1 — Offline career foundation ✅ complete
 
 The milestone this branch delivers.
@@ -327,66 +322,83 @@ The milestone this branch delivers.
 
 ### M2 — Match play inside a career 🔶 in progress
 
-A career event is now played by the real engine.
+A career event is already played by the real engine, rated on the real result, and recorded against the event.
 
 - [x] Launch the real match from a career event, with the opponents drawn from the bracket
 - [x] Carry the career athlete's own attributes into the match lineup
 - [x] Use the real result in place of the simulated one when rating the match
 - [x] Record the result as an immutable career record against the same event id
 - [x] Keep the engine's own match report attached to that record
-- [x] Award tour points from the result, with the points weighting the tour uses
+- [x] Award tour points from the result
 - [x] Let the opponents the player faced move through the world rating state
-- [ ] Play the match inside the career page rather than handing off to the engine page
 - [ ] Take the difficulty from the career rather than always playing normal
 - [ ] Carry opponent memory from one career match into the next
 
-The handoff is a shared handshake: the career writes a pending match, the
-engine plays it with the lineup already built, and the engine's own match
-report comes back to be scored. `src/career/handshake.js` is the only thing
-the two pages share, so the handoff works either way round.
+The handoff is a settled decision. The career writes a pending match, the engine plays it, and the report comes back. Playing inside the career page is not planned, because the match needs the whole screen.
 
-Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
+### M3 — Competitions that are real ⬜ planned
 
-### M3 — Ladder progression 🔶 in progress
+The seven competition shapes are built and tested. This milestone puts them in the calendar and gives an event a field.
 
-There are no seasons to model, so this milestone is about moving up the ladder
-rather than surviving a schedule.
+- [ ] Entering an event fields a tournament rather than one match
+- [ ] Field sizes by tier: 64, 56 and 48 spots, with the qualifier filling the rest
+- [ ] Qualifier draws, and a secondary bracket for those who lose out
+- [ ] Draw seeding in ranking bands, and byes by combined ranking
+- [ ] Division gates that read the division's own rating, and carry the highest-player or combined rule per event
+- [ ] Multi-week events that occupy consecutive weeks
+- [ ] A way to skip weeks with nothing on the calendar
+- [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
 
-- [x] The world board and your place on it, for each format
-- [x] A form summary: recent matches, the record and the streak
-- [x] Qualification for the national rounds and above, earned with tour points
-- [x] A rival, the player nearest to you on the board, who moves as they do
-- [x] Prize money, and sponsors that arrive with a standing and pay into every purse
-- [ ] The composite world ranking, weighted across doubles, mixed and singles
-- [ ] Moving up the board as the thing the career is about
+**Why it is here.** A ranking is a measurement of rounds reached, and rounds do not exist until an event fields a tournament. This is the foundation the tour is expressed in.
 
-### M4 — Club life and opponents ⬜ planned
+### M4 — The ranking and the pro tour ⬜ planned
+
+- [ ] Four rankings: Overall, Doubles, Mixed and Singles
+- [ ] Best fourteen results in a fifty-two week window, with the four biggest events always counting
+- [ ] The composite: doubles 50, mixed 35, singles 15
+- [ ] Points by round reached, per tier, replacing points for entry
+- [ ] Entry selection: the top ten in the division, then contracted players, then ranking, then the qualifier
+- [ ] Wild cards, and the Challenger route into an Open main draw
+- [ ] The Challenger ranking, kept separate from the tour
+- [ ] The PPA Finals: top eight Overall, round robin into semifinals
+- [ ] The World Championship as a once-a-year anchor
+
+### M5 — Contracts, obligations and the drop ⬜ planned
+
+- [ ] Contract levels: Futures, Standard and Gold
+- [ ] The three routes in: top fifty Overall, top of the Challenger Tour, or recommendation
+- [ ] The obligation: twenty-five events a year, and an event only counts with two of three formats
+- [ ] The season boundary: renew, promote or release
+- [ ] Release without leaving the game: no main draw spot, no prize multiplier, no league
+- [ ] The ineligible period: twelve months out of the biggest events, and eight smaller events to reapply
+- [ ] Working back: a Challenger win, the top fifty, or a recommendation
+- [ ] The team league: draft, season, and promotion and relegation
+
+### M6 — A career with an end ⬜ planned
+
+Retirement is the endpoint of a career. Everything above is a stage a career passes through on the way to it.
+
+- [ ] The age curve and the ceiling rule: a rating can fall below a player's age-adjusted peak but never rise above it
+- [ ] Recovery that declines with age
+- [ ] Voluntary retirement
+- [ ] Forced retirement, offered plainly when the ceiling falls below the level the player is attempting
+- [ ] The all-time board, and the career record as a final artifact
+- [ ] The epilogue
+
+### M7 — Club life and opponents ⬜ planned
 
 - [ ] Opponent AI that remembers results, per the match engine's existing opponent memory
-- [ ] Teammates and doubles partners drawn from the club roster
+- [ ] Persistent doubles partners drawn from the club roster, gated on the highest player by default
 - [ ] Coach feedback that points at a specific rating
 - [ ] Club reputation that gates entry to better clubs
 
-### M5 — Calendar depth ⬜ planned
-
-Travel between cities is done. What is left is making the calendar bite.
-
-- [x] Fatigue and recovery: a week spent beyond what the recovery covers carries into the next one
-- [x] The seven competition shapes, generated from a seed and played out: round robin, round robin with open partners, bracket tournament, double elimination, both ladders, and MLP
-- [ ] The competition engine wired into the calendar, so an event fields a tournament instead of one match
-- [ ] Multi-week tournaments that occupy consecutive weeks
-- [ ] Team leagues and MLPs that run for a season with a playoff
-- [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
-- [ ] Rest and injury risk
-- [ ] Travel costs that matter, and a home city worth defending
-
-### M6 — World expansion ⬜ planned
+### M8 — World expansion ⬜ planned
 
 - [ ] Regions beyond North America and Asia, if the two-region model holds up
-- [ ] International series with real venues
-- [ ] The pro league as a career endpoint, reachable through tour points
+- [ ] International stops with real venues
+- [ ] A world calendar that spreads the five divisions across concurrent events
 
-### M7 — Packaging ⬜ planned
+### M9 — Packaging ⬜ planned
 
 - [ ] Android, PC and iOS builds of the same career save
 - [ ] Save import and export between devices
@@ -425,6 +437,11 @@ Travel between cities is done. What is left is making the calendar bite.
 | 2026-11-08 | Prize money and sponsors | A career needs a reason to keep going that is not a number on a board. Sponsors arrive with a standing and pay into every purse. |
 | 2026-11-08 | The rating is derived from the 14 skill ratings for now, and switches to result-driven in milestone 2 | DUPR is a results system. Deriving it from skills is a starting prior, not the final model. |
 | 2026-11-08 | The seven competition shapes are templates, and a competition is generated rather than authored | A tournament's shape is a set of rules, not a piece of content. Encoding them as data means an organiser can vary the points and the format, and the same seed always produces the same field. |
+| 2026-11-08 | The pro league is a career stage, not the endpoint. Retirement is the endpoint | A career that stops at the top is a ladder climb. A career that can decline and end is a career, and it makes falling out of the pro league a normal part of one. |
+| 2026-11-08 | The pro tour is modelled on the real PPA rather than invented | Rankings, tiers, contracts, the obligation rule and the route back in are all taken from the published tour. Inventing them would have produced something that felt like a generic sports game. |
+| 2026-11-08 | A tournament fields 44 to 64 spots per division, not the whole ranked population | The ranked board is 1,200 and a draw is 64. The rest of the population sits at other events, in qualifiers, or on the Challenger circuit. |
+| 2026-11-08 | A rating gate reads the division's own rating, and the mixed rating is reference only | A doubles gate that read mixed would let a mixed specialist into a doubles bracket they cannot play. |
+| 2026-11-08 | Gated doubles default to the highest player, and some events use the combined rating | The highest-player rule is how real gated events work: a 5.0 can partner with a 3.0 at a 5.0 gate. Combined gating is the variant for events that want the teams level. |
 | 2026-11-08 | A playoff, a double elimination and a ladder resolve during play rather than up front | Who reaches a playoff depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The structure and the simulation have to live together. |
 
 ---
