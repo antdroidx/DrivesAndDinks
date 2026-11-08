@@ -1,9 +1,8 @@
 // The pro tour.
 //
-// The pro league works differently from a rating system. Its world ranking
-// is a composite of tour points earned over the last 52 weeks, weighted
-// 50 percent doubles, 35 percent mixed doubles and 15 percent singles, and
-// the men's and women's boards are ranked separately.
+// The published tour ranking is a composite of points earned over the last
+// 52 weeks, weighted 50 percent doubles, 35 percent mixed doubles and 15
+// percent singles, and the men's and women's boards are ranked separately.
 //
 // That is why a tour floor is not simply a rating cut. In the published
 // rankings the men's board had 1471 players with its last place at 4.89 and
@@ -15,6 +14,10 @@
 // of the world population the tour takes. This module carries both pieces:
 // where a rating puts a player on their board, and how tour points are
 // earned and aged out.
+//
+// The composite ranking itself is not built yet. The board is placed by
+// rating alone, and the points a player earns are one undifferentiated
+// pool rather than three weighted by format. That is milestone 3 work.
 
 // The world has a modelled rated population on each board, and the tour is
 // the top slice of it. The tour size is a share of that population rather

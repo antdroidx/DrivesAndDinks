@@ -315,7 +315,7 @@ The milestone this branch delivers.
 - [x] Brackets instead of rating gates, with play up and play down
 - [x] Singles, doubles and mixed doubles rated and ranked separately
 - [x] Open events with no rating gates, and a gated event always accepting a bracket half a step up
-- [x] No seasons: tournaments all year, leagues and the amateur MLP one to three months, the pro tour nine months, the MLP a summer circuit
+- [x] No seasons: tournaments all year, leagues and the amateur MLP one to three months, and at the top of the game the pro league, the MLP and the international series running in turn
 - [x] Training moves attributes only; playing an event moves the rating and grows one attribute
 - [x] A career can move to the other region
 - [x] The pro tour: separate men's and women's boards, one symmetric floor, and a rolling points window
@@ -373,6 +373,7 @@ Travel between cities is done. What is left is making the calendar bite.
 
 - [x] Fatigue and recovery: a week spent beyond what the recovery covers carries into the next one
 - [x] The seven competition shapes, generated from a seed and played out: round robin, round robin with open partners, bracket tournament, double elimination, both ladders, and MLP
+- [ ] The competition engine wired into the calendar, so an event fields a tournament instead of one match
 - [ ] Multi-week tournaments that occupy consecutive weeks
 - [ ] Team leagues and MLPs that run for a season with a playoff
 - [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
