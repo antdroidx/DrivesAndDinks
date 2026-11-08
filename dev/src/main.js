@@ -1,41 +1,41 @@
-import {seededRandom} from './competition.js?v=192';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=192';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=192';
-import {playerFeet,footSole} from './player-feet.js?v=192';
+import {seededRandom} from './competition.js?v=193';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=193';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=193';
+import {playerFeet,footSole} from './player-feet.js?v=193';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=192';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=193';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=192';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=193';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=192';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=193';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=192';
+import {createAnimeGameRenderer} from './anime-game.js?v=193';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=192';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=193';
 
-import {setupCourtDisplay} from './court-display.js?v=192';
+import {setupCourtDisplay} from './court-display.js?v=193';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=192';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=193';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=192';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=192';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=193';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=193';
 
-import {movingStance} from './detailed-character.js?v=192';
+import {movingStance} from './detailed-character.js?v=193';
 
-import {sampleMatchAnimation} from './match-animation.js?v=192';
+import {sampleMatchAnimation} from './match-animation.js?v=193';
 
-import {setupSelection} from './selection.js?v=192';import {setupStartScreen} from './start-screen.js?v=192';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=192';
+import {setupSelection} from './selection.js?v=193';import {setupStartScreen} from './start-screen.js?v=193';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=193';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=192';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=193';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=192';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=193';
 
-import {Game} from './game.js?v=192';
-import {C} from './core.js?v=192';
+import {Game} from './game.js?v=193';
+import {C} from './core.js?v=193';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=192';import {playerEmotionState} from './player-emotion.js?v=192';import {PerformanceMonitor} from './performance-monitor.js?v=192';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=193';import {playerEmotionState} from './player-emotion.js?v=193';import {PerformanceMonitor} from './performance-monitor.js?v=193';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=192';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=193';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -217,11 +217,24 @@ function playerPresentation(p,game,animation){
  return {emotion:state.expression,sweat:state.sweat,emotionIntensity:state.intensity,emotionMarks:state.marks,emotionClock:game.clock};
 }
 function drawWeatherEffects(c,camera){
- if(game.surfaceKind==='indoor'||!game.conditions?.wind)return;
- const wind=game.conditions.wind,humidity=game.conditions.humidity;
- c.save();c.globalAlpha=.025+humidity*.025;c.fillStyle='#d9eef0';c.fillRect(camera.x,camera.y,camera.width,camera.height);
- c.globalAlpha=.12;c.strokeStyle='#e5f5f2';c.lineWidth=1;
- for(let i=0;i<9;i++){const y=105+(i*43)%180,x=((game.clock*wind*8+i*137)%1120)-80;c.beginPath();c.moveTo(x,y);c.lineTo(x+55+wind*34,y-3);c.stroke()}
+ if(game.surfaceKind.startsWith('indoor')||!game.conditions?.wind)return;
+ const wind=game.conditions.wind,humidity=game.conditions.humidity,temperature=game.conditions.temperature??70,band=game.conditions.temperatureBand??(temperature<58?'cold':temperature>=90?'hot':'fair');
+ c.save();
+ if(band==='cold'){
+  c.globalAlpha=.06+humidity*.018;c.fillStyle='#a9cfdf';c.fillRect(camera.x,camera.y,camera.width,camera.height);
+  c.globalAlpha=.12;c.fillStyle='#dceff5';c.fillRect(camera.x,camera.y,camera.width,Math.max(36,camera.height*.22));
+  c.globalAlpha=.18;c.strokeStyle='#eaf8ff';c.lineWidth=1;
+  for(let i=0;i<7;i++){const y=92+(i*37)%180,x=((game.clock*wind*7+i*151)%1120)-80;c.beginPath();c.moveTo(x,y);c.lineTo(x+64+wind*30,y-5);c.stroke()}
+ }else if(band==='hot'){
+  c.globalAlpha=.055+humidity*.018;c.fillStyle='#efb36f';c.fillRect(camera.x,camera.y,camera.width,camera.height);
+  c.globalAlpha=.11;c.fillStyle='#ffe0a5';c.fillRect(camera.x,camera.y,camera.width,Math.max(36,camera.height*.28));
+  c.globalAlpha=.13;c.strokeStyle='#ffd28a';c.lineWidth=1;
+  for(let i=0;i<7;i++){const y=92+(i*37)%180,x=((game.clock*wind*7+i*151)%1120)-80;c.beginPath();c.moveTo(x,y);c.lineTo(x+64+wind*30,y-5);c.stroke()}
+ }else{
+  c.globalAlpha=.025+humidity*.025;c.fillStyle='#d9eef0';c.fillRect(camera.x,camera.y,camera.width,camera.height);
+  c.globalAlpha=.12;c.strokeStyle='#e5f5f2';c.lineWidth=1;
+  for(let i=0;i<9;i++){const y=105+(i*43)%180,x=((game.clock*wind*8+i*137)%1120)-80;c.beginPath();c.moveTo(x,y);c.lineTo(x+55+wind*34,y-3);c.stroke()}
+ }
  c.restore();
 }
 function drawDust(dust){
@@ -230,7 +243,7 @@ function drawDust(dust){
 
   if(particle.life<=0)continue;const t=1-particle.life/.26,q=project(particle.x,particle.y,particle.z);
 
-  ctx.save();ctx.globalAlpha=Math.max(0,(1-t)*.14*particle.strength*(activeVenue?.id==='indoor'?.25:1));
+  ctx.save();ctx.globalAlpha=Math.max(0,(1-t)*.14*particle.strength*(activeVenue?.id?.startsWith('indoor')?.25:1));
 
   ctx.fillStyle='#ded2b8';
 

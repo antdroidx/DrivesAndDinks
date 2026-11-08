@@ -1,6 +1,6 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=192';
-import {normalizeStackingSelection} from './stacking.js?v=192';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=192';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=193';
+import {normalizeStackingSelection} from './stacking.js?v=193';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=193';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -83,7 +83,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({}),op
 
  const footerControls=footer.querySelector('.footer-controls');
  const formatField=form.querySelector('label[for="match-format"]'),difficultyField=form.querySelector('label[for="match-difficulty"]'),matchModeField=form.querySelector('label[for="match-mode"]');
- for(const option of venueField.querySelector('select').options)option.textContent=({none:'No venue',random:'Random',outdoor:'Outdoor',indoor:'Indoor',stadium:'Stadium'})[option.value]??option.textContent;
+ for(const option of venueField.querySelector('select').options)option.textContent=({none:'No venue',random:'Random',outdoor:'Outdoor',indoor:'Indoor Hall','indoor-stadium':'Indoor Stadium',stadium:'Stadium'})[option.value]??option.textContent;
  footerControls.append(formatField,difficultyField,matchModeField,venueField,courtField);
 
  let draft=normalizeSelection(),stackingDraft=normalizeStackingSelection(),started=false,previewLineup=[],editingName=false;
