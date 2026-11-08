@@ -59,6 +59,7 @@ jobs:
             cp index.html style.css studio.html studio.css manifest.webmanifest _site/dev/
             printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/dev/build-info.js
             cp -R src assets _site/dev/
+            cp -R career-mode _site/dev/career-mode/
             if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
             if [ -f style-lab.html ]; then cp style-lab.html _site/dev/; fi
             node scripts/version-build.js "${{ github.run_number }}" _site/dev
@@ -81,6 +82,7 @@ jobs:
             cp _release/index.html _release/style.css _release/studio.html _release/studio.css _site/
             printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/build-info.js
             cp -R _release/src _release/assets _site/
+            cp -R _release/career-mode _site/career-mode/
             cp _release/sw.js _release/manifest.webmanifest _site/
             if [ -f _release/character-lab.html ]; then cp _release/character-lab.html _release/character-lab.css _site/; fi
             if [ -f _release/style-lab.html ]; then cp _release/style-lab.html _site/; fi

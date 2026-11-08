@@ -1,4 +1,4 @@
-import {readFileSync,readdirSync,writeFileSync} from 'node:fs';
+import {existsSync,readFileSync,readdirSync,writeFileSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 
@@ -58,6 +58,24 @@ export function versionSite(root,version){
     if(!name.endsWith('.js'))continue;
     const file=path.join(sourceDir,name);
     writeFileSync(file,versionModuleImports(readFileSync(file,'utf8'),version));
+  }
+
+  // Career mode has its own entry point and a nested module folder.
+  const careerDir=path.join(sourceDir,'career');
+  if(existsSync(careerDir)){
+    for(const name of readdirSync(careerDir)){
+      if(!name.endsWith('.js'))continue;
+      const file=path.join(careerDir,name);
+      writeFileSync(file,versionModuleImports(readFileSync(file,'utf8'),version));
+    }
+  }
+
+  const careerPage=path.join(site,'career-mode','index.html');
+  if(existsSync(careerPage)){
+    writeFileSync(careerPage,readFileSync(careerPage,'utf8')
+      .replace('href="career.css"',`href="career.css?v=${version}"`)
+      .replace('src="../build-info.js"',`src="../build-info.js?v=${version}"`)
+      .replace('src="../src/career/main.js"',`src="../src/career/main.js?v=${version}"`));
   }
 }
 
