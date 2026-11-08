@@ -10,6 +10,7 @@ import {C} from '../src/core.js';
 import {ReplayClock} from '../src/fault-replay.js';
 
 function context(){let depth=0;return new Proxy({get depth(){return depth},getImageData(){return {data:new Uint8ClampedArray(144*144*4)}}},{get(target,key){if(key in target)return target[key];return (...args)=>{for(const arg of args)if(typeof arg==='number')assert.ok(Number.isFinite(arg),`${key}: invalid coordinate`);if(key==='save')depth++;if(key==='restore')assert.ok(--depth>=0)}},set(){return true}})}
+function fillOrderContext(){let depth=0,fillStyle=null;const fills=[];return new Proxy({get depth(){return depth},get fills(){return fills}},{get(target,key){if(key in target)return target[key];return (...args)=>{for(const arg of args)if(typeof arg==='number')assert.ok(Number.isFinite(arg),`${key}: invalid coordinate`);if(key==='save')depth++;if(key==='restore')assert.ok(--depth>=0);if(key==='fill')fills.push(fillStyle)}},set(target,key,value){if(key==='fillStyle')fillStyle=value;return true}})}
 
 test('profile athletes draw connected limbs through every shared motion and body',()=>{
  for(const d of CHARACTER_CONCEPTS)for(const mode of ['idle',...MOTIONS])for(const direction of [-1,1])for(const phase of [0,.25,.52,.8,1]){
@@ -17,6 +18,16 @@ test('profile athletes draw connected limbs through every shared motion and body
   assert.equal(c.depth,0);assert.deepEqual(d,before);
   for(const chain of [...p.arms,...p.legs])for(const point of chain)assert.ok(Number.isFinite(point.x)&&Number.isFinite(point.y));
   for(const chain of p.raw.arms3)for(let i=0;i<2;i++){const length=Math.hypot(chain[i+1].x-chain[i].x,chain[i+1].y-chain[i].y,chain[i+1].z-chain[i].z);assert.ok(Math.abs(length-ARM_LENGTHS[i])<1e-8)}
+ }
+});
+
+test('profile hair remains visible over the face silhouette at every hairline',()=>{
+ for(const base of CHARACTER_CONCEPTS)for(const hair of HAIR_OPTIONS[base.body])if(hair.id!=='bald'){
+  const design={...base,hair:hair.id,headwear:'none'},c=fillOrderContext();
+  drawProfileAthlete(c,design,'idle',0,100,200,2,{direction:-1});
+  const skinIndex=c.fills.indexOf(design.skin),hairIndex=c.fills.lastIndexOf(design.hairColor);
+  assert.ok(hairIndex>skinIndex,`${hair.id} hair is painted behind the profile face`);
+  assert.equal(c.depth,0);
  }
 });
 
