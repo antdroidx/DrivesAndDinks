@@ -7,10 +7,10 @@
 // the unreadable payload is kept aside for recovery.
 
 import {NAME_CULTURES,RATING_KEYS,skillAverage} from '../roster.js';
-import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING} from './rating.js';
+import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING,FORMATS} from './rating.js';
 import {REGIONS} from './geography.js';
 
-export const CAREER_SAVE_VERSION=6;
+export const CAREER_SAVE_VERSION=7;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -60,6 +60,23 @@ export const CAREER_MIGRATIONS=Object.freeze({
     // the provisional rating rather than anything derived from skill.
     if(!athlete.record?.matches)athlete.rating=NEW_PLAYER_RATING;
     return {...state,worldRatings:state.worldRatings??{},matches:state.matches??[],athlete};
+  },
+  // v7 split the rating per format and the world ratings per format.
+  6:state=>{
+    const athlete={...state.athlete};
+    const legacy=athlete.rating;
+    delete athlete.rating;
+    const formats={};
+    for(const format of FORMATS)formats[format]=athlete.formats?.[format]??legacy??NEW_PLAYER_RATING;
+    athlete.formats=formats;
+    const legacyWorld=state.worldRatings??{};
+    const worldRatings={};
+    for(const format of FORMATS)worldRatings[format]=legacyWorld[format]??{};
+    // The old world ratings were a flat map of doubles results.
+    if(!legacyWorld.doubles&&!legacyWorld.singles&&Object.keys(legacyWorld).length){
+      worldRatings.doubles=legacyWorld;
+    }
+    return {...state,athlete,worldRatings};
   }
 });
 
@@ -124,7 +141,11 @@ export function validateCareer(state){
   if(typeof athlete.id!=='string'||!athlete.id)return {ok:false,reason:'Athlete id is missing'};
   if(typeof athlete.name!=='string'||!athlete.name.trim())return {ok:false,reason:'Athlete name is missing'};
   if(!isRatingMap(athlete.ratings))return {ok:false,reason:'Athlete ratings are invalid'};
-  if(!Number.isFinite(athlete.rating)||athlete.rating<RATING_MIN||athlete.rating>RATING_MAX)return {ok:false,reason:'Athlete rating is invalid'};
+  if(!athlete.formats||typeof athlete.formats!=='object')return {ok:false,reason:'Athlete ratings are invalid'};
+  for(const format of FORMATS){
+    const rating=athlete.formats[format];
+    if(!Number.isFinite(rating)||rating<RATING_MIN||rating>RATING_MAX)return {ok:false,reason:'Athlete rating is invalid'};
+  }
   if(typeof athlete.archetypeId!=='string'||!athlete.archetypeId)return {ok:false,reason:'Athlete archetype is missing'};
   if(athlete.tourPoints!=null&&!Number.isFinite(athlete.tourPoints))return {ok:false,reason:'Tour points are invalid'};
   return {ok:true};

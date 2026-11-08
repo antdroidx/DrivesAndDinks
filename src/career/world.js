@@ -6,27 +6,30 @@
 // uses, and everyone who does not play drifts back toward the middle of the
 // scale on a half life.
 //
-// Only the ratings that have actually changed are stored. An athlete who
-// has never played keeps their starting rating and the week it was set, so
-// their current rating is simply that rating aged forward.
+// The population is rated separately in doubles and in singles, and both
+// formats play. Only the ratings that have actually changed are stored: an
+// athlete who has never played keeps their starting rating and the week it
+// was set, so their current rating is that rating aged forward.
 
 import {buildRegionSkills,buildAthlete,mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
-import {regressRating,simulateOutcome,rateMatch,RATING_BRACKETS,RATING_MIN,RATING_MAX} from './rating.js';
+import {regressRating,simulateOutcome,rateMatch,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js';
 
-// Roughly how many matches the region's population plays in a week.
-export const WORLD_MATCHES_PER_WEEK=140;
+// Roughly how many matches the region's population plays in a week, split
+// between the two formats.
+export const WORLD_MATCHES_PER_WEEK=220;
 
 const round3=value=>Math.round(value*1000)/1000;
 const clampRating=value=>Math.max(RATING_MIN,Math.min(RATING_MAX,value));
 
-// The current rating of every athlete in the region, with idle players
+// The current rating of every athlete in one format, with idle players
 // drifted back toward the middle of the scale.
-export function currentRatings(skills,ratings,week){
+export function currentRatings(skills,ratings,week,format){
   const current=new Map();
+  const table=ratings?.[format]??{};
   for(const athlete of skills){
-    const stored=ratings?.[athlete.id];
-    const base=stored?stored[0]:athlete.baseRating;
+    const stored=table[athlete.id];
+    const base=stored?stored[0]:athlete.baseFormats[format];
     const lastPlayed=stored?stored[1]:athlete.lastPlayed;
     const matches=stored?stored[2]:0;
     current.set(athlete.id,{
@@ -39,63 +42,117 @@ export function currentRatings(skills,ratings,week){
   return current;
 }
 
+function playMatch(home,away,random,matchType='league'){
+  const outcome=simulateOutcome({
+    mySkill:home.skill,
+    theirSkill:away.skill,
+    myRating:home.rating,
+    theirRating:away.rating,
+    random
+  });
+  const rated=rateMatch({
+    players:[
+      {id:home.id,rating:home.rating,team:'mine',matchesPlayed:home.matches},
+      {id:away.id,rating:away.rating,team:'opponent',matchesPlayed:away.matches}
+    ],
+    actualMyPoints:outcome.myPoints,
+    actualOpponentPoints:outcome.opponentPoints,
+    matchType,
+    weeksAgo:0
+  });
+  return {home:rated.players[0],away:rated.players[1],score:`${outcome.myPoints}-${outcome.opponentPoints}`};
+}
+
 // Advances the world by one week.
 export function advanceWorld({seed,regionId,week,ratings}){
   const skills=buildRegionSkills(seed,regionId);
-  const current=currentRatings(skills,ratings,week);
   const random=seededRandom(mixSeed(seed,`world:${regionId}:${week}`));
-  // Pair neighbours in the standings, which is how leagues are seeded, so
-  // matches are between players of similar standing.
-  const pool=[...current.values()].sort((a,b)=>a.rating-b.rating);
   const next={...(ratings??{})};
+  for(const format of FORMATS)next[format]={...(next[format]??{})};
   let played=0;
-  const count=Math.min(WORLD_MATCHES_PER_WEEK,Math.floor(pool.length/2));
-  for(let index=0;index<count;index++){
-    const home=pool[index*2];
-    const away=pool[index*2+1];
-    if(!home||!away)break;
-    // Not every pairing plays every week.
-    if(random()<0.35)continue;
-    const outcome=simulateOutcome({
-      mySkill:home.skill,
-      theirSkill:away.skill,
-      myRating:home.rating,
-      theirRating:away.rating,
-      random
-    });
-    const rated=rateMatch({
-      players:[
-        {id:home.id,rating:home.rating,team:'mine',matchesPlayed:home.matches},
-        {id:away.id,rating:away.rating,team:'opponent',matchesPlayed:away.matches}
-      ],
-      actualMyPoints:outcome.myPoints,
-      actualOpponentPoints:outcome.opponentPoints,
-      matchType:'league',
-      weeksAgo:0
-    });
-    next[home.id]=[round3(rated.players[0].rating),week,home.matches+1];
-    next[away.id]=[round3(rated.players[1].rating),week,away.matches+1];
-    played++;
+
+  for(const format of FORMATS){
+    const current=currentRatings(skills,next,week,format);
+    // Pair neighbours in the standings, which is how leagues are seeded, so
+    // matches are between players of similar standing.
+    const pool=[...current.values()].sort((a,b)=>a.rating-b.rating);
+    const count=Math.min(WORLD_MATCHES_PER_WEEK,Math.floor(pool.length/2));
+    // Step across the whole table rather than taking the bottom of it, so
+    // the strongest players are paired with each other too.
+    const stride=Math.max(1,Math.floor((pool.length/2)/count));
+    for(let index=0;index<count;index++){
+      // Not every pairing plays every week.
+      if(random()<0.35)continue;
+      const offset=index*stride;
+      if(format==='singles'){
+        const home=pool[offset*2];
+        const away=pool[offset*2+1];
+        if(!home||!away)break;
+        const result=playMatch(home,away,random);
+        next[format][home.id]=[round3(result.home.rating),week,home.matches+1];
+        next[format][away.id]=[round3(result.away.rating),week,away.matches+1];
+      }else{
+        const a=pool[offset*2];
+        const b=pool[offset*2+1];
+        const c=pool[offset*2+2];
+        const d=pool[offset*2+3];
+        if(!a||!b||!c||!d)break;
+        const myTeam=[a,b];
+        const theirTeam=[c,d];
+        const outcome=simulateOutcome({
+          mySkill:(a.skill+b.skill)/2,
+          theirSkill:(c.skill+d.skill)/2,
+          myRating:(a.rating+b.rating)/2,
+          theirRating:(c.rating+d.rating)/2,
+          random
+        });
+        const rated=rateMatch({
+          players:[
+            {id:a.id,rating:a.rating,team:'mine',matchesPlayed:a.matches},
+            {id:b.id,rating:b.rating,team:'mine',matchesPlayed:b.matches},
+            {id:c.id,rating:c.rating,team:'opponent',matchesPlayed:c.matches},
+            {id:d.id,rating:d.rating,team:'opponent',matchesPlayed:d.matches}
+          ],
+          actualMyPoints:outcome.myPoints,
+          actualOpponentPoints:outcome.opponentPoints,
+          matchType:'league',
+          weeksAgo:0
+        });
+        for(const player of rated.players){
+          const source=player.team==='mine'?myTeam.find(entry=>entry.id===player.id):theirTeam.find(entry=>entry.id===player.id);
+          next[format][player.id]=[round3(player.rating),week,source.matches+1];
+        }
+      }
+      played++;
+    }
   }
   return {ratings:next,matches:played};
 }
 
-// The player of a given bracket the player would meet. Playing up means
-// facing someone a bracket stronger, which is exactly what makes it a
-// gamble worth taking.
-export function opponentInBracket({seed,regionId,ratings,week,divisionId,random}){
+// The players a player would meet in a bracket, in a given format. Playing
+// up means facing somebody a bracket stronger, which is exactly what makes
+// it a gamble worth taking.
+export function opponentsInBracket({seed,regionId,ratings,week,divisionId,format='doubles',count=1,random}){
   const skills=buildRegionSkills(seed,regionId);
-  const current=currentRatings(skills,ratings,week);
+  const current=currentRatings(skills,ratings,week,format);
   const division=RATING_BRACKETS.find(entry=>entry.id===divisionId);
-  if(!division)return null;
+  if(!division)return [];
   const all=[...current.values()];
   const inBracket=all.filter(athlete=>athlete.rating>=division.min&&athlete.rating<=division.max);
   // If nobody is in that bracket yet, take the closest player to it.
   const pool=inBracket.length?inBracket:all;
-  if(!pool.length)return null;
+  if(!pool.length)return [];
   const roll=random??Math.random;
-  const chosen=pool[Math.floor(roll()*pool.length)];
-  // Rebuild the drawn athlete in full so the player sees who they faced.
-  const full=chosen.club?buildAthlete(seed,chosen.club,chosen.index):null;
-  return full?{...full,rating:chosen.rating,matches:chosen.matches,skill:chosen.skill}:chosen;
+  const picked=[];
+  const used=new Set();
+  while(picked.length<count&&used.size<pool.length){
+    const index=Math.floor(roll()*pool.length);
+    if(used.has(index))continue;
+    used.add(index);
+    const chosen=pool[index];
+    // Rebuild the drawn athlete in full so the player sees who they faced.
+    const full=chosen.club?buildAthlete(seed,chosen.club,chosen.index):null;
+    picked.push(full?{...full,rating:chosen.rating,matches:chosen.matches,skill:chosen.skill}:chosen);
+  }
+  return picked;
 }

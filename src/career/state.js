@@ -7,12 +7,12 @@
 
 import {CHARACTERS,RATING_KEYS,generateIdentity,skillAverage} from '../roster.js';
 import {seededRandom} from '../competition.js';
-import {REGIONS,regionById,allCities,cityById,citizenshipFor,EVENT_BY_ID} from './geography.js';
+import {REGIONS,regionById,allCities,cityById,cityByIdAnywhere,citizenshipFor,EVENT_BY_ID} from './geography.js';
 import {pointsForEntry,addPoints,pointsInWindow} from './tour.js';
 import {buildClubIndex,findClub,mixSeed} from './population.js';
 import {generateWeekEvents,weekLabel,entryEligibility} from './calendar.js';
-import {NEW_PLAYER_RATING,simulateOutcome,rateMatch} from './rating.js';
-import {opponentInBracket,advanceWorld} from './world.js';
+import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,FORMATS,divisionFor} from './rating.js';
+import {opponentsInBracket,advanceWorld} from './world.js';
 
 // A career starts at a 3.500 rating, so the underlying skill starts where
 // that rating sits rather than at the bottom of the scale.
@@ -23,6 +23,8 @@ export const WEEKLY_RECOVERY=35;
 // a player choose to compete rather than to grind.
 export const TRAINING_COST=8;
 export const TRAVEL_COST=10;
+// Crossing an ocean costs more than a domestic move.
+export const INTERNATIONAL_TRAVEL_COST=20;
 export const HISTORY_LIMIT=60;
 export const LOG_LIMIT=14;
 
@@ -61,9 +63,9 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city}){
     archetypeLabel:archetype.style,
     ratings,
     skillAverage:average,
-    // A career starts without a rating. The number is provisional until the
-    // first rated match sets it.
-    rating:NEW_PLAYER_RATING,
+    // A career starts without a rating in either format. The numbers are
+    // provisional until the first rated match sets them.
+    formats:Object.fromEntries(FORMATS.map(format=>[format,NEW_PLAYER_RATING])),
     record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0},
     tourPoints:0,
     tourPointsHistory:[]
@@ -115,9 +117,40 @@ export function createCareer(options={}){
 // Early gains are quick and later gains are slow, so a long career keeps
 // something to chase without a flat rate grind.
 export function trainingCost(){return TRAINING_COST}
-export function trainingGain(state,focus){
-  const rating=state.athlete.ratings[focus]??50;
-  return clamp(Math.round(1+2*(100-rating)/60),1,3);
+// Training moves an attribute by a single point. It is deliberately
+// small: the rating belongs to playing, not to drilling.
+export function trainingGain(){return 1}
+
+// The attributes a format rewards.
+const FORMAT_SIGNATURE=Object.freeze({
+  doubles:['dink','drop','volley'],
+  singles:['serve','agility','reach']
+});
+
+// Playing an event grows the attributes the player actually relies on: the
+// skill the event rewards, what they are strongest at, and what the format
+// asks for. One attribute moves, a little.
+export function attributeGrowth({attributes,eventFocus,format,random=Math.random}){
+  const candidates=[];
+  const push=(key,weight)=>{
+    if(!key||!RATING_KEYS.includes(key)||attributes[key]==null)return;
+    candidates.push([key,weight]);
+  };
+  push(eventFocus,3);
+  const strongest=RATING_KEYS
+    .filter(key=>key!=='aggression')
+    .sort((a,b)=>(attributes[b]??0)-(attributes[a]??0))
+    .slice(0,2);
+  for(const key of strongest)push(key,2);
+  for(const key of FORMAT_SIGNATURE[format]??[])push(key,2);
+  if(!candidates.length)return {};
+  const total=candidates.reduce((sum,[,weight])=>sum+weight,0);
+  let roll=random()*total;
+  for(const [key,weight] of candidates){
+    roll-=weight;
+    if(roll<=0)return {[key]:1};
+  }
+  return {[candidates[0][0]]:1};
 }
 export function canAct(state){return state.lastActionWeek!==state.week}
 
@@ -147,8 +180,8 @@ export function train(state,focus){
   ratings[focus]=clamp(ratings[focus]+gain,0,99);
   ratings.control=clamp(ratings.control+1,0,99);
   const next=withAthlete(state,ratings);
-  const moved=pushHistory(pushLog(next,`Practised ${focus} — +${gain} ${focus}.`),`Practised ${focus}`);
-  return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Practised ${focus}. +${gain} ${focus}, +1 control.`};
+  const moved=pushHistory(pushLog(next,`Trained ${focus} — +${gain} ${focus}.`),`Trained ${focus}`);
+  return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Trained ${focus}. +${gain} ${focus}, +1 control.`};
 }
 
 export function currentEvents(state){return generateWeekEvents(state,state.week)}
@@ -156,44 +189,67 @@ export function currentEvents(state){return generateWeekEvents(state,state.week)
 // Entering an event registers the player in a bracket. Which bracket they
 // choose matters: playing up raises the bar for a good result, and playing
 // down means a narrow win counts as an underperformance.
-export function attendEvent(state,eventId,divisionId=null){
+export function attendEvent(state,eventId,optionId=null){
   const event=currentEvents(state).find(entry=>entry.id===eventId);
   if(!event)return {ok:false,state,message:'That event is not on the calendar this week.'};
   if(!canAct(state))return {ok:false,state,message:'You have already used this week. Advance the calendar to continue.'};
   const eligible=entryEligibility(state,EVENT_BY_ID[event.eventId]);
   if(!eligible.ok)return {ok:false,state,message:eligible.reason};
-  const division=event.divisions.find(entry=>entry.id===(divisionId??event.defaultDivisionId));
-  if(!division)return {ok:false,state,message:'That bracket is not running at this event.'};
-  if(state.energy<event.energyCost)return {ok:false,state,message:`That event needs ${event.energyCost} energy. You have ${state.energy}.`};
-  const ratings={...state.athlete.ratings};
-  const gain=event.kind==='practice'?2:1;
-  ratings[event.skillFocus]=clamp(ratings[event.skillFocus]+gain,0,99);
+  const option=event.options.find(entry=>entry.id===(optionId??event.defaultOptionId));
+  if(!option)return {ok:false,state,message:'That bracket is not running at this event.'};
+  const format=option.format;
+  const division=option.divisionId;
+  if(state.energy<event.energyCost){
+    return {ok:false,state,message:'That event needs '+event.energyCost+' energy. You have '+state.energy+'.'};
+  }
 
-  // The match is played. The opponent comes from the bracket the player
-  // entered, so playing up means facing somebody a bracket stronger, and
-  // the rating moves on how the result compared with the expectation.
-  const opponent=opponentInBracket({
+  // The match is played. The opponents come from the bracket and the format
+  // the player entered, so playing up means facing somebody a bracket
+  // stronger, and the rating moves on how the result compared with the
+  // expectation rather than on the result itself.
+  const opponentCount=format==='doubles'?2:1;
+  const opponents=opponentsInBracket({
     seed:state.seed,
     regionId:state.regionId,
     ratings:state.worldRatings,
     week:state.week,
-    divisionId:division.id,
-    random:seededRandom(mixSeed(state.seed,`opponent:${state.week}:${event.eventId}:${division.id}`))
+    divisionId:division,
+    format,
+    count:opponentCount,
+    random:seededRandom(mixSeed(state.seed,'opponent:'+state.week+':'+event.eventId+':'+option.id))
   });
-  const myRating=state.athlete.rating;
-  const theirRating=opponent?.rating??myRating;
+  const partner=format==='doubles'
+    ?(opponentsInBracket({
+      seed:state.seed,
+      regionId:state.regionId,
+      ratings:state.worldRatings,
+      week:state.week,
+      divisionId:division,
+      format,
+      count:1,
+      random:seededRandom(mixSeed(state.seed,'partner:'+state.week+':'+event.eventId+':'+option.id))
+    })[0]??null)
+    :null;
+
+  const myRating=state.athlete.formats[format]??NEW_PLAYER_RATING;
+  const theirRating=opponents.length?opponents.reduce((sum,o)=>sum+o.rating,0)/opponents.length:myRating;
+  const mySkill=formatSkill(state.athlete.ratings,format);
+  const theirSkill=opponents.length?opponents.reduce((sum,o)=>sum+o.skill,0)/opponents.length:mySkill;
   const outcome=simulateOutcome({
-    mySkill:state.athlete.skillAverage,
-    theirSkill:opponent?.skill??state.athlete.skillAverage,
+    mySkill,
+    theirSkill,
     myRating,
     theirRating,
-    random:seededRandom(mixSeed(state.seed,`play:${state.week}:${event.eventId}:${division.id}`))
+    random:seededRandom(mixSeed(state.seed,'play:'+state.week+':'+event.eventId+':'+option.id))
   });
+
+  const myTeam=[{id:'player',rating:myRating,team:'mine',matchesPlayed:state.athlete.record.matches}];
+  if(partner)myTeam.push({id:partner.id??'partner',rating:partner.rating,team:'mine',matchesPlayed:partner.matches??0});
+  const theirTeam=opponents.length
+    ?opponents.map(opponent=>({id:opponent.id??'opponent',rating:opponent.rating,team:'opponent',matchesPlayed:opponent.matches??0}))
+    :[{id:'opponent',rating:theirRating,team:'opponent',matchesPlayed:0}];
   const rated=rateMatch({
-    players:[
-      {id:'player',rating:myRating,team:'mine',matchesPlayed:state.athlete.record.matches},
-      {id:opponent?.id??'opponent',rating:theirRating,team:'opponent',matchesPlayed:opponent?.matches??0}
-    ],
+    players:myTeam.concat(theirTeam),
     actualMyPoints:outcome.myPoints,
     actualOpponentPoints:outcome.opponentPoints,
     matchType:event.matchType,
@@ -203,10 +259,20 @@ export function attendEvent(state,eventId,divisionId=null){
   const won=outcome.myPoints>outcome.opponentPoints;
   const delta=newRating-myRating;
 
+  // Playing an event grows an attribute the player relies on.
+  const growth=attributeGrowth({
+    attributes:state.athlete.ratings,
+    eventFocus:event.skillFocus,
+    format,
+    random:seededRandom(mixSeed(state.seed,'growth:'+state.week+':'+event.eventId+':'+option.id))
+  });
+  const ratings={...state.athlete.ratings};
+  for(const key of Object.keys(growth))ratings[key]=clamp(ratings[key]+growth[key],0,99);
+
   const athlete={
     ...state.athlete,
     ratings,
-    rating:newRating,
+    formats:Object.assign({},state.athlete.formats,{[format]:newRating}),
     record:{
       ...state.athlete.record,
       matches:state.athlete.record.matches+1,
@@ -214,36 +280,39 @@ export function attendEvent(state,eventId,divisionId=null){
       losses:state.athlete.record.losses+(won?0:1)
     }
   };
-  const next={...state,athlete};
-  const score=`${outcome.myPoints}-${outcome.opponentPoints}`;
-  const note=`${event.title} · ${division.label} bracket · ${score} vs ${opponent?.name??'a local'}`;
-  const moved=pushHistory(pushLog(next,`${note}. Rating ${formatRating3(newRating)} (${delta>=0?'+':''}${delta.toFixed(3)}).`),note);
+  const next=Object.assign({},state,{athlete});
+  const score=outcome.myPoints+'-'+outcome.opponentPoints;
+  const faced=opponents.map(opponent=>opponent.name??'a local').join(' and ');
+  const signed=(delta>=0?'+':'')+delta.toFixed(3);
+  const note=event.title+' · '+option.label+' '+format+' bracket · '+score+' vs '+(faced||'a local');
+  const moved=pushHistory(pushLog(next,note+'. Rating '+formatRating3(newRating)+' ('+signed+').'),note);
   const entered=[...new Set([...(state.entered??[]),event.eventId])].slice(-16);
-  const earned=pointsForEntry(event.eventId,division.id,event.ownDivisionId);
+  const ownDivision=divisionFor(state.athlete.formats[format]??NEW_PLAYER_RATING);
+  const earned=pointsForEntry(event.eventId,division,ownDivision.id);
   const tourPointsHistory=addPoints(state.athlete.tourPointsHistory,state.week,earned);
   const matchRecord={
     week:state.week,
     eventId:event.eventId,
-    bracket:division.label,
+    format,
+    bracket:option.label,
     score,
-    opponent:opponent?.name??'a local',
+    opponent:faced||'a local',
     won,
     rating:newRating,
     delta:Number(delta.toFixed(3))
   };
   return {
     ok:true,
-    state:{
-      ...moved,
-      athlete:{...moved.athlete,tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory},
+    state:Object.assign({},moved,{
+      athlete:Object.assign({},moved.athlete,{tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory}),
       energy:state.energy-event.energyCost,
       lastActionWeek:state.week,
       entered,
-      lastEntry:{week:state.week,eventId:event.eventId,divisionId:division.id,label:division.label},
+      lastEntry:{week:state.week,eventId:event.eventId,format,divisionId:division,label:option.label},
       matches:[...state.matches,matchRecord].slice(-40),
-      stats:{...state.stats,entries:state.stats.entries+1,matches:state.stats.matches+1}
-    },
-    message:`${won?'Won':'Lost'} ${score} in the ${division.label} bracket. Rating ${formatRating3(newRating)} (${delta>=0?'+':''}${delta.toFixed(3)}).`
+      stats:Object.assign({},state.stats,{entries:state.stats.entries+1,matches:state.stats.matches+1})
+    }),
+    message:(won?'Won ':'Lost ')+score+' in the '+option.label+' '+format+' bracket. '+format.toUpperCase()+' rating '+formatRating3(newRating)+' ('+signed+').'
   };
 }
 
@@ -270,12 +339,30 @@ export function leaveClub(state){
 }
 
 export function moveToCity(state,cityId){
-  const city=cityById(state.regionId,cityId);
-  if(!city)return {ok:false,state,message:'That city is not in your region.'};
+  const city=cityByIdAnywhere(cityId);
+  if(!city)return {ok:false,state,message:'That city is not in the world.'};
   if(city.id===state.cityId)return {ok:false,state,message:`You are already in ${city.label}.`};
-  if(state.energy<TRAVEL_COST)return {ok:false,state,message:`Travelling needs ${TRAVEL_COST} energy. You have ${state.energy}.`};
-  const next=pushLog(pushHistory({...state,energy:state.energy-TRAVEL_COST,cityId:city.id,cityLabel:city.label,areaId:city.areaId,areaLabel:city.areaLabel,country:city.country,clubId:null,club:null,stats:{...state.stats,moves:state.stats.moves+1}},`Moved to ${city.label}.`),`Moved to ${city.label}. Club membership cleared.`);
-  return {ok:true,state:next,message:`You moved to ${city.label}.`};
+  const international=city.regionId!==state.regionId;
+  const cost=international?INTERNATIONAL_TRAVEL_COST:TRAVEL_COST;
+  if(state.energy<cost)return {ok:false,state,message:`Travelling needs ${cost} energy. You have ${state.energy}.`};
+  const moved=pushHistory({
+    ...state,
+    energy:state.energy-cost,
+    regionId:city.regionId,
+    regionLabel:regionById(city.regionId).label,
+    areaId:city.areaId,
+    areaLabel:city.areaLabel,
+    cityId:city.id,
+    cityLabel:city.label,
+    country:city.country,
+    clubId:null,
+    club:null,
+    // The other region is a different population, so its ratings start fresh.
+    worldRatings:{},
+    stats:{...state.stats,moves:state.stats.moves+1}
+  },`Moved to ${city.label}, ${city.country}.`);
+  const next=pushLog(moved,`Moved to ${city.label}, ${city.country}. Club membership cleared.`);
+  return {ok:true,state:next,message:international?`You moved to ${city.label}, ${city.country}.`:`You moved to ${city.label}.`};
 }
 
 export function advanceWeek(state){

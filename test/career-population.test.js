@@ -48,7 +48,7 @@ test('generated athletes are stable, fully rated and inside the rating band',()=
     for(const value of Object.values(athlete.ratings))assert.ok(value>=20&&value<=99,`${athlete.name} rating ${value}`);
     assert.ok(athlete.name.length>3);
     assert.ok(['left','right'].includes(athlete.handedness));
-    assert.ok(athlete.rating>=2&&athlete.rating<=8);
+    for(const format of Object.keys(athlete.formats))assert.ok(athlete.formats[format]>=2&&athlete.formats[format]<=8);
     assert.equal(athlete.clubId,club.id);
   }
 });
@@ -58,6 +58,20 @@ test('generated athletes use the 13 percent left handed rate',()=>{
   const left=athletes.filter(athlete=>athlete.handedness==='left').length;
   const rate=left/athletes.length;
   assert.ok(rate>0.08&&rate<0.19,`left handed rate was ${rate.toFixed(3)}`);
+});
+
+test('athletes are rated separately in doubles, singles and mixed',()=>{
+  const clubs=buildClubIndex(SEED,'north-america');
+  const roster=buildClubRoster(SEED,clubs[0]);
+  for(const athlete of roster){
+    assert.deepEqual(Object.keys(athlete.formats).sort(),['doubles','mixed','singles']);
+    // The two games reward different things, so the ratings must differ.
+    assert.ok(Math.abs(athlete.formats.doubles-athlete.formats.singles)>0.01,athlete.name);
+  }
+  // A player who is better in one game should be better in that game.
+  const betterInDoubles=roster.some(athlete=>athlete.formats.doubles>athlete.formats.singles);
+  const betterInSingles=roster.some(athlete=>athlete.formats.singles>athlete.formats.doubles);
+  assert.ok(betterInDoubles&&betterInSingles,'the population has both kinds of player');
 });
 
 test('citizenship comes from the region pool and mostly matches the city',()=>{

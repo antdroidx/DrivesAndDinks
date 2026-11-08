@@ -5,14 +5,14 @@
 // costs progress.
 
 import {CHARACTERS,RATING_KEYS,RATING_LABELS} from '../roster.js';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank} from './geography.js';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS} from './geography.js';
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
-  currentEvents,canAct,trainingCost,trainingGain
+  currentEvents,canAct,trainingCost,trainingGain,INTERNATIONAL_TRAVEL_COST
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
-import {weekLabel,upcomingWeeks,seasonLabel,generateWeekEvents} from './calendar.js';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -27,6 +27,7 @@ const app={
   view:'home',
   draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:''},
   filters:{areaId:'',cityId:'',tier:'',query:''},
+  move:{regionId:'',cityId:''},
   expandedClub:null,
   storage:careerStorage()
 };
@@ -73,7 +74,7 @@ function renderStatus(){
   statusStrip.innerHTML=`
     <div><small>WEEK</small><strong>${career.week+1}</strong></div>
     <div><small>ENERGY</small><strong>${career.energy}</strong></div>
-    <div><small>RATING</small><strong>${formatRating(career.athlete.rating)}</strong></div>
+    <div><small>BEST RATING</small><strong>${formatRating(Math.max(...Object.values(career.athlete.formats??{doubles:0})))}</strong></div>
     <div><small>LOCATION</small><strong>${escapeHtml(career.cityLabel)}</strong></div>`;
 }
 
@@ -125,8 +126,14 @@ function renderHome(){
   const career=app.career;
   const events=currentEvents(career);
   const actReady=canAct(career);
-  const band=ratingBand(career.athlete.rating);
-  const ownBracket=divisionFor(career.athlete.rating);
+  const formatRows=FORMATS.map(format=>{
+    const rating=career.athlete.formats[format]??0;
+    const standing=tourRank(rating,career.athlete.gender);
+    return `<div class="format-line"><strong>${formatRating(rating)}</strong><span>${escapeHtml(formatLabel(format,career.athlete.gender))}</span><small>${escapeHtml(ratingBand(rating).label)}${standing?' · tour '+standing.toLocaleString('en-US'):''}</small></div>`;
+  }).join('');
+  const moveRegion=REGIONS.find(region=>region.id===(app.move.regionId||career.regionId))??REGIONS[0];
+  const moveCities=allCities(moveRegion.id);
+  const moveCity=moveCities.find(city=>city.id===app.move.cityId)??moveCities.find(city=>city.id===career.cityId)??moveCities[0];
   const entered=new Set(career.entered??[]);
   const nextEvent=COMPETITION_EVENTS.find(event=>!entered.has(event.id))??null;
   const reliabilityInfo=reliability(career.athlete.record.matches);
@@ -144,7 +151,8 @@ function renderHome(){
     </div>`).join('');
 
   const tour=tourFor(career.athlete.gender);
-  const tourStanding=tourRank(career.athlete.rating,career.athlete.gender);
+  const bestFormat=FORMATS.reduce((best,format)=>(career.athlete.formats[format]??0)>(career.athlete.formats[best]??0)?format:best,FORMATS[0]);
+  const tourStanding=tourRank(career.athlete.formats[bestFormat]??0,career.athlete.gender);
   const highestEntered=COMPETITION_EVENTS.reduce((best,event,index)=>entered.has(event.id)?index:best,-1);
   const ladder=COMPETITION_EVENTS.map((event,index)=>{
     const done=entered.has(event.id);
@@ -169,10 +177,8 @@ function renderHome(){
         </div>
       </div>
       <div style="text-align:right">
-        <small class="muted">${escapeHtml(seasonLabel(career.week))}</small>
-        <div style="font-size:30px;font-weight:700">${formatRating(career.athlete.rating)}</div>
-        <small class="muted">Rating · ${escapeHtml(band.label)}</small>
-        <small class="muted">${escapeHtml(ownBracket.label)} bracket</small>
+        <small class="muted">${escapeHtml(weekShortLabel(career.week))}</small>
+        <div class="format-list">${formatRows}</div>
         <small class="muted">${tourStanding?`Tour rank ${tourStanding.toLocaleString('en-US')} of ${tour.size.toLocaleString('en-US')}`:`Not on the ${tour.label}'s tour`}</small>
         <div class="hint">${escapeHtml(reliabilityText)}</div>
         <div class="hint">Next on the ladder: ${escapeHtml(nextEvent?nextEvent.label:'the pro league')}</div>
@@ -185,16 +191,16 @@ function renderHome(){
         <label for="focus-select">TRAINING FOCUS</label>
         <select id="focus-select" ${actReady?'':'disabled'}>${focusOptions}</select>
       </div>
-      <button type="button" class="secondary" data-action="train" ${actReady&&career.energy>=trainingCost(career)?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">PRACTISE · ${trainingCost(career)} ENERGY</button>
+      <button type="button" class="secondary" data-action="train" ${actReady&&career.energy>=trainingCost(career)?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
       <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end">ADVANCE WEEK →</button>
     </div>
-    <div class="hint">Practice gives +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. Later gains are slower than early ones.</div>
+    <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Later gains are slower than early ones.</div>
   </section>
 
   <div class="grid two">
     <section class="panel">
       <h2>THIS WEEK · ${escapeHtml(weekLabel(career.week))}</h2>
-      ${events.length?events.map(event=>eventRow(event,actReady)).join(''):'<p>No events this week. Join a club to get club night on the calendar.</p>'}
+      ${events.length?events.map(event=>eventRow(event,actReady,career.athlete.gender)).join(''):'<p>No events this week. Join a club to get club night on the calendar.</p>'}
     </section>
     <section class="panel">
       <h2>THE LADDER</h2>
@@ -206,6 +212,21 @@ function renderHome(){
     <section class="panel">
       <h2>RATINGS</h2>
       ${groups}
+    </section>
+    <section class="panel">
+      <h2>MOVE</h2>
+      <p>Pick the tour up in another city, or in the other region. Moving clears your club.</p>
+      <div class="filters">
+        <select id="move-region">
+          ${REGIONS.map(region=>`<option value="${region.id}"${region.id===moveRegion.id?' selected':''}>${escapeHtml(region.label)}</option>`).join('')}
+        </select>
+        <select id="move-city">
+          ${moveCities.map(city=>`<option value="${city.id}"${city.id===moveCity?.id?' selected':''}>${escapeHtml(city.label)}, ${escapeHtml(city.country)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="actions">
+        <button type="button" class="secondary" data-action="move" ${moveCity&&moveCity.id!==career.cityId?'':'disabled'}>${moveRegion.id===career.regionId?'MOVE':'MOVE ACROSS REGIONS'} · ${moveRegion.id===career.regionId?'10':'20'} ENERGY</button>
+      </div>
     </section>
     <section class="panel">
       <h2>MATCHES</h2>
@@ -225,33 +246,38 @@ function renderHome(){
 
 function bracketSummary(event){
   if(!event.brackets.length)return 'open bracket';
-  if(event.brackets.length===1)return `${event.brackets[0]} bracket`;
-  return `${event.brackets[0]} – ${event.brackets.at(-1)} brackets`;
+  const formats=(event.formats??[]).map(format=>format==='doubles'?'Doubles':format==='mixed'?'Mixed':'Singles').join('/');
+  if(event.brackets.length===1)return `${event.brackets[0]} bracket · ${formats}`;
+  return `${event.brackets[0]} – ${event.brackets.at(-1)} brackets · ${formats}`;
 }
 
 // The brackets an event is running, with the player's own bracket marked and
 // the one above it offered as a deliberate step up.
-function bracketOptions(event){
-  return event.enterable.map(id=>{
-    const division=event.divisions.find(entry=>entry.id===id);
+function bracketOptions(event,gender){
+  const ownLevel=event.options.find(option=>option.isPlayer)?.divisionId;
+  return event.options.map(option=>{
+    const division=event.divisions.find(entry=>entry.id===option.divisionId);
     if(!division)return '';
-    const own=division.isPlayer?' · your bracket':'';
-    const up=division.level>event.divisions.find(entry=>entry.isPlayer)?.level?' · play up':'';
-    return `<option value="${division.id}"${division.id===event.defaultDivisionId?' selected':''}>${escapeHtml(division.label+own+up)}</option>`;
+    const notes=[];
+    if(option.isPlayer)notes.push('your bracket');
+    else if(division.level>divisionFor(event.ownRatings?.[option.format]??0).level)notes.push('play up');
+    const suffix=notes.length?' · '+notes.join(' · '):'';
+    const label=formatLabel(option.format,gender)+' · '+division.label+suffix;
+    return `<option value="${option.id}"${option.id===event.defaultOptionId?' selected':''}>${escapeHtml(label)}</option>`;
   }).join('');
 }
 
-function eventRow(event,actReady){
+function eventRow(event,actReady,gender){
   const locked=!event.eligible.ok;
   const running=event.divisions.map(division=>division.label).join(' · ');
   return `<div class="event">
     <div class="body">
       <strong>${escapeHtml(event.title)}</strong>
-      <small>${escapeHtml(event.venue)} · ${event.energyCost} energy${event.kind==='practice'?'':' · match'}</small>
+      <small>${escapeHtml(event.venue)} · ${event.energyCost} energy · rated match</small>
       <small>Brackets: ${escapeHtml(running)}</small>
-      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:`<select class="bracket" data-division="${event.id}" ${actReady?'':'disabled'}>${bracketOptions(event)}</select>`}
+      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:`<select class="bracket" data-division="${event.id}" ${actReady?'':'disabled'}>${bracketOptions(event,gender)}</select>`}
     </div>
-    ${locked?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${actReady?'':'disabled'}>${event.kind==='practice'?'PRACTISE':'ENTER'}</button>`}
+    ${locked?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${actReady?'':'disabled'}>ENTER</button>`}
   </div>`;
 }
 
@@ -348,11 +374,11 @@ function renderCalendar(){
   return `
   <section class="panel">
     <h2>CALENDAR · ${escapeHtml(career.regionLabel.toUpperCase())}</h2>
-    <p>${escapeHtml(seasonLabel(career.week))} · club nights weekly, city and regional rounds on their own cycles.</p>
+    <p>Tournaments run all year. Leagues and the amateur MLP run for a month or three. The pro tour runs nine months and the MLP is a summer circuit.</p>
     ${weeks.map(entry=>{
       const events=generateWeekEvents(career,entry.week);
       return `<div class="week${entry.isCurrent?' current':''}">
-        <h3><span>${escapeHtml(entry.label)}</span><small>${escapeHtml(entry.season)}</small></h3>
+        <h3><span>${escapeHtml(entry.label)}</span><small>${escapeHtml(entry.short)}</small></h3>
         ${events.length?events.map(event=>eventRow(event,actReady&&entry.isCurrent)).join(''):'<p class="empty">Quiet week.</p>'}
       </div>`;
     }).join('')}
@@ -406,6 +432,11 @@ document.addEventListener('click',event=>{
       return;
     }
     if(action==='advance'){apply(advanceWeek(app.career));return}
+    if(action==='move'){
+      const city=document.getElementById('move-city')?.value;
+      apply(moveToCity(app.career,city));
+      return;
+    }
     if(action==='join'){apply(joinClub(app.career,trigger.dataset.club));return}
     if(action==='leave'){apply(leaveClub(app.career));return}
     if(action==='attend'){
@@ -444,6 +475,8 @@ document.addEventListener('change',event=>{
   }
   if(id==='filter-city'){app.filters.cityId=event.target.value;render()}
   if(id==='filter-tier'){app.filters.tier=event.target.value;render()}
+  if(id==='move-region'){app.move.regionId=event.target.value;app.move.cityId='';render()}
+  if(id==='move-city'){app.move.cityId=event.target.value}
 });
 
 document.addEventListener('input',event=>{

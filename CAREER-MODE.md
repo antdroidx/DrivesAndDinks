@@ -183,22 +183,52 @@ Events do not gate entry on a rating. They run **a bracket for each level of pla
 
 A player may enter their own bracket, one above it, or one below it. **Playing up is the fastest way to move a rating**, because the bar to beat is lower. Playing down risks a drop, because a narrow win is an underperformance.
 
+### Formats
+
+A player is rated separately in each format, and each format has its own ranking:
+
+- **Singles**
+- **Doubles**, played on a men's or a women's board
+- **Mixed Doubles**
+
+The three diverge because the games reward different things. Doubles leans on the soft game and the net, singles on the serve and the feet, and mixed is a blend. Every athlete carries a bias toward one of them, so a 3.9 doubles player might be a 3.4 singles player.
+
+The player's card shows all three ratings, the band each one sits in, and the tour standing each one earns.
+
+### Brackets, not gates
+
+Events do not gate entry on a rating. They run **a bracket for each level of play**, and a bracket is named by the top of its range: the 3.5 bracket holds players rated 3.500 to 3.999. The player signs up for a bracket and is placed in it.
+
+| Bracket | Holds |
+|---|---|
+| 2.0 | 2.000 – 2.499 |
+| 2.5 | 2.500 – 2.999 |
+| 3.0 | 3.000 – 3.499 |
+| 3.5 | 3.500 – 3.999 |
+| 4.0 | 4.000 – 4.499 |
+| 4.5 | 4.500 – 4.999 |
+| 5.0+ | 5.000 – 8.000 |
+
+**Some events are completely open**, with no rating gates at all. Ladder events are the usual case, and an open tournament works just as well. An open event takes any bracket it runs, which is what lets a player who feels underrated go and play better company — and lets anyone drop into a lower bracket to grind.
+
+A **gated** event only takes players whose rating sits in the bracket, with one allowance: a bracket half a step above their own is always open to them. A 3.3 player can enter a 3.5 tournament.
+
 ### The competition ladder
 
-| Event | Scope | Brackets it fields | Energy |
-|---|---|---|---|
-| Club Night | your club | 2.0 – 3.5 | 12 |
-| Local League | your city | 2.5 – 4.0 | 18 |
-| City Open | your city | 3.0 – 4.5 | 24 |
-| Regional Open | your area | 3.5 – 5.0+ | 30 |
-| Semi-Pro Circuit | your region | 4.5 – 5.0+ | 36 |
-| National Championship | your nation | 5.0+ | 44 |
-| International Series | world | 5.0+ | 52 |
-| Pro League | the pro tour | open, by tour standing | 64 |
+| Event | Scope | Brackets | Formats | Energy | Length |
+|---|---|---|---|---|---|
+| Club Night | your club | 2.0 – 3.5, open | Doubles | 12 | weekly |
+| Local League | your city | 2.5 – 4.0, open | Doubles | 18 | a month or three |
+| City Open | your city | 3.0 – 4.5, open | Singles / Doubles / Mixed | 24 | a tournament |
+| Regional Open | your area | 3.5 – 5.0+ | Singles / Doubles | 30 | a tournament |
+| Amateur MLP | your region | 3.5 – 4.5 | Doubles | 30 | a month or three |
+| Semi-Pro Circuit | your region | 4.5 – 5.0+ | Doubles | 36 | a season |
+| National Championship | your nation | 5.0+ | Singles / Doubles / Mixed | 44 | a tournament |
+| International Series | world | 5.0+ | Singles / Doubles | 52 | nine months |
+| Pro League | the pro tour | open, by standing | Doubles | 64 | nine months |
+| MLP | the pro tour | 5.0+ | Doubles | 58 | a summer circuit |
 
-Larger events field fewer and higher brackets, which is how the ladder works in the real game: a club night reaches beginners, a national championship only runs the 5.0+ bracket, and the semi-pro circuit is where a 5.0+ player competes.
-
-Solo **training costs 8 energy**, a fraction of any rated match. The calendar should make a player choose to compete rather than to grind.
+**There are no seasons at amateur level.** Tournaments run all year at different clubs and locations. Leagues and the amateur MLP run for a month or three. The pro tour runs about nine months and the MLP is a summer circuit for pros.
 
 ### The pro tour
 
@@ -220,7 +250,7 @@ A player earns tour points from events, and points age out on the rolling 52 wee
 
 One action per week. Either train for 8 energy, or enter a rated event, which costs far more: 12 for club night, 18 for a local league, and up to 64 for the pro league. Advancing the week restores 35 energy (cap 100), rolls a fresh calendar and advances the world.
 
-Training gains taper with level — roughly +3 early, +1 near 90 — so the early career moves quickly and the late career does not grind flat. Training develops the athlete; it does not move the standing. Only rated matches do that.
+**Training moves attributes only.** It is a single point to the attribute you focus on, and it never moves your rating. **Playing an event moves both**: the rating in the format you entered, and one attribute you rely on. Which attribute grows is weighted by the skill the event rewards, what you are strongest at, and what the format asks for, so a soft player gets better at the soft game and a server gets better at serving.
 
 ---
 
@@ -271,9 +301,12 @@ the real result replaces the simulated one.
 
 Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
 
-### M3 — Seasons and ladder progression ⬜ planned
+### M3 — Ladder progression ⬜ planned
 
-- [ ] Season boundaries, standings and a season summary
+There are no seasons to model, so this milestone is about moving up the ladder
+rather than surviving a schedule.
+
+- [ ] Standings and a form summary
 - [ ] Promotion and relegation between ladder tiers
 - [ ] Qualification for the national rounds
 - [ ] A rival who also moves through the ladder
@@ -326,6 +359,12 @@ Depends on: `PRE-CAREER-AUDIT.md` P0 rules fidelity and match integrity items.
 | 2026-11-08 | The pro league is entered on a tour standing, with one symmetric 4.95 floor for both boards | The published floors are a points cut and differ oddly between the boards. One floor keeps a rating meaning the same thing on each. |
 | 2026-11-08 | Players are identified by city and citizenship, not ethnicity | Citizenship and city say where a player is from and what they play for, without labelling them. |
 | 2026-11-08 | Training costs 8 energy against 12 for the cheapest rated match | The calendar should make a player choose to compete rather than to grind. |
+| 2026-11-08 | Training moves attributes only, by a single point, and never the rating | Anything that gives you a rating is an event. Drilling is for the attributes and is deliberately small so a player cannot over-boost. |
+| 2026-11-08 | Playing an event moves the rating and grows one attribute the player relies on | Attributes should follow what a player actually does, so growth is weighted by the event's focus, their strongest skills and the format. |
+| 2026-11-08 | Singles, doubles and mixed doubles are rated and ranked separately | The games reward different things, and a player should be rated on what they do in the game they are playing. |
+| 2026-11-08 | Some events are completely open, and a gated event always accepts a bracket half a step above the player's own | Real events do not gate entry on a rating. Open events let an underrated player find stronger company; the half step up is how a player plays up. |
+| 2026-11-08 | There are no seasons. Tournaments run all year, leagues and the amateur MLP run one to three months, the pro tour runs nine months and the MLP is a summer circuit | That is how amateur and professional pickleball actually run. |
+| 2026-11-08 | A career can move to the other region, at a higher energy cost | The pro circuit is international. The question was never whether a player can go, only what it costs. |
 | 2026-11-08 | The rating is derived from the 14 skill ratings for now, and switches to result-driven in milestone 2 | DUPR is a results system. Deriving it from skills is a starting prior, not the final model. |
 
 ---

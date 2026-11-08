@@ -31,7 +31,7 @@ export const RATING_BANDS=Object.freeze([
   {id:'professional',min:5,max:8}
 ]);
 export const RATING_LABELS=Object.freeze({
-  novice:{label:'Novice',note:'Learning the game. Club nights and practice.'},
+  novice:{label:'Novice',note:'Learning the game. Club nights and training.'},
   intermediate:{label:'Intermediate',note:'Reliable rallies. Local league ready.'},
   advanced:{label:'Advanced',note:'Pressure the net. Regional and semi-pro ready.'},
   professional:{label:'Professional',note:'National and international level. Pro league ready.'}
@@ -106,6 +106,53 @@ export function simulateOutcome({mySkill,theirSkill,myRating,theirRating,random=
   const myPoints=Math.round(clamp((total+margin)/2,0,MAX_POINTS));
   const opponentPoints=Math.round(clamp((total-margin)/2,0,MAX_POINTS));
   return {myPoints,opponentPoints,expected,skillGap,margin};
+}
+
+// ---- formats ----------------------------------------------------------------
+//
+// A player is rated separately in singles and in doubles, and each format
+// has its own ranking. The two diverge because the games reward different
+// things: doubles is a net and placement game, singles is a serve, receive
+// and movement game. Every athlete carries a bias toward one of them.
+
+export const FORMATS=Object.freeze(['singles','doubles','mixed']);
+export const FORMAT_LABELS=Object.freeze({
+  singles:'Singles',
+  doubles:'Doubles',
+  mixed:'Mixed Doubles'
+});
+
+// Gender doubles is played on a men's or a women's board, so the label the
+// player sees depends on who they are.
+export function formatLabel(format,gender){
+  if(format!=='doubles')return FORMAT_LABELS[format]??format;
+  return gender==='female'?"Women's Doubles":"Men's Doubles";
+}
+
+// How much of an athlete's skill carries into a format. Doubles leans on
+// the soft game and the net, singles on the serve and the feet.
+export const FORMAT_WEIGHTS=Object.freeze({
+  doubles:{dink:1.15,drop:1.15,volley:1.12,control:1.08,defense:1.08,serve:.95,agility:.95},
+  singles:{serve:1.15,agility:1.12,reach:1.1,power:1.08,defense:1.05,dink:.92,drop:.9},
+  mixed:{dink:1.08,drop:1.05,volley:1.08,serve:1.08,agility:1.06,control:1.05,reach:1.05,defense:1.05}
+});
+
+// The skill an athlete shows in a format, given their base attributes.
+export function formatSkill(attributes,format){
+  const weights=FORMAT_WEIGHTS[format]??FORMAT_WEIGHTS.doubles;
+  let total=0;
+  let weight=0;
+  for(const key of Object.keys(attributes)){
+    const factor=weights[key]??1;
+    total+=(Number(attributes[key])||0)*factor;
+    weight+=factor;
+  }
+  return weight?total/weight:0;
+}
+
+// The rating an athlete holds in a format.
+export function ratingInFormat(attributes,format,bias=0){
+  return ratingFromSkill(formatSkill(attributes,format)+bias);
 }
 
 // ---- brackets ---------------------------------------------------------------

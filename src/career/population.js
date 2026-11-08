@@ -8,6 +8,7 @@
 import {CHARACTERS,generateIdentity,skillAverage} from '../roster.js';
 import {seededRandom} from '../competition.js';
 import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js';
+import {FORMATS,ratingInFormat} from './rating.js';
 
 export const CLUB_TIERS=Object.freeze([
   {id:'recreational',label:'Recreational',skill:52,weight:.48},
@@ -103,7 +104,10 @@ export function buildAthleteSkill(seed,club,index){
     const base=archetype.ratings[key]??70;
     ratings[key]=clamp(Math.round(base+levelDelta+(random()-.5)*9),MIN_RATING,MAX_RATING);
   }
-  return {archetype,ratings,average:skillAverage(ratings)};
+  // A bias toward one format. Doubles rewards the soft game and the net,
+  // singles rewards the serve and the feet.
+  const formatBias=random()*10-5;
+  return {archetype,ratings,average:skillAverage(ratings),formatBias};
 }
 
 export function buildAthlete(seed,club,index){
@@ -116,7 +120,12 @@ export function buildAthlete(seed,club,index){
   const citizenship=citizenshipFor(club.regionId,{country:club.country},random);
   const handedness=random()<.13?'left':'right';
   const age=MIN_AGE+Math.floor(random()*(MAX_AGE-MIN_AGE+1));
-  const {archetype,ratings,average}=buildAthleteSkill(seed,club,index);
+  const {archetype,ratings,average,formatBias}=buildAthleteSkill(seed,club,index);
+  const formats={};
+  for(const format of FORMATS){
+    const bias=format==='doubles'?formatBias:-formatBias;
+    formats[format]=ratingInFormat(ratings,format,bias);
+  }
   return {
     id:`${club.id}-a${index}`,
     clubId:club.id,
@@ -134,8 +143,9 @@ export function buildAthlete(seed,club,index){
     archetypeLabel:archetype.style,
     ratings,
     skillAverage:average,
-    rating:ratingFromSkill(average),
-    baseRating:ratingFromSkill(average),
+    formats,
+    formatBias,
+    baseFormats:{...formats},
     lastPlayed:0,
     potential:clamp(Math.round(average+(random()*14-2)),MIN_RATING,MAX_RATING),
     record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0}
@@ -149,7 +159,12 @@ export function buildRegionSkills(seed,regionId){
   const athletes=[];
   for(const club of clubs){
     for(let index=0;index<club.memberCount;index++){
-      const {ratings,average}=buildAthleteSkill(seed,club,index);
+      const {ratings,average,formatBias}=buildAthleteSkill(seed,club,index);
+      const formats={};
+      for(const format of FORMATS){
+        const bias=format==='doubles'?formatBias:-formatBias;
+        formats[format]=ratingInFormat(ratings,format,bias);
+      }
       athletes.push({
         id:`${club.id}-a${index}`,
         clubId:club.id,
@@ -158,7 +173,8 @@ export function buildRegionSkills(seed,regionId){
         index,
         club,
         skill:average,
-        baseRating:ratingFromSkill(average),
+        formats,
+        baseFormats:{...formats},
         lastPlayed:0
       });
     }

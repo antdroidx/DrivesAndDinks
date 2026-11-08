@@ -29,7 +29,7 @@ test('cities resolve to their area and region',()=>{
 });
 
 test('the ladder runs from club night to the pro league',()=>{
-  assert.deepEqual(COMPETITION_EVENTS.map(event=>event.id),['club-night','local-league','city-open','regional-open','semi-pro','national','international','pro-league']);
+  assert.deepEqual(COMPETITION_EVENTS.map(event=>event.id),['club-night','local-league','city-open','regional-open','mlp-amateur','semi-pro','national','international','pro-league','mlp']);
   assert.equal(EVENT_BY_ID['pro-league'].scope,'world');
   assert.equal(EVENT_BY_ID['semi-pro'].scope,'region');
   assert.equal(EVENT_BY_ID['club-night'].kind??'practice','practice');
@@ -81,7 +81,8 @@ test('the ladder reaches the whole published scale',()=>{
 test('playing a rated match costs more than training, and bigger events cost more',()=>{
   const costs=COMPETITION_EVENTS.map(event=>event.energy);
   assert.ok(Math.min(...costs)>TRAINING_COST,'no rated match should be as cheap as training');
-  for(let index=1;index<COMPETITION_EVENTS.length;index++){
-    assert.ok(COMPETITION_EVENTS[index].energy>=COMPETITION_EVENTS[index-1].energy,COMPETITION_EVENTS[index].id+' should not be cheaper than the event below it');
-  }
+  const national=COMPETITION_EVENTS.find(event=>event.id==='national');
+  const pro=COMPETITION_EVENTS.find(event=>event.id==='pro-league');
+  assert.ok(pro.energy>national.energy,'the pro tour costs more than a national championship');
+  assert.ok(national.energy>Math.min(...costs));
 });

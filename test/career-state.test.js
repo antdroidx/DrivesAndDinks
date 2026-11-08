@@ -33,8 +33,8 @@ test('a new career starts in the chosen city with a valid state',()=>{
 
 test('a new career starts well outside the pro league',()=>{
   const state=career();
-  assert.equal(tourRank(state.athlete.rating,state.athlete.gender),null,'a beginner is not on the tour');
-  assert.ok(state.athlete.rating<tourFor(state.athlete.gender).floorRating);
+  assert.equal(tourRank(state.athlete.formats.doubles,state.athlete.gender),null,'a beginner is not on the tour');
+  assert.ok(state.athlete.formats.doubles<tourFor(state.athlete.gender).floorRating);
 });
 
 test('the starting city is deterministic for a seed and differs between regions',()=>{
@@ -60,7 +60,7 @@ test('training costs energy, raises the focused rating and takes the week',()=>{
   assert.equal(result.state.energy,state.energy-cost);
   assert.ok(result.state.athlete.ratings.dink>state.athlete.ratings.dink);
   assert.ok(result.state.athlete.ratings.control>state.athlete.ratings.control);
-  assert.ok(result.state.athlete.rating>=state.athlete.rating);
+  assert.ok(result.state.athlete.formats.doubles>=state.athlete.formats.doubles);
   assert.equal(canAct(result.state),false);
 });
 
@@ -79,11 +79,15 @@ test('training is refused when there is not enough energy',()=>{
   assert.match(result.message,/energy/);
 });
 
-test('later gains are slower than early gains',()=>{
+test('training is a single small step, whatever the level',()=>{
   const early=career();
   const late=career();
   late.athlete={...late.athlete,ratings:{...late.athlete.ratings,dink:92}};
-  assert.ok(trainingGain(early,'dink')>trainingGain(late,'dink'));
+  assert.equal(trainingGain(early,'dink'),1);
+  assert.equal(trainingGain(late,'dink'),1);
+  // Training never touches the rating.
+  const trained=train(early,'dink').state;
+  assert.equal(trained.athlete.formats.doubles,early.athlete.formats.doubles);
 });
 
 test('advancing a week moves time forward and restores energy',()=>{
@@ -146,17 +150,30 @@ test('an event is entered by choosing a bracket, not by clearing a rating gate',
   const event=currentEvents(joined).find(entry=>entry.eligible.ok);
   assert.ok(event.divisions.length>0,'an event runs brackets');
   assert.ok(event.enterable.length>0,'at least one bracket is open to the player');
-  const own=divisionFor(joined.athlete.rating);
+  const own=divisionFor(joined.athlete.formats.doubles);
   const brackets=event.divisions.map(division=>division.id);
   if(brackets.includes(own.id))assert.ok(event.enterable.includes(own.id),'the player may enter their own bracket');
 });
 
-test('a player may play up one bracket or down one bracket, but no further',()=>{
+test('an open event takes any bracket it runs',()=>{
   const joined=withClub(career());
-  const own=divisionFor(joined.athlete.rating);
   const event=currentEvents(joined).find(entry=>entry.eventId==='club-night');
-  assert.ok(event.enterable.length<=3,'at most own, one up and one down');
-  for(const id of event.enterable)assert.ok(Math.abs(bracketLevel(id)-own.level)<=1.01);
+  assert.equal(event.open,true);
+  // A club night runs four brackets and takes all of them.
+  assert.equal(event.enterable.length,event.brackets.length);
+  assert.ok(event.options.length>=event.brackets.length);
+});
+
+test('a gated event only takes players in its range, plus half a step up',()=>{
+  const joined=withClub(career());
+  const own=divisionFor(joined.athlete.formats.doubles);
+  const event=currentEvents(joined).find(entry=>entry.eventId==='semi-pro');
+  if(!event)return;
+  assert.equal(event.open,false);
+  for(const id of event.enterable){
+    const level=bracketLevel(id);
+    assert.ok(level<=own.level+0.51,'a gated event allows one half step up');
+  }
 });
 
 function bracketLevel(id){return Number(id.replace('+',''))}
@@ -191,7 +208,7 @@ test('entering a tour event earns points that age out',()=>{
   const event=currentEvents({...state,week:0}).find(entry=>entry.eventId==='local-league');
   assert.ok(event,'the local league should run');
   const before=state.athlete.tourPoints;
-  const result=attendEvent(state,event.id,event.defaultDivisionId);
+  const result=attendEvent(state,event.id,event.defaultOptionId);
   assert.ok(result.ok,result.message);
   assert.ok(result.state.athlete.tourPoints>before,'a tour event is worth points');
 });
@@ -199,13 +216,15 @@ test('entering a tour event earns points that age out',()=>{
 test('attending an event costs energy, records the bracket and improves the focused rating',()=>{
   const joined=withClub(career());
   const event=currentEvents(joined).find(entry=>entry.eligible.ok);
-  const result=attendEvent(joined,event.id,event.defaultDivisionId);
+  const result=attendEvent(joined,event.id,event.defaultOptionId);
   assert.ok(result.ok,result.message);
   assert.equal(result.state.energy,joined.energy-event.energyCost);
-  assert.ok(result.state.athlete.ratings[event.skillFocus]>joined.athlete.ratings[event.skillFocus]);
+  const grown=Object.keys(result.state.athlete.ratings).filter(key=>result.state.athlete.ratings[key]>joined.athlete.ratings[key]);
+  assert.equal(grown.length,1,'playing an event grows one attribute');
+  assert.ok(grown.length===1&&result.state.athlete.ratings[grown[0]]<=99);
   assert.equal(canAct(result.state),false);
   assert.ok(result.state.entered.includes(event.eventId));
-  assert.equal(result.state.lastEntry.divisionId,event.defaultDivisionId);
+  assert.equal(result.state.lastEntry.divisionId,event.defaultOptionId.split(':')[1]);
 });
 
 test('a bracket that is not running cannot be entered',()=>{

@@ -2,7 +2,7 @@
 //
 // Career time is counted in weeks from a fixed Monday so that every save
 // reads the same date no matter when it was written. Each week generates the
-// events running that week: club practice nearby, then league and tournament
+// events running that week: club night nearby, then league and tournament
 // events that open up as the career moves through the world.
 //
 // Events are not gated on a rating. They carry the brackets they field, and
@@ -29,9 +29,8 @@ export function weekShortLabel(week){
   return `${MONTHS[date.getUTCMonth()]} ${date.getUTCDate()}`;
 }
 export function careerYear(week){return 2026+Math.floor(week/52)}
-export function seasonLabel(week){return `Season ${careerYear(week)-2025}`}
 
-// How often each event comes around. Practice is weekly; the national and
+// How often each event comes around. Club night is weekly; the national and
 // international rounds are rare by design, so the ladder stays worth
 // climbing toward.
 const CADENCE=Object.freeze({
@@ -39,10 +38,12 @@ const CADENCE=Object.freeze({
   'local-league':{every:2,on:0},
   'city-open':{every:4,on:1},
   'regional-open':{every:6,on:2},
+  'mlp-amateur':{every:8,on:3},
   'semi-pro':{every:9,on:4},
   'national':{every:12,on:6},
   'international':{every:16,on:8},
-  'pro-league':{every:20,on:10}
+  'pro-league':{every:20,on:10},
+  'mlp':{every:20,on:10}
 });
 
 function eventTitle(event,state,club){
@@ -61,17 +62,57 @@ function eventVenue(event,state,club){
 
 // The brackets an event is running that a player of this rating may enter.
 // A player may play up one bracket or down one bracket from their own.
-export function bracketsFor(state,event){
+// The brackets a player may enter.
+//
+// An open event has no rating gates: any bracket it runs is available, so a
+// player who feels underrated can go and play better company, and a player
+// who wants to grind can drop into a lower one. A gated event only takes
+// players whose rating sits in the bracket, with one allowance: a bracket
+// half a step above their own is always open to them.
+export function enterableBrackets(state,event,format){
+  if(!event.brackets.length)return [];
+  if(event.open)return event.brackets.slice();
+  const rating=state.athlete.formats?.[format]??0;
+  const own=divisionFor(rating);
+  return event.brackets.filter(id=>{
+    const division=RATING_BRACKETS.find(entry=>entry.id===id);
+    if(!division)return false;
+    if(rating>=division.min&&rating<=division.max)return true;
+    return division.level<=own.level+0.5;
+  });
+}
+
+export function bracketsFor(state,event,format){
   // The pro league runs one open bracket rather than a ladder of them. Its
   // access rule is the world ranking, which is checked separately.
   if(!event.brackets.length)return {running:[{...PRO_LEAGUE_DIVISION,isPlayer:false}],enterable:[PRO_LEAGUE_DIVISION.id]};
-  const own=divisionFor(state.athlete.rating);
+  const rating=state.athlete.formats?.[format]??state.athlete.rating??0;
+  const own=divisionFor(rating);
   const running=event.brackets
     .map(id=>RATING_BRACKETS.find(division=>division.id===id))
     .filter(Boolean)
     .map(division=>({...division,isPlayer:division.id===own.id}));
-  const enterable=availableDivisions(state.athlete.rating,event.brackets).map(division=>division.id);
+  const enterable=enterableBrackets(state,event,format);
   return {running,enterable};
+}
+
+// Every combination of format and bracket a player may enter at an event.
+export function entryOptions(state,event){
+  const options=[];
+  for(const format of event.formats??['doubles']){
+    const {running,enterable}=bracketsFor(state,event,format);
+    for(const division of running){
+      if(!enterable.includes(division.id))continue;
+      options.push({
+        id:`${format}:${division.id}`,
+        format,
+        divisionId:division.id,
+        label:division.label,
+        isPlayer:division.isPlayer
+      });
+    }
+  }
+  return options;
 }
 
 // Whether a player may enter an event at all. This is about access, not
@@ -92,6 +133,13 @@ export function entryEligibility(state,event,enterable=null){
   return {ok:true,reason:null};
 }
 
+// The player's strongest rating across the formats, which is the one the
+// tour standing is measured on.
+export function bestFormatRating(state){
+  const formats=Object.values(state.athlete.formats??{});
+  return formats.length?Math.max(...formats):0;
+}
+
 // Builds the events for one week.
 export function generateWeekEvents(state,week){
   const club=state.clubId?state.club:null;
@@ -101,16 +149,33 @@ export function generateWeekEvents(state,week){
     if(!cadence)continue;
     if(week%cadence.every!==cadence.on)continue;
     if(event.scope==='club'&&!club)continue;
-    const {running,enterable}=bracketsFor(state,event);
+    // A seasonal event only runs inside its window. The pro tour and the MLP
+    // run part of the year; amateur play does not.
+    if(event.months&&!event.months.includes(weekDate(week).getUTCMonth()))continue;
+    const formats=event.formats??['doubles'];
+    const perFormat=formats.map(format=>({format,...bracketsFor(state,event,format)}));
+    const enterable=perFormat.flatMap(entry=>entry.enterable);
     const eligible=entryEligibility(state,event,enterable);
-    const own=divisionFor(state.athlete.rating);
-    const defaultDivision=running.find(division=>enterable.includes(division.id))??null;
+    const options=[];
+    for(const entry of perFormat){
+      for(const division of entry.running){
+        if(!entry.enterable.includes(division.id))continue;
+        options.push({
+          id:`${entry.format}:${division.id}`,
+          format:entry.format,
+          divisionId:division.id,
+          label:division.label,
+          isPlayer:division.isPlayer
+        });
+      }
+    }
+    const defaultOption=options.find(option=>option.isPlayer)??options[0]??null;
     events.push({
       id:`w${week}-${event.id}`,
       week,
       eventId:event.id,
       label:event.label,
-      kind:event.id==='club-night'?'practice':'match',
+      kind:'match',
       scope:event.scope,
       scopeLabel:EVENT_SCOPE_LABELS[event.scope],
       title:eventTitle(event,state,club),
@@ -123,13 +188,18 @@ export function generateWeekEvents(state,week){
       skillFocus:event.skillFocus,
       matchType:event.matchType,
       dateLabel:weekShortLabel(week),
-      divisions:running,
+      formats,
+      brackets:event.brackets.slice(),
+      open:event.open??false,
+      duration:event.duration??1,
+      ownRatings:{...state.athlete.formats},
+      divisions:perFormat.flatMap(entry=>entry.running),
       enterable,
-      defaultDivisionId:defaultDivision?.id??null,
-      ownDivisionId:own.id,
+      options,
+      defaultOptionId:defaultOption?.id??null,
       qualification:event.qualification??null,
       tour:event.qualification==='pro-tour'?tourFor(state.athlete.gender):null,
-      tourRank:event.qualification==='pro-tour'?tourRank(state.athlete.rating,state.athlete.gender):null,
+      tourRank:event.qualification==='pro-tour'?tourRank(bestFormatRating(state),state.athlete.gender):null,
       eligible,
       lockedReason:eligible.reason??null
     });
@@ -142,7 +212,7 @@ export function upcomingWeeks(state,count=8){
   const weeks=[];
   for(let offset=0;offset<count;offset++){
     const week=state.week+offset;
-    weeks.push({week,label:weekLabel(week),short:weekShortLabel(week),season:seasonLabel(week),isCurrent:offset===0});
+    weeks.push({week,label:weekLabel(week),short:weekShortLabel(week),isCurrent:offset===0});
   }
   return weeks;
 }

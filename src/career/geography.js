@@ -155,17 +155,19 @@ export const REGIONS = Object.freeze([
 // only the 5.0+ bracket, and the pro league is entered by world ranking
 // rather than by bracket.
 export const COMPETITION_EVENTS = Object.freeze([
-  {id:'club-night',label:'Club Night',scope:'club',brackets:['2.0','2.5','3.0','3.5'],energy:12,skillFocus:'control',matchType:'club'},
-  {id:'local-league',label:'Local League',scope:'city',brackets:['2.5','3.0','3.5','4.0'],energy:18,skillFocus:'serve',matchType:'league'},
-  {id:'city-open',label:'City Open',scope:'city',brackets:['3.0','3.5','4.0','4.5'],energy:24,skillFocus:'drive',matchType:'tournament'},
-  {id:'regional-open',label:'Regional Open',scope:'area',brackets:['3.5','4.0','4.5','5.0+'],energy:30,skillFocus:'volley',matchType:'tournament'},
-  {id:'semi-pro',label:'Semi-Pro Circuit',scope:'region',brackets:['4.5','5.0+'],energy:36,skillFocus:'defense',matchType:'league'},
-  {id:'national',label:'National Championship',scope:'nation',brackets:['5.0+'],energy:44,skillFocus:'courtIQ',matchType:'tournament'},
-  {id:'international',label:'International Series',scope:'world',brackets:['5.0+'],energy:52,skillFocus:'aggression',matchType:'tournament'},
-  {id:'pro-league',label:'Pro League',scope:'world',brackets:[],qualification:'pro-tour',energy:64,skillFocus:'reach',matchType:'tournament'}
+  {id:'club-night',label:'Club Night',scope:'club',brackets:['2.0','2.5','3.0','3.5'],formats:['doubles'],open:true,energy:12,skillFocus:'control',matchType:'club',duration:1,months:null},
+  {id:'local-league',label:'Local League',scope:'city',brackets:['2.5','3.0','3.5','4.0'],formats:['doubles'],open:true,energy:18,skillFocus:'serve',matchType:'league',duration:6,months:null},
+  {id:'city-open',label:'City Open',scope:'city',brackets:['3.0','3.5','4.0','4.5'],formats:['singles','doubles','mixed'],open:true,energy:24,skillFocus:'drive',matchType:'tournament',duration:1,months:null},
+  {id:'regional-open',label:'Regional Open',scope:'area',brackets:['3.5','4.0','4.5','5.0+'],formats:['singles','doubles'],open:false,energy:30,skillFocus:'volley',matchType:'tournament',duration:1,months:null},
+  {id:'mlp-amateur',label:'Amateur MLP',scope:'region',brackets:['3.5','4.0','4.5'],formats:['doubles'],open:false,energy:30,skillFocus:'defense',matchType:'league',duration:10,months:null},
+  {id:'semi-pro',label:'Semi-Pro Circuit',scope:'region',brackets:['4.5','5.0+'],formats:['doubles'],open:false,energy:36,skillFocus:'defense',matchType:'league',duration:12,months:null},
+  {id:'national',label:'National Championship',scope:'nation',brackets:['5.0+'],formats:['singles','doubles','mixed'],open:false,energy:44,skillFocus:'courtIQ',matchType:'tournament',duration:1,months:null},
+  {id:'international',label:'International Series',scope:'world',brackets:['5.0+'],formats:['singles','doubles'],open:false,energy:52,skillFocus:'aggression',matchType:'tournament',duration:20,months:[0,1,2,3,4,5,6,7,8]},
+  {id:'pro-league',label:'Pro League',scope:'world',brackets:[],formats:['doubles'],qualification:'pro-tour',open:false,energy:64,skillFocus:'reach',matchType:'tournament',duration:26,months:[0,1,2,3,4,5,6,7,8]},
+  {id:'mlp',label:'MLP',scope:'world',brackets:['5.0+'],formats:['doubles'],qualification:'pro-tour',open:false,energy:58,skillFocus:'reach',matchType:'league',duration:14,months:[5,6,7,8]}
 ]);
 
-// The pro league has one open bracket rather than a ladder of them.
+// The pro league runs one open bracket rather than a ladder of them.
 export const PRO_LEAGUE_DIVISION=Object.freeze({id:'pro-league',label:'Pro League Open',min:5.5,max:8,level:5.5});
 
 export const EVENT_SCOPE_LABELS=Object.freeze({
@@ -200,6 +202,13 @@ export function cityById(regionId,cityId){
   }
   return null;
 }
+export function cityByIdAnywhere(cityId){
+  for(const region of REGIONS){
+    const city=cityById(region.id,cityId);
+    if(city)return city;
+  }
+  return null;
+}
 export function allCities(regionId){return allAreas(regionId).flatMap(area=>area.cities.map(city=>({...city,areaId:area.id,areaLabel:area.label,regionId})))}
 export function citiesForArea(regionId,areaId){return areaById(regionId,areaId)?.cities??[]}
 export function majorCities(regionId){return allCities(regionId).filter(city=>city.tier==='major')}
@@ -209,7 +218,8 @@ export function majorCities(regionId){return allCities(regionId).filter(city=>ci
 export {
   RATING_MIN,RATING_MAX,RATING_ELITE,RATING_BANDS,RATING_LABELS,RATING_PRECISION,
   ratingFromSkill,ratingBand,formatRating,skillForRating,reliability,divisionFor,
-  RATING_BRACKETS,MATCH_TYPES,expectedScore,matchPerformance,updateRating,rateMatch
+  RATING_BRACKETS,FORMATS,FORMAT_LABELS,formatLabel,
+MATCH_TYPES,expectedScore,matchPerformance,updateRating,rateMatch,regressRating,simulateOutcome
 } from './rating.js';
 
 export {
