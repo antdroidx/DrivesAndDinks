@@ -263,25 +263,30 @@ Checkboxes are updated as work lands on this branch.
 The milestone this branch delivers.
 
 - [x] Isolated `/career-mode/` entry point; root prototype untouched and still publishing unchanged
-- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 6`, five migrations in place)
+- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 7`, six migrations in place)
 - [x] Corruption recovery: a damaged file falls back to the last verified save, and an unreadable file with no backup is quarantined rather than silently reset
 - [x] Stable ids for athletes, clubs and events, guaranteed by seed derivation
 - [x] North America and Asia, split into 14 areas and 74 cities
 - [x] Generated population: clubs, rosters, names, archetypes, ratings, 13 % left-handed rate
 - [x] Browse clubs, expand a roster, join a club, browse and search players
-- [x] Weekly calendar with the 8-event ladder, bracket choice and calendar advance
+- [x] Weekly calendar with the 10-event ladder, bracket choice and calendar advance
 - [x] Energy, one-action-per-week rule, training curve, travel and club membership
 - [x] Career rating: a precise 2.000–8.000 scale, the published bands, and a reliability percentage
 - [x] The rating calculation itself: expected score, performance against expectation, match type, recency and volume
 - [x] A career starts at a provisional 3.500 and the first rated match sets it
 - [x] The whole population is dynamically rated, with a 52 week half life back to the middle
 - [x] Brackets instead of rating gates, with play up and play down
+- [x] Singles, doubles and mixed doubles rated and ranked separately
+- [x] Open events with no rating gates, and a gated event always accepting a bracket half a step up
+- [x] No seasons: tournaments all year, leagues and the amateur MLP one to three months, the pro tour nine months, the MLP a summer circuit
+- [x] Training moves attributes only; playing an event moves the rating and grows one attribute
+- [x] A career can move to the other region
 - [x] The pro tour: separate men's and women's boards, one symmetric floor, and a rolling points window
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 90 automated tests across seven files (`test/career-*.test.js`), 531 in the suite overall
-- [x] Verified in the built-in browser: create, train, enter a bracket, play a rated match, advance, browse, roster, search, reload-persistence
+- [x] 92 automated tests across seven files (`test/career-*.test.js`), 533 in the suite overall
+- [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
 ### M2 — Match play inside a career ⬜ next
 
@@ -321,10 +326,13 @@ rather than surviving a schedule.
 
 ### M5 — Calendar depth ⬜ planned
 
-- [ ] Travel between cities and regions
-- [ ] Multi-week tournaments
+Travel between cities is done. What is left is making the calendar bite.
+
+- [ ] Multi-week tournaments that occupy consecutive weeks
+- [ ] Team leagues and MLPs that run for a season with a playoff
 - [ ] Fatigue, recovery and scheduling conflicts
 - [ ] Rest and injury risk
+- [ ] Travel costs that matter, and a home city worth defending
 
 ### M6 — World expansion ⬜ planned
 
