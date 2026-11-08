@@ -7,7 +7,7 @@
 // what was expected and what actually happened.
 
 import {rateMatch,expectedScore,matchPerformance,teamStrength} from './rating.js';
-import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints} from './tour.js';
+import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints,EVENT_POOL,POOL_TOUR} from './tour.js';
 
 export const CAREER_RECORD_LIMIT=60;
 

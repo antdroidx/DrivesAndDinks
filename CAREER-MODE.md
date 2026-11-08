@@ -10,7 +10,7 @@ It lives at its own entry point, **`/career-mode/`**. The gameplay prototype at 
 | Entry point | `career-mode/index.html` → `https://antdroidx.github.io/DrivesAndDinks/career-mode/` |
 | Engine modules | `src/career/` |
 | Local run | `npm start` → `http://127.0.0.1:8768/career-mode/` |
-| Current milestone | **M1 — offline career foundation: complete** |
+| Current milestone | **M2/M3 — in progress; M5 competition shapes landed** |
 | Last updated | 2026-11-08 |
 
 ---
@@ -56,6 +56,8 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/population.js` | Deterministic club and athlete generation from a seed. |
 | `src/career/save.js` | Versioned save schema, migrations, validation, corruption recovery. |
 | `src/career/calendar.js` | Week arithmetic, event generation, bracket choice and entry eligibility. |
+| `src/career/events.js` | The competition templates: the seven shapes of event and the rules they are played under. |
+| `src/career/competition.js` | Turning a template into a real competition: the field, the rounds, and the simulation that plays it out. |
 | `src/career/state.js` | Career state and every action a player can take. |
 | `src/career/main.js` | The user interface. |
 
@@ -224,11 +226,29 @@ A **gated** event only takes players whose rating sits in the bracket, with one 
 | Amateur MLP | your region | 3.5 – 4.5 | Doubles | 30 | a month or three |
 | Semi-Pro Circuit | your region | 4.5 – 5.0+ | Doubles | 36 | a season |
 | National Championship | your nation | 5.0+ | Singles / Doubles / Mixed | 44 | a tournament |
-| International Series | world | 5.0+ | Singles / Doubles | 52 | nine months |
-| Pro League | the pro tour | open, by standing | Doubles | 64 | nine months |
-| MLP | the pro tour | 5.0+ | Doubles | 58 | a summer circuit |
+| International Series | world | 5.0+ | Singles / Doubles | 52 | September to December |
+| Pro League | the pro tour | open, by standing | Doubles | 64 | January to June |
+| MLP | the pro tour | 5.0+ | Doubles | 58 | June to August |
 
-**There are no seasons at amateur level.** Tournaments run all year at different clubs and locations. Leagues and the amateur MLP run for a month or three. The pro tour runs about nine months and the MLP is a summer circuit for pros.
+**There are no seasons at amateur level.** Tournaments run all year at different clubs and locations. Leagues and the amateur MLP run for a month or three. At the top of the game the three world events run in turn rather than on top of each other: the pro league from January to June, the MLP as a summer circuit from June to August, and the international series through the autumn.
+
+### The shapes of a competition
+
+An event is not one thing. Every level of the game can host any of seven shapes of competition, and a competition is **generated from the career's seed rather than authored**, so the same career always draws the same field while a different career draws a different one.
+
+| Template | Shape | How it is won |
+|---|---|---|
+| Round Robin League | fixed teams, every pair meets once | the top four go to a playoff |
+| Round Robin, Open Partners | every player gets a new partner each round | the best record wins the league |
+| Bracket Tournament | the field is split into brackets of eight, each a short round robin | the bracket winners go to a playoff |
+| Double Elimination | nobody is out until they have lost twice, and the draw is made again each round | the last side standing |
+| Ladder, Fixed Teams | teams ranked onto courts; win and you move up a rung, lose and you move down | the most points at the end |
+| Ladder, Open Partners | players placed on courts by rating and given a random partner | the most points at the end |
+| MLP | a team of four or five plays doubles and singles against combinations of the other side | the season |
+
+The rules travel with the template and an organiser can vary any of them: **games to 11**, playoff games to **15**, the last four of a tournament **best of three**, a round robin round kept to about **seven games**. Games are won by two, exactly as they are on court.
+
+Some shapes cannot be arranged up front, so they are resolved as they are played. Who reaches the playoff of a round robin depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The player's own matches are never decided by the simulation: they are left for the player to play, and the rest of the field is played out around them.
 
 ### The pro tour
 
@@ -248,7 +268,24 @@ A player earns tour points from events, and points age out on the rolling 52 wee
 
 ### The weekly loop
 
-One action per week. Either train for 8 energy, or enter a rated event, which costs far more: 12 for club night, 18 for a local league, and up to 64 for the pro league. Advancing the week restores 35 energy (cap 100), rolls a fresh calendar and advances the world.
+A week is a budget of **100 energy**, and the player spends it however they like.
+
+- **Training is repeatable**, up to four sessions a week.
+- **One event a week.** A league that runs for a season is an event every week of it; a tournament is one event.
+- **Travel** costs 10 energy inside a region and 20 across regions, on top of everything else.
+
+Both the cost of a training session and the weekly recovery scale with the level the player competes at, so the shape of a week changes as a career climbs. A stronger player trains harder and takes more back.
+
+| Rating | A training session | Recovery | A week that fits inside it |
+|---|---|---|---|
+| 3.5, where a career starts | 10 | 69 | three sessions and a club night, 42 |
+| 4.5 | 14 | 75 | three sessions and a regional open, 72 |
+| 5.5 | 18 | 81 | two sessions and a national round, 80 |
+| 6.5 | 22 | 87 | one session and a pro league event, 86 |
+
+Spending more than the weekly recovery carries the rest into the next week as fatigue, so a heavy week is felt the week after. The consequence is that **early careers are training-heavy and late careers are not**: a 3.5 player can afford four sessions and still compete, while a pro's week is almost entirely the tour.
+
+Advancing the week restores the recovery, rolls a fresh calendar and advances the world.
 
 **Training moves attributes only.** It is a single point to the attribute you focus on, and it never moves your rating. **Playing an event moves both**: the rating in the format you entered, and one attribute you rely on. Which attribute grows is weighted by the skill the event rewards, what you are strongest at, and what the format asks for, so a soft player gets better at the soft game and a server gets better at serving.
 
@@ -270,7 +307,7 @@ The milestone this branch delivers.
 - [x] Generated population: clubs, rosters, names, archetypes, ratings, 13 % left-handed rate
 - [x] Browse clubs, expand a roster, join a club, browse and search players
 - [x] Weekly calendar with the 10-event ladder, bracket choice and calendar advance
-- [x] Energy, one-action-per-week rule, training curve, travel and club membership
+- [x] Energy as a weekly budget: repeatable training, one event a week, and costs and recovery scaled to the level of play
 - [x] Career rating: a precise 2.000–8.000 scale, the published bands, and a reliability percentage
 - [x] The rating calculation itself: expected score, performance against expectation, match type, recency and volume
 - [x] A career starts at a provisional 3.500 and the first rated match sets it
@@ -285,7 +322,7 @@ The milestone this branch delivers.
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 92 automated tests across seven files (`test/career-*.test.js`), 533 in the suite overall
+- [x] 123 automated tests across nine files (`test/career-*.test.js`), 564 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
 ### M2 — Match play inside a career 🔶 in progress
@@ -334,9 +371,11 @@ rather than surviving a schedule.
 
 Travel between cities is done. What is left is making the calendar bite.
 
+- [x] Fatigue and recovery: a week spent beyond what the recovery covers carries into the next one
+- [x] The seven competition shapes, generated from a seed and played out: round robin, round robin with open partners, bracket tournament, double elimination, both ladders, and MLP
 - [ ] Multi-week tournaments that occupy consecutive weeks
 - [ ] Team leagues and MLPs that run for a season with a playoff
-- [ ] Fatigue, recovery and scheduling conflicts
+- [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
 - [ ] Rest and injury risk
 - [ ] Travel costs that matter, and a home city worth defending
 
@@ -362,7 +401,7 @@ Travel between cities is done. What is left is making the calendar bite.
 | 2026-11-08 | The population is derived from a seed and never stored | Keeps saves tiny and makes ids stable by construction. |
 | 2026-11-08 | `src/career/` holds the engine, `career-mode/` holds the shell | The engine lives with the rest of the engine; the entry point stays a separate, deployable folder. |
 | 2026-11-08 | The service worker is network-first with a cache fallback | A cache-first worker masked code changes. Offline still works; stale code cannot. |
-| 2026-11-08 | One action per week | Makes the calendar the pacing device, and leaves the energy cost of a real match meaningful. |
+| 2026-11-08 | A week is a budget of 100 energy, not a single action | The one-action rule contradicted how players actually train. A week now holds several training sessions and one event, and energy decides how they are spent. |
 | 2026-11-08 | Save schema version 2, with a v1 migration that repairs the culture label | The first migration was needed in practice, so the chain is proven rather than theoretical. |
 | 2026-11-08 | The career rating is a precise 2.000 to 8.000 scale with the published bands and a reliability percentage | Matches the rating convention pickleball players already know. Precise rather than bucketed, so progress is always visible. |
 | 2026-11-08 | The rating calculation is implemented in full, including the cases where a win lowers a rating | A rating that only moves on wins is a points system, not a rating system. The calculation is the point. |
@@ -372,7 +411,7 @@ Travel between cities is done. What is left is making the calendar bite.
 | 2026-11-08 | Events carry brackets instead of rating gates | Real tournaments do not gate entry on a rating. They run a bracket per level and the player picks one. |
 | 2026-11-08 | The pro league is entered on a tour standing, with one symmetric 4.95 floor for both boards | The published floors are a points cut and differ oddly between the boards. One floor keeps a rating meaning the same thing on each. |
 | 2026-11-08 | Players are identified by city and citizenship, not ethnicity | Citizenship and city say where a player is from and what they play for, without labelling them. |
-| 2026-11-08 | Training costs 8 energy against 12 for the cheapest rated match | The calendar should make a player choose to compete rather than to grind. |
+| 2026-11-08 | Training and recovery scale with the level of play, and a week carries fatigue | The first version left energy decorative: with one action a week and a fixed recovery of 35, a real career started every week at full energy and the meter never changed a decision. Scaling both costs and recovery makes the meter bite, and makes training-heavy weeks a property of an early career rather than a special case. |
 | 2026-11-08 | Training moves attributes only, by a single point, and never the rating | Anything that gives you a rating is an event. Drilling is for the attributes and is deliberately small so a player cannot over-boost. |
 | 2026-11-08 | Playing an event moves the rating and grows one attribute the player relies on | Attributes should follow what a player actually does, so growth is weighted by the event's focus, their strongest skills and the format. |
 | 2026-11-08 | Singles, doubles and mixed doubles are rated and ranked separately | The games reward different things, and a player should be rated on what they do in the game they are playing. |
@@ -384,6 +423,8 @@ Travel between cities is done. What is left is making the calendar bite.
 | 2026-11-08 | The national rounds and above are qualified for with tour points | Ratings are not gates. What earns a place in a national field is a season of results. |
 | 2026-11-08 | Prize money and sponsors | A career needs a reason to keep going that is not a number on a board. Sponsors arrive with a standing and pay into every purse. |
 | 2026-11-08 | The rating is derived from the 14 skill ratings for now, and switches to result-driven in milestone 2 | DUPR is a results system. Deriving it from skills is a starting prior, not the final model. |
+| 2026-11-08 | The seven competition shapes are templates, and a competition is generated rather than authored | A tournament's shape is a set of rules, not a piece of content. Encoding them as data means an organiser can vary the points and the format, and the same seed always produces the same field. |
+| 2026-11-08 | A playoff, a double elimination and a ladder resolve during play rather than up front | Who reaches a playoff depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The structure and the simulation have to live together. |
 
 ---
 
@@ -391,7 +432,7 @@ Travel between cities is done. What is left is making the calendar bite.
 
 1. **Ranking inside a region.** Is a career rating one number for the player, or a separate rating per tournament class? One number is simpler; per-class ratings would stop a doubles specialist being punished at singles events.
 2. **Season length.** A season is currently 52 weeks. Should a season be shorter, with an off-season, so careers have a rhythm rather than a continuous grind?
-3. **Practice as a separate verb.** Right now practice and event entry are the same action. Should training be something the player does *between* weeks for free, so the weekly action is only ever a match?
+3. **Practice as a separate verb.** Training is now repeatable inside a week and costs energy, so it competes with competing for the budget rather than with the week itself. Should training ever be free, done between weeks, so that the week's only real decision is which event to enter?
 4. **Region transfer.** Can a player move permanently to the other region mid-career, or is a career tied to its starting region?
 5. **Singles and doubles on one rating.** DUPR is a doubles rating and the PPA board blends doubles, mixed and singles. Should a career carry one rating across both formats, or a rating per format?
 
@@ -401,7 +442,8 @@ Travel between cities is done. What is left is making the calendar bite.
 
 ```sh
 npm test                                   # whole suite, including the career tests
-node --test test/career-geography.test.js \
+node --test test/career-competition.test.js \
+                 test/career-geography.test.js \
                  test/career-population.test.js \
                  test/career-save.test.js \
                  test/career-state.test.js \
@@ -409,4 +451,4 @@ node --test test/career-geography.test.js \
 npm start                                  # then open /career-mode/
 ```
 
-The career tests assert behaviour, not implementation: that the ladder ascends, that a career round-trips through the save file, that a corrupt file recovers, that ids stay stable across rebuilds, that one action is allowed per week, and that the root prototype still does not reference career mode.
+The career tests assert behaviour, not implementation: that the ladder ascends, that a career round-trips through the save file, that a corrupt file recovers, that ids stay stable across rebuilds, that a week holds several training sessions and one event, that every competition shape plays out to a champion, and that the root prototype still does not reference career mode.

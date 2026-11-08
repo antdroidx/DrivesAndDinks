@@ -129,6 +129,30 @@ export function advanceWorld({seed,regionId,week,ratings}){
   return {ratings:next,matches:played};
 }
 
+// The rated population of a region, as a flat list of athletes with their
+// current rating in a format.
+//
+// This is the field a competition is drawn from. Only the best players are
+// returned, because a tournament is fielded from the top of the rating list,
+// and names are only built for the athletes that come back.
+export function ratedPopulation({seed,regionId,ratings,week,format='doubles',limit=80}){
+  const skills=buildRegionSkills(seed,regionId);
+  const current=currentRatings(skills,ratings,week,format);
+  const ranked=[...current.values()].sort((a,b)=>b.rating-a.rating).slice(0,limit);
+  return ranked.map(athlete=>{
+    const full=athlete.club?buildAthlete(seed,athlete.club,athlete.index):null;
+    return {
+      id:athlete.id,
+      name:full?.name??athlete.id,
+      skill:athlete.skill,
+      rating:athlete.rating,
+      clubId:athlete.clubId,
+      cityId:athlete.cityId,
+      matches:athlete.matches
+    };
+  });
+}
+
 // The players a player would meet in a bracket, in a given format. Playing
 // up means facing somebody a bracket stronger, which is exactly what makes
 // it a gamble worth taking.

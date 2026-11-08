@@ -19,10 +19,22 @@ import {opponentsInBracket,advanceWorld} from './world.js';
 // that rating sits rather than at the bottom of the scale.
 export const STARTING_SKILL=51;
 export const MAX_ENERGY=100;
-export const WEEKLY_RECOVERY=35;
-// Solo training costs a fraction of a rated match. The calendar should make
-// a player choose to compete rather than to grind.
-export const TRAINING_COST=8;
+// A week holds a number of actions rather than one: a player trains several
+// nights a week and competes on top of that. Energy is the budget for the
+// week, so the player decides how to spend it.
+export const MAX_TRAINING_SESSIONS=4;
+// Training costs more as the player competes at a higher level, because a
+// stronger player trains harder and a harder session takes more out of the
+// week. The same number of sessions costs an amateur a fifth of his budget
+// and a pro a quarter of it.
+export const TRAINING_BASE_COST=8;
+export const TRAINING_COST_PER_LEVEL=4;
+export const TRAINING_MAX_COST=28;
+// Recovery scales the same way. A pro's week holds more work than an
+// amateur's and takes it back faster.
+export const RECOVERY_BASE=66;
+export const RECOVERY_PER_LEVEL=6;
+export const RECOVERY_MAX=96;
 export const TRAVEL_COST=10;
 // Crossing an ocean costs more than a domestic move.
 export const INTERNATIONAL_TRAVEL_COST=20;
@@ -120,6 +132,9 @@ export function createCareer(options={}){
     entered:[],
     lastEntry:null,
     lastActionWeek:-1,
+    lastEventWeek:-1,
+    trainingWeek:0,
+    trainingSessions:0,
     log:[{week:0,text:`Career started in ${city.label}.`}]
   };
 }
@@ -127,7 +142,19 @@ export function createCareer(options={}){
 // ---- training curve -------------------------------------------------------
 // Early gains are quick and later gains are slow, so a long career keeps
 // something to chase without a flat rate grind.
-export function trainingCost(){return TRAINING_COST}
+// The rating the weekly load scales with: the player's best format.
+export function careerRating(state){
+  const formats=Object.values(state?.athlete?.formats??{}).filter(value=>Number.isFinite(value));
+  return formats.length?Math.max(...formats):NEW_PLAYER_RATING;
+}
+export function trainingCost(state){
+  if(!state)return TRAINING_BASE_COST;
+  return clamp(Math.round(TRAINING_BASE_COST+(careerRating(state)-3)*TRAINING_COST_PER_LEVEL),TRAINING_BASE_COST,TRAINING_MAX_COST);
+}
+export function weeklyRecovery(state){
+  if(!state)return RECOVERY_BASE;
+  return clamp(Math.round(RECOVERY_BASE+(careerRating(state)-3)*RECOVERY_PER_LEVEL),RECOVERY_BASE,RECOVERY_MAX);
+}
 // Training moves an attribute by a single point. It is deliberately
 // small: the rating belongs to playing, not to drilling.
 export function trainingGain(){return 1}
@@ -163,7 +190,29 @@ export function attributeGrowth({attributes,eventFocus,format,random=Math.random
   }
   return {[candidates[0][0]]:1};
 }
-export function canAct(state){return state.lastActionWeek!==state.week}
+// Training sessions taken this week. Saves made before the counter existed
+// simply have none.
+export function trainingSessionsThisWeek(state){
+  return state.trainingWeek===state.week?(state.trainingSessions??0):0;
+}
+export function canTrain(state){
+  return trainingSessionsThisWeek(state)<MAX_TRAINING_SESSIONS&&state.energy>=trainingCost(state);
+}
+export function trainBlockReason(state){
+  if(trainingSessionsThisWeek(state)>=MAX_TRAINING_SESSIONS){
+    return `You have trained ${MAX_TRAINING_SESSIONS} times this week. Advance the calendar to train again.`;
+  }
+  const cost=trainingCost(state);
+  if(state.energy<cost)return `Training needs ${cost} energy. You have ${state.energy}.`;
+  return null;
+}
+// One event a week. A league that runs for a season is an event every week
+// of it, and a tournament is one event.
+export function canEnterEvent(state){return (state.lastEventWeek??-1)!==state.week}
+export function eventBlockReason(state){
+  return canEnterEvent(state)?null:'You have already entered an event this week. Advance the calendar to compete again.';
+}
+export function canAct(state){return canTrain(state)||canEnterEvent(state)}
 
 function withAthlete(state,ratings){
   const average=skillAverage(ratings);
@@ -183,16 +232,16 @@ export function pushLog(state,text){
 
 export function train(state,focus){
   if(!RATING_KEYS.includes(focus))return {ok:false,state,message:`Unknown focus "${focus}"`};
-  if(!canAct(state))return {ok:false,state,message:'You have already used this week. Advance the calendar to continue.'};
+  if(!canTrain(state))return {ok:false,state,message:trainBlockReason(state)};
   const cost=trainingCost(state);
-  if(state.energy<cost)return {ok:false,state,message:`Training needs ${cost} energy. You have ${state.energy}.`};
   const gain=trainingGain(state,focus);
   const ratings={...state.athlete.ratings};
   ratings[focus]=clamp(ratings[focus]+gain,0,99);
   ratings.control=clamp(ratings.control+1,0,99);
   const next=withAthlete(state,ratings);
   const moved=pushHistory(pushLog(next,`Trained ${focus} — +${gain} ${focus}.`),`Trained ${focus}`);
-  return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Trained ${focus}. +${gain} ${focus}, +1 control.`};
+  const sessions=trainingSessionsThisWeek(state)+1;
+  return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingWeek:state.week,trainingSessions:sessions,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Trained ${focus}. +${gain} ${focus}, +1 control. ${sessions}/${MAX_TRAINING_SESSIONS} sessions this week.`};
 }
 
 export function currentEvents(state){return generateWeekEvents(state,state.week)}
@@ -203,7 +252,7 @@ export function currentEvents(state){return generateWeekEvents(state,state.week)
 export function attendEvent(state,eventId,optionId=null){
   const event=currentEvents(state).find(entry=>entry.id===eventId);
   if(!event)return {ok:false,state,message:'That event is not on the calendar this week.'};
-  if(!canAct(state))return {ok:false,state,message:'You have already used this week. Advance the calendar to continue.'};
+  if(!canEnterEvent(state))return {ok:false,state,message:eventBlockReason(state)};
   const eligible=entryEligibility(state,EVENT_BY_ID[event.eventId]);
   if(!eligible.ok)return {ok:false,state,message:eligible.reason};
   const option=event.options.find(entry=>entry.id===(optionId??event.defaultOptionId));
@@ -318,6 +367,7 @@ export function attendEvent(state,eventId,optionId=null){
       athlete:Object.assign({},moved.athlete,{tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory}),
       energy:state.energy-event.energyCost,
       lastActionWeek:state.week,
+      lastEventWeek:state.week,
       entered,
       lastEntry:{week:state.week,eventId:event.eventId,format,divisionId:division,label:option.label},
       matches:[...state.matches,matchRecord].slice(-40),
@@ -378,14 +428,17 @@ export function moveToCity(state,cityId){
 
 export function advanceWeek(state){
   const week=state.week+1;
-  const energy=clamp(state.energy+WEEKLY_RECOVERY,0,MAX_ENERGY);
+  // What the player takes back next week. Spending more than this in a week
+  // carries the rest into the next one as fatigue.
+  const recovery=weeklyRecovery(state);
+  const energy=clamp(state.energy+recovery,0,MAX_ENERGY);
   const world=advanceWorld({
     seed:state.seed,
     regionId:state.regionId,
     week,
     ratings:state.worldRatings
   });
-  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
+  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
   const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.`);
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }

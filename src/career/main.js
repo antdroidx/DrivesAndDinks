@@ -9,7 +9,7 @@ import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,re
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
-  currentEvents,canAct,trainingCost,trainingGain,INTERNATIONAL_TRAVEL_COST
+  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {startCareerMatch,finishCareerMatch} from './career-match.js';
@@ -129,7 +129,9 @@ function renderCreate(){
 function renderHome(){
   const career=app.career;
   const events=currentEvents(career);
-  const actReady=canAct(career);
+  const trainReady=canTrain(career);
+  const eventReady=canEnterEvent(career);
+  const sessions=trainingSessionsThisWeek(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
     const standing=tourRank(rating,career.athlete.gender);
@@ -189,13 +191,13 @@ function renderHome(){
       </div>
     </div>
     <div class="energy-bar"><b style="width:${career.energy}%"></b></div>
-    <div class="hint">${career.energy} energy · ${actReady?'You have an action left this week.':'You have used this week. Advance the calendar.'}</div>
+    <div class="hint">${career.energy} energy · ${sessions}/${MAX_TRAINING_SESSIONS} training sessions used · ${eventReady?'an event is still open this week.':'you have entered your event this week.'} You recover ${weeklyRecovery(career)} a week.</div>
     <div class="actions">
       <div class="field" style="flex:1 1 190px;margin:0">
         <label for="focus-select">TRAINING FOCUS</label>
-        <select id="focus-select" ${actReady?'':'disabled'}>${focusOptions}</select>
+        <select id="focus-select">${focusOptions}</select>
       </div>
-      <button type="button" class="secondary" data-action="train" ${actReady&&career.energy>=trainingCost(career)?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
+      <button type="button" class="secondary" data-action="train" ${trainReady?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
       <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end">ADVANCE WEEK →</button>
     </div>
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Later gains are slower than early ones.</div>
@@ -204,7 +206,7 @@ function renderHome(){
   <div class="grid two">
     <section class="panel">
       <h2>THIS WEEK · ${escapeHtml(weekLabel(career.week))}</h2>
-      ${events.length?events.map(event=>eventRow(event,actReady,career.athlete.gender)).join(''):'<p>No events this week. Join a club to get club night on the calendar.</p>'}
+      ${events.length?events.map(event=>eventRow(event,eventReady,career.athlete.gender)).join(''):'<p>No events this week. Join a club to get club night on the calendar.</p>'}
     </section>
     <section class="panel">
       <h2>THE LADDER</h2>
@@ -432,16 +434,16 @@ function topKey(ratings){
 function renderCalendar(){
   const career=app.career;
   const weeks=upcomingWeeks(career,10);
-  const actReady=canAct(career);
+  const eventReady=canEnterEvent(career);
   return `
   <section class="panel">
     <h2>CALENDAR · ${escapeHtml(career.regionLabel.toUpperCase())}</h2>
-    <p>Tournaments run all year. Leagues and the amateur MLP run for a month or three. The pro tour runs nine months and the MLP is a summer circuit.</p>
+    <p>Tournaments run all year. Leagues and the amateur MLP run for a month or three. The pro league runs from January to June, the MLP is a summer circuit, and the international series runs through the autumn.</p>
     ${weeks.map(entry=>{
       const events=generateWeekEvents(career,entry.week);
       return `<div class="week${entry.isCurrent?' current':''}">
         <h3><span>${escapeHtml(entry.label)}</span><small>${escapeHtml(entry.short)}</small></h3>
-        ${events.length?events.map(event=>eventRow(event,actReady&&entry.isCurrent)).join(''):'<p class="empty">Quiet week.</p>'}
+        ${events.length?events.map(event=>eventRow(event,eventReady&&entry.isCurrent)).join(''):'<p class="empty">Quiet week.</p>'}
       </div>`;
     }).join('')}
     <div class="actions"><button type="button" class="secondary" data-action="advance">ADVANCE WEEK →</button></div>

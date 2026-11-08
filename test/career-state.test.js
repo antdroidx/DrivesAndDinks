@@ -2,7 +2,8 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
-  currentEvents,canAct,trainingCost,trainingGain,MAX_ENERGY,WEEKLY_RECOVERY,STARTING_SKILL
+  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,
+  weeklyRecovery,MAX_ENERGY,MAX_TRAINING_SESSIONS,STARTING_SKILL
 } from '../src/career/state.js';
 import {buildClubIndex} from '../src/career/population.js';
 import {skillAverage} from '../src/roster.js';
@@ -52,7 +53,7 @@ test('the archetype sets the starting shape of the ratings',()=>{
   assert.ok(banger.athlete.ratings.drive>control.athlete.ratings.drive);
 });
 
-test('training costs energy, raises the focused rating and takes the week',()=>{
+test('training costs energy, raises the focused rating and counts against the week',()=>{
   const state=career();
   const cost=trainingCost(state);
   const result=train(state,'dink');
@@ -61,15 +62,48 @@ test('training costs energy, raises the focused rating and takes the week',()=>{
   assert.ok(result.state.athlete.ratings.dink>state.athlete.ratings.dink);
   assert.ok(result.state.athlete.ratings.control>state.athlete.ratings.control);
   assert.ok(result.state.athlete.formats.doubles>=state.athlete.formats.doubles);
-  assert.equal(canAct(result.state),false);
+  assert.equal(trainingSessionsThisWeek(result.state),1);
+  // Training does not use up the event slot.
+  assert.equal(canEnterEvent(result.state),true);
 });
 
-test('only one action is allowed per week',()=>{
-  const state=train(career(),'serve').state;
-  const second=train(state,'serve');
-  assert.equal(second.ok,false);
-  assert.match(second.message,/already used this week/);
-  assert.equal(second.state.week,state.week);
+test('training is limited to a set number of sessions a week',()=>{
+  let state=career();
+  for(let index=0;index<MAX_TRAINING_SESSIONS;index++){
+    const result=train(state,'serve');
+    assert.ok(result.ok,result.message);
+    state=result.state;
+  }
+  const blocked=train(state,'serve');
+  assert.equal(blocked.ok,false);
+  assert.match(blocked.message,new RegExp('trained '+MAX_TRAINING_SESSIONS+' times this week'));
+  assert.equal(blocked.state.week,state.week);
+  // A new week opens the sessions up again.
+  const next=advanceWeek(state).state;
+  assert.equal(trainingSessionsThisWeek(next),0);
+  assert.equal(canTrain(next),true);
+});
+
+test('a week holds several training sessions and one event',()=>{
+  const joined=withClub(career());
+  const event=currentEvents(joined).find(entry=>entry.eligible.ok);
+  const attended=attendEvent(joined,event.id,event.defaultOptionId);
+  assert.ok(attended.ok,attended.message);
+  assert.equal(canEnterEvent(attended.state),false,'an event takes the event slot');
+  assert.equal(canTrain(attended.state),true,'an event does not stop training');
+  const trained=train(attended.state,'serve');
+  assert.ok(trained.ok,trained.message);
+});
+
+test('training and recovery scale with the level the player competes at',()=>{
+  const amateur=career();
+  const pro={...amateur,athlete:{...amateur.athlete,formats:{singles:6.5,doubles:6.5,mixed:6.5}}};
+  assert.ok(trainingCost(pro)>trainingCost(amateur),'a stronger player trains harder');
+  assert.ok(weeklyRecovery(pro)>weeklyRecovery(amateur),'a stronger player takes more back');
+  // The pro's week still balances: a training block and a tour event fit
+  // inside what a week recovers.
+  const tourEvent=64;
+  assert.ok(trainingCost(pro)+tourEvent<=weeklyRecovery(pro),'a pro week is sustainable');
 });
 
 test('training is refused when there is not enough energy',()=>{
@@ -95,7 +129,7 @@ test('advancing a week moves time forward and restores energy',()=>{
   const result=advanceWeek(trained);
   assert.ok(result.ok);
   assert.equal(result.state.week,1);
-  assert.equal(result.state.energy,Math.min(MAX_ENERGY,trained.energy+WEEKLY_RECOVERY));
+  assert.equal(result.state.energy,Math.min(MAX_ENERGY,trained.energy+weeklyRecovery(trained)));
   assert.equal(canAct(result.state),true);
   assert.ok(result.state.history.length>trained.history.length);
 });
@@ -239,7 +273,7 @@ test('attending an event costs energy, records the bracket and improves the focu
   const grown=Object.keys(result.state.athlete.ratings).filter(key=>result.state.athlete.ratings[key]>joined.athlete.ratings[key]);
   assert.equal(grown.length,1,'playing an event grows one attribute');
   assert.ok(grown.length===1&&result.state.athlete.ratings[grown[0]]<=99);
-  assert.equal(canAct(result.state),false);
+  assert.equal(canEnterEvent(result.state),false);
   assert.ok(result.state.entered.includes(event.eventId));
   assert.equal(result.state.lastEntry.divisionId,event.defaultOptionId.split(':')[1]);
 });

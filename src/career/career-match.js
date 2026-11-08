@@ -3,14 +3,14 @@
 // A career event is played by the real engine. This module starts the match,
 // hands the field to the engine, and scores the result back into the career.
 
-import {currentEvents,canAct,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
+import {currentEvents,canEnterEvent,eventBlockReason,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
 import {buildCareerMatchup,drawField} from './matchmaking.js';
 import {rateMatchReport,buildCareerRecord,pointsForResult,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
 import {entryEligibility} from './calendar.js';
 import {EVENT_BY_ID} from './geography.js';
 import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
-import {addPoints,pointsInWindow} from './tour.js';
+import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP} from './tour.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 
@@ -25,7 +25,7 @@ const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 export function startCareerMatch(state,eventId,optionId=null){
   const event=currentEvents(state).find(entry=>entry.id===eventId);
   if(!event)return {ok:false,state,message:'That event is not on the calendar this week.'};
-  if(!canAct(state))return {ok:false,state,message:'You have already used this week. Advance the calendar to continue.'};
+  if(!canEnterEvent(state))return {ok:false,state,message:eventBlockReason(state)};
   const eligible=entryEligibility(state,EVENT_BY_ID[event.eventId]);
   if(!eligible.ok)return {ok:false,state,message:eligible.reason};
   const option=event.options.find(entry=>entry.id===(optionId??event.defaultOptionId));
@@ -93,7 +93,11 @@ export function finishCareerMatch(state,report){
     ownDivisionId:ownDivision.id,
     won:outcome.won
   });
-  const tourPointsHistory=addPoints(state.athlete.tourPointsHistory,state.week,earned);
+  // The MLP pays into its own pool. It is a separate activity and its
+  // points never count towards the pro tour.
+  const pool=EVENT_POOL[pending.eventId]??POOL_TOUR;
+  const tourPointsHistory=pool===POOL_MLP?state.athlete.tourPointsHistory:addPoints(state.athlete.tourPointsHistory,state.week,earned);
+  const mlpPointsHistory=pool===POOL_MLP?addPoints(state.athlete.mlpPointsHistory??[],state.week,earned):state.athlete.mlpPointsHistory??[];
   const prize=prizeFor({
     eventId:pending.eventId,
     won:outcome.won,
@@ -129,7 +133,9 @@ export function finishCareerMatch(state,report){
       losses:state.athlete.record.losses+(outcome.won?0:1)
     }),
     tourPoints:pointsInWindow(tourPointsHistory,state.week),
-    tourPointsHistory
+    tourPointsHistory,
+    mlpPoints:pointsInWindow(mlpPointsHistory,state.week),
+    mlpPointsHistory
   });
   const note=record.label+' · '+record.bracket+' '+pending.format+' bracket · '+record.score;
   const entered=[...new Set([...(state.entered??[]),pending.eventId])].slice(-16);
@@ -137,9 +143,10 @@ export function finishCareerMatch(state,report){
   return {
     ok:true,
     state:Object.assign({},moved,{
-      athlete:Object.assign({},moved.athlete,{tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory}),
+      athlete:Object.assign({},moved.athlete,{tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory,mlpPoints:pointsInWindow(mlpPointsHistory,state.week),mlpPointsHistory}),
       energy:state.energy-(pending.energyCost??0),
       lastActionWeek:state.week,
+      lastEventWeek:state.week,
       entered,
       pendingMatch:null,
       worldRatings,

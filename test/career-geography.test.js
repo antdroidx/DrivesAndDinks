@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {REGIONS,allCities,allAreas,cityById,areaById,COMPETITION_EVENTS,EVENT_BY_ID,PRO_LEAGUE_DIVISION,formatRating,RATING_MIN,RATING_MAX,RATING_BRACKETS,divisionFor,majorCities} from '../src/career/geography.js';
-import {TRAINING_COST} from '../src/career/state.js';
+import {trainingCost,createCareer} from '../src/career/state.js';
 
 test('career geography is limited to North America and Asia',()=>{
   assert.deepEqual(REGIONS.map(region=>region.id),['north-america','asia']);
@@ -80,7 +80,10 @@ test('the ladder reaches the whole published scale',()=>{
 
 test('playing a rated match costs more than training, and bigger events cost more',()=>{
   const costs=COMPETITION_EVENTS.map(event=>event.energy);
-  assert.ok(Math.min(...costs)>TRAINING_COST,'no rated match should be as cheap as training');
+  // A training session at the level a career starts at costs less than the
+  // cheapest rated match.
+  const starting=createCareer({seed:1,regionId:'north-america'});
+  assert.ok(Math.min(...costs)>trainingCost(starting),'no rated match should be as cheap as training');
   const national=COMPETITION_EVENTS.find(event=>event.id==='national');
   const pro=COMPETITION_EVENTS.find(event=>event.id==='pro-league');
   assert.ok(pro.energy>national.energy,'the pro tour costs more than a national championship');

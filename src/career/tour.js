@@ -35,6 +35,15 @@ export const PRO_TOURS=Object.freeze({
 
 export const TOUR_POINTS_WINDOW=52;
 
+// Which pool an event pays into. The MLP is a separate activity, so what it
+// pays never counts towards the pro tour.
+export const POOL_TOUR='tour';
+export const POOL_MLP='mlp';
+export const EVENT_POOL=Object.freeze({
+  'mlp':POOL_MLP,
+  'mlp-amateur':POOL_TOUR
+});
+
 // Points a player earns for entering each event. The tour pays more than a
 // local league, and playing up in a bracket is worth more than staying in
 // their own, because beating stronger opposition is what the board rewards.
