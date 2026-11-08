@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {courtFrame,toggleFullscreen} from '../src/court-display.js';
+import {courtFrame,toggleFullscreen,COURT_HUD_HEIGHT} from '../src/court-display.js';
 test('fullscreen requests browser chrome be hidden and supports exit',async()=>{
  const calls=[],doc={exitFullscreen:async()=>calls.push('exit')},element={requestFullscreen:async options=>calls.push(options)};
  assert.equal(await toggleFullscreen(doc,element),true);assert.deepEqual(calls,[{navigationUI:'hide'}]);doc.fullscreenElement=element;assert.equal(await toggleFullscreen(doc,element),false);assert.equal(calls[1],'exit');
@@ -21,16 +21,26 @@ test('scorebug marks only the team currently serving with a pickleball icon',()=
  assert.match(source,/game\.score\?\.team/);
 });
 
-test('all layouts use the full available width, even when portrait height is limited',()=>{
- for(const [width,height,stacked] of [[925,900,true],[390,460,true],[390,740,true],[568,300,false],[844,340,false],[1240,700,false]]){
- const frame=courtFrame(width,height,stacked);assert.equal(frame.width,width);assert.ok(frame.height<=height);assert.ok(frame.height+(stacked?42:0)<=height);
+test('all layouts reserve the full score strip without shrinking court width',()=>{
+ for(const [width,height] of [[925,900],[390,460],[390,740],[568,300],[844,340],[1240,700],[404,568],[640,360]]){
+  const frame=courtFrame(width,height);assert.equal(frame.width,width);assert.ok(frame.height<=height);assert.equal(frame.height+COURT_HUD_HEIGHT+4,height);
  }
 });
-test('portrait screenshot regression does not shrink width to fit the controls plus a square court',()=>{
- assert.deepEqual(courtFrame(925,900,true),{width:925,height:854});
- assert.deepEqual(courtFrame(390,460,true),{width:390,height:414});
+test('portrait keeps fold-outer width and fits below the score strip',()=>{
+ assert.deepEqual(courtFrame(925,900),{width:925,height:842});
+ assert.deepEqual(courtFrame(404,568),{width:404,height:510});
 });
-test('landscape restores its full-width view with the original available height',()=>{
- assert.deepEqual(courtFrame(844,340,false),{width:844,height:340});
- assert.deepEqual(courtFrame(1240,700,false),{width:1240,height:700});
+test('landscape uses full width and reserves scorebug space above the court',()=>{
+ assert.deepEqual(courtFrame(844,340),{width:844,height:282});
+ assert.deepEqual(courtFrame(640,360),{width:640,height:302});
+});
+
+test('scorebug has one stable row in both fold-outer orientations',()=>{
+ const css=readFileSync(new URL('../style.css',import.meta.url),'utf8'),source=readFileSync(new URL('../src/court-display.js',import.meta.url),'utf8');
+ assert.match(css,/main\[data-court-layout="wide"\] \.playfield\{grid-template-columns:minmax\(0,1fr\);grid-template-rows:var\(--court-hud-height,54px\) var\(--court-height\)\}/);
+ assert.doesNotMatch(css,/main\[data-court-layout="wide"\] #court-hud\{position:absolute/);
+ assert.match(css,/main\[data-court-layout="stacked"\] \.playfield\{grid-template-rows:var\(--court-hud-height,54px\) var\(--court-height\)/);
+ assert.match(css,/\.serve-ball\{position:relative;display:block;grid-column:2;grid-row:2/);
+ assert.match(css,/\.score-meta\{grid-column:1\/-1;grid-row:2;align-self:center/);
+ assert.match(source,/field\.style\.setProperty\('--court-hud-height',COURT_HUD_HEIGHT\+'px'\)/);
 });
