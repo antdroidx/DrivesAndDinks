@@ -293,10 +293,9 @@ export function buildTeamLeague(teams,random){
 }
 
 // Chooses the shape an event runs this week.
-export function pickShape(event,random){
+export function pickShape(event){
   const shapes=(event?.shapes??[]).filter(Boolean);
-  if(!shapes.length)return 'tournament-bracket';
-  return shapes[Math.floor(random()*shapes.length)];
+  return shapes[0]??'tournament-bracket';
 }
 
 // Starts a tournament for an event entry.
@@ -326,6 +325,12 @@ export function startTournament({state,event,option}){
       tournament=Object.assign({},main,{shape:'qualifier',mainShape:main.shape,main,currentMatch:{home:playerTeam,away:opponent},qualifierMatch:{home:playerTeam,away:opponent},stage:'qualifier',round:0,history:[]});
     }
   }
+  // A league night plays its two or three matches and the rest of the season
+  // is simulated. A tournament plays all of its rounds.
+  const nightMatches=Number(event?.nightMatches)||0;
+  if(nightMatches>0&&(tournament.shape==='round-robin'||tournament.shape==='open')){
+    tournament.rounds=tournament.rounds.slice(0,Math.max(1,nightMatches));
+  }
   return {
     ok:true,
     tournament:Object.assign(tournament,{
@@ -341,6 +346,7 @@ export function startTournament({state,event,option}){
       championPoints:event.championPoints??0,
       difficulty:event.difficulty??'normal',
       qualifierSlots:event.qualifierSlots??0,
+      nightMatches,
       rules:{
         points:event.targetScore??11,
         playoffPoints:event.playoffPoints??15,

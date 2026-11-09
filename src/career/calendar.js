@@ -227,6 +227,11 @@ export function generateWeekEvents(state,week){
       championPoints:event.championPoints??0,
       difficulty:event.difficulty??'normal',
       qualifierSlots:event.qualifierSlots??0,
+      // A league night is one to three matches, not a whole season.
+      nightMatches:event.nightMatches??0,
+      // The shapes an event may run. Without this the calendar only ever
+      // fielded a bracket.
+      shapes:event.shapes??[],
       scoring:event.scoring??'side-out',
       targetScore:event.targetScore??11,
       playoffPoints:event.playoffPoints??15,
