@@ -323,7 +323,21 @@ The detailed engine report is retained for recent matches, but the permanent rec
 
 Knockout semifinalists share bronze because the game has no third-place match. League medals go to the top three. A multi-division event records one result for each division.
 
-## 12. The age curve
+## 12. Creating a player
+
+Initial attributes are calculated from five inputs:
+
+| Input | Effect |
+|---|---|
+| Archetype | Sets the relative strength and weakness profile |
+| Experience | Sets overall starting level from true beginner to competitive background |
+| Height and weight | Modifies reach, power, smash and agility through bounded body-size adjustments |
+| Age | Applies youth development and existing physical decline |
+| Starting trait | Adds one small focus such as quickness, soft touch or court IQ |
+
+The seed adds a small random variation after those choices. Experience begins a provisional rating between 2.500 and 4.500; the first rated matches then replace it with a results-driven value.
+
+## 13. The age curve
 
 Retirement needs more than one curve. Each player receives a deterministic development profile covering:
 
@@ -356,7 +370,7 @@ Retirement needs more than one curve. Each player receives a deterministic devel
 
 ---
 
-## 13. What this means for the code
+## 14. What this means for the code
 
 Not written yet. This is the shape it should take.
 
@@ -401,7 +415,7 @@ The competition first, because a ranking is a measurement of rounds reached and 
 
 ---
 
-## 14. Open questions
+## 15. Open questions
 
 1. **How long is a season?** The real tour runs September to May for the tour and May to August for the league, so a season is a calendar year and a career is twenty of them. At one action a week that is over a thousand actions in a player's working life. The calendar view already shows ten weeks ahead, so the game knows how to compress time, but a career needs a way to skip the empty weeks. Recommendation: keep the fifty-two week year and add an advance-to-next-event control, so the player only ever looks at weeks that matter, and expect a career to run fifteen to twenty seasons.
 
@@ -417,7 +431,7 @@ The competition first, because a ranking is a measurement of rounds reached and 
 
 ---
 
-## 15. Sources
+## 16. Sources
 
 - Carvana PPA Tour, *How Pro Pickleball Works* — rankings, tiers, contracts, entry, byes, the finals
 - Carvana PPA Tour, *Player Handbook* — points tables, seeding, withdrawals, the participation rule

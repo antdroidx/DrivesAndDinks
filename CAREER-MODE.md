@@ -60,6 +60,7 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/analytics.js` | Durable game totals, event history, medals and rating peaks. |
 | `src/career/age.js` | Unique development profiles, attribute-specific decline, training capacity and age-scaled recovery. |
 | `src/career/retirement.js` | Retirement advice, the epilogue and the local all-time board. |
+| `src/career/creation.js` | Experience levels, body-size modifiers and one starting trait. |
 | `src/career/club-life.js` | Club reputation, persistent partners, partner gates and coach feedback. |
 | `src/career/opponents.js` | Persistent opponent memory and head-to-head history. |
 | `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
@@ -506,6 +507,10 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | A selected partner participates in the rating gate | Gated doubles reads the highest player by default and the combined average for selected events. A stronger partner can move the team into a higher bracket or disqualify the chosen division. |
 | 2026-11-08 | Opponent learning is stored by permanent athlete id, then remapped to engine lineup slots for each match | The shared engine already learns patterns; durable career records let the same opponent remember the player in later events without relying on lineup ordering. |
 | 2026-11-08 | Club reputation unlocks club tiers | Recreational clubs take a new player immediately. Competitive clubs require 25 reputation and elite clubs require 60, earned through completed events and strong finishes. |
+| 2026-11-08 | New-player attributes come from archetype, experience, body size, age, one trait, and seeded variation | Archetype controls skill shape. Experience sets overall level. Height and weight modify reach, power and agility. Age applies development and decline. The trait adds one focused bonus, and the seed varies the final result. |
+| 2026-11-08 | Experience starts the provisional format rating between 2.5 and 4.5 | A true beginner, casual player, general athlete, racket-sport crossover and competitive-background player should not share one starting rating. |
+| 2026-11-08 | Height and weight affect attributes through a body-size model rather than raw labels | Taller players gain reach; heavier and taller frames can gain power; extreme size and mass cost agility. The modifiers remain bounded so archetype identity survives. |
+| 2026-11-08 | A new career selects one optional starting trait | Quickness, power, soft touch, court IQ, serve, or broad athleticism can create a modest unique edge without replacing the archetype. |
 
 ---
 
@@ -526,6 +531,7 @@ npm test                                   # whole suite, including the career t
 node --test test/career-age.test.js \
                  test/career-analytics.test.js \
                  test/career-club-life.test.js \
+                 test/career-creation.test.js \
                  test/career-competition.test.js \
                  test/career-contracts.test.js \
                  test/career-geography.test.js \

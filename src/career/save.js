@@ -12,7 +12,7 @@ import {REGIONS} from './geography.js';
 import {emptyAnalytics} from './analytics.js';
 import {peakAgeFor,createDevelopmentProfile} from './age.js';
 
-export const CAREER_SAVE_VERSION=14;
+export const CAREER_SAVE_VERSION=15;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -22,6 +22,20 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v15 added body, experience and starting-trait creation fields.
+  14:state=>({
+    ...state,
+    athlete:{
+      ...state.athlete,
+      height:state.athlete?.height??(state.athlete?.gender==='female'?164:177),
+      weight:state.athlete?.weight??(state.athlete?.gender==='female'?64:80),
+      bodyModifiers:state.athlete?.bodyModifiers??{},
+      experience:state.athlete?.experience??'athlete',
+      experienceLabel:state.athlete?.experienceLabel??'General athlete',
+      startingTrait:state.athlete?.startingTrait??'none',
+      startingTraitLabel:state.athlete?.startingTraitLabel??'No extra trait'
+    }
+  }),
   // v14 added club partners, reputation, opponents and coaching.
   13:state=>({
     ...state,
@@ -243,6 +257,10 @@ export function validateCareer(state){
   if(!athlete.peakFormats||typeof athlete.peakFormats!=='object')return {ok:false,reason:'Peak ratings are invalid'};
   if(!athlete.development||typeof athlete.development!=='object')return {ok:false,reason:'Development profile is invalid'};
   if(!athlete.maintenance||typeof athlete.maintenance!=='object')return {ok:false,reason:'Training maintenance is invalid'};
+  if(!Number.isFinite(athlete.height)||athlete.height<145||athlete.height>210)return {ok:false,reason:'Athlete height is invalid'};
+  if(!Number.isFinite(athlete.weight)||athlete.weight<40||athlete.weight>140)return {ok:false,reason:'Athlete weight is invalid'};
+  if(typeof athlete.experience!=='string')return {ok:false,reason:'Starting experience is invalid'};
+  if(typeof athlete.startingTrait!=='string')return {ok:false,reason:'Starting trait is invalid'};
   if(typeof state.retired!=='boolean')return {ok:false,reason:'Retirement state is invalid'};
   if(state.allTimeBoard!=null&&!Array.isArray(state.allTimeBoard))return {ok:false,reason:'All-time board is invalid'};
   return {ok:true};

@@ -23,6 +23,7 @@ import {analyticsSummary} from './analytics.js';
 import {retire,retirementAdvice,allTimeBoard} from './retirement.js';
 import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback} from './club-life.js';
 import {opponentHistory} from './opponents.js';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS} from './creation.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -35,7 +36,7 @@ const RATING_GROUPS=Object.freeze([
 const app={
   career:null,
   view:'home',
-  draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25},
+  draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25,height:164,weight:64,experience:'athlete',trait:'none'},
   filters:{areaId:'',cityId:'',tier:'',query:''},
   move:{regionId:'',cityId:''},
   standingsFormat:null,
@@ -97,6 +98,8 @@ function renderCreate(){
   const cityId=cities.some(city=>city.id===app.draft.cityId)?app.draft.cityId:cities[0].id;
   const archetypes=CHARACTERS.map(character=>`<option value="${character.id}"${character.id===app.draft.archetypeId?' selected':''}>${escapeHtml(character.style)} — ${escapeHtml(character.description)}</option>`).join('');
   const cityOptions=cities.map(city=>`<option value="${city.id}"${city.id===cityId?' selected':''}>${escapeHtml(city.label)}, ${escapeHtml(city.country)}</option>`).join('');
+  const experienceOptions=EXPERIENCE_OPTIONS.map(option=>`<option value="${option.id}"${option.id===app.draft.experience?' selected':''}>${escapeHtml(option.label)} — ${escapeHtml(option.description)}</option>`).join('');
+  const traitOptions=STARTING_TRAITS.map(option=>`<option value="${option.id}"${option.id===app.draft.trait?' selected':''}>${escapeHtml(option.label)} — ${escapeHtml(option.description)}</option>`).join('');
   return `
   <section class="panel">
     <h2>START A CAREER</h2>
@@ -132,6 +135,26 @@ function renderCreate(){
       <div class="field">
         <label for="draft-city">STARTING CITY</label>
         <select id="draft-city">${cityOptions}</select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="draft-height">HEIGHT · CM</label>
+        <input id="draft-height" type="number" min="145" max="210" value="${app.draft.height}" inputmode="numeric">
+      </div>
+      <div class="field">
+        <label for="draft-weight">WEIGHT · KG</label>
+        <input id="draft-weight" type="number" min="40" max="140" value="${app.draft.weight}" inputmode="numeric">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label for="draft-experience">PLAYING EXPERIENCE</label>
+        <select id="draft-experience">${experienceOptions}</select>
+      </div>
+      <div class="field">
+        <label for="draft-trait">STARTING TRAIT</label>
+        <select id="draft-trait">${traitOptions}</select>
       </div>
     </div>
     <button type="button" class="primary" data-action="create">BEGIN CAREER →</button>
@@ -655,7 +678,11 @@ document.addEventListener('click',event=>{
         archetypeId:document.getElementById('draft-archetype')?.value,
         regionId:document.getElementById('draft-region')?.value,
         cityId:document.getElementById('draft-city')?.value,
-        age:Number(document.getElementById('draft-age')?.value)
+        age:Number(document.getElementById('draft-age')?.value),
+        height:Number(document.getElementById('draft-height')?.value),
+        weight:Number(document.getElementById('draft-weight')?.value),
+        experience:document.getElementById('draft-experience')?.value,
+        trait:document.getElementById('draft-trait')?.value
       });
       persist();
       toast(`Career started in ${app.career.cityLabel}.`);
@@ -745,6 +772,10 @@ document.addEventListener('change',event=>{
   }
   if(id==='draft-city'){app.draft.cityId=event.target.value}
   if(id==='draft-age'){app.draft.age=Number(event.target.value)||25}
+  if(id==='draft-height'){app.draft.height=Number(event.target.value)||177}
+  if(id==='draft-weight'){app.draft.weight=Number(event.target.value)||80}
+  if(id==='draft-experience'){app.draft.experience=event.target.value}
+  if(id==='draft-trait'){app.draft.trait=event.target.value}
   if(id==='draft-gender'){app.draft.gender=event.target.value}
   if(id==='draft-archetype'){app.draft.archetypeId=event.target.value}
   if(id==='filter-area'){

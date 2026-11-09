@@ -17,10 +17,11 @@ import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js';
 import {evaluateSeason,seasonDue,isContracted} from './contracts.js';
 import {emptyAnalytics} from './analytics.js';
 import {clubAccess,clearPartners} from './club-life.js';
+import {normalizeHeight,normalizeWeight,experienceById,traitById,startingModifiers} from './creation.js';
 import {normalizeStartAge,createDevelopmentProfile,developmentAgeFactor,attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,noteSkillPeaks,noteTrainingMaintenance,advanceAgeYear,capRatingForAge,capAttributeForAge} from './age.js';
 
-// A career starts at a 3.500 rating, so the underlying skill starts where
-// that rating sits rather than at the bottom of the scale.
+// The neutral adult creation baseline is 3.500. Experience can move this
+// to 2.500-4.500 before youth development is applied.
 export const STARTING_SKILL=51;
 export const MAX_ENERGY=100;
 // A week holds a number of actions rather than one: a player trains several
@@ -54,12 +55,17 @@ export function startingCityId(regionId,seed){
   return pool[Math.floor(random()*pool.length)].id;
 }
 
-function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age}){
+function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,height,weight,experience,trait}){
   const archetype=CHARACTERS.find(character=>character.id===archetypeId)??CHARACTERS[0];
   const random=seededRandom(mixSeed(seed,`player:${regionId}:${archetype.id}`));
   const identity=generateIdentity({gender,random});
   const resolvedName=String(name??'').trim()||identity.name;
   const resolvedAge=normalizeStartAge(age,18+Math.floor(random()*12));
+  const resolvedHeight=normalizeHeight(height,gender);
+  const resolvedWeight=normalizeWeight(weight,resolvedHeight,gender);
+  const experienceOption=experienceById(experience);
+  const traitOption=traitById(trait);
+  const creationModifiers=startingModifiers({experience:experienceOption.id,trait:traitOption.id,height:resolvedHeight,weight:resolvedWeight});
   const development=createDevelopmentProfile(seed,resolvedAge);
   const peakAge=development.peakAge;
   const shift=STARTING_SKILL-70;
@@ -67,12 +73,12 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age}){
   const ratings={};
   for(const key of RATING_KEYS){
     const base=archetype.ratings[key]??70;
-    peakRatings[key]=clamp(Math.round(base+shift+(random()-.5)*5),20,99);
+    peakRatings[key]=clamp(Math.round(base+shift+(creationModifiers[key]??0)+(random()-.5)*5),20,99);
     ratings[key]=clamp(Math.floor(peakRatings[key]*attributeAgeFactor(key,resolvedAge)),20,99);
   }
   const average=skillAverage(ratings);
-  const firstRating=clamp(Math.round(NEW_PLAYER_RATING*(resolvedAge<25?developmentAgeFactor(resolvedAge):1)*1000)/1000,2,8);
-  const peakFormats=Object.fromEntries(FORMATS.map(format=>[format,NEW_PLAYER_RATING]));
+  const firstRating=clamp(Math.round(experienceOption.rating*(resolvedAge<25?developmentAgeFactor(resolvedAge):1)*1000)/1000,2,8);
+  const peakFormats=Object.fromEntries(FORMATS.map(format=>[format,experienceOption.rating]));
   return {
     id:`player-${seed}`,
     name:resolvedName,
@@ -83,6 +89,13 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age}){
     gender:gender==='female'?'female':'male',
     age:resolvedAge,
     startAge:resolvedAge,
+    height:resolvedHeight,
+    weight:resolvedWeight,
+    bodyModifiers:creationModifiers,
+    experience:experienceOption.id,
+    experienceLabel:experienceOption.label,
+    startingTrait:traitOption.id,
+    startingTraitLabel:traitOption.label,
     peakAge,
     development,
     maintenance:Object.fromEntries(RATING_KEYS.map(key=>[key,0])),
@@ -115,7 +128,11 @@ export function createCareer(options={}){
     regionId,
     seed,
     city,
-    age:options.age
+    age:options.age,
+    height:options.height,
+    weight:options.weight,
+    experience:options.experience,
+    trait:options.trait
   });
   // The rival is the player nearest to you on the board when you start.
   const rival=findRival({
