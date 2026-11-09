@@ -47,6 +47,8 @@ test('elite players retain realistic ratings through their fifties and sixties',
   assert.ok(ageCeiling(6.0,55)>=5.0,'a 6.0 peak should retain 5.0 at 55');
   assert.ok(ageCeiling(6.5,60)>=5.0,'a 6.5 peak should remain above 5.0 at 60');
   assert.ok(ageCeiling(6.5,65)>=4.6,'a 6.5 peak should retain useful elite ability at 65');
+  assert.ok(ageCeiling(7.0,55)>=5.8,'a 7.0 peak should remain elite at 55');
+  assert.ok(ageCeiling(8.0,60)>=6.2,'the theoretical top should remain elite at 60');
   assert.ok(ageSkillFactor(79)>ageSkillFactor(80),'eighty begins a pronounced decline');
   assert.ok(ageCeiling(6.5,80)<3,'an elite ceiling drops sharply at eighty');
   assert.ok(recoveryAgeFactor(80)<recoveryAgeFactor(79));
