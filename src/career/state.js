@@ -140,6 +140,9 @@ export function createCareer(options={}){
     // A league match is a weeknight commitment, so it does not take the
     // tournament slot. It has its own.
     lastLeagueWeek:-1,
+    // A world event is a trip. You cannot play a local league match and fly
+    // to one in the same week.
+    lastTravelWeek:-1,
     trainingWeek:0,
     trainingSessions:0,
     log:[{week:0,text:`Career started in ${city.label}.`}]
@@ -216,13 +219,25 @@ export function trainBlockReason(state){
 // One event a week. A league that runs for a season is an event every week
 // of it, and a tournament is one event.
 export function isLeagueEvent(event){return event?.matchType==='league'}
+export function isTravelEvent(event){return event?.scope==='world'}
 export function canEnterEvent(state,event=null){
   const week=state.week;
+  const travel=isTravelEvent(event);
+  // A trip and a home commitment cannot both happen in one week.
+  if(travel&&(state.lastLeagueWeek??-1)===week)return false;
+  if(!travel&&(state.lastTravelWeek??-1)===week)return false;
   if(isLeagueEvent(event))return (state.lastLeagueWeek??-1)!==week;
   return (state.lastEventWeek??-1)!==week;
 }
 export function eventBlockReason(state,event=null){
   if(canEnterEvent(state,event))return null;
+  const week=state.week;
+  if(isTravelEvent(event)&&(state.lastLeagueWeek??-1)===week){
+    return 'You played a league match this week. A world event needs the travel time.';
+  }
+  if(!isTravelEvent(event)&&(state.lastTravelWeek??-1)===week){
+    return 'You are travelling for a world event this week.';
+  }
   return isLeagueEvent(event)
     ?'You have already played your league match this week.'
     :'You have already entered an event this week. Advance the calendar to compete again.';
@@ -471,7 +486,7 @@ export function advanceWeek(state){
   const tournament=state.tournament?.nightComplete
     ?{...state.tournament,nightComplete:false}
     :state.tournament;
-  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,tournament,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
+  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,lastTravelWeek:-1,tournament,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
   const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.`);
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }

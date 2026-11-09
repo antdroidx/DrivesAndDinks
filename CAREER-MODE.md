@@ -333,7 +333,7 @@ The milestone this branch delivers.
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 147 career tests across eleven files (`test/career-*.test.js`), 597 in the suite overall
+- [x] 148 career tests across eleven files (`test/career-*.test.js`), 597 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
 ### M2 — Match play inside a career ✅ complete
@@ -352,7 +352,7 @@ A career event is played by the real engine, rated on the real result, and recor
 
 The handoff is a settled decision. The career writes a pending match, the engine plays it, and the report comes back. Playing inside the career page is not planned, because the match needs the whole screen.
 
-### M3 — Competitions that are real 🔶 in progress
+### M3 — Competitions that are real ✅ complete
 
 An event now fields a tournament rather than a single match.
 
@@ -370,8 +370,8 @@ An event now fields a tournament rather than a single match.
 - [x] All seven shapes wired in: bracket, round robin, double elimination, fixed and open ladders, and the team league
 - [ ] Multi-week events that occupy consecutive weeks
 - [x] A way to skip weeks with nothing on the calendar
-- [ ] Events that share a week: the single event slot and the energy budget decide which one, and a league match can be missed for a tournament at a cost to the league standing
-- [ ] Travel conflicts: two events in different regions in the same week cannot both be played
+- [x] Events that share a week: the single event slot and the energy budget decide which one, and a league match can be missed for a tournament at a cost to the league standing
+- [x] Travel conflicts: a world event and a home league match cannot share a week
 
 **Why it is here.** A ranking is a measurement of rounds reached, and rounds do not exist until an event fields a tournament. This is the foundation the tour is expressed in.
 

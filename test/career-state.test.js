@@ -143,6 +143,15 @@ test('advancing to the next event skips the quiet weeks',()=>{
   for(const event of jumped.events)assert.ok(event.eligible.ok&&event.options.length,'the event is enterable');
 });
 
+test('a world event and a home league match cannot share a week',()=>{
+  const state=withClub(career());
+  const world={scope:'world',matchType:'tournament'};
+  const local={scope:'city',matchType:'tournament'};
+  assert.equal(canEnterEvent(state,world),true,'a free week allows the trip');
+  assert.equal(canEnterEvent({...state,lastLeagueWeek:state.week},world),false,'a league match blocks the trip');
+  assert.equal(canEnterEvent({...state,lastTravelWeek:state.week},local),false,'a trip blocks the home event');
+});
+
 test('joining a club records the club and moves the player to its city',()=>{
   const state=career();
   const clubs=buildClubIndex(SEED,'north-america');

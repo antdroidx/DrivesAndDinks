@@ -6,7 +6,7 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
 import {careerProfile} from './matchmaking.js';
 import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
@@ -146,6 +146,7 @@ export function startCareerMatch(state,eventId,optionId=null){
     lastActionWeek:state.week,
     lastEventWeek:isLeagueEvent(event)?state.lastEventWeek:state.week,
     lastLeagueWeek:isLeagueEvent(event)?state.week:state.lastLeagueWeek,
+    lastTravelWeek:isTravelEvent(event)?state.week:state.lastTravelWeek,
     stats:Object.assign({},state.stats,{entries:(state.stats.entries??0)+1})
   });
   // A bye in the first round is stepped over straight away.
