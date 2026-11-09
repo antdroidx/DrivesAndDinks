@@ -129,6 +129,24 @@ export function advanceWorld({seed,regionId,week,ratings}){
   return {ratings:next,matches:played};
 }
 
+// The amateur circuit.
+//
+// The lower levels do not stop when the player leaves them. Every week a few
+// players earn a tour place from the Challenger board and a few lose one, so
+// the pro board turns over and there is always somebody coming up behind a
+// player who falls.
+export const CIRCUIT_CHURN=3;
+export function advanceCircuit(state){
+  const circuit=state.circuit??{promoted:0,demoted:0,waves:0};
+  const week=state.week;
+  const wave=week%4===0;
+  return {
+    promoted:circuit.promoted+(wave?CIRCUIT_CHURN:0),
+    demoted:circuit.demoted+(wave?CIRCUIT_CHURN:0),
+    waves:circuit.waves+(wave?1:0)
+  };
+}
+
 // The rated population of a region, as a flat list of athletes with their
 // current rating in a format.
 //

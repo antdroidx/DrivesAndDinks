@@ -13,7 +13,8 @@ import {buildClubIndex,findClub,mixSeed} from './population.js';
 import {generateWeekEvents,weekLabel,entryEligibility} from './calendar.js';
 import {findRival} from './standings.js';
 import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,FORMATS,divisionFor} from './rating.js';
-import {opponentsInBracket,advanceWorld} from './world.js';
+import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js';
+import {evaluateSeason,seasonDue,isContracted} from './contracts.js';
 
 // A career starts at a 3.500 rating, so the underlying skill starts where
 // that rating sits rather than at the bottom of the scale.
@@ -488,8 +489,24 @@ export function advanceWeek(state){
   const tournament=state.tournament?.nightComplete
     ?{...state.tournament,nightComplete:false}
     :state.tournament;
-  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,lastTravelWeek:-1,tournament,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
-  const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.`);
+  const circuit=advanceCircuit({...state,week});
+  let advanced={
+    ...state,week,energy,
+    lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,lastTravelWeek:-1,tournament,
+    trainingWeek:week,trainingSessions:0,
+    worldRatings:world.ratings,
+    circuit,
+    stats:{...state.stats,weeks:state.stats.weeks+1}
+  };
+  // The season boundary decides whether a contract is kept.
+  let seasonNote='';
+  if(seasonDue(advanced,state.week)&&isContracted(advanced)){
+    const evaluated=evaluateSeason(advanced);
+    advanced=evaluated.state;
+    seasonNote=evaluated.released?' Contract released.':' Contract renewed.';
+  }
+  const moved=pushHistory(advanced,`Week ${week+1} begins.`);
+  const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.${seasonNote}`);
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }
 
