@@ -5,7 +5,7 @@
 // costs progress.
 
 import {CHARACTERS,RATING_KEYS,RATING_LABELS} from '../roster.js';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS} from './geography.js';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS} from './geography.js';
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
@@ -15,7 +15,7 @@ import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {startCareerMatch,finishCareerMatch} from './career-match.js';
 import {isPlayerDone} from './tournament.js';
 import {writePendingMatch,readMatchResult,clearMatchResult} from './handshake.js';
-import {boardPosition,nearbyRivals,findRival,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
 import {rankingSummary} from './ranking.js';
 import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js';
@@ -24,6 +24,7 @@ import {retire,retirementAdvice,allTimeBoard} from './retirement.js';
 import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback} from './club-life.js';
 import {opponentHistory} from './opponents.js';
 import {EXPERIENCE_OPTIONS,STARTING_TRAITS} from './creation.js';
+import {directoryPage} from './directory.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -37,10 +38,11 @@ const app={
   career:null,
   view:'home',
   draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25,height:164,weight:64,experience:'athlete',trait:'none'},
-  filters:{areaId:'',cityId:'',tier:'',query:''},
+  filters:{areaId:'',cityId:'',tier:'',query:'',gender:'',bracket:'',minAge:'',maxAge:'',sort:'rating-desc',page:0},
   move:{regionId:'',cityId:''},
   standingsFormat:null,
   expandedClub:null,
+  directoryCache:null,
   storage:careerStorage()
 };
 
@@ -551,6 +553,7 @@ function renderStandings(){
   const position=boardPosition(career,format);
   const form=careerForm(career);
   const rivals=nearbyRivals(career,format,6);
+  const leaders=topPlayers(career,format,25);
   const rival=findRival(career,format);
   const sponsors=sponsorsFor(career,format);
   const formatTabs=FORMATS.map(entry=>`<button type="button" data-action="standings-format" data-format="${entry.id}" class="${entry.id===format?'active':''}">${escapeHtml(formatLabel(entry,career.athlete.gender))}</button>`).join('');
@@ -591,7 +594,16 @@ function renderStandings(){
   </div>
 
   <section class="panel">
-    <h2>ON THE BOARD</h2>
+    <h2>TOP OF THE BOARD</h2>
+    <p>Highest current ${escapeHtml(formatLabel(format,career.athlete.gender))} ratings across North America and Asia. This is the rating board; PPA tour points decide event entry and qualification.</p>
+    ${leaders.map(entry=>`<div class="club">
+      <div class="body"><strong>#${entry.rank} ${escapeHtml(entry.name)}</strong><small>${escapeHtml(entry.cityLabel)} · ${escapeHtml(entry.regionId==='asia'?'Asia':'North America')} · ${escapeHtml(entry.citizenship)} · Rating ${formatRating(entry.rating)}</small></div>
+      <div class="actions"><span class="need">World ${entry.worldRank.toLocaleString('en-US')}</span></div>
+    </div>`).join('')}
+  </section>
+
+  <section class="panel">
+    <h2>NEAR YOU</h2>
     <p>The players nearest to you in ${escapeHtml(formatLabel(format,career.athlete.gender))}.</p>
     ${rivals.map(entry=>`<div class="club">
       <div class="body">
@@ -603,32 +615,59 @@ function renderStandings(){
   </section>`;
 }
 
+function playerDirectory(career){
+  const cache=app.directoryCache;
+  if(cache&&cache.seed===career.seed&&cache.regionId===career.regionId)return cache.athletes;
+  const athletes=buildRegionRoster(career.seed,career.regionId).athletes;
+  app.directoryCache={seed:career.seed,regionId:career.regionId,athletes};
+  return athletes;
+}
+
 function renderPlayers(){
   const career=app.career;
   const areas=REGIONS.find(region=>region.id===career.regionId).areas;
   const areaOptions=areas.map(area=>`<option value="${area.id}"${app.filters.areaId===area.id?' selected':''}>${escapeHtml(area.label)}</option>`).join('');
-  const term=app.filters.query.trim();
-  let athletes=[];
-  if(term){
-    const {athletes:found}=buildRegionRoster(career.seed,career.regionId,{areaId:app.filters.areaId||undefined});
-    const lower=term.toLowerCase();
-    athletes=found.filter(athlete=>athlete.name.toLowerCase().includes(lower)).slice(0,80);
-  }
+  const cities=allCities(career.regionId).filter(city=>!app.filters.areaId||city.areaId===app.filters.areaId);
+  const cityOptions=cities.map(city=>`<option value="${city.id}"${app.filters.cityId===city.id?' selected':''}>${escapeHtml(city.label)}</option>`).join('');
+  const bracketOptions=RATING_BRACKETS.map(division=>`<option value="${division.id}"${app.filters.bracket===division.id?' selected':''}>${escapeHtml(division.label)}</option>`).join('');
+  const directory=directoryPage(playerDirectory(career),app.filters,app.filters.page??0);
+  app.filters.page=directory.page;
   return `
   <section class="panel">
-    <h2>PLAYERS</h2>
-    <p>Search every athlete in ${escapeHtml(career.regionLabel)}. Ratings are the same model the match engine uses.</p>
+    <h2>PLAYERS · ${escapeHtml(career.regionLabel.toUpperCase())}</h2>
+    <p>Browse every athlete in the region. Name search is optional. Ratings are the same model used by the match engine.</p>
     <div class="filters">
-      <input id="player-search" type="search" placeholder="Search players by name" value="${escapeHtml(term)}" autocomplete="off">
+      <input id="player-search" type="search" placeholder="Filter by name" value="${escapeHtml(app.filters.query)}" autocomplete="off">
       <select id="filter-area"><option value="">All areas</option>${areaOptions}</select>
+      <select id="filter-city"><option value="">All cities</option>${cityOptions}</select>
+      <select id="filter-gender">
+        <option value="">Any gender</option>
+        <option value="female"${app.filters.gender==='female'?' selected':''}>Female</option>
+        <option value="male"${app.filters.gender==='male'?' selected':''}>Male</option>
+      </select>
+      <select id="filter-bracket"><option value="">Any doubles rating</option>${bracketOptions}</select>
+      <select id="filter-sort">
+        <option value="rating-desc"${app.filters.sort==='rating-desc'?' selected':''}>Highest rating</option>
+        <option value="rating-asc"${app.filters.sort==='rating-asc'?' selected':''}>Lowest rating</option>
+        <option value="age-asc"${app.filters.sort==='age-asc'?' selected':''}>Youngest first</option>
+        <option value="age-desc"${app.filters.sort==='age-desc'?' selected':''}>Oldest first</option>
+        <option value="name"${app.filters.sort==='name'?' selected':''}>Name A–Z</option>
+      </select>
+      <input id="filter-age-min" type="number" min="18" max="54" placeholder="Min age" value="${escapeHtml(app.filters.minAge)}" inputmode="numeric">
+      <input id="filter-age-max" type="number" min="18" max="54" placeholder="Max age" value="${escapeHtml(app.filters.maxAge)}" inputmode="numeric">
     </div>
-    ${term?(athletes.length?athletes.map(athlete=>`<div class="player">
+    <p class="hint">${directory.total.toLocaleString('en-US')} matching players · page ${directory.page+1} of ${directory.pages}</p>
+    ${directory.rows.length?directory.rows.map(athlete=>`<div class="player">
       <div class="body">
         <strong>${escapeHtml(athlete.name)}</strong>
-        <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.cityLabel)}, ${escapeHtml(athlete.citizenship ?? '')} · ${escapeHtml(athlete.clubName)}</small>
-        <small>Rating ${formatRating(athlete.formats?.doubles??0)} · ${escapeHtml(ratingBand(athlete.formats?.doubles??0).label)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
+        <small>${escapeHtml(athlete.archetypeLabel)} · ${athlete.gender} · age ${athlete.age} · ${escapeHtml(athlete.cityLabel)}, ${escapeHtml(athlete.citizenship ?? '')} · ${escapeHtml(athlete.clubName)}</small>
+        <small>Doubles ${formatRating(athlete.formats?.doubles??0)} · Singles ${formatRating(athlete.formats?.singles??0)} · Mixed ${formatRating(athlete.formats?.mixed??0)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
       </div>
-    </div>`).join(''):'<p class="muted">No players matched that name.</p>'):'<p class="muted">Type a name to search the region.</p>'}
+    </div>`).join(''):'<p class="muted">No players match those filters.</p>'}
+    <div class="actions">
+      <button type="button" class="secondary" data-action="players-page" data-page="${directory.page-1}" ${directory.page<=0?'disabled':''}>← PREVIOUS</button>
+      <button type="button" class="secondary" data-action="players-page" data-page="${directory.page+1}" ${directory.page>=directory.pages-1?'disabled':''}>NEXT →</button>
+    </div>
   </section>`;
 }
 
@@ -711,6 +750,11 @@ document.addEventListener('click',event=>{
       return;
     }
     if(action==='advance'){apply(advanceWeek(app.career));return}
+    if(action==='players-page'){
+      app.filters.page=Math.max(0,Number(trigger.dataset.page)||0);
+      render();
+      return;
+    }
     if(action==='standings-format'){
       app.standingsFormat=trigger.dataset.format;
       render();
@@ -781,10 +825,16 @@ document.addEventListener('change',event=>{
   if(id==='filter-area'){
     app.filters.areaId=event.target.value;
     app.filters.cityId='';
+    app.filters.page=0;
     render();
   }
-  if(id==='filter-city'){app.filters.cityId=event.target.value;render()}
-  if(id==='filter-tier'){app.filters.tier=event.target.value;render()}
+  if(id==='filter-city'){app.filters.cityId=event.target.value;app.filters.page=0;render()}
+  if(id==='filter-tier'){app.filters.tier=event.target.value;app.filters.page=0;render()}
+  if(id==='filter-gender'){app.filters.gender=event.target.value;app.filters.page=0;render()}
+  if(id==='filter-bracket'){app.filters.bracket=event.target.value;app.filters.page=0;render()}
+  if(id==='filter-sort'){app.filters.sort=event.target.value;app.filters.page=0;render()}
+  if(id==='filter-age-min'){app.filters.minAge=event.target.value;app.filters.page=0;render()}
+  if(id==='filter-age-max'){app.filters.maxAge=event.target.value;app.filters.page=0;render()}
   if(id==='move-region'){app.move.regionId=event.target.value;app.move.cityId='';render()}
   if(id==='move-city'){app.move.cityId=event.target.value}
 });
@@ -792,6 +842,7 @@ document.addEventListener('change',event=>{
 document.addEventListener('input',event=>{
   if(event.target.id==='player-search'){
     app.filters.query=event.target.value;
+    app.filters.page=0;
     const caret=event.target.selectionStart;
     render();
     const field=document.getElementById('player-search');

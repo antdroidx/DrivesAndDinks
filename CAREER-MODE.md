@@ -61,6 +61,7 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/age.js` | Unique development profiles, attribute-specific decline, training capacity and age-scaled recovery. |
 | `src/career/retirement.js` | Retirement advice, the epilogue and the local all-time board. |
 | `src/career/creation.js` | Experience levels, body-size modifiers and one starting trait. |
+| `src/career/directory.js` | Browsable player filters, sorting and pagination. |
 | `src/career/club-life.js` | Club reputation, persistent partners, partner gates and coach feedback. |
 | `src/career/opponents.js` | Persistent opponent memory and head-to-head history. |
 | `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
@@ -511,6 +512,7 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | Experience starts the provisional format rating between 2.5 and 4.5 | A true beginner, casual player, general athlete, racket-sport crossover and competitive-background player should not share one starting rating. |
 | 2026-11-08 | Height and weight affect attributes through a body-size model rather than raw labels | Taller players gain reach; heavier and taller frames can gain power; extreme size and mass cost agility. The modifiers remain bounded so archetype identity survives. |
 | 2026-11-08 | A new career selects one optional starting trait | Quickness, power, soft touch, court IQ, serve, or broad athleticism can create a modest unique edge without replacing the archetype. |
+| 2026-11-08 | The player directory browses by filters rather than requiring a name | Region athletes are cached locally, then filtered by area, city, gender, age, doubles bracket and optional name. Sorting and 40-player pagination keep browsing usable. |
 
 ---
 
@@ -532,6 +534,7 @@ node --test test/career-age.test.js \
                  test/career-analytics.test.js \
                  test/career-club-life.test.js \
                  test/career-creation.test.js \
+                 test/career-directory.test.js \
                  test/career-competition.test.js \
                  test/career-contracts.test.js \
                  test/career-geography.test.js \

@@ -9,6 +9,7 @@ import {buildRegionSkills,buildAthlete} from './population.js';
 import {currentRatings} from './world.js';
 import {tourFor,tourRank,worldRank,PRO_TOUR_SIZE,PRO_FLOOR_RATING,EVENT_POINTS} from './tour.js';
 import {summarizeCareerForm} from './match-record.js';
+import {REGIONS} from './geography.js';
 
 // The rounds a player has to earn their way into.
 export const QUALIFICATION_POINTS=Object.freeze({
@@ -84,6 +85,46 @@ export function nearbyRivals(state,format,count=6){
       cityId:athlete.cityId
     };
   });
+}
+
+// The highest-rated players on the selected discipline board across both
+// regions. CPU ranking histories do not exist yet, so this is deliberately a
+// rating leaderboard rather than the points ranking used to enter PPA events.
+export function topPlayers(state,format,count=25){
+  const boardGender=format==='mixed'?null:state.athlete.gender;
+  const skills=REGIONS.flatMap(region=>buildRegionSkills(state.seed,region.id));
+  const current=[...currentRatings(skills,state.worldRatings,state.week,format).values()]
+    .filter(athlete=>!boardGender||athlete.gender===boardGender);
+  current.push({
+    id:'player',
+    name:state.athlete.name,
+    citizenship:state.athlete.citizenship??'',
+    cityId:state.cityId,
+    cityLabel:state.cityLabel,
+    regionId:state.regionId,
+    gender:state.athlete.gender,
+    age:state.athlete.age,
+    rating:state.athlete.formats[format]??0
+  });
+  return current
+    .sort((a,b)=>b.rating-a.rating)
+    .slice(0,Math.max(1,count))
+    .map((athlete,index)=>{
+      const full=athlete.club?buildAthlete(state.seed,athlete.club,athlete.index):null;
+      return {
+        rank:index+1,
+        id:athlete.id,
+        name:full?.name??athlete.name??athlete.id,
+        citizenship:full?.citizenship??athlete.citizenship??'',
+        cityId:athlete.cityId,
+        regionId:athlete.club?.regionId??athlete.regionId??null,
+        cityLabel:full?.cityLabel??athlete.cityLabel??'',
+        gender:full?.gender??athlete.gender,
+        age:full?.age??null,
+        rating:athlete.rating,
+        worldRank:worldRank(athlete.rating,full?.gender??athlete.gender)
+      };
+    });
 }
 
 // The rival is the player the career keeps coming back to: the nearest one on

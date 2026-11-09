@@ -7,7 +7,7 @@ import {buildClubIndex} from '../src/career/population.js';
 import {formatRating} from '../src/career/rating.js';
 import {RATING_KEYS} from '../src/roster.js';
 import {rateMatchReport} from '../src/career/match-record.js';
-import {boardPosition,nearbyRivals,findRival,qualificationStatus,sponsorsFor,prizeFor,careerForm} from '../src/career/standings.js';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,prizeFor,careerForm} from '../src/career/standings.js';
 
 const SEED=4242;
 const career=(overrides={})=>createCareer({name:'Test Player',gender:'male',archetypeId:'avery',regionId:'north-america',cityId:'seattle',seed:SEED,...overrides});
@@ -238,6 +238,21 @@ test('the board places the player and the players nearest to them',()=>{
   const rivals=nearbyRivals(state,'doubles',4);
   assert.equal(rivals.length,4);
   for(const rival of rivals)assert.ok(rival.name&&rival.name.length>2);
+});
+
+test('the top of the board lists the strongest players in a discipline',()=>{
+  const state=withClub(career());
+  const leaders=topPlayers(state,'doubles',20);
+  assert.equal(leaders.length,20);
+  for(let index=1;index<leaders.length;index++)assert.ok(leaders[index-1].rating>=leaders[index].rating);
+  assert.equal(new Set(leaders.map(entry=>entry.id)).size,leaders.length);
+  assert.ok(leaders.every(entry=>entry.gender==='male'));
+  assert.equal(new Set(leaders.map(entry=>entry.regionId)).size,2);
+  const mixed=topPlayers(state,'mixed',20);
+  assert.equal(new Set(mixed.map(entry=>entry.gender)).size,2);
+  const topped={...state,athlete:{...state.athlete,formats:{...state.athlete.formats,doubles:8}}};
+  const includingPlayer=topPlayers(topped,'doubles',20);
+  assert.equal(includingPlayer[0].id,'player');
 });
 
 test('the rival is the player nearest on the board',()=>{
