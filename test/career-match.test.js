@@ -210,6 +210,23 @@ test('a tournament survives being saved between rounds',()=>{
   assert.equal(scored.state.tournament.round,round+1,'the tournament advanced a round');
 });
 
+test('a career match carries difficulty and keeps what the engine learned',()=>{
+  const state=withClub(career());
+  const event=currentEvents(state).find(entry=>entry.eligible.ok);
+  const started=startCareerMatch(state,event.id,event.defaultOptionId);
+  assert.ok(['easy','normal','hard'].includes(started.pending.difficulty),'the event sets the difficulty');
+  assert.equal(started.pending.learning,null,'nothing has been learned yet');
+  const report={
+    score:{points:[11,4],winner:0},
+    players:started.pending.matchup.lineup.map((profile,index)=>({id:index,team:index<2?0:1,name:profile.name})),
+    learning:[{playerId:2,samples:6,expectedX:4.2,confidence:.4,lobRate:.1,lobConfidence:0,recent:[{shot:'dink',x:3,y:20}]}]
+  };
+  const scored=finishCareerMatch(started.state,report);
+  assert.ok(scored.ok,scored.message);
+  assert.equal(scored.state.opponentLearning[0].playerId,2,'the learning is kept');
+  if(scored.state.pendingMatch)assert.ok(scored.state.pendingMatch.learning,'the next round remembers it');
+});
+
 test('the board places the player and the players nearest to them',()=>{
   const state=withClub(career());
   const position=boardPosition(state,'doubles');

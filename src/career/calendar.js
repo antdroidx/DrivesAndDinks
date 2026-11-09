@@ -200,6 +200,7 @@ export function generateWeekEvents(state,week){
       drawSize:event.drawSize??16,
       gateBasis:event.gateBasis??'highest',
       championPoints:event.championPoints??0,
+      difficulty:event.difficulty??'normal',
       scoring:event.scoring??'side-out',
       targetScore:event.targetScore??11,
       playoffPoints:event.playoffPoints??15,

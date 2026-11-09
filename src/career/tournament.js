@@ -303,6 +303,7 @@ export function startTournament({state,event,option}){
       matchType:event.matchType,
       energyCost:event.energy,
       championPoints:event.championPoints??0,
+      difficulty:event.difficulty??'normal',
       rules:{
         points:event.targetScore??11,
         playoffPoints:event.playoffPoints??15,

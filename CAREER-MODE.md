@@ -336,9 +336,9 @@ The milestone this branch delivers.
 - [x] 132 career tests across ten files (`test/career-*.test.js`), 582 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
-### M2 — Match play inside a career 🔶 in progress
+### M2 — Match play inside a career ✅ complete
 
-A career event is already played by the real engine, rated on the real result, and recorded against the event.
+A career event is played by the real engine, rated on the real result, and recorded against the event.
 
 - [x] Launch the real match from a career event, with the opponents drawn from the bracket
 - [x] Carry the career athlete's own attributes into the match lineup
@@ -347,8 +347,8 @@ A career event is already played by the real engine, rated on the real result, a
 - [x] Keep the engine's own match report attached to that record
 - [x] Award tour points from the result
 - [x] Let the opponents the player faced move through the world rating state
-- [ ] Take the difficulty from the career rather than always playing normal
-- [ ] Carry opponent memory from one career match into the next
+- [x] Take the difficulty from the career: club and league nights are easy, opens normal, national and pro events hard
+- [x] Carry opponent memory from one career match into the next
 
 The handoff is a settled decision. The career writes a pending match, the engine plays it, and the report comes back. Playing inside the career page is not planned, because the match needs the whole screen.
 

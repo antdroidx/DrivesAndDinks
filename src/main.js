@@ -436,9 +436,9 @@ if(careerMatch){
   const screen=document.querySelector('#game-start');
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
-  game.configure({format:careerMatch.matchup.format,showNameTags:true,rules:careerMatch.rules},careerMatch.matchup.lineup);
+  game.configure({format:careerMatch.matchup.format,showNameTags:true,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
   game.mode='play';
-  game.setDifficulty('normal');
+  game.setDifficulty(careerMatch.difficulty??'normal');
   refreshVenue();
   const scoringLabel=careerMatch.rules?`First to ${careerMatch.rules.targetScore}, ${careerMatch.rules.scoring==='rally'?'rally scoring':'side-out'}, win by ${careerMatch.rules.winBy}`:'First to 11, side-out, win by 2';
   document.querySelector('#active-loadout').textContent='CAREER MATCH \u00b7 '+careerMatch.bracket+' '+careerMatch.format+' \u00b7 '+scoringLabel;

@@ -96,6 +96,8 @@ function pendingFor({state,tournament}){
     round:tournament.round,
     tournamentId:tournament.id,
     rules:matchRules(tournament),
+    difficulty:tournament.difficulty??'normal',
+    learning:state.opponentLearning??null,
     matchup 
   };
 }
@@ -217,6 +219,9 @@ export function finishCareerMatch(state,report){
   let next=Object.assign({},state,{
     athlete,
     pendingMatch:null,
+    // What the engine learned about these opponents carries into the next
+    // career match.
+    opponentLearning:report.learning??state.opponentLearning??null,
     worldRatings,
     matches:[...state.matches,record].slice(-CAREER_RECORD_LIMIT),
     stats:Object.assign({},state.stats,{matches:(state.stats.matches??0)+1})
