@@ -333,7 +333,7 @@ The milestone this branch delivers.
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 146 career tests across eleven files (`test/career-*.test.js`), 596 in the suite overall
+- [x] 147 career tests across eleven files (`test/career-*.test.js`), 597 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
 ### M2 — Match play inside a career ✅ complete
@@ -365,7 +365,7 @@ An event now fields a tournament rather than a single match.
 - [x] Points follow the real tour proportions by place, from champion down to the first round
 - [x] Points and prize are paid for the placing when the tournament ends
 - [x] Qualifier draws: a player outside the main-draw cut plays one match to get in
-- [ ] A secondary bracket for those who lose out in the main draw
+- [x] A secondary bracket: a first round knockout loss opens one more match
 - [x] Seeding in bands, with the top two fixed, and byes by combined ranking in doubles
 - [x] All seven shapes wired in: bracket, round robin, double elimination, fixed and open ladders, and the team league
 - [ ] Multi-week events that occupy consecutive weeks

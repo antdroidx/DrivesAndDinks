@@ -439,6 +439,10 @@ export function startRound(tournament,random){
     tournament.currentMatch=tournament.qualifierMatch??null;
     return;
   }
+  if(tournament.inConsolation){
+    tournament.currentMatch=tournament.consolationMatch??null;
+    return;
+  }
   if(tournament.shape==='bracket'){
     const alive=tournament.alive;
     for(let index=0;index<alive.length;index+=2){
@@ -574,6 +578,14 @@ export function recordPlayerResult(tournament,{won,score}){
   tournament.history=tournament.history??[];
   tournament.history.push({round:tournament.round,opponent:opponent.name,opponentRating:opponent.rating,won:bye?true:won,score:bye?'bye':score});
   if(bye)won=true;
+  if(tournament.inConsolation){
+    tournament.inConsolation=false;
+    tournament.consolationDone=true;
+    tournament.playerOut=true;
+    tournament.finished=true;
+    tournament.currentMatch=null;
+    return {ok:true,tournament};
+  }
   if(tournament.shape==='qualifier'){
     if(!won){
       tournament.playerOut=true;
@@ -598,7 +610,20 @@ export function recordPlayerResult(tournament,{won,score}){
         nextAlive.push(won?(home?.id===tournament.playerTeamId?home:away):(home?.id===tournament.playerTeamId?away:home));
       }else nextAlive.push(winners[index/2]??null);
     }
-    if(!won){tournament.playerOut=true;tournament.playerPlace=placeForLoss(tournament.round,tournament.size);}
+    if(!won){
+      tournament.playerPlace=placeForLoss(tournament.round,tournament.size);
+      // A first round loss drops the player into a secondary bracket for one
+      // more match, rather than ending the event on the spot.
+      if(tournament.round===0&&tournament.size>=8&&!tournament.consolationUsed){
+        const playerTeam=tournament.teams.find(team=>team.id===tournament.playerTeamId);
+        const opponent=tournament.teams.find(team=>team.id!==tournament.playerTeamId);
+        if(playerTeam&&opponent){
+          tournament.consolationUsed=true;
+          tournament.inConsolation=true;
+          tournament.consolationMatch={home:playerTeam,away:opponent,slot:0,consolation:true};
+        }else tournament.playerOut=true;
+      }else tournament.playerOut=true;
+    }
     tournament.alive=nextAlive;
     tournament.round+=1;
     if(tournament.alive.filter(Boolean).length<=1){
@@ -675,7 +700,9 @@ export function recordPlayerResult(tournament,{won,score}){
 
 // Whether the player's part in the tournament is over.
 export function isPlayerDone(tournament){
-  return Boolean(tournament?.finished||tournament?.playerOut);
+  if(!tournament)return true;
+  if(tournament.inConsolation)return false;
+  return Boolean(tournament.finished||tournament.playerOut);
 }
 
 // The points a finished tournament is worth to the player.

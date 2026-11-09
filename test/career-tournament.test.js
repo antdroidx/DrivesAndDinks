@@ -62,8 +62,13 @@ test('a loss ends a knockout and keeps a league going',()=>{
   startRound(bracket,seededRandom(5));
   simulateRestOfRound(bracket,seededRandom(5));
   recordPlayerResult(bracket,{won:false,score:'7-11'});
-  assert.ok(isPlayerDone(bracket),'losing a knockout ends the run');
   assert.equal(bracket.playerPlace,5,'an eight team bracket pays fifth for a first round loss');
+  assert.equal(bracket.inConsolation,true,'a knockout loss opens a secondary match');
+  assert.equal(isPlayerDone(bracket),false,'the secondary match is still to play');
+  startRound(bracket,seededRandom(5));
+  assert.ok(nextPlayerMatch(bracket),'there is a consolation match');
+  recordPlayerResult(bracket,{won:true,score:'11-9'});
+  assert.ok(isPlayerDone(bracket),'the secondary match ends the event');
 
   const league=startTournament({state,event:eventFor('round-robin-league'),option}).tournament;
   startRound(league,seededRandom(5));
