@@ -317,7 +317,7 @@ The milestone this branch delivers.
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 123 automated tests across nine files (`test/career-*.test.js`), 564 in the suite overall
+- [x] 132 automated tests across ten files (`test/career-*.test.js`), 574 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
 ### M2 — Match play inside a career 🔶 in progress
@@ -346,17 +346,18 @@ An event now fields a tournament rather than a single match.
 - [x] A division fields its own rating band, even when the event is open
 - [x] The gate basis is recorded per event, as the highest player or the combined team
 - [x] The tournament is saved between rounds, so a handoff to the engine survives a reload
+- [x] Points follow the real tour proportions by place, from champion down to the first round
 - [x] Points and prize are paid for the placing when the tournament ends
 - [ ] Qualifier draws, and a secondary bracket for those who lose out
 - [ ] Seeding in bands rather than strictly by rating, and byes by combined ranking in doubles
-- [ ] The seven shapes from `events.js` wired in, rather than the two the career currently uses
+- [x] All seven shapes wired in: bracket, round robin, double elimination, fixed and open ladders, and the team league
 - [ ] Multi-week events that occupy consecutive weeks
 - [ ] A way to skip weeks with nothing on the calendar
 - [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
 
 **Why it is here.** A ranking is a measurement of rounds reached, and rounds do not exist until an event fields a tournament. This is the foundation the tour is expressed in.
 
-**Where it stands.** The career plays a seeded bracket for tournaments and a round robin for leagues. The other five shapes exist in `competition.js`, with tests, and are not yet selected by the calendar.
+**Where it stands.** Every event names the shapes it may run, and the calendar picks one from that set. Knockouts take one loss, a double elimination takes two, a ladder swaps the winner up and the loser down a rung, an open draw gives the player a new partner each round, and a team league plays sides of four.
 
 ### M4 — The ranking and the pro tour ⬜ planned
 

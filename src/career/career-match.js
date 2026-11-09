@@ -16,7 +16,7 @@ import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
-import {startTournament,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary} from './tournament.js';
+import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary} from './tournament.js';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 
@@ -133,6 +133,7 @@ export function startCareerMatch(state,eventId,optionId=null){
   const started=startTournament({state,event,option});
   if(!started.ok)return {ok:false,state,message:started.message};
   const tournament=started.tournament;
+  startRound(tournament,seededRandom(mixSeed(state.seed,'start:'+state.week+':'+event.eventId)));
   let next=Object.assign({},state,{
     tournament,
     energy:state.energy-event.energyCost,
@@ -143,7 +144,10 @@ export function startCareerMatch(state,eventId,optionId=null){
   // A bye in the first round is stepped over straight away.
   let guard=0;
   while(playerHasBye(tournament)&&guard++<8){
+    const byeRandom=seededRandom(mixSeed(state.seed,'bye:'+state.week+':'+event.eventId+':'+tournament.round));
+    simulateRestOfRound(tournament,byeRandom);
     recordPlayerResult(tournament,{won:true,score:'bye'});
+    if(!tournament.finished)startRound(tournament,byeRandom);
   }
   const pending=pendingFor({state:next,tournament});
   if(!pending){
@@ -220,8 +224,18 @@ export function finishCareerMatch(state,report){
   // Record the result in the tournament and play the rest of the round.
   const tournament=next.tournament;
   if(tournament){
-    simulateRestOfRound(tournament,seededRandom(mixSeed(state.seed,`round:${state.week}:${tournament.eventId}:${tournament.round}`+':rest')));
+    const roundRandom=seededRandom(mixSeed(state.seed,`round:${state.week}:${tournament.eventId}:${tournament.round}`+':rest'));
+    simulateRestOfRound(tournament,roundRandom);
     recordPlayerResult(tournament,{won:outcome.won,score:record.score});
+    // Open the next round, stepping over any bye the player has.
+    let byeGuard=0;
+    while(!tournament.finished&&!tournament.playerOut){
+      startRound(tournament,roundRandom);
+      if(!playerHasBye(tournament))break;
+      simulateRestOfRound(tournament,roundRandom);
+      recordPlayerResult(tournament,{won:true,score:'bye'});
+      if(byeGuard++>8)break;
+    }
     next=Object.assign({},next,{tournament});
   }
 
