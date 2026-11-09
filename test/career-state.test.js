@@ -96,7 +96,7 @@ test('a week holds several training sessions and one event',()=>{
 });
 
 test('training and recovery scale with the level the player competes at',()=>{
-  const amateur=career();
+  const amateur=career({age:24});
   const pro={...amateur,athlete:{...amateur.athlete,formats:{singles:6.5,doubles:6.5,mixed:6.5}}};
   assert.ok(trainingCost(pro)>trainingCost(amateur),'a stronger player trains harder');
   assert.ok(weeklyRecovery(pro)>weeklyRecovery(amateur),'a stronger player takes more back');

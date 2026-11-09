@@ -57,6 +57,9 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/save.js` | Versioned save schema, migrations, validation, corruption recovery. |
 | `src/career/calendar.js` | Week arithmetic, event generation, bracket choice, entry eligibility and per-division cuts. |
 | `src/career/contracts.js` | Contract levels, obligations, reviews, release and the re-entry route. |
+| `src/career/analytics.js` | Durable game totals, event history, medals and rating peaks. |
+| `src/career/age.js` | Starting age, development, decline, rating ceilings and age-scaled recovery. |
+| `src/career/retirement.js` | Retirement advice, the epilogue and the local all-time board. |
 | `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
 | `src/career/career-match.js` | The handoff between a career tournament and the shared match engine. |
 | `src/career/events.js` | The competition templates: the seven shapes of event and the rules they are played under. |
@@ -82,7 +85,7 @@ Career ratings are the **same 14 values** the match engine simulates with, so a 
 - Athlete ids are stable for the life of a career, because they are a function of the id, not of an enumeration order.
 - Adding a club to a region cannot renumber another club's roster.
 
-The cost is that the population must be regenerated on demand. A full region roster (1 007 athletes) rebuilds in about 11 ms, so browsing is live rather than paged.
+The cost is that the population must be regenerated on demand. A full region roster now holds roughly two thousand to three thousand athletes and rebuilds in tens of milliseconds, so browsing stays live rather than paged.
 
 ### Data flow
 
@@ -101,8 +104,8 @@ calendar.js ──► events ─────────────────
 
 | Region | Areas | Cities | Clubs | Athletes |
 |---|---|---|---|---|
-| North America | 8 | 42 | 128 | 1 007 |
-| Asia | 6 | 32 | 100 | 791 |
+| North America | 8 | 42 | 128 | 3 056 |
+| Asia | 6 | 32 | 100 | 2 388 |
 
 North America: Pacific Coast, Mountain & Desert, Southwest, Midwest, Great Lakes, Southeast, Northeast Corridor, Canada.
 
@@ -314,7 +317,7 @@ The order is a dependency chain. A ranking measures the rounds a player reached,
 The milestone this branch delivers.
 
 - [x] Isolated `/career-mode/` entry point; root prototype untouched and still publishing unchanged
-- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 7`, six migrations in place)
+- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 11`, ten migrations in place)
 - [x] Corruption recovery: a damaged file falls back to the last verified save, and an unreadable file with no backup is quarantined rather than silently reset
 - [x] Stable ids for athletes, clubs and events, guaranteed by seed derivation
 - [x] North America and Asia, split into 14 areas and 74 cities
@@ -410,18 +413,19 @@ Contracts now supply tour access and annual review; the draw cut itself remains 
 - [x] Gender-correct fields and a deep regional population for 64-team draws
 - [x] A contracted pro stops entering amateur leagues and local opens; the PPA tour becomes the job
 
-### M6 — A career with an end ⬜ planned
+### M6 — A career with an end ✅ complete
 
 Retirement is the endpoint of a career. Everything above is a stage a career passes through on the way to it.
 
-- [ ] The age curve and the ceiling rule: a rating can fall below a player's age-adjusted peak but never rise above it
-- [ ] Recovery that declines with age
-- [ ] A starting age chosen at creation, so a career can begin at ten or at thirty
-- [ ] No fixed career length: the player plays until they retire
-- [ ] Voluntary retirement at any point
-- [ ] Forced retirement, offered plainly when the ceiling falls below the level the player is attempting
-- [ ] The all-time board, and the career record as a final artifact
-- [ ] The epilogue
+- [x] The age curve and the ceiling rule: a rating can fall below a player's age-adjusted peak but never rise above it
+- [x] Recovery that declines with age
+- [x] A starting age chosen at creation, from ten through seventy
+- [x] No fixed career length: the player plays until they retire
+- [x] Voluntary retirement at any point
+- [x] A retirement recommendation when the ceiling falls below the level the player is pursuing
+- [x] The all-time board, and the career record as a final artifact
+- [x] The epilogue
+- [x] Durable analytics independent of the bounded match report history
 
 ### M7 — Club life and opponents ⬜ planned
 
@@ -489,6 +493,10 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | One event can host all three divisions, for the player and CPU fields | Every division has its own bracket, ranking cut and rating result. Additional divisions at the same event cost an extra 20 percent of the event's energy and preserve the event count once in the contract obligation. |
 | 2026-11-08 | Regional fields use a larger gender-correct population than the 1,200-player ranking pool | A 64-team doubles draw needs 128 players from one gender. The generated regional roster provides enough depth for every tier, while selection uses rating-appropriate seeded variation to keep the competition fresh. |
 | 2026-11-08 | Mixed doubles teams contain one man and one woman, and gender doubles stays within one gender | Field composition is a game rule, not presentation. The same population and selection logic fills human and CPU draws. |
+| 2026-11-08 | The career record keeps durable game and event totals beyond the detailed match archive | The engine reports remain the recent film room, while cumulative points, medals, format splits, competition splits and rating peaks survive for the entire career. |
+| 2026-11-08 | A tournament semifinalist receives bronze, and a league top-three finish receives a medal | The game has no bronze match in knockout draws, so both losing semifinalists share bronze. League standings use first, second and third directly. |
+| 2026-11-08 | Age has development, prime and decline phases, with a per-format ceiling after the prime | A younger career starts below the adult baseline, the prime grows freely, and after age 34 rating gains cannot exceed the age-adjusted personal peak. |
+| 2026-11-08 | Retirement is voluntary, with a recommendation when the player's ceiling leaves the pursued level | The career ends only through the player's decision. The recommendation presents the physical reality without forcing the player out. |
 | 2026-11-08 | A playoff, a double elimination and a ladder resolve during play rather than up front | Who reaches a playoff depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The structure and the simulation have to live together. |
 
 ---
@@ -499,8 +507,6 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 2. **Season rhythm.** A season is 52 weeks. Should it be shorter, with an off-season, so careers have a rhythm rather than one continuous grind?
 3. **Practice as a separate verb.** Training is repeatable inside a week and costs energy, so it competes with competing for the budget. Should any training be free?
 4. **Region transfer.** Can a player move permanently to the other region mid-career, or is a career tied to its starting region?
-5. **Career length.** How many seasons should a career last before the age curve makes retirement the right choice? The tour design suggests fifteen to twenty. A shorter career is easier to finish and easier to replay.
-
 The tour and career-arc questions — season length, declining a contract, the age curve against the rating's half-life, the recommendation route, the league and how much of the ranked population is simulated — are in [`PRO-TOUR.md`](PRO-TOUR.md).
 
 ---
@@ -509,7 +515,9 @@ The tour and career-arc questions — season length, declining a contract, the a
 
 ```sh
 npm test                                   # whole suite, including the career tests
-node --test test/career-competition.test.js \
+node --test test/career-age.test.js \
+                 test/career-analytics.test.js \
+                 test/career-competition.test.js \
                  test/career-contracts.test.js \
                  test/career-geography.test.js \
                  test/career-match.test.js \

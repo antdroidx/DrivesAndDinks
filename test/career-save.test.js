@@ -5,6 +5,7 @@ import {
   serializeCareer,parseCareer,migrateCareer,validateCareer,saveCareer,loadCareer,clearCareer,memoryStorage
 } from '../src/career/save.js';
 import {createCareer,train,advanceWeek} from '../src/career/state.js';
+import {retire} from '../src/career/retirement.js';
 
 const career=()=>createCareer({name:'Test Player',gender:'male',archetypeId:'avery',regionId:'north-america',cityId:'seattle',seed:4242});
 
@@ -131,6 +132,37 @@ test('a career saved before the label fix loads with the repaired label',()=>{
   const loaded=loadCareer(storage);
   assert.ok(loaded.state,loaded.reason);
   assert.equal(loaded.state.athlete.cultureLabel,'Middle Eastern');
+});
+
+test('age, analytics and a retired epilogue round trip through the save',()=>{
+  const storage=memoryStorage();
+  const state=retire(createCareer({name:'Retired Tester',age:37,seed:4242,regionId:'north-america',cityId:'seattle'}),'voluntary').state;
+  const saved=saveCareer(state,storage);
+  assert.ok(saved.ok,saved.reason);
+  const loaded=loadCareer(storage);
+  assert.equal(loaded.state.athlete.age,37);
+  assert.equal(loaded.state.retired,true);
+  assert.equal(loaded.state.epilogue.startAge,37);
+  assert.equal(loaded.state.allTimeBoard.length,1);
+});
+
+test('a pre-age save gains age ceilings without losing its career',()=>{
+  const state=career();
+  const legacy={...state};
+  delete legacy.analytics;
+  delete legacy.eventHistory;
+  delete legacy.ratingHistory;
+  delete legacy.retired;
+  legacy.athlete={...legacy.athlete};
+  delete legacy.athlete.startAge;
+  delete legacy.athlete.peakAge;
+  delete legacy.athlete.peakRatings;
+  delete legacy.athlete.peakFormats;
+  const migrated=migrateCareer({version:9,state:legacy});
+  assert.ok(migrated.ok,migrated.reason);
+  assert.equal(migrated.state.athlete.startAge,migrated.state.athlete.age);
+  assert.ok(migrated.state.athlete.peakFormats.doubles>0);
+  assert.deepEqual(migrated.state.retired,false);
 });
 
 test('a missing save is not an error',()=>{

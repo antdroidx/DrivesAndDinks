@@ -296,19 +296,34 @@ The MLP is a separate competition with its own calendar, its own points and its 
 
 ## 10. Retirement
 
-The endpoint of a career, and the only true one.
+The endpoint of a career, and the only true one. The player can retire at any point; the game does not impose a fixed season count.
 
 **Voluntary.** The player retires when they choose. No more events. The career is over and the record is final.
 
-**Forced.** Age and condition eventually make it impossible to hold a standing, and the game should say so plainly rather than letting a player drift into irrelevance. A player whose age-adjusted ceiling has fallen below the level they are trying to compete at has two choices: drop to a level they can win, or retire.
+**Recommended.** Age and condition eventually make it impossible to hold a standing. The record screen says plainly when the age-adjusted ceiling has fallen below the level the player is pursuing. The player can drop to a level they can win or retire.
 
 **There is no fixed career length.** A career lasts as long as the player wants it to. The starting age is a character creation choice, so a player beginning at ten has sixty possible years and a player beginning at thirty has a much shorter one. The age curve sets what is possible at each age, and the player decides when to stop. Nothing in the game forces a retirement at a set number of seasons.
 
-**After.** A retired player keeps their record and their place on the all-time board. They do not appear on the current board, because the current board is about who is playing now.
+**After.** Retirement freezes the career, writes the epilogue and adds a local all-time entry with age span, games, wins, titles, medals, earnings and peak ratings. The retired player no longer appears in the active calendar.
 
 ---
 
-## 11. The age curve
+## 11. The career record
+
+The detailed engine report is retained for recent matches, but the permanent record is cumulative. It survives the rolling match archive and covers:
+
+| Layer | What is recorded |
+|---|---|
+| Ratings | Current, starting and peak values for singles, gender doubles and mixed doubles |
+| Game record | W-L, points scored and allowed, win rate, point differential, averages, current streak and best streak |
+| Competition record | Tournaments, leagues, MLP and club play independently |
+| Format record | Singles, gender doubles, mixed doubles and all doubles together |
+| Event history | Week, event, division, placing, medal, games, games W-L, points, series record, prize and ranking points |
+| Career artifact | Titles, finals, gold/silver/bronze medals, earnings, retirement age and the epilogue |
+
+Knockout semifinalists share bronze because the game has no third-place match. League medals go to the top three. A multi-division event records one result for each division.
+
+## 12. The age curve
 
 Retirement needs a curve under it. The model: every athlete has a **peak age** and a **peak skill**, and skill is multiplied by an age factor.
 
@@ -336,7 +351,7 @@ What a peak-6.0 player looks like:
 
 ---
 
-## 12. What this means for the code
+## 13. What this means for the code
 
 Not written yet. This is the shape it should take.
 
@@ -351,7 +366,7 @@ Not written yet. This is the shape it should take.
 | `ranking` | the four rankings, each a points total |
 | `rankingHistory` | enough history to age results out of the fifty-two week window |
 | `season` | the current season number |
-| `peakAge`, `peakSkill` | the age curve, fixed at creation |
+| `peakAge`, `peakRatings`, `peakFormats` | the age curve and personal ceilings, fixed as the career records its bests |
 | `retired` | whether the career is over |
 
 ### New modules
@@ -373,7 +388,7 @@ The competition first, because a ranking is a measurement of rounds reached and 
 
 ---
 
-## 13. Open questions
+## 14. Open questions
 
 1. **How long is a season?** The real tour runs September to May for the tour and May to August for the league, so a season is a calendar year and a career is twenty of them. At one action a week that is over a thousand actions in a player's working life. The calendar view already shows ten weeks ahead, so the game knows how to compress time, but a career needs a way to skip the empty weeks. Recommendation: keep the fifty-two week year and add an advance-to-next-event control, so the player only ever looks at weeks that matter, and expect a career to run fifteen to twenty seasons.
 
@@ -389,7 +404,7 @@ The competition first, because a ranking is a measurement of rounds reached and 
 
 ---
 
-## 14. Sources
+## 15. Sources
 
 - Carvana PPA Tour, *How Pro Pickleball Works* — rankings, tiers, contracts, entry, byes, the finals
 - Carvana PPA Tour, *Player Handbook* — points tables, seeding, withdrawals, the participation rule

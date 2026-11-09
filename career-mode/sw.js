@@ -10,7 +10,7 @@
 // a stale precache entry, while a device with no network still opens the
 // game from the cache.
 
-const CACHE='drives-dinks-career-v3';
+const CACHE='drives-dinks-career-v4';
 const PRECACHE=[
   './',
   './index.html',
@@ -23,6 +23,9 @@ const PRECACHE=[
   '../src/career/calendar.js',
   '../src/career/population.js',
   '../src/career/geography.js',
+  '../src/career/analytics.js',
+  '../src/career/age.js',
+  '../src/career/retirement.js',
   '../src/career/contracts.js',
   '../src/career/rating.js',
   '../src/career/tour.js',

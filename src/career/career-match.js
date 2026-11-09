@@ -16,6 +16,8 @@ import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
 import {recordResult} from './ranking.js';
 import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation} from './contracts.js';
+import {recordGame,recordEventResult,eventTypeFor} from './analytics.js';
+import {capRatingForAge,noteSkillPeaks} from './age.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
@@ -187,7 +189,9 @@ export function finishCareerMatch(state,report){
   if(!pending)return {ok:false,state,message:'There is no match waiting to be scored.'};
   const event=EVENT_BY_ID[pending.eventId];
   const option={id:pending.optionId,format:pending.format,divisionId:pending.divisionId,label:pending.bracket};
-  const outcome=rateMatchReport({report,matchup:pending.matchup,matchType:pending.matchType??event?.matchType});
+  const ratedOutcome=rateMatchReport({report,matchup:pending.matchup,matchType:pending.matchType??event?.matchType});
+  const ageAdjusted=capRatingForAge(state.athlete,pending.format,ratedOutcome.playerRating);
+  const outcome={...ratedOutcome,playerRating:ageAdjusted.rating,delta:ageAdjusted.rating-pending.matchup.playerRating};
   const formats=Object.assign({},state.athlete.formats);
   formats[pending.format]=outcome.playerRating;
 
@@ -212,6 +216,7 @@ export function finishCareerMatch(state,report){
   });
   const ratings=Object.assign({},state.athlete.ratings);
   for(const key of Object.keys(growth))ratings[key]=clamp(ratings[key]+growth[key],0,99);
+  const peakRatings=noteSkillPeaks(state.athlete,ratings);
 
   const record=buildCareerRecord({
     report,
@@ -224,6 +229,8 @@ export function finishCareerMatch(state,report){
   const athlete=Object.assign({},state.athlete,{
     ratings,
     formats,
+    peakRatings,
+    peakFormats:ageAdjusted.peakFormats,
     record:Object.assign({},state.athlete.record,{
       matches:state.athlete.record.matches+1,
       wins:state.athlete.record.wins+(outcome.won?1:0),
@@ -241,6 +248,17 @@ export function finishCareerMatch(state,report){
     stats:Object.assign({},state.stats,{matches:(state.stats.matches??0)+1})
   });
 
+  next=recordGame(next,{
+    week:state.week,
+    eventId:pending.eventId,
+    format:pending.format,
+    eventType:eventTypeFor(event??{},state.tournament??{}),
+    won:outcome.won,
+    pointsFor:outcome.myPoints,
+    pointsAgainst:outcome.theirPoints,
+    rating:outcome.playerRating,
+    delta:outcome.delta
+  });
   // Record the result in the tournament and play the rest of the round.
   const tournament=next.tournament;
   if(tournament){
@@ -327,7 +345,31 @@ function finishTournament(state,tournament){
     +(prize?' · $'+prize.toLocaleString('en-US'):'')+'.';
   const offered=contractOffer(ranked);
   const withContract=offered?signContract(ranked,offered,state.week):ranked;
-  const next=pushLog(pushHistory(Object.assign({},withContract,{
+  const type=eventTypeFor(tournamentEvent??{},tournament);
+  const series=tournament.records?.[tournament.playerTeamId]??null;
+  const playerStats=tournament.playerStats??{games:0,wins:0,losses:0,pointsFor:0,pointsAgainst:0};
+  const eventLogged=recordEventResult(withContract,{
+    key:`${state.week}:${tournament.eventId}:${tournament.optionId}:${tournament.format}`,
+    week:state.week,
+    eventId:tournament.eventId,
+    optionId:tournament.optionId,
+    label:tournament.label,
+    type,
+    tier:tournamentEvent?.tier??null,
+    format:tournament.format,
+    place,
+    fieldSize:tournament.teams?.length??tournament.size??0,
+    games:playerStats.games,
+    wins:playerStats.wins,
+    losses:playerStats.losses,
+    pointsFor:playerStats.pointsFor,
+    pointsAgainst:playerStats.pointsAgainst,
+    seriesWins:series?.wins??0,
+    seriesLosses:series?.losses??0,
+    prize,
+    rankingPoints:earned
+  });
+  const next=pushLog(pushHistory(Object.assign({},eventLogged,{
     athlete,
     money:state.money+prize,
     entered,

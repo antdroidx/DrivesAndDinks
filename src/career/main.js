@@ -19,6 +19,8 @@ import {boardPosition,nearbyRivals,findRival,qualificationStatus,sponsorsFor,car
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
 import {rankingSummary} from './ranking.js';
 import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js';
+import {analyticsSummary} from './analytics.js';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -31,7 +33,7 @@ const RATING_GROUPS=Object.freeze([
 const app={
   career:null,
   view:'home',
-  draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:''},
+  draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25},
   filters:{areaId:'',cityId:'',tier:'',query:''},
   move:{regionId:'',cityId:''},
   standingsFormat:null,
@@ -72,7 +74,7 @@ function render(){
   resetButton.hidden=!hasCareer;
   if(hasCareer)renderStatus();
   for(const button of nav.querySelectorAll('button'))button.classList.toggle('active',button.dataset.view===app.view);
-  const renderer={home:renderHome,clubs:renderClubs,players:renderPlayers,calendar:renderCalendar,standings:renderStandings}[app.view]??renderHome;
+  const renderer={home:renderHome,clubs:renderClubs,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
   view.innerHTML=hasCareer?renderer():renderCreate();
 }
 
@@ -83,7 +85,8 @@ function renderStatus(){
     <div><small>ENERGY</small><strong>${career.energy}</strong></div>
     <div><small>BEST RATING</small><strong>${formatRating(Math.max(...Object.values(career.athlete.formats??{doubles:0})))}</strong></div>
     <div><small>LOCATION</small><strong>${escapeHtml(career.cityLabel)}</strong></div>
-    <div><small>TOUR</small><strong>${escapeHtml(contractLevel(career)==='none'?'NO CONTRACT':contractLevel(career).toUpperCase())}</strong></div>`;
+    <div><small>TOUR</small><strong>${escapeHtml(contractLevel(career)==='none'?'NO CONTRACT':contractLevel(career).toUpperCase())}</strong></div>
+    <div><small>AGE</small><strong>${career.athlete.age}</strong></div>`;
 }
 
 function renderCreate(){
@@ -114,6 +117,10 @@ function renderCreate(){
       </div>
     </div>
     <div class="field-row">
+      <div class="field">
+        <label for="draft-age">STARTING AGE</label>
+        <input id="draft-age" type="number" min="10" max="70" value="${app.draft.age}" inputmode="numeric">
+      </div>
       <div class="field">
         <label for="draft-region">REGION</label>
         <select id="draft-region">
@@ -169,12 +176,31 @@ function renderTournament(career){
   </section>`;
 }
 
+function renderRetiredHome(career){
+  const epilogue=career.epilogue;
+  if(!epilogue)return '<section class="panel"><h2>CAREER COMPLETE</h2><p>This career has ended.</p></section>';
+  return `<section class="panel">
+    <h2>CAREER COMPLETE · ${escapeHtml(epilogue.name)}</h2>
+    <p><strong>${epilogue.startAge}–${epilogue.endAge}</strong> · ${epilogue.seasons} seasons · retired ${epilogue.reason}</p>
+    <div class="board-head">
+      <div><small>GAMES</small><strong>${epilogue.games}</strong></div>
+      <div><small>RECORD</small><strong>${epilogue.wins}-${epilogue.losses}</strong></div>
+      <div><small>TITLES</small><strong>${epilogue.titles}</strong></div>
+      <div><small>MEDALS</small><strong>${epilogue.medals.gold}G ${epilogue.medals.silver}S ${epilogue.medals.bronze}B</strong></div>
+      <div><small>EARNINGS</small><strong>$${epilogue.earnings.toLocaleString('en-US')}</strong></div>
+    </div>
+    <p class="hint">Open RECORD for the full event history, format splits and all-time board.</p>
+  </section>`;
+}
+
 function renderHome(){
   const career=app.career;
+  if(career.retired)return renderRetiredHome(career);
   const events=currentEvents(career);
   const trainReady=canTrain(career);
   const eventReady=events.some(event=>canEnterEvent(career,event));
   const sessions=trainingSessionsThisWeek(career);
+  const retirement=retirementAdvice(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
     const standing=tourRank(rating,career.athlete.gender);
@@ -236,6 +262,7 @@ function renderHome(){
         <div class="hint">${escapeHtml(board('Overall',ranking.overall,ranking.points.overall))}${ranking.finals?' · finals qualified':''}</div>
         <div class="hint">${escapeHtml([board('Doubles',ranking.doubles,ranking.points.doubles),board('Mixed',ranking.mixed,ranking.points.mixed),board('Singles',ranking.singles,ranking.points.singles)].join(' · '))}</div>
         <div class="hint">${escapeHtml(contractText)}</div>
+        <div class="hint">${escapeHtml(retirement.message)}</div>
         <div class="hint">Next on the ladder: ${escapeHtml(nextEvent?nextEvent.label:'the pro league')}</div>
       </div>
     </div>
@@ -246,9 +273,9 @@ function renderHome(){
         <label for="focus-select">TRAINING FOCUS</label>
         <select id="focus-select">${focusOptions}</select>
       </div>
-      <button type="button" class="secondary" data-action="train" ${trainReady?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
-      <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end">ADVANCE WEEK →</button>
-      <button type="button" class="secondary" data-action="next-event" style="flex:1 1 190px;align-self:flex-end">NEXT EVENT →</button>
+      <button type="button" class="secondary" data-action="train" ${trainReady&&!career.retired?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
+      <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end" ${career.retired?'disabled':''}>ADVANCE WEEK →</button>
+      <button type="button" class="secondary" data-action="next-event" style="flex:1 1 190px;align-self:flex-end" ${career.retired?'disabled':''}>NEXT EVENT →</button>
     </div>
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Later gains are slower than early ones.</div>
   </section>
@@ -397,6 +424,85 @@ function clubRow(club,career){
   </div>`:''}`;
 }
 
+function recordPercent(record){
+  return record.wins+record.losses?Math.round(record.wins/(record.wins+record.losses)*100):0;
+}
+
+function recordLine(label,record,eventRecord,current=null,peak=null){
+  const medals=(eventRecord?.gold??0)+(eventRecord?.silver??0)+(eventRecord?.bronze??0);
+  const rating=current==null?'':formatRating(current);
+  const peakText=peak==null?'':' · peak '+formatRating(peak);
+  const eventText=eventRecord?' · '+eventRecord.played+' events':'';
+  return `<div class="club"><div class="body"><strong>${escapeHtml(label)}</strong><small>${rating?rating+peakText+' · ':''}${record.wins}W ${record.losses}L ${record.played?' · '+recordPercent(record)+'%':''}</small><small>${record.pointsFor} scored · ${record.pointsAgainst} allowed · ${record.pointDifference>=0?'+':''}${record.pointDifference} differential</small></div><div class="actions"><span class="need">${eventText}${medals?' · '+medals+' medals':''}</span></div></div>`;
+}
+
+function renderRecord(){
+  const career=app.career;
+  const summary=analyticsSummary(career);
+  const eventTypes=summary.events;
+  const medals=Object.fromEntries(['gold','silver','bronze'].map(medal=>[
+    medal,Object.values(eventTypes).reduce((sum,entry)=>sum+(entry[medal]??0),0)
+  ]));
+  const totalEvents=Object.values(eventTypes).reduce((sum,entry)=>sum+entry.played,0);
+  const totalTitles=Object.values(eventTypes).reduce((sum,entry)=>sum+entry.titles,0);
+  const earnings=Object.values(eventTypes).reduce((sum,entry)=>sum+entry.prize,0);
+  const rankingPoints=Object.values(eventTypes).reduce((sum,entry)=>sum+entry.rankingPoints,0);
+  const current=summary.ratings;
+  const peaks=summary.ratingPeaks;
+  const history=[...(summary.eventHistory??[])].reverse().slice(0,30);
+  return `
+  <section class="panel">
+    <h2>${career.retired?'CAREER COMPLETE':'CAREER RECORD'}</h2>
+    <p>${career.retired?escapeHtml(career.epilogue?.reason==='voluntary'?'Retired by choice at age '+career.epilogue.endAge+'.':'Career ended at age '+career.epilogue.endAge+'.'):'Every rated game contributes durable totals, while event history keeps placings, medals, series records and points scored.'}</p>
+    <div class="board-head">
+      <div><small>GAMES</small><strong>${summary.overall.played}</strong></div>
+      <div><small>RECORD</small><strong>${summary.overall.wins}-${summary.overall.losses}</strong></div>
+      <div><small>WIN RATE</small><strong>${recordPercent(summary.overall)}%</strong></div>
+      <div><small>POINTS</small><strong>${summary.overall.pointsFor}:${summary.overall.pointsAgainst}</strong></div>
+      <div><small>EVENTS</small><strong>${totalEvents}</strong></div>
+    </div>
+    <p class="hint">${totalTitles} titles · ${medals.gold} gold · ${medals.silver} silver · ${medals.bronze} bronze · $${earnings.toLocaleString('en-US')} earned · ${rankingPoints.toLocaleString('en-US')} ranking points</p>
+    ${career.retired?'':`<div class="actions"><button type="button" class="secondary" data-action="retire">RETIRE FROM COMPETITION</button></div>`}
+  </section>
+
+  ${career.retired&&career.allTimeBoard?.length?`<section class="panel"><h2>ALL-TIME BOARD</h2>${allTimeBoard(career).map((entry,index)=>`<div class="club"><div class="body"><strong>#${index+1} ${escapeHtml(entry.name)}</strong><small>${entry.startAge}–${entry.endAge} · ${entry.games} games · ${entry.titles} titles</small></div><div class="actions"><span class="need">${entry.medals.gold}G ${entry.medals.silver}S ${entry.medals.bronze}B</span></div></div>`).join('')}</section>`:''}
+
+  <div class="grid two">
+    <section class="panel">
+      <h2>BY FORMAT</h2>
+      ${recordLine('Singles',summary.formats.singles,null,current.singles,peaks.singles)}
+      ${recordLine('Gender doubles',summary.formats.doubles,null,current.doubles,peaks.doubles)}
+      ${recordLine('Mixed doubles',summary.formats.mixed,null,current.mixed,peaks.mixed)}
+      ${recordLine('All doubles',summary.doublesAll,null,null,null)}
+    </section>
+
+    <section class="panel">
+      <h2>BY COMPETITION</h2>
+      ${recordLine('Tournaments',summary.byType.tournament,eventTypes.tournament)}
+      ${recordLine('Leagues',summary.byType.league,eventTypes.league)}
+      ${recordLine('MLP',summary.byType.mlp,eventTypes.mlp)}
+      ${recordLine('Club play',summary.byType.club,eventTypes.club)}
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>PERFORMANCE</h2>
+    <div class="board-head">
+      <div><small>POINT DIFFERENTIAL</small><strong>${summary.overall.pointDifference>=0?'+':''}${summary.overall.pointDifference}</strong></div>
+      <div><small>AVG SCORED</small><strong>${summary.overall.averageFor.toFixed(1)}</strong></div>
+      <div><small>AVG ALLOWED</small><strong>${summary.overall.averageAgainst.toFixed(1)}</strong></div>
+      <div><small>BEST STREAK</small><strong>${summary.overall.bestWinStreak}</strong></div>
+      <div><small>CURRENT STREAK</small><strong>${summary.currentStreak}</strong></div>
+    </div>
+    <p class="hint">Tournament medals award both semifinalists bronze. League medals go to the top three. Series records are kept separately from every rated game inside a best-of-three.</p>
+  </section>
+
+  <section class="panel">
+    <h2>EVENT HISTORY</h2>
+    ${history.length?`<ul class="history">${history.map(entry=>`<li><span>${escapeHtml(weekShortLabel(entry.week))}</span><strong>${escapeHtml(entry.label)} · ${escapeHtml(entry.format??'event')}</strong><small>${entry.medal?entry.medal.toUpperCase()+' · ':''}${entry.place?'place '+entry.place:'complete'} · ${entry.wins}W ${entry.losses}L · ${entry.pointsFor}:${entry.pointsAgainst}</small></li>`).join('')}</ul>`:'<p class="muted">No completed events yet.</p>'}
+  </section>`;
+}
+
 function renderStandings(){
   const career=app.career;
   const format=app.standingsFormat??FORMATS[0];
@@ -529,7 +635,8 @@ document.addEventListener('click',event=>{
         gender:document.getElementById('draft-gender')?.value,
         archetypeId:document.getElementById('draft-archetype')?.value,
         regionId:document.getElementById('draft-region')?.value,
-        cityId:document.getElementById('draft-city')?.value
+        cityId:document.getElementById('draft-city')?.value,
+        age:Number(document.getElementById('draft-age')?.value)
       });
       persist();
       toast(`Career started in ${app.career.cityLabel}.`);
@@ -549,6 +656,12 @@ document.addEventListener('click',event=>{
     if(action==='train'){
       const focus=document.getElementById('focus-select')?.value??app.career.trainingFocus;
       apply(train(app.career,focus));
+      return;
+    }
+    if(action==='retire'){
+      if(!confirm('Retire from competition? This career record becomes final.'))return;
+      const ended=retire(app.career,'voluntary');
+      if(ended.ok){app.career=ended.state;app.view='record';persist();render();toast(ended.message);}else toast(ended.message,true);
       return;
     }
     if(action==='advance'){apply(advanceWeek(app.career));return}
@@ -611,6 +724,7 @@ document.addEventListener('change',event=>{
     render();
   }
   if(id==='draft-city'){app.draft.cityId=event.target.value}
+  if(id==='draft-age'){app.draft.age=Number(event.target.value)||25}
   if(id==='draft-gender'){app.draft.gender=event.target.value}
   if(id==='draft-archetype'){app.draft.archetypeId=event.target.value}
   if(id==='filter-area'){

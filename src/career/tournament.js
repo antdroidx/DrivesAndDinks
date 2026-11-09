@@ -668,6 +668,15 @@ export function recordPlayerResult(tournament,{won,score}){
   tournament.history=tournament.history??[];
   tournament.history.push({round:tournament.round,opponent:opponent.name,opponentRating:opponent.rating,won:bye?true:won,score:bye?'bye':score});
   if(bye)won=true;
+  if(!bye&&match){
+    const [pointsFor=0,pointsAgainst=0]=String(score??'').split('-').map(value=>Number(value)||0);
+    const stats=tournament.playerStats??{games:0,wins:0,losses:0,pointsFor:0,pointsAgainst:0};
+    stats.games+=1;
+    if(won)stats.wins+=1;else stats.losses+=1;
+    stats.pointsFor+=pointsFor;
+    stats.pointsAgainst+=pointsAgainst;
+    tournament.playerStats=stats;
+  }
   if(tournament.inConsolation){
     tournament.inConsolation=false;
     tournament.consolationDone=true;

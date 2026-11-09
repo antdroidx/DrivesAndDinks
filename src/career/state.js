@@ -15,6 +15,8 @@ import {findRival} from './standings.js';
 import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,FORMATS,divisionFor} from './rating.js';
 import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js';
 import {evaluateSeason,seasonDue,isContracted} from './contracts.js';
+import {emptyAnalytics} from './analytics.js';
+import {normalizeStartAge,peakAgeFor,ageSkillFactor,recoveryAgeFactor,noteSkillPeaks,advanceAgeYear,capRatingForAge} from './age.js';
 
 // A career starts at a 3.500 rating, so the underlying skill starts where
 // that rating sits rather than at the bottom of the scale.
@@ -51,18 +53,25 @@ export function startingCityId(regionId,seed){
   return pool[Math.floor(random()*pool.length)].id;
 }
 
-function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city}){
+function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age}){
   const archetype=CHARACTERS.find(character=>character.id===archetypeId)??CHARACTERS[0];
   const random=seededRandom(mixSeed(seed,`player:${regionId}:${archetype.id}`));
   const identity=generateIdentity({gender,random});
   const resolvedName=String(name??'').trim()||identity.name;
+  const resolvedAge=normalizeStartAge(age,18+Math.floor(random()*12));
+  const peakAge=peakAgeFor(seed);
   const shift=STARTING_SKILL-70;
+  const peakRatings={};
   const ratings={};
+  const ageFactor=ageSkillFactor(resolvedAge);
   for(const key of RATING_KEYS){
     const base=archetype.ratings[key]??70;
-    ratings[key]=clamp(Math.round(base+shift+(random()-.5)*5),20,99);
+    peakRatings[key]=clamp(Math.round(base+shift+(random()-.5)*5),20,99);
+    ratings[key]=clamp(Math.floor(peakRatings[key]*ageFactor),20,99);
   }
   const average=skillAverage(ratings);
+  const firstRating=clamp(Math.round(NEW_PLAYER_RATING*ageFactor*1000)/1000,2,8);
+  const peakFormats=Object.fromEntries(FORMATS.map(format=>[format,NEW_PLAYER_RATING]));
   return {
     id:`player-${seed}`,
     name:resolvedName,
@@ -71,7 +80,11 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city}){
     hairColor:identity.hairColor,
     shirtColor:identity.shirtColor,
     gender:gender==='female'?'female':'male',
-    age:18+Math.floor(random()*12),
+    age:resolvedAge,
+    startAge:resolvedAge,
+    peakAge,
+    peakRatings,
+    peakFormats,
     handedness:random()<.13?'left':'right',
     archetypeId:archetype.id,
     archetypeLabel:archetype.style,
@@ -79,7 +92,7 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city}){
     skillAverage:average,
     // A career starts without a rating in either format. The numbers are
     // provisional until the first rated match sets them.
-    formats:Object.fromEntries(FORMATS.map(format=>[format,NEW_PLAYER_RATING])),
+    formats:Object.fromEntries(FORMATS.map(format=>[format,firstRating])),
     record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0},
     tourPoints:0,
     tourPointsHistory:[]
@@ -98,7 +111,8 @@ export function createCareer(options={}){
     archetypeId:options.archetypeId,
     regionId,
     seed,
-    city
+    city,
+    age:options.age
   });
   // The rival is the player nearest to you on the board when you start.
   const rival=findRival({
@@ -124,10 +138,20 @@ export function createCareer(options={}){
     energy:MAX_ENERGY,
     trainingFocus:'drive',
     athlete,
+    retired:false,
+    retiredWeek:null,
+    retirementReason:null,
+    retiredAge:null,
+    epilogue:null,
+    allTimeBoard:[],
     history:[],
     stats:{weeks:0,sessions:0,entries:0,moves:0,matches:0},
     worldRatings:{},
     matches:[],
+    // Durable career totals survive after detailed match reports roll off.
+    analytics:emptyAnalytics(athlete.formats),
+    eventHistory:[],
+    ratingHistory:[],
     // The results the four rankings are built from.
     rankingResults:[],
     money:250,
@@ -175,7 +199,8 @@ export function trainingCost(state){
 }
 export function weeklyRecovery(state){
   if(!state)return RECOVERY_BASE;
-  return clamp(Math.round(RECOVERY_BASE+(careerRating(state)-3)*RECOVERY_PER_LEVEL),RECOVERY_BASE,RECOVERY_MAX);
+  const base=clamp(Math.round(RECOVERY_BASE+(careerRating(state)-3)*RECOVERY_PER_LEVEL),RECOVERY_BASE,RECOVERY_MAX);
+  return Math.max(10,Math.round(base*recoveryAgeFactor(state.athlete?.age??25)));
 }
 // Training moves an attribute by a single point. It is deliberately
 // small: the rating belongs to playing, not to drilling.
@@ -250,6 +275,7 @@ export function eventEntryCost(state,event){
   return Math.max(4,Math.ceil((Number(event?.energyCost??event?.energy??0)||0)*0.2));
 }
 export function canEnterEvent(state,event=null){
+  if(state.retired)return false;
   const week=state.week;
   const travel=isTravelEvent(event);
   // A trip and a home commitment cannot both happen in one week.
@@ -265,6 +291,7 @@ export function canEnterEvent(state,event=null){
   return sameEvent&&complete;
 }
 export function eventBlockReason(state,event=null){
+  if(state.retired)return 'This career has ended.';
   if(canEnterEvent(state,event))return null;
   const week=state.week;
   if(isTravelEvent(event)&&(state.lastLeagueWeek??-1)===week){
@@ -282,7 +309,7 @@ export function eventBlockReason(state,event=null){
   }
   return 'You have already entered a different event this week. Advance the calendar to compete again.';
 }
-export function canAct(state){return canTrain(state)||canEnterEvent(state)}
+export function canAct(state){return !state.retired&&(canTrain(state)||canEnterEvent(state))}
 
 function withAthlete(state,ratings){
   const average=skillAverage(ratings);
@@ -309,12 +336,13 @@ export function train(state,focus){
   ratings[focus]=clamp(ratings[focus]+gain,0,99);
   ratings.control=clamp(ratings.control+1,0,99);
   const next=withAthlete(state,ratings);
+  next.athlete.peakRatings=noteSkillPeaks(state.athlete,ratings);
   const moved=pushHistory(pushLog(next,`Trained ${focus} — +${gain} ${focus}.`),`Trained ${focus}`);
   const sessions=trainingSessionsThisWeek(state)+1;
   return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingWeek:state.week,trainingSessions:sessions,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Trained ${focus}. +${gain} ${focus}, +1 control. ${sessions}/${MAX_TRAINING_SESSIONS} sessions this week.`};
 }
 
-export function currentEvents(state){return generateWeekEvents(state,state.week)}
+export function currentEvents(state){return state.retired?[]:generateWeekEvents(state,state.week)}
 
 // Entering an event registers the player in a bracket. Which bracket they
 // choose matters: playing up raises the bar for a good result, and playing
@@ -385,7 +413,8 @@ export function attendEvent(state,eventId,optionId=null){
     matchType:event.matchType,
     weeksAgo:0
   });
-  const newRating=rated.players[0].rating;
+  const ageAdjusted=capRatingForAge(state.athlete,format,rated.players[0].rating);
+  const newRating=ageAdjusted.rating;
   const won=outcome.myPoints>outcome.opponentPoints;
   const delta=newRating-myRating;
 
@@ -402,6 +431,8 @@ export function attendEvent(state,eventId,optionId=null){
   const athlete={
     ...state.athlete,
     ratings,
+    peakRatings:noteSkillPeaks(state.athlete,ratings),
+    peakFormats:ageAdjusted.peakFormats,
     formats:Object.assign({},state.athlete.formats,{[format]:newRating}),
     record:{
       ...state.athlete.record,
@@ -511,6 +542,7 @@ export function advanceToNextEvent(state,{maxWeeks=52}={}){
 }
 
 export function advanceWeek(state){
+  if(state.retired)return {ok:false,state,message:'This career has ended.'};
   const week=state.week+1;
   // What the player takes back next week. Spending more than this in a week
   // carries the rest into the next one as fatigue.
@@ -526,8 +558,10 @@ export function advanceWeek(state){
     ?{...state.tournament,nightComplete:false}
     :state.tournament;
   const circuit=advanceCircuit({...state,week});
+  const birthday=advanceAgeYear(state.athlete,week);
   let advanced={
     ...state,week,energy,
+    athlete:birthday.athlete,
     lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,lastTravelWeek:-1,tournament,
     trainingWeek:week,trainingSessions:0,
     worldRatings:world.ratings,
@@ -535,7 +569,7 @@ export function advanceWeek(state){
     stats:{...state.stats,weeks:state.stats.weeks+1}
   };
   // The season boundary decides whether a contract is kept.
-  let seasonNote='';
+  let seasonNote=birthday.aged?' '+birthday.ageNote:'';
   if(seasonDue(advanced,state.week)&&isContracted(advanced)){
     const evaluated=evaluateSeason(advanced);
     advanced=evaluated.state;
