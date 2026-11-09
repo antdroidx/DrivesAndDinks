@@ -533,6 +533,11 @@ export function simulateRestOfRound(tournament,random){
     return results;
   }
   if(tournament.shape==='round-robin'||tournament.shape==='mlp'){
+    // A round is played once. The player's best of three takes several games,
+    // but the rest of the league only plays that round once, so the tables
+    // stay level.
+    if(tournament.simulatedRound===tournament.round)return results;
+    tournament.simulatedRound=tournament.round;
     const round=tournament.rounds[tournament.round]??[];
     for(const match of round){
       if(match.home.id===tournament.playerTeamId||match.away.id===tournament.playerTeamId)continue;
@@ -656,10 +661,18 @@ export function recordPlayerResult(tournament,{won,score}){
         tournament.currentMatch={home:series.home,away:series.away,game:true};
         return {ok:true,tournament};
       }
+      const playerWonSeries=series.playerWins>series.opponentWins;
       const record=tournament.records[tournament.playerTeamId];
       if(record){
-        if(series.playerWins>series.opponentWins)record.wins+=1;
+        if(playerWonSeries)record.wins+=1;
         else record.losses+=1;
+      }
+      // The opponent plays the same series and takes the other side of it.
+      const opponentId=series.home.id===tournament.playerTeamId?series.away.id:series.home.id;
+      const opponentRecord=tournament.records[opponentId];
+      if(opponentRecord){
+        if(playerWonSeries)opponentRecord.losses+=1;
+        else opponentRecord.wins+=1;
       }
       tournament.series=null;
     }
