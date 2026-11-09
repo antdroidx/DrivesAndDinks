@@ -133,6 +133,9 @@ export function createCareer(options={}){
     rivalId:rival?.id??null,
     // Wild cards earned by winning a Challenger event.
     wildCards:0,
+    contract:'none',
+    contractSince:null,
+    contractEvents:0,
     entered:[],
     lastEntry:null,
     lastActionWeek:-1,
@@ -482,7 +485,6 @@ export function advanceWeek(state){
     week,
     ratings:state.worldRatings
   });
-  // A league night that finished last week opens again in the new week.
   const tournament=state.tournament?.nightComplete
     ?{...state.tournament,nightComplete:false}
     :state.tournament;

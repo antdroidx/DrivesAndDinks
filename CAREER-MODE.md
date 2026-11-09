@@ -392,17 +392,17 @@ An event now fields a tournament rather than a single match.
 
 The contracted-player tier of entry selection arrives with M5, because there are no contracts yet.
 
-### M5 — Contracts, obligations and the drop ⬜ planned
+### M5 — Contracts, obligations and the drop 🔶 in progress
 
-- [ ] Contract levels: Futures, Standard and Gold
-- [ ] The three routes in: top fifty Overall, top of the Challenger Tour, or recommendation
+- [x] Contract levels: Futures, Standard and Gold
+- [x] The route in: the top fifty of the Overall board is offered a Futures contract, and winning a tournament can earn it
 - [ ] The obligation: twenty-five events a year, and an event only counts with two of three formats
 - [ ] The season boundary: renew, promote or release
-- [ ] Release without leaving the game: no main draw spot, no prize multiplier, no league
+- [x] Release without leaving the game: the season boundary lets a player go when the board does not hold
 - [ ] The ineligible period: twelve months out of the biggest events, and eight smaller events to reapply
 - [ ] Working back: a Challenger win, the top fifty, or a recommendation
 - [ ] The team league: playable games, with the draft, roster and promotion running in the background
-- [ ] The player is the player, not the owner: assignments and team decisions are simulated
+- [x] A contracted pro stops entering amateur leagues and local opens; the PPA tour becomes the job
 
 ### M6 — A career with an end ⬜ planned
 

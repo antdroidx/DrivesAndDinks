@@ -15,6 +15,7 @@ import {EVENT_BY_ID} from './geography.js';
 import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
 import {recordResult} from './ranking.js';
+import {contractOffer,signed as signContract} from './contracts.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
@@ -311,7 +312,9 @@ function finishTournament(state,tournament){
   const summary=tournament.label+': '+placeText
     +(earned?' · '+earned+' points':'')
     +(prize?' · $'+prize.toLocaleString('en-US'):'')+'.';
-  const next=pushLog(pushHistory(Object.assign({},ranked,{
+  const offered=contractOffer(ranked);
+  const withContract=offered?signContract(ranked,offered,state.week):ranked;
+  const next=pushLog(pushHistory(Object.assign({},withContract,{
     athlete,
     money:state.money+prize,
     entered,

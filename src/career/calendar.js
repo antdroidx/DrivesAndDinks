@@ -13,6 +13,7 @@ import {RATING_BRACKETS,availableDivisions,divisionFor,formatRating} from './rat
 import {tourFor,tourRank,pointsInWindow} from './tour.js';
 import {mixSeed} from './population.js';
 import {finalsQualified,positions} from './ranking.js';
+import {isContracted} from './contracts.js';
 import {seededRandom} from '../competition.js';
 
 // Monday, 5 January 2026. Career week 0 starts here.
@@ -140,6 +141,10 @@ export function entryStatus(state,event){
 // about skill: a club night needs a club, and the pro league needs a world
 // ranking inside the top 250.
 export function entryEligibility(state,event,enterable=null){
+  // Once the tour signs you, the amateur ladder is not your job any more.
+  if(isContracted(state)&&['local','challenger'].includes(event?.tier)){
+    return {ok:false,reason:'A contracted pro competes on the tour, not in amateur events'};
+  }
   if(event.scope==='club'&&!state.clubId)return {ok:false,reason:'Join a club first'};
   // The tour standing is the more fundamental lock, so it is checked first.
   if(event.qualification==='finals'){
