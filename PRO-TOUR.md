@@ -374,6 +374,10 @@ Not written yet. This is the shape it should take.
 | `development` | unique learning, peak, movement, power and recovery profile |
 | `maintenance` | per-attribute practice history that offsets late-career decline |
 | `peakAge`, `peakRatings`, `peakFormats` | personal bests used to measure decline |
+| `partners` | persistent gender and mixed doubles partners from the current club |
+| `clubReputation` | earned access to competitive and elite clubs |
+| `opponents` | head-to-head records and each opponent's learned tendencies |
+| `coachFeedback` | the current attribute-specific coaching recommendation |
 | `retired` | whether the career is over |
 
 ### New modules
@@ -382,6 +386,8 @@ Not written yet. This is the shape it should take.
 - `src/career/contracts.js` — the levels, the obligations, the season boundary, promotion and release
 - `src/career/season.js` — the calendar, the finals qualification, the end-of-season evaluation
 - `src/career/age.js` — development profiles, attribute-specific aging, training capacity and recovery
+- `src/career/club-life.js` — club reputation, persistent partners, partner gates and coach feedback
+- `src/career/opponents.js` — durable opponent memory and head-to-head records
 
 ### What changes and what does not
 

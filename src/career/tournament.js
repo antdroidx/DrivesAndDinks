@@ -24,6 +24,7 @@ import {seededRandom} from '../competition.js';
 import {mixSeed} from './population.js';
 import {pointsForFinish} from './tour.js';
 import {entryStatus} from './calendar.js';
+import {resolvePartner} from './club-life.js';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -156,8 +157,12 @@ export function buildField({state,event,option,drawSize=16}){
   const oppositeGender=playerGender==='female'?'male':'female';
   const player={id:state.athlete.id??'player',name:state.athlete.name,rating:target,skill:formatSkill(state.athlete.ratings,format),isPlayer:true,
     archetypeId:state.athlete.archetypeId,gender:playerGender,handedness:state.athlete.handedness};
-  const samePool=divisionPopulation({state,event,option,gender:playerGender});
-  const oppositePool=divisionPopulation({state,event,option,gender:oppositeGender});
+  const storedPartner=singles||teamLeague?null:resolvePartner(state,format);
+  const selectedPartner=storedPartner?{...storedPartner,skill:formatSkill(storedPartner.ratings??{},format)}:null;
+  const samePool=divisionPopulation({state,event,option,gender:playerGender})
+    .filter(athlete=>athlete.id!==selectedPartner?.id);
+  const oppositePool=divisionPopulation({state,event,option,gender:oppositeGender})
+    .filter(athlete=>athlete.id!==selectedPartner?.id);
   const teams=[];
 
   if(singles){
@@ -166,7 +171,7 @@ export function buildField({state,event,option,drawSize=16}){
     teams.push(makeTeam([player],'player'));
     for(const athlete of takePlayers(queue,need-1))teams.push(makeTeam([athlete],'t'+teams.length));
   }else if(mixed){
-    const partner=(takePlayers(variedOrder(oppositePool,target,random),1)[0])??null;
+    const partner=selectedPartner??((takePlayers(variedOrder(oppositePool,target,random),1)[0])??null);
     if(!partner)return null;
     teams.push(makeTeam([player,partner],'player'));
     const men=variedOrder(playerGender==='male'?samePool:oppositePool,target,random)
@@ -194,7 +199,7 @@ export function buildField({state,event,option,drawSize=16}){
       teams.push(makeTeam(members,'t'+teams.length));
     }
   }else{
-    const partner=takePlayers(variedOrder(samePool,target,random),1)[0]??null;
+    const partner=selectedPartner??(takePlayers(variedOrder(samePool,target,random),1)[0]??null);
     if(!partner)return null;
     teams.push(makeTeam([player,partner],'player'));
     const queue=variedOrder(samePool,target,random).filter(athlete=>athlete.id!==partner.id);

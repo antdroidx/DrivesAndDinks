@@ -12,7 +12,7 @@ import {REGIONS} from './geography.js';
 import {emptyAnalytics} from './analytics.js';
 import {peakAgeFor,createDevelopmentProfile} from './age.js';
 
-export const CAREER_SAVE_VERSION=13;
+export const CAREER_SAVE_VERSION=14;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -22,6 +22,14 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v14 added club partners, reputation, opponents and coaching.
+  13:state=>({
+    ...state,
+    partners:state.partners??{doubles:null,mixed:null},
+    clubReputation:state.clubReputation??0,
+    opponents:state.opponents??{},
+    coachFeedback:state.coachFeedback??null
+  }),
   // v13 added per-attribute maintenance from repeated training.
   12:state=>({
     ...state,
@@ -225,6 +233,9 @@ export function validateCareer(state){
   if(state.eventHistory!=null&&!Array.isArray(state.eventHistory))return {ok:false,reason:'Event history is invalid'};
   if(state.ratingHistory!=null&&!Array.isArray(state.ratingHistory))return {ok:false,reason:'Rating history is invalid'};
   if(state.analytics!=null&&(!state.analytics||typeof state.analytics!=='object'))return {ok:false,reason:'Career analytics are invalid'};
+  if(!state.partners||typeof state.partners!=='object')return {ok:false,reason:'Club partners are invalid'};
+  if(!Number.isFinite(state.clubReputation)||state.clubReputation<0)return {ok:false,reason:'Club reputation is invalid'};
+  if(!state.opponents||typeof state.opponents!=='object')return {ok:false,reason:'Opponent history is invalid'};
   if(!Number.isFinite(athlete.age)||athlete.age<10||athlete.age>120)return {ok:false,reason:'Athlete age is invalid'};
   if(!Number.isFinite(athlete.startAge)||athlete.startAge<10||athlete.startAge>70)return {ok:false,reason:'Starting age is invalid'};
   if(!Number.isFinite(athlete.peakAge))return {ok:false,reason:'Peak age is invalid'};

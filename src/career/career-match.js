@@ -18,6 +18,8 @@ import {recordResult} from './ranking.js';
 import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation} from './contracts.js';
 import {recordGame,recordEventResult,eventTypeFor} from './analytics.js';
 import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js';
+import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js';
+import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
@@ -101,7 +103,7 @@ function pendingFor({state,tournament}){
     tournamentId:tournament.id,
     rules:matchRules(tournament),
     difficulty:tournament.difficulty??'normal',
-    learning:state.opponentLearning??null,
+    learning:opponentLearningForMatchup(state,matchup)??state.opponentLearning??null,
     matchup 
   };
 }
@@ -136,6 +138,8 @@ export function startCareerMatch(state,eventId,optionId=null){
   if(formatsPlayed(state,event.eventId).includes(option.format)){
     return {ok:false,state,message:'You have already played '+option.format+' at this event.'};
   }
+  const partnerGate=partnerGateStatus(state,event,option);
+  if(!partnerGate.ok)return {ok:false,state,message:partnerGate.reason};
   const entry=entryStatus(state,event,{format:option.format});
   if(entry.via==='declined'){
     return {ok:false,state,message:'Outside the direct cut and the qualifier field for this event.'};
@@ -246,10 +250,13 @@ export function finishCareerMatch(state,report){
     // What the engine learned about these opponents carries into the next
     // career match.
     opponentLearning:report.learning??state.opponentLearning??null,
+    coachFeedback:buildCoachFeedback(state,{format:pending.format,won:outcome.won,eventFocus:event?.skillFocus}),
     worldRatings,
     matches:[...state.matches,record].slice(-CAREER_RECORD_LIMIT),
     stats:Object.assign({},state.stats,{matches:(state.stats.matches??0)+1})
   });
+
+  next=recordOpponentResult(next,{matchup:pending.matchup,report,won:outcome.won,week:state.week,eventId:pending.eventId,eventLabel:event?.label??pending.bracket,format:pending.format});
 
   next=recordGame(next,{
     week:state.week,
@@ -351,7 +358,8 @@ function finishTournament(state,tournament){
   const type=eventTypeFor(tournamentEvent??{},tournament);
   const series=tournament.records?.[tournament.playerTeamId]??null;
   const playerStats=tournament.playerStats??{games:0,wins:0,losses:0,pointsFor:0,pointsAgainst:0};
-  const eventLogged=recordEventResult(withContract,{
+  const reputationState=awardClubReputation(withContract,{type,place});
+  const eventLogged=recordEventResult(reputationState,{
     key:`${state.week}:${tournament.eventId}:${tournament.optionId}:${tournament.format}`,
     week:state.week,
     eventId:tournament.eventId,

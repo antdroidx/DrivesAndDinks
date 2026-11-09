@@ -16,6 +16,7 @@ import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,FORMATS,division
 import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js';
 import {evaluateSeason,seasonDue,isContracted} from './contracts.js';
 import {emptyAnalytics} from './analytics.js';
+import {clubAccess,clearPartners} from './club-life.js';
 import {normalizeStartAge,createDevelopmentProfile,developmentAgeFactor,attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,noteSkillPeaks,noteTrainingMaintenance,advanceAgeYear,capRatingForAge,capAttributeForAge} from './age.js';
 
 // A career starts at a 3.500 rating, so the underlying skill starts where
@@ -136,6 +137,10 @@ export function createCareer(options={}){
     country:city.country,
     clubId:null,
     club:null,
+    partners:{doubles:null,mixed:null},
+    clubReputation:0,
+    opponents:{},
+    coachFeedback:null,
     week:0,
     energy:MAX_ENERGY,
     trainingFocus:'drive',
@@ -498,19 +503,22 @@ export function joinClub(state,clubId){
   const clubs=buildClubIndex(state.seed,state.regionId);
   const club=findClub(clubs,clubId);
   if(!club)return {ok:false,state,message:'That club is not in this region.'};
+  const access=clubAccess(state,club);
+  if(!access.ok)return {ok:false,state,message:`${club.tierLabel} clubs need ${access.required} reputation. You have ${access.current}.`};
   if(state.energy<TRAVEL_COST&&club.cityId!==state.cityId)return {ok:false,state,message:`Travelling to ${club.cityLabel} needs ${TRAVEL_COST} energy.`};
   const city=cityById(state.regionId,club.cityId);
   const moved=club.cityId!==state.cityId
     ?{...state,energy:state.energy-TRAVEL_COST,cityId:city.id,cityLabel:city.label,areaId:city.areaId,areaLabel:city.areaLabel,country:city.country,stats:{...state.stats,moves:state.stats.moves+1}}
     :state;
-  const next=pushLog(pushHistory({...moved,clubId:club.id,club:{id:club.id,name:club.name,cityId:club.cityId,cityLabel:club.cityLabel,tierLabel:club.tierLabel,surface:club.surface}},'Joined a club.'),`Joined ${club.name}.`);
+  const joined={...moved,clubId:club.id,club:{id:club.id,name:club.name,cityId:club.cityId,cityLabel:club.cityLabel,tierLabel:club.tierLabel,surface:club.surface}};
+  const next=pushLog(pushHistory(clearPartners(joined),'Joined a club.'),`Joined ${club.name}.`);
   return {ok:true,state:next,message:`You joined ${club.name} in ${club.cityLabel}.`};
 }
 
 export function leaveClub(state){
   if(!state.clubId)return {ok:false,state,message:'You are not in a club.'};
   const name=state.club?.name??'the club';
-  const next=pushLog(pushHistory({...state,clubId:null,club:null},'Left a club.'),`Left ${name}.`);
+  const next=pushLog(pushHistory(clearPartners({...state,clubId:null,club:null}),'Left a club.'),`Left ${name}.`);
   return {ok:true,state:next,message:`You left ${name}.`};
 }
 
@@ -522,7 +530,7 @@ export function moveToCity(state,cityId){
   const cost=international?INTERNATIONAL_TRAVEL_COST:TRAVEL_COST;
   if(state.energy<cost)return {ok:false,state,message:`Travelling needs ${cost} energy. You have ${state.energy}.`};
   const moved=pushHistory({
-    ...state,
+    ...clearPartners(state),
     energy:state.energy-cost,
     regionId:city.regionId,
     regionLabel:regionById(city.regionId).label,

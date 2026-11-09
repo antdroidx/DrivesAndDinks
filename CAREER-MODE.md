@@ -60,6 +60,8 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/analytics.js` | Durable game totals, event history, medals and rating peaks. |
 | `src/career/age.js` | Unique development profiles, attribute-specific decline, training capacity and age-scaled recovery. |
 | `src/career/retirement.js` | Retirement advice, the epilogue and the local all-time board. |
+| `src/career/club-life.js` | Club reputation, persistent partners, partner gates and coach feedback. |
+| `src/career/opponents.js` | Persistent opponent memory and head-to-head history. |
 | `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
 | `src/career/career-match.js` | The handoff between a career tournament and the shared match engine. |
 | `src/career/events.js` | The competition templates: the seven shapes of event and the rules they are played under. |
@@ -313,7 +315,7 @@ The order is a dependency chain. A ranking measures the rounds a player reached,
 The milestone this branch delivers.
 
 - [x] Isolated `/career-mode/` entry point; root prototype untouched and still publishing unchanged
-- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 13`, twelve migrations in place)
+- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 14`, thirteen migrations in place)
 - [x] Corruption recovery: a damaged file falls back to the last verified save, and an unreadable file with no backup is quarantined rather than silently reset
 - [x] Stable ids for athletes, clubs and events, guaranteed by seed derivation
 - [x] North America and Asia, split into 14 areas and 74 cities
@@ -425,12 +427,14 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 - [x] The epilogue
 - [x] Durable analytics independent of the bounded match report history
 
-### M7 — Club life and opponents ⬜ planned
+### M7 — Club life and opponents ✅ complete
 
-- [ ] Opponent AI that remembers results, per the match engine's existing opponent memory
-- [ ] Persistent doubles partners drawn from the club roster, gated on the highest player by default
-- [ ] Coach feedback that points at a specific rating
-- [ ] Club reputation that gates entry to better clubs
+- [x] Opponent AI that remembers each opponent by athlete id and carries the engine snapshot into the rematch
+- [x] Persistent gender-doubles and mixed-doubles partners chosen from the current club roster
+- [x] Partner-aware gates: highest player by default, combined rating when the event requests it
+- [x] Coach feedback that points at a specific weak attribute and value
+- [x] Club reputation that gates competitive and elite clubs
+- [x] Head-to-head opponent history and club partner summaries in the career record
 
 ### M8 — World expansion ⬜ planned
 
@@ -498,6 +502,10 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | Training maintenance offsets part of late-career decline | Repeated work on a technical skill improves its maintenance score and slows its natural loss. Physical gains still become harder and training capacity falls with age. |
 | 2026-11-08 | Retirement is voluntary, with a recommendation when the player's ceiling leaves the pursued level | The career ends only through the player's decision. The recommendation presents the physical reality without forcing the player out. |
 | 2026-11-08 | A playoff, a double elimination and a ladder resolve during play rather than up front | Who reaches a playoff depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The structure and the simulation have to live together. |
+| 2026-11-08 | Persistent partners come from the player's current club and are stored separately for gender and mixed doubles | A same-gender partner for gender doubles and an opposite-gender partner for mixed doubles serve different divisions. Leaving or changing clubs clears both assignments. |
+| 2026-11-08 | A selected partner participates in the rating gate | Gated doubles reads the highest player by default and the combined average for selected events. A stronger partner can move the team into a higher bracket or disqualify the chosen division. |
+| 2026-11-08 | Opponent learning is stored by permanent athlete id, then remapped to engine lineup slots for each match | The shared engine already learns patterns; durable career records let the same opponent remember the player in later events without relying on lineup ordering. |
+| 2026-11-08 | Club reputation unlocks club tiers | Recreational clubs take a new player immediately. Competitive clubs require 25 reputation and elite clubs require 60, earned through completed events and strong finishes. |
 
 ---
 
@@ -517,6 +525,7 @@ The tour and career-arc questions — season length, declining a contract, the a
 npm test                                   # whole suite, including the career tests
 node --test test/career-age.test.js \
                  test/career-analytics.test.js \
+                 test/career-club-life.test.js \
                  test/career-competition.test.js \
                  test/career-contracts.test.js \
                  test/career-geography.test.js \

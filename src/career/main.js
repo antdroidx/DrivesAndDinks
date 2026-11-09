@@ -21,6 +21,8 @@ import {rankingSummary} from './ranking.js';
 import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js';
 import {analyticsSummary} from './analytics.js';
 import {retire,retirementAdvice,allTimeBoard} from './retirement.js';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback} from './club-life.js';
+import {opponentHistory} from './opponents.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -283,6 +285,12 @@ function renderHome(){
 
   ${renderTournament(career)}
 
+  <section class="panel">
+    <h2>COACH & PARTNERS</h2>
+    <p>${escapeHtml(currentCoachFeedback(career).message)}</p>
+    <p class="hint">Gender doubles: ${escapeHtml(resolvePartner(career,'doubles')?.name??'automatic draw')} · Mixed doubles: ${escapeHtml(resolvePartner(career,'mixed')?.name??'automatic draw')}</p>
+  </section>
+
   <div class="grid two">
     <section class="panel">
       <h2>THIS WEEK · ${escapeHtml(weekLabel(career.week))}</h2>
@@ -387,7 +395,7 @@ function renderClubs(){
   return `
   <section class="panel">
     <h2>CLUBS · ${escapeHtml(career.regionLabel.toUpperCase())}</h2>
-    <p>${clubs.length} clubs across ${areas.length} areas. Joining a club in another city moves you there.</p>
+    <p>${clubs.length} clubs across ${areas.length} areas. Joining a club in another city moves you there. Club reputation: ${career.clubReputation??0}.</p>
     <div class="filters">
       <select id="filter-area"><option value="">All areas</option>${areaOptions}</select>
       <select id="filter-city"><option value="">All cities</option>${cityOptions}</select>
@@ -402,15 +410,16 @@ function clubRow(club,career){
   const isMember=career.clubId===club.id;
   const roster=expanded?buildClubRoster(career.seed,club):null;
   const summary=roster?summarizeClub(roster):null;
+  const access=clubAccess(career,club);
   return `
   <div class="club">
     <div class="body">
       <strong>${escapeHtml(club.name)}</strong>
       <small>${escapeHtml(club.cityLabel)}, ${escapeHtml(club.country)} · ${escapeHtml(club.tierLabel)} · ${escapeHtml(club.surface)} · ${club.memberCount} members</small>
-      ${expanded&&summary?`<small>Average rating ${summary.average} · top player ${escapeHtml(summary.top.name)}</small>`:''}
+      ${expanded&&summary?`<small>Average rating ${summary.average} · top player ${escapeHtml(summary.top.name)} · needs ${access.required} club reputation</small>`:''}
     </div>
     <div class="actions">
-      ${expanded?`<button type="button" class="secondary" data-action="join" data-club="${club.id}" ${isMember?'disabled':''}>${isMember?'MEMBER':'JOIN'}</button>`:''}
+      ${expanded?`<button type="button" class="secondary" data-action="join" data-club="${club.id}" ${isMember||!access.ok?'disabled':''}>${isMember?'MEMBER':access.ok?'JOIN':'REP '+access.required}</button>`:''}
       <button type="button" class="secondary" data-action="expand-club" data-club="${club.id}">${expanded?'HIDE':'ROSTER'}</button>
     </div>
   </div>
@@ -421,6 +430,10 @@ function clubRow(club,career){
         <strong>${escapeHtml(athlete.name)}</strong>
         <small>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.citizenship ?? '')} · ${athlete.age} · ${athlete.handedness}-handed · Rating ${formatRating(athlete.formats?.doubles??0)}</small>
       </div>
+      ${isMember?`<div class="actions">
+        ${partnerGenderAllowed(career.athlete.gender,athlete.gender,'doubles')?`<button type="button" class="secondary" data-action="choose-partner" data-format="doubles" data-athlete="${athlete.id}">${career.partners?.doubles?.id===athlete.id?'SELECTED':'GENDER PARTNER'}</button>`:''}
+        ${partnerGenderAllowed(career.athlete.gender,athlete.gender,'mixed')?`<button type="button" class="secondary" data-action="choose-partner" data-format="mixed" data-athlete="${athlete.id}">${career.partners?.mixed?.id===athlete.id?'SELECTED':'MIXED PARTNER'}</button>`:''}
+      </div>`:''}
     </div>`).join('')}
   </div>`:''}`;
 }
@@ -496,6 +509,11 @@ function renderRecord(){
       <div><small>CURRENT STREAK</small><strong>${summary.currentStreak}</strong></div>
     </div>
     <p class="hint">Tournament medals award both semifinalists bronze. League medals go to the top three. Series records are kept separately from every rated game inside a best-of-three.</p>
+  </section>
+
+  <section class="panel">
+    <h2>OPPONENTS</h2>
+    ${opponentHistory(career).length?`<ul class="history">${opponentHistory(career).slice(0,15).map(opponent=>`<li><span>${escapeHtml(opponent.name)}</span><strong>${opponent.wins}-${opponent.losses}</strong><small>${escapeHtml(opponent.lastEventLabel??'match')} · last ${opponent.lastResult} · week ${opponent.lastWeek+1}</small></li>`).join('')}</ul>`:'<p class="muted">No persistent opponents yet.</p>'}
   </section>
 
   <section class="panel">
@@ -677,6 +695,7 @@ document.addEventListener('click',event=>{
       return;
     }
     if(action==='join'){apply(joinClub(app.career,trigger.dataset.club));return}
+    if(action==='choose-partner'){apply(choosePartner(app.career,trigger.dataset.format,trigger.dataset.athlete));return}
     if(action==='leave'){apply(leaveClub(app.career));return}
     if(action==='attend'){
       const picker=trigger.closest('.event')?.querySelector('select[data-division]');

@@ -154,7 +154,7 @@ test('a world event and a home league match cannot share a week',()=>{
 test('joining a club records the club and moves the player to its city',()=>{
   const state=career();
   const clubs=buildClubIndex(SEED,'north-america');
-  const elsewhere=clubs.find(club=>club.cityId!=='seattle');
+  const elsewhere=clubs.find(club=>club.cityId!=='seattle'&&club.tier==='recreational');
   const result=joinClub(state,elsewhere.id);
   assert.ok(result.ok,result.message);
   assert.equal(result.state.clubId,elsewhere.id);
