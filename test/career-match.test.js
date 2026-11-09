@@ -238,6 +238,7 @@ test('the board places the player and the players nearest to them',()=>{
   const rivals=nearbyRivals(state,'doubles',4);
   assert.equal(rivals.length,4);
   for(const rival of rivals)assert.ok(rival.name&&rival.name.length>2);
+  assert.ok(rivals.every(rival=>rival.gender==='male'),'gender doubles must use the same discipline board');
 });
 
 test('the top of the board lists the strongest players in a discipline',()=>{
@@ -261,6 +262,7 @@ test('the rival is the player nearest on the board',()=>{
   assert.ok(rival);
   assert.ok(rival.name);
   assert.ok(rival.gap<1);
+  assert.equal(rival.gender,'male');
 });
 
 test('qualification is measured in tour points',()=>{

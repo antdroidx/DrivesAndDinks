@@ -549,14 +549,15 @@ function renderRecord(){
 
 function renderStandings(){
   const career=app.career;
-  const format=app.standingsFormat??FORMATS[0];
+  const format=FORMATS.includes(app.standingsFormat)?app.standingsFormat:FORMATS[0];
+  app.standingsFormat=format;
   const position=boardPosition(career,format);
   const form=careerForm(career);
   const rivals=nearbyRivals(career,format,6);
   const leaders=topPlayers(career,format,25);
   const rival=findRival(career,format);
   const sponsors=sponsorsFor(career,format);
-  const formatTabs=FORMATS.map(entry=>`<button type="button" data-action="standings-format" data-format="${entry.id}" class="${entry.id===format?'active':''}">${escapeHtml(formatLabel(entry,career.athlete.gender))}</button>`).join('');
+  const formatTabs=FORMATS.map(entry=>`<button type="button" data-action="standings-format" data-format="${entry}" class="${entry===format?'active':''}">${escapeHtml(formatLabel(entry,career.athlete.gender))}</button>`).join('');
   const qualification=Object.entries(QUALIFICATION_POINTS).map(([eventId,needed])=>{
     const status=qualificationStatus(career,eventId);
     return `<li><span>${escapeHtml(eventId.replace('-',' '))}</span><span class="need ${status.ok?'ok':''}">${status.ok?'Qualified':status.points+' / '+needed+' points'}</span></li>`;
@@ -756,7 +757,8 @@ document.addEventListener('click',event=>{
       return;
     }
     if(action==='standings-format'){
-      app.standingsFormat=trigger.dataset.format;
+      const format=trigger.dataset.format;
+      if(FORMATS.includes(format))app.standingsFormat=format;
       render();
       return;
     }

@@ -54,6 +54,13 @@ test('Pages publishes career mode beside the prototype and the dev mirror',()=>{
   assert.match(workflow,/cp -R _prototype\/src _prototype\/assets _site\/prototype\//);
 });
 
+test('standings format tabs submit valid format ids',()=>{
+  const main=read('src/career/main.js');
+  assert.ok(main.includes('data-format="${entry}"'),'format tabs must use the string id from FORMATS');
+  assert.ok(!main.includes('data-format="${entry.id}"'),'format tabs must not read an id from a string');
+  assert.ok(main.includes('FORMATS.includes(app.standingsFormat)'),'standings must reject an invalid remembered format');
+});
+
 test('the career service worker precaches the app shell and the shared engine',()=>{
   const sw=read('career-mode/sw.js');
   for(const entry of ['./index.html','./career.css','../src/career/main.js','../src/roster.js','../src/competition.js','../src/core.js']){
