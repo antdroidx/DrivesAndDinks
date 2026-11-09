@@ -516,6 +516,8 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | Height and weight affect attributes through a body-size model rather than raw labels | Taller players gain reach; heavier and taller frames can gain power; extreme size and mass cost agility. The modifiers remain bounded so archetype identity survives. |
 | 2026-11-08 | A new career selects one optional starting trait | Quickness, power, soft touch, court IQ, serve, or broad athleticism can create a modest unique edge without replacing the archetype. |
 | 2026-11-08 | The player directory browses by filters rather than requiring a name | Region athletes are cached locally, then filtered by area, city, gender, age, doubles bracket and optional name. Sorting and 40-player pagination keep browsing usable. |
+| 2026-11-09 | Quick Sim uses the same career transitions as a played match | A quick result still moves the format rating, opponent world ratings, match archive, analytics, tournament history, points and purse. A league quick-sim completes the current best-of-three. Sim to End advances shortened league cards week by week and closes the event. |
+| 2026-11-09 | Career leagues are bounded cards rather than full round-robin schedules | Local League uses three one-opponent cards, Amateur MLP and Semi-Pro use four, and MLP uses three. The field still rotates opponents and preserves the same league scoring and standing rules. |
 
 ---
 

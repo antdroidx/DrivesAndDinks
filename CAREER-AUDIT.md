@@ -5,45 +5,48 @@ Branch: `codex/career-mode`
 
 ## Verdict
 
-The career foundation is substantial and the major correctness blockers are fixed. The revised amateur schedule now creates a meaningful career arc: a full schedule reaches a first pro event at a median 74 weeks, while a lighter schedule usually takes 230–238 weeks and succeeds in roughly 70–76% of casual-background careers.
+The career foundation is healthy and the manual workload is now bounded. Career leagues use three or four one-opponent cards, Quick Sim preserves the normal career transition path, and Sim to End can finish the remaining competition. The corrected prospect harness now charges entries and travel while receiving salary and prizes, so its professional timing reflects the actual finance rules.
 
-The remaining problem is not simply pro timing. A full schedule still implies about 4,500 player-controlled matches in ten years, and age produces only modest differences once a player trains consistently. Before adding more systems, league cards and low-stakes match resolution need to reduce the manual workload.
+A committed casual career reaches a first professional event at a median week 74 in every sample. A light casual career succeeds in 93.5–96.75% of samples and reaches that event at a median week 178–231. Competitive-background committed careers reach the professional summer circuit much sooner, at median week 27; their light schedules take median week 127–131.
+
+Age now separates most clearly on low-volume schedules. At age 40 and 50, light-career median best ratings fall to 4.978 and 4.919, compared with 5.231–5.246 at ages 20 and 30. Committed schedules compress those differences because every cohort trains at its cap. No sampled career reached the Overall top eight and PPA Finals, so finals qualification remains open.
 
 ## Prospect Model
 
-`scripts/audit-career-prospects.js` runs repeatable ten-year cohorts using the real creation, aging, training, rating, ranking, contract and calendar functions. Matches and event placements use the same skill-gap model, not full engine rallies or human input skill.
+`scripts/audit-career-prospects.js` runs repeatable ten-year cohorts using the real creation, aging, training, rating, ranking, contract, calendar and finance functions. Matches and event placements use the same skill-gap model, not full engine rallies or human input skill. Entry, travel, salary and prize transactions are applied during the run.
 
 Definitions:
 
 - **Rating floor reached:** any discipline touches 4.950 at some point. This can be temporary and is not the primary pro metric.
-- **Tour debut:** first accepted Pro League or MLP event. This requires a contract and the 4.950 rating floor.
+- **Tour debut:** first accepted Pro League or MLP event. This requires a contract, the 4.950 rating floor and enough money for entry and travel.
 - **Contract:** first Futures contract under the merit or sustained Challenger route.
 - **Committed:** up to the age-allowed training limit, one strongest event or division weekly, one active league, and at most two distinct amateur tournaments per month.
 - **Light:** training and doubles competition every fortnight.
 
 ### Casual background
 
-Two hundred ten-year careers per age and policy.
+Four hundred ten-year careers per age and policy.
 
-| Start age | Tour debut, committed | Tour debut, light | Light contract | Median debut, light | Light matches / 10 years |
+| Start age | Committed tour debut | Light tour debut | Light contract | Median light debut | Light matches / 10 years |
 |---:|---:|---:|---:|---:|---:|
-| 15 | 100% at week 74 | 68.5% | 71.0% | week 238 | 2,624 |
-| 20 | 100% at week 74 | 75.5% | 78.0% | week 230 | 2,540 |
-| 30 | 100% at week 74 | 71.5% | 73.5% | week 230 | 2,553 |
-| 40 | 100% at week 74 | 75.0% | 77.5% | week 231 | 2,563 |
-| 50 | 100% at week 74 | 69.5% | 70.5% | week 231 | 2,591 |
+| 15 | 100% at week 74 | 94.0% | 94.5% | week 230 | 670 |
+| 20 | 100% at week 74 | 96.5% | 96.75% | week 178 | 663 |
+| 30 | 100% at week 74 | 96.75% | 97.0% | week 180 | 671 |
+| 40 | 100% at week 74 | 95.5% | 96.25% | week 188 | 658 |
+| 50 | 100% at week 74 | 93.5% | 94.0% | week 231 | 661 |
 
-The committed schedule produces about 198–199 events and 4,538–4,571 matches in ten years. The lighter schedule produces about 132–134 events and 2,540–2,591 matches.
+The committed schedule produces about 176–183 events and 849–870 games in ten years. The lighter schedule produces about 139–141 events and 658–671 games. These counts still assume every player game is manual; the new Quick Sim can resolve a match, a league series, or the remaining competition without bypassing rating and finance updates.
 
-Competitive-background starters reach tour debut sooner on the light schedule: median week 183–232 with 70.5–77.5% success. The committed schedule still converges on week 74 because the professional calendar, not development, becomes the limiting factor.
+Competitive-background starters reach the first professional summer event at median week 27 on a committed schedule and week 127–131 on a light schedule. Their light-career debut rate is 96.75–98.25%.
 
 ### Interpretation
 
-- A few-month professional debut has been removed. The full schedule is now roughly a 14-month route; the normal lighter route is multi-year.
-- Starting experience still matters more than age on the lighter schedule.
-- Age 50 is somewhat less likely to debut than ages 20–40, but the separation is too small.
-- Every cohort eventually touches 4.950 under sustained play. Tour debut is the more meaningful measure because it requires contract and rating readiness together.
-- The full schedule remains too match-heavy. League formats account for much of the 450 matches per year.
+- The old 4,500-game ten-year workload is gone. Shortened league cards and Quick Sim together make the career practical to play.
+- Casual debut timing is stable around 14 months for committed play and three to four years for light play.
+- Experience still matters more than age on the lighter schedule.
+- Age 50 is now visibly weaker under light play, while ages 20–30 retain the strongest ratings.
+- Every cohort touches 4.950 under sustained play. Tour debut is still the more useful milestone because it also requires contract and financial access.
+- PPA Finals qualification has not occurred in either prospect file and needs a separate ranking-cut review.
 
 Raw summaries and twelve-career previews are in:
 
@@ -51,7 +54,6 @@ Raw summaries and twelve-career previews are in:
 - `validation/career-prospects.json`
 
 Use `--include-samples` to retain every simulated career.
-
 ## Schedule Rules
 
 - Amateur tournament starts are limited to two distinct events per calendar month.
@@ -81,7 +83,7 @@ Expenditures:
 
 Do not model taxes, insurance, investments, detailed budgets, or cash-flow statements. The useful decision is whether the player can afford the next event, paddle or coaching session.
 
-Current implementation only has prize money, a starting balance and sponsor purse bonuses. Entry fees, salary allowance, paddle purchases, coaching purchases and travel expenses are not implemented yet.
+Current implementation has a dated ledger for prizes, contract salary, entry fees and travel. Event entry is blocked when those costs exceed the balance. The prospect harness applies the same transactions. Paddle, coaching and equipment purchases remain future work.
 
 The future finance model must share one balance contract with energy. Energy controls physical activity; money controls access to coaching, travel, entries and equipment. Coaching improves the effectiveness of energy spent but does not restore energy. Entry and travel consume both resources. Paddle purchases affect bounded match performance but do not reverse age decline. Age and injuries cap recovery and growth regardless of available money.
 
@@ -135,6 +137,9 @@ The architecture can accept these as new shape records plus outlines and optiona
 - Creation skill now matches the selected provisional rating.
 - Pro events require a contract and rating floor.
 - Amateur tournament frequency and training energy are enforced.
+- Career leagues are bounded to three or four cards.
+- Quick Sim routes through the same rating, world, record, analytics, finance and tournament transitions as manual play.
+- The prospect harness charges entry and travel costs and credits salary and prizes.
 
 Regression coverage is in `test/career-audit.test.js` and the existing career suites.
 
@@ -142,7 +147,7 @@ Regression coverage is in `test/career-audit.test.js` and the existing career su
 
 ### P0 before more features
 
-1. **Shorten league cards:** reduce each weekly league obligation and provide selective simulation for completed or irrelevant rounds.
+1. **League cards and quick simulation:** complete. Career leagues use three or four rounds with one opponent per week. Quick Sim preserves the normal career transitions and Sim to End can resolve the remaining tournament or league in one action.
 2. **Post-match result screen:** show score, rating change, tournament progress, next opponent and save confirmation.
 3. **Tournament view:** show draw, seed, path, standings, rules, entry route and projected match count.
 4. **Professional status:** show one qualification flow with contract, rating floor, entry cut and reasons.
@@ -159,14 +164,14 @@ Regression coverage is in `test/career-audit.test.js` and the existing career su
 - Add rating/ranking trends and match-report drilldown.
 - Add save export/import and preserve the all-time board outside the active save.
 - Keep the selected rival stable.
-- Add the basic finance limiter after the workload is controlled.
+- Add coaching and equipment purchase flows on top of the finance ledger.
 - Add expanded paddle shapes after the core career loop is stable.
 
 ## Recommended Order
 
-1. Shorten league cards and add selective match simulation.
-2. Tune age differentiation against explicit debut-rate targets.
+1. Validate the shortened league cards and Quick Sim workload with human playtests.
+2. Review PPA Finals qualification and explicit age-by-age targets.
 3. Complete post-match, tournament and professional-status UX.
-4. Add the simple finance limiter.
+4. Add injuries, coached training and equipment purchases.
 5. Add the expanded paddle catalog and shapes.
 6. Re-run this audit and full engine playtests before broader world or career features.

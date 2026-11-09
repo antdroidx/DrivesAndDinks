@@ -24,10 +24,10 @@ test('event projections expose money, energy, recovery and match workload',()=>{
   assert.equal(load.energyAfter,92);
   assert.equal(load.moneyAfter,240);
   assert.equal(load.projectedNextEnergy,100);
-  assert.equal(load.matches.min,4);
-  assert.equal(load.matches.max,6);
+  assert.equal(load.matches.min,2);
+  assert.equal(load.matches.max,3);
   assert.equal(load.matches.unit,'games');
-  assert.match(load.matchLabel,/about 5/);
+  assert.match(load.matchLabel,/about 3/);
 });
 
 test('competition shapes produce bounded player match estimates',()=>{

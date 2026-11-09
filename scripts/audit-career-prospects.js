@@ -7,6 +7,8 @@ import {generateWeekEvents} from '../src/career/calendar.js';
 import {pointsForFinish,addPoints,pointsInWindow,PRO_FLOOR_RATING} from '../src/career/tour.js';
 import {recordResult,positions} from '../src/career/ranking.js';
 import {contractOffer,signed,isContracted,isTourEvent,recordTourEvent,evaluateSeason,seasonDue} from '../src/career/contracts.js';
+import {chargeEventCosts,paySalary,creditPrize} from '../src/career/finance.js';
+import {PRIZE_MONEY} from '../src/career/standings.js';
 import {RATING_KEYS} from '../src/roster.js';
 
 const args=process.argv.slice(2);
@@ -208,9 +210,21 @@ function placeForEvent(event,wins,matches,lossIndex,random){
   return Math.max(2,Math.min(event.drawSize,Math.pow(2,rounds-lossIndex)+1));
 }
 
+function prizeShare(place){
+  if(!place)return 0;
+  if(place<=1)return 1;
+  if(place===2)return .6;
+  if(place<=4)return .35;
+  if(place<=8)return .15;
+  return 0;
+}
+
 function playEvent(state,{event,option,random}){
+  const charged=chargeEventCosts(state,event,event.label);
+  if(!charged.ok)return {state,blocked:true,reason:charged.message};
+  state=charged.state;
   const league=(event.shapes??[]).some(shape=>shape.includes('round-robin')||shape==='mlp-style');
-  const rounds=league?Math.max(3,event.drawSize-1):Math.max(1,Math.ceil(Math.log2(event.drawSize)));
+  const rounds=league?Math.max(1,event.careerRounds??event.drawSize-1):Math.max(1,Math.ceil(Math.log2(event.drawSize)));
   let wins=0,lossIndex=null,games=0;
   for(let match=0;match<rounds;match++){
     const seriesTarget=league?3:1;
@@ -242,6 +256,11 @@ function playEvent(state,{event,option,random}){
       mlpPoints:state.athlete.mlpPoints??0
     }
   };
+  const prize=Math.round((PRIZE_MONEY[event.eventId]??0)*prizeShare(place));
+  if(prize){
+    const credited=creditPrize(state,{week:state.week,label:'Prize · '+event.label,amount:prize,reference:'audit-event:'+state.week+':'+event.eventId+':'+option.format});
+    if(credited.ok)state=credited.state;
+  }
   if(isContracted(state)&&isTourEvent(event))state=recordTourEvent(state,{eventId:event.eventId,week:state.week,format:option.format});
   const offer=contractOffer(state);
   if(offer&&!isContracted(state))state=signed(state,offer,state.week);
@@ -306,6 +325,10 @@ function simulateCareer({age,sample,policy}){
         state=reviewed.state;
       }
     }
+    if(week>0){
+      const paid=paySalary(state,{week,contract:state.contract});
+      if(paid.ok)state=paid.state;
+    }
     const beforeSessions=state.stats.sessions;
     state=applyTraining(state,random);
     training+=state.stats.sessions-beforeSessions;
@@ -319,10 +342,11 @@ function simulateCareer({age,sample,policy}){
         if(state.energy<Math.ceil(event.energyCost*.2))break;
         const played=playEvent(state,{event,option,random});
         state=played.state;
+        if(played.blocked)break;
         matches+=played.games;
         events++;
         playedEvents.add(event.eventId);
-        if(event.matchType==='league')activeLeagueUntil=week+Math.max(1,event.duration||1);
+        if(event.matchType==='league')activeLeagueUntil=week+Math.max(1,event.careerRounds??(event.duration||1));
         milestones.national=firstWeek(milestones.national,week,event.eventId==='national');
         milestones.proEvent=firstWeek(milestones.proEvent,week,['pro-league','mlp'].includes(event.eventId));
         milestones.finals=firstWeek(milestones.finals,week,event.eventId==='ppa-finals');
@@ -414,7 +438,7 @@ const report={
   schemaVersion:1,
   generatedAt:new Date().toISOString(),
   methodology:{
-    scope:'Statistical career prospect model using the branch creation, aging, training, rating, ranking and contract functions. Matches and event placements are batch-sampled from the same skill-gap model; this is not a human playtest and does not run full engine rallies.',
+    scope:'Statistical career prospect model using the branch creation, aging, training, rating, ranking, contract and finance functions. Matches and event placements are batch-sampled from the same skill-gap model; this is not a human playtest and does not run full engine rallies.',
     ages:cohorts,
     samplesPerCohort:samples,
     years,

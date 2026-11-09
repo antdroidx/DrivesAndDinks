@@ -12,7 +12,7 @@ import {
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
-import {startCareerMatch,finishCareerMatch} from './career-match.js';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd} from './career-match.js';
 import {isPlayerDone} from './tournament.js';
 import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js';
 import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
@@ -207,7 +207,7 @@ function renderTournament(career){
     <div class="hint">Round ${(tournament.round??0)+1} of ${total} · ${tournament.teams?.length??tournament.size} teams in the draw</div>
     ${teamPanel}
     <p><strong>Next match: ${escapeHtml(opponent)}</strong></p>
-    ${pending?`<div class="actions"><button type="button" class="primary" data-action="resume-match">PLAY MATCH →</button></div>`:tournament.nightComplete?'<p class="hint">League night complete. Advance the calendar for the next card.</p>':done?'':`<div class="actions"><button type="button" class="primary" data-action="resume-tournament">RESUME COMPETITION →</button></div>`}
+    ${pending?`<div class="actions"><button type="button" class="primary" data-action="resume-match">PLAY MATCH →</button><button type="button" class="secondary" data-action="quick-sim">QUICK SIM</button><button type="button" class="secondary" data-action="sim-competition">SIM TO END</button></div>`:tournament.nightComplete?'<p class="hint">League night complete. Advance the calendar, quick-sim the next card, or simulate the remaining league.</p><div class="actions"><button type="button" class="secondary" data-action="sim-competition">SIM REMAINING LEAGUE</button></div>':done?'':`<div class="actions"><button type="button" class="primary" data-action="resume-tournament">RESUME COMPETITION →</button><button type="button" class="secondary" data-action="sim-competition">SIM TO END</button></div>`}
     ${history?`<ul class="tournament-history">${history}</ul>`:''}
   </section>`;
 }
@@ -441,7 +441,7 @@ function eventRow(event,career,gender,active=event.week===career.week){
       <small>Brackets: ${escapeHtml(running)}</small>
       ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:!active?'<div class="lock">Upcoming · advance the calendar to enter.</div>':blockReason?`<div class="lock">${escapeHtml(blockReason)}</div>`:options.length?`<select class="bracket" data-division="${event.id}" ${ready?'':'disabled'}>${bracketOptions(event,gender,options)}</select>`:'<div class="lock">All offered divisions are complete.</div>'}
     </div>
-    ${locked||!active||!options.length?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${ready?'':'disabled'}>ENTER</button>`}
+    ${locked||!active||!options.length?'':`<div class="event-actions"><button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${ready?'':'disabled'}>ENTER</button><button type="button" class="secondary" data-action="quick-attend" data-event="${event.id}" ${ready?'':'disabled'}>QUICK SIM</button></div>`}
   </div>`;
 }
 
@@ -833,6 +833,15 @@ document.addEventListener('click',event=>{
       location.href='../?career-match=1';
       return;
     }
+    if(action==='quick-attend'){
+      const picker=trigger.closest('.event')?.querySelector('select[data-division]');
+      const started=startCareerMatch(app.career,trigger.dataset.event,picker?.value??null);
+      if(!started.ok){toast(started.message,true);return}
+      apply(simulateCompetitionToEnd(started.state));
+      return;
+    }
+    if(action==='quick-sim'){apply(quickSimCareerMatch(app.career));return}
+    if(action==='sim-competition'){apply(simulateCompetitionToEnd(app.career));return}
     if(action==='next-event'){
       const jumped=advanceToNextEvent(app.career);
       app.career=jumped.state;

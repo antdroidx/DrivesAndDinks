@@ -359,6 +359,20 @@ export function pickShape(event){
   return shapes[0]??'tournament-bracket';
 }
 
+// A career league is a shortened card rather than a full round-robin. The
+// draw still rotates opponents, but the player only commits to the number of
+// weeks the event advertises instead of every team in the field.
+function limitLeagueSchedule(tournament,event){
+  const limit=Math.max(0,Number(event?.careerRounds)||0);
+  const cap=value=>{
+    if(limit>0&&Array.isArray(value?.rounds))value.rounds=value.rounds.slice(0,limit);
+    return value;
+  };
+  cap(tournament);
+  cap(tournament?.main);
+  return tournament;
+}
+
 // Starts a tournament for an event entry.
 export function startTournament({state,event,option}){
   const entry=entryStatus(state,event,{format:option.format});
@@ -404,8 +418,9 @@ export function startTournament({state,event,option}){
       tournament=Object.assign({},main,{shape:'qualifier',mainShape:main.shape,main,teams:mainTeams,currentMatch:{home:playerTeam,away:opponent},qualifierMatch:{home:playerTeam,away:opponent},stage:'qualifier',round:0,history:[]});
     }
   }
-  // A league night plays its two or three matches and the rest of the season
-  // is simulated. A tournament plays all of its rounds.
+  tournament=limitLeagueSchedule(tournament,event);
+  // A league card plays one opponent per week. A tournament plays all of
+  // its rounds in the same event week unless the player asks to quick-sim.
   const nightMatches=Number(event?.nightMatches)||0;
   return {
     ok:true,

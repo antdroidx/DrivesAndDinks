@@ -137,7 +137,9 @@ button.secondary:disabled{opacity:.45;cursor:not-allowed}
   border-radius:7px;padding:6px 8px;font:inherit;font-size:11px;max-width:100%;
 }
 .event select.bracket:focus{outline:2px solid var(--accent);outline-offset:1px}
-.event button{flex:0 0 auto}
+.event-actions{display:grid;gap:6px;flex:0 0 132px}
+.event-actions button{width:100%}
+@media(max-width:560px){.event{align-items:stretch;flex-direction:column}.event-actions{grid-template-columns:1fr 1fr;flex-basis:auto}}
 
 .club,.player{
   display:flex;gap:12px;align-items:center;padding:11px 12px;border:1px solid var(--line);

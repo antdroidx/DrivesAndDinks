@@ -157,3 +157,11 @@ test('career UI source covers the audited entry and handoff safeguards',()=>{
   assert.match(rootMain,/\['setup-button','difficulty','mode','restart','restart-top'\]/);
   assert.match(rootMain,/writeMatchResult\(game\.matchReport\(\),careerMatch\.matchId\)/);
 });
+
+test('the prospect harness uses finance and shortened career league cards',()=>{
+  const audit=readFileSync(new URL('../scripts/audit-career-prospects.js',import.meta.url),'utf8');
+  assert.match(audit,/chargeEventCosts/);
+  assert.match(audit,/paySalary/);
+  assert.match(audit,/creditPrize/);
+  assert.match(audit,/event\.careerRounds/);
+});

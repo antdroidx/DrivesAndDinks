@@ -6,7 +6,7 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost} from './state.js';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js';
 import {careerProfile} from './matchmaking.js';
 import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
@@ -23,7 +23,7 @@ import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js';
 import {mixSeed} from './population.js';
 import {chargeEventCosts,creditPrize} from './finance.js';
 import {seededRandom} from '../competition.js';
-import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
+import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 
@@ -186,6 +186,93 @@ export function startCareerMatch(state,eventId,optionId=null){
   return {ok:true,state:next,pending,message:'Tournament started. '+next.tournament.teams.length+' teams in the draw.'};
 }
 
+function quickReportFor({pending,tournament,random}){
+  const match=tournament?.currentMatch;
+  if(!match)return null;
+  const rules=pending.rules??matchRules(tournament);
+  const outcome=simulateMatch(match.home,match.away,random,rules.targetScore,rules);
+  const playerIsHome=match.home.id===tournament.playerTeamId;
+  const myPoints=playerIsHome?outcome.homeMine:outcome.homeTheirs;
+  const theirPoints=playerIsHome?outcome.homeTheirs:outcome.homeMine;
+  return {
+    mode:'career-quick-sim',format:pending.matchup.format,complete:true,
+    seed:Math.round(random()*2147483647),
+    score:{points:[myPoints,theirPoints],winner:myPoints>theirPoints?0:1},
+    players:pending.matchup.lineup.map((profile,index)=>({
+      id:index,team:index<(pending.matchup.lineup.length===2?1:2)?0:1,name:profile.name
+    }))
+  };
+}
+
+// Plays the selected player path statistically while preserving the same
+// rating, world-rating, record, finance, and tournament transitions as an
+// engine result. A league quick-sim completes the current best-of-three so a
+// single action never leaves a half-finished card.
+export function quickSimCareerMatch(state,{finishSeries=true}={}){
+  if(!state?.pendingMatch)return {ok:false,state,message:'There is no match waiting to be simulated.'};
+  const first=state.pendingMatch;
+  let current=state;
+  let last=null;
+  let games=0;
+  while(current.pendingMatch&&games<5){
+    const pending=current.pendingMatch;
+    const tournament=current.tournament;
+    const random=seededRandom(mixSeed(state.seed,`quick:${state.week}:${pending.tournamentId}:${pending.round}:${games}:${pending.matchup.team}`));
+    const report=quickReportFor({pending,tournament,random});
+    if(!report)return {ok:false,state:current,message:'The next simulated match is unavailable.'};
+    const scored=finishCareerMatch(current,report);
+    if(!scored.ok)return scored;
+    current=scored.state;
+    last=scored;
+    games+=1;
+    if(!finishSeries||first.matchType!=='league')break;
+    if(!current.pendingMatch||current.pendingMatch.round!==first.round||current.tournament?.nightComplete)break;
+  }
+  const tail=last?.record?` Last score ${last.record.score}.` : '';
+  return {ok:true,state:current,record:last?.record,games,message:`Quick-sim complete: ${games} game${games===1?'':'s'}.${tail}`};
+}
+
+// Simulates the player's remaining path through the active competition. For
+// a league, quiet week advances happen automatically between cards.
+export function simulateCompetitionToEnd(state,{maxMatches=40,maxWeeks=52}={}){
+  if(!state?.tournament)return {ok:false,state,message:'There is no active competition to simulate.'};
+  const eventId=state.tournament.eventId;
+  const optionId=state.tournament.optionId;
+  const eventLabel=state.tournament.label;
+  let current=state;
+  let games=0;
+  let weeks=0;
+  for(let guard=0;guard<maxMatches+maxWeeks;guard++){
+    const tournament=current.tournament;
+    if(!tournament)break;
+    if(isPlayerDone(tournament)){
+      return {ok:true,state:current,games,weeks,partial:false,message:`${eventLabel} complete.${tournament.placeText?' '+tournament.placeText+'.':''}`};
+    }
+    if(current.pendingMatch){
+      if(games>=maxMatches)break;
+      const simulated=quickSimCareerMatch(current);
+      if(!simulated.ok)return simulated;
+      current=simulated.state;
+      games+=simulated.games;
+      continue;
+    }
+    if(tournament.nightComplete){
+      if(weeks>=maxWeeks)break;
+      current=advanceWeek(current).state;
+      weeks+=1;
+    }
+    const resumed=startCareerMatch(current,eventId,optionId);
+    if(!resumed.ok)return resumed;
+    current=resumed.state;
+  }
+  const done=current.tournament&&isPlayerDone(current.tournament);
+  return {
+    ok:true,state:current,games,weeks,partial:!done,
+    message:done
+      ?`${eventLabel} complete.${current.tournament.placeText?' '+current.tournament.placeText+'.':''}`
+      :`Quick simulation paused after ${games} games and ${weeks} week${weeks===1?'':'s'}.`
+  };
+}
 function simulateAndAdvance(state,tournament){
   const random=seededRandom(mixSeed(state.seed,`round:${state.week}:${tournament.eventId}:${tournament.round}`));
   simulateRestOfRound(tournament,random);

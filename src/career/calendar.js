@@ -261,8 +261,10 @@ export function generateWeekEvents(state,week){
       qualifierSlots:event.qualifierSlots??0,
       qualifierFieldSize:event.qualifierFieldSize??(event.qualifierSlots??0)*2,
       wildCardSlots:event.wildCardSlots??(MAIN_DRAW_LEVELS.includes(event.tier??'local')?2:0),
-      // A league night is one to three matches, not a whole season.
+      // A league card is one opponent. careerRounds bounds the player's
+      // season rather than scheduling every team in the draw.
       nightMatches:event.nightMatches??0,
+      careerRounds:event.careerRounds??0,
       // The shapes an event may run. Without this the calendar only ever
       // fielded a bracket.
       shapes:event.shapes??[],
