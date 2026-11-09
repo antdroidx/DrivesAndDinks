@@ -329,16 +329,20 @@ Retirement needs a curve under it. The model: every athlete has a **peak age** a
 
 | Age | Factor | Note |
 |---|---|---|
-| up to 34 | 1.00 | development plateau and prime |
-| 35 to 39 | 0.99 down to 0.966 | the first slide |
-| 40 to 44 | 0.96 down to 0.928 | |
-| 45 to 49 | 0.92 down to 0.888 | |
-| 50 to 54 | 0.88 down to 0.848 | |
-| 55 to 59 | 0.84 down to 0.792 | experienced players remain highly competitive |
-| 60 to 64 | 0.78 down to 0.732 | |
-| 65 to 69 | 0.72 down to 0.664 | |
-| 70 to 74 | 0.65 down to 0.586 | |
-| 75 to 79 | 0.57 down to 0.498 | |
+| 10 | 0.55 | early development |
+| 11 to 12 | 0.59 up to 0.63 | |
+| 13 to 15 | 0.69 up to 0.81 | the elite teenage range begins to emerge |
+| 16 to 18 | 0.86 up to 0.96 | top teenagers can already be world class |
+| 19 to 24 | 0.967 up to 1.00 | final development |
+| 25 to 40 | 1.00 | the normal sustained prime |
+| 41 to 44 | 0.995 down to 0.971 | gradual decline begins |
+| 45 to 49 | 0.96 down to 0.92 | |
+| 50 to 54 | 0.91 down to 0.87 | |
+| 55 to 59 | 0.86 down to 0.82 | experienced players remain highly competitive |
+| 60 to 64 | 0.81 down to 0.762 | |
+| 65 to 69 | 0.75 down to 0.694 | |
+| 70 to 74 | 0.68 down to 0.616 | |
+| 75 to 79 | 0.60 down to 0.528 | |
 | 80 and over | 0.42 at 80, declining by 0.04 a year | pronounced late-life drop |
 
 **The ceiling rule.** A player's rating can fall below their age-adjusted ceiling but never rise above it. The ceiling represents physical aging while preserving the reality that high-level players remain competitive well into their fifties and sixties.
@@ -347,11 +351,11 @@ The age curve scales from each player's own peak. The rating scale runs from 2.0
 
 An elite peak-7.0 player:
 
-| Age | 30 | 35 | 40 | 45 | 50 | 55 | 60 | 65 | 70 | 79 | 80 | 85 |
+| Age | 25 | 30 | 35 | 40 | 45 | 50 | 55 | 60 | 65 | 70 | 79 | 80 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Rating ceiling | 7.00 | 6.93 | 6.72 | 6.44 | 6.16 | 5.88 | 5.46 | 5.04 | 4.55 | 3.49 | 2.94 | 2.00 |
+| Rating ceiling | 7.00 | 7.00 | 7.00 | 7.00 | 6.72 | 6.37 | 6.02 | 5.67 | 5.25 | 4.76 | 3.70 | 2.94 |
 
-A peak-8.0 player retains a 6.72 ceiling at 55 and 6.24 at 60, so the age curve does not prevent all-time players from staying elite. At 80 the same player falls to 3.36. Eighty starts a pronounced drop, but it is not a forced endpoint. The scale's 2.00 floor means careers can continue beyond 80 at the bottom of the competitive range.
+A peak-8.0 player retains a 6.88 ceiling at 55 and 6.48 at 60, so the age curve does not prevent all-time players from staying elite. At 80 the same player falls to 3.36. A player can have a personal peak younger or older inside the broad 25–40 prime window, and exceptional outliers remain competitive because the curve scales from their own peak. Eighty starts a pronounced drop, but it is not a forced endpoint.
 
 **The window is however long the player wants it to be.** There is no fixed career length, because there is no fixed starting age and no fixed retirement. A player who starts at ten can play for fifty years if their body and their appetite allow it, and a player who starts at thirty has a shorter window. The age curve decides what a player is capable of at each age; the player decides when to stop.
 

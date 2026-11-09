@@ -17,7 +17,7 @@ export function normalizeStartAge(age,fallback=25){
 }
 
 export function peakAgeFor(seed){
-  return 24+(Math.abs(Math.trunc(Number(seed)||0))%7);
+  return 25+(Math.abs(Math.trunc(Number(seed)||0))%16);
 }
 
 // Development below the adult baseline; decline follows the documented
@@ -28,30 +28,27 @@ export function ageSkillFactor(age){
   if(value<=12)return .55+(value-10)*.04;
   if(value<=15)return .63+(value-12)*.06;
   if(value<=18)return .81+(value-15)*.05;
-  if(value<=29)return 1;
-  if(value<=34)return 1;
-  if(value<=39)return .99-(value-35)*.006;
-  if(value<=44)return .96-(value-40)*.008;
-  if(value<=49)return .92-(value-45)*.008;
-  if(value<=54)return .88-(value-50)*.008;
-  if(value<=59)return .84-(value-55)*.012;
-  if(value<=64)return .78-(value-60)*.012;
-  if(value<=69)return .72-(value-65)*.014;
-  if(value<=74)return .65-(value-70)*.016;
-  if(value<=79)return .57-(value-75)*.018;
+  if(value<=24)return .96+(value-18)*.0066666667;
+  if(value<=40)return 1;
+  if(value<=44)return .995-(value-41)*.008;
+  if(value<=49)return .96-(value-45)*.01;
+  if(value<=54)return .91-(value-50)*.01;
+  if(value<=59)return .86-(value-55)*.01;
+  if(value<=64)return .81-(value-60)*.012;
+  if(value<=69)return .75-(value-65)*.014;
+  if(value<=74)return .68-(value-70)*.016;
+  if(value<=79)return .60-(value-75)*.018;
   // Eighty marks a pronounced late-life drop rather than a hard stop.
   return Math.max(.10,.42-(value-80)*.04);
 }
 
 export function recoveryAgeFactor(age){
   const value=Math.max(0,Number(age)||0);
-  if(value<=25)return 1;
-  if(value<=34)return 1-(value-25)*.005;
-  if(value<=44)return .955-(value-35)*.008;
-  if(value<=54)return .883-(value-45)*.008;
-  if(value<=64)return .811-(value-55)*.009;
-  if(value<=74)return .73-(value-65)*.01;
-  if(value<=79)return .64-(value-75)*.012;
+  if(value<=40)return 1;
+  if(value<=49)return .992-(value-41)*.008;
+  if(value<=59)return .93-(value-50)*.009;
+  if(value<=69)return .84-(value-60)*.01;
+  if(value<=79)return .74-(value-70)*.012;
   return Math.max(.18,.48-(value-80)*.025);
 }
 
@@ -73,7 +70,7 @@ export function capRatingForAge(athlete,format,nextRating){
   const peakFormats={...(athlete.peakFormats??athlete.formats??{})};
   const value=Number(nextRating)||2;
   const age=Number(athlete.age)||MIN_START_AGE;
-  const peakAge=Math.max(34,Number(athlete.peakAge)||25);
+  const peakAge=Math.max(40,Number(athlete.peakAge)||25);
   if(age<=peakAge)peakFormats[format]=Math.max(peakFormats[format]??2,value);
   const capped=age<=peakAge?value:Math.min(value,ageCeiling(peakFormats[format]??value,age));
   return {rating:capped,peakFormats};
@@ -91,7 +88,7 @@ export function advanceAgeYear(athlete,week){
   if(week<=0||week%52!==0)return {athlete,aged:false,ageNote:''};
   const age=Number(athlete.age)+1;
   const next={...athlete,age};
-  if(age<=Math.max(34,Number(athlete.peakAge??25)))return {athlete:next,aged:true,ageNote:`Age ${age}.`};
+  if(age<=Math.max(40,Number(athlete.peakAge??25)))return {athlete:next,aged:true,ageNote:`Age ${age}.`};
   const factor=ageSkillFactor(age);
   const peakRatings=athlete.peakRatings??athlete.ratings??{};
   const ratings={...athlete.ratings};

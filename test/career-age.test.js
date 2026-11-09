@@ -27,16 +27,19 @@ test('the age curve develops, plateaus and declines',()=>{
   assert.ok(ageSkillFactor(10)<ageSkillFactor(15));
   assert.ok(ageSkillFactor(15)<ageSkillFactor(20));
   assert.equal(ageSkillFactor(25),1);
-  assert.equal(ageSkillFactor(34),1);
-  assert.ok(ageSkillFactor(40)<1);
+  assert.equal(ageSkillFactor(40),1);
+  assert.ok(ageSkillFactor(41)<1);
   assert.ok(ageSkillFactor(55)<ageSkillFactor(45));
-  assert.ok(recoveryAgeFactor(25)>recoveryAgeFactor(40));
-  assert.ok(recoveryAgeFactor(40)>recoveryAgeFactor(60));
+  assert.equal(recoveryAgeFactor(25),1);
+  assert.equal(recoveryAgeFactor(40),1);
+  assert.ok(recoveryAgeFactor(41)<1);
+  assert.ok(recoveryAgeFactor(60)<recoveryAgeFactor(41));
 });
 
 test('recovery declines with age without making a week unusable',()=>{
   const young=career({age:24});
   const veteran=career({age:55});
+  young.athlete.formats={singles:5.5,doubles:5.5,mixed:5.5};
   veteran.athlete.formats={singles:5.5,doubles:5.5,mixed:5.5};
   assert.ok(weeklyRecovery(veteran)<weeklyRecovery(young));
   assert.ok(weeklyRecovery(veteran)>=10);
@@ -47,8 +50,8 @@ test('elite players retain realistic ratings through their fifties and sixties',
   assert.ok(ageCeiling(6.0,55)>=5.0,'a 6.0 peak should retain 5.0 at 55');
   assert.ok(ageCeiling(6.5,60)>=5.0,'a 6.5 peak should remain above 5.0 at 60');
   assert.ok(ageCeiling(6.5,65)>=4.6,'a 6.5 peak should retain useful elite ability at 65');
-  assert.ok(ageCeiling(7.0,55)>=5.8,'a 7.0 peak should remain elite at 55');
-  assert.ok(ageCeiling(8.0,60)>=6.2,'the theoretical top should remain elite at 60');
+  assert.ok(ageCeiling(7.0,55)>=6.0,'a 7.0 peak should remain elite at 55');
+  assert.ok(ageCeiling(8.0,60)>=6.4,'the theoretical top should remain elite at 60');
   assert.ok(ageSkillFactor(79)>ageSkillFactor(80),'eighty begins a pronounced decline');
   assert.ok(ageCeiling(6.5,80)<3,'an elite ceiling drops sharply at eighty');
   assert.ok(recoveryAgeFactor(80)<recoveryAgeFactor(79));
