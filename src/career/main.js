@@ -13,6 +13,7 @@ import {
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {startCareerMatch,finishCareerMatch} from './career-match.js';
+import {isPlayerDone} from './tournament.js';
 import {writePendingMatch,readMatchResult,clearMatchResult} from './handshake.js';
 import {boardPosition,nearbyRivals,findRival,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
@@ -126,6 +127,32 @@ function renderCreate(){
   </section>`;
 }
 
+function renderTournament(career){
+  const tournament=career.tournament;
+  if(!tournament)return '';
+  const done=isPlayerDone(tournament);
+  const pending=career.pendingMatch;
+  const history=(tournament.history??[]).map(entry=>
+    `<li class="${entry.won?'won':'lost'}"><span>R${entry.round+1}</span><span>${escapeHtml(entry.opponent)}</span><span>${escapeHtml(entry.score)}</span></li>`
+  ).join('');
+  const total=tournament.shape==='bracket'?Math.round(Math.log2(tournament.size||16)):(tournament.rounds?.length??1);
+  if(done){
+    return `<section class="panel">
+      <h2>${escapeHtml(tournament.label)} · COMPLETE</h2>
+      <p><strong>${escapeHtml(tournament.placeText??'Finished')}</strong>${tournament.points?` · ${tournament.points} points`:''}</p>
+      ${history?`<ul class="tournament-history">${history}</ul>`:''}
+    </section>`;
+  }
+  const opponent=pending?.matchup?.team??pending?.matchup?.opponentNames?.join(' & ')??'the next side';
+  return `<section class="panel">
+    <h2>${escapeHtml(tournament.label)} · ${escapeHtml(tournament.bracket)} ${escapeHtml(tournament.format)}</h2>
+    <div class="hint">Round ${(tournament.round??0)+1} of ${total} · ${tournament.teams?.length??tournament.size} teams in the draw</div>
+    <p><strong>Next match: ${escapeHtml(opponent)}</strong></p>
+    ${pending?`<div class="actions"><button type="button" class="primary" data-action="resume-match">PLAY MATCH →</button></div>`:'<p class="hint">The round is still being played. Advance the calendar.</p>'}
+    ${history?`<ul class="tournament-history">${history}</ul>`:''}
+  </section>`;
+}
+
 function renderHome(){
   const career=app.career;
   const events=currentEvents(career);
@@ -202,6 +229,8 @@ function renderHome(){
     </div>
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Later gains are slower than early ones.</div>
   </section>
+
+  ${renderTournament(career)}
 
   <div class="grid two">
     <section class="panel">
@@ -516,6 +545,12 @@ document.addEventListener('click',event=>{
       persist();
       writePendingMatch(started.pending);
       // The match is played on the engine page and the result comes back.
+      location.href='../?career-match=1';
+      return;
+    }
+    if(action==='resume-match'){
+      if(!app.career.pendingMatch){toast('There is no match to play.',true);return}
+      writePendingMatch(app.career.pendingMatch);
       location.href='../?career-match=1';
       return;
     }

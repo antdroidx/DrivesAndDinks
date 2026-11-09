@@ -148,7 +148,14 @@ export function ratedPopulation({seed,regionId,ratings,week,format='doubles',lim
       rating:athlete.rating,
       clubId:athlete.clubId,
       cityId:athlete.cityId,
-      matches:athlete.matches
+      matches:athlete.matches,
+      // The identity the match engine needs to build a profile.
+      archetypeId:full?.archetypeId??'avery',
+      archetypeLabel:full?.archetypeLabel??'All-rounder',
+      gender:full?.gender??'male',
+      handedness:full?.handedness??'right',
+      citizenship:full?.citizenship??null,
+      age:full?.age??null
     };
   });
 }

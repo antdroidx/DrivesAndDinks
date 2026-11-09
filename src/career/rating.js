@@ -170,6 +170,16 @@ export const RATING_BRACKETS=Object.freeze([
   {id:'5.0+',label:'5.0+',min:5,max:8,level:5}
 ]);
 
+// The rating a team is gated on. The normal rule reads the strongest player,
+// so a 5.0 can partner a 3.0 into a 5.0 gate; some events read the combined
+// rating instead, which is what keeps the teams level rather than the best
+// player setting the bar.
+export function gateRating(ratings,basis='highest'){
+  const list=(Array.isArray(ratings)?ratings:[ratings]).filter(Number.isFinite);
+  if(!list.length)return 0;
+  if(basis==='combined')return list.reduce((sum,value)=>sum+value,0)/list.length;
+  return Math.max(...list);
+}
 export function divisionFor(rating){
   const value=clamp(Number(rating)||RATING_MIN,RATING_MIN,RATING_MAX);
   return RATING_BRACKETS.find(division=>value>=division.min&&value<=division.max)??RATING_BRACKETS.at(-1);

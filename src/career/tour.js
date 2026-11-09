@@ -38,6 +38,20 @@ export const PRO_TOURS=Object.freeze({
 
 export const TOUR_POINTS_WINDOW=52;
 
+// Points are awarded for the highest round reached, which is the same thing
+// as the place a player finished in. The proportions are the real tour's:
+// champion 100 percent, finalist 80, semifinal 60, quarterfinal 40, and on
+// down by half each round after that.
+const PLACE_FACTORS=Object.freeze([1,.8,.6,.4,.2,.1,.05,.025]);
+
+export function pointsForFinish(championPoints,place){
+  const champion=Number(championPoints)||0;
+  const finished=Number(place)||0;
+  if(!champion||finished<1)return 0;
+  const band=finished<=1?0:Math.floor(Math.log2(finished-1))+1;
+  return Math.round(champion*(PLACE_FACTORS[Math.min(PLACE_FACTORS.length-1,band)]??0));
+}
+
 // Which pool an event pays into. The MLP is a separate activity, so what it
 // pays never counts towards the pro tour.
 export const POOL_TOUR='tour';

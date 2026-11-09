@@ -1,28 +1,124 @@
 // Career matches.
 //
-// A career event is played by the real engine. This module starts the match,
-// hands the field to the engine, and scores the result back into the career.
+// A career event is a tournament. Entering one fields a draw, and the player
+// plays their own path through it on the real engine while the rest of the
+// field is simulated. This module owns the bridge: it turns a tournament
+// match into an engine lineup, and it scores the engine's report back into
+// the tournament and the career.
 
 import {currentEvents,canEnterEvent,eventBlockReason,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
-import {buildCareerMatchup,drawField} from './matchmaking.js';
-import {rateMatchReport,buildCareerRecord,pointsForResult,CAREER_RECORD_LIMIT} from './match-record.js';
+import {careerProfile} from './matchmaking.js';
+import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
 import {entryEligibility} from './calendar.js';
 import {EVENT_BY_ID} from './geography.js';
 import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
-import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP} from './tour.js';
+import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
+import {startTournament,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary} from './tournament.js';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 
-// Starts a real match at a career event.
+// The share of the purse a finish is worth.
+const PRIZE_FACTORS=Object.freeze([1,.6,.35,.15]);
+
+function prizeFactor(place){
+  if(!place)return 0;
+  if(place<=1)return PRIZE_FACTORS[0];
+  if(place===2)return PRIZE_FACTORS[1];
+  if(place<=4)return PRIZE_FACTORS[2];
+  if(place<=8)return PRIZE_FACTORS[3];
+  return 0;
+}
+
+// Turns one tournament match into a lineup the engine can play.
+function matchupFor({state,tournament,match}){
+  const playerTeam=tournament.teams.find(team=>team.id===tournament.playerTeamId);
+  if(!playerTeam)return null;
+  const opponentTeam=match.home.id===playerTeam.id?match.away:match.home;
+  if(!opponentTeam)return null;
+  const doubles=tournament.format!=='singles';
+  const player=careerProfile(state.athlete);
+  if(doubles){
+    const partner=careerProfile(playerTeam.members[1]??playerTeam.members[0]);
+    const opponents=opponentTeam.members.slice(0,2).map(member=>careerProfile(member));
+    while(opponents.length<2)opponents.push(careerProfile(opponentTeam.members[0]));
+    return {
+      lineup:[player,partner,opponents[0],opponents[1]],
+      playerId:0,
+      athleteIds:['player',playerTeam.members[1]?.id??null,opponentTeam.members[0]?.id??null,opponentTeam.members[1]?.id??null],
+      format:'doubles',
+      playerRating:state.athlete.formats[tournament.format]??0,
+      opponentRatings:opponents.map((_,index)=>opponentTeam.members[index]?.rating??opponentTeam.rating),
+      opponentIds:opponentTeam.members.map(member=>member.id),
+      opponentNames:opponentTeam.members.map(member=>member.name),
+      partnerId:playerTeam.members[1]?.id??null,
+      partnerRating:playerTeam.members[1]?.rating??null,
+      team:opponentTeam.name,
+      teamRating:opponentTeam.rating
+    };
+  }
+  const opponent=careerProfile(opponentTeam.members[0]);
+  return {
+    lineup:[player,opponent],
+    playerId:0,
+    athleteIds:['player',opponentTeam.members[0]?.id??null],
+    format:'singles',
+    playerRating:state.athlete.formats[tournament.format]??0,
+    opponentRatings:[opponentTeam.rating],
+    opponentIds:opponentTeam.members.map(member=>member.id),
+    opponentNames:opponentTeam.members.map(member=>member.name),
+    partnerId:null,
+    partnerRating:null,
+    team:opponentTeam.name,
+    teamRating:opponentTeam.rating
+  };
+}
+
+// Builds the pending match for whatever round the tournament is on, or null
+// when the player has nothing to play.
+function pendingFor({state,tournament}){
+  if(!tournament||isPlayerDone(tournament))return null;
+  const match=nextPlayerMatch(tournament);
+  if(!match)return null;
+  const matchup=matchupFor({state,tournament,match});
+  if(!matchup)return null;
+  return {
+    eventId:tournament.eventId,
+    optionId:tournament.optionId,
+    format:tournament.format,
+    divisionId:tournament.divisionId,
+    bracket:tournament.bracket,
+    matchType:tournament.matchType,
+    energyCost:0,
+    week:tournament.week,
+    round:tournament.round,
+    tournamentId:tournament.id,
+    matchup
+  };
+}
+
+// Starts a career event.
 //
-// The field is drawn from the rated population of the bracket the player
-// entered, the lineup is built from the career athlete's own attributes, and
-// the matchup is handed to the engine. The pending match is kept in the
-// career so it survives the trip to the engine page and back.
+// The field is drawn, seeded and gated, and the first match of the player's
+// path is handed to the engine. An event already in progress resumes at the
+// next round instead of fielding a new draw.
 export function startCareerMatch(state,eventId,optionId=null){
+  if(state.tournament&&!isPlayerDone(state.tournament)&&state.tournament.eventId===eventId){
+    if(playerHasBye(state.tournament)){
+      // A bye is not a match. Advance through it and try the next round.
+      recordPlayerResult(state.tournament,{won:true,score:'bye'});
+      return startCareerMatch(state,eventId,optionId);
+    }
+    const pending=pendingFor({state,tournament:state.tournament});
+    if(!pending){
+      state.tournament=simulateAndAdvance(state,state.tournament);
+      return startCareerMatch(state,eventId,optionId);
+    }
+    return {ok:true,state:Object.assign({},state,{pendingMatch:pending}),pending,message:'Match ready.',resumed:true};
+  }
+
   const event=currentEvents(state).find(entry=>entry.id===eventId);
   if(!event)return {ok:false,state,message:'That event is not on the calendar this week.'};
   if(!canEnterEvent(state))return {ok:false,state,message:eventBlockReason(state)};
@@ -33,35 +129,38 @@ export function startCareerMatch(state,eventId,optionId=null){
   if(state.energy<event.energyCost){
     return {ok:false,state,message:'That event needs '+event.energyCost+' energy. You have '+state.energy+'.'};
   }
-  const {opponents,partner}=drawField({state,event,option});
-  const matchup=buildCareerMatchup({state,event,option,opponents,partner});
-  const pending={
-    eventId:event.eventId,
-    optionId:option.id,
-    format:option.format,
-    divisionId:option.divisionId,
-    bracket:option.label,
-    matchType:event.matchType,
-    energyCost:event.energyCost,
-    week:state.week,
-    matchup:Object.assign({},matchup,{
-      opponentNames:opponents.map(opponent=>opponent.name),
-      playerTeam:0
-    })
-  };
-  return {
-    ok:true,
-    state:Object.assign({},state,{pendingMatch:pending}),
-    pending,
-    message:'Match ready.'
-  };
+
+  const started=startTournament({state,event,option});
+  if(!started.ok)return {ok:false,state,message:started.message};
+  const tournament=started.tournament;
+  let next=Object.assign({},state,{
+    tournament,
+    energy:state.energy-event.energyCost,
+    lastActionWeek:state.week,
+    lastEventWeek:state.week,
+    stats:Object.assign({},state.stats,{entries:(state.stats.entries??0)+1})
+  });
+  // A bye in the first round is stepped over straight away.
+  let guard=0;
+  while(playerHasBye(tournament)&&guard++<8){
+    recordPlayerResult(tournament,{won:true,score:'bye'});
+  }
+  const pending=pendingFor({state:next,tournament});
+  if(!pending){
+    next=finishTournament(next,tournament,{reason:'no-match'});
+    return {ok:true,state:next,message:'The tournament is over.'};
+  }
+  next=Object.assign({},next,{pendingMatch:pending});
+  return {ok:true,state:next,pending,message:'Tournament started. '+next.tournament.teams.length+' teams in the draw.'};
+}
+
+function simulateAndAdvance(state,tournament){
+  const random=seededRandom(mixSeed(state.seed,`round:${state.week}:${tournament.eventId}:${tournament.round}`));
+  simulateRestOfRound(tournament,random);
+  return tournament;
 }
 
 // Scores a played match back into the career.
-//
-// The rating moves on the real result, the opponents move in the world
-// rating state because they played, tour points and prize money are awarded
-// for the result, and one attribute grows.
 export function finishCareerMatch(state,report){
   const pending=state.pendingMatch;
   if(!pending)return {ok:false,state,message:'There is no match waiting to be scored.'};
@@ -77,36 +176,13 @@ export function finishCareerMatch(state,report){
   const table=worldRatings[pending.format]=worldRatings[pending.format]??{};
   for(const player of outcome.ratings){
     if(player.id===pending.matchup.playerId)continue;
-    // The engine reports lineup positions, so they are mapped back onto the
-    // career athletes the field was drawn from.
     const athleteId=pending.matchup.athleteIds?.[player.id];
     if(!athleteId||athleteId==='player')continue;
     const previous=table[athleteId];
     table[athleteId]=[Math.round(player.rating*1000)/1000,state.week,(previous?.[2]??0)+1];
   }
 
-  // Tour points for the result, and prize money for the purse.
-  const ownDivision=divisionFor(state.athlete.formats[pending.format]??NEW_PLAYER_RATING);
-  const earned=pointsForResult({
-    eventId:pending.eventId,
-    divisionId:pending.divisionId,
-    ownDivisionId:ownDivision.id,
-    won:outcome.won
-  });
-  // The MLP pays into its own pool. It is a separate activity and its
-  // points never count towards the pro tour.
-  const pool=EVENT_POOL[pending.eventId]??POOL_TOUR;
-  const tourPointsHistory=pool===POOL_MLP?state.athlete.tourPointsHistory:addPoints(state.athlete.tourPointsHistory,state.week,earned);
-  const mlpPointsHistory=pool===POOL_MLP?addPoints(state.athlete.mlpPointsHistory??[],state.week,earned):state.athlete.mlpPointsHistory??[];
-  const prize=prizeFor({
-    eventId:pending.eventId,
-    won:outcome.won,
-    format:pending.format,
-    sponsors:sponsorsFor(state,pending.format)
-  });
-  const prizeText=prize?' Prize money '+prize.toLocaleString('en-US')+'.':'';
-
-  // One attribute grows.
+  // One attribute grows for every match played.
   const growth=attributeGrowth({
     attributes:state.athlete.ratings,
     eventFocus:event?.skillFocus,
@@ -131,33 +207,72 @@ export function finishCareerMatch(state,report){
       matches:state.athlete.record.matches+1,
       wins:state.athlete.record.wins+(outcome.won?1:0),
       losses:state.athlete.record.losses+(outcome.won?0:1)
-    }),
+    })
+  });
+  let next=Object.assign({},state,{
+    athlete,
+    pendingMatch:null,
+    worldRatings,
+    matches:[...state.matches,record].slice(-CAREER_RECORD_LIMIT),
+    stats:Object.assign({},state.stats,{matches:(state.stats.matches??0)+1})
+  });
+
+  // Record the result in the tournament and play the rest of the round.
+  const tournament=next.tournament;
+  if(tournament){
+    simulateRestOfRound(tournament,seededRandom(mixSeed(state.seed,`round:${state.week}:${tournament.eventId}:${tournament.round}`+':rest')));
+    recordPlayerResult(tournament,{won:outcome.won,score:record.score});
+    next=Object.assign({},next,{tournament});
+  }
+
+  const note=record.label+' · '+record.bracket+' '+pending.format+' bracket · '+record.score;
+  next=pushHistory(pushLog(next,note+'. Rating '+formatRating(outcome.playerRating)+' ('+signed(outcome.delta)+').'),note);
+
+  if(tournament&&!isPlayerDone(tournament)){
+    const pendingNext=pendingFor({state:next,tournament});
+    if(pendingNext)next=Object.assign({},next,{pendingMatch:pendingNext});
+    return {
+      ok:true,
+      state:next,
+      record,
+      message:(outcome.won?'Won ':'Lost ')+record.score+'. '+(pendingNext?'Next round ready.':'Tournament continuing.')
+    };
+  }
+
+  const finished=finishTournament(next,tournament,{reason:'done'});
+  return {ok:true,state:finished,record,message:(outcome.won?'Won ':'Lost ')+record.score+'. '+finished.tournament?.placeText};
+}
+
+// Closes a tournament: awards the points and the prize the finish is worth,
+// and records the placing.
+function finishTournament(state,tournament){
+  if(!tournament)return state;
+  const place=tournament.playerPlace??null;
+  const earned=tournamentPoints(tournament);
+  const pool=EVENT_POOL[tournament.eventId]??POOL_TOUR;
+  const tourPointsHistory=pool===POOL_MLP?state.athlete.tourPointsHistory:addPoints(state.athlete.tourPointsHistory,state.week,earned);
+  const mlpPointsHistory=pool===POOL_MLP?addPoints(state.athlete.mlpPointsHistory??[],state.week,earned):state.athlete.mlpPointsHistory??[];
+  const basePrize=prizeFor({eventId:tournament.eventId,won:true,format:tournament.format,sponsors:sponsorsFor(state,tournament.format)});
+  const prize=Math.round(basePrize*prizeFactor(place));
+  const placeText=place?(place===1?'Champion':place===2?'Runner-up':place<=4?'Semifinalist':place<=8?'Quarterfinalist':'Round of '+(tournament.size/2||16))+' · place '+(place??'—'):'Tournament complete';
+  const entered=[...new Set([...(state.entered??[]),tournament.eventId])].slice(-16);
+  const athlete=Object.assign({},state.athlete,{
     tourPoints:pointsInWindow(tourPointsHistory,state.week),
     tourPointsHistory,
     mlpPoints:pointsInWindow(mlpPointsHistory,state.week),
     mlpPointsHistory
   });
-  const note=record.label+' · '+record.bracket+' '+pending.format+' bracket · '+record.score;
-  const entered=[...new Set([...(state.entered??[]),pending.eventId])].slice(-16);
-  const moved=pushHistory(pushLog(Object.assign({},state,{athlete}),note+'. Rating '+formatRating(outcome.playerRating)+' ('+signed(outcome.delta)+').'),note);
-  return {
-    ok:true,
-    state:Object.assign({},moved,{
-      athlete:Object.assign({},moved.athlete,{tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory,mlpPoints:pointsInWindow(mlpPointsHistory,state.week),mlpPointsHistory}),
-      energy:state.energy-(pending.energyCost??0),
-      lastActionWeek:state.week,
-      lastEventWeek:state.week,
-      entered,
-      pendingMatch:null,
-      worldRatings,
-      money:state.money+prize,
-      matches:[...state.matches,record].slice(-CAREER_RECORD_LIMIT),
-      stats:Object.assign({},state.stats,{
-        entries:state.stats.entries+1,
-        matches:state.stats.matches+1
-      })
-    }),
-    record,
-    message:(outcome.won?'Won ':'Lost ')+record.score+' in the '+record.bracket+' '+pending.format+' bracket. Rating '+formatRating(outcome.playerRating)+' ('+signed(outcome.delta)+').'+prizeText
-  };
+  const closed=Object.assign({},tournament,{finished:true,placeText,points:earned});
+  const summary=tournament.label+': '+placeText
+    +(earned?' · '+earned+' points':'')
+    +(prize?' · $'+prize.toLocaleString('en-US'):'')+'.';
+  const next=pushLog(pushHistory(Object.assign({},state,{
+    athlete,
+    money:state.money+prize,
+    entered,
+    tournament:Object.assign({},closed,{teams:closed.teams?.slice(0,2)??[],history:closed.history?.slice(-8)??[]})
+  }),summary),summary);
+  return next;
 }
+
+export {tournamentSummary};

@@ -256,7 +256,9 @@ The MLP is a separate competition with its own calendar, its own points and its 
 
 **Structure.** Twenty-two teams in two levels — sixteen in the premier division, six in the challenger division — with promotion and relegation between them. Rosters are assembled by a draft each season, where the top pick chooses a partner and the picks run down the rankings.
 
-**In the career.** A player on the tour's top board is drafted. The team has a season. The team can win or lose, and the player can be traded, released, or picked up by a lower team when they decline.
+**What the player controls.** The player is a player. The team is assembled, managed and traded in the background: the draft, the roster decisions, the promotion and relegation are simulated, and the player is assigned to a team. The games themselves are played in full. A career game where you are also the owner is a different game, and this one is about the player.
+
+**In the career.** A player on the tour's top board is drafted into a team. The team's season runs in the background. The player is assigned their matches, plays them, and sees how their team did. If the player declines, the background process moves them to a lower team or releases them, exactly as the tour's own market would.
 
 ---
 
@@ -267,6 +269,8 @@ The endpoint of a career, and the only true one.
 **Voluntary.** The player retires when they choose. No more events. The career is over and the record is final.
 
 **Forced.** Age and condition eventually make it impossible to hold a standing, and the game should say so plainly rather than letting a player drift into irrelevance. A player whose age-adjusted ceiling has fallen below the level they are trying to compete at has two choices: drop to a level they can win, or retire.
+
+**There is no fixed career length.** A career lasts as long as the player wants it to. The starting age is a character creation choice, so a player beginning at ten has sixty possible years and a player beginning at thirty has a much shorter one. The age curve sets what is possible at each age, and the player decides when to stop. Nothing in the game forces a retirement at a set number of seasons.
 
 **After.** A retired player keeps their record and their place on the all-time board. They do not appear on the current board, because the current board is about who is playing now.
 
@@ -294,7 +298,7 @@ What a peak-6.0 player looks like:
 |---|---|---|---|---|---|---|
 | Rating ceiling | 6.00 | 5.94 | 5.85 | 5.25 | 4.20 | 3.00 |
 
-**The window.** A career started at eighteen or nineteen has about fifteen years of ascent before the plateau, and twenty more after it. A player who reaches the pro league in their late twenties can hold it into their late thirties, and then has a genuine second act: drop to a lower level, or retire.
+**The window is however long the player wants it to be.** There is no fixed career length, because there is no fixed starting age and no fixed retirement. A player who starts at ten can play for fifty years if their body and their appetite allow it, and a player who starts at thirty has a shorter window. The age curve decides what a player is capable of at each age; the player decides when to stop.
 
 **Recovery.** Rest and recovery already scale with the level of play. Age should scale it too — a forty-year-old gets less out of a week than a twenty-five-year-old does, which is the other half of why the curve bites.
 
@@ -347,7 +351,7 @@ The competition first, because a ranking is a measurement of rounds reached and 
 
 4. **Does the recommendation route exist in the game?** It is the route by which reputation, results and relationships substitute for ranking. It is the least mechanical part of the tour and the most human.
 
-5. **Should the MLP be playable at all?** The league is a large piece of work — drafts, teams, promotion and relegation, the dreambreaker. It could be a whole season's worth of content, or it could stay in the background as a thing the player is drafted into and occasionally plays.
+5. **How much of the league is the player's?** The games are playable and the management runs in the background. What still needs deciding is whether the player sees the team's roster and standing in detail, or only their own matches and a line about the team.
 
 6. **How much of the ranked population is simulated?** The board is twelve hundred and a draw is sixty-four. The world simulation already plays two hundred and twenty matches a week across the region. The rest of the board could be a statistical stand-in, which is cheap and adequate, or a rival could be simulated in enough detail that their season is legible.
 

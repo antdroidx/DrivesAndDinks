@@ -336,20 +336,27 @@ A career event is already played by the real engine, rated on the real result, a
 
 The handoff is a settled decision. The career writes a pending match, the engine plays it, and the report comes back. Playing inside the career page is not planned, because the match needs the whole screen.
 
-### M3 — Competitions that are real ⬜ planned
+### M3 — Competitions that are real 🔶 in progress
 
-The seven competition shapes are built and tested. This milestone puts them in the calendar and gives an event a field.
+An event now fields a tournament rather than a single match.
 
-- [ ] Entering an event fields a tournament rather than one match
-- [ ] Field sizes by tier: 64, 56 and 48 spots, with the qualifier filling the rest
+- [x] Entering an event fields a tournament, and the player plays their path through it one round at a time
+- [x] Draw sizes per tier: eight teams for leagues, sixteen to sixty-four for tournaments
+- [x] Seeded single elimination with byes, and a round robin for leagues
+- [x] A division fields its own rating band, even when the event is open
+- [x] The gate basis is recorded per event, as the highest player or the combined team
+- [x] The tournament is saved between rounds, so a handoff to the engine survives a reload
+- [x] Points and prize are paid for the placing when the tournament ends
 - [ ] Qualifier draws, and a secondary bracket for those who lose out
-- [ ] Draw seeding in ranking bands, and byes by combined ranking
-- [ ] Division gates that read the division's own rating, and carry the highest-player or combined rule per event
+- [ ] Seeding in bands rather than strictly by rating, and byes by combined ranking in doubles
+- [ ] The seven shapes from `events.js` wired in, rather than the two the career currently uses
 - [ ] Multi-week events that occupy consecutive weeks
 - [ ] A way to skip weeks with nothing on the calendar
 - [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
 
 **Why it is here.** A ranking is a measurement of rounds reached, and rounds do not exist until an event fields a tournament. This is the foundation the tour is expressed in.
+
+**Where it stands.** The career plays a seeded bracket for tournaments and a round robin for leagues. The other five shapes exist in `competition.js`, with tests, and are not yet selected by the calendar.
 
 ### M4 — The ranking and the pro tour ⬜ planned
 
@@ -372,7 +379,8 @@ The seven competition shapes are built and tested. This milestone puts them in t
 - [ ] Release without leaving the game: no main draw spot, no prize multiplier, no league
 - [ ] The ineligible period: twelve months out of the biggest events, and eight smaller events to reapply
 - [ ] Working back: a Challenger win, the top fifty, or a recommendation
-- [ ] The team league: draft, season, and promotion and relegation
+- [ ] The team league: playable games, with the draft, roster and promotion running in the background
+- [ ] The player is the player, not the owner: assignments and team decisions are simulated
 
 ### M6 — A career with an end ⬜ planned
 
@@ -380,7 +388,9 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 
 - [ ] The age curve and the ceiling rule: a rating can fall below a player's age-adjusted peak but never rise above it
 - [ ] Recovery that declines with age
-- [ ] Voluntary retirement
+- [ ] A starting age chosen at creation, so a career can begin at ten or at thirty
+- [ ] No fixed career length: the player plays until they retire
+- [ ] Voluntary retirement at any point
 - [ ] Forced retirement, offered plainly when the ceiling falls below the level the player is attempting
 - [ ] The all-time board, and the career record as a final artifact
 - [ ] The epilogue

@@ -68,7 +68,8 @@ test('a played match moves the rating on the real result',()=>{
   assert.ok(scored.state.athlete.formats[pending.format]!==pending.matchup.playerRating,'the rating moved');
   assert.equal(scored.state.athlete.record.matches,1);
   assert.equal(scored.state.athlete.record.wins,1);
-  assert.equal(scored.state.energy,state.energy-(pending.energyCost??0));
+  // The energy is paid once when the event is entered, not again per round.
+  assert.equal(scored.state.energy,state.energy-event.energyCost);
   assert.equal(scored.state.matches.length,1);
   assert.ok(scored.state.matches[0].report,'the engine report is kept against the event');
 });
@@ -136,18 +137,77 @@ test('the opponents move in the world rating state because they played',()=>{
   }
 });
 
-test('a match awards tour points and prize money',()=>{
+test('a tournament pays its points and purse for the placing',()=>{
   const state=withClub(career());
   // A club night has no purse, so the local league is used here.
   const event=currentEvents(state).find(entry=>entry.eventId==='local-league'&&entry.eligible.ok);
+  let current=startCareerMatch(state,event.id,event.defaultOptionId).state;
+  assert.ok(current.tournament,'the entry fielded a tournament');
+  let guard=0;
+  while(current.pendingMatch&&guard++<12){
+    const pending=current.pendingMatch;
+    const report={
+      score:{points:[11,5],winner:0},
+      players:pending.matchup.lineup.map((profile,index)=>({id:index,team:index<2?0:1,name:profile.name}))
+    };
+    const scored=finishCareerMatch(current,report);
+    assert.ok(scored.ok,scored.message);
+    current=scored.state;
+  }
+  assert.ok(current.tournament.finished,'the tournament finished');
+  assert.equal(current.tournament.playerPlace,1,'the player won every round');
+  assert.ok(current.athlete.tourPoints>0,'tour points were earned');
+  assert.ok(current.money>state.money,'there was a purse');
+});
+
+test('a first round loss still pays for the placing',()=>{
+  const state=withClub(career());
+  const event=currentEvents(state).find(entry=>entry.eventId==='local-league'&&entry.eligible.ok);
+  let current=startCareerMatch(state,event.id,event.defaultOptionId).state;
+  let guard=0;
+  let lost=false;
+  while(current.pendingMatch&&guard++<12){
+    const pending=current.pendingMatch;
+    const report={
+      score:{points:[5,11],winner:1},
+      players:pending.matchup.lineup.map((profile,index)=>({id:index,team:index<2?0:1,name:profile.name}))
+    };
+    const scored=finishCareerMatch(current,report);
+    assert.ok(scored.ok,scored.message);
+    current=scored.state;
+    if(!lost){lost=true;}
+  }
+  assert.ok(current.tournament.finished);
+  // Losing every round still finishes last in the league, so the placing is
+  // recorded and the points are what that placing is worth.
+  assert.ok(current.tournament.playerPlace>=1);
+});
+
+test('a bracket fields only its own rating band and seeds the strongest first',()=>{
+  const state=withClub(career());
+  const event=currentEvents(state).find(entry=>entry.eventId==='club-night'&&entry.eligible.ok);
   const started=startCareerMatch(state,event.id,event.defaultOptionId);
+  const tournament=started.state.tournament;
+  const ratings=tournament.teams.map(team=>team.rating);
+  assert.ok(Math.min(...ratings)>=3.0,'the 3.5 bracket does not field a 2.0 player');
+  assert.ok(Math.max(...ratings)<=4.0,'the 3.5 bracket does not field a 5.0 player');
+  assert.equal(tournament.shape,'bracket');
+});
+
+test('a tournament survives being saved between rounds',()=>{
+  const state=withClub(career());
+  const event=currentEvents(state).find(entry=>entry.eventId==='club-night'&&entry.eligible.ok);
+  const started=startCareerMatch(state,event.id,event.defaultOptionId);
+  const round=started.pending.round;
+  const copy=JSON.parse(JSON.stringify(started.state));
+  const pending=copy.pendingMatch;
   const report={
-    score:{points:[11,5],winner:0},
-    players:started.pending.matchup.lineup.map((profile,index)=>({id:index,team:index<2?0:1,name:profile.name}))
+    score:{points:[11,4],winner:0},
+    players:pending.matchup.lineup.map((profile,index)=>({id:index,team:index<2?0:1,name:profile.name}))
   };
-  const scored=finishCareerMatch(started.state,report);
-  assert.ok(scored.state.athlete.tourPoints>0,'tour points were earned');
-  assert.ok(scored.state.money>state.money,'there was a purse');
+  const scored=finishCareerMatch(copy,report);
+  assert.ok(scored.ok,scored.message);
+  assert.equal(scored.state.tournament.round,round+1,'the tournament advanced a round');
 });
 
 test('the board places the player and the players nearest to them',()=>{
