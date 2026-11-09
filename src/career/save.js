@@ -10,7 +10,7 @@ import {NAME_CULTURES,RATING_KEYS,skillAverage} from '../roster.js';
 import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING,FORMATS} from './rating.js';
 import {REGIONS} from './geography.js';
 
-export const CAREER_SAVE_VERSION=8;
+export const CAREER_SAVE_VERSION=9;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -66,6 +66,22 @@ export const CAREER_MIGRATIONS=Object.freeze({
     ...state,
     money:state.money??250,
     rivalId:state.rivalId??null
+  }),
+  // v9 added contract review, release and the route back to the tour.
+  8:state=>({
+    ...state,
+    contract:state.contract??'none',
+    contractSince:state.contractSince??null,
+    contractEvents:state.contractEvents??0,
+    contractFormats:state.contractFormats??{singles:0,doubles:0,mixed:0},
+    contractEventLog:state.contractEventLog??[],
+    ineligibleUntil:state.ineligibleUntil??null,
+    releasedAt:state.releasedAt??null,
+    reentryEvents:state.reentryEvents??0,
+    reentryEventIds:state.reentryEventIds??[],
+    contractRecommendation:state.contractRecommendation??null,
+    eventEntries:state.eventEntries??[],
+    rankingResults:state.rankingResults??[]
   }),
   // v7 split the rating per format and the world ratings per format.
   6:state=>{
@@ -154,6 +170,15 @@ export function validateCareer(state){
   }
   if(typeof athlete.archetypeId!=='string'||!athlete.archetypeId)return {ok:false,reason:'Athlete archetype is missing'};
   if(athlete.tourPoints!=null&&!Number.isFinite(athlete.tourPoints))return {ok:false,reason:'Tour points are invalid'};
+  if(!['none','futures','standard','gold'].includes(state.contract??'none'))return {ok:false,reason:'Contract level is invalid'};
+  if(state.contractSince!=null&&!Number.isFinite(state.contractSince))return {ok:false,reason:'Contract date is invalid'};
+  if(state.contractEvents!=null&&(!Number.isFinite(state.contractEvents)||state.contractEvents<0))return {ok:false,reason:'Contract events are invalid'};
+  if(state.contractFormats!=null&&(!state.contractFormats||typeof state.contractFormats!=='object'))return {ok:false,reason:'Contract formats are invalid'};
+  if(state.ineligibleUntil!=null&&!Number.isFinite(state.ineligibleUntil))return {ok:false,reason:'Ineligible date is invalid'};
+  if(state.reentryEvents!=null&&(!Number.isFinite(state.reentryEvents)||state.reentryEvents<0))return {ok:false,reason:'Re-entry events are invalid'};
+  if(state.contractEventLog!=null&&!Array.isArray(state.contractEventLog))return {ok:false,reason:'Contract history is invalid'};
+  if(state.reentryEventIds!=null&&!Array.isArray(state.reentryEventIds))return {ok:false,reason:'Re-entry history is invalid'};
+  if(state.eventEntries!=null&&!Array.isArray(state.eventEntries))return {ok:false,reason:'Event entry history is invalid'};
   return {ok:true};
 }
 

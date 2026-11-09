@@ -36,7 +36,7 @@ The reference is the Carvana PPA Tour, and specifically the World Pickleball Ran
 
 **There are three routes to a contract.** Crack the top fifty of the Overall ranking. Finish at the top of the Challenger Tour. Or be recommended and approved. The first two are merit; the third is the discretionary route that every real tour has and every game should probably have.
 
-**Contracts carry obligations.** A contracted player must play at least twenty-five events a year — fifteen on the tour, six in the league, four of their own choosing — and an event only counts toward that obligation if they compete in at least two of the three formats. This is the mechanism that forces complete players, and it is worth copying.
+**Contracts carry obligations.** The game asks for twelve PPA events in a contract year, with at least three appearances in two different disciplines. A multi-division event counts once toward the event total while every division played is recorded for the discipline requirement. This preserves the complete-player pressure while fitting a calendar that normally plays one tournament at a time.
 
 **There is a development circuit that feeds the tour.** The PPA Challenger Series runs around twenty stops of amateur divisions alongside a professional division, with its own ranking that is kept separate: Challenger points count toward the tour ranking, but tour points do not count toward the Challenger standings. Winning a Challenger professional event earns a wild card into a tour event's main draw.
 
@@ -123,51 +123,83 @@ Points are awarded for the highest round reached. A tier is named by the points 
 
 ## 5. How a field is built
 
-The game models twelve hundred players on each gender's board. The real tour does too, and it never puts them in one tournament.
+The game has two nested populations. The PPA ranking universe is roughly twelve hundred players across both genders; beneath it, each region generates about two thousand to twenty-nine hundred rated athletes. The regional roster supplies every division with a deep, gender-correct field while the twelve hundred ranked players remain the competitive board the career is measured against.
 
 **A tournament fields a main draw, per division.** An event runs up to five professional divisions: men's doubles, women's doubles, mixed doubles, men's singles and women's singles. A sixty-four spot event takes up to three hundred and twenty entries across those five, but each division is its own sixty-four team bracket. The rest of the ranked population is at home, at a different event, in a qualifier, or on the Challenger circuit.
 
-| Tier | Main draw | Qualifier |
-|---|---|---|
-| World Championship 3000 | 64 | 8 |
-| Major 2000 | 64 | 8 |
-| Cup 1500 | 56 | 8 |
-| Open 1000 | 48 | 8 |
-| Challenger 500 and below | 16 to 32 | 4 to 8 |
+| Tier | Main draw |
+|---|---:|
+| World Championship 3000 | 64 |
+| Major 2000 | 64 |
+| Cup 1500 | 32 |
+| Open 1000 | 32 |
+| Challenger 500 and below | 16 |
+| PPA Finals | 8 |
 
-**A spot is a team in doubles and a player in singles.** A fifty-six spot doubles draw is fifty-six teams, a hundred and twelve players.
+The game uses clean power-of-two draws because they are easier to read, faster to simulate and simpler to balance than the PPA's occasional 44 or 56-team fields. Tier still matters: a higher event pays more points and draws a stronger field, even when the bracket is the same size.
 
-### Who gets in
+**A spot is a team in doubles and a player in singles.** A thirty-two spot doubles draw is thirty-two teams and sixty-four players.
 
-Main draw places are filled in this order, which is the real tour's:
+### What the rating does
+
+Rating is the player's current strength. Ranking is the player's accumulated results record. They both matter and are allowed to disagree.
+
+- The simulated match uses rating to estimate the player's strength against each opponent.
+- The rating changes after every game, including games inside league series.
+- Division ratings enforce amateur and gated Challenger brackets.
+- Doubles gates read the doubles rating, mixed gates read the mixed rating, and singles gates read the singles rating.
+- The highest-player or combined-team rule decides which value a gated event uses.
+- Rating determines how competitive a player is once they enter a professional tournament, even though it does not choose the professional main-draw cut.
+- A rising rating is an early signal that the player is ready for stronger competition. The ranking points must still follow from actual results before they become eligible for the professional field.
+
+Professional entry and contract reviews use ranking because the tour ranks competitors by what they have earned. Rating can explain poor form, expose a mismatch between skill and results, and break close decisions, but it does not replace ranking. A highly rated newcomer still needs results; an established player keeps their ranking until the results in the fifty-two week window age out.
+
+### Three separate checks
+
+A place in a professional event is decided in three separate steps. A rating gate answers “may this entry compete at this level?” A draw cut answers “did this entry earn one of this week's places?” Mixing the two would turn every field into a single rating leaderboard, which is neither how amateur events nor the PPA work.
+
+**1. Event access.** This is a status and eligibility check. It decides whether the player may register at all: contracted players focus on the tour, released players can use the Challenger route, and an ineligible player cannot enter the biggest events. It does not consider whether the player will make the cutoff.
+
+**2. Division gate.** This applies to amateur and gated Challenger events. It reads the rating for the division being entered: doubles rating for doubles, mixed rating for mixed and singles rating for singles. The mixed rating is never used for a doubles gate.
+
+For doubles, the default is the **highest player's division rating**. Some events use the **combined rating**, the average of the two players' division ratings. The gate is a yes or no. A player who passes it can register even if they will not make the field.
+
+**3. Ranking cut.** This applies to the professional main draw. Each division has its own cap, and entry is selected from that division's ranking. For doubles and mixed doubles, selection uses the pair's combined ranking; for singles, it uses the individual ranking. The relevant ranking is the one for that division, not the Overall board.
+
+| Tier | Main draw | Qualifier field | Qualifier places | Wild cards |
+|---|---:|---:|---:|---:|
+| World Championship 3000 | 64 | 16 | 8 | 2 |
+| Major 2000 | 64 | 16 | 8 | 2 |
+| Cup 1500 | 32 | 8 | 4 | 2 |
+| Open 1000 | 32 | 8 | 4 | 2 |
+| Challenger 500 and below | 16 | 8 | 2 | 0 |
+| PPA Finals | 8 | — | — | — |
+
+These are the game's defaults; an event may override its qualifier field or wild-card count. Qualifier sizes count teams in doubles and players in singles. A qualifier entrant plays one qualification match; a winner takes one of the reserved main-draw places. The main draw and qualifier are different fields, which is what prevents the larger regional population from turning into an unlimited bracket.
+
+The remaining main-draw places are filled by the division ranking:
 
 | Priority | Who |
 |---|---|
-| 1 | the top ten in that division's ranking over the last fifty-two weeks |
-| 2 | contracted players and teams containing a contracted player |
-| 3 | everyone else, by ranking points in that division |
-| 4 | wild cards and committee seeds |
-| 5 | qualifier winners, filling whatever is left |
+| 1 | registered players or teams, by ranking in that division |
+| 2 | committee wild cards inside the reserved places |
+| 3 | qualifier winners inside the reserved places |
 
-**The qualifier is open.** Anyone may register, it is single elimination, two of three games to eleven, and no points are awarded inside it. It is seeded by ranking. It is how a player outside the main draw earns their way in, and it is the reason a large ranked population does not need a large draw.
+The qualifier places and wild cards are reserved before the direct-entry cut. A 32-place Open with four qualifier places and two wild cards therefore has 26 direct places. Contract status decides whether a player may enter the tour; ranking decides whether they make a particular division.
 
-**Wild cards.** Two per event, drawn from the highest-ranked players who did not get in directly. Winning a Challenger professional event earns a wild card into a tour Open, with at most two Challenger winners per Open.
+**The qualifier has its own cut.** Any eligible player outside the direct draw may apply, but the qualifier fields only its configured number of entrants, selected by the division ranking. A player beyond both the main-draw and qualifier cuts is declined for that event and can enter another event or the lower circuit. This is the realistic answer to a large ranked population: open registration does not mean an unlimited draw.
+
+**What the player sees.** Entry reports should state the exact outcome and reason: accepted directly with the ranking that earned the place, accepted into the qualifier, first alternate, declined at the qualifier cut, below the rating gate, or ineligible because of status. CPU fields use the same selection function, so the player is never subject to a rule the rest of the tour ignores.
 
 ### Seeding and byes
 
-The draw is seeded in bands, and only the first two places are fixed: one and two in place, then three to four randomised within their band, then five to eight, nine to twelve, thirteen to sixteen, seventeen to twenty-four, twenty-five to thirty-two, and finally the qualifiers.
+The draw is seeded in bands. Seeds one and two are fixed, seeds three to four are randomised within their band, then five to eight, nine to sixteen, and the rest of the field. In doubles and mixed doubles, the seed is based on the pair's combined ranking; in singles it is the individual ranking.
 
-Byes are awarded by **combined ranking** in doubles and by individual ranking in singles, which is the rule the real tour uses and the reason two good players are worth more than one.
-
-| Draw | Byes |
-|---|---|
-| 64 | none |
-| 56 | top eight into the round of sixteen, seeds nine to sixteen into the round of thirty-two |
-| 48 | top eight into the round of sixteen, seeds nine to sixteen into the round of thirty-two |
+The standard game events use 8, 16, 32 or 64 entries, so they need no byes. If content later defines an irregular draw, byes go to the best entries by combined ranking in doubles or individual ranking in singles.
 
 ### In the game
 
-The ranked population is modelled, not enumerated: the field is drawn from the top of each division's ranking for the region the event is in, which is why a Seattle Open and a Miami Open are different fields. The player enters through the main draw if their ranking earns it and through the qualifier if it does not, so the twelve hundred are visible as a standings list and present in every draw without twelve hundred athletes ever being built.
+The regional population is derived deterministically from each club. Every division draws from a rating-appropriate slice of an eligible gender pool: gender doubles and singles stay within the player's gender, while every mixed team has one man and one woman. Selection adds seeded jitter around the target rating and advances the random stream by event, division and week, so a later field is competitive without repeating the same twenty names. CPU and human entrants use the same field construction.
 
 ---
 
@@ -214,19 +246,19 @@ The third route is discretionary on purpose. Real tours have it, and a game that
 
 ### The obligations
 
-A contracted player must play at least twenty-five events a year:
+A contracted player must complete twelve PPA events in each contract year:
 
-| | |
+| Requirement | Game rule |
 |---|---|
-| Tour events | 15 |
-| League events | 6 |
-| Of the player's own choosing | 4 |
+| Event total | 12 PPA events |
+| Discipline spread | at least 3 appearances in each of 2 different disciplines |
+| MLP | does not count toward the PPA obligation |
 
-**And an event only counts if they play at least two of the three formats.** This is the single best rule in the real tour and the game should have it. It forces the complete player the ranking is built to reward, and it means a doubles specialist on a tour contract has to occasionally turn up and play singles.
+A single event can supply all three divisions. It counts once toward the event total, while each division played is added to that event's record. This keeps the complete-player requirement attainable with the game's one-tournament-at-a-time interface.
 
 ### The season boundary
 
-Contracts are evaluated once a year, at the end of the season. At that boundary a player is renewed, promoted, demoted or released.
+Contracts are reviewed on their fifty-two week anniversary. At that review a player is renewed, promoted, demoted or released. Futures can move to Standard by reaching the top twenty-five in a discipline or the top thirty Overall; Standard can move to Gold through a top-twenty-five Overall place; Gold moves down to Standard outside that place.
 
 ---
 
@@ -234,13 +266,13 @@ Contracts are evaluated once a year, at the end of the season. At that boundary 
 
 This is the mechanic the whole design turns on.
 
-**A player is released** when the season ends and their contract is not renewed. The usual reason is that they did not hold their place: the season went badly, their rating fell, other players moved ahead of them, and their ranking no longer justifies the contract.
+**A player is released** when the contract review finds either an Overall place outside the top fifty or an unmet event obligation. Results, not reputation, hold the contract.
 
 **What happens to them.** They keep their rating. Their ranking falls for two reasons that are both true to the real tour — their own points age out of the fifty-two week window, and the players above them have moved ahead. They lose their main draw spots, so they enter through the qualifier or on a wild card. They lose the prize money multiplier. They are no longer eligible for the league.
 
 **They do not leave the game.** They are no longer a contracted pro, which is a different thing entirely. They can still enter the tour's events through the qualifier, they can still play Challengers, and their points still count toward their ranking. They can sign again.
 
-**The ineligible period.** A player who had a contract and let it lapse is ineligible for the biggest events for twelve months. They can play Challengers and select international stops, and they work back in by playing eight of those smaller events inside a year and reapplying.
+**The ineligible period.** A released player is blocked from Major and World events for fifty-two weeks. Smaller events remain open, and eight completed starts create a new Futures offer. Stale ranking points cannot bypass the period, so the route back is played rather than inherited.
 
 **Working back up.** Three routes, same as getting in the first time: finish at the top of the Challenger Tour, climb into the top fifty Overall, or be recommended. Winning a Challenger gets them a wild card into an Open main draw in the meantime, which is a place in the same draw as the contracted pros, earned on court.
 
@@ -252,9 +284,9 @@ This is the mechanic the whole design turns on.
 
 The MLP is a separate competition with its own calendar, its own points and its own standing, and it does not feed the tour ranking.
 
-**Format.** A match is men's doubles, then women's doubles, then mixed doubles, each to twenty-one win by two. The team that wins two of the three wins the match. If it reaches one-one, a dreambreaker tiebreak decides it: singles, players rotating, first to twenty-one.
+**Format.** The playable prototype uses an eight-team round robin. Each team carries a four-player roster with two men and two women. The player is assigned automatically and sees the team, roster and standings; the draft and management happen in the background.
 
-**Structure.** Twenty-two teams in two levels — sixteen in the premier division, six in the challenger division — with promotion and relegation between them. Rosters are assembled by a draft each season, where the top pick chooses a partner and the picks run down the rankings.
+**Structure.** The summer schedule runs one series per night across seven weeks. CPU teams play out their fixtures as the calendar advances, while the player plays their own matches on the engine. Promotion and roster churn are background state rather than owner controls.
 
 **What the player controls.** The player is a player. The team is assembled, managed and traded in the background: the draft, the roster decisions, the promotion and relegation are simulated, and the player is assigned to a team. The games themselves are played in full. A career game where you are also the owner is a different game, and this one is about the player.
 
@@ -314,7 +346,7 @@ Not written yet. This is the shape it should take.
 |---|---|
 | `contract` | none, futures, standard, gold |
 | `contractSince` | the week the current contract began |
-| `contractObligation` | events played this season against the events required |
+| `contractEvents`, `contractFormats`, `contractEventLog` | event and discipline progress for the current contract year |
 | `ineligibleUntil` | the week before which the player may not enter the biggest events |
 | `ranking` | the four rankings, each a points total |
 | `rankingHistory` | enough history to age results out of the fifty-two week window |
@@ -353,7 +385,7 @@ The competition first, because a ranking is a measurement of rounds reached and 
 
 5. **How much of the league is the player's?** The games are playable and the management runs in the background. What still needs deciding is whether the player sees the team's roster and standing in detail, or only their own matches and a line about the team.
 
-6. **How much of the ranked population is simulated?** The board is twelve hundred and a draw is sixty-four. The world simulation already plays two hundred and twenty matches a week across the region. The rest of the board could be a statistical stand-in, which is cheap and adequate, or a rival could be simulated in enough detail that their season is legible.
+6. **How much of the ranked population is simulated?** The board is twelve hundred and a division draw is normally sixteen, thirty-two or sixty-four. The world simulation already plays two hundred and twenty matches a week across the region. The rest of the board could be a statistical stand-in, which is cheap and adequate, or a rival could be simulated in enough detail that their season is legible.
 
 ---
 

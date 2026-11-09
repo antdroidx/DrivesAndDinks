@@ -13,7 +13,7 @@ import {RATING_BRACKETS,availableDivisions,divisionFor,formatRating} from './rat
 import {tourFor,tourRank,pointsInWindow} from './tour.js';
 import {mixSeed} from './population.js';
 import {finalsQualified,positions} from './ranking.js';
-import {isContracted} from './contracts.js';
+import {isContracted,isIneligible} from './contracts.js';
 import {seededRandom} from '../competition.js';
 
 // Monday, 5 January 2026. Career week 0 starts here.
@@ -44,8 +44,8 @@ const CADENCE=Object.freeze({
   'semi-pro':{every:9,on:4},
   'national':{every:12,on:6},
   'international':{every:16,on:8},
-  'pro-league':{every:20,on:10},
-  'mlp':{every:20,on:10},
+  'pro-league':{every:2,on:0},
+  'mlp':{every:1,on:0},
   'world-championship':{every:52,on:13},
   'ppa-finals':{every:52,on:49}
 });
@@ -120,21 +120,43 @@ export function entryOptions(state,event){
 }
 
 // Whether the board earns a place in the main draw, a wild card into it, or
-// a place in the qualifier.
-//
-// The top of the board is accepted directly. A wild card, earned by winning a
-// Challenger event, gets an otherwise unqualified player into the main draw.
-// Everyone else qualifies.
+// a place in the qualifier. The division ranking makes the cut; the Overall
+// ranking is used only when no format is supplied.
 export const MAIN_DRAW_LEVELS=Object.freeze(['open','cup','major','world']);
-export function entryStatus(state,event){
-  const board=positions(state,state.week).overall;
-  const direct=Math.max(2,event?.drawSize??16);
-  if(board!==null&&board<=direct)return {direct:true,via:'ranking',rank:board};
-  // A wild card does not need a ranking; that is the point of one.
-  if((state.wildCards??0)>0&&MAIN_DRAW_LEVELS.includes(event?.tier)){
-    return {direct:true,via:'wild-card',rank:board};
+
+export function entryConfig(event){
+  const drawSize=Math.max(2,Number(event?.drawSize)||16);
+  const qualifierSlots=Math.max(0,Math.min(drawSize-1,Number(event?.qualifierSlots)||0));
+  const defaultWildCards=event?.tier==='open'||event?.tier==='cup'||event?.tier==='major'||event?.tier==='world'?2:0;
+  const wildCardSlots=Math.max(0,Math.min(drawSize-qualifierSlots-1,event?.wildCardSlots==null?defaultWildCards:Number(event.wildCardSlots)||0));
+  return {
+    drawSize,
+    qualifierSlots,
+    qualifierFieldSize:Math.max(0,Number(event?.qualifierFieldSize)||qualifierSlots*2),
+    wildCardSlots,
+    directSlots:Math.max(1,drawSize-qualifierSlots-wildCardSlots)
+  };
+}
+
+export function entryStatus(state,event,{format='overall'}={}){
+  const config=entryConfig(event);
+  const league=(event?.shapes??[]).includes('mlp-style');
+  if(league||!MAIN_DRAW_LEVELS.includes(event?.tier)){
+    return {direct:true,via:'eligible',rank:null,...config};
   }
-  return {direct:false,via:null,rank:board};
+  const board=positions(state,state.week);
+  const rank=format==='overall'?board.overall:board[format]??null;
+  if(rank!==null&&rank<=config.directSlots){
+    return {direct:true,via:'ranking',rank,...config};
+  }
+  if((state.wildCards??0)>0&&config.wildCardSlots>0){
+    return {direct:true,via:'wild-card',rank,...config};
+  }
+  const qualifierCut=config.directSlots+config.qualifierFieldSize;
+  if(config.qualifierFieldSize>0&&(rank===null||rank<=qualifierCut)){
+    return {direct:false,via:'qualifier',rank,qualifierCut,...config};
+  }
+  return {direct:false,via:'declined',rank,qualifierCut,...config};
 }
 
 // Whether a player may enter an event at all. This is about access, not
@@ -144,6 +166,9 @@ export function entryEligibility(state,event,enterable=null){
   // Once the tour signs you, the amateur ladder is not your job any more.
   if(isContracted(state)&&['local','challenger'].includes(event?.tier)){
     return {ok:false,reason:'A contracted pro competes on the tour, not in amateur events'};
+  }
+  if(isIneligible(state)&&['major','world'].includes(event?.tier)){
+    return {ok:false,reason:'Released from the tour · the biggest events reopen after a twelve-month re-entry period'};
   }
   if(event.scope==='club'&&!state.clubId)return {ok:false,reason:'Join a club first'};
   // The tour standing is the more fundamental lock, so it is checked first.
@@ -232,6 +257,8 @@ export function generateWeekEvents(state,week){
       championPoints:event.championPoints??0,
       difficulty:event.difficulty??'normal',
       qualifierSlots:event.qualifierSlots??0,
+      qualifierFieldSize:event.qualifierFieldSize??(event.qualifierSlots??0)*2,
+      wildCardSlots:event.wildCardSlots??(MAIN_DRAW_LEVELS.includes(event.tier??'local')?2:0),
       // A league night is one to three matches, not a whole season.
       nightMatches:event.nightMatches??0,
       // The shapes an event may run. Without this the calendar only ever

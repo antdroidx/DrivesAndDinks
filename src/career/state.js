@@ -82,9 +82,7 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city}){
     formats:Object.fromEntries(FORMATS.map(format=>[format,NEW_PLAYER_RATING])),
     record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0},
     tourPoints:0,
-    tourPointsHistory:[],
-    // The results the four rankings are built from.
-    rankingResults:[]
+    tourPointsHistory:[]
   };
 }
 
@@ -130,6 +128,8 @@ export function createCareer(options={}){
     stats:{weeks:0,sessions:0,entries:0,moves:0,matches:0},
     worldRatings:{},
     matches:[],
+    // The results the four rankings are built from.
+    rankingResults:[],
     money:250,
     rivalId:rival?.id??null,
     // Wild cards earned by winning a Challenger event.
@@ -137,7 +137,15 @@ export function createCareer(options={}){
     contract:'none',
     contractSince:null,
     contractEvents:0,
+    contractFormats:{singles:0,doubles:0,mixed:0},
+    contractEventLog:[],
+    ineligibleUntil:null,
+    releasedAt:null,
+    reentryEvents:0,
+    reentryEventIds:[],
+    contractRecommendation:null,
     entered:[],
+    eventEntries:[],
     lastEntry:null,
     lastActionWeek:-1,
     lastEventWeek:-1,
@@ -224,6 +232,23 @@ export function trainBlockReason(state){
 // of it, and a tournament is one event.
 export function isLeagueEvent(event){return event?.matchType==='league'}
 export function isTravelEvent(event){return event?.scope==='world'}
+// Divisions entered in the current week. A PPA-style event can offer all
+// three divisions, and each division is a separate tournament.
+export function eventEntriesThisWeek(state){
+  return (state?.eventEntries??[]).filter(entry=>entry.week===state.week);
+}
+export function formatsPlayed(state,eventId,week=state?.week??0){
+  return [...new Set((state?.eventEntries??[])
+    .filter(entry=>entry.week===week&&entry.eventId===eventId)
+    .map(entry=>entry.format))];
+}
+export function eventEntryCost(state,event){
+  const previous=eventEntriesThisWeek(state).filter(entry=>entry.eventId===event?.eventId).length;
+  if(!previous)return Number(event?.energyCost??event?.energy??0)||0;
+  // Travel and setup are paid once. Additional divisions add match load
+  // without charging the player for the event a second time.
+  return Math.max(4,Math.ceil((Number(event?.energyCost??event?.energy??0)||0)*0.2));
+}
 export function canEnterEvent(state,event=null){
   const week=state.week;
   const travel=isTravelEvent(event);
@@ -231,7 +256,13 @@ export function canEnterEvent(state,event=null){
   if(travel&&(state.lastLeagueWeek??-1)===week)return false;
   if(!travel&&(state.lastTravelWeek??-1)===week)return false;
   if(isLeagueEvent(event))return (state.lastLeagueWeek??-1)!==week;
-  return (state.lastEventWeek??-1)!==week;
+  if((state.lastEventWeek??-1)!==week)return true;
+  // Once one tournament at an event is complete, the player may take on
+  // another division at that same event. A different event still has to wait
+  // for the next week.
+  const sameEvent=eventEntriesThisWeek(state).some(entry=>entry.eventId===event?.eventId);
+  const complete=state.tournament?.eventId===event?.eventId&&state.tournament?.finished;
+  return sameEvent&&complete;
 }
 export function eventBlockReason(state,event=null){
   if(canEnterEvent(state,event))return null;
@@ -242,9 +273,14 @@ export function eventBlockReason(state,event=null){
   if(!isTravelEvent(event)&&(state.lastTravelWeek??-1)===week){
     return 'You are travelling for a world event this week.';
   }
-  return isLeagueEvent(event)
-    ?'You have already played your league match this week.'
-    :'You have already entered an event this week. Advance the calendar to compete again.';
+  if(isLeagueEvent(event)){
+    return 'You have already played your league match this week.';
+  }
+  const played=new Set(formatsPlayed(state,event?.eventId));
+  if(played.size&&(event?.formats??[]).every(format=>played.has(format))){
+    return 'You have played every division offered at this event.';
+  }
+  return 'You have already entered a different event this week. Advance the calendar to compete again.';
 }
 export function canAct(state){return canTrain(state)||canEnterEvent(state)}
 
@@ -503,7 +539,13 @@ export function advanceWeek(state){
   if(seasonDue(advanced,state.week)&&isContracted(advanced)){
     const evaluated=evaluateSeason(advanced);
     advanced=evaluated.state;
-    seasonNote=evaluated.released?' Contract released.':' Contract renewed.';
+    seasonNote=evaluated.released
+      ?' Contract released; tour re-entry now runs through the smaller events.'
+      :evaluated.promoted
+        ?' Contract promoted to '+evaluated.level+'.'
+        :evaluated.demoted
+          ?' Contract moved down to '+evaluated.level+'.'
+          :' Contract renewed.';
   }
   const moved=pushHistory(advanced,`Week ${week+1} begins.`);
   const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.${seasonNote}`);

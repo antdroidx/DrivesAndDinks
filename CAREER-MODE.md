@@ -55,7 +55,10 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/world.js` | The world simulation: the population plays, ratings move, idle players drift back. |
 | `src/career/population.js` | Deterministic club and athlete generation from a seed. |
 | `src/career/save.js` | Versioned save schema, migrations, validation, corruption recovery. |
-| `src/career/calendar.js` | Week arithmetic, event generation, bracket choice and entry eligibility. |
+| `src/career/calendar.js` | Week arithmetic, event generation, bracket choice, entry eligibility and per-division cuts. |
+| `src/career/contracts.js` | Contract levels, obligations, reviews, release and the re-entry route. |
+| `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
+| `src/career/career-match.js` | The handoff between a career tournament and the shared match engine. |
 | `src/career/events.js` | The competition templates: the seven shapes of event and the rules they are played under. |
 | `src/career/competition.js` | Turning a template into a real competition: the field, the rounds, and the simulation that plays it out. |
 | `src/career/state.js` | Career state and every action a player can take. |
@@ -384,24 +387,27 @@ An event now fields a tournament rather than a single match.
 - [x] The composite: doubles 50, mixed 35, singles 15
 - [x] Points by round reached, per tier, replacing points for entry
 - [x] The board is placed on points, not on the rating
-- [x] Entry selection: the top of the board is accepted directly, a wild card gets an unranked player in, and everyone else qualifies
+- [x] Entry selection: each division makes its own ranking cut, with reserved wild-card and qualifier places
 - [x] Wild cards, earned by winning a Challenger event, and the Challenger route into an Open main draw
 - [x] The Challenger ranking, kept separate from the tour
 - [x] The PPA Finals: top eight Overall, and an eight-team round robin as the event
 - [x] The World Championship as a once-a-year anchor, worth 3000
 
-The contracted-player tier of entry selection arrives with M5, because there are no contracts yet.
+Contracts now supply tour access and annual review; the draw cut itself remains ranking-based.
 
-### M5 — Contracts, obligations and the drop 🔶 in progress
+### M5 — Contracts, obligations and the drop ✅ complete
 
 - [x] Contract levels: Futures, Standard and Gold
 - [x] The route in: the top fifty of the Overall board is offered a Futures contract, and winning a tournament can earn it
-- [ ] The obligation: twenty-five events a year, and an event only counts with two of three formats
-- [ ] The season boundary: renew, promote or release
-- [x] Release without leaving the game: the season boundary lets a player go when the board does not hold
-- [ ] The ineligible period: twelve months out of the biggest events, and eight smaller events to reapply
-- [ ] Working back: a Challenger win, the top fifty, or a recommendation
-- [ ] The team league: playable games, with the draft, roster and promotion running in the background
+- [x] The obligation: twelve PPA events, with at least three appearances in two disciplines
+- [x] Annual contract review: renew, promote, demote or release
+- [x] Professional field selection: per-division main-draw cut, capped qualifier field and entry status
+- [x] Release without leaving the game: a failed review leaves the player in the same career
+- [x] The ineligible period: twelve months out of the biggest events, and eight smaller starts to reapply
+- [x] Working back: a Challenger win, the top fifty, or a recommendation
+- [x] Multi-division events: singles, gender doubles and mixed doubles can each field a human or CPU entrant
+- [x] The team league: playable games with automatic roster assignment and CPU fixtures in the background
+- [x] Gender-correct fields and a deep regional population for 64-team draws
 - [x] A contracted pro stops entering amateur leagues and local opens; the PPA tour becomes the job
 
 ### M6 — A career with an end ⬜ planned
@@ -472,9 +478,17 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | A game's rules are points, win by, and scoring, and they travel with the match | The engine played to eleven in every game while the tournament said playoffs were to fifteen. A rule the simulation and the match disagree about is not a rule. |
 | 2026-11-08 | The pro league is a career stage, not the endpoint. Retirement is the endpoint | A career that stops at the top is a ladder climb. A career that can decline and end is a career, and it makes falling out of the pro league a normal part of one. |
 | 2026-11-08 | The pro tour is modelled on the real PPA rather than invented | Rankings, tiers, contracts, the obligation rule and the route back in are all taken from the published tour. Inventing them would have produced something that felt like a generic sports game. |
-| 2026-11-08 | A tournament fields 44 to 64 spots per division, not the whole ranked population | The ranked board is 1,200 and a draw is 64. The rest of the population sits at other events, in qualifiers, or on the Challenger circuit. |
+| 2026-11-08 | A tournament fields 16, 32 or 64 spots per division, not the whole ranked population | The ranked pool is about 1,200 across both genders. Clean power-of-two draws are easier to understand, simulate and control. The rest of the population sits at other events, in separately capped qualifiers, or on the Challenger circuit. |
+| 2026-11-08 | Professional entry uses three checks: event access, division rating gate, then ranking cut | Rating eligibility and ranking selection answer different questions. A player can pass a gate but miss the field, or qualify through ranking even though the pro draw has no rating gate. |
+| 2026-11-08 | Main-draw and qualifier cuts use the division ranking, with combined ranking for doubles | The Overall ranking selects contracts and finals places. Using it for every draw would produce one order for men’s doubles, mixed doubles, singles and every team combination, which is not how the tour is structured. |
+| 2026-11-08 | Qualifier places are reserved and the qualifier field has its own cap | The PPA does not admit the whole ranked population to a qualifier. The game uses eight-person qualifier fields for 32-place draws and sixteen-person fields for 64-place draws. Each entrant plays one qualification match, and each winner fills a reserved main-draw place. |
+| 2026-11-08 | The real tour is the behavioural guide, while the game uses simplified draw sizes | Exact 44 and 56-team fields add byes and administrative edge cases without making the career clearer. Standard 16, 32 and 64-team brackets preserve the pressure and progression while keeping field construction controllable. |
 | 2026-11-08 | A rating gate reads the division's own rating, and the mixed rating is reference only | A doubles gate that read mixed would let a mixed specialist into a doubles bracket they cannot play. |
 | 2026-11-08 | Gated doubles default to the highest player, and some events use the combined rating | The highest-player rule is how real gated events work: a 5.0 can partner with a 3.0 at a 5.0 gate. Combined gating is the variant for events that want the teams level. |
+| 2026-11-08 | A contract year requires twelve PPA events and three appearances in two disciplines | The real 25-event rule cannot be reached by the current one-tournament-at-a-time calendar. The smaller target preserves attendance and complete-player pressure while remaining playable. |
+| 2026-11-08 | One event can host all three divisions, for the player and CPU fields | Every division has its own bracket, ranking cut and rating result. Additional divisions at the same event cost an extra 20 percent of the event's energy and preserve the event count once in the contract obligation. |
+| 2026-11-08 | Regional fields use a larger gender-correct population than the 1,200-player ranking pool | A 64-team doubles draw needs 128 players from one gender. The generated regional roster provides enough depth for every tier, while selection uses rating-appropriate seeded variation to keep the competition fresh. |
+| 2026-11-08 | Mixed doubles teams contain one man and one woman, and gender doubles stays within one gender | Field composition is a game rule, not presentation. The same population and selection logic fills human and CPU draws. |
 | 2026-11-08 | A playoff, a double elimination and a ladder resolve during play rather than up front | Who reaches a playoff depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The structure and the simulation have to live together. |
 
 ---
@@ -496,10 +510,16 @@ The tour and career-arc questions — season length, declining a contract, the a
 ```sh
 npm test                                   # whole suite, including the career tests
 node --test test/career-competition.test.js \
+                 test/career-contracts.test.js \
                  test/career-geography.test.js \
+                 test/career-match.test.js \
                  test/career-population.test.js \
+                 test/career-ranking.test.js \
+                 test/career-rating.test.js \
+                 test/career-tour.test.js \
                  test/career-save.test.js \
                  test/career-state.test.js \
+                 test/career-tournament.test.js \
                  test/career-mode-packaging.test.js
 npm start                                  # then open /career-mode/
 ```

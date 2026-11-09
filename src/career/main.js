@@ -9,7 +9,7 @@ import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,re
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
-  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent
+  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {startCareerMatch,finishCareerMatch} from './career-match.js';
@@ -18,6 +18,7 @@ import {writePendingMatch,readMatchResult,clearMatchResult} from './handshake.js
 import {boardPosition,nearbyRivals,findRival,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
 import {rankingSummary} from './ranking.js';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -81,7 +82,8 @@ function renderStatus(){
     <div><small>WEEK</small><strong>${career.week+1}</strong></div>
     <div><small>ENERGY</small><strong>${career.energy}</strong></div>
     <div><small>BEST RATING</small><strong>${formatRating(Math.max(...Object.values(career.athlete.formats??{doubles:0})))}</strong></div>
-    <div><small>LOCATION</small><strong>${escapeHtml(career.cityLabel)}</strong></div>`;
+    <div><small>LOCATION</small><strong>${escapeHtml(career.cityLabel)}</strong></div>
+    <div><small>TOUR</small><strong>${escapeHtml(contractLevel(career)==='none'?'NO CONTRACT':contractLevel(career).toUpperCase())}</strong></div>`;
 }
 
 function renderCreate(){
@@ -128,11 +130,22 @@ function renderCreate(){
   </section>`;
 }
 
+function contractLine(career){
+  if(isContracted(career)){
+    const progress=obligationProgress(career);
+    const left=Math.max(0,(career.contractSince??career.week)+SEASON_WEEKS-career.week);
+    return contractLevel(career)+' contract · '+progress.events+'/'+progress.requiredEvents+' events · '+progress.disciplines+'/2 disciplines · review in '+left+' weeks';
+  }
+  if(isIneligible(career))return 'Released · re-entry '+(career.reentryEvents??0)+'/8 events · biggest events reopen week '+((career.ineligibleUntil??0)+1);
+  return 'No contract · division ranking decides PPA main-draw entry';
+}
+
 function renderTournament(career){
   const tournament=career.tournament;
   if(!tournament)return '';
   const done=isPlayerDone(tournament);
   const pending=career.pendingMatch;
+  const teamPanel=tournament.shape==='mlp'&&tournament.teamLeague?`<p class="hint"><strong>${escapeHtml(tournament.teamLeague.teamName)}</strong> · roster and team management are handled in the background.</p><ul class="history">${[...(tournament.teams??[])].sort((a,b)=>(tournament.records?.[b.id]?.wins??0)-(tournament.records?.[a.id]?.wins??0)).map(team=>`<li><span>${escapeHtml(team.name)}</span><strong>${tournament.records?.[team.id]?.wins??0}W</strong><em>${tournament.records?.[team.id]?.losses??0}L</em></li>`).join('')}</ul>`:'';
   const history=(tournament.history??[]).map(entry=>
     `<li class="${entry.won?'won':'lost'}"><span>R${entry.round+1}</span><span>${escapeHtml(entry.opponent)}</span><span>${escapeHtml(entry.score)}</span></li>`
   ).join('');
@@ -141,6 +154,7 @@ function renderTournament(career){
     return `<section class="panel">
       <h2>${escapeHtml(tournament.label)} · COMPLETE</h2>
       <p><strong>${escapeHtml(tournament.placeText??'Finished')}</strong>${tournament.points?` · ${tournament.points} points`:''}</p>
+      ${teamPanel}
       ${history?`<ul class="tournament-history">${history}</ul>`:''}
     </section>`;
   }
@@ -148,6 +162,7 @@ function renderTournament(career){
   return `<section class="panel">
     <h2>${escapeHtml(tournament.label)} · ${escapeHtml(tournament.bracket)} ${escapeHtml(tournament.format)}</h2>
     <div class="hint">Round ${(tournament.round??0)+1} of ${total} · ${tournament.teams?.length??tournament.size} teams in the draw</div>
+    ${teamPanel}
     <p><strong>Next match: ${escapeHtml(opponent)}</strong></p>
     ${pending?`<div class="actions"><button type="button" class="primary" data-action="resume-match">PLAY MATCH →</button></div>`:'<p class="hint">The round is still being played. Advance the calendar.</p>'}
     ${history?`<ul class="tournament-history">${history}</ul>`:''}
@@ -158,7 +173,7 @@ function renderHome(){
   const career=app.career;
   const events=currentEvents(career);
   const trainReady=canTrain(career);
-  const eventReady=canEnterEvent(career);
+  const eventReady=events.some(event=>canEnterEvent(career,event));
   const sessions=trainingSessionsThisWeek(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
@@ -171,6 +186,7 @@ function renderHome(){
   const entered=new Set(career.entered??[]);
   const nextEvent=COMPETITION_EVENTS.find(event=>!entered.has(event.id))??null;
   const ranking=rankingSummary(career);
+  const contractText=contractLine(career);
   const board=(label,place,points)=>`${label} ${place?'#'+place:'—'} · ${Math.round(points).toLocaleString('en-US')}`;
   const reliabilityInfo=reliability(career.athlete.record.matches);
   const reliabilityText=career.athlete.record.matches
@@ -219,6 +235,7 @@ function renderHome(){
         <div class="hint">${escapeHtml(reliabilityText)}</div>
         <div class="hint">${escapeHtml(board('Overall',ranking.overall,ranking.points.overall))}${ranking.finals?' · finals qualified':''}</div>
         <div class="hint">${escapeHtml([board('Doubles',ranking.doubles,ranking.points.doubles),board('Mixed',ranking.mixed,ranking.points.mixed),board('Singles',ranking.singles,ranking.points.singles)].join(' · '))}</div>
+        <div class="hint">${escapeHtml(contractText)}</div>
         <div class="hint">Next on the ladder: ${escapeHtml(nextEvent?nextEvent.label:'the pro league')}</div>
       </div>
     </div>
@@ -241,7 +258,7 @@ function renderHome(){
   <div class="grid two">
     <section class="panel">
       <h2>THIS WEEK · ${escapeHtml(weekLabel(career.week))}</h2>
-      ${events.length?events.map(event=>eventRow(event,eventReady,career.athlete.gender)).join(''):'<p>No events this week. Join a club to get club night on the calendar.</p>'}
+      ${events.length?events.map(event=>eventRow(event,career,career.athlete.gender)).join(''):'<p>No events this week. Join a club to get club night on the calendar.</p>'}
     </section>
     <section class="panel">
       <h2>THE LADDER</h2>
@@ -294,9 +311,9 @@ function bracketSummary(event){
 
 // The brackets an event is running, with the player's own bracket marked and
 // the one above it offered as a deliberate step up.
-function bracketOptions(event,gender){
-  const ownLevel=event.options.find(option=>option.isPlayer)?.divisionId;
-  return event.options.map(option=>{
+function bracketOptions(event,gender,options){
+  const ownLevel=options.find(option=>option.isPlayer)?.divisionId;
+  return options.map(option=>{
     const division=event.divisions.find(entry=>entry.id===option.divisionId);
     if(!division)return '';
     const notes=[];
@@ -308,17 +325,22 @@ function bracketOptions(event,gender){
   }).join('');
 }
 
-function eventRow(event,actReady,gender){
+function eventRow(event,career,gender){
   const locked=!event.eligible.ok;
+  const played=formatsPlayed(career,event.eventId);
+  const options=event.options.filter(option=>!played.includes(option.format));
+  const ready=canEnterEvent(career,event)&&options.length>0;
   const running=event.divisions.map(division=>division.label).join(' · ');
+  const cost=eventEntryCost(career,event);
+  const divisionNote=played.length?' · completed '+played.join(', '):'';
   return `<div class="event">
     <div class="body">
       <strong>${escapeHtml(event.title)}</strong>
-      <small>${escapeHtml(event.venue)} · ${event.energyCost} energy · rated match</small>
+      <small>${escapeHtml(event.venue)} · ${cost} energy · rated match${escapeHtml(divisionNote)}</small>
       <small>Brackets: ${escapeHtml(running)}</small>
-      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:`<select class="bracket" data-division="${event.id}" ${actReady?'':'disabled'}>${bracketOptions(event,gender)}</select>`}
+      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:options.length?`<select class="bracket" data-division="${event.id}" ${ready?'':'disabled'}>${bracketOptions(event,gender,options)}</select>`:'<div class="lock">All offered divisions are complete.</div>'}
     </div>
-    ${locked?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${actReady?'':'disabled'}>ENTER</button>`}
+    ${locked||!options.length?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${ready?'':'disabled'}>ENTER</button>`}
   </div>`;
 }
 
@@ -469,7 +491,6 @@ function topKey(ratings){
 function renderCalendar(){
   const career=app.career;
   const weeks=upcomingWeeks(career,10);
-  const eventReady=canEnterEvent(career);
   return `
   <section class="panel">
     <h2>CALENDAR · ${escapeHtml(career.regionLabel.toUpperCase())}</h2>
@@ -478,7 +499,7 @@ function renderCalendar(){
       const events=generateWeekEvents(career,entry.week);
       return `<div class="week${entry.isCurrent?' current':''}">
         <h3><span>${escapeHtml(entry.label)}</span><small>${escapeHtml(entry.short)}</small></h3>
-        ${events.length?events.map(event=>eventRow(event,eventReady&&entry.isCurrent)).join(''):'<p class="empty">Quiet week.</p>'}
+        ${events.length?events.map(event=>eventRow(event,entry.isCurrent?career:{...career,week:entry.week},career.athlete.gender)).join(''):'<p class="empty">Quiet week.</p>'}
       </div>`;
     }).join('')}
     <div class="actions"><button type="button" class="secondary" data-action="advance">ADVANCE WEEK →</button></div>

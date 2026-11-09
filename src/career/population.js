@@ -64,6 +64,7 @@ export function buildClubIndex(seed,regionId){
         const prefix=pick(CLUB_PREFIXES,random);
         const suffix=pick(CLUB_SUFFIXES,random);
         const tierInfo=CLUB_TIER_BY_ID[tier];
+        const baseMembers=18+Math.floor(random()*9);
         clubs.push({
           id:clubId(city.id,index),
           name:`${prefix} ${suffix}`,
@@ -78,7 +79,7 @@ export function buildClubIndex(seed,regionId){
           tierLabel:tierInfo.label,
           surface,
           skill:tierInfo.skill,
-          memberCount:6+Math.floor(random()*5),
+          memberCount:tier==='elite'?Math.round(baseMembers*1.55):baseMembers,
           founded:1996+Math.floor(random()*28)
         });
       }
@@ -107,20 +108,22 @@ export function buildAthleteSkill(seed,club,index){
   // A bias toward one format. Doubles rewards the soft game and the net,
   // singles rewards the serve and the feet.
   const formatBias=random()*10-5;
-  return {archetype,ratings,average:skillAverage(ratings),formatBias};
+  // Gender belongs to the skill stream so the light world roster and the
+  // fully detailed athlete always agree on it.
+  const gender=pick(GENDERS,random);
+  return {archetype,ratings,average:skillAverage(ratings),formatBias,gender};
 }
 
 export function buildAthlete(seed,club,index){
   const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}:identity`));
+  const {archetype,ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index);
   const region=regionById(club.regionId);
   const weights=Object.entries(region?.cultureWeights??{white_american:1});
   const culture=weightedPick(weights,random);
-  const gender=pick(GENDERS,random);
   const identity=generateIdentity({gender,culture,random});
   const citizenship=citizenshipFor(club.regionId,{country:club.country},random);
   const handedness=random()<.13?'left':'right';
   const age=MIN_AGE+Math.floor(random()*(MAX_AGE-MIN_AGE+1));
-  const {archetype,ratings,average,formatBias}=buildAthleteSkill(seed,club,index);
   const formats={};
   for(const format of FORMATS){
     const bias=format==='doubles'?formatBias:-formatBias;
@@ -159,7 +162,7 @@ export function buildRegionSkills(seed,regionId){
   const athletes=[];
   for(const club of clubs){
     for(let index=0;index<club.memberCount;index++){
-      const {ratings,average,formatBias}=buildAthleteSkill(seed,club,index);
+      const {ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index);
       const formats={};
       for(const format of FORMATS){
         const bias=format==='doubles'?formatBias:-formatBias;
@@ -173,6 +176,7 @@ export function buildRegionSkills(seed,regionId){
         index,
         club,
         skill:average,
+        gender,
         formats,
         baseFormats:{...formats},
         lastPlayed:0

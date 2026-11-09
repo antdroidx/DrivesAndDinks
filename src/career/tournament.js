@@ -108,10 +108,10 @@ function makeTeam(members,id){
 
 // The rated players a division can field.
 //
-// A bracket is a rating band, so the field for a 3.5 bracket is the 3.5
-// bracket even when the event is open. A thin band is filled by the nearest
-// ratings above and below it.
-function populationFor({state,event,option}){
+// Doubles uses players of the entrant's gender. Mixed doubles uses one man
+// and one woman on every team. A thin rating band borrows from the nearest
+// ratings, but gender never falls back to a different division's pool.
+export function divisionPopulation({state,event,option,gender=null}){
   const division=RATING_BRACKETS.find(entry=>entry.id===option.divisionId);
   const all=ratedPopulation({
     seed:state.seed,
@@ -119,47 +119,103 @@ function populationFor({state,event,option}){
     ratings:state.worldRatings,
     week:state.week,
     format:option.format,
-    limit:1000
-  });
-  if(!division)return all;
-  const inBracket=all.filter(athlete=>athlete.rating>=division.min&&athlete.rating<=division.max);
-  if(inBracket.length>=48)return inBracket;
+    gender,
+    limit:2000
+  }).filter(athlete=>athlete.id!==(state.athlete.id??'player'));
+  const gendered=gender?all.filter(athlete=>athlete.gender===gender):all;
+  const pool=gendered.length?gendered:all;
+  if(!division)return pool;
+  const inBracket=pool.filter(athlete=>athlete.rating>=division.min&&athlete.rating<=division.max);
+  const source=inBracket.length?inBracket:pool;
   const distance=athlete=>athlete.rating<division.min?division.min-athlete.rating:athlete.rating>division.max?athlete.rating-division.max:0;
-  return [...all].sort((a,b)=>distance(a)-distance(b)).slice(0,Math.max(48,inBracket.length));
+  return [...source].sort((a,b)=>distance(a)-distance(b));
 }
+
+// A varied order around the target rating. The small seeded jitter stops the
+// same strongest names from filling every draw while preserving the bracket's
+// competitive level.
+function variedOrder(pool,target,random){
+  return pool
+    .map(athlete=>({athlete,score:Math.abs(athlete.rating-target)+random()*.9}))
+    .sort((a,b)=>a.score-b.score)
+    .map(entry=>entry.athlete);
+}
+
+function takePlayers(queue,count){return queue.splice(0,count)}
 
 // Builds the player, then fills the draw around them.
 export function buildField({state,event,option,drawSize=16}){
   const random=seededRandom(mixSeed(state.seed,`tournament:${state.week}:${event.eventId}:${option.id}`));
-  const singles=option.format==='singles';
+  const format=option.format;
+  const singles=format==='singles';
+  const mixed=format==='mixed';
   const teamLeague=(event?.shapes??[]).includes('mlp-style');
-  const teamSize=singles?1:teamLeague?4:2;
   const need=Math.max(4,drawSize??event?.drawSize??16);
-  const rating=state.athlete.formats[option.format];
-  const skill=formatSkill(state.athlete.ratings,option.format);
-  const player={id:state.athlete.id??'player',name:state.athlete.name,rating,skill,isPlayer:true,
-    archetypeId:state.athlete.archetypeId,gender:state.athlete.gender,handedness:state.athlete.handedness};
-  const pool=populationFor({state,event,option})
-    .filter(athlete=>athlete.id!==player.id)
-    .sort((a,b)=>b.rating-a.rating);
+  const target=state.athlete.formats[format]??4;
+  const playerGender=state.athlete.gender==='female'?'female':'male';
+  const oppositeGender=playerGender==='female'?'male':'female';
+  const player={id:state.athlete.id??'player',name:state.athlete.name,rating:target,skill:formatSkill(state.athlete.ratings,format),isPlayer:true,
+    archetypeId:state.athlete.archetypeId,gender:playerGender,handedness:state.athlete.handedness};
+  const samePool=divisionPopulation({state,event,option,gender:playerGender});
+  const oppositePool=divisionPopulation({state,event,option,gender:oppositeGender});
   const teams=[];
-  if(singles){
-    teams.push(makeTeam([player],'player'));
-  }else{
-    // The partner is the player's own level, which is how a player picks
-    // one, rather than the strongest name in the draw.
-    const partners=pool.slice(0,teamSize-1);
-    for(const partner of partners)pool.splice(pool.indexOf(partner),1);
-    if(partners.length<teamSize-1)return null;
-    teams.push(makeTeam([player,...partners],'player'));
-  }
-  while(teams.length<need&&pool.length>=teamSize){
-    const members=pool.splice(0,teamSize);
-    teams.push(makeTeam(members,'t'+teams.length));
-  }
-  return {teams,players:[player,...pool]};
-}
 
+  if(singles){
+    const queue=variedOrder(samePool,target,random);
+    if(queue.length<need-1)return null;
+    teams.push(makeTeam([player],'player'));
+    for(const athlete of takePlayers(queue,need-1))teams.push(makeTeam([athlete],'t'+teams.length));
+  }else if(mixed){
+    const partner=(takePlayers(variedOrder(oppositePool,target,random),1)[0])??null;
+    if(!partner)return null;
+    teams.push(makeTeam([player,partner],'player'));
+    const men=variedOrder(playerGender==='male'?samePool:oppositePool,target,random)
+      .filter(athlete=>athlete.id!==(playerGender==='male'?player.id:partner.id));
+    const women=variedOrder(playerGender==='female'?samePool:oppositePool,target,random)
+      .filter(athlete=>athlete.id!==(playerGender==='female'?player.id:partner.id));
+    if(Math.min(men.length,women.length)<need-1)return null;
+    while(teams.length<need){
+      const man=takePlayers(men,1)[0];
+      const woman=takePlayers(women,1)[0];
+      teams.push(makeTeam([man,woman],'t'+teams.length));
+    }
+  }else if(teamLeague){
+    const sameCount=1;
+    const oppositeCount=2;
+    const teammates=[];
+    const same=variedOrder(samePool,target,random);
+    const opposite=variedOrder(oppositePool,target,random);
+    teammates.push(...takePlayers(same,sameCount),...takePlayers(opposite,oppositeCount));
+    if(teammates.length<3)return null;
+    teams.push(makeTeam([player,...teammates],'player'));
+    if(Math.min(same.length,opposite.length/2)<need-1)return null;
+    while(teams.length<need){
+      const members=[...takePlayers(same,2),...takePlayers(opposite,2)];
+      teams.push(makeTeam(members,'t'+teams.length));
+    }
+  }else{
+    const partner=takePlayers(variedOrder(samePool,target,random),1)[0]??null;
+    if(!partner)return null;
+    teams.push(makeTeam([player,partner],'player'));
+    const queue=variedOrder(samePool,target,random).filter(athlete=>athlete.id!==partner.id);
+    if(queue.length<(need-1)*2)return null;
+    while(teams.length<need){
+      const members=takePlayers(queue,2);
+      teams.push(makeTeam(members,'t'+teams.length));
+    }
+  }
+
+  const players=[];
+  const seen=new Set();
+  for(const team of teams){
+    for(const member of team.members){
+      if(member.id===player.id||seen.has(member.id))continue;
+      seen.add(member.id);
+      players.push(member);
+    }
+  }
+  return {teams,players};
+}
 // A single elimination bracket, seeded by rating, with byes in the empty
 // slots.
 export function buildBracket(teams,random=Math.random){
@@ -300,6 +356,10 @@ export function pickShape(event){
 
 // Starts a tournament for an event entry.
 export function startTournament({state,event,option}){
+  const entry=entryStatus(state,event,{format:option.format});
+  if(entry.via==='declined'){
+    return {ok:false,message:'Outside the direct cut and the qualifier field for this event.'};
+  }
   const field=buildField({state,event,option,drawSize:event?.drawSize??16});
   if(!field||field.teams.length<2)return {ok:false,message:'Nobody else is fielding at this event.'};
   const random=seededRandom(mixSeed(state.seed,`format:${state.week}:${event.eventId}:${option.id}`));
@@ -308,14 +368,26 @@ export function startTournament({state,event,option}){
   const kind=pickShape(event,random);
   const playerAthlete={id:'player',name:state.athlete.name,rating:state.athlete.formats[option.format],skill:formatSkill(state.athlete.ratings,option.format),archetypeId:state.athlete.archetypeId,gender:state.athlete.gender,handedness:state.athlete.handedness};
   let tournament=buildByKind(kind,teams,field.players,random);
+  if(kind==='mlp-style'){
+    const nicknames=['Aces','Breakers','Drivers','Momentum','Rally','Sentinels','Stingers','Volley'];
+    for(let index=0;index<teams.length;index++){
+      teams[index].name=state.cityLabel+' '+nicknames[index%nicknames.length];
+    }
+    const playerTeam=teams.find(team=>team.id===tournament.playerTeamId);
+    tournament.teams=teams;
+    tournament.teamLeague={
+      managedInBackground:true,
+      teamName:playerTeam?.name??state.cityLabel+' Aces',
+      roster:playerTeam?.members?.map(member=>member.name)??[]
+    };
+  }
   // The board decides whether the player is accepted directly, or has to
   // qualify. One qualifier match gets them into the draw in place of the
   // team they beat.
   const qualifierSlots=Math.max(0,Math.min(drawSize-1,event?.qualifierSlots??0));
-  const entry=entryStatus(state,event);
-  if(!entry.direct&&qualifierSlots>0&&teams.length>qualifierSlots){
+  if(!entry.direct&&entry.via==='qualifier'&&qualifierSlots>0&&teams.length>qualifierSlots){
     const ranked=[...teams].sort((a,b)=>b.rating-a.rating);
-    const cut=ranked.length-qualifierSlots;
+    const cut=Math.max(1,Math.min(ranked.length-1,entry.directSlots??ranked.length-qualifierSlots));
     const playerIndex=ranked.findIndex(team=>team.id==='player');
     if(playerIndex>=cut){
       const opponent=ranked[cut-1]??ranked[0];
@@ -342,7 +414,10 @@ export function startTournament({state,event,option}){
       energyCost:event.energy,
       championPoints:event.championPoints??0,
       difficulty:event.difficulty??'normal',
+      entry:Object.assign({},entry),
       qualifierSlots:event.qualifierSlots??0,
+      qualifierFieldSize:event.qualifierFieldSize??0,
+      wildCardSlots:event.wildCardSlots??0,
       nightMatches,
       nightComplete:false,
       rules:{

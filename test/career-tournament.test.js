@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer} from '../src/career/state.js';
 import {
   startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,
-  isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands
+  isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands,divisionPopulation
 } from '../src/career/tournament.js';
 import {pointsForFinish} from '../src/career/tour.js';
 import {seededRandom} from '../src/competition.js';
@@ -79,7 +79,7 @@ test('a loss ends a knockout and keeps a league going',()=>{
 });
 
 test('a player outside the main draw has to qualify',()=>{
-  const event=Object.assign(eventFor('tournament-bracket'),{qualifierSlots:4});
+  const event=Object.assign(eventFor('tournament-bracket'),{tier:'open',qualifierSlots:4,qualifierFieldSize:64,wildCardSlots:0});
   const random=seededRandom(31);
 
   const win=startTournament({state,event,option}).tournament;
@@ -100,6 +100,51 @@ test('a player outside the main draw has to qualify',()=>{
   assert.equal(isPlayerDone(loss),true,'losing the qualifier ends the event');
   assert.equal(loss.failedToQualify,true);
   assert.equal(tournamentPoints(loss),0,'a qualifier loss pays nothing');
+});
+
+test('gender doubles and singles field only the player gender',()=>{
+  const event=eventFor('tournament-bracket');
+  for(const format of ['doubles','singles']){
+    const option={id:format+':5.0+',format,divisionId:'5.0+',label:'5.0+'};
+    const started=startTournament({state:{...state,week:5},event:{...event,drawSize:32},option});
+    assert.ok(started.ok,started.message);
+    assert.equal(started.tournament.teams.length,32);
+    for(const team of started.tournament.teams){
+      assert.ok(team.members.every(member=>member.gender===state.athlete.gender),format+' crossed gender lines');
+    }
+  }
+});
+
+test('mixed doubles fields one man and one woman on every team',()=>{
+  const option={id:'mixed:5.0+',format:'mixed',divisionId:'5.0+',label:'5.0+'};
+  const started=startTournament({state:{...state,week:6},event:{...eventFor('tournament-bracket'),drawSize:32},option});
+  assert.ok(started.ok,started.message);
+  assert.equal(started.tournament.teams.length,32);
+  for(const team of started.tournament.teams){
+    assert.equal(team.members.length,2);
+    assert.deepEqual(new Set(team.members.map(member=>member.gender)),new Set(['male','female']),team.name);
+  }
+});
+
+test('a full sixty-four-team professional field can be filled',()=>{
+  const option={id:'doubles:5.0+',format:'doubles',divisionId:'5.0+',label:'5.0+'};
+  const started=startTournament({state:{...state,week:7},event:{...eventFor('tournament-bracket'),drawSize:64},option});
+  assert.ok(started.ok,started.message);
+  assert.equal(started.tournament.teams.length,64);
+  assert.equal(new Set(started.tournament.teams.flatMap(team=>team.members.map(member=>member.id))).size,128);
+});
+
+test('a later event draws a different slice of the same division',()=>{
+  const option={id:'doubles:5.0+',format:'doubles',divisionId:'5.0+',label:'5.0+'};
+  const event={...eventFor('tournament-bracket'),drawSize:16};
+  const first=startTournament({state:{...state,week:8},event,option}).tournament;
+  const second=startTournament({state:{...state,week:9},event,option}).tournament;
+  const firstIds=new Set(first.teams.flatMap(team=>team.members.map(member=>member.id)));
+  const secondIds=new Set(second.teams.flatMap(team=>team.members.map(member=>member.id)));
+  const overlap=[...firstIds].filter(id=>secondIds.has(id)).length;
+  assert.ok(overlap<firstIds.size,'the next field should not repeat the entire draw');
+  const pool=divisionPopulation({state,event,option:{...option,format:'doubles'},gender:state.athlete.gender});
+  assert.ok(pool.length>=128,'a 64-team gender doubles field needs 128 eligible players');
 });
 
 test('seeds are drawn in bands, with the top two fixed',()=>{

@@ -6,7 +6,7 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost} from './state.js';
 import {careerProfile} from './matchmaking.js';
 import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
@@ -15,7 +15,7 @@ import {EVENT_BY_ID} from './geography.js';
 import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
 import {recordResult} from './ranking.js';
-import {contractOffer,signed as signContract} from './contracts.js';
+import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation} from './contracts.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
@@ -131,11 +131,18 @@ export function startCareerMatch(state,eventId,optionId=null){
   if(!eligible.ok)return {ok:false,state,message:eligible.reason};
   const option=event.options.find(entry=>entry.id===(optionId??event.defaultOptionId));
   if(!option)return {ok:false,state,message:'That bracket is not running at this event.'};
-  if(state.energy<event.energyCost){
-    return {ok:false,state,message:'That event needs '+event.energyCost+' energy. You have '+state.energy+'.'};
+  if(formatsPlayed(state,event.eventId).includes(option.format)){
+    return {ok:false,state,message:'You have already played '+option.format+' at this event.'};
+  }
+  const entry=entryStatus(state,event,{format:option.format});
+  if(entry.via==='declined'){
+    return {ok:false,state,message:'Outside the direct cut and the qualifier field for this event.'};
+  }
+  const energyCost=eventEntryCost(state,event);
+  if(state.energy<energyCost){
+    return {ok:false,state,message:'That division needs '+energyCost+' energy. You have '+state.energy+'.'};
   }
 
-  const entry=entryStatus(state,event);
   const started=startTournament({state,event,option});
   if(!started.ok)return {ok:false,state,message:started.message};
   const tournament=started.tournament;
@@ -143,7 +150,8 @@ export function startCareerMatch(state,eventId,optionId=null){
   let next=Object.assign({},state,{
     wildCards:entry.via==='wild-card'?Math.max(0,(state.wildCards??0)-1):(state.wildCards??0),
     tournament,
-    energy:state.energy-event.energyCost,
+    energy:state.energy-energyCost,
+    eventEntries:[...(state.eventEntries??[]),{week:state.week,eventId:event.eventId,format:option.format,divisionId:option.divisionId,cost:energyCost}].slice(-32),
     lastActionWeek:state.week,
     lastEventWeek:isLeagueEvent(event)?state.lastEventWeek:state.week,
     lastLeagueWeek:isLeagueEvent(event)?state.week:state.lastLeagueWeek,
@@ -300,15 +308,20 @@ function finishTournament(state,tournament){
   const closed=Object.assign({},tournament,{finished:true,placeText,points:earned});
   // The ranking is built from results, not from the board.
   // Winning a Challenger earns a wild card into a bigger main draw.
-  const wonChallenger=place===1&&(EVENT_BY_ID[tournament.eventId]?.tier==='challenger');
-  const ranked=recordResult(wonChallenger?{...state,wildCards:(state.wildCards??0)+1}:state,{
+  const tournamentEvent=EVENT_BY_ID[tournament.eventId];
+  const wonChallenger=place===1&&tournamentEvent?.tier==='challenger';
+  let ranked=recordResult(wonChallenger?{...state,wildCards:(state.wildCards??0)+1}:state,{
     week:state.week,
     eventId:tournament.eventId,
     format:tournament.format,
-    tier:EVENT_BY_ID[tournament.eventId]?.tier??'challenger',
+    tier:tournamentEvent?.tier??'challenger',
     place,
     points:earned
   });
+  if(wonChallenger)ranked=markRecommendation(ranked,'challenger-win');
+  ranked=isTourEvent(tournamentEvent)
+    ?recordTourEvent(ranked,{eventId:tournament.eventId,week:state.week,format:tournament.format})
+    :recordReentryEvent(ranked,{eventId:tournament.eventId,week:state.week});
   const summary=tournament.label+': '+placeText
     +(earned?' · '+earned+' points':'')
     +(prize?' · $'+prize.toLocaleString('en-US'):'')+'.';
@@ -318,7 +331,11 @@ function finishTournament(state,tournament){
     athlete,
     money:state.money+prize,
     entered,
-    tournament:Object.assign({},closed,{teams:closed.teams?.slice(0,2)??[],history:closed.history?.slice(-8)??[]})
+    tournament:Object.assign({},closed,{
+      teams:closed.shape==='mlp'?closed.teams??[]:closed.teams?.slice(0,2)??[],
+      records:closed.shape==='mlp'?closed.records??{}:undefined,
+      history:closed.history?.slice(-8)??[]
+    })
   }),summary),summary);
   return next;
 }

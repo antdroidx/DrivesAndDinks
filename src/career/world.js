@@ -32,9 +32,12 @@ export function currentRatings(skills,ratings,week,format){
     const base=stored?stored[0]:athlete.baseFormats[format];
     const lastPlayed=stored?stored[1]:athlete.lastPlayed;
     const matches=stored?stored[2]:0;
+    // An athlete who has never played in this career keeps their generated
+    // starting rating. Once they have a result, inactivity starts the drift.
+    const rating=stored?regressRating(base,week-lastPlayed):base;
     current.set(athlete.id,{
       ...athlete,
-      rating:clampRating(regressRating(base,week-lastPlayed)),
+      rating:clampRating(rating),
       lastPlayed,
       matches
     });
@@ -153,10 +156,11 @@ export function advanceCircuit(state){
 // This is the field a competition is drawn from. Only the best players are
 // returned, because a tournament is fielded from the top of the rating list,
 // and names are only built for the athletes that come back.
-export function ratedPopulation({seed,regionId,ratings,week,format='doubles',limit=80}){
+export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gender=null,limit=80}){
   const skills=buildRegionSkills(seed,regionId);
   const current=currentRatings(skills,ratings,week,format);
-  const ranked=[...current.values()].sort((a,b)=>b.rating-a.rating).slice(0,limit);
+  const pool=gender?[...current.values()].filter(athlete=>athlete.gender===gender):[...current.values()];
+  const ranked=pool.sort((a,b)=>b.rating-a.rating).slice(0,limit);
   return ranked.map(athlete=>{
     const full=athlete.club?buildAthlete(seed,athlete.club,athlete.index):null;
     return {
