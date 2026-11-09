@@ -328,9 +328,6 @@ export function startTournament({state,event,option}){
   // A league night plays its two or three matches and the rest of the season
   // is simulated. A tournament plays all of its rounds.
   const nightMatches=Number(event?.nightMatches)||0;
-  if(nightMatches>0&&(tournament.shape==='round-robin'||tournament.shape==='open')){
-    tournament.rounds=tournament.rounds.slice(0,Math.max(1,nightMatches));
-  }
   return {
     ok:true,
     tournament:Object.assign(tournament,{
@@ -347,6 +344,7 @@ export function startTournament({state,event,option}){
       difficulty:event.difficulty??'normal',
       qualifierSlots:event.qualifierSlots??0,
       nightMatches,
+      nightComplete:false,
       rules:{
         points:event.targetScore??11,
         playoffPoints:event.playoffPoints??15,
@@ -677,8 +675,13 @@ export function recordPlayerResult(tournament,{won,score}){
       tournament.series=null;
     }
     tournament.round+=1;
+    const nightMatches=Number(tournament.nightMatches)||0;
+    if(nightMatches>0&&tournament.round<tournament.rounds.length&&tournament.round%nightMatches===0){
+      tournament.nightComplete=true;
+    }
     if(tournament.round>=tournament.rounds.length){
       tournament.finished=true;
+      tournament.nightComplete=false;
       const standings=[...tournament.teams].sort((a,b)=>{
         const ra=tournament.records[a.id],rb=tournament.records[b.id];
         return rb.wins-ra.wins||rb.points-ra.points||b.rating-a.rating;

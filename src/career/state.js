@@ -467,7 +467,11 @@ export function advanceWeek(state){
     week,
     ratings:state.worldRatings
   });
-  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
+  // A league night that finished last week opens again in the new week.
+  const tournament=state.tournament?.nightComplete
+    ?{...state.tournament,nightComplete:false}
+    :state.tournament;
+  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,tournament,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
   const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.`);
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }

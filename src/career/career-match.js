@@ -247,6 +247,15 @@ export function finishCareerMatch(state,report){
       if(byeGuard++>8)break;
     }
     next=Object.assign({},next,{tournament});
+    // A league night pauses the season until the week advances.
+    if(tournament.nightComplete&&!tournament.finished){
+      return {
+        ok:true,
+        state:next,
+        record,
+        message:(outcome.won?'Won ':'Lost ')+record.score+'. League night complete — advance the week for the next night.'
+      };
+    }
   }
 
   const note=record.label+' · '+record.bracket+' '+pending.format+' bracket · '+record.score;

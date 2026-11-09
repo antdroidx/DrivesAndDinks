@@ -144,7 +144,8 @@ test('a tournament pays its points and purse for the placing',()=>{
   let current=startCareerMatch(state,event.id,event.defaultOptionId).state;
   assert.ok(current.tournament,'the entry fielded a tournament');
   let guard=0;
-  while(current.pendingMatch&&guard++<12){
+  while(guard++<40&&!current.tournament.finished){
+    if(!current.pendingMatch){current=advanceWeek(current).state;current=startCareerMatch(current,current.tournament.eventId,current.tournament.optionId).state;continue;}
     const pending=current.pendingMatch;
     const report={
       score:{points:[11,5],winner:0},
@@ -166,7 +167,8 @@ test('a first round loss still pays for the placing',()=>{
   let current=startCareerMatch(state,event.id,event.defaultOptionId).state;
   let guard=0;
   let lost=false;
-  while(current.pendingMatch&&guard++<12){
+  while(guard++<40&&!current.tournament.finished){
+    if(!current.pendingMatch){current=advanceWeek(current).state;current=startCareerMatch(current,current.tournament.eventId,current.tournament.optionId).state;continue;}
     const pending=current.pendingMatch;
     const report={
       score:{points:[5,11],winner:1},
