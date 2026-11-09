@@ -9,7 +9,7 @@ import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,re
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
-  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost
+  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {startCareerMatch,finishCareerMatch} from './career-match.js';
@@ -200,6 +200,7 @@ function renderHome(){
   const trainReady=canTrain(career);
   const eventReady=events.some(event=>canEnterEvent(career,event));
   const sessions=trainingSessionsThisWeek(career);
+  const sessionLimit=trainingSessionsLimit(career);
   const retirement=retirementAdvice(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
@@ -267,7 +268,7 @@ function renderHome(){
       </div>
     </div>
     <div class="energy-bar"><b style="width:${career.energy}%"></b></div>
-    <div class="hint">${career.energy} energy · ${sessions}/${MAX_TRAINING_SESSIONS} training sessions used · ${eventReady?'an event is still open this week.':'you have entered your event this week.'} You recover ${weeklyRecovery(career)} a week.</div>
+    <div class="hint">${career.energy} energy · ${sessions}/${sessionLimit} training sessions used · ${eventReady?'an event is still open this week.':'you have entered your event this week.'} You recover ${weeklyRecovery(career)} a week.</div>
     <div class="actions">
       <div class="field" style="flex:1 1 190px;margin:0">
         <label for="focus-select">TRAINING FOCUS</label>
@@ -277,7 +278,7 @@ function renderHome(){
       <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end" ${career.retired?'disabled':''}>ADVANCE WEEK →</button>
       <button type="button" class="secondary" data-action="next-event" style="flex:1 1 190px;align-self:flex-end" ${career.retired?'disabled':''}>NEXT EVENT →</button>
     </div>
-    <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Later gains are slower than early ones.</div>
+    <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Training capacity is ${sessionLimit} sessions at age ${career.athlete.age}.</div>
   </section>
 
   ${renderTournament(career)}

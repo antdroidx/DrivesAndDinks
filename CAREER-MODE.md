@@ -58,7 +58,7 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/calendar.js` | Week arithmetic, event generation, bracket choice, entry eligibility and per-division cuts. |
 | `src/career/contracts.js` | Contract levels, obligations, reviews, release and the re-entry route. |
 | `src/career/analytics.js` | Durable game totals, event history, medals and rating peaks. |
-| `src/career/age.js` | Starting age, development, decline, rating ceilings and age-scaled recovery. |
+| `src/career/age.js` | Unique development profiles, attribute-specific decline, training capacity and age-scaled recovery. |
 | `src/career/retirement.js` | Retirement advice, the epilogue and the local all-time board. |
 | `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
 | `src/career/career-match.js` | The handoff between a career tournament and the shared match engine. |
@@ -283,22 +283,18 @@ A player earns tour points from events, and points age out on the rolling 52 wee
 
 ### The weekly loop
 
-A week is a budget of **100 energy**, and the player spends it however they like.
+A week is a budget of **100 energy**, and the player spends it however they like. Training capacity falls with age:
 
-- **Training is repeatable**, up to four sessions a week.
-- **One tournament a week and one league match.** A tournament plays several rounds in the week. A league match is a single game on a weeknight, so it has its own slot and does not take the weekend. That is how players actually arrange a week, and it is why a league match costs far less energy than a tournament.
-- **Travel** costs 10 energy inside a region and 20 across regions, on top of everything else.
+| Age | Training sessions available each week |
+|---|---:|
+| 10–35 | 4 |
+| 36–45 | 3 |
+| 46–60 | 2 |
+| 61+ | 1 |
 
-Both the cost of a training session and the weekly recovery scale with the level the player competes at, so the shape of a week changes as a career climbs. A stronger player trains harder and takes more back.
+A tournament still occupies its weekend and a league match has a separate weeknight slot. Travel costs 10 energy inside a region and 20 across regions. Weekly recovery scales with both the level of play and the player's individual recovery profile. Spending more than the recovery carries the remainder into the following week as fatigue.
 
-| Rating | A training session | Recovery | A week that fits inside it |
-|---|---|---|---|
-| 3.5, where a career starts | 10 | 69 | three sessions, a league match and a club night, 50 |
-| 4.5 | 14 | 75 | three sessions and a regional open, 72 |
-| 5.5 | 18 | 81 | two sessions and a national round, 80 |
-| 6.5 | 22 | 87 | one session and a pro league event, 86 |
-
-Spending more than the weekly recovery carries the rest into the next week as fatigue, so a heavy week is felt the week after. The consequence is that **early careers are training-heavy and late careers are not**: a 3.5 player can afford four sessions and still compete, while a pro's week is almost entirely the tour.
+**Training moves attributes only.** A technical attribute can keep improving at any age. Speed and agility become harder to improve after the normal prime, and power begins its player-specific decline after 49. Repeatedly training a skill builds maintenance that slows its late-career decline. Court IQ and tactical adaptation can compensate for physical losses. Training never directly changes the results-driven rating; matches do.
 
 Advancing the week restores the recovery, rolls a fresh calendar and advances the world.
 
@@ -317,7 +313,7 @@ The order is a dependency chain. A ranking measures the rounds a player reached,
 The milestone this branch delivers.
 
 - [x] Isolated `/career-mode/` entry point; root prototype untouched and still publishing unchanged
-- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 11`, ten migrations in place)
+- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 13`, twelve migrations in place)
 - [x] Corruption recovery: a damaged file falls back to the last verified save, and an unreadable file with no backup is quarantined rather than silently reset
 - [x] Stable ids for athletes, clubs and events, guaranteed by seed derivation
 - [x] North America and Asia, split into 14 areas and 74 cities
@@ -417,12 +413,14 @@ Contracts now supply tour access and annual review; the draw cut itself remains 
 
 Retirement is the endpoint of a career. Everything above is a stage a career passes through on the way to it.
 
-- [x] The age curve and the ceiling rule: a rating can fall below a player's age-adjusted peak but never rise above it
+- [x] Unique development profiles: normal peak 25–35, later peaks for late starters, and individual decline rates
+- [x] Attribute-specific aging: movement declines before power and technique, while training can sustain technical skills
+- [x] Training capacity and recovery decline with age
 - [x] Recovery that declines with age
 - [x] A starting age chosen at creation, from ten through eighty
 - [x] No fixed career length: the player plays until they retire
 - [x] Voluntary retirement at any point
-- [x] A retirement recommendation when the ceiling falls below the level the player is pursuing
+- [x] A retirement recommendation when the estimated physical ceiling falls below the level the player is pursuing
 - [x] The all-time board, and the career record as a final artifact
 - [x] The epilogue
 - [x] Durable analytics independent of the bounded match report history
@@ -495,7 +493,9 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | Mixed doubles teams contain one man and one woman, and gender doubles stays within one gender | Field composition is a game rule, not presentation. The same population and selection logic fills human and CPU draws. |
 | 2026-11-08 | The career record keeps durable game and event totals beyond the detailed match archive | The engine reports remain the recent film room, while cumulative points, medals, format splits, competition splits and rating peaks survive for the entire career. |
 | 2026-11-08 | A tournament semifinalist receives bronze, and a league top-three finish receives a medal | The game has no bronze match in knockout draws, so both losing semifinalists share bronze. League standings use first, second and third directly. |
-| 2026-11-08 | Age has development, prime and decline phases, with a per-format ceiling after the prime | A younger career starts below the adult baseline, ages 25 through 40 form the normal prime, and age-adjusted ceilings limit gains after that window. |
+| 2026-11-08 | Age is attribute-specific and driven by a unique development profile | A player who starts young normally peaks from 25–35; late starters can peak later but remain age-limited. Movement declines before power, technique keeps responding to training, and court IQ supports adaptation. |
+| 2026-11-08 | Format ratings are results-driven and never hard-capped by age | Aging changes the attributes used by the match engine. A player can keep improving by adapting technique and tactics even after movement begins to decline. |
+| 2026-11-08 | Training maintenance offsets part of late-career decline | Repeated work on a technical skill improves its maintenance score and slows its natural loss. Physical gains still become harder and training capacity falls with age. |
 | 2026-11-08 | Retirement is voluntary, with a recommendation when the player's ceiling leaves the pursued level | The career ends only through the player's decision. The recommendation presents the physical reality without forcing the player out. |
 | 2026-11-08 | A playoff, a double elimination and a ladder resolve during play rather than up front | Who reaches a playoff depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The structure and the simulation have to live together. |
 

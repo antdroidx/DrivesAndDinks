@@ -10,9 +10,9 @@ import {NAME_CULTURES,RATING_KEYS,skillAverage} from '../roster.js';
 import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING,FORMATS} from './rating.js';
 import {REGIONS} from './geography.js';
 import {emptyAnalytics} from './analytics.js';
-import {peakAgeFor} from './age.js';
+import {peakAgeFor,createDevelopmentProfile} from './age.js';
 
-export const CAREER_SAVE_VERSION=11;
+export const CAREER_SAVE_VERSION=13;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -22,6 +22,22 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v13 added per-attribute maintenance from repeated training.
+  12:state=>({
+    ...state,
+    athlete:{
+      ...state.athlete,
+      maintenance:state.athlete?.maintenance??Object.fromEntries(RATING_KEYS.map(key=>[key,0]))
+    }
+  }),
+  // v12 added unique development and physical-decline profiles.
+  11:state=>({
+    ...state,
+    athlete:{
+      ...state.athlete,
+      development:state.athlete?.development??createDevelopmentProfile(state.seed,state.athlete?.startAge??state.athlete?.age??25)
+    }
+  }),
   // v11 added age ceilings and the retirement artifact.
   10:state=>({
     ...state,
@@ -214,6 +230,8 @@ export function validateCareer(state){
   if(!Number.isFinite(athlete.peakAge))return {ok:false,reason:'Peak age is invalid'};
   if(!athlete.peakRatings||typeof athlete.peakRatings!=='object')return {ok:false,reason:'Peak skills are invalid'};
   if(!athlete.peakFormats||typeof athlete.peakFormats!=='object')return {ok:false,reason:'Peak ratings are invalid'};
+  if(!athlete.development||typeof athlete.development!=='object')return {ok:false,reason:'Development profile is invalid'};
+  if(!athlete.maintenance||typeof athlete.maintenance!=='object')return {ok:false,reason:'Training maintenance is invalid'};
   if(typeof state.retired!=='boolean')return {ok:false,reason:'Retirement state is invalid'};
   if(state.allTimeBoard!=null&&!Array.isArray(state.allTimeBoard))return {ok:false,reason:'All-time board is invalid'};
   return {ok:true};

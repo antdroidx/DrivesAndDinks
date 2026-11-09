@@ -17,7 +17,7 @@ import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} 
 import {recordResult} from './ranking.js';
 import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation} from './contracts.js';
 import {recordGame,recordEventResult,eventTypeFor} from './analytics.js';
-import {capRatingForAge,noteSkillPeaks} from './age.js';
+import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
@@ -214,8 +214,10 @@ export function finishCareerMatch(state,report){
     format:pending.format,
     random:seededRandom(mixSeed(state.seed,'growth:'+state.week+':'+pending.eventId+':'+pending.optionId))
   });
+  const maintenance=noteTrainingMaintenance(state.athlete,Object.keys(growth),.04);
+  const growthAthlete={...state.athlete,maintenance};
   const ratings=Object.assign({},state.athlete.ratings);
-  for(const key of Object.keys(growth))ratings[key]=clamp(ratings[key]+growth[key],0,99);
+  for(const key of Object.keys(growth))ratings[key]=capAttributeForAge(growthAthlete,key,clamp(ratings[key]+growth[key],0,99));
   const peakRatings=noteSkillPeaks(state.athlete,ratings);
 
   const record=buildCareerRecord({
@@ -230,6 +232,7 @@ export function finishCareerMatch(state,report){
     ratings,
     formats,
     peakRatings,
+    maintenance,
     peakFormats:ageAdjusted.peakFormats,
     record:Object.assign({},state.athlete.record,{
       matches:state.athlete.record.matches+1,

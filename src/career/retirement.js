@@ -16,8 +16,8 @@ export function retirementAdvice(state){
     recommended,
     ceilings,
     message:recommended
-      ?`Age ${state.athlete.age} · attainable ceiling ${best.toFixed(2)}. The level you are pursuing is moving out of reach. You can keep playing lower events or retire.`
-      :`Age ${state.athlete.age} · attainable ceiling ${best.toFixed(2)}.`
+      ?`Age ${state.athlete.age} · estimated physical ceiling ${best.toFixed(2)}. Technique can still improve, but the level you are pursuing is moving out of reach. You can keep playing lower events or retire.`
+      :`Age ${state.athlete.age} · estimated physical ceiling ${best.toFixed(2)}. Technique can still improve.`
   };
 }
 

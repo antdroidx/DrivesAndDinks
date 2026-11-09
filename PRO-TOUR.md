@@ -300,7 +300,7 @@ The endpoint of a career, and the only true one. The player can retire at any po
 
 **Voluntary.** The player retires when they choose. No more events. The career is over and the record is final.
 
-**Recommended.** Age and condition eventually make it impossible to hold a standing. The record screen says plainly when the age-adjusted ceiling has fallen below the level the player is pursuing. The player can drop to a level they can win or retire.
+**Recommended.** Age and condition eventually make it impossible to hold a standing. The record screen says plainly when the estimated physical ceiling has fallen below the level the player is pursuing. The player can drop to a level they can win or retire.
 
 **There is no fixed career length.** A career lasts as long as the player wants it to. The starting age is a character creation choice, so a player beginning at ten has sixty possible years and a player beginning at thirty has a much shorter one. The age curve sets what is possible at each age, and the player decides when to stop. Nothing in the game forces a retirement at a set number of seasons.
 
@@ -325,37 +325,30 @@ Knockout semifinalists share bronze because the game has no third-place match. L
 
 ## 12. The age curve
 
-Retirement needs a curve under it. The model: every athlete has a **peak age** and a **peak skill**, and skill is multiplied by an age factor.
+Retirement needs more than one curve. Each player receives a deterministic development profile covering:
 
-| Age | Factor | Note |
-|---|---|---|
-| 10 | 0.55 | early development |
-| 11 to 12 | 0.59 up to 0.63 | |
-| 13 to 15 | 0.69 up to 0.81 | the elite teenage range begins to emerge |
-| 16 to 18 | 0.86 up to 0.96 | top teenagers can already be world class |
-| 19 to 24 | 0.967 up to 1.00 | final development |
-| 25 to 40 | 1.00 | the normal sustained prime |
-| 41 to 44 | 0.995 down to 0.971 | gradual decline begins |
-| 45 to 49 | 0.96 down to 0.92 | |
-| 50 to 54 | 0.91 down to 0.87 | |
-| 55 to 59 | 0.86 down to 0.82 | experienced players remain highly competitive |
-| 60 to 64 | 0.81 down to 0.762 | |
-| 65 to 69 | 0.75 down to 0.694 | |
-| 70 to 74 | 0.68 down to 0.616 | |
-| 75 to 79 | 0.60 down to 0.528 | |
-| 80 and over | 0.42 at 80, declining by 0.04 a year | pronounced late-life drop |
+| Model | What it changes |
+|---|---|
+| Learning rate | how quickly technical skills respond to training |
+| Normal peak age | 25–35 for a player who started young |
+| Late-start peak | a late starter can peak later as technique catches up, capped at 45 |
+| Movement decline | individual speed and agility decline after the normal prime |
+| Power retention | power remains stable through 49 and then declines on a player-specific schedule beginning at 50–55 |
+| Recovery resilience | how much energy the player recovers between weeks |
+| Training maintenance | how well repeated practice protects declining attributes |
 
-**The ceiling rule.** A player's rating can fall below their age-adjusted ceiling but never rise above it. The ceiling represents physical aging while preserving the reality that high-level players remain competitive well into their fifties and sixties.
+**Attribute families behave differently.** Speed and agility peak early and decline after the normal prime. Power holds into the fifties. Technical touch, shot quality, defense, control and court IQ continue to respond to training; some technical attributes begin a gentle natural decline after 55, but repeated training builds maintenance that offsets part of it. Court IQ remains the main adaptation tool.
 
-The age curve scales from each player's own peak. The rating scale runs from 2.00 to 8.00, with 7.00 as the modelled elite anchor and 8.00 reserved for the theoretical top. A peak-6.0 player is a useful mid-professional example, not the maximum.
+**Training capacity falls with age.**
 
-An elite peak-7.0 player:
+| Age | Sessions in a typical week |
+|---|---:|
+| 10–35 | 4 |
+| 36–45 | 3 |
+| 46–60 | 2 |
+| 61+ | 1 |
 
-| Age | 25 | 30 | 35 | 40 | 45 | 50 | 55 | 60 | 65 | 70 | 79 | 80 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Rating ceiling | 7.00 | 7.00 | 7.00 | 7.00 | 6.72 | 6.37 | 6.02 | 5.67 | 5.25 | 4.76 | 3.70 | 2.94 |
-
-A peak-8.0 player retains a 6.88 ceiling at 55 and 6.48 at 60, so the age curve does not prevent all-time players from staying elite. At 80 the same player falls to 3.36. A player can have a personal peak younger or older inside the broad 25–40 prime window, and exceptional outliers remain competitive because the curve scales from their own peak. Eighty starts a pronounced drop, but it is not a forced endpoint.
+**There is no hard age cap on the format rating.** The rating remains results-driven. Aging changes the physical and technical attributes that feed the match engine, so a player can continue improving by adapting technique, tactics and shot selection even when movement declines. Better training can slow or partly offset decline, but it cannot make an old body perform like a young one.
 
 **The window is however long the player wants it to be.** There is no fixed career length, because there is no fixed starting age and no fixed retirement. A player who starts at ten can play for fifty years if their body and their appetite allow it, and a player who starts at thirty has a shorter window. The age curve decides what a player is capable of at each age; the player decides when to stop.
 
@@ -378,7 +371,9 @@ Not written yet. This is the shape it should take.
 | `ranking` | the four rankings, each a points total |
 | `rankingHistory` | enough history to age results out of the fifty-two week window |
 | `season` | the current season number |
-| `peakAge`, `peakRatings`, `peakFormats` | the age curve and personal ceilings, fixed as the career records its bests |
+| `development` | unique learning, peak, movement, power and recovery profile |
+| `maintenance` | per-attribute practice history that offsets late-career decline |
+| `peakAge`, `peakRatings`, `peakFormats` | personal bests used to measure decline |
 | `retired` | whether the career is over |
 
 ### New modules
@@ -386,7 +381,7 @@ Not written yet. This is the shape it should take.
 - `src/career/ranking.js` — the four rankings, the composite, the window, the tie-breaks
 - `src/career/contracts.js` — the levels, the obligations, the season boundary, promotion and release
 - `src/career/season.js` — the calendar, the finals qualification, the end-of-season evaluation
-- `src/career/age.js` — the age curve and the ceiling rule
+- `src/career/age.js` — development profiles, attribute-specific aging, training capacity and recovery
 
 ### What changes and what does not
 

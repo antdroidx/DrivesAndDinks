@@ -2,7 +2,9 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createCareer,advanceWeek,canAct,canEnterEvent,currentEvents,weeklyRecovery} from '../src/career/state.js';
 import {
-  MIN_START_AGE,MAX_START_AGE,ageSkillFactor,recoveryAgeFactor,ageCeiling,capRatingForAge,advanceAgeYear,ratingCeilingFor
+  MIN_START_AGE,MAX_START_AGE,developmentAgeFactor,agilityAgeFactor,powerAgeFactor,attributeAgeFactor,
+  ageSkillFactor,recoveryAgeFactor,trainingSessionsForAge,trainingSessionsForAge as sessionCap,
+  createDevelopmentProfile,capAttributeForAge,capRatingForAge,advanceAgeYear,ratingCeilingFor
 } from '../src/career/age.js';
 import {retire,retirementAdvice,allTimeBoard} from '../src/career/retirement.js';
 import {recordGame} from '../src/career/analytics.js';
@@ -23,17 +25,45 @@ test('starting age is selectable from ten through eighty',()=>{
   assert.equal(MIN_START_AGE,10);
 });
 
-test('the age curve develops, plateaus and declines',()=>{
-  assert.ok(ageSkillFactor(10)<ageSkillFactor(15));
-  assert.ok(ageSkillFactor(15)<ageSkillFactor(20));
-  assert.equal(ageSkillFactor(25),1);
-  assert.equal(ageSkillFactor(40),1);
-  assert.ok(ageSkillFactor(41)<1);
-  assert.ok(ageSkillFactor(55)<ageSkillFactor(45));
+test('development and physical decline affect different attributes',()=>{
+  assert.ok(developmentAgeFactor(10)<developmentAgeFactor(15));
+  assert.ok(developmentAgeFactor(15)<developmentAgeFactor(20));
+  assert.equal(developmentAgeFactor(25),1);
+  assert.equal(agilityAgeFactor(35),1);
+  assert.ok(agilityAgeFactor(36)<1);
+  assert.ok(agilityAgeFactor(50)<agilityAgeFactor(36));
+  assert.ok(agilityAgeFactor(80)<agilityAgeFactor(50));
+  assert.equal(powerAgeFactor(49),1);
+  assert.equal(powerAgeFactor(50),1);
+  assert.ok(powerAgeFactor(51)<1);
+  assert.ok(powerAgeFactor(55)>.85,'hard hitters keep most of their power into the fifties');
+  assert.ok(attributeAgeFactor('dink',80)<1,'technical touch can soften late in a career');
+  assert.equal(attributeAgeFactor('courtIQ',80),1,'court IQ remains an adaptation tool');
+  assert.ok(attributeAgeFactor('dink',80,{},1)>attributeAgeFactor('dink',80,{},0),'training maintains technical touch');
   assert.equal(recoveryAgeFactor(25),1);
-  assert.equal(recoveryAgeFactor(40),1);
-  assert.ok(recoveryAgeFactor(41)<1);
-  assert.ok(recoveryAgeFactor(60)<recoveryAgeFactor(41));
+  assert.ok(recoveryAgeFactor(40)<1);
+  assert.ok(recoveryAgeFactor(60)<recoveryAgeFactor(40));
+});
+
+test('normal and late-starting careers have different peak windows',()=>{
+  const early=createDevelopmentProfile(4242,12).peakAge;
+  const late=createDevelopmentProfile(4242,30).peakAge;
+  const veryLate=createDevelopmentProfile(4242,50).peakAge;
+  assert.ok(early>=25&&early<=35,'a young starter normally peaks from 25-35');
+  assert.ok(late>=38,'a late starter can reach a later technical peak');
+  assert.equal(veryLate,45,'late development is still limited by age');
+});
+
+test('training capacity declines independently from technique growth',()=>{
+  assert.equal(trainingSessionsForAge(30),4);
+  assert.equal(trainingSessionsForAge(40),3);
+  assert.equal(trainingSessionsForAge(50),2);
+  assert.equal(trainingSessionsForAge(65),1);
+  const technical=career({age:70}).athlete;
+  technical.peakRatings={...technical.peakRatings,dink:95};
+  const declining=capAttributeForAge(technical,'dink',95);
+  const maintained=capAttributeForAge({...technical,maintenance:{...technical.maintenance,dink:1}},'dink',95);
+  assert.ok(maintained>declining,'training can sustain a technical attribute through decline');
 });
 
 test('recovery declines with age without making a week unusable',()=>{
@@ -45,42 +75,43 @@ test('recovery declines with age without making a week unusable',()=>{
   assert.ok(weeklyRecovery(veteran)>=10);
 });
 
-test('elite players retain realistic ratings through their fifties and sixties',()=>{
-  assert.ok(ageCeiling(6.5,55)>=5.4,'a 6.5 peak should retain at least 5.4 at 55');
-  assert.ok(ageCeiling(6.0,55)>=5.0,'a 6.0 peak should retain 5.0 at 55');
-  assert.ok(ageCeiling(6.5,60)>=5.0,'a 6.5 peak should remain above 5.0 at 60');
-  assert.ok(ageCeiling(6.5,65)>=4.6,'a 6.5 peak should retain useful elite ability at 65');
-  assert.ok(ageCeiling(7.0,55)>=6.0,'a 7.0 peak should remain elite at 55');
-  assert.ok(ageCeiling(8.0,60)>=6.4,'the theoretical top should remain elite at 60');
-  assert.ok(ageSkillFactor(79)>ageSkillFactor(80),'eighty begins a pronounced decline');
-  assert.ok(ageCeiling(6.5,80)<3,'an elite ceiling drops sharply at eighty');
+test('elite physical ceilings preserve realistic performance through age',()=>{
+  assert.ok(ageSkillFactor(55)>.7,'a typical elite player retains useful physical performance at 55');
+  assert.ok(ageSkillFactor(60)<ageSkillFactor(55));
+  assert.ok(ageSkillFactor(80)<.35,'eighty begins a pronounced physical drop');
   assert.ok(recoveryAgeFactor(80)<recoveryAgeFactor(79));
 });
 
-test('a rating can fall below the age-adjusted peak but cannot rise above it',()=>{
-  const athlete={
-    ...career({age:50}).athlete,
-    age:50,
-    peakAge:27,
-    formats:{singles:4.5,doubles:4.5,mixed:4.5},
-    peakFormats:{singles:6.5,doubles:6.5,mixed:6.5}
-  };
-  const ceilings=ratingCeilingFor(athlete);
-  const capped=capRatingForAge(athlete,'doubles',7);
-  assert.ok(ceilings.doubles<6.5);
-  assert.equal(capped.rating,ceilings.doubles);
-  const lower=capRatingForAge(athlete,'doubles',3.1);
-  assert.equal(lower.rating,3.1,'the player may fall below the ceiling');
+test('an older player can still improve ratings and technical skills',()=>{
+  const athlete=career({age:60}).athlete;
+  const raised=capRatingForAge(athlete,'doubles',7.2);
+  assert.equal(raised.rating,7.2,'format ratings are not hard-capped by age');
+  assert.equal(raised.peakFormats.doubles,7.2);
+  assert.ok(ratingCeilingFor(athlete).doubles<8,'the physical estimate is advisory, not a hard rating cap');
+  const noMaintenance=capAttributeForAge({...athlete,peakRatings:{...athlete.peakRatings,dink:95}},'dink',95);
+  const withMaintenance=capAttributeForAge({...athlete,peakRatings:{...athlete.peakRatings,dink:95},maintenance:{...athlete.maintenance,dink:1}},'dink',95);
+  assert.ok(noMaintenance<95,'technical skill naturally softens in late career');
+  assert.ok(withMaintenance>noMaintenance,'training slows the technical decline');
+  assert.ok(capAttributeForAge(athlete,'agility',95)<95,'movement training reaches a lower ceiling');
 });
 
-test('a birthday advances age and applies the new ceiling',()=>{
-  const state=career({age:44});
-  const athlete={...state.athlete,peakAge:27,peakFormats:{singles:6,doubles:6,mixed:6},peakRatings:state.athlete.ratings};
+test('birthdays reduce movement and later power without erasing technique',()=>{
+  const base=career({age:50}).athlete;
+  const athlete={
+    ...base,
+    age:50,
+    peakRatings:{...base.ratings,agility:95,power:95,dink:95},
+    ratings:{...base.ratings,agility:90,power:94,dink:90},
+    peakFormats:{singles:5,doubles:5,mixed:5},
+    formats:{singles:5,doubles:5,mixed:5}
+  };
   const next=advanceAgeYear(athlete,52);
   assert.equal(next.aged,true);
-  assert.equal(next.athlete.age,45);
-  assert.ok(next.ageNote.length>0);
-  assert.ok(next.athlete.formats.doubles<=ratingCeilingFor(next.athlete).doubles);
+  assert.equal(next.athlete.age,51);
+  assert.ok(next.athlete.ratings.agility<90);
+  assert.ok(next.athlete.ratings.power<94);
+  assert.equal(next.athlete.ratings.dink,90,'shot quality does not decline automatically');
+  assert.equal(next.athlete.formats.doubles,5,'the physical estimate does not cap the result rating');
 });
 
 test('a retirement recommendation appears when the ceiling leaves the pursued level',()=>{

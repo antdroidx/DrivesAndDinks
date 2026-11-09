@@ -16,7 +16,7 @@ import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,FORMATS,division
 import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js';
 import {evaluateSeason,seasonDue,isContracted} from './contracts.js';
 import {emptyAnalytics} from './analytics.js';
-import {normalizeStartAge,peakAgeFor,ageSkillFactor,recoveryAgeFactor,noteSkillPeaks,advanceAgeYear,capRatingForAge} from './age.js';
+import {normalizeStartAge,createDevelopmentProfile,developmentAgeFactor,attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,noteSkillPeaks,noteTrainingMaintenance,advanceAgeYear,capRatingForAge,capAttributeForAge} from './age.js';
 
 // A career starts at a 3.500 rating, so the underlying skill starts where
 // that rating sits rather than at the bottom of the scale.
@@ -59,18 +59,18 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age}){
   const identity=generateIdentity({gender,random});
   const resolvedName=String(name??'').trim()||identity.name;
   const resolvedAge=normalizeStartAge(age,18+Math.floor(random()*12));
-  const peakAge=peakAgeFor(seed);
+  const development=createDevelopmentProfile(seed,resolvedAge);
+  const peakAge=development.peakAge;
   const shift=STARTING_SKILL-70;
   const peakRatings={};
   const ratings={};
-  const ageFactor=ageSkillFactor(resolvedAge);
   for(const key of RATING_KEYS){
     const base=archetype.ratings[key]??70;
     peakRatings[key]=clamp(Math.round(base+shift+(random()-.5)*5),20,99);
-    ratings[key]=clamp(Math.floor(peakRatings[key]*ageFactor),20,99);
+    ratings[key]=clamp(Math.floor(peakRatings[key]*attributeAgeFactor(key,resolvedAge)),20,99);
   }
   const average=skillAverage(ratings);
-  const firstRating=clamp(Math.round(NEW_PLAYER_RATING*ageFactor*1000)/1000,2,8);
+  const firstRating=clamp(Math.round(NEW_PLAYER_RATING*(resolvedAge<25?developmentAgeFactor(resolvedAge):1)*1000)/1000,2,8);
   const peakFormats=Object.fromEntries(FORMATS.map(format=>[format,NEW_PLAYER_RATING]));
   return {
     id:`player-${seed}`,
@@ -83,6 +83,8 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age}){
     age:resolvedAge,
     startAge:resolvedAge,
     peakAge,
+    development,
+    maintenance:Object.fromEntries(RATING_KEYS.map(key=>[key,0])),
     peakRatings,
     peakFormats,
     handedness:random()<.13?'left':'right',
@@ -200,7 +202,7 @@ export function trainingCost(state){
 export function weeklyRecovery(state){
   if(!state)return RECOVERY_BASE;
   const base=clamp(Math.round(RECOVERY_BASE+(careerRating(state)-3)*RECOVERY_PER_LEVEL),RECOVERY_BASE,RECOVERY_MAX);
-  return Math.max(10,Math.round(base*recoveryAgeFactor(state.athlete?.age??25)));
+  return Math.max(10,Math.round(base*recoveryAgeFactor(state.athlete?.age??25,state.athlete?.development)));
 }
 // Training moves an attribute by a single point. It is deliberately
 // small: the rating belongs to playing, not to drilling.
@@ -239,15 +241,20 @@ export function attributeGrowth({attributes,eventFocus,format,random=Math.random
 }
 // Training sessions taken this week. Saves made before the counter existed
 // simply have none.
+export function trainingSessionsLimit(state){
+  return trainingSessionsForAge(state?.athlete?.age??25);
+}
 export function trainingSessionsThisWeek(state){
   return state.trainingWeek===state.week?(state.trainingSessions??0):0;
 }
 export function canTrain(state){
-  return trainingSessionsThisWeek(state)<MAX_TRAINING_SESSIONS&&state.energy>=trainingCost(state);
+  return !state.retired&&trainingSessionsThisWeek(state)<trainingSessionsLimit(state)&&state.energy>=trainingCost(state);
 }
 export function trainBlockReason(state){
-  if(trainingSessionsThisWeek(state)>=MAX_TRAINING_SESSIONS){
-    return `You have trained ${MAX_TRAINING_SESSIONS} times this week. Advance the calendar to train again.`;
+  if(state.retired)return 'This career has ended.';
+  const limit=trainingSessionsLimit(state);
+  if(trainingSessionsThisWeek(state)>=limit){
+    return `You have trained ${limit} times this week. Advance the calendar to train again.`;
   }
   const cost=trainingCost(state);
   if(state.energy<cost)return `Training needs ${cost} energy. You have ${state.energy}.`;
@@ -333,13 +340,17 @@ export function train(state,focus){
   const cost=trainingCost(state);
   const gain=trainingGain(state,focus);
   const ratings={...state.athlete.ratings};
-  ratings[focus]=clamp(ratings[focus]+gain,0,99);
-  ratings.control=clamp(ratings.control+1,0,99);
+  const maintenance=noteTrainingMaintenance(state.athlete,[focus,'control'],.12);
+  const trainingAthlete={...state.athlete,maintenance};
+  ratings[focus]=capAttributeForAge(trainingAthlete,focus,clamp(ratings[focus]+gain,0,99));
+  ratings.control=capAttributeForAge(trainingAthlete,'control',clamp(ratings.control+1,0,99));
   const next=withAthlete(state,ratings);
+  next.athlete.maintenance=maintenance;
   next.athlete.peakRatings=noteSkillPeaks(state.athlete,ratings);
   const moved=pushHistory(pushLog(next,`Trained ${focus} — +${gain} ${focus}.`),`Trained ${focus}`);
   const sessions=trainingSessionsThisWeek(state)+1;
-  return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingWeek:state.week,trainingSessions:sessions,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Trained ${focus}. +${gain} ${focus}, +1 control. ${sessions}/${MAX_TRAINING_SESSIONS} sessions this week.`};
+  const limit=trainingSessionsLimit(state);
+  return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingWeek:state.week,trainingSessions:sessions,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Trained ${focus}. +${gain} ${focus}, +1 control. ${sessions}/${limit} sessions this week.`};
 }
 
 export function currentEvents(state){return state.retired?[]:generateWeekEvents(state,state.week)}
@@ -425,12 +436,15 @@ export function attendEvent(state,eventId,optionId=null){
     format,
     random:seededRandom(mixSeed(state.seed,'growth:'+state.week+':'+event.eventId+':'+option.id))
   });
+  const maintenance=noteTrainingMaintenance(state.athlete,Object.keys(growth),.04);
+  const growthAthlete={...state.athlete,maintenance};
   const ratings={...state.athlete.ratings};
-  for(const key of Object.keys(growth))ratings[key]=clamp(ratings[key]+growth[key],0,99);
+  for(const key of Object.keys(growth))ratings[key]=capAttributeForAge(growthAthlete,key,clamp(ratings[key]+growth[key],0,99));
 
   const athlete={
     ...state.athlete,
     ratings,
+    maintenance,
     peakRatings:noteSkillPeaks(state.athlete,ratings),
     peakFormats:ageAdjusted.peakFormats,
     formats:Object.assign({},state.athlete.formats,{[format]:newRating}),
