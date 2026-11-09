@@ -30,21 +30,28 @@ export function ageSkillFactor(age){
   if(value<=18)return .81+(value-15)*.05;
   if(value<=29)return 1;
   if(value<=34)return 1;
-  if(value<=39)return .98-(value-35)*.006;
-  if(value<=44)return .95-(value-40)*.015;
-  if(value<=49)return .875-(value-45)*.035;
-  if(value<=54)return .70-(value-50)*.04;
-  return Math.max(.2,.50-(value-55)*.04);
+  if(value<=39)return .99-(value-35)*.006;
+  if(value<=44)return .96-(value-40)*.008;
+  if(value<=49)return .92-(value-45)*.008;
+  if(value<=54)return .88-(value-50)*.008;
+  if(value<=59)return .84-(value-55)*.012;
+  if(value<=64)return .78-(value-60)*.012;
+  if(value<=69)return .72-(value-65)*.014;
+  if(value<=74)return .65-(value-70)*.016;
+  if(value<=79)return .57-(value-75)*.018;
+  return Math.max(.2,.48-(value-80)*.025);
 }
 
 export function recoveryAgeFactor(age){
   const value=Math.max(0,Number(age)||0);
   if(value<=25)return 1;
-  if(value<=34)return 1-(value-25)*.01;
-  if(value<=39)return .90-(value-35)*.025;
-  if(value<=49)return .775-(value-40)*.02;
-  if(value<=59)return .575-(value-50)*.015;
-  return Math.max(.25,.425-(value-60)*.015);
+  if(value<=34)return 1-(value-25)*.005;
+  if(value<=44)return .955-(value-35)*.008;
+  if(value<=54)return .883-(value-45)*.008;
+  if(value<=64)return .811-(value-55)*.009;
+  if(value<=74)return .73-(value-65)*.01;
+  if(value<=84)return .64-(value-75)*.012;
+  return Math.max(.35,.532-(value-85)*.015);
 }
 
 export function ageCeiling(peak,age){

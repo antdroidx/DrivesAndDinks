@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createCareer,advanceWeek,canAct,canEnterEvent,currentEvents,weeklyRecovery} from '../src/career/state.js';
 import {
-  MIN_START_AGE,MAX_START_AGE,ageSkillFactor,recoveryAgeFactor,capRatingForAge,advanceAgeYear,ratingCeilingFor
+  MIN_START_AGE,MAX_START_AGE,ageSkillFactor,recoveryAgeFactor,ageCeiling,capRatingForAge,advanceAgeYear,ratingCeilingFor
 } from '../src/career/age.js';
 import {retire,retirementAdvice,allTimeBoard} from '../src/career/retirement.js';
 import {recordGame} from '../src/career/analytics.js';
@@ -39,6 +39,13 @@ test('recovery declines with age without making a week unusable',()=>{
   veteran.athlete.formats={singles:5.5,doubles:5.5,mixed:5.5};
   assert.ok(weeklyRecovery(veteran)<weeklyRecovery(young));
   assert.ok(weeklyRecovery(veteran)>=10);
+});
+
+test('elite players retain realistic ratings through their fifties and sixties',()=>{
+  assert.ok(ageCeiling(6.5,55)>=5.4,'a 6.5 peak should retain at least 5.4 at 55');
+  assert.ok(ageCeiling(6.0,55)>=5.0,'a 6.0 peak should retain 5.0 at 55');
+  assert.ok(ageCeiling(6.5,60)>=5.0,'a 6.5 peak should remain above 5.0 at 60');
+  assert.ok(ageCeiling(6.5,65)>=4.6,'a 6.5 peak should retain useful elite ability at 65');
 });
 
 test('a rating can fall below the age-adjusted peak but cannot rise above it',()=>{
