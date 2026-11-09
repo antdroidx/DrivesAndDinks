@@ -370,7 +370,8 @@ An event now fields a tournament rather than a single match.
 - [x] All seven shapes wired in: bracket, round robin, double elimination, fixed and open ladders, and the team league
 - [ ] Multi-week events that occupy consecutive weeks
 - [x] A way to skip weeks with nothing on the calendar
-- [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
+- [ ] Events that share a week: the single event slot and the energy budget decide which one, and a league match can be missed for a tournament at a cost to the league standing
+- [ ] Travel conflicts: two events in different regions in the same week cannot both be played
 
 **Why it is here.** A ranking is a measurement of rounds reached, and rounds do not exist until an event fields a tournament. This is the foundation the tour is expressed in.
 
