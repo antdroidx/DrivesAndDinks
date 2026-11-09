@@ -119,7 +119,7 @@ function renderCreate(){
     <div class="field-row">
       <div class="field">
         <label for="draft-age">STARTING AGE</label>
-        <input id="draft-age" type="number" min="10" max="70" value="${app.draft.age}" inputmode="numeric">
+        <input id="draft-age" type="number" min="10" max="80" value="${app.draft.age}" inputmode="numeric">
       </div>
       <div class="field">
         <label for="draft-region">REGION</label>

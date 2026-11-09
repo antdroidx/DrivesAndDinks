@@ -419,7 +419,7 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 
 - [x] The age curve and the ceiling rule: a rating can fall below a player's age-adjusted peak but never rise above it
 - [x] Recovery that declines with age
-- [x] A starting age chosen at creation, from ten through seventy
+- [x] A starting age chosen at creation, from ten through eighty
 - [x] No fixed career length: the player plays until they retire
 - [x] Voluntary retirement at any point
 - [x] A retirement recommendation when the ceiling falls below the level the player is pursuing

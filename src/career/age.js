@@ -7,7 +7,7 @@
 import {FORMATS,ratingFromSkill} from './rating.js';
 
 export const MIN_START_AGE=10;
-export const MAX_START_AGE=70;
+export const MAX_START_AGE=80;
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -39,7 +39,8 @@ export function ageSkillFactor(age){
   if(value<=69)return .72-(value-65)*.014;
   if(value<=74)return .65-(value-70)*.016;
   if(value<=79)return .57-(value-75)*.018;
-  return Math.max(.2,.48-(value-80)*.025);
+  // Eighty marks a pronounced late-life drop rather than a hard stop.
+  return Math.max(.10,.42-(value-80)*.04);
 }
 
 export function recoveryAgeFactor(age){
@@ -50,8 +51,8 @@ export function recoveryAgeFactor(age){
   if(value<=54)return .883-(value-45)*.008;
   if(value<=64)return .811-(value-55)*.009;
   if(value<=74)return .73-(value-65)*.01;
-  if(value<=84)return .64-(value-75)*.012;
-  return Math.max(.35,.532-(value-85)*.015);
+  if(value<=79)return .64-(value-75)*.012;
+  return Math.max(.18,.48-(value-80)*.025);
 }
 
 export function ageCeiling(peak,age){

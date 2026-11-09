@@ -339,17 +339,17 @@ Retirement needs a curve under it. The model: every athlete has a **peak age** a
 | 65 to 69 | 0.72 down to 0.664 | |
 | 70 to 74 | 0.65 down to 0.586 | |
 | 75 to 79 | 0.57 down to 0.498 | |
-| 80 and over | 0.48 declining by 0.025 a year | |
+| 80 and over | 0.42 at 80, declining by 0.04 a year | pronounced late-life drop |
 
 **The ceiling rule.** A player's rating can fall below their age-adjusted ceiling but never rise above it. The ceiling represents physical aging while preserving the reality that high-level players remain competitive well into their fifties and sixties.
 
 What a peak-6.0 player looks like:
 
-| Age | 30 | 35 | 40 | 45 | 50 | 55 | 60 | 65 | 70 |
-|---|---|---|---|---|---|---|---|---|---|
-| Rating ceiling | 6.00 | 5.94 | 5.76 | 5.52 | 5.28 | 5.04 | 4.68 | 4.32 | 3.90 |
+| Age | 30 | 35 | 40 | 45 | 50 | 55 | 60 | 65 | 70 | 79 | 80 | 85 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Rating ceiling | 6.00 | 5.94 | 5.76 | 5.52 | 5.28 | 5.04 | 4.68 | 4.32 | 3.90 | 2.99 | 2.52 | 2.00 |
 
-A peak-6.5 player retains a 5.46 ceiling at 55 and 5.07 at 60. The game does not impose a hard 3.00 ceiling on experienced players.
+A peak-6.5 player retains a 5.46 ceiling at 55 and 5.07 at 60. Eighty starts a pronounced drop, but it is not a forced endpoint. The scale's 2.00 floor means careers can continue beyond 80 at the bottom of the competitive range.
 
 **The window is however long the player wants it to be.** There is no fixed career length, because there is no fixed starting age and no fixed retirement. A player who starts at ten can play for fifty years if their body and their appetite allow it, and a player who starts at thirty has a shorter window. The age curve decides what a player is capable of at each age; the player decides when to stop.
 

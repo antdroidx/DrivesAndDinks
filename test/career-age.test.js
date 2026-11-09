@@ -9,7 +9,7 @@ import {recordGame} from '../src/career/analytics.js';
 
 const career=(overrides={})=>createCareer({name:'Age Tester',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'seattle',seed:4242,...overrides});
 
-test('starting age is selectable from ten through seventy',()=>{
+test('starting age is selectable from ten through eighty',()=>{
   const child=career({age:10});
   const adult=career({age:30});
   const capped=career({age:99});
@@ -17,6 +17,7 @@ test('starting age is selectable from ten through seventy',()=>{
   assert.equal(child.athlete.startAge,10);
   assert.equal(adult.athlete.age,30);
   assert.equal(capped.athlete.age,MAX_START_AGE);
+  assert.equal(MAX_START_AGE,80);
   assert.ok(child.athlete.formats.doubles<adult.athlete.formats.doubles,'a child starts below the adult baseline');
   assert.ok(Object.values(child.athlete.ratings).some(value=>value<adult.athlete.ratings.drive));
   assert.equal(MIN_START_AGE,10);
@@ -46,6 +47,9 @@ test('elite players retain realistic ratings through their fifties and sixties',
   assert.ok(ageCeiling(6.0,55)>=5.0,'a 6.0 peak should retain 5.0 at 55');
   assert.ok(ageCeiling(6.5,60)>=5.0,'a 6.5 peak should remain above 5.0 at 60');
   assert.ok(ageCeiling(6.5,65)>=4.6,'a 6.5 peak should retain useful elite ability at 65');
+  assert.ok(ageSkillFactor(79)>ageSkillFactor(80),'eighty begins a pronounced decline');
+  assert.ok(ageCeiling(6.5,80)<3,'an elite ceiling drops sharply at eighty');
+  assert.ok(recoveryAgeFactor(80)<recoveryAgeFactor(79));
 });
 
 test('a rating can fall below the age-adjusted peak but cannot rise above it',()=>{
