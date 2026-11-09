@@ -303,6 +303,12 @@ export function startTournament({state,event,option}){
       matchType:event.matchType,
       energyCost:event.energy,
       championPoints:event.championPoints??0,
+      rules:{
+        points:event.targetScore??11,
+        playoffPoints:event.playoffPoints??15,
+        scoring:event.scoring??'side-out',
+        winBy:event.winBy??2
+      },
       week:state.week,
       teams,
       // Only an open draw needs the player pool; a team draw carries
@@ -312,13 +318,41 @@ export function startTournament({state,event,option}){
   };
 }
 
+// The rules a given round is played under. The last four of a bracket play
+// to the playoff score rather than the league score.
+export function matchRules(tournament){
+  const rules=tournament?.rules??{};
+  const base=rules.points??11;
+  const playoff=rules.playoffPoints??15;
+  const late=tournament?.shape==='bracket'&&tournament.size/Math.pow(2,tournament.round??0)<=4;
+  return {targetScore:late?playoff:base,scoring:rules.scoring??'side-out',winBy:rules.winBy??2};
+}
+
 // The simulated outcome of a match between two sides.
-export function simulateMatch(home,away,random,points=11){
+//
+// Side-out only scores for the serving side and hands the serve over on a
+// lost rally. Rally scoring awards a point to whoever wins the rally.
+export function simulateMatch(home,away,random,points=11,rules={}){
   const edge=clamp(.5+(home.skill-away.skill)/60,.28,.72);
+  const winBy=Math.max(1,rules.winBy??2);
   let mine=0,theirs=0;
+  if(rules.scoring==='rally'){
+    while(true){
+      if(random()<edge)mine++;else theirs++;
+      if((mine>=points||theirs>=points)&&Math.abs(mine-theirs)>=winBy)break;
+    }
+    return {homeMine:mine,homeTheirs:theirs,homeWon:mine>theirs,score:mine+'-'+theirs};
+  }
+  let serving=0;
   while(true){
-    if(random()<edge)mine++;else theirs++;
-    if((mine>=points||theirs>=points)&&Math.abs(mine-theirs)>=2)break;
+    const homeWins=random()<edge;
+    if(serving===0){
+      if(homeWins){mine++;if(mine>=points&&mine-theirs>=winBy)break;}
+      else serving=1;
+    }else{
+      if(!homeWins){theirs++;if(theirs>=points&&theirs-mine>=winBy)break;}
+      else serving=0;
+    }
   }
   return {homeMine:mine,homeTheirs:theirs,homeWon:mine>theirs,score:mine+'-'+theirs};
 }
@@ -412,6 +446,7 @@ export function startRound(tournament,random){
 // Plays every match in the current round except the player's.
 export function simulateRestOfRound(tournament,random){
   const results=[];
+  const rules=matchRules(tournament);
   if(tournament.shape==='bracket'){
     const alive=tournament.alive;
     const winners=[];
@@ -422,7 +457,7 @@ export function simulateRestOfRound(tournament,random){
       if(!home){winners.push(away);continue;}
       if(!away){winners.push(home);continue;}
       if(home.id===tournament.playerTeamId||away.id===tournament.playerTeamId){winners.push(null);continue;}
-      const outcome=simulateMatch(home,away,random);
+      const outcome=simulateMatch(home,away,random,rules.targetScore,rules);
       winners.push(outcome.homeWon?home:away);
       results.push({round:tournament.round,home:home.id,away:away.id,score:outcome.score,winner:outcome.homeWon?home.id:away.id});
     }
@@ -433,7 +468,7 @@ export function simulateRestOfRound(tournament,random){
     const round=tournament.rounds[tournament.round]??[];
     for(const match of round){
       if(match.home.id===tournament.playerTeamId||match.away.id===tournament.playerTeamId)continue;
-      const outcome=simulateMatch(match.home,match.away,random);
+      const outcome=simulateMatch(match.home,match.away,random,rules.targetScore,rules);
       const homeRecord=tournament.records[match.home.id];
       const awayRecord=tournament.records[match.away.id];
       if(outcome.homeWon){homeRecord.wins+=1;awayRecord.losses+=1;}else{awayRecord.wins+=1;homeRecord.losses+=1;}
@@ -446,7 +481,7 @@ export function simulateRestOfRound(tournament,random){
     for(const match of tournament.pairings??[]){
       if(!match.away)continue;
       if(match.home.id===tournament.playerTeamId||match.away.id===tournament.playerTeamId)continue;
-      const outcome=simulateMatch(match.home,match.away,random);
+      const outcome=simulateMatch(match.home,match.away,random,rules.targetScore,rules);
       const loser=outcome.homeWon?match.away:match.home;
       tournament.lives[loser.id]-=1;
       results.push({round:tournament.round,home:match.home.id,away:match.away.id,score:outcome.score,winner:outcome.homeWon?match.home.id:match.away.id});
@@ -456,7 +491,7 @@ export function simulateRestOfRound(tournament,random){
   if(tournament.shape==='ladder'){
     for(const match of tournament.pairings??[]){
       if(match.home.id===tournament.playerTeamId||match.away.id===tournament.playerTeamId)continue;
-      const outcome=simulateMatch(match.home,match.away,random);
+      const outcome=simulateMatch(match.home,match.away,random,rules.targetScore,rules);
       const winner=outcome.homeWon?match.home:match.away;
       const loser=outcome.homeWon?match.away:match.home;
       tournament.points[winner.id]=(tournament.points[winner.id]??0)+1;

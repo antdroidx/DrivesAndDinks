@@ -99,6 +99,10 @@ export const TEMPLATE_BY_ID=Object.freeze(Object.fromEntries(EVENT_TEMPLATES.map
 export const DEFAULT_RULES=Object.freeze({
   points:11,
   playoffPoints:15,
+  winBy:2,
+  // Side-out is the traditional game. A rally format scores every rally and
+  // is used by some leagues.
+  scoring:'side-out',
   finalBestOf:3,
   doubleEliminationPoints:15,
   roundsPerBracket:7,

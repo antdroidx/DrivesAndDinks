@@ -188,11 +188,51 @@ export function launch(b,x,y,shot='drive',paddle=DEFAULT_PADDLE,quality=1,option
 }
 export function inBounds(x,y){return x>=0&&x<=20&&y>=0&&y<=44}
 export function legalVolley(team,y,bounces,shotCount){if(shotCount<=2&&bounces===0)return 'Two-bounce fault';if(bounces===0&&(team===0?y<=29:y>=15))return 'Kitchen volley fault';return null}
+export const SCORING_MODES=Object.freeze(['side-out','rally']);
+
+// A game is defined by the points it plays to, the margin it must win by, and
+// whether only the serving side can score.
+//
+// Side-out is the traditional game: a rally only scores for the serving side,
+// and losing the rally hands the serve over. Rally scoring awards a point to
+// whoever wins the rally, and the winner serves next.
+export function normalizeScoringRules(rules={}){
+ const targetScore=Math.max(1,Math.round(Number(rules?.targetScore??rules?.points)||11));
+ const winBy=Math.max(1,Math.round(Number(rules?.winBy)||2));
+ const scoring=rules?.scoring==='rally'?'rally':'side-out';
+ return {targetScore,winBy,scoring};
+}
+
 export class Score {
- constructor(format='doubles'){this.format=format;this.points=[0,0];this.team=0;this.server=2;this.first=true;this.rightPlayer=[1,0];this.serverPlayer=1;this.winner=null}
- point(winner){if(this.format==='singles'){if(winner===this.team){this.points[winner]++;if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else this.team=winner;return}if(winner===this.team){this.points[winner]++;this.rightPlayer[winner]=1-this.rightPlayer[winner];if(this.points[winner]>=11&&this.points[winner]-this.points[1-winner]>=2)this.winner=winner}else if(this.first||this.server===2){this.team=1-this.team;this.server=1;this.first=false;this.serverPlayer=this.rightPlayer[this.team]}else{this.server=2;this.serverPlayer=1-this.serverPlayer}}
+ constructor(format='doubles',rules={}){
+  this.format=format;
+  this.rules=normalizeScoringRules(rules);
+  this.points=[0,0];this.team=0;this.server=2;this.first=true;this.rightPlayer=[1,0];this.serverPlayer=1;this.winner=null;
+ }
+ scorePoint(winner){
+  const {targetScore,winBy}=this.rules;
+  if(this.points[winner]>=targetScore&&this.points[winner]-this.points[1-winner]>=winBy)this.winner=winner;
+ }
+ point(winner){
+  if(this.rules.scoring==='rally'){
+   this.points[winner]++;
+   // The rally winner serves next. In doubles the right-court player serves,
+   // so the pair rotates every point.
+   if(winner!==this.team){this.team=winner;this.rightPlayer[winner]=1-this.rightPlayer[winner];this.serverPlayer=this.rightPlayer[winner];}
+   else{this.rightPlayer[winner]=1-this.rightPlayer[winner];this.serverPlayer=1-this.serverPlayer;}
+   this.scorePoint(winner);
+   return;
+  }
+  if(this.format==='singles'){
+   if(winner===this.team){this.points[winner]++;this.scorePoint(winner);}else this.team=winner;
+   return;
+  }
+  if(winner===this.team){this.points[winner]++;this.rightPlayer[winner]=1-this.rightPlayer[winner];this.scorePoint(winner);}
+  else if(this.first||this.server===2){this.team=1-this.team;this.server=1;this.first=false;this.serverPlayer=this.rightPlayer[this.team];}
+  else{this.server=2;this.serverPlayer=1-this.serverPlayer;}
+ }
  get player(){return this.serverPlayer}
- get call(){if(this.format==='singles')return `${this.points[this.team]} - ${this.points[1-this.team]}`;return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
+ get call(){if(this.format==='singles'||this.rules.scoring==='rally')return `${this.points[this.team]} - ${this.points[1-this.team]}`;return `${this.points[this.team]} - ${this.points[1-this.team]} - ${this.server}`}
 }
 export function move(p,tx,ty,dt,brake=false){
  p.stamina=Math.max(0,Math.min(1,p.stamina??1));const staminaScale=.82+.18*p.stamina,dx=tx-p.x,dy=ty-p.y,d=Math.hypot(dx,dy),maxSpeed=(p.abilities?.speed??C.speed)*staminaScale,acceleration=(p.abilities?.acceleration??C.accel)*(.78+.22*p.stamina),contactLock=p.swing>(p.swingDuration||.36)*.82,recovering=(p.recoveryTimer||0)>0,settling=(p.splitStepTimer||0)>0;

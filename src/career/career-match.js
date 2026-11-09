@@ -16,7 +16,7 @@ import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
-import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary} from './tournament.js';
+import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 
@@ -95,7 +95,8 @@ function pendingFor({state,tournament}){
     week:tournament.week,
     round:tournament.round,
     tournamentId:tournament.id,
-    matchup
+    rules:matchRules(tournament),
+    matchup 
   };
 }
 

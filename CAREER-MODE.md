@@ -243,6 +243,22 @@ The rules travel with the template and an organiser can vary any of them: **game
 
 Some shapes cannot be arranged up front, so they are resolved as they are played. Who reaches the playoff of a round robin depends on the results, who is still alive in a double elimination depends on the results, and a ladder's courts are re-formed every round. The player's own matches are never decided by the simulation: they are left for the player to play, and the rest of the field is played out around them.
 
+### Scoring
+
+A game is defined by three things: **the points it plays to**, **the margin it must win by**, and **whether only the serving side can score**.
+
+| Rule | What it means |
+|---|---|
+| Points | 11 in league play, 15 in the last four of a tournament, and up to 21 in a league format |
+| Win by | two, in every format the game runs |
+| Scoring | side-out or rally |
+
+**Side-out** is the traditional game. A rally only scores for the serving side, and losing a rally hands the serve over. It is the default and it is what the match engine has always played.
+
+**Rally scoring** awards a point to whoever wins the rally, and the winner serves next. It is faster, and it is what the MLP and the Amateur MLP use, so a league night feels different from a sanctioned tournament.
+
+The rules travel with the match. The career writes them into the pending match, the engine builds its scoreboard with them, and the tournament simulation plays by the same rules. A playoff game really is to fifteen; before this, the engine always played to eleven however the tournament was configured.
+
 ### The pro tour
 
 The pro league works differently from a rating system. Its world ranking is a composite of tour points earned over the last 52 weeks, weighted 50 percent doubles, 35 percent mixed doubles and 15 percent singles, and the men's and women's boards are ranked separately.
@@ -448,6 +464,7 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | Prize money and sponsors | A career needs a reason to keep going that is not a number on a board. Sponsors arrive with a standing and pay into every purse. |
 | 2026-11-08 | The rating is derived from the 14 skill ratings only until the first rated match, then moves on results | DUPR is a results system. Deriving it from skills is a starting prior, not the final model, and the prior expires the moment there is a result. |
 | 2026-11-08 | The seven competition shapes are templates, and a competition is generated rather than authored | A tournament's shape is a set of rules, not a piece of content. Encoding them as data means an organiser can vary the points and the format, and the same seed always produces the same field. |
+| 2026-11-08 | A game's rules are points, win by, and scoring, and they travel with the match | The engine played to eleven in every game while the tournament said playoffs were to fifteen. A rule the simulation and the match disagree about is not a rule. |
 | 2026-11-08 | The pro league is a career stage, not the endpoint. Retirement is the endpoint | A career that stops at the top is a ladder climb. A career that can decline and end is a career, and it makes falling out of the pro league a normal part of one. |
 | 2026-11-08 | The pro tour is modelled on the real PPA rather than invented | Rankings, tiers, contracts, the obligation rule and the route back in are all taken from the published tour. Inventing them would have produced something that felt like a generic sports game. |
 | 2026-11-08 | A tournament fields 44 to 64 spots per division, not the whole ranked population | The ranked board is 1,200 and a draw is 64. The rest of the population sits at other events, in qualifiers, or on the Challenger circuit. |
