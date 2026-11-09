@@ -333,7 +333,7 @@ The milestone this branch delivers.
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 132 automated tests across ten files (`test/career-*.test.js`), 574 in the suite overall
+- [x] 132 career tests across ten files (`test/career-*.test.js`), 582 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
 ### M2 — Match play inside a career 🔶 in progress
