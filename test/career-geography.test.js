@@ -78,14 +78,17 @@ test('the ladder reaches the whole published scale',()=>{
   }
 });
 
-test('playing a rated match costs more than training, and bigger events cost more',()=>{
-  const costs=COMPETITION_EVENTS.map(event=>event.energy);
-  // A training session at the level a career starts at costs less than the
-  // cheapest rated match.
-  const starting=createCareer({seed:1,regionId:'north-america'});
-  assert.ok(Math.min(...costs)>trainingCost(starting),'no rated match should be as cheap as training');
+test('a league match is cheap and a tournament is not',()=>{
+  const league=COMPETITION_EVENTS.find(event=>event.id==='local-league');
+  const city=COMPETITION_EVENTS.find(event=>event.id==='city-open');
   const national=COMPETITION_EVENTS.find(event=>event.id==='national');
   const pro=COMPETITION_EVENTS.find(event=>event.id==='pro-league');
+  // A league night is one game against one opponent, so it costs less than a
+  // tournament that plays several rounds in a week.
+  assert.ok(league.energy<city.energy,'a league night is cheaper than a tournament');
+  assert.ok(city.energy<national.energy);
   assert.ok(pro.energy>national.energy,'the pro tour costs more than a national championship');
-  assert.ok(national.energy>Math.min(...costs));
+  const starting=createCareer({seed:1,regionId:'north-america'});
+  assert.ok(city.energy>trainingCost(starting),'a tournament costs more than a training session');
 });
+

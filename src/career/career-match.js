@@ -6,7 +6,7 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,attributeGrowth,pushHistory,pushLog,clamp} from './state.js';
 import {careerProfile} from './matchmaking.js';
 import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
@@ -125,7 +125,7 @@ export function startCareerMatch(state,eventId,optionId=null){
 
   const event=currentEvents(state).find(entry=>entry.id===eventId);
   if(!event)return {ok:false,state,message:'That event is not on the calendar this week.'};
-  if(!canEnterEvent(state))return {ok:false,state,message:eventBlockReason(state)};
+  if(!canEnterEvent(state,event))return {ok:false,state,message:eventBlockReason(state,event)};
   const eligible=entryEligibility(state,EVENT_BY_ID[event.eventId]);
   if(!eligible.ok)return {ok:false,state,message:eligible.reason};
   const option=event.options.find(entry=>entry.id===(optionId??event.defaultOptionId));
@@ -144,7 +144,8 @@ export function startCareerMatch(state,eventId,optionId=null){
     tournament,
     energy:state.energy-event.energyCost,
     lastActionWeek:state.week,
-    lastEventWeek:state.week,
+    lastEventWeek:isLeagueEvent(event)?state.lastEventWeek:state.week,
+    lastLeagueWeek:isLeagueEvent(event)?state.week:state.lastLeagueWeek,
     stats:Object.assign({},state.stats,{entries:(state.stats.entries??0)+1})
   });
   // A bye in the first round is stepped over straight away.

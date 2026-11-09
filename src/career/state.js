@@ -137,6 +137,9 @@ export function createCareer(options={}){
     lastEntry:null,
     lastActionWeek:-1,
     lastEventWeek:-1,
+    // A league match is a weeknight commitment, so it does not take the
+    // tournament slot. It has its own.
+    lastLeagueWeek:-1,
     trainingWeek:0,
     trainingSessions:0,
     log:[{week:0,text:`Career started in ${city.label}.`}]
@@ -212,9 +215,17 @@ export function trainBlockReason(state){
 }
 // One event a week. A league that runs for a season is an event every week
 // of it, and a tournament is one event.
-export function canEnterEvent(state){return (state.lastEventWeek??-1)!==state.week}
-export function eventBlockReason(state){
-  return canEnterEvent(state)?null:'You have already entered an event this week. Advance the calendar to compete again.';
+export function isLeagueEvent(event){return event?.matchType==='league'}
+export function canEnterEvent(state,event=null){
+  const week=state.week;
+  if(isLeagueEvent(event))return (state.lastLeagueWeek??-1)!==week;
+  return (state.lastEventWeek??-1)!==week;
+}
+export function eventBlockReason(state,event=null){
+  if(canEnterEvent(state,event))return null;
+  return isLeagueEvent(event)
+    ?'You have already played your league match this week.'
+    :'You have already entered an event this week. Advance the calendar to compete again.';
 }
 export function canAct(state){return canTrain(state)||canEnterEvent(state)}
 
@@ -456,7 +467,7 @@ export function advanceWeek(state){
     week,
     ratings:state.worldRatings
   });
-  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
+  const moved=pushHistory({...state,week,energy,lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,trainingWeek:week,trainingSessions:0,worldRatings:world.ratings,stats:{...state.stats,weeks:state.stats.weeks+1}},`Week ${week+1} begins.`);
   const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.`);
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }

@@ -280,14 +280,14 @@ A player earns tour points from events, and points age out on the rolling 52 wee
 A week is a budget of **100 energy**, and the player spends it however they like.
 
 - **Training is repeatable**, up to four sessions a week.
-- **One event a week.** A league that runs for a season is an event every week of it; a tournament is one event.
+- **One tournament a week and one league match.** A tournament plays several rounds in the week. A league match is a single game on a weeknight, so it has its own slot and does not take the weekend. That is how players actually arrange a week, and it is why a league match costs far less energy than a tournament.
 - **Travel** costs 10 energy inside a region and 20 across regions, on top of everything else.
 
 Both the cost of a training session and the weekly recovery scale with the level the player competes at, so the shape of a week changes as a career climbs. A stronger player trains harder and takes more back.
 
 | Rating | A training session | Recovery | A week that fits inside it |
 |---|---|---|---|
-| 3.5, where a career starts | 10 | 69 | three sessions and a club night, 42 |
+| 3.5, where a career starts | 10 | 69 | three sessions, a league match and a club night, 50 |
 | 4.5 | 14 | 75 | three sessions and a regional open, 72 |
 | 5.5 | 18 | 81 | two sessions and a national round, 80 |
 | 6.5 | 22 | 87 | one session and a pro league event, 86 |
