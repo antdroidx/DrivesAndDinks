@@ -97,14 +97,19 @@ export function technicalAgeFactor(key,age,maintenance=0){
   return 1-(1-base)*(1-maintained*.75);
 }
 
+function maintainedDecline(base,maintenance,effect){
+  const maintained=Math.min(1,Math.max(0,Number(maintenance)||0));
+  return 1-(1-base)*(1-maintained*effect);
+}
+
 export function attributeAgeFactor(key,age,profile={},maintenance=0){
   if(age<25){
     const development=developmentAgeFactor(age);
     const learning=profile.learningRate??1;
     return Math.min(1,development*(.96+learning*.04));
   }
-  if(key==='agility')return agilityAgeFactor(age,profile);
-  if(key==='power')return powerAgeFactor(age,profile);
+  if(key==='agility')return maintainedDecline(agilityAgeFactor(age,profile),maintenance,.55);
+  if(key==='power')return maintainedDecline(powerAgeFactor(age,profile),maintenance,.55);
   return technicalAgeFactor(key,age,maintenance);
 }
 
