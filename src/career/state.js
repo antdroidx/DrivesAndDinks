@@ -131,6 +131,8 @@ export function createCareer(options={}){
     matches:[],
     money:250,
     rivalId:rival?.id??null,
+    // Wild cards earned by winning a Challenger event.
+    wildCards:0,
     entered:[],
     lastEntry:null,
     lastActionWeek:-1,

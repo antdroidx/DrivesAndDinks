@@ -10,7 +10,7 @@ import {currentEvents,canEnterEvent,eventBlockReason,attributeGrowth,pushHistory
 import {careerProfile} from './matchmaking.js';
 import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
-import {entryEligibility} from './calendar.js';
+import {entryEligibility,entryStatus} from './calendar.js';
 import {EVENT_BY_ID} from './geography.js';
 import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
@@ -134,11 +134,13 @@ export function startCareerMatch(state,eventId,optionId=null){
     return {ok:false,state,message:'That event needs '+event.energyCost+' energy. You have '+state.energy+'.'};
   }
 
+  const entry=entryStatus(state,event);
   const started=startTournament({state,event,option});
   if(!started.ok)return {ok:false,state,message:started.message};
   const tournament=started.tournament;
   startRound(tournament,seededRandom(mixSeed(state.seed,'start:'+state.week+':'+event.eventId)));
   let next=Object.assign({},state,{
+    wildCards:entry.via==='wild-card'?Math.max(0,(state.wildCards??0)-1):(state.wildCards??0),
     tournament,
     energy:state.energy-event.energyCost,
     lastActionWeek:state.week,
@@ -285,7 +287,9 @@ function finishTournament(state,tournament){
   });
   const closed=Object.assign({},tournament,{finished:true,placeText,points:earned});
   // The ranking is built from results, not from the board.
-  const ranked=recordResult(state,{
+  // Winning a Challenger earns a wild card into a bigger main draw.
+  const wonChallenger=place===1&&(EVENT_BY_ID[tournament.eventId]?.tier==='challenger');
+  const ranked=recordResult(wonChallenger?{...state,wildCards:(state.wildCards??0)+1}:state,{
     week:state.week,
     eventId:tournament.eventId,
     format:tournament.format,

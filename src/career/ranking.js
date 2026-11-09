@@ -92,6 +92,17 @@ export function recordResult(state,result){
   return {...state,rankingResults:history};
 }
 
+// The Challenger circuit has its own board: the best sixteen Challenger
+// results over the same window. Tour points never count towards it.
+export const CHALLENGER_BEST=16;
+export function challengerPoints(results,week){
+  return (results??[])
+    .filter(result=>result.tier==='challenger'&&inWindow(result,week))
+    .sort((a,b)=>b.points-a.points)
+    .slice(0,CHALLENGER_BEST)
+    .reduce((sum,result)=>sum+(Number(result.points)||0),0);
+}
+
 // Whether a player has earned a place in the season finals.
 export function finalsQualified(state,week=state?.week??0){
   const place=rankForPoints(rankings(state,week).overall);
@@ -104,6 +115,8 @@ export function rankingSummary(state,week=state?.week??0){
   return {
     ...position,
     points:{...position.points,overall:Math.round(position.points.overall)},
+    challenger:challengerPoints(state?.rankingResults,week),
+    challengerRank:rankForPoints(challengerPoints(state?.rankingResults,week)),
     finals:finalsQualified(state,week)
   };
 }

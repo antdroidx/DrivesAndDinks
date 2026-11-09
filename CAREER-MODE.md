@@ -333,7 +333,7 @@ The milestone this branch delivers.
 - [x] Citizenship and city in place of ethnicity
 - [x] Offline: service worker precaches the shell and the shared engine modules
 - [x] Local persistence with immediate write-through on every action
-- [x] 144 career tests across eleven files (`test/career-*.test.js`), 594 in the suite overall
+- [x] 146 career tests across eleven files (`test/career-*.test.js`), 596 in the suite overall
 - [x] Verified in the built-in browser: create, train, pick a format and bracket, play a rated match, advance, browse, roster, search, move region, reload-persistence
 
 ### M2 — Match play inside a career ✅ complete
@@ -376,18 +376,20 @@ An event now fields a tournament rather than a single match.
 
 **Where it stands.** Every event names the shapes it may run, and the calendar picks one from that set. Knockouts take one loss, a double elimination takes two, a ladder swaps the winner up and the loser down a rung, an open draw gives the player a new partner each round, and a team league plays sides of four.
 
-### M4 — The ranking and the pro tour 🔶 in progress
+### M4 — The ranking and the pro tour ✅ complete
 
 - [x] Four rankings: Overall, Doubles, Mixed and Singles
 - [x] Best fourteen results in a fifty-two week window, with the biggest events always counting
 - [x] The composite: doubles 50, mixed 35, singles 15
 - [x] Points by round reached, per tier, replacing points for entry
 - [x] The board is placed on points, not on the rating
+- [x] Entry selection: the top of the board is accepted directly, a wild card gets an unranked player in, and everyone else qualifies
+- [x] Wild cards, earned by winning a Challenger event, and the Challenger route into an Open main draw
+- [x] The Challenger ranking, kept separate from the tour
 - [x] The PPA Finals: top eight Overall, and an eight-team round robin as the event
 - [x] The World Championship as a once-a-year anchor, worth 3000
-- [ ] Entry selection: the top ten in the division, then contracted players, then ranking, then the qualifier
-- [ ] Wild cards, and the Challenger route into an Open main draw
-- [ ] The Challenger ranking, kept separate from the tour
+
+The contracted-player tier of entry selection arrives with M5, because there are no contracts yet.
 
 ### M5 — Contracts, obligations and the drop ⬜ planned
 

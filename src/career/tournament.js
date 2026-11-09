@@ -23,6 +23,7 @@ import {RATING_BRACKETS,formatSkill} from './rating.js';
 import {seededRandom} from '../competition.js';
 import {mixSeed} from './population.js';
 import {pointsForFinish} from './tour.js';
+import {entryStatus} from './calendar.js';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -308,10 +309,12 @@ export function startTournament({state,event,option}){
   const kind=pickShape(event,random);
   const playerAthlete={id:'player',name:state.athlete.name,rating:state.athlete.formats[option.format],skill:formatSkill(state.athlete.ratings,option.format),archetypeId:state.athlete.archetypeId,gender:state.athlete.gender,handedness:state.athlete.handedness};
   let tournament=buildByKind(kind,teams,field.players,random);
-  // A player outside the main-draw cut has to qualify first. One match gets
-  // them into the draw in place of the team they beat.
+  // The board decides whether the player is accepted directly, or has to
+  // qualify. One qualifier match gets them into the draw in place of the
+  // team they beat.
   const qualifierSlots=Math.max(0,Math.min(drawSize-1,event?.qualifierSlots??0));
-  if(qualifierSlots>0&&teams.length>qualifierSlots){
+  const entry=entryStatus(state,event);
+  if(!entry.direct&&qualifierSlots>0&&teams.length>qualifierSlots){
     const ranked=[...teams].sort((a,b)=>b.rating-a.rating);
     const cut=ranked.length-qualifierSlots;
     const playerIndex=ranked.findIndex(team=>team.id==='player');

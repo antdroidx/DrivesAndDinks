@@ -1,8 +1,9 @@
+import {entryStatus} from '../src/career/calendar.js';
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {
   formatPoints,overallPoints,rankings,rankForPoints,pointsAtRank,
-  finalsQualified,recordResult,RANKING_BEST,RANKING_WINDOW,FORMAT_WEIGHTS
+  finalsQualified,recordResult,challengerPoints,RANKING_BEST,RANKING_WINDOW,FORMAT_WEIGHTS
 } from '../src/career/ranking.js';
 
 const state=(results=[],week=0)=>({week,rankingResults:results});
@@ -67,6 +68,16 @@ test('the finals take the top eight',()=>{
   assert.equal(finalsQualified(outside),false);
 });
 
+test('the challenger board counts only challenger results',()=>{
+  const results=[
+    result(0,'doubles',500,'challenger'),
+    result(0,'doubles',250,'challenger'),
+    result(0,'doubles',2000,'major'),
+    result(0,'doubles',1000,'cup')
+  ];
+  assert.equal(challengerPoints(results,0),750,'only the Challenger tier counts');
+});
+
 test('recording a result keeps the history and trims the old',()=>{
   let tracked={week:0,rankingResults:[]};
   tracked=recordResult(tracked,{week:0,format:'doubles',tier:'open',points:800,place:1,eventId:'e1'});
@@ -74,3 +85,23 @@ test('recording a result keeps the history and trims the old',()=>{
   assert.equal(tracked.rankingResults[0].points,800);
   assert.equal(tracked.rankingResults[0].tier,'open');
 });
+
+test('the board decides direct entry, a wild card, or the qualifier',()=>{
+  const unranked={week:0,rankingResults:[],wildCards:0};
+  const event={drawSize:16,tier:'open'};
+  assert.equal(entryStatus(unranked,event).direct,false,'no points means you qualify');
+  assert.equal(entryStatus({...unranked,wildCards:1},event).via,'wild-card');
+
+  const top={
+    week:0,
+    wildCards:0,
+    rankingResults:[
+      {week:0,format:'doubles',tier:'major',points:12000,place:1},
+      {week:0,format:'mixed',tier:'major',points:12000,place:1},
+      {week:0,format:'singles',tier:'major',points:12000,place:1}
+    ]
+  };
+  assert.equal(entryStatus(top,event).direct,true,'the top of the board is accepted directly');
+  assert.equal(entryStatus(top,event).via,'ranking');
+});
+

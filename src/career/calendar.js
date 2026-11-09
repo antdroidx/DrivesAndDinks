@@ -12,7 +12,7 @@ import {COMPETITION_EVENTS,EVENT_BY_ID,PRO_LEAGUE_DIVISION,EVENT_SCOPE_LABELS} f
 import {RATING_BRACKETS,availableDivisions,divisionFor,formatRating} from './rating.js';
 import {tourFor,tourRank,pointsInWindow} from './tour.js';
 import {mixSeed} from './population.js';
-import {finalsQualified} from './ranking.js';
+import {finalsQualified,positions} from './ranking.js';
 import {seededRandom} from '../competition.js';
 
 // Monday, 5 January 2026. Career week 0 starts here.
@@ -116,6 +116,24 @@ export function entryOptions(state,event){
     }
   }
   return options;
+}
+
+// Whether the board earns a place in the main draw, a wild card into it, or
+// a place in the qualifier.
+//
+// The top of the board is accepted directly. A wild card, earned by winning a
+// Challenger event, gets an otherwise unqualified player into the main draw.
+// Everyone else qualifies.
+export const MAIN_DRAW_LEVELS=Object.freeze(['open','cup','major','world']);
+export function entryStatus(state,event){
+  const board=positions(state,state.week).overall;
+  const direct=Math.max(2,event?.drawSize??16);
+  if(board!==null&&board<=direct)return {direct:true,via:'ranking',rank:board};
+  // A wild card does not need a ranking; that is the point of one.
+  if((state.wildCards??0)>0&&MAIN_DRAW_LEVELS.includes(event?.tier)){
+    return {direct:true,via:'wild-card',rank:board};
+  }
+  return {direct:false,via:null,rank:board};
 }
 
 // Whether a player may enter an event at all. This is about access, not
