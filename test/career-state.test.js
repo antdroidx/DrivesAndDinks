@@ -68,7 +68,7 @@ test('training costs energy, raises the focused rating and counts against the we
 });
 
 test('training is limited to a set number of sessions a week',()=>{
-  let state=career();
+  let state={...career(),energy:1000};
   for(let index=0;index<MAX_TRAINING_SESSIONS;index++){
     const result=train(state,'serve');
     assert.ok(result.ok,result.message);
@@ -84,13 +84,18 @@ test('training is limited to a set number of sessions a week',()=>{
   assert.equal(canTrain(next),true);
 });
 
-test('a week holds several training sessions and one event',()=>{
+test('a week separates league, club and tournament lanes',()=>{
   const joined=withClub(career());
-  const event=currentEvents(joined).find(entry=>entry.eligible.ok);
-  const attended=attendEvent(joined,event.id,event.defaultOptionId);
+  const league=currentEvents(joined).find(entry=>entry.matchType==='league'&&entry.eligible.ok);
+  assert.ok(league);
+  const attended=attendEvent(joined,league.id,league.defaultOptionId);
   assert.ok(attended.ok,attended.message);
-  assert.equal(canEnterEvent(attended.state),false,'an event takes the event slot');
+  assert.equal(canEnterEvent(attended.state,league),false,'one league match per week');
   assert.equal(canTrain(attended.state),true,'an event does not stop training');
+  const club={eventId:'club-night',matchType:'club',scope:'club'};
+  const tournament={eventId:'city-open',matchType:'tournament',scope:'city'};
+  assert.equal(canEnterEvent(attended.state,club),true,'club ladders have their own weekly lane');
+  assert.equal(canEnterEvent(attended.state,tournament),true,'tournaments have a separate lane');
   const trained=train(attended.state,'serve');
   assert.ok(trained.ok,trained.message);
 });
@@ -143,7 +148,7 @@ test('advancing to the next event skips the quiet weeks',()=>{
 });
 
 test('a world event and a home league match cannot share a week',()=>{
-  const state=withClub(career());
+  const state={...withClub(career()),money:1000};
   const world={scope:'world',matchType:'tournament'};
   const local={scope:'city',matchType:'tournament'};
   assert.equal(canEnterEvent(state,world),true,'a free week allows the trip');
@@ -237,19 +242,17 @@ test('an event the player cannot enter says why',()=>{
   }
 });
 
-test('the pro league is locked until the player holds a tour standing',()=>{
+test('the pro league is locked until the player signs a tour contract',()=>{
   let state=withClub(career());
   const proEvent=currentEvents({...state,week:10}).find(entry=>entry.eventId==='pro-league');
   assert.ok(proEvent,'the pro league should appear on the calendar');
-  assert.equal(proEvent.eligible.ok,false,'a beginner cannot enter the tour');
-  assert.match(proEvent.lockedReason,/rating/);
-  // A rating that clears the board floor is not enough on its own.
-  state={...state,athlete:{...state.athlete,formats:{...state.athlete.formats,doubles:5,singles:5,mixed:5}}};
-  const noPoints=currentEvents({...state,week:10}).find(entry=>entry.eventId==='pro-league');
-  assert.equal(noPoints.eligible.ok,false);
-  assert.match(noPoints.lockedReason,/tour points/);
-  // A rating, a standing and the qualification points together open it.
-  state={...state,athlete:{...state.athlete,tourPoints:2000,tourPointsHistory:[{week:0,points:2000}]}};
+  assert.equal(proEvent.eligible.ok,false,'an amateur cannot enter the tour');
+  assert.match(proEvent.lockedReason,/contract/);
+  state={
+    ...state,
+    contract:'futures',
+    athlete:{...state.athlete,formats:{...state.athlete.formats,doubles:5,singles:5,mixed:5},tourPoints:2000,tourPointsHistory:[{week:0,points:2000}]}
+  };
   const open=currentEvents({...state,week:10}).find(entry=>entry.eventId==='pro-league');
   assert.ok(open.eligible.ok,open.lockedReason);
 });
@@ -290,7 +293,7 @@ test('attending an event costs energy, records the bracket and improves the focu
   const grown=Object.keys(result.state.athlete.ratings).filter(key=>result.state.athlete.ratings[key]>joined.athlete.ratings[key]);
   assert.equal(grown.length,1,'playing an event grows one attribute');
   assert.ok(grown.length===1&&result.state.athlete.ratings[grown[0]]<=99);
-  assert.equal(canEnterEvent(result.state),false);
+  assert.equal(canEnterEvent(result.state,event),false);
   assert.ok(result.state.entered.includes(event.eventId));
   assert.equal(result.state.lastEntry.divisionId,event.defaultOptionId.split(':')[1]);
 });

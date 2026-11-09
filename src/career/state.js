@@ -10,15 +10,19 @@ import {seededRandom} from '../competition.js';
 import {REGIONS,regionById,allCities,cityById,cityByIdAnywhere,citizenshipFor,EVENT_BY_ID} from './geography.js';
 import {pointsForEntry,addPoints,pointsInWindow} from './tour.js';
 import {buildClubIndex,findClub,mixSeed} from './population.js';
-import {generateWeekEvents,weekLabel,entryEligibility} from './calendar.js';
+import {generateWeekEvents,weekLabel,weekDate,entryEligibility} from './calendar.js';
 import {findRival} from './standings.js';
-import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,FORMATS,divisionFor} from './rating.js';
+import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,skillForRating,FORMATS,divisionFor} from './rating.js';
 import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js';
 import {evaluateSeason,seasonDue,isContracted} from './contracts.js';
 import {emptyAnalytics} from './analytics.js';
 import {clubAccess,clearPartners} from './club-life.js';
 import {normalizeHeight,normalizeWeight,experienceById,traitById,startingModifiers} from './creation.js';
 import {normalizeStartAge,createDevelopmentProfile,developmentAgeFactor,attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,noteSkillPeaks,noteTrainingMaintenance,advanceAgeYear,capRatingForAge,capAttributeForAge} from './age.js';
+import {emptyFinance,eventFinancialCost,chargeEventCosts,chargeMove,paySalary} from './finance.js';
+import {potentialForStartAge} from './career-lifecycle.js';
+import {emptyCpuWorld,createCpuWorld,advanceCpuWorld} from './cpu-careers.js';
+import {eventEntryCost} from './planning.js';
 
 // The neutral adult creation baseline is 3.500. Experience can move this
 // to 2.500-4.500 before youth development is applied.
@@ -30,11 +34,12 @@ export const MAX_ENERGY=100;
 export const MAX_TRAINING_SESSIONS=4;
 // Training costs more as the player competes at a higher level, because a
 // stronger player trains harder and a harder session takes more out of the
-// week. The same number of sessions costs an amateur a fifth of his budget
-// and a pro a quarter of it.
-export const TRAINING_BASE_COST=8;
-export const TRAINING_COST_PER_LEVEL=4;
-export const TRAINING_MAX_COST=28;
+// week. A serious session can consume a third of the week, so training,
+// club play, league play and tournaments compete for the same budget.
+export const TRAINING_BASE_COST=30;
+export const TRAINING_COST_PER_LEVEL=10;
+export const TRAINING_MAX_COST=70;
+export const AMATEUR_TOURNAMENTS_PER_MONTH=2;
 // Recovery scales the same way. A pro's week holds more work than an
 // amateur's and takes it back faster.
 export const RECOVERY_BASE=66;
@@ -68,17 +73,25 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,heig
   const creationModifiers=startingModifiers({experience:experienceOption.id,trait:traitOption.id,height:resolvedHeight,weight:resolvedWeight});
   const development=createDevelopmentProfile(seed,resolvedAge);
   const peakAge=development.peakAge;
-  const shift=STARTING_SKILL-70;
+  const potential=potentialForStartAge(resolvedAge,70);
+  const potentialSkillBonus=(potential-70)*.7;
+  const potentialRatingBonus=(potential-70)/40;
   const peakRatings={};
   const ratings={};
+  const shaped={};
   for(const key of RATING_KEYS){
-    const base=archetype.ratings[key]??70;
-    peakRatings[key]=clamp(Math.round(base+shift+(creationModifiers[key]??0)+(random()-.5)*5),20,99);
+    shaped[key]=(archetype.ratings[key]??70)+(creationModifiers[key]??0)+(random()-.5)*5;
+  }
+  // Preserve the archetype's strengths and weaknesses while moving the whole
+  // profile to the skill level implied by the selected experience.
+  const skillShift=skillForRating(experienceOption.rating)-skillAverage(shaped);
+  for(const key of RATING_KEYS){
+    peakRatings[key]=clamp(Math.round(shaped[key]+skillShift+potentialSkillBonus),20,99);
     ratings[key]=clamp(Math.floor(peakRatings[key]*attributeAgeFactor(key,resolvedAge)),20,99);
   }
   const average=skillAverage(ratings);
-  const firstRating=clamp(Math.round(experienceOption.rating*(resolvedAge<25?developmentAgeFactor(resolvedAge):1)*1000)/1000,2,8);
-  const peakFormats=Object.fromEntries(FORMATS.map(format=>[format,experienceOption.rating]));
+  const firstRating=clamp(Math.round((experienceOption.rating+potentialRatingBonus*.35)*(resolvedAge<25?developmentAgeFactor(resolvedAge):1)*1000)/1000,2,8);
+  const peakFormats=Object.fromEntries(FORMATS.map(format=>[format,clamp(experienceOption.rating+potentialRatingBonus,2,8)]));
   return {
     id:`player-${seed}`,
     name:resolvedName,
@@ -97,6 +110,7 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,heig
     startingTrait:traitOption.id,
     startingTraitLabel:traitOption.label,
     peakAge,
+    potential,
     development,
     maintenance:Object.fromEntries(RATING_KEYS.map(key=>[key,0])),
     peakRatings,
@@ -179,6 +193,8 @@ export function createCareer(options={}){
     // The results the four rankings are built from.
     rankingResults:[],
     money:250,
+    finance:emptyFinance(250),
+    cpuWorld:emptyCpuWorld(),
     rivalId:rival?.id??null,
     // Wild cards earned by winning a Challenger event.
     wildCards:0,
@@ -197,6 +213,7 @@ export function createCareer(options={}){
     lastEntry:null,
     lastActionWeek:-1,
     lastEventWeek:-1,
+    lastClubWeek:-1,
     // A league match is a weeknight commitment, so it does not take the
     // tournament slot. It has its own.
     lastLeagueWeek:-1,
@@ -282,10 +299,35 @@ export function trainBlockReason(state){
   if(state.energy<cost)return `Training needs ${cost} energy. You have ${state.energy}.`;
   return null;
 }
-// One event a week. A league that runs for a season is an event every week
-// of it, and a tournament is one event.
 export function isLeagueEvent(event){return event?.matchType==='league'}
+export function isClubEvent(event){return event?.matchType==='club'}
+export function isTournamentEvent(event){return event?.matchType==='tournament'}
 export function isTravelEvent(event){return event?.scope==='world'}
+
+function entryDefinition(entry){
+  const eventId=String(entry?.eventId??'').replace(/^w\d+-/,'');
+  return EVENT_BY_ID[eventId]??null;
+}
+
+function calendarMonth(week){
+  const date=weekDate(week);
+  return date.getUTCFullYear()*12+date.getUTCMonth();
+}
+
+export function tournamentEntriesThisMonth(state,week=state?.week??0){
+  const month=calendarMonth(week);
+  const seen=new Set();
+  for(const entry of state?.eventEntries??[]){
+    if(!entry?.eventId||calendarMonth(entry.week)!==month)continue;
+    const type=entry.matchType??entryDefinition(entry)?.matchType;
+    if(type==='tournament')seen.add(entry.eventId);
+  }
+  return seen.size;
+}
+
+export function amateurTournamentSlotsUsed(state,week=state?.week??0){
+  return isContracted(state)?0:tournamentEntriesThisMonth(state,week);
+}
 // Divisions entered in the current week. A PPA-style event can offer all
 // three divisions, and each division is a separate tournament.
 export function eventEntriesThisWeek(state){
@@ -296,38 +338,47 @@ export function formatsPlayed(state,eventId,week=state?.week??0){
     .filter(entry=>entry.week===week&&entry.eventId===eventId)
     .map(entry=>entry.format))];
 }
-export function eventEntryCost(state,event){
-  const previous=eventEntriesThisWeek(state).filter(entry=>entry.eventId===event?.eventId).length;
-  if(!previous)return Number(event?.energyCost??event?.energy??0)||0;
-  // Travel and setup are paid once. Additional divisions add match load
-  // without charging the player for the event a second time.
-  return Math.max(4,Math.ceil((Number(event?.energyCost??event?.energy??0)||0)*0.2));
-}
+export {eventEntryCost};
 export function canEnterEvent(state,event=null){
   if(state.retired)return false;
+  const tournament=state.tournament;
+  if(tournament&&!tournament.finished&&!tournament.playerOut&&!tournament.inConsolation)return false;
+  if(event&&eventFinancialCost(state,event).total>(Number(state.money)||0))return false;
   const week=state.week;
   const travel=isTravelEvent(event);
   // A trip and a home commitment cannot both happen in one week.
   if(travel&&(state.lastLeagueWeek??-1)===week)return false;
   if(!travel&&(state.lastTravelWeek??-1)===week)return false;
+  if(isClubEvent(event))return (state.lastClubWeek??-1)!==week;
   if(isLeagueEvent(event))return (state.lastLeagueWeek??-1)!==week;
-  if((state.lastEventWeek??-1)!==week)return true;
-  // Once one tournament at an event is complete, the player may take on
-  // another division at that same event. A different event still has to wait
-  // for the next week.
   const sameEvent=eventEntriesThisWeek(state).some(entry=>entry.eventId===event?.eventId);
   const complete=state.tournament?.eventId===event?.eventId&&state.tournament?.finished;
-  return sameEvent&&complete;
+  if(sameEvent&&complete)return true;
+  if((state.lastEventWeek??-1)===week)return false;
+  if(event&&isTournamentEvent(event)&&amateurTournamentSlotsUsed(state,week)>=AMATEUR_TOURNAMENTS_PER_MONTH)return false;
+  return true;
 }
 export function eventBlockReason(state,event=null){
   if(state.retired)return 'This career has ended.';
+  const tournament=state.tournament;
+  if(tournament&&!tournament.finished&&!tournament.playerOut&&!tournament.inConsolation){
+    return 'Finish the competition already in progress before entering another event.';
+  }
   if(canEnterEvent(state,event))return null;
   const week=state.week;
+  const financialCost=eventFinancialCost(state,event);
+  if(financialCost.total>(Number(state.money)||0)){
+    return 'Event needs $'+financialCost.total+' for entry and travel. You have $'+(Number(state.money)||0)+'.';
+  }
+
   if(isTravelEvent(event)&&(state.lastLeagueWeek??-1)===week){
     return 'You played a league match this week. A world event needs the travel time.';
   }
   if(!isTravelEvent(event)&&(state.lastTravelWeek??-1)===week){
     return 'You are travelling for a world event this week.';
+  }
+  if(isClubEvent(event)){
+    return 'You have already played your club ladder this week.';
   }
   if(isLeagueEvent(event)){
     return 'You have already played your league match this week.';
@@ -336,7 +387,10 @@ export function eventBlockReason(state,event=null){
   if(played.size&&(event?.formats??[]).every(format=>played.has(format))){
     return 'You have played every division offered at this event.';
   }
-  return 'You have already entered a different event this week. Advance the calendar to compete again.';
+  if(event&&isTournamentEvent(event)&&amateurTournamentSlotsUsed(state,week)>=AMATEUR_TOURNAMENTS_PER_MONTH){
+    return 'Amateur tournament limit reached: '+AMATEUR_TOURNAMENTS_PER_MONTH+' events this month.';
+  }
+  return 'You have already entered a tournament this week. Club ladders and league play have separate weekly slots.';
 }
 export function canAct(state){return !state.retired&&(canTrain(state)||canEnterEvent(state))}
 
@@ -383,17 +437,20 @@ export function currentEvents(state){return state.retired?[]:generateWeekEvents(
 export function attendEvent(state,eventId,optionId=null){
   const event=currentEvents(state).find(entry=>entry.id===eventId);
   if(!event)return {ok:false,state,message:'That event is not on the calendar this week.'};
-  if(!canEnterEvent(state))return {ok:false,state,message:eventBlockReason(state)};
+  if(!canEnterEvent(state,event))return {ok:false,state,message:eventBlockReason(state,event)};
   const eligible=entryEligibility(state,EVENT_BY_ID[event.eventId]);
   if(!eligible.ok)return {ok:false,state,message:eligible.reason};
   const option=event.options.find(entry=>entry.id===(optionId??event.defaultOptionId));
   if(!option)return {ok:false,state,message:'That bracket is not running at this event.'};
   const format=option.format;
   const division=option.divisionId;
-  if(state.energy<event.energyCost){
-    return {ok:false,state,message:'That event needs '+event.energyCost+' energy. You have '+state.energy+'.'};
+  const energyCost=eventEntryCost(state,event);
+  const charged=chargeEventCosts(state,event,event.title);
+  if(!charged.ok)return {ok:false,state,message:charged.message};
+  const paid=charged.state;
+  if(paid.energy<energyCost){
+    return {ok:false,state,message:'That event needs '+energyCost+' energy. You have '+paid.energy+'.'};
   }
-
   // The match is played. The opponents come from the bracket and the format
   // the player entered, so playing up means facing somebody a bracket
   // stronger, and the rating moves on how the result compared with the
@@ -502,10 +559,16 @@ export function attendEvent(state,eventId,optionId=null){
     ok:true,
     state:Object.assign({},moved,{
       athlete:Object.assign({},moved.athlete,{tourPoints:pointsInWindow(tourPointsHistory,state.week),tourPointsHistory}),
-      energy:state.energy-event.energyCost,
+      energy:state.energy-energyCost,
+      money:paid.money,
+      finance:paid.finance,
       lastActionWeek:state.week,
-      lastEventWeek:state.week,
+      lastEventWeek:isClubEvent(event)||isLeagueEvent(event)?state.lastEventWeek:state.week,
+      lastClubWeek:isClubEvent(event)?state.week:state.lastClubWeek,
+      lastLeagueWeek:isLeagueEvent(event)?state.week:state.lastLeagueWeek,
+      lastTravelWeek:isTravelEvent(event)?state.week:state.lastTravelWeek,
       entered,
+      eventEntries:[...(state.eventEntries??[]),{week:state.week,eventId:event.eventId,format,divisionId:division,cost:energyCost,matchType:event.matchType,tier:event.tier}].slice(-64),
       lastEntry:{week:state.week,eventId:event.eventId,format,divisionId:division,label:option.label},
       matches:[...state.matches,matchRecord].slice(-40),
       stats:Object.assign({},state.stats,{entries:state.stats.entries+1,matches:state.stats.matches+1})
@@ -524,9 +587,25 @@ export function joinClub(state,clubId){
   if(!access.ok)return {ok:false,state,message:`${club.tierLabel} clubs need ${access.required} reputation. You have ${access.current}.`};
   if(state.energy<TRAVEL_COST&&club.cityId!==state.cityId)return {ok:false,state,message:`Travelling to ${club.cityLabel} needs ${TRAVEL_COST} energy.`};
   const city=cityById(state.regionId,club.cityId);
-  const moved=club.cityId!==state.cityId
-    ?{...state,energy:state.energy-TRAVEL_COST,cityId:city.id,cityLabel:city.label,areaId:city.areaId,areaLabel:city.areaLabel,country:city.country,stats:{...state.stats,moves:state.stats.moves+1}}
-    :state;
+  let moved=state;
+  if(club.cityId!==state.cityId){
+    const travel=chargeMove(state,{
+      international:false,
+      cityLabel:city.label,
+      reference:'club:'+club.id+':'+state.week
+    });
+    if(!travel.ok)return {ok:false,state,message:travel.message};
+    moved={
+      ...travel.state,
+      energy:travel.state.energy-TRAVEL_COST,
+      cityId:city.id,
+      cityLabel:city.label,
+      areaId:city.areaId,
+      areaLabel:city.areaLabel,
+      country:city.country,
+      stats:{...travel.state.stats,moves:travel.state.stats.moves+1}
+    };
+  }
   const joined={...moved,clubId:club.id,club:{id:club.id,name:club.name,cityId:club.cityId,cityLabel:club.cityLabel,tierLabel:club.tierLabel,surface:club.surface}};
   const next=pushLog(pushHistory(clearPartners(joined),'Joined a club.'),`Joined ${club.name}.`);
   return {ok:true,state:next,message:`You joined ${club.name} in ${club.cityLabel}.`};
@@ -546,9 +625,15 @@ export function moveToCity(state,cityId){
   const international=city.regionId!==state.regionId;
   const cost=international?INTERNATIONAL_TRAVEL_COST:TRAVEL_COST;
   if(state.energy<cost)return {ok:false,state,message:`Travelling needs ${cost} energy. You have ${state.energy}.`};
+  const travel=chargeMove(state,{
+    international,
+    cityLabel:city.label,
+    reference:'move:'+city.id+':'+state.week
+  });
+  if(!travel.ok)return {ok:false,state,message:travel.message};
   const moved=pushHistory({
-    ...clearPartners(state),
-    energy:state.energy-cost,
+    ...clearPartners(travel.state),
+    energy:travel.state.energy-cost,
     regionId:city.regionId,
     regionLabel:regionById(city.regionId).label,
     areaId:city.areaId,
@@ -569,6 +654,10 @@ export function moveToCity(state,cityId){
 // Skips the quiet weeks and stops on the next week with something the
 // player can enter, so a career does not have to be clicked forward.
 export function advanceToNextEvent(state,{maxWeeks=52}={}){
+  const tournament=state.tournament;
+  if(tournament&&!tournament.finished&&!tournament.playerOut&&!tournament.inConsolation){
+    return {ok:false,state,events:[],message:'Finish the competition already in progress before searching for another event.'};
+  }
   let current=state;
   for(let index=0;index<maxWeeks;index++){
     current=advanceWeek(current).state;
@@ -593,17 +682,26 @@ export function advanceWeek(state){
     week,
     ratings:state.worldRatings
   });
+  const cpuWorld=state.cpuWorld?.records&&Object.keys(state.cpuWorld.records).length?state.cpuWorld:createCpuWorld(state.seed,state.regionId,Math.max(0,week-1));
+  const cpu=advanceCpuWorld(cpuWorld,{
+    seed:state.seed,
+    regionId:state.regionId,
+    week,
+    ratings:world.ratings
+  });
+  world.ratings=cpu.ratings;
   const tournament=state.tournament?.nightComplete
     ?{...state.tournament,nightComplete:false}
     :state.tournament;
-  const circuit=advanceCircuit({...state,week});
+  const circuit=cpu.world.circuit;
   const birthday=advanceAgeYear(state.athlete,week);
   let advanced={
     ...state,week,energy,
     athlete:birthday.athlete,
-    lastActionWeek:-1,lastEventWeek:-1,lastLeagueWeek:-1,lastTravelWeek:-1,tournament,
+    lastActionWeek:-1,lastEventWeek:-1,lastClubWeek:-1,lastLeagueWeek:-1,lastTravelWeek:-1,tournament,
     trainingWeek:week,trainingSessions:0,
     worldRatings:world.ratings,
+    cpuWorld:cpu.world,
     circuit,
     stats:{...state.stats,weeks:state.stats.weeks+1}
   };
@@ -620,6 +718,8 @@ export function advanceWeek(state){
           ?' Contract moved down to '+evaluated.level+'.'
           :' Contract renewed.';
   }
+  const salary=paySalary(advanced,{week,contract:advanced.contract});
+  if(salary.ok)advanced=salary.state;
   const moved=pushHistory(advanced,`Week ${week+1} begins.`);
   const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.${seasonNote}`);
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};

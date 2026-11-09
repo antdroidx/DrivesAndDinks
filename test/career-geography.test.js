@@ -89,6 +89,7 @@ test('a league match is cheap and a tournament is not',()=>{
   assert.ok(city.energy<national.energy);
   assert.ok(pro.energy>national.energy,'the pro tour costs more than a national championship');
   const starting=createCareer({seed:1,regionId:'north-america'});
-  assert.ok(city.energy>trainingCost(starting),'a tournament costs more than a training session');
+  assert.ok(trainingCost(starting)>league.energy,'serious training costs more than a league night');
+  assert.ok(national.energy>trainingCost(starting),'a major tournament still costs more than a training session');
 });
 

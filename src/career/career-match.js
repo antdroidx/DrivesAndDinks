@@ -6,7 +6,7 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost} from './state.js';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost} from './state.js';
 import {careerProfile} from './matchmaking.js';
 import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js';
 import {sponsorsFor,prizeFor} from './standings.js';
@@ -14,13 +14,14 @@ import {entryEligibility,entryStatus} from './calendar.js';
 import {EVENT_BY_ID} from './geography.js';
 import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
-import {recordResult} from './ranking.js';
-import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation} from './contracts.js';
+import {recordResult,challengerPoints} from './ranking.js';
+import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js';
 import {recordGame,recordEventResult,eventTypeFor} from './analytics.js';
 import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js';
 import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js';
 import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js';
 import {mixSeed} from './population.js';
+import {chargeEventCosts,creditPrize} from './finance.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
 
@@ -151,15 +152,19 @@ export function startCareerMatch(state,eventId,optionId=null){
 
   const started=startTournament({state,event,option});
   if(!started.ok)return {ok:false,state,message:started.message};
+  const charged=chargeEventCosts(state,event,event.label);
+  if(!charged.ok)return {ok:false,state,message:charged.message};
+  const paid=charged.state;
   const tournament=started.tournament;
   startRound(tournament,seededRandom(mixSeed(state.seed,'start:'+state.week+':'+event.eventId)));
-  let next=Object.assign({},state,{
+  let next=Object.assign({},paid,{
     wildCards:entry.via==='wild-card'?Math.max(0,(state.wildCards??0)-1):(state.wildCards??0),
     tournament,
-    energy:state.energy-energyCost,
-    eventEntries:[...(state.eventEntries??[]),{week:state.week,eventId:event.eventId,format:option.format,divisionId:option.divisionId,cost:energyCost}].slice(-32),
+    energy:paid.energy-energyCost,
+    eventEntries:[...(state.eventEntries??[]),{week:state.week,eventId:event.eventId,format:option.format,divisionId:option.divisionId,cost:energyCost,matchType:event.matchType,tier:event.tier}].slice(-64),
     lastActionWeek:state.week,
-    lastEventWeek:isLeagueEvent(event)?state.lastEventWeek:state.week,
+    lastEventWeek:isClubEvent(event)||isLeagueEvent(event)?state.lastEventWeek:state.week,
+    lastClubWeek:isClubEvent(event)?state.week:state.lastClubWeek,
     lastLeagueWeek:isLeagueEvent(event)?state.week:state.lastLeagueWeek,
     lastTravelWeek:isTravelEvent(event)?state.week:state.lastTravelWeek,
     stats:Object.assign({},state.stats,{entries:(state.stats.entries??0)+1})
@@ -193,7 +198,7 @@ export function finishCareerMatch(state,report){
   if(!pending)return {ok:false,state,message:'There is no match waiting to be scored.'};
   const event=EVENT_BY_ID[pending.eventId];
   const option={id:pending.optionId,format:pending.format,divisionId:pending.divisionId,label:pending.bracket};
-  const ratedOutcome=rateMatchReport({report,matchup:pending.matchup,matchType:pending.matchType??event?.matchType});
+  const ratedOutcome=rateMatchReport({report,matchup:pending.matchup,matchType:pending.matchType??event?.matchType,targetScore:pending.rules?.targetScore});
   const ageAdjusted=capRatingForAge(state.athlete,pending.format,ratedOutcome.playerRating);
   const outcome={...ratedOutcome,playerRating:ageAdjusted.rating,delta:ageAdjusted.rating-pending.matchup.playerRating};
   const formats=Object.assign({},state.athlete.formats);
@@ -346,7 +351,9 @@ function finishTournament(state,tournament){
     place,
     points:earned
   });
-  if(wonChallenger)ranked=markRecommendation(ranked,'challenger-win');
+  if(wonChallenger&&challengerPoints(ranked.rankingResults,ranked.week)>=CHALLENGER_CONTRACT_POINTS){
+    ranked=markRecommendation(ranked,'challenger-season');
+  }
   ranked=isTourEvent(tournamentEvent)
     ?recordTourEvent(ranked,{eventId:tournament.eventId,week:state.week,format:tournament.format})
     :recordReentryEvent(ranked,{eventId:tournament.eventId,week:state.week});
@@ -380,9 +387,15 @@ function finishTournament(state,tournament){
     prize,
     rankingPoints:earned
   });
-  const next=pushLog(pushHistory(Object.assign({},eventLogged,{
+  const prizeLedger=creditPrize(eventLogged,{
+    week:state.week,
+    label:'Prize · '+tournament.label,
+    amount:prize,
+    reference:'tournament:'+tournament.id
+  });
+  const financiallyClosed=prizeLedger.ok?prizeLedger.state:eventLogged;
+  const next=pushLog(pushHistory(Object.assign({},financiallyClosed,{
     athlete,
-    money:state.money+prize,
     entered,
     tournament:Object.assign({},closed,{
       teams:closed.shape==='mlp'?closed.teams??[]:closed.teams?.slice(0,2)??[],

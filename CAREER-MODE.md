@@ -10,8 +10,8 @@ It lives at its own entry point, **`/career-mode/`**. The gameplay prototype at 
 | Entry point | `career-mode/index.html` → `https://antdroidx.github.io/DrivesAndDinks/career-mode/` |
 | Engine modules | `src/career/` |
 | Local run | `npm start` → `http://127.0.0.1:8768/career-mode/` |
-| Current milestone | **M2 and M3 — in progress; the competition shapes are built** |
-| Last updated | 2026-11-08 |
+| Current milestone | **Roadmap Phase 2 core complete: CPU careers and dynamic world; scale/device benchmarks next** |
+| Last updated | 2026-11-09 |
 
 ---
 
@@ -23,16 +23,19 @@ It lives at its own entry point, **`/career-mode/`**. The gameplay prototype at 
 - A fixed world of two regions, their areas, cities, clubs and athletes.
 - Browsing clubs, rosters and players.
 - A weekly calendar with a competition ladder that opens up as the player improves.
+- Career tournaments that hand the player's matches to the shared engine and simulate the rest of the field.
+- Results rankings, contracts, age development, retirement, club life and persistent opponents.
 
 **Deliberately not built yet**
 
-- Match play inside a career. Career events schedule and gate today; they do not resolve a match. This is M2 and it needs the match engine.
-- Cloud sync, accounts, leaderboards, monetisation.
-- Anything that changes the match engine. Career mode is additive; it does not modify `src/game.js`, `src/core.js` or `src/tactics.js`.
+- World expansion beyond the current two regions and broader career events.
+- Final packaging and release polish for career mode.
+- Cloud sync, accounts, global leaderboards, monetisation.
+- Injuries, withdrawals, schedule negotiations and other optional career depth.
 
 ### Relationship to `PRE-CAREER-AUDIT.md`
 
-`PRE-CAREER-AUDIT.md` gates career work behind the match engine's P0 items (rules fidelity, match integrity, balance, device readiness). This milestone is deliberately scoped so it does not depend on any of them, because it never touches the match engine. One P0 item is satisfied directly rather than worked around:
+`PRE-CAREER-AUDIT.md` records the match-engine gates that preceded career integration. Career mode now hands player matches to that engine, so rules fidelity, match integrity, balance and device behavior remain release dependencies rather than isolated career concerns. The career-specific persistence gate is implemented directly:
 
 > **P0 — "Define a versioned career save schema with migrations, corruption recovery and stable IDs for athletes, opponents, events and ratings."**
 
@@ -296,7 +299,7 @@ A week is a budget of **100 energy**, and the player spends it however they like
 | 46–60 | 2 |
 | 61+ | 1 |
 
-A tournament still occupies its weekend and a league match has a separate weeknight slot. Travel costs 10 energy inside a region and 20 across regions. Weekly recovery scales with both the level of play and the player's individual recovery profile. Spending more than the recovery carries the remainder into the following week as fatigue.
+A tournament still occupies its weekend and a league match has a separate weeknight slot. An amateur may start at most **two distinct tournaments per calendar month**; a multi-division tournament counts once. Only one league can be active at a time, while a club ladder remains available weekly. Travel costs 10 energy inside a region and 20 across regions. Training sessions cost 30–70 energy depending on level, so training and competition compete for the week. Weekly recovery scales with both the level of play and the player's individual recovery profile. Spending more than the recovery carries the remainder into the following week as fatigue.
 
 **Training moves attributes only.** A technical attribute can keep improving at any age. Speed and agility become harder to improve after the normal prime, and power begins its player-specific decline after 49. Repeatedly training a skill builds maintenance that slows its late-career decline. Court IQ and tactical adaptation can compensate for physical losses. Training never directly changes the results-driven rating; matches do.
 

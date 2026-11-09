@@ -15,6 +15,7 @@ import {mixSeed} from './population.js';
 import {finalsQualified,positions} from './ranking.js';
 import {isContracted,isIneligible} from './contracts.js';
 import {seededRandom} from '../competition.js';
+import {projectEventLoad} from './planning.js';
 
 // Monday, 5 January 2026. Career week 0 starts here.
 export const CAREER_EPOCH_MS=Date.UTC(2026,0,5);
@@ -177,6 +178,7 @@ export function entryEligibility(state,event,enterable=null){
     if(!qualified)return {ok:false,reason:'The finals take the top eight of the Overall ranking'};
   }
   if(event.qualification==='pro-tour'){
+    if(!isContracted(state))return {ok:false,reason:'Sign a tour contract before entering professional events'};
     const tour=tourFor(state.athlete.gender);
     const rating=bestFormatRating(state);
     const rank=tourRank(rating,state.athlete.gender);
@@ -234,7 +236,7 @@ export function generateWeekEvents(state,week){
       }
     }
     const defaultOption=options.find(option=>option.isPlayer)??options[0]??null;
-    events.push({
+    const calendarEvent={
       id:`w${week}-${event.id}`,
       week,
       eventId:event.id,
@@ -283,7 +285,9 @@ export function generateWeekEvents(state,week){
       tourRank:event.qualification==='pro-tour'?tourRank(bestFormatRating(state),state.athlete.gender):null,
       eligible,
       lockedReason:eligible.reason??null
-    });
+    };
+    calendarEvent.planning=projectEventLoad(state,calendarEvent);
+    events.push(calendarEvent);
   }
   return events.sort((a,b)=>COMPETITION_EVENTS.findIndex(entry=>entry.id===a.eventId)-COMPETITION_EVENTS.findIndex(entry=>entry.id===b.eventId));
 }

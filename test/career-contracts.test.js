@@ -112,6 +112,16 @@ test('after one division, another division at the same event remains playable',(
   assert.equal(canEnterEvent({...afterDoubles,tournament:{eventId:'other-event',finished:true}},event),false);
 });
 
+test('merit contracts wait for the professional rating floor',()=>{
+  const state=ranked(career(),40);
+  assert.equal(contractOffer(state),null);
+  const ready={
+    ...state,
+    athlete:{...state.athlete,formats:{singles:5,doubles:5,mixed:5}}
+  };
+  assert.equal(contractOffer(ready),'futures');
+});
+
 test('a challenger win supplies the recommendation route back',()=>{
   const released={...career(),contract:'none',ineligibleUntil:52,contractRecommendation:null};
   assert.equal(contractOffer(markRecommendation(released,'challenger-win')),'futures');
@@ -167,8 +177,9 @@ test('MLP does not count toward the PPA obligation or re-entry route',()=>{
 });
 
 test('the summer MLP is playable as a weekly background-managed team league',()=>{
-  const state=ranked({...career(),week:22},5);
+  const state=ranked({...career(),week:22,contract:'futures'},5);
   state.athlete={...state.athlete,formats:{singles:5.5,doubles:5.5,mixed:5.5},tourPoints:5000,tourPointsHistory:[{week:0,points:5000}]};
+  state.money=2000;
   const event=currentEvents(state).find(entry=>entry.eventId==='mlp');
   assert.ok(event,'the MLP should run during its summer window');
   assert.equal(event.eligible.ok,true,event.lockedReason);

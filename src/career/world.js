@@ -68,7 +68,7 @@ function playMatch(home,away,random,matchType='league'){
 
 // Advances the world by one week.
 export function advanceWorld({seed,regionId,week,ratings}){
-  const skills=buildRegionSkills(seed,regionId);
+  const skills=buildRegionSkills(seed,regionId,week);
   const random=seededRandom(mixSeed(seed,`world:${regionId}:${week}`));
   const next={...(ratings??{})};
   for(const format of FORMATS)next[format]={...(next[format]??{})};
@@ -157,7 +157,7 @@ export function advanceCircuit(state){
 // returned, because a tournament is fielded from the top of the rating list,
 // and names are only built for the athletes that come back.
 export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gender=null,limit=80}){
-  const skills=buildRegionSkills(seed,regionId);
+  const skills=buildRegionSkills(seed,regionId,week);
   const current=currentRatings(skills,ratings,week,format);
   const pool=gender?[...current.values()].filter(athlete=>athlete.gender===gender):[...current.values()];
   const ranked=pool.sort((a,b)=>b.rating-a.rating).slice(0,limit);
@@ -186,7 +186,7 @@ export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gen
 // up means facing somebody a bracket stronger, which is exactly what makes
 // it a gamble worth taking.
 export function opponentsInBracket({seed,regionId,ratings,week,divisionId,format='doubles',count=1,random}){
-  const skills=buildRegionSkills(seed,regionId);
+  const skills=buildRegionSkills(seed,regionId,week);
   const current=currentRatings(skills,ratings,week,format);
   const division=RATING_BRACKETS.find(entry=>entry.id===divisionId);
   if(!division)return [];

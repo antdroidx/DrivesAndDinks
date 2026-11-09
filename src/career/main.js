@@ -9,12 +9,12 @@ import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,re
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
-  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit
+  currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {startCareerMatch,finishCareerMatch} from './career-match.js';
 import {isPlayerDone} from './tournament.js';
-import {writePendingMatch,readMatchResult,clearMatchResult} from './handshake.js';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js';
 import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
 import {rankingSummary} from './ranking.js';
@@ -25,6 +25,9 @@ import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoac
 import {opponentHistory} from './opponents.js';
 import {EXPERIENCE_OPTIONS,STARTING_TRAITS} from './creation.js';
 import {directoryPage} from './directory.js';
+import {financeSummary} from './finance.js';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -53,6 +56,7 @@ const toastEl=document.getElementById('career-toast');
 const resetButton=document.getElementById('career-reset');
 
 const escapeHtml=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const money=value=>{const amount=Math.round(Number(value)||0);return (amount<0?'-$':'$')+Math.abs(amount).toLocaleString('en-US')};
 
 let toastTimer=null;
 function toast(message,warn=false){
@@ -74,6 +78,10 @@ function persist(){
 
 function render(){
   const hasCareer=Boolean(app.career);
+  if(hasCareer&&Object.keys(app.career.cpuWorld?.records??{}).length===0){
+    app.career.cpuWorld=createCpuWorld(app.career.seed,app.career.regionId,app.career.week);
+    persist();
+  }
   nav.hidden=!hasCareer;
   statusStrip.hidden=!hasCareer;
   resetButton.hidden=!hasCareer;
@@ -91,6 +99,7 @@ function renderStatus(){
     <div><small>BEST RATING</small><strong>${formatRating(Math.max(...Object.values(career.athlete.formats??{doubles:0})))}</strong></div>
     <div><small>LOCATION</small><strong>${escapeHtml(career.cityLabel)}</strong></div>
     <div><small>TOUR</small><strong>${escapeHtml(contractLevel(career)==='none'?'NO CONTRACT':contractLevel(career).toUpperCase())}</strong></div>
+    <div><small>MONEY</small><strong>${money(career.money)}</strong></div>
     <div><small>AGE</small><strong>${career.athlete.age}</strong></div>`;
 }
 
@@ -198,7 +207,7 @@ function renderTournament(career){
     <div class="hint">Round ${(tournament.round??0)+1} of ${total} · ${tournament.teams?.length??tournament.size} teams in the draw</div>
     ${teamPanel}
     <p><strong>Next match: ${escapeHtml(opponent)}</strong></p>
-    ${pending?`<div class="actions"><button type="button" class="primary" data-action="resume-match">PLAY MATCH →</button></div>`:'<p class="hint">The round is still being played. Advance the calendar.</p>'}
+    ${pending?`<div class="actions"><button type="button" class="primary" data-action="resume-match">PLAY MATCH →</button></div>`:tournament.nightComplete?'<p class="hint">League night complete. Advance the calendar for the next card.</p>':done?'':`<div class="actions"><button type="button" class="primary" data-action="resume-tournament">RESUME COMPETITION →</button></div>`}
     ${history?`<ul class="tournament-history">${history}</ul>`:''}
   </section>`;
 }
@@ -225,9 +234,11 @@ function renderHome(){
   if(career.retired)return renderRetiredHome(career);
   const events=currentEvents(career);
   const trainReady=canTrain(career);
-  const eventReady=events.some(event=>canEnterEvent(career,event));
+  const eventReady=events.some(event=>event.eligible.ok&&event.options.length&&canEnterEvent(career,event));
   const sessions=trainingSessionsThisWeek(career);
   const sessionLimit=trainingSessionsLimit(career);
+  const plan=weeklyActivityPlan(career,events,{trainingCost:trainingCost(career),recovery:weeklyRecovery(career),trainingRemaining:Math.max(0,sessionLimit-sessions)});
+  const world=cpuWorldSummary(career.cpuWorld);
   const retirement=retirementAdvice(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
@@ -242,6 +253,8 @@ function renderHome(){
   const ranking=rankingSummary(career);
   const contractText=contractLine(career);
   const board=(label,place,points)=>`${label} ${place?'#'+place:'—'} · ${Math.round(points).toLocaleString('en-US')}`;
+  const tournamentSlots=amateurTournamentSlotsUsed(career);
+  const tournamentText=isContracted(career)?'Pro schedule active':`Amateur tournaments ${tournamentSlots}/${AMATEUR_TOURNAMENTS_PER_MONTH} this month`;
   const reliabilityInfo=reliability(career.athlete.record.matches);
   const reliabilityText=career.athlete.record.matches
     ? `Reliability ${reliabilityInfo.percent}% · ${reliabilityInfo.label}`
@@ -290,6 +303,7 @@ function renderHome(){
         <div class="hint">${escapeHtml(board('Overall',ranking.overall,ranking.points.overall))}${ranking.finals?' · finals qualified':''}</div>
         <div class="hint">${escapeHtml([board('Doubles',ranking.doubles,ranking.points.doubles),board('Mixed',ranking.mixed,ranking.points.mixed),board('Singles',ranking.singles,ranking.points.singles)].join(' · '))}</div>
         <div class="hint">${escapeHtml(contractText)}</div>
+        <div class="hint">${escapeHtml(tournamentText)}</div>
         <div class="hint">${escapeHtml(retirement.message)}</div>
         <div class="hint">Next on the ladder: ${escapeHtml(nextEvent?nextEvent.label:'the pro league')}</div>
       </div>
@@ -308,7 +322,30 @@ function renderHome(){
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Training capacity is ${sessionLimit} sessions at age ${career.athlete.age}.</div>
   </section>
 
+  <section class="panel">
+    <h2>WEEK PLAN</h2>
+    <div class="board-head">
+      <div><small>ENERGY LEFT</small><strong>${plan.energy}</strong></div>
+      <div><small>BALANCE</small><strong>${money(plan.money)}</strong></div>
+      <div><small>NEXT RECOVERY</small><strong>+${plan.recovery}</strong></div>
+      <div><small>EVENT OPTIONS</small><strong>${plan.eventOptions}</strong></div>
+    </div>
+    <p class="hint">Training: ${plan.trainingCost} energy and up to ${plan.trainingRemaining} sessions. ${plan.cheapest?`Cheapest event: ${money(plan.cheapest.moneyCost)} and ${plan.cheapest.energy} energy.`:'No enterable event is currently projected.'}</p>
+    <p class="hint">${plan.lightest?`Lightest event: ${plan.lightest.energy} energy · ${escapeHtml(plan.lightest.matchLabel)} · projected ${plan.lightest.energyAfter} energy and ${money(plan.lightest.moneyAfter)} after entry.`:'Advance to a week with competition to compare event loads.'}</p>
+  </section>
+
   ${renderTournament(career)}
+
+  <section class="panel">
+    <h2>WORLD PULSE</h2>
+    <div class="board-head">
+      <div><small>ACTIVE</small><strong>${world.active}</strong></div>
+      <div><small>CIRCUIT</small><strong>${world.circuit}</strong></div>
+      <div><small>BACKGROUND</small><strong>${world.background}</strong></div>
+      <div><small>TOUR INVITES</small><strong>${world.tourInvites}</strong></div>
+    </div>
+    <p class="hint">${world.population.toLocaleString('en-US')} generated athletes · average age ${world.averageAge.toFixed(1)} · average rating ${world.averageRating.toFixed(2)} · ${world.entrants} entrants and ${world.retired} retirements recorded.</p>
+  </section>
 
   <section class="panel">
     <h2>COACH & PARTNERS</h2>
@@ -386,22 +423,25 @@ function bracketOptions(event,gender,options){
   }).join('');
 }
 
-function eventRow(event,career,gender){
+function eventRow(event,career,gender,active=event.week===career.week){
   const locked=!event.eligible.ok;
   const played=formatsPlayed(career,event.eventId);
   const options=event.options.filter(option=>!played.includes(option.format));
-  const ready=canEnterEvent(career,event)&&options.length>0;
+  const ready=active&&canEnterEvent(career,event)&&options.length>0;
+  const blockReason=active&&!locked&&!ready?eventBlockReason(career,event):null;
   const running=event.divisions.map(division=>division.label).join(' · ');
   const cost=eventEntryCost(career,event);
+  const load=projectEventLoad(career,event,{recovery:weeklyRecovery(career)});
   const divisionNote=played.length?' · completed '+played.join(', '):'';
   return `<div class="event">
     <div class="body">
       <strong>${escapeHtml(event.title)}</strong>
-      <small>${escapeHtml(event.venue)} · ${cost} energy · rated match${escapeHtml(divisionNote)}</small>
+      <small>${escapeHtml(event.venue)} · ${cost} energy · ${money(load.moneyCost)} · ${escapeHtml(load.matchLabel)}${escapeHtml(divisionNote)}</small>
+      <small>After entry: ${load.energyAfter} energy · ${money(load.moneyAfter)} · +${load.recovery} recovery next week</small>
       <small>Brackets: ${escapeHtml(running)}</small>
-      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:options.length?`<select class="bracket" data-division="${event.id}" ${ready?'':'disabled'}>${bracketOptions(event,gender,options)}</select>`:'<div class="lock">All offered divisions are complete.</div>'}
+      ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:!active?'<div class="lock">Upcoming · advance the calendar to enter.</div>':blockReason?`<div class="lock">${escapeHtml(blockReason)}</div>`:options.length?`<select class="bracket" data-division="${event.id}" ${ready?'':'disabled'}>${bracketOptions(event,gender,options)}</select>`:'<div class="lock">All offered divisions are complete.</div>'}
     </div>
-    ${locked||!options.length?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${ready?'':'disabled'}>ENTER</button>`}
+    ${locked||!active||!options.length?'':`<button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${ready?'':'disabled'}>ENTER</button>`}
   </div>`;
 }
 
@@ -433,7 +473,7 @@ function renderClubs(){
 function clubRow(club,career){
   const expanded=app.expandedClub===club.id;
   const isMember=career.clubId===club.id;
-  const roster=expanded?buildClubRoster(career.seed,club):null;
+  const roster=expanded?buildClubRoster(career.seed,club,career.week):null;
   const summary=roster?summarizeClub(roster):null;
   const access=clubAccess(career,club);
   return `
@@ -478,6 +518,7 @@ function recordLine(label,record,eventRecord,current=null,peak=null){
 function renderRecord(){
   const career=app.career;
   const summary=analyticsSummary(career);
+  const finance=financeSummary(career);
   const eventTypes=summary.events;
   const medals=Object.fromEntries(['gold','silver','bronze'].map(medal=>[
     medal,Object.values(eventTypes).reduce((sum,entry)=>sum+(entry[medal]??0),0)
@@ -537,6 +578,16 @@ function renderRecord(){
   </section>
 
   <section class="panel">
+    <h2>FINANCE</h2>
+    <div class="board-head">
+      <div><small>BALANCE</small><strong>${money(finance.balance)}</strong></div>
+      <div><small>INCOME</small><strong>${money(finance.income)}</strong></div>
+      <div><small>SPENT</small><strong>${money(finance.expenses)}</strong></div>
+    </div>
+    ${finance.ledger.length?`<ul class="history">${[...finance.ledger].reverse().slice(0,16).map(entry=>`<li><span>${escapeHtml(entry.date)}</span><strong>${escapeHtml(entry.label)}</strong><em class="${entry.amount>0?'up':'down'}">${entry.amount>0?'+':''}${money(entry.amount)}</em><small>${money(entry.balanceAfter)} balance</small></li>`).join('')}</ul>`:'<p class="muted">No finance entries yet. The opening balance is '+money(finance.balance)+'.</p>'}
+  </section>
+
+  <section class="panel">
     <h2>OPPONENTS</h2>
     ${opponentHistory(career).length?`<ul class="history">${opponentHistory(career).slice(0,15).map(opponent=>`<li><span>${escapeHtml(opponent.name)}</span><strong>${opponent.wins}-${opponent.losses}</strong><small>${escapeHtml(opponent.lastEventLabel??'match')} · last ${opponent.lastResult} · week ${opponent.lastWeek+1}</small></li>`).join('')}</ul>`:'<p class="muted">No persistent opponents yet.</p>'}
   </section>
@@ -571,7 +622,7 @@ function renderStandings(){
       <div><small>YOUR RATING</small><strong>${formatRating(position.rating)}</strong></div>
       <div><small>WORLD RANK</small><strong>${position.worldRank.toLocaleString('en-US')}</strong></div>
       <div><small>TOUR</small><strong>${position.onTour?position.rank.toLocaleString('en-US')+' of '+position.size.toLocaleString('en-US'):'Outside the tour'}</strong></div>
-      <div><small>PRIZE MONEY</small><strong>${(career.money??0).toLocaleString('en-US')}</strong></div>
+      <div><small>BALANCE</small><strong>${money(career.money)}</strong></div>
     </div>
     <p class="hint">The ${escapeHtml(position.label)} board holds ${position.size.toLocaleString('en-US')} players and the floor is a ${position.floor.toFixed(2)} rating.</p>
   </section>
@@ -619,7 +670,7 @@ function renderStandings(){
 function playerDirectory(career){
   const cache=app.directoryCache;
   if(cache&&cache.seed===career.seed&&cache.regionId===career.regionId)return cache.athletes;
-  const athletes=buildRegionRoster(career.seed,career.regionId).athletes;
+  const athletes=buildRegionRoster(career.seed,career.regionId,{},career.week).athletes;
   app.directoryCache={seed:career.seed,regionId:career.regionId,athletes};
   return athletes;
 }
@@ -687,7 +738,7 @@ function renderCalendar(){
       const events=generateWeekEvents(career,entry.week);
       return `<div class="week${entry.isCurrent?' current':''}">
         <h3><span>${escapeHtml(entry.label)}</span><small>${escapeHtml(entry.short)}</small></h3>
-        ${events.length?events.map(event=>eventRow(event,entry.isCurrent?career:{...career,week:entry.week},career.athlete.gender)).join(''):'<p class="empty">Quiet week.</p>'}
+        ${events.length?events.map(event=>eventRow(event,entry.isCurrent?career:{...career,week:entry.week},career.athlete.gender,entry.isCurrent)).join(''):'<p class="empty">Quiet week.</p>'}
       </div>`;
     }).join('')}
     <div class="actions"><button type="button" class="secondary" data-action="advance">ADVANCE WEEK →</button></div>
@@ -730,6 +781,7 @@ document.addEventListener('click',event=>{
       return;
     }
     if(action==='reset'){
+      if(!confirm('Delete this career and start over? This cannot be undone.'))return;
       clearCareer(app.storage);
       app.career=null;
       app.view='home';
@@ -787,6 +839,19 @@ document.addEventListener('click',event=>{
       persist();
       render();
       toast(jumped.message);
+      return;
+    }
+    if(action==='resume-tournament'){
+      const tournament=app.career.tournament;
+      if(!tournament||tournament.finished||tournament.playerOut){toast('There is no competition to resume.',true);return}
+      if(tournament.nightComplete){toast('Advance the calendar for the next league night.',true);return}
+      const started=startCareerMatch(app.career,tournament.eventId,tournament.optionId);
+      if(!started.ok){toast(started.message,true);return}
+      app.career=started.state;
+      persist();
+      if(!started.pending){render();toast(started.message);return}
+      writePendingMatch(started.pending);
+      location.href='../?career-match=1';
       return;
     }
     if(action==='resume-match'){
@@ -863,9 +928,8 @@ if(loaded.state){app.career=loaded.state}
 if(loaded.reason)toast(loaded.reason,true);
 
 // A match played on the engine page comes back here to be scored.
-const playedResult=readMatchResult();
+const playedResult=takeMatchResult(pendingMatchId(app.career?.pendingMatch));
 if(playedResult&&app.career?.pendingMatch){
-  clearMatchResult();
   const scored=finishCareerMatch(app.career,playedResult);
   if(scored.ok){
     app.career=scored.state;

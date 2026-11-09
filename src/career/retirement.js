@@ -8,7 +8,7 @@ const medalTotal=(events,name)=>Object.values(events??{}).reduce((sum,entry)=>su
 
 export function retirementAdvice(state){
   if(state.retired)return {recommended:false,message:'Career complete.'};
-  const ceilings=Object.fromEntries(Object.entries(state.athlete.peakFormats??state.athlete.formats??{}).map(([format,peak])=>[format,ageCeiling(peak,state.athlete.age)]));
+  const ceilings=Object.fromEntries(Object.entries(state.athlete.peakFormats??state.athlete.formats??{}).map(([format,peak])=>[format,ageCeiling(peak,state.athlete.age,state.athlete.development)]));
   const best=Math.max(...Object.values(ceilings));
   const pursuingPro=state.contract&&state.contract!=='none';
   const recommended=(pursuingPro&&best<PRO_FLOOR_RATING)||(state.athlete.age>=65&&best<3.5);

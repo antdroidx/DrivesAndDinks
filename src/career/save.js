@@ -11,8 +11,10 @@ import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING,FORMATS} from '.
 import {REGIONS} from './geography.js';
 import {emptyAnalytics} from './analytics.js';
 import {peakAgeFor,createDevelopmentProfile} from './age.js';
+import {emptyFinance,validateFinance} from './finance.js';
+import {emptyCpuWorld,validateCpuWorld} from './cpu-careers.js';
 
-export const CAREER_SAVE_VERSION=15;
+export const CAREER_SAVE_VERSION=17;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -22,6 +24,16 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v17 added compact CPU career and dynamic-world deltas.
+  16:state=>({
+    ...state,
+    cpuWorld:state.cpuWorld??emptyCpuWorld()
+  }),
+  // v16 added the dated finance ledger and activity projections.
+  15:state=>({
+    ...state,
+    finance:state.finance??emptyFinance(state.money??250)
+  }),
   // v15 added body, experience and starting-trait creation fields.
   14:state=>({
     ...state,
@@ -218,6 +230,11 @@ export function validateCareer(state){
   if(!REGION_IDS.includes(state.regionId))return {ok:false,reason:`Unknown region "${state.regionId}"`};
   if(!Number.isInteger(state.week)||state.week<0)return {ok:false,reason:'Career week is invalid'};
   if(!Number.isFinite(state.energy)||state.energy<0||state.energy>100)return {ok:false,reason:'Career energy is invalid'};
+  if(!Number.isFinite(state.money)||state.money<0)return {ok:false,reason:'Career money is invalid'};
+  const finance=validateFinance(state);
+  if(!finance.ok)return {ok:false,reason:finance.reason};
+  const cpuWorld=validateCpuWorld(state.cpuWorld);
+  if(!cpuWorld.ok)return {ok:false,reason:cpuWorld.reason};
   if(!RATING_KEYS.includes(state.trainingFocus))return {ok:false,reason:`Unknown training focus "${state.trainingFocus}"`};
   if(state.clubId!=null&&typeof state.clubId!=='string')return {ok:false,reason:'Club reference is invalid'};
   if(state.areaId!=null&&typeof state.areaId!=='string')return {ok:false,reason:'Area reference is invalid'};
@@ -251,7 +268,7 @@ export function validateCareer(state){
   if(!Number.isFinite(state.clubReputation)||state.clubReputation<0)return {ok:false,reason:'Club reputation is invalid'};
   if(!state.opponents||typeof state.opponents!=='object')return {ok:false,reason:'Opponent history is invalid'};
   if(!Number.isFinite(athlete.age)||athlete.age<10||athlete.age>120)return {ok:false,reason:'Athlete age is invalid'};
-  if(!Number.isFinite(athlete.startAge)||athlete.startAge<10||athlete.startAge>70)return {ok:false,reason:'Starting age is invalid'};
+  if(!Number.isFinite(athlete.startAge)||athlete.startAge<10||athlete.startAge>80)return {ok:false,reason:'Starting age is invalid'};
   if(!Number.isFinite(athlete.peakAge))return {ok:false,reason:'Peak age is invalid'};
   if(!athlete.peakRatings||typeof athlete.peakRatings!=='object')return {ok:false,reason:'Peak skills are invalid'};
   if(!athlete.peakFormats||typeof athlete.peakFormats!=='object')return {ok:false,reason:'Peak ratings are invalid'};

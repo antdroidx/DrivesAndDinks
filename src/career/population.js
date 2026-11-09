@@ -9,6 +9,8 @@ import {CHARACTERS,generateIdentity,skillAverage} from '../roster.js';
 import {seededRandom} from '../competition.js';
 import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js';
 import {FORMATS,ratingInFormat} from './rating.js';
+import {attributeAgeFactor,createDevelopmentProfile} from './age.js';
+import {trainingResponse,potentialForStartAge} from './career-lifecycle.js';
 
 export const CLUB_TIERS=Object.freeze([
   {id:'recreational',label:'Recreational',skill:52,weight:.48},
@@ -25,7 +27,7 @@ export const CLUB_SURFACES=Object.freeze([
 const CLUB_PREFIXES=['Riverbend','Falcon','Granite','Harbor','Sunset','Cedar','Lakeside','Summit','Copper','Willow','Palmetto','Mesquite','Bayou','Marina','Foothill','Prairie','Sakura','Kowloon','Ganges','Han River','Sandy','Bluestone'];
 const CLUB_SUFFIXES=['Pickleball Club','Racquet Club','Pickleball Association','Courts & Co.','Pickleball Center','Pickleball Society','Leagues & Club'];
 const GENDERS=['male','female'];
-const MIN_AGE=18,MAX_AGE=54;
+const MIN_AGE=15,MAX_AGE=64;
 const MIN_RATING=25,MAX_RATING=99;
 
 // FNV-1a keeps the seed and the identifier independent, so one club's roster
@@ -96,14 +98,33 @@ export function findClub(clubs,id){return clubs.find(club=>club.id===id)??null}
 // The identity and the skill are drawn from separate streams so that a
 // roster can be rebuilt for simulation without paying for names and
 // appearance that nobody looks at.
-export function buildAthleteSkill(seed,club,index){
+function ageAtWeek(startAge,week){
+  const base=Number.isFinite(Number(startAge))?Number(startAge):MIN_AGE;
+  return Math.max(MIN_AGE,base+Math.floor((Number(week)||0)/52));
+}
+
+function developedRatings({baseRatings,peakRatings,age,development,maintenance}){
+  const ratings={};
+  for(const key of Object.keys(peakRatings)){
+    const peak=peakRatings[key]??baseRatings[key]??MIN_RATING;
+    const factor=attributeAgeFactor(key,age,development,maintenance?.[key]??0);
+    const learning=age<25?trainingResponse(age,development):1;
+    const target=age<(development?.peakAge??30)
+      ?baseRatings[key]+(peak-baseRatings[key])*clamp((age-15)/Math.max(1,(development?.peakAge??30)-15),0,1)*learning
+      :peak;
+    ratings[key]=clamp(Math.round(Math.min(target,peak)*factor),MIN_RATING,MAX_RATING);
+  }
+  return ratings;
+}
+
+export function buildAthleteSkill(seed,club,index,week=0,startAgeOverride=null){
   const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}:skill`));
   const archetype=CHARACTERS[Math.floor(random()*CHARACTERS.length)];
   const levelDelta=club.skill-70;
-  const ratings={};
+  const baseRatings={};
   for(const key of Object.keys(archetype.ratings)){
     const base=archetype.ratings[key]??70;
-    ratings[key]=clamp(Math.round(base+levelDelta+(random()-.5)*9),MIN_RATING,MAX_RATING);
+    baseRatings[key]=clamp(Math.round(base+levelDelta+(random()-.5)*9),MIN_RATING,MAX_RATING);
   }
   // A bias toward one format. Doubles rewards the soft game and the net,
   // singles rewards the serve and the feet.
@@ -111,19 +132,30 @@ export function buildAthleteSkill(seed,club,index){
   // Gender belongs to the skill stream so the light world roster and the
   // fully detailed athlete always agree on it.
   const gender=pick(GENDERS,random);
-  return {archetype,ratings,average:skillAverage(ratings),formatBias,gender};
+  const hasAgeOverride=startAgeOverride!=null&&Number.isFinite(Number(startAgeOverride));
+  const startAge=hasAgeOverride?Math.max(MIN_AGE,Math.min(MAX_AGE,Math.round(Number(startAgeOverride)))):MIN_AGE+Math.floor(random()*(MAX_AGE-MIN_AGE+1));
+  const development=createDevelopmentProfile(mixSeed(seed,`athlete:${club.id}:${index}:development`),startAge);
+  const generatedPotential=clamp(Math.round(skillAverage(baseRatings)+(random()*14-2)),MIN_RATING,MAX_RATING);
+  const potential=potentialForStartAge(startAge,generatedPotential);
+  const peakRatings={};
+  for(const key of Object.keys(baseRatings)){
+    peakRatings[key]=clamp(Math.round(baseRatings[key]+(potential-skillAverage(baseRatings))*(key==='aggression'?.35:.7)+(random()-.5)*4),MIN_RATING,MAX_RATING);
+  }
+  const age=ageAtWeek(startAge,week);
+  const maintenance=Object.fromEntries(Object.keys(baseRatings).map(key=>[key,0]));
+  const ratings=developedRatings({baseRatings,peakRatings,age,development,maintenance});
+  return {archetype,baseRatings,peakRatings,maintenance,development,startAge,age,potential,ratings,average:skillAverage(ratings),formatBias,gender};
 }
 
-export function buildAthlete(seed,club,index){
+export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
   const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}:identity`));
-  const {archetype,ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index);
+  const {archetype,baseRatings,peakRatings,maintenance,development,startAge,age,potential,ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index,week,startAgeOverride);
   const region=regionById(club.regionId);
   const weights=Object.entries(region?.cultureWeights??{white_american:1});
   const culture=weightedPick(weights,random);
   const identity=generateIdentity({gender,culture,random});
   const citizenship=citizenshipFor(club.regionId,{country:club.country},random);
   const handedness=random()<.13?'left':'right';
-  const age=MIN_AGE+Math.floor(random()*(MAX_AGE-MIN_AGE+1));
   const formats={};
   for(const format of FORMATS){
     const bias=format==='doubles'?formatBias:-formatBias;
@@ -141,6 +173,11 @@ export function buildAthlete(seed,club,index){
     citizenship,
     gender,
     age,
+    startAge,
+    development,
+    peakRatings,
+    maintenance,
+    potential,
     handedness,
     archetypeId:archetype.id,
     archetypeLabel:archetype.style,
@@ -150,19 +187,18 @@ export function buildAthlete(seed,club,index){
     formatBias,
     baseFormats:{...formats},
     lastPlayed:0,
-    potential:clamp(Math.round(average+(random()*14-2)),MIN_RATING,MAX_RATING),
     record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0}
   };
 }
 
 // A light roster for the world simulation. It carries ids and skill, not
 // names, so a whole region can be rated in a few milliseconds.
-export function buildRegionSkills(seed,regionId){
+export function buildRegionSkills(seed,regionId,week=0){
   const clubs=buildClubIndex(seed,regionId);
   const athletes=[];
   for(const club of clubs){
     for(let index=0;index<club.memberCount;index++){
-      const {ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index);
+      const {ratings,average,formatBias,gender,startAge,age,development,peakRatings,maintenance,potential}=buildAthleteSkill(seed,club,index,week);
       const formats={};
       for(const format of FORMATS){
         const bias=format==='doubles'?formatBias:-formatBias;
@@ -177,6 +213,12 @@ export function buildRegionSkills(seed,regionId){
         club,
         skill:average,
         gender,
+        startAge,
+        age,
+        development,
+        peakRatings,
+        maintenance,
+        potential,
         formats,
         baseFormats:{...formats},
         lastPlayed:0
@@ -186,22 +228,22 @@ export function buildRegionSkills(seed,regionId){
   return athletes;
 }
 
-export function buildClubRoster(seed,club){
+export function buildClubRoster(seed,club,week=0){
   const athletes=[];
-  for(let index=0;index<club.memberCount;index++)athletes.push(buildAthlete(seed,club,index));
+  for(let index=0;index<club.memberCount;index++)athletes.push(buildAthlete(seed,club,index,week));
   return athletes;
 }
 
 // Browsing a whole region is a full roster build. It stays cheap because
 // nothing is memoized or stored, but the caller can scope it down.
-export function buildRegionRoster(seed,regionId,filter={}){
+export function buildRegionRoster(seed,regionId,filter={},week=0){
   const clubs=buildClubIndex(seed,regionId).filter(club=>
     (!filter.areaId||club.areaId===filter.areaId)&&
     (!filter.cityId||club.cityId===filter.cityId)&&
     (!filter.clubId||club.id===filter.clubId));
   const athletes=[];
   for(const club of clubs){
-    for(const athlete of buildClubRoster(seed,club))athletes.push(athlete);
+    for(const athlete of buildClubRoster(seed,club,week))athletes.push(athlete);
   }
   return {clubs,athletes};
 }

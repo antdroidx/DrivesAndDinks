@@ -15,9 +15,8 @@
 // where a rating puts a player on their board, and how tour points are
 // earned and aged out.
 //
-// The composite ranking itself is not built yet. The board is placed by
-// rating alone, and the points a player earns are one undifferentiated
-// pool rather than three weighted by format. That is milestone 3 work.
+// The points ranking and weighted composite live in ranking.js. This module
+// keeps the rating-to-world-rank curve and the rolling tour-points window.
 
 // The world has a modelled rated population on each board, and the tour is
 // the top slice of it. The tour size is a share of that population rather

@@ -13,10 +13,24 @@ function storage(){
   try{return globalThis.localStorage??null}catch{return null}
 }
 
+export function pendingMatchId(match){
+  if(!match)return null;
+  return match.matchId??[
+    match.eventId,match.optionId,match.week,match.tournamentId,match.round
+  ].map(value=>value??'').join(':');
+}
+
 export function writePendingMatch(match){
   const store=storage();
-  if(!store)return false;
-  try{store.setItem(CAREER_PENDING_KEY,JSON.stringify({...match,queuedAt:new Date().toISOString()}));return true}catch{return false}
+  if(!store||!match?.matchup?.lineup)return false;
+  try{
+    store.setItem(CAREER_PENDING_KEY,JSON.stringify({
+      ...match,
+      matchId:pendingMatchId(match),
+      queuedAt:new Date().toISOString()
+    }));
+    return true;
+  }catch{return false}
 }
 
 export function readPendingMatch(){
@@ -36,20 +50,38 @@ export function clearPendingMatch(){
   try{store.removeItem(CAREER_PENDING_KEY);return true}catch{return false}
 }
 
-export function writeMatchResult(report){
+export function writeMatchResult(report,matchId=null){
   const store=storage();
-  if(!store)return false;
-  try{store.setItem(CAREER_RESULT_KEY,JSON.stringify({...report,playedAt:new Date().toISOString()}));return true}catch{return false}
+  if(!store||!report)return false;
+  try{
+    store.setItem(CAREER_RESULT_KEY,JSON.stringify({
+      ...report,
+      matchId:matchId??null,
+      playedAt:new Date().toISOString()
+    }));
+    return true;
+  }catch{return false}
 }
 
-export function readMatchResult(){
+export function readMatchResult(expectedMatchId=null){
   const store=storage();
   if(!store)return null;
   try{
     const raw=store.getItem(CAREER_RESULT_KEY);
     if(!raw)return null;
-    return JSON.parse(raw);
+    const report=JSON.parse(raw);
+    if(!report||typeof report!=='object'||!report.score)return null;
+    if(expectedMatchId&&report.matchId!==expectedMatchId)return null;
+    return report;
   }catch{return null}
+}
+
+// Consumes the result once. A stale result is discarded instead of being
+// allowed to score a later, unrelated career match.
+export function takeMatchResult(expectedMatchId=null){
+  const report=readMatchResult(expectedMatchId);
+  clearMatchResult();
+  return report;
 }
 
 export function clearMatchResult(){

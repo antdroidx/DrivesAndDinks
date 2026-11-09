@@ -13,7 +13,9 @@
     "diagnose:stacking": "node scripts/diagnose-stacking.js",
     "validate:rally": "node scripts/validate-rally-variety.js 20 180",
     "venue:perspective": "node scripts/venue-perspective.js",
-    "profile:engine": "node scripts/profile-engine.js 60"
+    "profile:engine": "node scripts/profile-engine.js 60",
+    "audit:career": "node scripts/audit-career-prospects.js",
+    "audit:cpu": "node scripts/audit-cpu-careers.js"
   }
 }
 

@@ -73,7 +73,7 @@ function disciplinePool(athletes,state,format){
 // The players nearest to the player on the board, taken from the population
 // of the region. Each carries the world rank its rating implies.
 export function nearbyRivals(state,format,count=6){
-  const skills=buildRegionSkills(state.seed,state.regionId);
+  const skills=buildRegionSkills(state.seed,state.regionId,state.week);
   const current=[...currentRatings(skills,state.worldRatings,state.week,format).values()];
   const mine=state.athlete.formats[format]??0;
   const others=disciplinePool(current,state,format).filter(athlete=>athlete.id!=='player');
@@ -97,7 +97,7 @@ export function nearbyRivals(state,format,count=6){
 // regions. CPU ranking histories do not exist yet, so this is deliberately a
 // rating leaderboard rather than the points ranking used to enter PPA events.
 export function topPlayers(state,format,count=25){
-  const skills=REGIONS.flatMap(region=>buildRegionSkills(state.seed,region.id));
+  const skills=REGIONS.flatMap(region=>buildRegionSkills(state.seed,region.id,state.week));
   const current=disciplinePool([...currentRatings(skills,state.worldRatings,state.week,format).values()],state,format);
   current.push({
     id:'player',
@@ -135,7 +135,7 @@ export function topPlayers(state,format,count=25){
 // the board when the career began.
 export function findRival(state,format){
   const mine=state.athlete.formats[format]??0;
-  const skills=buildRegionSkills(state.seed,state.regionId);
+  const skills=buildRegionSkills(state.seed,state.regionId,state.week);
   const current=disciplinePool([...currentRatings(skills,state.worldRatings,state.week,format).values()],state,format);
   let best=null;
   let gap=Infinity;

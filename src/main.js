@@ -439,6 +439,10 @@ if(careerMatch){
   game.configure({format:careerMatch.matchup.format,showNameTags:true,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
   game.mode='play';
   game.setDifficulty(careerMatch.difficulty??'normal');
+  for(const id of ['setup-button','difficulty','mode','restart','restart-top']){
+    const control=document.getElementById(id);
+    if(control){control.hidden=true;control.disabled=true;}
+  }
   refreshVenue();
   const scoringLabel=careerMatch.rules?`First to ${careerMatch.rules.targetScore}, ${careerMatch.rules.scoring==='rally'?'rally scoring':'side-out'}, win by ${careerMatch.rules.winBy}`:'First to 11, side-out, win by 2';
   document.querySelector('#active-loadout').textContent='CAREER MATCH \u00b7 '+careerMatch.bracket+' '+careerMatch.format+' \u00b7 '+scoringLabel;
@@ -473,7 +477,12 @@ if(animationTestMode){
 const resultDialog=document.querySelector('#match-result');
 
 function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){
-  if(careerMatch){writeMatchResult(game.matchReport());clearPendingMatch();resultDialog.close();location.href='./career-mode/';return;}
+  if(careerMatch){
+    if(writeMatchResult(game.matchReport(),careerMatch.matchId)){
+      clearPendingMatch();resultDialog.close();location.href='./career-mode/';
+    }
+    return;
+  }
  const practice=game.practice;resultDialog.querySelector('h2').textContent=practice?'Practice complete':'Match ended';document.querySelector('#rematch').textContent=practice?'REPEAT DRILL':'REMATCH';
  document.querySelector('#match-winner').textContent=practice?practice.drill.name:game.score.winner===0?'Your team wins!':'Opponents win!';
  document.querySelector('#match-score').textContent=practice?`${practice.successes} of ${practice.total} sequences hit`:`Your team ${game.score.points[0]} – ${game.score.points[1]} Opponents`;

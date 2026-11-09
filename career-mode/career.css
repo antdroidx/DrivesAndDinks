@@ -16,6 +16,7 @@
 }
 
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{margin:0;padding:0}
 body{
   background:var(--bg);
@@ -129,7 +130,7 @@ button.secondary:disabled{opacity:.45;cursor:not-allowed}
 .event:last-child{border-bottom:0}
 .event .body{flex:1 1 auto;min-width:0}
 .event strong{display:block;font-size:13px}
-.event small{color:var(--muted);font-size:11px}
+.event small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
 .event .lock{color:var(--coral);font-size:11px}
 .event select.bracket{
   margin-top:6px;background:var(--panel);color:var(--text);border:1px solid var(--line);

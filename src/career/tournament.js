@@ -397,9 +397,11 @@ export function startTournament({state,event,option}){
     if(playerIndex>=cut){
       const opponent=ranked[cut-1]??ranked[0];
       const playerTeam=ranked[playerIndex];
-      const mainTeams=ranked.map(team=>team.id===opponent.id?playerTeam:team);
+      const mainTeams=ranked.filter(team=>team.id!==playerTeam.id&&team.id!==opponent.id);
+      mainTeams.push(playerTeam);
       const main=buildByKind(kind,mainTeams,field.players,random);
-      tournament=Object.assign({},main,{shape:'qualifier',mainShape:main.shape,main,currentMatch:{home:playerTeam,away:opponent},qualifierMatch:{home:playerTeam,away:opponent},stage:'qualifier',round:0,history:[]});
+      main.teams=mainTeams;
+      tournament=Object.assign({},main,{shape:'qualifier',mainShape:main.shape,main,teams:mainTeams,currentMatch:{home:playerTeam,away:opponent},qualifierMatch:{home:playerTeam,away:opponent},stage:'qualifier',round:0,history:[]});
     }
   }
   // A league night plays its two or three matches and the rest of the season
@@ -499,10 +501,13 @@ export function nextPlayerMatch(tournament){
   return tournament.currentMatch??null;
 }
 
-// Whether the player is sitting this round out with a bye. A bye only exists
-// in a bracket, and only when the pairing has no opponent.
+// Whether the player is sitting this round out with a bye in a bracket or
+// double-elimination round.
 export function playerHasBye(tournament){
   if(!tournament||tournament.finished||tournament.playerOut)return false;
+  if(tournament.shape==='double-elimination'){
+    return (tournament.pairings??[]).some(match=>!match.away&&match.home?.id===tournament.playerTeamId);
+  }
   if(tournament.shape!=='bracket')return false;
   const alive=tournament.alive??[];
   for(let index=0;index<alive.length;index+=2){
@@ -700,7 +705,7 @@ export function recordPlayerResult(tournament,{won,score}){
     }
     const history=tournament.history;
     const main=tournament.main;
-    Object.assign(tournament,main,{history,qualified:true,stage:'main',currentMatch:null});
+    Object.assign(tournament,main,{history,teams:main.teams??tournament.teams,qualified:true,stage:'main',currentMatch:null});
     return {ok:true,tournament};
   }
   if(tournament.shape==='bracket'){

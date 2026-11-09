@@ -1,6 +1,6 @@
 # The Pro Tour, and the End of a Career
 
-A design document. No code has been written against it yet.
+The core tour, ranking, contract and aging systems are implemented. This document remains the behavioral design reference; the open questions and product choices below are still authoritative.
 
 ---
 
@@ -224,7 +224,7 @@ An event also chooses how it reads a team:
 
 **For a solo entry the two rules are the same thing**, because the team is one player.
 
-**Where the code stands.** `enterableBrackets` reads `state.athlete.formats[format]`, so a doubles event already gates on the doubles rating and ignores mixed. That is correct for a solo entry. The highest-player rule becomes live when the player can choose or keep a partner, and each event needs to carry which rule it uses.
+**Where the code stands.** `enterableBrackets` reads `state.athlete.formats[format]`, so a doubles event gates on the doubles rating and ignores mixed. `partnerGateStatus` applies the event's highest-player or combined rule when a persistent partner is selected.
 
 ---
 

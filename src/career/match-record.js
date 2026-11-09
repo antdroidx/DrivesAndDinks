@@ -6,7 +6,7 @@
 // rates it the way every other match is rated: on the difference between
 // what was expected and what actually happened.
 
-import {rateMatch,expectedScore,matchPerformance,teamStrength} from './rating.js';
+import {rateMatch,expectedScore,matchPerformance,teamStrength,MAX_POINTS} from './rating.js';
 import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints,EVENT_POOL,POOL_TOUR} from './tour.js';
 
 export const CAREER_RECORD_LIMIT=60;
@@ -22,8 +22,39 @@ export function pointsForResult({eventId,divisionId,ownDivisionId,won}){
   return Math.round(base*result*(playedUp?PLAY_UP_MULTIPLIER:1));
 }
 
+const compactPlayer=player=>({
+  id:player.id,team:player.team,name:player.name,handedness:player.handedness,
+  archetype:player.archetype,attributes:player.attributes,physique:player.physique,paddle:player.paddle
+});
+
+const compactEvent=event=>({
+  sequence:event.sequence,time:event.time,type:event.type,shot:event.shot,stroke:event.stroke,
+  playerId:event.playerId,quality:event.quality,reason:event.reason,winner:event.winner,shots:event.shots,
+  position:event.position,placement:event.placement,mechanics:event.mechanics,transition:event.transition,
+  distance:event.distance,movement:event.movement,netMargin:event.netMargin
+});
+
+// Full engine reports can approach 400 KB each. Career saves keep the durable
+// summary and a bounded evidence tail so a long career remains restorable.
+export function compactMatchReport(report={}){
+  const journal=report.journal??{};
+  return {
+    schemaVersion:report.schemaVersion,build:report.build,seed:report.seed,format:report.format,
+    mode:report.mode,difficulty:report.difficulty,elapsed:report.elapsed,complete:report.complete,
+    score:report.score,players:(report.players??[]).map(compactPlayer),stats:report.stats,tactics:report.tactics,
+    playtest:report.playtest,learning:report.learning,practice:report.practice,
+    sideSwitched:report.sideSwitched,sideSwitchThreshold:report.sideSwitchThreshold,
+    stacking:report.stacking?{config:report.stacking.config,summary:report.stacking.summary}:null,
+    journal:{
+      droppedEvents:journal.droppedEvents??0,droppedRallies:journal.droppedRallies??0,
+      events:(journal.events??[]).slice(-80).map(compactEvent),
+      rallies:(journal.rallies??[]).slice(-20)
+    }
+  };
+}
+
 // Rates a played match and returns the new rating for every player on court.
-export function rateMatchReport({report,matchup,matchType='league'}){
+export function rateMatchReport({report,matchup,matchType='league',targetScore=11}){
   // The engine reports teams as numbers, so they are mapped onto the two
   // sides the rating calculation works with.
   const myTeam=matchup.playerTeam??0;
@@ -47,10 +78,13 @@ export function rateMatchReport({report,matchup,matchType='league'}){
   }));
   const myPoints=points[myTeam]??0;
   const theirPoints=points[1-myTeam]??0;
+  const scoreScale=MAX_POINTS/Math.max(MAX_POINTS,Number(targetScore)||MAX_POINTS);
+  const ratedMyPoints=myPoints*scoreScale;
+  const ratedTheirPoints=theirPoints*scoreScale;
   const rated=rateMatch({
     players,
-    actualMyPoints:myPoints,
-    actualOpponentPoints:theirPoints,
+    actualMyPoints:ratedMyPoints,
+    actualOpponentPoints:ratedTheirPoints,
     matchType,
     weeksAgo:0
   });
@@ -64,11 +98,13 @@ export function rateMatchReport({report,matchup,matchType='league'}){
     delta:(player?.rating??matchup.playerRating)-matchup.playerRating,
     myPoints,
     theirPoints,
+    ratedMyPoints,
+    ratedTheirPoints,
     won:myPoints>theirPoints,
     expected,
     performance:matchPerformance({
-      actualMyPoints:myPoints,
-      actualOpponentPoints:theirPoints,
+      actualMyPoints:ratedMyPoints,
+      actualOpponentPoints:ratedTheirPoints,
       expectedMyPoints:expected.myPoints,
       expectedOpponentPoints:expected.opponentPoints
     })
@@ -90,7 +126,7 @@ export function buildCareerRecord({report,matchup,event,option,outcome,week}){
     delta:Number(outcome.delta.toFixed(3)),
     opponent:matchup.opponentNames?.[0]??'a local',
     opponents:matchup.opponentNames??[],
-    report
+    report:compactMatchReport(report)
   };
 }
 

@@ -10,7 +10,8 @@
 // least three appearances in two different disciplines. It keeps the
 // complete-player pressure while remaining attainable.
 
-import {positions} from './ranking.js';
+import {positions,challengerPoints} from './ranking.js';
+import {PRO_FLOOR_RATING} from './tour.js';
 
 export const SEASON_WEEKS=52;
 export const CONTRACT_RANK=50;
@@ -21,6 +22,7 @@ export const OBLIGATION_FORMATS=3;
 export const REQUIRED_DISCIPLINES=2;
 export const INELIGIBLE_WEEKS=52;
 export const REENTRY_EVENTS=8;
+export const CHALLENGER_CONTRACT_POINTS=5000;
 export const TOUR_TIERS=Object.freeze(['open','cup','major','world']);
 
 const emptyFormats=()=>({singles:0,doubles:0,mixed:0});
@@ -68,8 +70,11 @@ export function contractOffer(state){
     if(state?.contractRecommendation||(state?.reentryEvents??0)>=REENTRY_EVENTS)return 'futures';
     return null;
   }
-  if(rank!==null&&rank<=CONTRACT_RANK)return 'futures';
   if(state?.contractRecommendation)return 'futures';
+  const bestRating=Math.max(...Object.values(state?.athlete?.formats??{}).filter(value=>Number.isFinite(value)),0);
+  if(bestRating<PRO_FLOOR_RATING)return null;
+  if(rank!==null&&rank<=CONTRACT_RANK)return 'futures';
+  if(challengerPoints(state?.rankingResults,week)>=CHALLENGER_CONTRACT_POINTS)return 'futures';
   return null;
 }
 
