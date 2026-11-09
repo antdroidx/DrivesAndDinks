@@ -39,6 +39,29 @@ export function bracketSize(teams){
   return size;
 }
 
+// Seeds are placed in bands. The top two are fixed, and each later band is
+// drawn at random within itself, which is how a real draw is made: two
+// equally ranked players can land in either half.
+export const SEED_BANDS=Object.freeze([[0,2],[2,4],[4,8],[8,12],[12,16],[16,24],[24,32],[32,64]]);
+
+export function seedBands(teams,random=Math.random,{fixTop=true}={}){
+  const ranked=[...teams].sort((a,b)=>b.rating-a.rating);
+  const out=[];
+  for(const [start,end] of SEED_BANDS){
+    const slice=ranked.slice(start,end);
+    if(!slice.length)break;
+    const first=out.length;
+    out.push(...shuffle(slice,random));
+    if(fixTop&&first===0&&out.length>=2){
+      // One and two hold their places; the rest of the band does not.
+      const fixed=slice.sort((a,b)=>b.rating-a.rating);
+      out[0]=fixed[0];
+      out[1]=fixed[1];
+    }
+  }
+  return out;
+}
+
 // The standard bracket order, so seed one and seed two can only meet in the
 // final. Returns zero based seeds in slot order.
 export function seedOrder(size){
@@ -138,8 +161,8 @@ export function buildField({state,event,option,drawSize=16}){
 
 // A single elimination bracket, seeded by rating, with byes in the empty
 // slots.
-export function buildBracket(teams){
-  const ranked=[...teams].sort((a,b)=>b.rating-a.rating);
+export function buildBracket(teams,random=Math.random){
+  const ranked=seedBands(teams,random);
   const size=bracketSize(ranked.length);
   const order=seedOrder(size);
   const slots=order.map(seed=>ranked[seed]??null);
@@ -283,13 +306,23 @@ export function startTournament({state,event,option}){
   const drawSize=Math.max(2,event?.drawSize??16);
   const teams=field.teams.slice(0,drawSize);
   const kind=pickShape(event,random);
-  let tournament;
-  if(kind==='round-robin-open'||kind==='ladder-open')tournament=buildOpen({players:[{id:'player',name:state.athlete.name,rating:state.athlete.formats[option.format],skill:formatSkill(state.athlete.ratings,option.format),archetypeId:state.athlete.archetypeId,gender:state.athlete.gender,handedness:state.athlete.handedness},...field.players.slice(0,drawSize*2)],random,kind});
-  else if(kind==='mlp-style')tournament=buildTeamLeague(teams,random);
-  else if(kind==='tournament-double-elimination')tournament=buildDoubleElimination(teams,random);
-  else if(kind==='ladder-fixed')tournament=buildLadder(teams,random);
-  else if(kind==='round-robin-league')tournament=buildRoundRobin(teams,random);
-  else tournament=buildBracket(teams);
+  const playerAthlete={id:'player',name:state.athlete.name,rating:state.athlete.formats[option.format],skill:formatSkill(state.athlete.ratings,option.format),archetypeId:state.athlete.archetypeId,gender:state.athlete.gender,handedness:state.athlete.handedness};
+  let tournament=buildByKind(kind,teams,field.players,random);
+  // A player outside the main-draw cut has to qualify first. One match gets
+  // them into the draw in place of the team they beat.
+  const qualifierSlots=Math.max(0,Math.min(drawSize-1,event?.qualifierSlots??0));
+  if(qualifierSlots>0&&teams.length>qualifierSlots){
+    const ranked=[...teams].sort((a,b)=>b.rating-a.rating);
+    const cut=ranked.length-qualifierSlots;
+    const playerIndex=ranked.findIndex(team=>team.id==='player');
+    if(playerIndex>=cut){
+      const opponent=ranked[cut-1]??ranked[0];
+      const playerTeam=ranked[playerIndex];
+      const mainTeams=ranked.map(team=>team.id===opponent.id?playerTeam:team);
+      const main=buildByKind(kind,mainTeams,field.players,random);
+      tournament=Object.assign({},main,{shape:'qualifier',mainShape:main.shape,main,currentMatch:{home:playerTeam,away:opponent},qualifierMatch:{home:playerTeam,away:opponent},stage:'qualifier',round:0,history:[]});
+    }
+  }
   return {
     ok:true,
     tournament:Object.assign(tournament,{
@@ -304,6 +337,7 @@ export function startTournament({state,event,option}){
       energyCost:event.energy,
       championPoints:event.championPoints??0,
       difficulty:event.difficulty??'normal',
+      qualifierSlots:event.qualifierSlots??0,
       rules:{
         points:event.targetScore??11,
         playoffPoints:event.playoffPoints??15,
@@ -314,7 +348,7 @@ export function startTournament({state,event,option}){
       teams,
       // Only an open draw needs the player pool; a team draw carries
       // its teams and nothing else.
-      players:tournament.shape==='open'?tournament.players:[]
+      players:tournament.shape==='open'?[playerAthlete,...field.players]:[]
     })
   };
 }
@@ -327,6 +361,16 @@ export function matchRules(tournament){
   const playoff=rules.playoffPoints??15;
   const late=tournament?.shape==='bracket'&&tournament.size/Math.pow(2,tournament.round??0)<=4;
   return {targetScore:late?playoff:base,scoring:rules.scoring??'side-out',winBy:rules.winBy??2};
+}
+
+// Builds the tournament for a shape.
+function buildByKind(kind,teams,players,random){
+  if(kind==='round-robin-open'||kind==='ladder-open')return buildOpen({players,random,kind});
+  if(kind==='mlp-style')return buildTeamLeague(teams,random);
+  if(kind==='tournament-double-elimination')return buildDoubleElimination(teams,random);
+  if(kind==='ladder-fixed')return buildLadder(teams,random);
+  if(kind==='round-robin-league')return buildRoundRobin(teams,random);
+  return buildBracket(teams,random);
 }
 
 // The simulated outcome of a match between two sides.
@@ -388,6 +432,10 @@ export function startRound(tournament,random){
   if(tournament.finished)return;
   tournament._roundStarted=true;
   tournament.currentMatch=null;
+  if(tournament.shape==='qualifier'){
+    tournament.currentMatch=tournament.qualifierMatch??null;
+    return;
+  }
   if(tournament.shape==='bracket'){
     const alive=tournament.alive;
     for(let index=0;index<alive.length;index+=2){
@@ -523,6 +571,19 @@ export function recordPlayerResult(tournament,{won,score}){
   tournament.history=tournament.history??[];
   tournament.history.push({round:tournament.round,opponent:opponent.name,opponentRating:opponent.rating,won:bye?true:won,score:bye?'bye':score});
   if(bye)won=true;
+  if(tournament.shape==='qualifier'){
+    if(!won){
+      tournament.playerOut=true;
+      tournament.finished=true;
+      tournament.failedToQualify=true;
+      tournament.currentMatch=null;
+      return {ok:true,tournament};
+    }
+    const history=tournament.history;
+    const main=tournament.main;
+    Object.assign(tournament,main,{history,qualified:true,stage:'main',currentMatch:null});
+    return {ok:true,tournament};
+  }
   if(tournament.shape==='bracket'){
     const winners=tournament.pendingWinners??[];
     const nextAlive=[];

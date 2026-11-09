@@ -9,7 +9,7 @@ import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,re
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
-  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST
+  currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {startCareerMatch,finishCareerMatch} from './career-match.js';
@@ -226,6 +226,7 @@ function renderHome(){
       </div>
       <button type="button" class="secondary" data-action="train" ${trainReady?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
       <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end">ADVANCE WEEK →</button>
+      <button type="button" class="secondary" data-action="next-event" style="flex:1 1 190px;align-self:flex-end">NEXT EVENT →</button>
     </div>
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. It does not move your rating. Later gains are slower than early ones.</div>
   </section>
@@ -546,6 +547,14 @@ document.addEventListener('click',event=>{
       writePendingMatch(started.pending);
       // The match is played on the engine page and the result comes back.
       location.href='../?career-match=1';
+      return;
+    }
+    if(action==='next-event'){
+      const jumped=advanceToNextEvent(app.career);
+      app.career=jumped.state;
+      persist();
+      render();
+      toast(jumped.message);
       return;
     }
     if(action==='resume-match'){

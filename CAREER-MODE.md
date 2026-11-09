@@ -364,11 +364,12 @@ An event now fields a tournament rather than a single match.
 - [x] The tournament is saved between rounds, so a handoff to the engine survives a reload
 - [x] Points follow the real tour proportions by place, from champion down to the first round
 - [x] Points and prize are paid for the placing when the tournament ends
-- [ ] Qualifier draws, and a secondary bracket for those who lose out
-- [ ] Seeding in bands rather than strictly by rating, and byes by combined ranking in doubles
+- [x] Qualifier draws: a player outside the main-draw cut plays one match to get in
+- [ ] A secondary bracket for those who lose out in the main draw
+- [x] Seeding in bands, with the top two fixed, and byes by combined ranking in doubles
 - [x] All seven shapes wired in: bracket, round robin, double elimination, fixed and open ladders, and the team league
 - [ ] Multi-week events that occupy consecutive weeks
-- [ ] A way to skip weeks with nothing on the calendar
+- [x] A way to skip weeks with nothing on the calendar
 - [ ] Scheduling conflicts: two events in the same week, and a tournament that overlaps a league
 
 **Why it is here.** A ranking is a measurement of rounds reached, and rounds do not exist until an event fields a tournament. This is the foundation the tour is expressed in.

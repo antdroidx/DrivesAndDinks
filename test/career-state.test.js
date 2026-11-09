@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
+  createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,advanceToNextEvent,
   currentEvents,canAct,canTrain,canEnterEvent,trainingCost,trainingGain,trainingSessionsThisWeek,
   weeklyRecovery,MAX_ENERGY,MAX_TRAINING_SESSIONS,STARTING_SKILL
 } from '../src/career/state.js';
@@ -132,6 +132,15 @@ test('advancing a week moves time forward and restores energy',()=>{
   assert.equal(result.state.energy,Math.min(MAX_ENERGY,trained.energy+weeklyRecovery(trained)));
   assert.equal(canAct(result.state),true);
   assert.ok(result.state.history.length>trained.history.length);
+});
+
+test('advancing to the next event skips the quiet weeks',()=>{
+  const joined=withClub(career());
+  const jumped=advanceToNextEvent(joined);
+  assert.ok(jumped.ok);
+  assert.ok(jumped.state.week>joined.week,'the calendar moved');
+  assert.ok(jumped.events.length>0,'it stopped on an event');
+  for(const event of jumped.events)assert.ok(event.eligible.ok&&event.options.length,'the event is enterable');
 });
 
 test('joining a club records the club and moves the player to its city',()=>{

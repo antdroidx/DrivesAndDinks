@@ -274,7 +274,7 @@ function finishTournament(state,tournament){
   const mlpPointsHistory=pool===POOL_MLP?addPoints(state.athlete.mlpPointsHistory??[],state.week,earned):state.athlete.mlpPointsHistory??[];
   const basePrize=prizeFor({eventId:tournament.eventId,won:true,format:tournament.format,sponsors:sponsorsFor(state,tournament.format)});
   const prize=Math.round(basePrize*prizeFactor(place));
-  const placeText=place?(place===1?'Champion':place===2?'Runner-up':place<=4?'Semifinalist':place<=8?'Quarterfinalist':'Round of '+(tournament.size/2||16))+' · place '+(place??'—'):'Tournament complete';
+  const placeText=place?(place===1?'Champion':place===2?'Runner-up':place<=4?'Semifinalist':place<=8?'Quarterfinalist':'Round of '+(tournament.size/2||16))+' · place '+(place??'—'):tournament.failedToQualify?'Did not qualify':'Tournament complete';
   const entered=[...new Set([...(state.entered??[]),tournament.eventId])].slice(-16);
   const athlete=Object.assign({},state.athlete,{
     tourPoints:pointsInWindow(tourPointsHistory,state.week),

@@ -426,6 +426,20 @@ export function moveToCity(state,cityId){
   return {ok:true,state:next,message:international?`You moved to ${city.label}, ${city.country}.`:`You moved to ${city.label}.`};
 }
 
+// Skips the quiet weeks and stops on the next week with something the
+// player can enter, so a career does not have to be clicked forward.
+export function advanceToNextEvent(state,{maxWeeks=52}={}){
+  let current=state;
+  for(let index=0;index<maxWeeks;index++){
+    current=advanceWeek(current).state;
+    const events=generateWeekEvents(current,current.week).filter(event=>event.eligible.ok&&event.options.length);
+    if(events.length){
+      return {ok:true,state:current,events,message:`${weekLabel(current.week)}. ${events.length} event${events.length===1?'':'s'} available.`};
+    }
+  }
+  return {ok:true,state:current,events:[],message:'No enterable event in the next year.'};
+}
+
 export function advanceWeek(state){
   const week=state.week+1;
   // What the player takes back next week. Spending more than this in a week

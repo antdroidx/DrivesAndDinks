@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer} from '../src/career/state.js';
 import {
   startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,
-  isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss
+  isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands
 } from '../src/career/tournament.js';
 import {pointsForFinish} from '../src/career/tour.js';
 import {seededRandom} from '../src/competition.js';
@@ -71,6 +71,39 @@ test('a loss ends a knockout and keeps a league going',()=>{
   recordPlayerResult(league,{won:false,score:'7-11'});
   assert.equal(isPlayerDone(league),false,'a league continues after a loss');
   assert.ok(league.round>0,'the league moved on');
+});
+
+test('a player outside the main draw has to qualify',()=>{
+  const event=Object.assign(eventFor('tournament-bracket'),{qualifierSlots:4});
+  const random=seededRandom(31);
+
+  const win=startTournament({state,event,option}).tournament;
+  assert.equal(win.shape,'qualifier','the bottom of the draw qualifies');
+  startRound(win,random);
+  const match=nextPlayerMatch(win);
+  assert.ok(match,'there is a qualifier match');
+  recordPlayerResult(win,{won:true,score:'11-7'});
+  assert.equal(win.qualified,true);
+  assert.equal(win.stage,'main');
+  assert.notEqual(win.shape,'qualifier','winning promotes into the main draw');
+  startRound(win,random);
+  assert.ok(nextPlayerMatch(win),'the main draw has a first match');
+
+  const loss=startTournament({state,event,option}).tournament;
+  startRound(loss,random);
+  recordPlayerResult(loss,{won:false,score:'7-11'});
+  assert.equal(isPlayerDone(loss),true,'losing the qualifier ends the event');
+  assert.equal(loss.failedToQualify,true);
+  assert.equal(tournamentPoints(loss),0,'a qualifier loss pays nothing');
+});
+
+test('seeds are drawn in bands, with the top two fixed',()=>{
+  const teams=Array.from({length:16},(_,index)=>({id:'t'+index,rating:5-index*0.1}));
+  const drawn=seedBands(teams,seededRandom(7));
+  assert.equal(drawn[0].id,'t0','seed one holds');
+  assert.equal(drawn[1].id,'t1','seed two holds');
+  assert.deepEqual(new Set(drawn.slice(4,8).map(team=>team.id)),new Set(['t4','t5','t6','t7']),'five to eight form a band');
+  assert.deepEqual(new Set(drawn.slice(8,12).map(team=>team.id)),new Set(['t8','t9','t10','t11']),'nine to twelve form a band');
 });
 
 test('a bracket is sized to the next power of two and seeded strongest first',()=>{
