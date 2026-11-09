@@ -29,7 +29,7 @@ test('cities resolve to their area and region',()=>{
 });
 
 test('the ladder runs from club night to the pro league',()=>{
-  assert.deepEqual(COMPETITION_EVENTS.map(event=>event.id),['club-night','local-league','city-open','regional-open','mlp-amateur','semi-pro','national','international','pro-league','mlp']);
+  assert.deepEqual(COMPETITION_EVENTS.map(event=>event.id),['club-night','local-league','city-open','regional-open','mlp-amateur','semi-pro','national','international','pro-league','mlp','world-championship','ppa-finals']);
   assert.equal(EVENT_BY_ID['pro-league'].scope,'world');
   assert.equal(EVENT_BY_ID['semi-pro'].scope,'region');
   assert.equal(EVENT_BY_ID['club-night'].kind??'practice','practice');

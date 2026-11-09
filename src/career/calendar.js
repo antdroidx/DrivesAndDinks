@@ -12,6 +12,7 @@ import {COMPETITION_EVENTS,EVENT_BY_ID,PRO_LEAGUE_DIVISION,EVENT_SCOPE_LABELS} f
 import {RATING_BRACKETS,availableDivisions,divisionFor,formatRating} from './rating.js';
 import {tourFor,tourRank,pointsInWindow} from './tour.js';
 import {mixSeed} from './population.js';
+import {finalsQualified} from './ranking.js';
 import {seededRandom} from '../competition.js';
 
 // Monday, 5 January 2026. Career week 0 starts here.
@@ -43,7 +44,9 @@ const CADENCE=Object.freeze({
   'national':{every:12,on:6},
   'international':{every:16,on:8},
   'pro-league':{every:20,on:10},
-  'mlp':{every:20,on:10}
+  'mlp':{every:20,on:10},
+  'world-championship':{every:52,on:13},
+  'ppa-finals':{every:52,on:49}
 });
 
 function eventTitle(event,state,club){
@@ -121,6 +124,10 @@ export function entryOptions(state,event){
 export function entryEligibility(state,event,enterable=null){
   if(event.scope==='club'&&!state.clubId)return {ok:false,reason:'Join a club first'};
   // The tour standing is the more fundamental lock, so it is checked first.
+  if(event.qualification==='finals'){
+    const qualified=finalsQualified(state);
+    if(!qualified)return {ok:false,reason:'The finals take the top eight of the Overall ranking'};
+  }
   if(event.qualification==='pro-tour'){
     const tour=tourFor(state.athlete.gender);
     const rating=bestFormatRating(state);

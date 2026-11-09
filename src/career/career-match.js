@@ -14,6 +14,7 @@ import {entryEligibility} from './calendar.js';
 import {EVENT_BY_ID} from './geography.js';
 import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
+import {recordResult} from './ranking.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
@@ -283,10 +284,19 @@ function finishTournament(state,tournament){
     mlpPointsHistory
   });
   const closed=Object.assign({},tournament,{finished:true,placeText,points:earned});
+  // The ranking is built from results, not from the board.
+  const ranked=recordResult(state,{
+    week:state.week,
+    eventId:tournament.eventId,
+    format:tournament.format,
+    tier:EVENT_BY_ID[tournament.eventId]?.tier??'challenger',
+    place,
+    points:earned
+  });
   const summary=tournament.label+': '+placeText
     +(earned?' · '+earned+' points':'')
     +(prize?' · $'+prize.toLocaleString('en-US'):'')+'.';
-  const next=pushLog(pushHistory(Object.assign({},state,{
+  const next=pushLog(pushHistory(Object.assign({},ranked,{
     athlete,
     money:state.money+prize,
     entered,

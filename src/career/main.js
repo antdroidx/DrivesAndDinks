@@ -17,6 +17,7 @@ import {isPlayerDone} from './tournament.js';
 import {writePendingMatch,readMatchResult,clearMatchResult} from './handshake.js';
 import {boardPosition,nearbyRivals,findRival,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
+import {rankingSummary} from './ranking.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -169,6 +170,8 @@ function renderHome(){
   const moveCity=moveCities.find(city=>city.id===app.move.cityId)??moveCities.find(city=>city.id===career.cityId)??moveCities[0];
   const entered=new Set(career.entered??[]);
   const nextEvent=COMPETITION_EVENTS.find(event=>!entered.has(event.id))??null;
+  const ranking=rankingSummary(career);
+  const board=(label,place,points)=>`${label} ${place?'#'+place:'—'} · ${Math.round(points).toLocaleString('en-US')}`;
   const reliabilityInfo=reliability(career.athlete.record.matches);
   const reliabilityText=career.athlete.record.matches
     ? `Reliability ${reliabilityInfo.percent}% · ${reliabilityInfo.label}`
@@ -214,6 +217,8 @@ function renderHome(){
         <div class="format-list">${formatRows}</div>
         <small class="muted">${tourStanding?`Tour rank ${tourStanding.toLocaleString('en-US')} of ${tour.size.toLocaleString('en-US')}`:`Not on the ${tour.label}'s tour`}</small>
         <div class="hint">${escapeHtml(reliabilityText)}</div>
+        <div class="hint">${escapeHtml(board('Overall',ranking.overall,ranking.points.overall))}${ranking.finals?' · finals qualified':''}</div>
+        <div class="hint">${escapeHtml([board('Doubles',ranking.doubles,ranking.points.doubles),board('Mixed',ranking.mixed,ranking.points.mixed),board('Singles',ranking.singles,ranking.points.singles)].join(' · '))}</div>
         <div class="hint">Next on the ladder: ${escapeHtml(nextEvent?nextEvent.label:'the pro league')}</div>
       </div>
     </div>

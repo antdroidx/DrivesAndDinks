@@ -81,7 +81,9 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city}){
     formats:Object.fromEntries(FORMATS.map(format=>[format,NEW_PLAYER_RATING])),
     record:{value:1+average/15,confidence:0,matches:0,wins:0,losses:0},
     tourPoints:0,
-    tourPointsHistory:[]
+    tourPointsHistory:[],
+    // The results the four rankings are built from.
+    rankingResults:[]
   };
 }
 
