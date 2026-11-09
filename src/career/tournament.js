@@ -462,7 +462,13 @@ export function startRound(tournament,random){
   }
   if(tournament.shape==='round-robin'||tournament.shape==='mlp'){
     const round=tournament.rounds[tournament.round]??[];
-    tournament.currentMatch=round.find(match=>match.home.id===tournament.playerTeamId||match.away.id===tournament.playerTeamId)??null;
+    const match=round.find(entry=>entry.home.id===tournament.playerTeamId||entry.away.id===tournament.playerTeamId)??null;
+    // Each opponent is a best of three. Every game still counts for the
+    // rating, but only the series is a league win.
+    if(match&&!tournament.series){
+      tournament.series={home:match.home,away:match.away,playerWins:0,opponentWins:0};
+    }
+    tournament.currentMatch=tournament.series?{home:tournament.series.home,away:tournament.series.away}:match;
     return;
   }
   if(tournament.shape==='double-elimination'){
@@ -641,8 +647,22 @@ export function recordPlayerResult(tournament,{won,score}){
     return {ok:true,tournament};
   }
   if(tournament.shape==='round-robin'||tournament.shape==='mlp'){
-    const record=tournament.records[tournament.playerTeamId];
-    if(record){if(won){record.wins+=1;}else{record.losses+=1;}}
+    const series=tournament.series;
+    if(series){
+      if(won)series.playerWins+=1;else series.opponentWins+=1;
+      const decided=series.playerWins>=2||series.opponentWins>=2;
+      if(!decided){
+        // The next game is played against the same opponent.
+        tournament.currentMatch={home:series.home,away:series.away,game:true};
+        return {ok:true,tournament};
+      }
+      const record=tournament.records[tournament.playerTeamId];
+      if(record){
+        if(series.playerWins>series.opponentWins)record.wins+=1;
+        else record.losses+=1;
+      }
+      tournament.series=null;
+    }
     tournament.round+=1;
     if(tournament.round>=tournament.rounds.length){
       tournament.finished=true;
