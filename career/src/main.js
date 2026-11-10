@@ -1,42 +1,42 @@
-import {seededRandom} from './competition.js?v=196';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=196';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=196';
-import {playerFeet,footSole} from './player-feet.js?v=196';
+import {seededRandom} from './competition.js?v=197';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=197';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=197';
+import {playerFeet,footSole} from './player-feet.js?v=197';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=196';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=197';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=196';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=197';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=196';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=197';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=196';
+import {createAnimeGameRenderer} from './anime-game.js?v=197';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=196';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=197';
 
-import {setupCourtDisplay} from './court-display.js?v=196';
+import {setupCourtDisplay} from './court-display.js?v=197';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=196';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=197';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=196';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=196';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=197';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=197';
 
-import {movingStance} from './detailed-character.js?v=196';
+import {movingStance} from './detailed-character.js?v=197';
 
-import {sampleMatchAnimation} from './match-animation.js?v=196';
+import {sampleMatchAnimation} from './match-animation.js?v=197';
 
-import {setupSelection} from './selection.js?v=196';
-import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM} from './career/handshake.js?v=196';import {setupStartScreen} from './start-screen.js?v=196';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=196';
+import {setupSelection} from './selection.js?v=197';
+import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM} from './career/handshake.js?v=197';import {setupStartScreen} from './start-screen.js?v=197';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=197';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=196';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=197';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=196';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=197';
 
-import {Game} from './game.js?v=196';
-import {C} from './core.js?v=196';
+import {Game} from './game.js?v=197';
+import {C} from './core.js?v=197';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=196';import {playerEmotionState} from './player-emotion.js?v=196';import {PerformanceMonitor} from './performance-monitor.js?v=196';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=197';import {playerEmotionState} from './player-emotion.js?v=197';import {PerformanceMonitor} from './performance-monitor.js?v=197';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=196';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=197';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -96,8 +96,10 @@ const matchIntroDialog=document.querySelector('#match-intro'),matchIntroTeamsRoo
 const sideSwitchDialog=document.querySelector('#side-switch-dialog'),sideSwitchContinue=document.querySelector('#side-switch-continue');
 function showSideSwitchNotice(){if(sideSwitchDialog.open)return;game.setPaused(true);sideSwitchDialog.showModal()}
 sideSwitchContinue.onclick=()=>{sideSwitchDialog.close();game.setPaused(false);syncPauseButton()};sideSwitchDialog.oncancel=event=>event.preventDefault();
-function showMatchIntro(players,onBegin){
+function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH-UP',action='START MATCH →',entry=null}={}){
  matchIntroTeamsRoot.replaceChildren();
+ const introKicker=matchIntroDialog.querySelector('.intro-heading small'),introTitle=matchIntroDialog.querySelector('#match-intro-title');if(introKicker)introKicker.textContent=kicker;if(introTitle)introTitle.textContent=title;beginMatchButton.textContent=action;
+ let entrySummary=matchIntroDialog.querySelector('#match-entry-summary');if(!entrySummary){entrySummary=document.createElement('div');entrySummary.id='match-entry-summary';entrySummary.className='match-entry-summary';matchIntroDialog.querySelector('.intro-heading').after(entrySummary)}entrySummary.hidden=!entry;entrySummary.replaceChildren();if(entry){for(const line of entry){const row=document.createElement('p');row.textContent=line;entrySummary.append(row)}}
  const introTeams=matchIntroTeams(players);for(const team of introTeams){
   const section=document.createElement('section');section.className='intro-team';section.dataset.team=String(team.team);
   const heading=document.createElement('h3');heading.textContent=team.label;section.append(heading);
@@ -431,14 +433,18 @@ startScreen=setupStartScreen({onPlay:()=>selectionUI.open(),version:'0.1.0',buil
 
 // A career match arrives from the career mode with its field already drawn
 // and its lineup already built from the career athlete's own attributes.
-const careerMatch=readPendingMatch()&&new URLSearchParams(location.search).has(CAREER_MATCH_PARAM)?readPendingMatch():null;
+const careerQuery=new URLSearchParams(location.search),careerMatch=readPendingMatch()&&careerQuery.has(CAREER_MATCH_PARAM)?readPendingMatch():null;
+const careerReturnPath=careerQuery.get('career-return')==='career'?(location.pathname.startsWith('/dev/')?'../career/':'./career/'):'./career-mode/';
+let careerResultCommitted=false;
 if(careerMatch){
+  startScreen?.close();
   const screen=document.querySelector('#game-start');
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
   game.configure({format:careerMatch.matchup.format,showNameTags:true,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
   game.mode='play';
   game.setDifficulty(careerMatch.difficulty??'normal');
+  game.setPaused(true);
   for(const id of ['setup-button','difficulty','mode','restart','restart-top']){
     const control=document.getElementById(id);
     if(control){control.hidden=true;control.disabled=true;}
@@ -446,6 +452,18 @@ if(careerMatch){
   refreshVenue();
   const scoringLabel=careerMatch.rules?`First to ${careerMatch.rules.targetScore}, ${careerMatch.rules.scoring==='rally'?'rally scoring':'side-out'}, win by ${careerMatch.rules.winBy}`:'First to 11, side-out, win by 2';
   document.querySelector('#active-loadout').textContent='CAREER MATCH \u00b7 '+careerMatch.bracket+' '+careerMatch.format+' \u00b7 '+scoringLabel;
+  const teamSize=careerMatch.matchup.format==='singles'?1:2;
+  const yourPlayers=careerMatch.matchup.lineup.slice(0,teamSize).map(player=>player.name).join(' & ');
+  const opponentPlayers=careerMatch.matchup.lineup.slice(teamSize,teamSize*2).map(player=>player.name).join(' & ');
+  const yourTeamName=careerMatch.matchup.playerTeamName??'Your entry';
+  const opponentTeamName=careerMatch.matchup.team??'Opponent entry';
+  const entry=[
+    `${careerMatch.eventLabel??careerMatch.eventId??'Career event'} · ${careerMatch.bracket??'Open draw'} · ${careerMatch.format} · Round ${Number(careerMatch.round??0)+1}`,
+    yourTeamName===yourPlayers?`Your team: ${yourPlayers}`:`Your team: ${yourTeamName} — ${yourPlayers}`,
+    opponentTeamName===opponentPlayers?`Opponent: ${opponentPlayers}`:`Opponent: ${opponentTeamName} — ${opponentPlayers}`,
+    scoringLabel
+  ];
+  showMatchIntro(game.players,()=>{game.setPaused(false);beginConfiguredMatch()},{kicker:'CAREER MATCH',title:'THE MATCH-UP',action:'ENTER MATCH →',entry});
   last=0;acc=0;
 }
 
@@ -478,9 +496,18 @@ const resultDialog=document.querySelector('#match-result');
 
 function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){
   if(careerMatch){
-    if(writeMatchResult(game.matchReport(),careerMatch.matchId)){
-      clearPendingMatch();resultDialog.close();location.href='./career-mode/';
+    if(!careerResultCommitted){
+      careerResultCommitted=true;
+      if(writeMatchResult(game.matchReport(),careerMatch.matchId))clearPendingMatch();
     }
+    resultDialog.querySelector('h2').textContent='Career match complete';
+    document.querySelector('#match-winner').textContent=game.score.winner===0?'Your team wins!':'Opponents win!';
+    document.querySelector('#match-score').textContent=`Your team ${game.score.points[0]} – ${game.score.points[1]} ${careerMatch.matchup.team??'Opponents'}`;
+    const contacts=game.stats.teams.reduce((n,t)=>n+t.hits,0),mishits=game.stats.teams.reduce((n,t)=>n+t.mishits,0);
+    document.querySelector('#match-analysis').textContent=`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Return to career to apply the tournament result, rating change and recovery.`;
+    document.querySelector('#rematch').hidden=true;
+    document.querySelector('#return-selection').textContent='RETURN TO CAREER →';
+    resultDialog.showModal();
     return;
   }
  const practice=game.practice;resultDialog.querySelector('h2').textContent=practice?'Practice complete':'Match ended';document.querySelector('#rematch').textContent=practice?'REPEAT DRILL':'REMATCH';
@@ -492,9 +519,9 @@ function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialo
 
 resultDialog.addEventListener('cancel',e=>e.preventDefault());
 
-document.querySelector('#rematch').onclick=()=>{resultDialog.close();if(game.practice){const {id,seed}=game.practice;game.startPractice(id,seed)}else game.reset();last=0;acc=0;setShot(game.practice?(game.practice.step.shot==='lob'?'lob':game.practice.step.shot==='drive'?'attack':'soft'):'attack');syncPauseButton()};
+document.querySelector('#rematch').onclick=()=>{if(careerMatch)return;resultDialog.close();if(game.practice){const {id,seed}=game.practice;game.startPractice(id,seed)}else game.reset();last=0;acc=0;setShot(game.practice?(game.practice.step.shot==='lob'?'lob':game.practice.step.shot==='drive'?'attack':'soft'):'attack');syncPauseButton()};
 
-document.querySelector('#return-selection').onclick=()=>{resultDialog.close();selectionUI.open()};
+document.querySelector('#return-selection').onclick=()=>{if(careerMatch){location.href=careerReturnPath;return}document.querySelector('#rematch').hidden=false;document.querySelector('#return-selection').textContent='PLAYER SELECTION';resultDialog.close();selectionUI.open()};
 
 const lesson=document.createElement("p");lesson.className="control-lesson";lesson.textContent="Movement is automatic | ← → aim · ↑ ↓ depth · Shift fine control | 1 Attack, 2 Soft, 3 Lob select AND hit | Space repeats shot | White ring = hit now";canvas.insertAdjacentElement("afterend",lesson);
 

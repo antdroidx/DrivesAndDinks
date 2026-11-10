@@ -4,37 +4,38 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS} from '../roster.js?v=196';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=196';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=196';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor} from '../roster.js?v=197';
+import {drawPixelCharacter,onCharacterSpritesReady} from '../pixel-character.js?v=197';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=197';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=197';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=196';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=196';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=196';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=196';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=196';
-import {isPlayerDone} from './tournament.js?v=196';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=196';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=196';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=196';
-import {rankingSummary} from './ranking.js?v=196';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=196';
-import {analyticsSummary} from './analytics.js?v=196';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=196';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=196';
-import {opponentHistory} from './opponents.js?v=196';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=196';
-import {directoryPage} from './directory.js?v=196';
-import {financeSummary,COACHING_FEE} from './finance.js?v=196';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=196';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=196';
-import {currentInjury,activeInjuries} from './injuries.js?v=196';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle} from './equipment.js?v=196';
-import {teamCareerSummary} from './team-league.js?v=196';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=196';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=196';
+} from './state.js?v=197';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=197';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=197';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=197';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=197';
+import {isPlayerDone} from './tournament.js?v=197';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=197';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=197';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=197';
+import {rankingSummary} from './ranking.js?v=197';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=197';
+import {analyticsSummary} from './analytics.js?v=197';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=197';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=197';
+import {opponentHistory} from './opponents.js?v=197';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=197';
+import {directoryPage} from './directory.js?v=197';
+import {financeSummary,COACHING_FEE} from './finance.js?v=197';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=197';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=197';
+import {currentInjury,activeInjuries} from './injuries.js?v=197';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats} from './equipment.js?v=197';
+import {teamCareerSummary} from './team-league.js?v=197';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=197';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=197';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -47,7 +48,8 @@ const RATING_GROUPS=Object.freeze([
 const app={
   career:null,
   view:'home',
-  draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25,height:164,weight:64,experience:'athlete',trait:'none'},
+  draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25,height:164,weight:64,experience:'athlete',trait:'none',
+    handedness:DEFAULT_SELECTION.handedness,shirtColor:DEFAULT_SELECTION.shirtColor,paddleColor:DEFAULT_SELECTION.paddleColor,highlightColor:DEFAULT_SELECTION.highlightColor,hairStyle:DEFAULT_SELECTION.hairStyle,hairColor:DEFAULT_SELECTION.hairColor,skinColor:DEFAULT_SELECTION.skinColor,headwear:DEFAULT_SELECTION.headwear,eyewear:DEFAULT_SELECTION.eyewear,outfit:DEFAULT_SELECTION.outfit,court:DEFAULT_SELECTION.court},
   filters:{areaId:'',cityId:'',tier:'',query:'',gender:'',bracket:'',minAge:'',maxAge:'',sort:'rating-desc',page:0},
   move:{regionId:'',cityId:''},
   standingsFormat:null,
@@ -65,6 +67,11 @@ const resetButton=document.getElementById('career-reset');
 
 const escapeHtml=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const money=value=>{const amount=Math.round(Number(value)||0);return (amount<0?'-$':'$')+Math.abs(amount).toLocaleString('en-US')};
+const EQUIPMENT_STAT_LABELS=Object.freeze({power:'Power',control:'Control',spin:'Spin',reach:'Reach',hands:'Hands',sweetSpot:'Sweet spot'});
+function equipmentStatRows(item){
+  const stats=equipmentStats(item);
+  return `<div class="paddle-stats" aria-label="${escapeHtml(item.label)} attributes">${Object.entries(stats).map(([key,value])=>`<div class="paddle-stat"><span>${escapeHtml(EQUIPMENT_STAT_LABELS[key]??key)}</span><div><i style="width:${value}%"></i></div><strong>${value}</strong></div>`).join('')}</div>`;
+}
 
 let toastTimer=null;
 function toast(message,warn=false){
@@ -99,6 +106,7 @@ function render(){
   if(inboxButton){const unread=hasCareer?unreadCount(app.career):0;inboxButton.textContent=unread?`INBOX · ${unread}`:'INBOX';}
   const renderer={home:renderHome,clubs:renderClubs,team:renderTeam,inbox:renderInbox,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
   view.innerHTML=hasCareer?renderer():renderCreate();
+  if(!hasCareer)requestAnimationFrame(drawCareerDraftPreview);
 }
 
 function renderStatus(){
@@ -113,6 +121,43 @@ function renderStatus(){
     <div><small>AGE</small><strong>${career.athlete.age}</strong></div>`;
 }
 
+function optionTags(items,value,labelKey='name'){
+  return items.map(item=>`<option value="${item.id}"${item.id===value?' selected':''}>${escapeHtml(item[labelKey]??item.label??item.id)}</option>`).join('');
+}
+
+function careerDraftSelection(){
+  return normalizeSelection({
+    character:app.draft.archetypeId,
+    gender:app.draft.gender,
+    handedness:app.draft.handedness,
+    customName:app.draft.name,
+    paddle:'balanced',
+    paddleShape:'hybrid',
+    shirtColor:app.draft.shirtColor,
+    paddleColor:app.draft.paddleColor,
+    highlightColor:app.draft.highlightColor,
+    hairStyle:app.draft.hairStyle,
+    hairColor:app.draft.hairColor,
+    skinColor:app.draft.skinColor,
+    headwear:app.draft.headwear,
+    eyewear:app.draft.eyewear,
+    outfit:app.draft.outfit,
+    court:app.draft.court
+  });
+}
+
+function drawCareerDraftPreview(){
+  const canvas=document.getElementById('career-player-preview');
+  if(!canvas)return;
+  const selection=careerDraftSelection(),profile=buildProfile(selection),ctx=canvas.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(2,0,0,2,0,0);ctx.imageSmoothingEnabled=false;
+  ctx.fillStyle='#173039';ctx.fillRect(0,0,150,180);ctx.fillStyle='#355e60';ctx.fillRect(0,142,150,38);ctx.fillStyle='#eff3cf55';ctx.fillRect(0,150,150,2);
+  drawPixelCharacter(ctx,{personalize:true,appearance:profile.appearance,characterId:selection.character,handedness:selection.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:selection.handedness==='left'?-1:1,paddleShape:selection.paddleShape,lighting:'depth'});
+  canvas.setAttribute('aria-label',`${app.draft.name||'Career player'} appearance preview`);
+}
+
+onCharacterSpritesReady(()=>{if(!app.career)drawCareerDraftPreview()});
+
 function renderCreate(){
   const region=REGIONS.find(entry=>entry.id===app.draft.regionId)??REGIONS[0];
   const cities=allCities(region.id);
@@ -122,6 +167,7 @@ function renderCreate(){
   const experienceOptions=EXPERIENCE_OPTIONS.map(option=>`<option value="${option.id}"${option.id===app.draft.experience?' selected':''}>${escapeHtml(option.label)} — ${escapeHtml(option.description)}</option>`).join('');
   const traitOptions=STARTING_TRAITS.map(option=>`<option value="${option.id}"${option.id===app.draft.trait?' selected':''}>${escapeHtml(option.label)} — ${escapeHtml(option.description)}</option>`).join('');
   const imperialHeight=centimetersToFeetInches(app.draft.height),imperialWeight=kilogramsToPounds(app.draft.weight);
+  const hairChoices=[{id:'design',name:'As designed'},...hairStylesFor(app.draft.gender)];
   return `
   <section class="panel">
     <h2>START A CAREER</h2>
@@ -159,7 +205,34 @@ function renderCreate(){
         <select id="draft-city">${cityOptions}</select>
       </div>
     </div>
-    <div class="field-row">
+    <details class="career-profile-designer" open>
+      <summary>CHARACTER PROFILE <small>Built with the on-court game renderer</small></summary>
+      <div class="career-profile-layout">
+        <div class="career-profile-preview"><canvas id="career-player-preview" width="300" height="360" aria-label="Career player appearance preview"></canvas><small>${escapeHtml(CHARACTERS.find(item=>item.id===app.draft.archetypeId)?.style??'Career player')}</small></div>
+        <div class="career-profile-controls">
+          <div class="field-row">
+            <div class="field"><label for="draft-look-hand">HANDEDNESS</label><select id="draft-look-hand"><option value="right"${app.draft.handedness==='right'?' selected':''}>Right-handed</option><option value="left"${app.draft.handedness==='left'?' selected':''}>Left-handed</option></select></div>
+            <div class="field"><label for="draft-look-outfit">OUTFIT</label><select id="draft-look-outfit">${optionTags(OUTFIT_OPTIONS,app.draft.outfit)}</select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="draft-look-hair">HAIR</label><select id="draft-look-hair">${optionTags(hairChoices,app.draft.hairStyle)}</select></div>
+            <div class="field"><label for="draft-look-hair-color">HAIR COLOR</label><select id="draft-look-hair-color">${optionTags(HAIR_COLORS,app.draft.hairColor)}</select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="draft-look-skin">SKIN TONE</label><select id="draft-look-skin">${optionTags(SKIN_COLORS,app.draft.skinColor)}</select></div>
+            <div class="field"><label for="draft-look-shirt">KIT COLOR</label><select id="draft-look-shirt">${optionTags(CLOTHING_COLORS,app.draft.shirtColor)}</select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="draft-look-paddle-color">PADDLE COLOR</label><select id="draft-look-paddle-color">${optionTags(PADDLE_COLORS,app.draft.paddleColor)}</select></div>
+            <div class="field"><label for="draft-look-highlight">ACCENT COLOR</label><select id="draft-look-highlight">${optionTags(PADDLE_COLORS,app.draft.highlightColor)}</select></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label for="draft-look-headwear">HEADWEAR</label><select id="draft-look-headwear">${optionTags(HEADWEAR_OPTIONS,app.draft.headwear)}</select></div>
+            <div class="field"><label for="draft-look-eyewear">EYEWEAR</label><select id="draft-look-eyewear">${optionTags(EYEWEAR_OPTIONS,app.draft.eyewear)}</select></div>
+          </div>
+        </div>
+      </div>
+    </details>    <div class="field-row">
       <div class="field">
         <label>HEIGHT · FT / IN</label>
         <div class="measurement-pair">
@@ -185,7 +258,11 @@ function renderCreate(){
       </div>
     </div>
     <button type="button" class="primary" data-action="create">BEGIN CAREER →</button>
-    <p class="hint">The starting city decides where you train. You can move later, but moving leaves your club.</p>
+    <div class="career-save-load">
+      <button type="button" class="secondary" data-action="import-career">LOAD EXISTING CAREER FILE</button>
+      <input id="career-import-file" type="file" accept=".dnd,.txt,.json" hidden>
+      <p class="hint">Careers save automatically on this device. Import a portable career file here if you are starting from a backup.</p>
+    </div>
   </section>`;
 }
 
@@ -206,7 +283,7 @@ function renderTournament(career){
   const pending=career.pendingMatch;
   const teamPanel=tournament.shape==='mlp'&&tournament.teamLeague?`<p class="hint"><strong>${escapeHtml(tournament.teamLeague.teamName)}</strong> · roster and team management are handled in the background.</p><ul class="history">${[...(tournament.teams??[])].sort((a,b)=>(tournament.records?.[b.id]?.wins??0)-(tournament.records?.[a.id]?.wins??0)).map(team=>`<li><span>${escapeHtml(team.name)}</span><strong>${tournament.records?.[team.id]?.wins??0}W</strong><em>${tournament.records?.[team.id]?.losses??0}L</em></li>`).join('')}</ul>`:'';
   const history=(tournament.history??[]).map(entry=>
-    `<li class="${entry.won?'won':'lost'}"><span>R${entry.round+1}</span><span>${escapeHtml(entry.opponent)}</span><span>${escapeHtml(entry.score)}</span></li>`
+    `<li class="${entry.won?'won':'lost'}"><span class="tournament-round">R${entry.round+1}</span><span class="tournament-result">${entry.won?'W':'L'}</span><span class="tournament-opponent">${escapeHtml(entry.opponent)}</span><span class="tournament-score">${escapeHtml(entry.score)}</span></li>`
   ).join('');
   const total=tournament.shape==='bracket'?Math.round(Math.log2(tournament.size||16)):(tournament.rounds?.length??1);
   if(done){
@@ -258,7 +335,10 @@ function renderHome(){
   const world=cpuWorldSummary(career.cpuWorld);
   const injury=currentInjury(career);
   const paddle=equippedPaddle(career);
-  const paddles=equipmentCatalog(career).filter(item=>item.id!=='allcourt-hybrid');
+  const catalog=equipmentCatalog(career);
+  const ownedPaddles=catalog.filter(item=>career.equipment?.owned?.includes(item.id));
+  const paddles=catalog.filter(item=>item.id!=='allcourt-hybrid');
+  const loadoutPaddleOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===paddle.id?' selected':''}>${escapeHtml(item.label)}</option>`).join('');
   const retirement=retirementAdvice(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
@@ -345,11 +425,30 @@ function renderHome(){
       <button type="button" class="secondary" data-action="train" ${trainReady&&!career.retired?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
       <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end" ${career.retired?'disabled':''}>ADVANCE WEEK →</button>
       <button type="button" class="secondary" data-action="next-event" style="flex:1 1 190px;align-self:flex-end" ${career.retired?'disabled':''}>NEXT EVENT →</button>
-      <button type="button" class="secondary" data-action="export-career" style="flex:1 1 150px;align-self:flex-end">EXPORT SAVE</button>
-      <button type="button" class="secondary" data-action="import-career" style="flex:1 1 150px;align-self:flex-end">IMPORT SAVE</button>
+      <button type="button" class="secondary" data-action="save-career" style="flex:1 1 140px;align-self:flex-end">SAVE NOW</button>
+      <button type="button" class="secondary" data-action="export-career" style="flex:1 1 170px;align-self:flex-end">DOWNLOAD SAVE</button>
+      <button type="button" class="secondary" data-action="import-career" style="flex:1 1 170px;align-self:flex-end">LOAD SAVE</button>
       <input id="career-import-file" type="file" accept=".dnd,.txt,.json" hidden>
     </div>
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. Coached training adds another point and costs $${COACHING_FEE}. Training capacity is ${sessionLimit} sessions at age ${career.athlete.age}.</div>
+  </section>
+
+  <section class="panel match-loadout-panel">
+    <h2>MATCH LOADOUT</h2>
+    <div class="loadout-panel-grid">
+      <div>
+        <small class="muted">CURRENT PADDLE</small>
+        <strong>${escapeHtml(paddle.label)}</strong>
+        <p>${escapeHtml(paddle.familyLabel)} face · ${escapeHtml(paddle.shapeLabel)} shape · ${escapeHtml(paddle.description)}</p>
+        ${equipmentStatRows(paddle)}
+      </div>
+      <div>
+        <label for="dashboard-paddle">PADDLE BEFORE MATCH</label>
+        <select id="dashboard-paddle" data-loadout-paddle>${loadoutPaddleOptions}</select>
+        <small class="muted">This setup is written into the Matchup screen when you enter an event.</small>
+        <div class="loadout-profile-line"><span>PROFILE</span><strong>${escapeHtml(career.athlete.appearance?.outfit??career.athlete.outfit??'performance')}</strong><small>${escapeHtml(career.athlete.appearance?.hairStyle??career.athlete.hairStyle??'design')} hair · ${escapeHtml(career.athlete.appearance?.shirtColor??career.athlete.shirtColor??'green')} kit</small></div>
+      </div>
+    </div>
   </section>
 
   ${career.lastMatchResult?`<section class="panel last-result"><h2>LAST MATCH</h2><div class="board-head"><div><small>RESULT</small><strong>${career.lastMatchResult.won?'WIN':'LOSS'}</strong></div><div><small>SCORE</small><strong>${escapeHtml(career.lastMatchResult.score)}</strong></div><div><small>RATING</small><strong>${formatRating(career.lastMatchResult.rating)}</strong></div><div><small>CHANGE</small><strong class="${career.lastMatchResult.delta>=0?'up':'down'}">${career.lastMatchResult.delta>=0?'+':''}${Number(career.lastMatchResult.delta).toFixed(3)}</strong></div></div><p>${escapeHtml(career.lastMatchResult.label)} · ${escapeHtml(career.lastMatchResult.bracket)} ${escapeHtml(career.lastMatchResult.format)} · ${escapeHtml(career.lastMatchResult.tournamentStatus)}</p>${career.lastMatchResult.nextOpponent?`<p class="hint">Next opponent: ${escapeHtml(career.lastMatchResult.nextOpponent)}</p>`:''}${career.lastMatchResult.injury?`<p class="result-warning">${escapeHtml(career.lastMatchResult.injury.severity)} · ${escapeHtml(career.lastMatchResult.injury.area)}. Available ${escapeHtml(career.lastMatchResult.injury.returnLabel)}.</p>`:''}</section>`:''}
@@ -386,7 +485,7 @@ function renderHome(){
       const owned=career.equipment?.owned?.includes(item.id);
       const equipped=career.equipment?.equipped===item.id;
       const action=equipped?'<span class="tag accent">EQUIPPED</span>':owned?`<button type="button" class="secondary" data-action="equip" data-item="${item.id}">EQUIP</button>`:`<button type="button" class="secondary" data-action="buy-equipment" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
-      return `<div class="equipment-row"><div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small></div>${action}</div>`;
+      return `<div class="equipment-row"><div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small>${equipmentStatRows(item)}</div>${action}</div>`;
     }).join('')}
     ${signatureEligible(career)?'<div class="actions"><button type="button" class="secondary" data-action="create-signature">CREATE SIGNATURE PADDLE</button></div>':'<p class="hint">A Gold contract unlocks a personal signature release.</p>'}
   </section>
@@ -492,6 +591,9 @@ function eventRow(event,career,gender,active=event.week===career.week){
   const cost=eventEntryCost(career,event);
   const load=projectEventLoad(career,event,{recovery:weeklyRecovery(career)});
   const divisionNote=played.length?' · completed '+played.join(', '):'';
+  const loadoutPaddle=equippedPaddle(career);
+  const ownedPaddles=equipmentCatalog(career).filter(item=>career.equipment?.owned?.includes(item.id));
+  const loadoutOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===loadoutPaddle.id?' selected':''}>${escapeHtml(item.label)} · ${equipmentStats(item).power}P / ${equipmentStats(item).control}C</option>`).join('');
   return `<div class="event">
     <div class="body">
       <strong>${escapeHtml(event.title)}</strong>
@@ -499,6 +601,7 @@ function eventRow(event,career,gender,active=event.week===career.week){
       <small>After entry: ${load.energyAfter} energy · ${money(load.moneyAfter)} · +${load.recovery} recovery next week</small>
       <small>Brackets: ${escapeHtml(running)}</small>
       ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:!active?'<div class="lock">Upcoming · advance the calendar to enter.</div>':blockReason?`<div class="lock">${escapeHtml(blockReason)}</div>`:options.length?`<select class="bracket" data-division="${event.id}" ${ready?'':'disabled'}>${bracketOptions(event,gender,options)}</select>`:'<div class="lock">All offered divisions are complete.</div>'}
+      <label class="event-loadout"><span>PADDLE · ${escapeHtml(loadoutPaddle.label)}</span><select data-loadout-paddle aria-label="Paddle for this match">${loadoutOptions}</select></label>
     </div>
     ${locked||!active||!options.length?'':`<div class="event-actions"><button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${ready?'':'disabled'}>ENTER</button><button type="button" class="secondary" data-action="quick-attend" data-event="${event.id}" ${ready?'':'disabled'}>QUICK SIM</button></div>`}
   </div>`;
@@ -882,6 +985,11 @@ function renderCalendar(){
 
 // ---- events ---------------------------------------------------------------
 
+function careerMatchUrl(){
+  const standalone=location.pathname.includes('/career/');
+  return standalone?'../dev/?career-match=1&career-return=career':'../?career-match=1&career-return=career-mode';
+}
+
 function apply(result){
   if(result.ok){
     app.career=result.state;
@@ -914,7 +1022,20 @@ document.addEventListener('click',event=>{
         height,
         weight:poundsToKilograms(Number(document.getElementById('draft-weight-lb')?.value),height,gender),
         experience:document.getElementById('draft-experience')?.value,
-        trait:document.getElementById('draft-trait')?.value
+        trait:document.getElementById('draft-trait')?.value,
+        appearance:{
+          handedness:app.draft.handedness,
+          shirtColor:app.draft.shirtColor,
+          paddleColor:app.draft.paddleColor,
+          highlightColor:app.draft.highlightColor,
+          hairStyle:app.draft.hairStyle,
+          hairColor:app.draft.hairColor,
+          skinColor:app.draft.skinColor,
+          headwear:app.draft.headwear,
+          eyewear:app.draft.eyewear,
+          outfit:app.draft.outfit,
+          court:app.draft.court
+        }
       }),app.storage);
       persist();
       toast(`Career started in ${app.career.cityLabel}.`);
@@ -931,7 +1052,14 @@ document.addEventListener('click',event=>{
       render();
       return;
     }
+    if(action==='import-career'){document.getElementById('career-import-file')?.click();return}
     if(!app.career)return;
+    if(action==='save-career'){
+      persist();
+      toast('Career saved on this device.');
+      render();
+      return;
+    }
     if(action==='train'){
       const focus=document.getElementById('focus-select')?.value??app.career.trainingFocus;
       const coached=Boolean(document.getElementById('coached-training')?.checked);
@@ -946,7 +1074,6 @@ document.addEventListener('click',event=>{
       }).catch(error=>toast(error.message,true));
       return;
     }
-    if(action==='import-career'){document.getElementById('career-import-file')?.click();return}
     if(action==='buy-equipment'){apply(purchaseEquipment(app.career,trigger.dataset.item));return}
     if(action==='equip'){apply(equipPaddle(app.career,trigger.dataset.item));return}
     if(action==='create-signature'){apply(createSignaturePaddle(app.career));return}
@@ -1020,7 +1147,7 @@ document.addEventListener('click',event=>{
       persist();
       writePendingMatch(started.pending);
       // The match is played on the engine page and the result comes back.
-      location.href='../?career-match=1';
+      location.href=careerMatchUrl();
       return;
     }
     if(action==='quick-attend'){
@@ -1050,13 +1177,13 @@ document.addEventListener('click',event=>{
       persist();
       if(!started.pending){render();toast(started.message);return}
       writePendingMatch(started.pending);
-      location.href='../?career-match=1';
+      location.href=careerMatchUrl();
       return;
     }
     if(action==='resume-match'){
       if(!app.career.pendingMatch){toast('There is no match to play.',true);return}
       writePendingMatch(app.career.pendingMatch);
-      location.href='../?career-match=1';
+      location.href=careerMatchUrl();
       return;
     }
     if(action==='expand-club'){
@@ -1103,8 +1230,22 @@ document.addEventListener('change',async event=>{
   }
   if(id==='draft-experience'){app.draft.experience=event.target.value}
   if(id==='draft-trait'){app.draft.trait=event.target.value}
-  if(id==='draft-gender'){app.draft.gender=event.target.value}
-  if(id==='draft-archetype'){app.draft.archetypeId=event.target.value}
+  if(id==='draft-gender'){app.draft.gender=event.target.value;app.draft.hairStyle='design';render()}
+  if(id==='draft-archetype'){app.draft.archetypeId=event.target.value;render()}
+  if(id==='draft-look-hand'){app.draft.handedness=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-outfit'){app.draft.outfit=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-hair'){app.draft.hairStyle=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-hair-color'){app.draft.hairColor=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-skin'){app.draft.skinColor=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-shirt'){app.draft.shirtColor=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-paddle-color'){app.draft.paddleColor=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-highlight'){app.draft.highlightColor=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-headwear'){app.draft.headwear=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-eyewear'){app.draft.eyewear=event.target.value;drawCareerDraftPreview()}
+  if(event.target.matches?.('[data-loadout-paddle]')){
+    apply(equipPaddle(app.career,event.target.value));
+    return;
+  }
   if(id==='filter-area'){
     app.filters.areaId=event.target.value;
     app.filters.cityId='';

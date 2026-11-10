@@ -6,26 +6,26 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=196';
-import {careerProfile} from './matchmaking.js?v=196';
-import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=196';
-import {sponsorsFor,prizeFor} from './standings.js?v=196';
-import {entryEligibility,entryStatus} from './calendar.js?v=196';
-import {EVENT_BY_ID} from './geography.js?v=196';
-import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js?v=196';
-import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=196';
-import {recordResult,challengerPoints} from './ranking.js?v=196';
-import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=196';
-import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=196';
-import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=196';
-import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=196';
-import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=196';
-import {mixSeed} from './population.js?v=196';
-import {chargeEventCosts,creditPrize} from './finance.js?v=196';
-import {rollInjury} from './injuries.js?v=196';
-import {syncInbox} from './inbox.js?v=196';
-import {seededRandom} from '../competition.js?v=196';
-import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=196';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=197';
+import {careerProfile} from './matchmaking.js?v=197';
+import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=197';
+import {sponsorsFor,prizeFor} from './standings.js?v=197';
+import {entryEligibility,entryStatus} from './calendar.js?v=197';
+import {EVENT_BY_ID} from './geography.js?v=197';
+import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js?v=197';
+import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=197';
+import {recordResult,challengerPoints} from './ranking.js?v=197';
+import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=197';
+import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=197';
+import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=197';
+import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=197';
+import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=197';
+import {mixSeed} from './population.js?v=197';
+import {chargeEventCosts,creditPrize} from './finance.js?v=197';
+import {rollInjury} from './injuries.js?v=197';
+import {syncInbox} from './inbox.js?v=197';
+import {seededRandom} from '../competition.js?v=197';
+import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=197';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 export function matchSimulationPolicy(pending,tournament=null){
@@ -68,6 +68,7 @@ function matchupFor({state,tournament,match}){
     return {
       lineup:[player,partner,opponents[0],opponents[1]],
       playerId:0,
+      playerTeamName:playerTeam.name,
       athleteIds:['player',playerTeam.members[1]?.id??null,opponentTeam.members[0]?.id??null,opponentTeam.members[1]?.id??null],
       format:'doubles',
       playerRating:state.athlete.formats[tournament.format]??0,
@@ -84,6 +85,7 @@ function matchupFor({state,tournament,match}){
   return {
     lineup:[player,opponent],
     playerId:0,
+    playerTeamName:playerTeam.name,
     athleteIds:['player',opponentTeam.members[0]?.id??null],
     format:'singles',
     playerRating:state.athlete.formats[tournament.format]??0,
@@ -107,6 +109,7 @@ function pendingFor({state,tournament}){
   if(!matchup)return null;
   return {
     eventId:tournament.eventId,
+    eventLabel:EVENT_BY_ID[tournament.eventId]?.label??tournament.label,
     optionId:tournament.optionId,
     format:tournament.format,
     divisionId:tournament.divisionId,
@@ -492,6 +495,7 @@ function finishTournament(state,tournament){
     key:`${state.week}:${tournament.eventId}:${tournament.optionId}:${tournament.format}`,
     week:state.week,
     eventId:tournament.eventId,
+    eventLabel:EVENT_BY_ID[tournament.eventId]?.label??tournament.label,
     optionId:tournament.optionId,
     label:tournament.label,
     type,

@@ -29,7 +29,18 @@ const PRECACHE=[
   '../src/career/club-life.js',
   '../src/career/creation.js',
   '../src/career/directory.js',
-  '../src/career/opponents.js',\n  '../src/career/finance.js',\n  '../src/career/planning.js',\n  '../src/career/injuries.js',\n  '../src/career/equipment.js',\n  '../src/career/cpu-careers.js',\n  '../src/career/career-lifecycle.js',\n  '../src/career/team-league.js',\n  '../src/career/invitations.js',\n  '../src/career/inbox.js',\n  '../src/career/portable-save.js',\n  '../src/career/career-archive.js',
+  '../src/career/opponents.js',
+  '../src/career/finance.js',
+  '../src/career/planning.js',
+  '../src/career/injuries.js',
+  '../src/career/equipment.js',
+  '../src/career/cpu-careers.js',
+  '../src/career/career-lifecycle.js',
+  '../src/career/team-league.js',
+  '../src/career/invitations.js',
+  '../src/career/inbox.js',
+  '../src/career/portable-save.js',
+  '../src/career/career-archive.js',
   '../src/career/contracts.js',
   '../src/career/rating.js',
   '../src/career/tour.js',
@@ -46,7 +57,8 @@ const PRECACHE=[
   '../src/core.js',
   '../src/character-concepts.js',
   '../src/player-feet.js',
-  '../src/player-facing.js'
+  '../src/player-facing.js',
+  '../src/pixel-character.js'
 ];
 
 self.addEventListener('install',event=>{

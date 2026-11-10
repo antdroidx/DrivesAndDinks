@@ -1,5 +1,5 @@
-import {selectShot,backhandGrip,strokePower,scorpionOpportunity} from './core.js?v=196';
-import {strokeForContact} from './player-facing.js?v=196';import {RALLY_REACTIONS,REACTION_DURATION} from './player-emotion.js?v=196';
+import {selectShot,backhandGrip,strokePower,scorpionOpportunity} from './core.js?v=197';
+import {strokeForContact} from './player-facing.js?v=197';import {RALLY_REACTIONS,REACTION_DURATION} from './player-emotion.js?v=197';
 
 const clamp=t=>Math.max(0,Math.min(1,t));
 export function matchStrokeMode(player,shot=player.animationShot,stroke=player.stroke){

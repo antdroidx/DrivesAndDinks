@@ -4,11 +4,11 @@
 // athlete and the opponents drawn from the bracket into lineups the engine
 // can play, and records the match so the result can be rated afterwards.
 
-import {buildProfile} from '../roster.js?v=196';
-import {opponentsInBracket} from './world.js?v=196';
-import {mixSeed} from './population.js?v=196';
-import {seededRandom} from '../competition.js?v=196';
-import {equipmentSelection} from './equipment.js?v=196';
+import {buildProfile,applyPhysique} from '../roster.js?v=197';
+import {opponentsInBracket} from './world.js?v=197';
+import {mixSeed} from './population.js?v=197';
+import {seededRandom} from '../competition.js?v=197';
+import {equipmentSelection} from './equipment.js?v=197';
 
 // The engine caps injected attributes so a profile can never run away with
 // them. The career allows attributes up to 99, and the engine's ability
@@ -19,23 +19,24 @@ const DEFAULT_PADDLE='balanced';
 const DEFAULT_SHAPE='hybrid';
 
 function selectionFor(athlete,paddle,shape){
+  const look=athlete.appearance??{};
   return {
     character:athlete.archetypeId,
     gender:athlete.gender,
-    handedness:athlete.handedness,
+    handedness:look.handedness??athlete.handedness,
     customName:athlete.name,
     paddle,
     paddleShape:shape,
-    shirtColor:athlete.shirtColor??'green',
-    paddleColor:athlete.paddleColor??'mint',
-    highlightColor:athlete.highlightColor??'yellow',
-    hairStyle:athlete.hairStyle??'design',
-    hairColor:athlete.hairColor??'brown',
-    skinColor:athlete.skinColor??'medium',
-    headwear:athlete.headwear??'none',
-    eyewear:athlete.eyewear??'none',
-    outfit:athlete.outfit??'performance',
-    court:athlete.court??'blue-gray'
+    shirtColor:look.shirtColor??athlete.shirtColor??'green',
+    paddleColor:look.paddleColor??athlete.paddleColor??'mint',
+    highlightColor:look.highlightColor??athlete.highlightColor??'yellow',
+    hairStyle:look.hairStyle??athlete.hairStyle??'design',
+    hairColor:look.hairColor??athlete.hairColor??'brown',
+    skinColor:look.skinColor??athlete.skinColor??'medium',
+    headwear:look.headwear??athlete.headwear??'none',
+    eyewear:look.eyewear??athlete.eyewear??'none',
+    outfit:look.outfit??athlete.outfit??'performance',
+    court:look.court??athlete.court??'blue-gray'
   };
 }
 
@@ -55,10 +56,14 @@ function identityFor(athlete){
 // archetype, so the profile is built with those attributes injected rather
 // than taken from the archetype.
 export function careerProfile(athlete,{paddle=DEFAULT_PADDLE,shape=DEFAULT_SHAPE}={}){
-  return buildProfile(selectionFor(athlete,paddle,shape),{
+  const profile=buildProfile(selectionFor(athlete,paddle,shape),{
     attributes:athlete.ratings,
     identity:identityFor(athlete)
   });
+  const height=Number(athlete.height)||profile.appearance.height||177;
+  const bmi=Number(athlete.weight)/(Math.pow(height/100,2)||1);
+  const build=Number.isFinite(bmi)?Math.max(.12,Math.min(.9,.5225+(bmi-24)/25)):profile.appearance.build;
+  return applyPhysique(profile,{...profile.appearance,...athlete.appearance,height,build});
 }
 
 // Draws the field for a career event and builds the lineup.

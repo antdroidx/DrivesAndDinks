@@ -4,9 +4,10 @@
 // keeps cosmetics independent from performance and prevents new products from
 // exceeding the same bounded modifiers as the starter catalog.
 
-import {recordFinance} from './finance.js?v=196';
-import {seededRandom} from '../competition.js?v=196';
-import {mixSeed} from './population.js?v=196';
+import {recordFinance} from './finance.js?v=197';
+import {seededRandom} from '../competition.js?v=197';
+import {mixSeed} from './population.js?v=197';
+import {PADDLES,PADDLE_SHAPES} from '../roster.js?v=197';
 
 export const EQUIPMENT_VERSION=2;
 export const STARTER_EQUIPMENT_ID='allcourt-hybrid';
@@ -20,8 +21,14 @@ export const PADDLE_CATALOG=Object.freeze([
   {id:'touch-elongated',label:'Touch Elongated',family:'control',familyLabel:'Touch',shape:'elongated',shapeLabel:'Elongated',price:210,description:'Long face with control and spin emphasis.',status:'available',signature:false}
 ]);
 
-export const EQUIPMENT_BRANDS=Object.freeze(['Northline','Aftershock','Arc & Alder','Mesa Point','Copper Lane','Tidebreak']);
-export const EQUIPMENT_SERIES=Object.freeze(['Signal','Orbit','Atlas','Current','Forge','Vector']);
+export const EQUIPMENT_BRANDS=Object.freeze([
+  {name:'Northline',series:['Vector','Signal','Northwind','Meridian']},
+  {name:'Aftershock',series:['Volt','Pulse','Quake','Afterburn']},
+  {name:'Arc & Alder',series:['Orbit','Grove','Canopy','Halo']},
+  {name:'Mesa Point',series:['Ridge','Canyon','Sierra','Butte']},
+  {name:'Copper Lane',series:['Forge','Anvil','Foundry','Smith']},
+  {name:'Tidebreak',series:['Current','Harbor','Swell','Coast']}
+]);
 
 const FAMILIES=Object.freeze([
   {family:'balanced',familyLabel:'Allcourt'},{family:'power',familyLabel:'Ignite'},{family:'control',familyLabel:'Touch'}
@@ -46,24 +53,42 @@ export function emptyEquipment(){
 
 export function currentEquipmentYear(week=0){return Math.floor(Math.max(0,Number(week)||0)/52);}
 
+const EQUIPMENT_SHAPE_IDS=Object.freeze({widebody:'wide',hybrid:'hybrid',elongated:'elongated'});
+export function equipmentStats(item){
+  const family=PADDLES.find(entry=>entry.id===item?.family)??PADDLES[0];
+  const shape=PADDLE_SHAPES.find(entry=>entry.id===EQUIPMENT_SHAPE_IDS[item?.shape])??PADDLE_SHAPES.find(entry=>entry.id==='hybrid')??PADDLE_SHAPES[0];
+  const modifier=(entry,key)=>Number(entry?.ratingModifiers?.[key])||0;
+  const clamp=(value)=>Math.max(35,Math.min(95,Math.round(value)));
+  return {
+    power:clamp(70+modifier(family,'power')+modifier(shape,'power')),
+    control:clamp(70+modifier(family,'control')+modifier(shape,'control')),
+    spin:clamp(70+(Number(family.spin)-1)*100+(Number(shape.sweetSpotSpinGain)-1)*40),
+    reach:clamp(70+modifier(shape,'reach')),
+    hands:clamp(70+modifier(shape,'volley')),
+    sweetSpot:clamp(70+(Number(shape.sweetSpot)-1)*40)
+  };
+}
+
 export function generateSeasonCatalog(seed,week=0,{contract='none'}={}){
   const year=currentEquipmentYear(week);
   const random=seededRandom(mixSeed(seed,`equipment-catalog:${year}`));
+  const brandOrder=[...EQUIPMENT_BRANDS];
+  for(let index=brandOrder.length-1;index>0;index--){const swap=Math.floor(random()*(index+1));[brandOrder[index],brandOrder[swap]]=[brandOrder[swap],brandOrder[index]]}
   const items=[];
   for(let index=0;index<4;index++){
     const family=FAMILIES[Math.floor(random()*FAMILIES.length)];
     const shape=SHAPES[Math.floor(random()*SHAPES.length)];
-    const brand=EQUIPMENT_BRANDS[Math.floor(random()*EQUIPMENT_BRANDS.length)];
-    const series=EQUIPMENT_SERIES[Math.floor(random()*EQUIPMENT_SERIES.length)];
+    const brand=brandOrder[index%brandOrder.length];
+    const series=brand.series[(year+index)%brand.series.length];
     const releaseWeek=year*52+4+index*10;
     const discontinueWeek=year*52+48+index;
     const status=week<releaseWeek?'announced':week>=discontinueWeek?'discontinued':week>=releaseWeek+7?'low-stock':'available';
     items.push(normalizeItem({
-      id:`season:${year}:${index}`,label:`${brand} ${series} ${index+1}`,
-      brand,series,year,family:family.family,familyLabel:family.familyLabel,shape:shape.shape,shapeLabel:shape.shapeLabel,
+      id:`season:${year}:${index}`,label:`${brand.name} ${series} ${year+1}`,
+      brand:brand.name,series,year,family:family.family,familyLabel:family.familyLabel,shape:shape.shape,shapeLabel:shape.shapeLabel,
       price:120+(family.family==='balanced'?20:40)+(shape.shape==='elongated'?60:0)+index*10,
       description:`${family.familyLabel} face in a ${shape.shapeLabel.toLowerCase()} shape.`,
-      releaseWeek,discontinueWeek,status,cosmetic:{brand,series}
+      releaseWeek,discontinueWeek,status,cosmetic:{brand:brand.name,series,year}
     }));
   }
   if(contract==='gold'){
