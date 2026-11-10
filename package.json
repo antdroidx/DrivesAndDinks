@@ -22,6 +22,7 @@
     "audit:gameplay-levels": "node scripts/audit-gameplay-levels.js",
     "package:windows": "powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1",
     "package:android": "powershell -ExecutionPolicy Bypass -File scripts/package-android.ps1",
-    "audit:dupr": "node scripts/audit-dupr-expectations.js"
+    "audit:dupr": "node scripts/audit-dupr-expectations.js",
+    "audit:population": "node scripts/audit-population-counts.js --seed 4242"
   }
 }
