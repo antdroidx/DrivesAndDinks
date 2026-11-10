@@ -4,10 +4,10 @@
 // keeps cosmetics independent from performance and prevents new products from
 // exceeding the same bounded modifiers as the starter catalog.
 
-import {recordFinance} from './finance.js?v=206';
-import {seededRandom} from '../competition.js?v=206';
-import {mixSeed} from './population.js?v=206';
-import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS} from '../roster.js?v=206';
+import {recordFinance} from './finance.js?v=207';
+import {seededRandom} from '../competition.js?v=207';
+import {mixSeed} from './population.js?v=207';
+import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS} from '../roster.js?v=207';
 
 export const EQUIPMENT_VERSION=3;
 export const STARTER_EQUIPMENT_ID='allcourt-hybrid';

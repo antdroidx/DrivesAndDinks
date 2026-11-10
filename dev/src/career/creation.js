@@ -54,7 +54,7 @@ export function normalizeHeight(value,gender='male'){
 export function normalizeWeight(value,height=177,gender='male'){
   const fallback=gender==='female'?64:80;
   const number=Number(value);
-  return Number.isFinite(number)?clamp(Math.round(number),40,140):fallback;
+  return Number.isFinite(number)?clamp(Math.round(number*100)/100,40,140):fallback;
 }
 
 export function experienceById(id){return EXPERIENCE_OPTIONS.find(option=>option.id===id)??EXPERIENCE_OPTIONS[2]}

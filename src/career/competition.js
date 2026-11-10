@@ -13,9 +13,9 @@
 // changes every round. Those are resolved as the competition is played, so
 // the structure and the simulation live together.
 
-import {seededRandom} from '../competition.js?v=206';
-import {mixSeed} from './population.js?v=206';
-import {rulesFor} from './events.js?v=206';
+import {seededRandom} from '../competition.js?v=207';
+import {mixSeed} from './population.js?v=207';
+import {rulesFor} from './events.js?v=207';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
