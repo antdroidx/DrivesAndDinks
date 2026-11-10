@@ -216,6 +216,15 @@ test('league standings expose current team and individual ratings',()=>{
   assert.match(main,/history league-table/);
   assert.match(css,/\.league-table li\{align-items:flex-start/);
 });
+test('the CPU directory overlays live world ratings and activity records',()=>{
+  const main=read('src/career/main.js');
+  assert.match(main,/career\.cpuWorld\?\.backgroundStats/);
+  assert.match(main,/career\.worldRatings\?\.\[format\]\?\.\[athlete\.id\]/);
+  assert.match(main,/cache\.week===career\.week/);
+  assert.match(main,/<th>RECORD<\/th>/);
+  assert.match(main,/Week \$\{record\.lastMatchWeek\+1\} · \$\{record\.lastScore/);
+  assert.match(main,/athlete\.record\?\?career\.cpuWorld/);
+});
 test('players search renders a sortable table with overall ability',()=>{
   const main=read('src/career/main.js'),css=read('career/career.css');
   assert.match(main,/class="player-table"/);

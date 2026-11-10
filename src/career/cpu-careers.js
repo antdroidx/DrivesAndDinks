@@ -50,6 +50,7 @@ export function emptyCpuWorld(){
     version:CPU_WORLD_VERSION,
     lastWeek:null,
     records:{},
+    backgroundStats:{},
     retired:[],
     entrants:[],
     stories:[],
@@ -88,7 +89,7 @@ function compactRecord(record){
     peakRatings:record.peakRatings,
     maintenance:record.maintenance,
     ratings:record.ratings,
-    formats:record.formats,
+    formats:Object.fromEntries(Object.entries(record.formats??{}).map(([format,value])=>[format,round3(value)])),
     potential:record.potential,
     matches:record.matches,
     wins:record.wins,
@@ -177,8 +178,13 @@ export function createCpuWorld(seed,regionId,week=0,{activeLimit=CPU_ACTIVE_LIMI
   const active=ranked.slice(0,Math.max(0,activeLimit));
   const circuit=ranked.slice(active.length,active.length+Math.max(0,circuitLimit));
   const records={};
-  for(const skill of active)records[skill.id]=createCpuCareerRecord(skill,week,'active',regionId);
-  for(const skill of circuit)records[skill.id]=createCpuCareerRecord(skill,week,'circuit',regionId);
+  const namedSkill=skill=>{
+    if(!skill.club)return skill;
+    const athlete=buildAthlete(seed,skill.club,skill.index,week,skill.startAge);
+    return {...skill,name:athlete.name};
+  };
+  for(const skill of active)records[skill.id]=createCpuCareerRecord(namedSkill(skill),week,'active',regionId);
+  for(const skill of circuit)records[skill.id]=createCpuCareerRecord(namedSkill(skill),week,'circuit',regionId);
   const world=emptyCpuWorld();
   world.records=records;
   world.lastWeek=week;
@@ -282,7 +288,36 @@ function applyMatch(record,skill,week,cadence,template,random){
   return random()<cpuInjuryRisk(next,skill.age??record.age)?attachCpuInjury(next,week,random):next;
 }
 
-export function advanceCpuCareer(record,skill,week,random,template=REGIONAL_TEMPLATES['north-america']){
+function applyWorldMatch(record,skill,week,activity,template,random){
+  if(!activity||!activity.matches)return record;
+  const formats={...record.formats,...activity.formats};
+  const won=activity.wins??0,played=activity.matches;
+  const next={
+    ...record,
+    formats,
+    matches:record.matches+played,
+    wins:record.wins+won,
+    fatigue:clamp((record.fatigue??0)+played*(7+Math.round(random()*10)),0,100),
+    form:clamp((record.form??0)+(won>played/2?5:-4)*played,-20,20),
+    lastMatchWeek:week,
+    lastScore:activity.lastScore??null,
+    lastOpponentIds:activity.lastOpponentIds??[],
+    lastActiveWeek:week
+  };
+  const eventCadence=CPU_DETAIL_TIERS[record.detail]?.eventEvery??4;
+  if(week-(record.lastEventWeek??week-eventCadence)>=eventCadence){
+    const format=Object.keys(activity.formats??{})[0]??'doubles';
+    const event=eventPointsFor(next,format,week,random,template,CPU_DETAIL_TIERS[record.detail]??CPU_DETAIL_TIERS.background);
+    const history=addPoints(next.tourPointsHistory,week,event.points);
+    next.events=next.events+1;
+    next.tourPointsHistory=history;
+    next.tourPoints=pointsInWindow(history,week);
+    next.lastEventWeek=week;
+  }
+  return random()<cpuInjuryRisk(next,skill.age??record.age)?attachCpuInjury(next,week,random):next;
+}
+
+export function advanceCpuCareer(record,skill,week,random,template=REGIONAL_TEMPLATES['north-america'],activity=null){
   if(!record||record.retired)return record;
   const detail=CPU_DETAIL_TIERS[record.detail]??CPU_DETAIL_TIERS.background;
   const cadence=activityCadence(record.detail,template,skill.age??record.age);
@@ -295,7 +330,9 @@ export function advanceCpuCareer(record,skill,week,random,template=REGIONAL_TEMP
   };
   if(!activeInjuries(next).length){
     next=applyTraining(next,skill,week,cadence,template,random);
-    next=applyMatch(next,skill,week,cadence,template,random);
+    next=activity
+      ?applyWorldMatch(next,skill,week,activity,template,random)
+      :applyMatch(next,skill,week,cadence,template,random);
   }
   const best=bestFormatRating(next.formats);
   const invite=proInviteStatus({rating:best,tourPoints:next.tourPoints,matches:next.matches,age:next.age,potential:next.potential,proInviteWeek:next.proInviteWeek});
@@ -376,10 +413,11 @@ function tournamentOutlook(seed,regionId,week,clubs,template){
   });
 }
 
-function cpuSummary(world,skills,week){
+function cpuSummary(world,skills,week,ratings=null){
   const records=Object.values(world.records);
   const ages=skills.map(skill=>skill.age??0);
-  const ratings=skills.map(skill=>bestFormatRating(skill.formats));
+  const currentRatingsForSkill=skill=>bestFormatRating(Object.fromEntries(FORMATS.map(format=>[format,ratings?.[format]?.[skill.id]?.[0]??skill.formats?.[format]??RATING_MIN])));
+  const currentRatings=skills.map(currentRatingsForSkill);
   const invited=records.filter(record=>record.proInviteWeek!=null).length;
   const pros=records.filter(record=>record.contract&&record.contract!=='none').length;
   return {
@@ -393,17 +431,18 @@ function cpuSummary(world,skills,week){
     retired:world.retired.length,
     entrants:world.entrants.length,
     averageAge:ages.length?round3(ages.reduce((sum,value)=>sum+value,0)/ages.length):0,
-    averageRating:ratings.length?round3(ratings.reduce((sum,value)=>sum+value,0)/ratings.length):0
+    averageRating:currentRatings.length?round3(currentRatings.reduce((sum,value)=>sum+value,0)/currentRatings.length):0
   };
 }
 
-export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
+export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={},activity=null}={}){
   const previous=cpuWorld&&cpuWorld.version===CPU_WORLD_VERSION?cpuWorld:emptyCpuWorld();
   const random=seededRandom(mixSeed(seed,`cpu-advance:${regionId}:${week}`));
   const skills=skillsForWeek(seed,regionId,week);
   const skillById=new Map(skills.map(skill=>[skill.id,skill]));
   const template=regionalTemplate(regionId);
   const records={...(previous.records??{})};
+  const backgroundStats={...(previous.backgroundStats??{})};
   const retired=[...(previous.retired??[])];
   const entrants=[...(previous.entrants??[])];
   const stories=[...(previous.stories??[])];
@@ -418,7 +457,7 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
       record.retiredWeek=record.retiredWeek??week;
     }
     const before=record;
-    const next=advanceCpuCareer(record,skill,week,random,template);
+    const next=advanceCpuCareer(record,skill,week,random,template,activity==null?null:(activity[id]??{}));
     const afterInjured=activeInjuries({...next,week}).length>0;
     if(!beforeInjured&&afterInjured){
       circuit.injuries=(circuit.injuries??0)+1;
@@ -438,6 +477,20 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
       stories.push({week,type:'retirement',id,name:next.name,age:next.age});
     }
     records[id]=next;
+  }
+
+  for(const [id,match] of Object.entries(activity??{})){
+    if(records[id])continue;
+    const previousStat=backgroundStats[id]??{id,matches:0,wins:0,formats:{}};
+    backgroundStats[id]={
+      ...previousStat,
+      matches:(previousStat.matches??0)+match.matches,
+      wins:(previousStat.wins??0)+match.wins,
+      formats:{...previousStat.formats,...match.formats},
+      lastMatchWeek:week,
+      lastScore:match.lastScore,
+      lastOpponentIds:match.lastOpponentIds
+    };
   }
 
   const live=Object.values(records).filter(record=>!record.retired);
@@ -478,9 +531,12 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
 
   const nextRatings={...ratings};
   for(const format of FORMATS)nextRatings[format]={...(nextRatings[format]??{})};
+  // The weekly world simulation is authoritative for every match rating.
+  // Records only supply entrants that did not exist in the generated pool.
   for(const record of Object.values(records)){
     for(const format of FORMATS){
-      if(Number.isFinite(record.formats?.[format]))nextRatings[format][record.id]=[round3(record.formats[format]),week,record.matches];
+      if(nextRatings[format][record.id]||!Number.isFinite(record.formats?.[format]))continue;
+      nextRatings[format][record.id]=[round3(record.formats[format]),week,record.matches];
     }
   }
 
@@ -489,6 +545,7 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
     version:CPU_WORLD_VERSION,
     lastWeek:week,
     records,
+    backgroundStats,
     retired:retired.slice(-CPU_HISTORY_LIMIT),
     entrants:entrants.slice(-CPU_HISTORY_LIMIT),
     stories:stories.slice(-CPU_HISTORY_LIMIT),
@@ -499,7 +556,7 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
     summary:null
   };
   world.tournaments=tournamentOutlook(seed,regionId,week,world.clubs,template);
-  world.summary=cpuSummary(world,skills,week);
+  world.summary=cpuSummary(world,skills,week,nextRatings);
   return {world,ratings:nextRatings,summary:world.summary,circuit:world.circuit,stories:world.stories.slice(-12)};
 }
 
@@ -507,6 +564,7 @@ export function validateCpuWorld(value){
   if(!value||typeof value!=='object')return {ok:false,reason:'CPU world state is missing'};
   if(value.version!==CPU_WORLD_VERSION)return {ok:false,reason:'CPU world version is invalid'};
   if(!value.records||typeof value.records!=='object')return {ok:false,reason:'CPU career records are invalid'};
+  if(value.backgroundStats!=null&&typeof value.backgroundStats!=='object')return {ok:false,reason:'CPU background records are invalid'};
   for(const [id,record] of Object.entries(value.records)){
     if(!record||typeof record!=='object'||record.id!==id)return {ok:false,reason:'CPU career id is invalid'};
     if(!Number.isFinite(record.age)||record.age<10||record.age>120)return {ok:false,reason:'CPU career age is invalid'};

@@ -734,7 +734,7 @@ function namedOption(options,id,fallback='—'){
 function renderAthleteProfile(){
   const athlete=profileAthleteById(app.playerProfileId);
   if(!athlete)return '<section class="panel"><h2>PLAYER NOT FOUND</h2><p>That player is no longer in this region.</p><div class="actions"><button type="button" class="secondary" data-view="players">← BACK TO PLAYERS</button></div></section>';
-  const career=app.career,look=athlete.appearance??{},record=career.cpuWorld?.records?.[athlete.id]??null,engineProfile=careerProfile(athlete),paddleType=namedOption(PADDLES,engineProfile.paddle?.id,'Allcourt'),paddleShape=namedOption(PADDLE_SHAPES,engineProfile.paddle?.shapeId,'Hybrid - Flat Top');
+  const career=app.career,look=athlete.appearance??{},record=athlete.record??career.cpuWorld?.records?.[athlete.id]??null,engineProfile=careerProfile(athlete),paddleType=namedOption(PADDLES,engineProfile.paddle?.id,'Allcourt'),paddleShape=namedOption(PADDLE_SHAPES,engineProfile.paddle?.shapeId,'Hybrid - Flat Top');
   const formatRows=FORMATS.map(format=>{
     const rating=athlete.formats?.[format]??0,band=ratingBand(rating);
     return `<div class="format-line"><strong>${formatRating(rating)}</strong><span>${escapeHtml(formatLabel(format,athlete.gender))}</span><small>${escapeHtml(band.label)}</small></div>`;
@@ -747,8 +747,11 @@ function renderAthleteProfile(){
   const trackedMatches=tracked.reduce((total,entry)=>total+entry.matches,0);
   const opponents=Object.values(career.opponents??{}),headToHead=opponents.find(entry=>entry.id===athlete.id)??career.opponents?.[athlete.id]??null;
   const losses=record?Math.max(0,(record.matches??0)-(record.wins??0)):null;
+  const lastOpponents=(record?.lastOpponentIds??[]).map(id=>profileAthleteById(id)?.name??id).join(' & ');
   const historyRows=record?[
-    ['Matches',record.matches??0],['Record',`${record.wins??0}W · ${losses}L`],['Events',record.events??0],['Tour points',Math.round(record.tourPoints??0).toLocaleString('en-US')],['Stage',record.stage??record.detail??'background'],['Contract',record.contract??'none'],['Form',record.form??0],['Fatigue',`${Math.round(record.fatigue??0)}%`]
+    ['Matches',record.matches??0],['Record',`${record.wins??0}W · ${losses}L`],
+    ...(record.lastMatchWeek!=null?[['Last match',`Week ${record.lastMatchWeek+1} · ${record.lastScore??'played'}${lastOpponents?' vs '+lastOpponents:''}`]]:[]),
+    ['Events',record.events??0],['Tour points',Math.round(record.tourPoints??0).toLocaleString('en-US')],['Stage',record.stage??record.detail??'background'],['Contract',record.contract??'none'],['Form',record.form??0],['Fatigue',`${Math.round(record.fatigue??0)}%`]
   ]:[['Matches tracked in this career',trackedMatches],['Current history',trackedMatches?'Rating and match updates are tracked from played events.':'No recorded matches in this save yet.']];
   const height=Number(look.height)||177,feet=Math.floor((height/2.54)/12),inches=Math.round((height/2.54)%12);
   const outfit=namedOption(OUTFIT_OPTIONS,look.outfit,'Performance kit');
@@ -1157,9 +1160,31 @@ function renderStandings(){
 
 function playerDirectory(career){
   const cache=app.directoryCache;
-  if(cache&&cache.seed===career.seed&&cache.regionId===career.regionId)return cache.athletes;
-  const athletes=buildRegionRoster(career.seed,career.regionId,{},career.week).athletes;
-  app.directoryCache={seed:career.seed,regionId:career.regionId,athletes};
+  if(cache&&cache.seed===career.seed&&cache.regionId===career.regionId&&cache.week===career.week&&cache.worldVersion===career.cpuWorld?.lastWeek)return cache.athletes;
+  const athletes=buildRegionRoster(career.seed,career.regionId,{},career.week).athletes.map(athlete=>{
+    const cpuRecord=career.cpuWorld?.records?.[athlete.id]??null;
+    const background=career.cpuWorld?.backgroundStats?.[athlete.id]??null;
+    const formats={...(athlete.formats??{})};
+    for(const format of FORMATS){
+      const tracked=career.worldRatings?.[format]?.[athlete.id];
+      if(tracked&&Number.isFinite(tracked[0]))formats[format]=tracked[0];
+    }
+    const trackedMatches=FORMATS.reduce((sum,format)=>{
+      const tracked=career.worldRatings?.[format]?.[athlete.id];
+      return sum+(Number(tracked?.[2])||0);
+    },0);
+    const matches=cpuRecord?.matches??background?.matches??trackedMatches;
+    const wins=cpuRecord?.wins??background?.wins??0;
+    const record=cpuRecord??{
+      id:athlete.id,name:athlete.name,matches,wins,losses:Math.max(0,matches-wins),
+      events:background?.events??0,tourPoints:0,stage:'background',
+      lastMatchWeek:background?.lastMatchWeek??null,lastScore:background?.lastScore??null,
+      lastOpponentIds:background?.lastOpponentIds??[]
+    };
+    const ratings=cpuRecord?.ratings??athlete.ratings;
+    return {...athlete,ratings,skillAverage:skillAverage(ratings),formats,record};
+  });
+  app.directoryCache={seed:career.seed,regionId:career.regionId,week:career.week,worldVersion:career.cpuWorld?.lastWeek,athletes};
   return athletes;
 }
 
@@ -1201,12 +1226,13 @@ function renderPlayers(){
     <p class="hint">${directory.total.toLocaleString('en-US')} matching players · page ${directory.page+1} of ${directory.pages}</p>
     ${directory.rows.length?`<div class="player-table-wrap">
       <table class="player-table">
-        <thead><tr><th>PLAYER</th><th>OVERALL</th><th>DOUBLES</th><th>SINGLES</th><th>MIXED</th><th>AGE</th><th>GENDER</th><th>CITY / CLUB</th><th></th></tr></thead>
+        <thead><tr><th>PLAYER</th><th>OVERALL</th><th>RECORD</th><th>DOUBLES</th><th>SINGLES</th><th>MIXED</th><th>AGE</th><th>GENDER</th><th>CITY / CLUB</th><th></th></tr></thead>
         <tbody>${directory.rows.map(athlete=>{
           const overall=Math.round(athlete.skillAverage??skillAverage(athlete.ratings??{}));
           return `<tr>
             <td><strong>${escapeHtml(athlete.name)}</strong><small>${escapeHtml(athlete.archetypeLabel)}</small></td>
             <td><b class="overall-value">${overall}</b></td>
+            <td><strong>${athlete.record?.wins??0}W ${athlete.record?.losses??0}L</strong><small>${athlete.record?.matches??0} matches</small></td>
             <td>${formatRating(athlete.formats?.doubles??0)}</td>
             <td>${formatRating(athlete.formats?.singles??0)}</td>
             <td>${formatRating(athlete.formats?.mixed??0)}</td>

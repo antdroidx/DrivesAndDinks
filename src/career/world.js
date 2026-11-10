@@ -13,7 +13,7 @@
 
 import {buildRegionSkills,buildAthlete,mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
-import {regressRating,simulateOutcome,rateMatch,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js';
+import {regressRating,simulateOutcome,rateMatch,formatSkill,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js';
 
 // Roughly how many matches the region's population plays in a week, split
 // between the two formats.
@@ -37,6 +37,7 @@ export function currentRatings(skills,ratings,week,format){
     const rating=stored?regressRating(base,week-lastPlayed):base;
     current.set(athlete.id,{
       ...athlete,
+      skill:athlete.cpuRatings?formatSkill(athlete.cpuRatings,format):athlete.skill,
       rating:clampRating(rating),
       lastPlayed,
       matches
@@ -67,11 +68,21 @@ function playMatch(home,away,random,matchType='league'){
 }
 
 // Advances the world by one week.
-export function advanceWorld({seed,regionId,week,ratings}){
-  const skills=buildRegionSkills(seed,regionId,week);
+export function advanceWorld({seed,regionId,week,ratings,skillOverrides={}}){
+  const skills=buildRegionSkills(seed,regionId,week).map(skill=>({...skill,cpuRatings:skillOverrides?.[skill.id]?.ratings??null}));
   const random=seededRandom(mixSeed(seed,`world:${regionId}:${week}`));
   const next={...(ratings??{})};
   for(const format of FORMATS)next[format]={...(next[format]??{})};
+  const activity={};
+  const recordActivity=(athlete,data)=>{
+    const entry=activity[athlete.id]??={matches:0,wins:0,formats:{},lastMatchWeek:week};
+    entry.matches++;
+    entry.wins+=data.won?1:0;
+    entry.formats[data.format]=round3(data.rating);
+    entry.lastMatchWeek=week;
+    entry.lastScore=`${data.points}-${data.opponentPoints}`;
+    entry.lastOpponentIds=data.opponentIds;
+  };
   let played=0;
 
   for(const format of FORMATS){
@@ -92,6 +103,9 @@ export function advanceWorld({seed,regionId,week,ratings}){
         const away=pool[offset*2+1];
         if(!home||!away)break;
         const result=playMatch(home,away,random);
+        const homePoints=Number(result.score.split('-')[0])||0,awayPoints=Number(result.score.split('-')[1])||0,homeWon=homePoints>awayPoints;
+        recordActivity(home,{format,rating:result.home.rating,won:homeWon,points:homePoints,opponentPoints:awayPoints,opponentIds:[away.id]});
+        recordActivity(away,{format,rating:result.away.rating,won:!homeWon,points:awayPoints,opponentPoints:homePoints,opponentIds:[home.id]});
         next[format][home.id]=[round3(result.home.rating),week,home.matches+1];
         next[format][away.id]=[round3(result.away.rating),week,away.matches+1];
       }else{
@@ -121,15 +135,23 @@ export function advanceWorld({seed,regionId,week,ratings}){
           matchType:'league',
           weeksAgo:0
         });
+        const myWon=outcome.myPoints>outcome.opponentPoints;
         for(const player of rated.players){
           const source=player.team==='mine'?myTeam.find(entry=>entry.id===player.id):theirTeam.find(entry=>entry.id===player.id);
+          const mine=player.team==='mine';
+          recordActivity(source,{
+            format,rating:player.rating,won:mine?myWon:!myWon,
+            points:mine?outcome.myPoints:outcome.opponentPoints,
+            opponentPoints:mine?outcome.opponentPoints:outcome.myPoints,
+            opponentIds:mine?theirTeam.map(entry=>entry.id):myTeam.map(entry=>entry.id)
+          });
           next[format][player.id]=[round3(player.rating),week,source.matches+1];
         }
       }
       played++;
     }
   }
-  return {ratings:next,matches:played};
+  return {ratings:next,matches:played,activity};
 }
 
 // The amateur circuit.

@@ -29,6 +29,7 @@ test('the CPU world has active, circuit and background simulation tiers',()=>{
   assert.equal(world.summary.active,160);
   assert.equal(world.summary.circuit,420);
   assert.equal(world.summary.background,5100);
+  assert.ok(Object.values(world.records).every(record=>record.name&&!record.name.includes('-a')),'active CPU records use real generated names');
   assert.ok(world.summary.averageAge>30,'the generated world contains adult careers');
   assert.ok(validateCpuWorld(world).ok);
 });
@@ -39,6 +40,8 @@ test('CPU careers accumulate matches, age, stages and world turnover',()=>{
   const records=Object.values(advanced.world.records);
   assert.ok(records.some(record=>record.matches>0),'active and circuit athletes play');
   assert.ok(records.some(record=>record.events>0),'CPU careers enter events');
+  assert.ok(records.some(record=>Object.entries(record.ratings).some(([key,value])=>value!==initial.records[record.id].ratings[key])),'CPU attributes develop');
+  assert.ok(records.some(record=>record.wins>0),'CPU win records accumulate');
   assert.ok(records.some(record=>record.age>record.startAge),'ages advance');
   assert.ok(advanced.world.entrants.length>0||advanced.world.retired.length>0,'the world turns over');
   assert.ok(advanced.world.clubs.length>0);
@@ -75,6 +78,25 @@ test('schema v16 careers gain CPU world state without losing their career',()=>{
   assert.equal(migrated.version,CAREER_SAVE_VERSION);
   assert.ok(validateCpuWorld(migrated.state.cpuWorld).ok);
   assert.equal(migrated.state.athlete.name,'CPU Save');
+});
+
+test('world match simulation updates ratings and records for background CPU players too',()=>{
+ let state=createCareer({name:'Dynamic World',seed:SEED,regionId:'north-america',cityId:'seattle',age:25});
+ for(let index=0;index<8;index++)state=advanceWeek(state).state;
+ const background=state.cpuWorld.backgroundStats??{};
+ const ids=Object.keys(background);
+ assert.ok(ids.length>0,'background athletes who played must receive durable records');
+ const sample=background[ids[0]];
+ assert.ok(sample.matches>0&&sample.wins<=sample.matches);
+ for(const format of Object.keys(sample.formats??{})){
+  const tracked=state.worldRatings?.[format]?.[ids[0]];
+  assert.equal(tracked[0],sample.formats[format]);
+ }
+ const sampleRecord=Object.values(state.cpuWorld.records).find(record=>record.matches>0);
+ assert.ok(sampleRecord,'active/circuit careers must also record the shared world matches');
+ assert.ok(state.worldRatings.doubles[sampleRecord.id]);
+ assert.equal(state.worldRatings.doubles[sampleRecord.id][0],sampleRecord.formats.doubles);
+ assert.ok(state.cpuWorld.summary.averageRating>0);
 });
 
 test('weekly advancement persists CPU world deltas alongside the player',()=>{

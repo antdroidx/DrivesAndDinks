@@ -764,14 +764,16 @@ export function advanceWeek(state){
     seed:state.seed,
     regionId:state.regionId,
     week,
-    ratings:state.worldRatings
+    ratings:state.worldRatings,
+    skillOverrides:state.cpuWorld?.records??{}
   });
   const cpuWorld=state.cpuWorld?.records&&Object.keys(state.cpuWorld.records).length?state.cpuWorld:createCpuWorld(state.seed,state.regionId,Math.max(0,week-1));
   const cpu=advanceCpuWorld(cpuWorld,{
     seed:state.seed,
     regionId:state.regionId,
     week,
-    ratings:world.ratings
+    ratings:world.ratings,
+    activity:world.activity
   });
   world.ratings=cpu.ratings;
   const tournament=state.tournament?.nightComplete
