@@ -1,8 +1,8 @@
 // Retirement and the career epilogue.
 
-import {analyticsSummary} from './analytics.js?v=216';
-import {ageCeiling,ageSkillFactor} from './age.js?v=216';
-import {PRO_FLOOR_RATING} from './tour.js?v=216';
+import {analyticsSummary} from './analytics.js?v=217';
+import {ageCeiling,ageSkillFactor} from './age.js?v=217';
+import {PRO_FLOOR_RATING} from './tour.js?v=217';
 
 const medalTotal=(events,name)=>Object.values(events??{}).reduce((sum,entry)=>sum+(entry?.[name]??0),0);
 

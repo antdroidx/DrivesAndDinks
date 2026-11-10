@@ -4,40 +4,40 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=216';
-import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=216';
-import {createAnimeGameRenderer} from '../anime-game.js?v=216';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=216';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=216';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=217';
+import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=217';
+import {createAnimeGameRenderer} from '../anime-game.js?v=217';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=217';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=217';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=216';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=216';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=216';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=216';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=216';
-import {isPlayerDone} from './tournament.js?v=216';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=216';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=216';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=216';
-import {rankingSummary} from './ranking.js?v=216';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=216';
-import {analyticsSummary} from './analytics.js?v=216';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=216';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=216';
-import {opponentHistory} from './opponents.js?v=216';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=216';
-import {directoryPage} from './directory.js?v=216';
-import {financeSummary,COACHING_FEE} from './finance.js?v=216';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=216';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=216';
-import {currentInjury,activeInjuries} from './injuries.js?v=216';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=216';
-import {careerProfile} from './matchmaking.js?v=216';
-import {teamCareerSummary} from './team-league.js?v=216';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=216';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=216';
+} from './state.js?v=217';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=217';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=217';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=217';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=217';
+import {isPlayerDone} from './tournament.js?v=217';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=217';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=217';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=217';
+import {rankingSummary} from './ranking.js?v=217';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=217';
+import {analyticsSummary} from './analytics.js?v=217';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=217';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=217';
+import {opponentHistory} from './opponents.js?v=217';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=217';
+import {directoryPage} from './directory.js?v=217';
+import {financeSummary,COACHING_FEE} from './finance.js?v=217';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=217';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=217';
+import {currentInjury,activeInjuries} from './injuries.js?v=217';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=217';
+import {careerProfile} from './matchmaking.js?v=217';
+import {teamCareerSummary} from './team-league.js?v=217';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=217';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=217';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -68,6 +68,36 @@ const nav=document.getElementById('career-nav');
 const statusStrip=document.getElementById('career-status');
 const toastEl=document.getElementById('career-toast');
 const resetButton=document.getElementById('career-reset');
+const fullscreenButton=document.getElementById('career-fullscreen');
+const fullscreenSupported=Boolean(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+function syncCareerFullscreen(){
+  if(!fullscreenButton)return;
+  const active=Boolean(document.fullscreenElement||document.webkitFullscreenElement);
+  fullscreenButton.textContent=`FULL SCREEN: ${active?'ON':'OFF'}`;
+  fullscreenButton.setAttribute('aria-pressed',String(active));
+  fullscreenButton.disabled=!fullscreenSupported;
+  fullscreenButton.title=fullscreenSupported?'Toggle full screen':null;
+}
+if(fullscreenButton){
+  fullscreenButton.addEventListener('click',async()=>{
+    try{
+      if(document.fullscreenElement||document.webkitFullscreenElement){
+        const exit=document.exitFullscreen??document.webkitExitFullscreen;
+        if(exit)await exit.call(document);
+      }else{
+        const request=document.documentElement.requestFullscreen??document.documentElement.webkitRequestFullscreen;
+        if(!request)throw new Error('Fullscreen is unavailable');
+        await request.call(document.documentElement,{navigationUI:'hide'});
+      }
+    }catch{
+      toast('Full screen is unavailable in this browser.',true);
+    }
+    syncCareerFullscreen();
+  });
+  document.addEventListener('fullscreenchange',syncCareerFullscreen);
+  document.addEventListener('webkitfullscreenchange',syncCareerFullscreen);
+  syncCareerFullscreen();
+}
 
 const escapeHtml=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const money=value=>{const amount=Math.round(Number(value)||0);return (amount<0?'-$':'$')+Math.abs(amount).toLocaleString('en-US')};

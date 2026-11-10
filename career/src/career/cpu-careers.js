@@ -6,20 +6,20 @@
 // The result is a world that can age, improve, be invited to the pro tour,
 // change tiers and retire without turning every save into a full database.
 
-import {RATING_KEYS} from '../roster.js?v=216';
-import {seededRandom} from '../competition.js?v=216';
+import {RATING_KEYS} from '../roster.js?v=217';
+import {seededRandom} from '../competition.js?v=217';
 import {
   buildRegionSkills,buildAthlete,buildAthleteSkill,buildClubIndex,mixSeed
-} from './population.js?v=216';
-import {RATING_MIN,RATING_MAX,FORMATS,formatSkill,ratingInFormat,simulateOutcome,updateRating} from './rating.js?v=216';
-import {addPoints,pointsInWindow,PRO_FLOOR_RATING} from './tour.js?v=216';
+} from './population.js?v=217';
+import {RATING_MIN,RATING_MAX,FORMATS,formatSkill,ratingInFormat,simulateOutcome,updateRating} from './rating.js?v=217';
+import {addPoints,pointsInWindow,PRO_FLOOR_RATING} from './tour.js?v=217';
 import {
   CPU_DETAIL_TIERS,REGIONAL_TEMPLATES,regionalTemplate,activityCadence,
   trainingResponse,bestFormatRating,careerStage,proInviteStatus,retirementRisk,
   developmentProfileFor
-} from './career-lifecycle.js?v=216';
-import {capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance,attributeAgeFactor} from './age.js?v=216';
-import {emptyInjuries,normalizeInjuries,activeInjuries,createInjury,healInjuries} from './injuries.js?v=216';
+} from './career-lifecycle.js?v=217';
+import {capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance,attributeAgeFactor} from './age.js?v=217';
+import {emptyInjuries,normalizeInjuries,activeInjuries,createInjury,healInjuries} from './injuries.js?v=217';
 
 export const CPU_WORLD_VERSION=1;
 export const CPU_ACTIVE_LIMIT=160;

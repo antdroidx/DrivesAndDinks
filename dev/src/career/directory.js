@@ -1,7 +1,7 @@
 // Career player directory filtering and pagination.
 
-import {divisionFor} from './rating.js?v=216';
-import {skillAverage} from '../roster.js?v=216';
+import {divisionFor} from './rating.js?v=217';
+import {skillAverage} from '../roster.js?v=217';
 
 const overallOf=athlete=>Math.round(athlete.skillAverage??skillAverage(athlete.ratings??{}));
 
