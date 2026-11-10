@@ -107,6 +107,7 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,heig
     hairColor:appearance.hairColor??identity.hairColor,
     skinColor:appearance.skinColor??identity.skinColor,
     headwear:appearance.headwear??'none',
+    headwearColor:appearance.headwearColor??appearance.highlightColor??'yellow',
     eyewear:appearance.eyewear??'none',
     outfit:appearance.outfit??'performance',
     court:appearance.court??'blue-gray'
@@ -122,6 +123,7 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,heig
     highlightColor:look.highlightColor,
     hairStyle:look.hairStyle,
     headwear:look.headwear,
+    headwearColor:look.headwearColor,
     eyewear:look.eyewear,
     outfit:look.outfit,
     court:look.court,
@@ -181,6 +183,7 @@ export function createCareer(options={}){
     seed,
     regionId,
     week:0,
+    settings:{difficulty:['easy','normal','hard'].includes(options.settings?.difficulty)?options.settings.difficulty:'normal'},
     worldRatings:{},
     athlete:{gender:options.gender==='female'?'female':'male',formats:{singles:NEW_PLAYER_RATING,doubles:NEW_PLAYER_RATING,mixed:NEW_PLAYER_RATING}}
   },'doubles');
@@ -206,6 +209,7 @@ export function createCareer(options={}){
     lastCoachingWeek:null,
     coachingHistory:[],
     week:0,
+    settings:{difficulty:['easy','normal','hard'].includes(options.settings?.difficulty)?options.settings.difficulty:'normal'},
     energy:MAX_ENERGY,
     trainingFocus:'drive',
     athlete,

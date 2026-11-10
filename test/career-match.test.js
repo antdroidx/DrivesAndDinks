@@ -16,6 +16,14 @@ const withClub=(state)=>{
   return joinClub(state,clubs.find(club=>club.cityId===state.cityId).id).state;
 };
 
+test('career dashboard difficulty is applied to the next match',()=>{
+  const state=withClub(career({settings:{difficulty:'hard'}}));
+  const event=currentEvents(state).find(entry=>entry.eligible.ok);
+  const started=startCareerMatch(state,event.id,event.defaultOptionId);
+  assert.ok(started.ok,started.message);
+  assert.equal(started.pending.difficulty,'hard');
+});
+
 test('a career match starts from an event and draws a field from the bracket',()=>{
   const state=withClub(career());
   const event=currentEvents(state).find(entry=>entry.eligible.ok);

@@ -19,7 +19,7 @@ import {createTeamCareer,validateTeamCareer} from './team-league.js';
 import {emptyInvitations,validateInvitations} from './invitations.js';
 import {emptyInbox,validateInbox} from './inbox.js';
 
-export const CAREER_SAVE_VERSION=22;
+export const CAREER_SAVE_VERSION=23;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -29,6 +29,12 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v23 added colored headwear ownership and paddle color selection.
+  22:state=>({
+    ...state,
+    equipment:normalizeEquipment(state.equipment),
+    settings:{...state.settings,difficulty:['easy','normal','hard'].includes(state.settings?.difficulty)?state.settings.difficulty:'normal'}
+  }),
   // v22 added the full on-court character profile chosen at career creation.
   21:state=>{
     const athlete=state.athlete??{},look=athlete.appearance??{};
@@ -45,6 +51,7 @@ export const CAREER_MIGRATIONS=Object.freeze({
           hairColor:look.hairColor??athlete.hairColor??'brown',
           skinColor:look.skinColor??athlete.skinColor??'medium',
           headwear:look.headwear??athlete.headwear??'none',
+          headwearColor:look.headwearColor??athlete.headwearColor??look.highlightColor??'yellow',
           eyewear:look.eyewear??athlete.eyewear??'none',
           outfit:look.outfit??athlete.outfit??'performance',
           court:look.court??athlete.court??'blue-gray'
@@ -55,7 +62,8 @@ export const CAREER_MIGRATIONS=Object.freeze({
   // v21 added the seasonal equipment catalog and signature releases.
   20:state=>({
     ...state,
-    equipment:normalizeEquipment(state.equipment)
+    equipment:normalizeEquipment(state.equipment),
+    settings:{...state.settings,difficulty:['easy','normal','hard'].includes(state.settings?.difficulty)?state.settings.difficulty:'normal'}
   }),
   // v20 added the persistent career inbox and generated news.
   19:state=>({

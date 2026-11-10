@@ -7,6 +7,7 @@
 
 export const CAREER_PENDING_KEY='drives-dinks:career:pending-match';
 export const CAREER_RESULT_KEY='drives-dinks:career:match-result';
+export const CAREER_ENGINE_STATE_KEY='drives-dinks:career:engine-state';
 export const CAREER_MATCH_PARAM='career-match';
 
 function storage(){
@@ -42,6 +43,28 @@ export function readPendingMatch(){
     const match=JSON.parse(raw);
     return match&&match.matchup?.lineup?match:null;
   }catch{return null}
+}
+
+export function writeEngineState(matchId,state){
+  const store=storage();
+  if(!store||!matchId||!state)return false;
+  try{store.setItem(CAREER_ENGINE_STATE_KEY,JSON.stringify({matchId,state,savedAt:new Date().toISOString()}));return true}catch{return false}
+}
+
+export function readEngineState(expectedMatchId=null){
+  const store=storage();
+  if(!store)return null;
+  try{
+    const saved=JSON.parse(store.getItem(CAREER_ENGINE_STATE_KEY)??'null');
+    if(!saved?.state||(expectedMatchId&&saved.matchId!==expectedMatchId))return null;
+    return saved.state;
+  }catch{return null}
+}
+
+export function clearEngineState(){
+  const store=storage();
+  if(!store)return false;
+  try{store.removeItem(CAREER_ENGINE_STATE_KEY);return true}catch{return false}
 }
 
 export function clearPendingMatch(){

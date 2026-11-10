@@ -4,7 +4,7 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor} from '../roster.js';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js';
 import {onCharacterSpritesReady} from '../pixel-character.js';
 import {createAnimeGameRenderer} from '../anime-game.js';
 import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js';
@@ -33,7 +33,7 @@ import {financeSummary,COACHING_FEE} from './finance.js';
 import {weeklyActivityPlan,projectEventLoad} from './planning.js';
 import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js';
 import {currentInjury,activeInjuries} from './injuries.js';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats} from './equipment.js';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG} from './equipment.js';
 import {teamCareerSummary} from './team-league.js';
 import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js';
 import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js';
@@ -50,12 +50,13 @@ const app={
   career:null,
   view:'home',
   draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25,height:164,weight:64,experience:'athlete',trait:'none',
-    handedness:DEFAULT_SELECTION.handedness,shirtColor:DEFAULT_SELECTION.shirtColor,paddleColor:DEFAULT_SELECTION.paddleColor,highlightColor:DEFAULT_SELECTION.highlightColor,hairStyle:DEFAULT_SELECTION.hairStyle,hairColor:DEFAULT_SELECTION.hairColor,skinColor:DEFAULT_SELECTION.skinColor,headwear:DEFAULT_SELECTION.headwear,eyewear:DEFAULT_SELECTION.eyewear,outfit:DEFAULT_SELECTION.outfit,court:DEFAULT_SELECTION.court},
+    handedness:DEFAULT_SELECTION.handedness,shirtColor:DEFAULT_SELECTION.shirtColor,paddleColor:DEFAULT_SELECTION.paddleColor,highlightColor:DEFAULT_SELECTION.highlightColor,hairStyle:DEFAULT_SELECTION.hairStyle,hairColor:DEFAULT_SELECTION.hairColor,skinColor:DEFAULT_SELECTION.skinColor,headwear:DEFAULT_SELECTION.headwear,headwearColor:DEFAULT_SELECTION.highlightColor,eyewear:DEFAULT_SELECTION.eyewear,outfit:DEFAULT_SELECTION.outfit,court:DEFAULT_SELECTION.court},
   filters:{areaId:'',cityId:'',tier:'',query:'',gender:'',bracket:'',minAge:'',maxAge:'',sort:'rating-desc',page:0},
   move:{regionId:'',cityId:''},
   standingsFormat:null,
   inboxFilters:{category:'',query:'',archived:false},
   expandedClub:null,
+  profileDraft:null,
   directoryCache:null,
   storage:careerStorage()
 };
@@ -105,9 +106,10 @@ function render(){
   for(const button of nav.querySelectorAll('button'))button.classList.toggle('active',button.dataset.view===app.view);
   const inboxButton=nav.querySelector('[data-view="inbox"]');
   if(inboxButton){const unread=hasCareer?unreadCount(app.career):0;inboxButton.textContent=unread?`INBOX · ${unread}`:'INBOX';}
-  const renderer={home:renderHome,clubs:renderClubs,team:renderTeam,inbox:renderInbox,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
+  const renderer={home:renderHome,profile:renderProfile,shop:renderEquipment,league:renderLeague,clubs:renderClubs,team:renderTeam,inbox:renderInbox,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
   view.innerHTML=hasCareer?renderer():renderCreate();
   if(!hasCareer)requestAnimationFrame(drawCareerDraftPreview);
+  else if(app.view==='profile')requestAnimationFrame(drawCareerProfilePreview);
 }
 
 function renderStatus(){
@@ -126,36 +128,40 @@ function optionTags(items,value,labelKey='name'){
   return items.map(item=>`<option value="${item.id}"${item.id===value?' selected':''}>${escapeHtml(item[labelKey]??item.label??item.id)}</option>`).join('');
 }
 
-function careerDraftSelection(){
+function careerSelectionFor(source){
   return normalizeSelection({
-    character:app.draft.archetypeId,
-    gender:app.draft.gender,
-    handedness:app.draft.handedness,
-    customName:app.draft.name,
+    character:source.archetypeId,
+    gender:source.gender,
+    handedness:source.handedness,
+    customName:source.name,
     paddle:'balanced',
     paddleShape:'hybrid',
-    shirtColor:app.draft.shirtColor,
-    paddleColor:app.draft.paddleColor,
-    highlightColor:app.draft.highlightColor,
-    hairStyle:app.draft.hairStyle,
-    hairColor:app.draft.hairColor,
-    skinColor:app.draft.skinColor,
-    headwear:app.draft.headwear,
-    eyewear:app.draft.eyewear,
-    outfit:app.draft.outfit,
-    court:app.draft.court
+    shirtColor:source.shirtColor,
+    paddleColor:source.paddleColor,
+    highlightColor:source.highlightColor,
+    hairStyle:source.hairStyle,
+    hairColor:source.hairColor,
+    skinColor:source.skinColor,
+    headwear:source.headwear,
+    eyewear:source.eyewear,
+    outfit:source.outfit,
+    court:source.court
   });
 }
 
-function drawCareerDraftPreview(){
-  const canvas=document.getElementById('career-player-preview');
+function careerDraftSelection(){return careerSelectionFor(app.draft)}
+
+function drawCareerPreview(canvasId,source){
+  const canvas=document.getElementById(canvasId);
   if(!canvas)return;
-  const selection=careerDraftSelection(),profile=buildProfile(selection),ctx=canvas.getContext('2d');
+  const selection=careerSelectionFor(source),base=buildProfile(selection),height=Number(source.height)||base.appearance.height||177,bmi=Number(source.weight)/(Math.pow(height/100,2)||1),build=Number.isFinite(bmi)?Math.max(.12,Math.min(.9,.5225+(bmi-24)/25)):base.appearance.build,profile=applyPhysique(base,{...base.appearance,...selection,headwearColor:source.headwearColor,height,build}),ctx=canvas.getContext('2d');
   ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(2,0,0,2,0,0);ctx.imageSmoothingEnabled=false;
   ctx.fillStyle='#173039';ctx.fillRect(0,0,150,180);ctx.fillStyle='#355e60';ctx.fillRect(0,142,150,38);ctx.fillStyle='#eff3cf55';ctx.fillRect(0,150,150,2);
   drawCareerCharacter(ctx,{personalize:true,appearance:profile.appearance,characterId:selection.character,handedness:selection.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:selection.handedness==='left'?-1:1,paddleShape:selection.paddleShape,lighting:'depth',style:'anime',look:'storybook',outfit:selection.outfit});
-  canvas.setAttribute('aria-label',`${app.draft.name||'Career player'} appearance preview`);
+  canvas.setAttribute('aria-label',`${source.name||'Career player'} appearance preview`);
 }
+
+function drawCareerDraftPreview(){drawCareerPreview('career-player-preview',app.draft)}
 
 const drawCareerCharacter=createAnimeGameRenderer();
 onCharacterSpritesReady(()=>{if(!app.career)drawCareerDraftPreview()});
@@ -340,7 +346,7 @@ function renderHome(){
   const catalog=equipmentCatalog(career);
   const ownedPaddles=catalog.filter(item=>career.equipment?.owned?.includes(item.id));
   const paddles=catalog.filter(item=>item.id!=='allcourt-hybrid');
-  const loadoutPaddleOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===paddle.id?' selected':''}>${escapeHtml(item.label)}</option>`).join('');
+  const loadoutPaddleOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===paddle.id?' selected':''}>${escapeHtml(item.label)} · ${escapeHtml(PADDLE_COLORS.find(color=>color.id===item.color)?.name??'Mint')}</option>`).join('');
   const retirement=retirementAdvice(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
@@ -375,6 +381,7 @@ function renderHome(){
       }).join('')}
     </div>`).join('');
 
+  const careerDifficulty=career.settings?.difficulty??'normal';
   const tour=tourFor(career.athlete.gender);
   const bestFormat=FORMATS.reduce((best,format)=>(career.athlete.formats[format]??0)>(career.athlete.formats[best]??0)?format:best,FORMATS[0]);
   const tourStanding=tourRank(career.athlete.formats[bestFormat]??0,career.athlete.gender);
@@ -423,6 +430,10 @@ function renderHome(){
         <label for="focus-select">TRAINING FOCUS</label>
         <select id="focus-select">${focusOptions}</select>
       </div>
+      <div class="field" style="flex:0 1 150px;margin:0">
+        <label for="career-difficulty">MATCH DIFFICULTY</label>
+        <select id="career-difficulty"><option value="easy"${careerDifficulty==='easy'?' selected':''}>Easy</option><option value="normal"${careerDifficulty==='normal'?' selected':''}>Normal</option><option value="hard"${careerDifficulty==='hard'?' selected':''}>Hard</option></select>
+      </div>
       <label class="coach-toggle" style="flex:0 1 170px;align-self:flex-end"><input id="coached-training" type="checkbox"${career.coachingEnabled?' checked':''} ${career.money>=COACHING_FEE&&trainReady?'':'disabled'}> COACHED · +$${COACHING_FEE}</label>
       <button type="button" class="secondary" data-action="train" ${trainReady&&!career.retired?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
       <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end" ${career.retired?'disabled':''}>ADVANCE WEEK →</button>
@@ -441,14 +452,14 @@ function renderHome(){
       <div>
         <small class="muted">CURRENT PADDLE</small>
         <strong>${escapeHtml(paddle.label)}</strong>
-        <p>${escapeHtml(paddle.familyLabel)} face · ${escapeHtml(paddle.shapeLabel)} shape · ${escapeHtml(paddle.description)}</p>
+        <p>${escapeHtml(PADDLE_COLORS.find(color=>color.id===paddle.color)?.name??'Mint')} · ${escapeHtml(paddle.familyLabel)} face · ${escapeHtml(paddle.shapeLabel)} shape · ${escapeHtml(paddle.description)}</p>
         ${equipmentStatRows(paddle)}
       </div>
       <div>
         <label for="dashboard-paddle">PADDLE BEFORE MATCH</label>
         <select id="dashboard-paddle" data-loadout-paddle>${loadoutPaddleOptions}</select>
         <small class="muted">This setup is written into the Matchup screen when you enter an event.</small>
-        <div class="loadout-profile-line"><span>PROFILE</span><strong>${escapeHtml(career.athlete.appearance?.outfit??career.athlete.outfit??'performance')}</strong><small>${escapeHtml(career.athlete.appearance?.hairStyle??career.athlete.hairStyle??'design')} hair · ${escapeHtml(career.athlete.appearance?.shirtColor??career.athlete.shirtColor??'green')} kit</small></div>
+
       </div>
     </div>
   </section>
@@ -478,18 +489,6 @@ function renderHome(){
     </div>
     <p class="hint">Training: ${plan.trainingCost} energy and up to ${plan.trainingRemaining} sessions. ${plan.cheapest?`Cheapest event: ${money(plan.cheapest.moneyCost)} and ${plan.cheapest.energy} energy.`:'No enterable event is currently projected.'}</p>
     <p class="hint">${plan.lightest?`Lightest event: ${plan.lightest.energy} energy · ${escapeHtml(plan.lightest.matchLabel)} · projected ${plan.lightest.energyAfter} energy and ${money(plan.lightest.moneyAfter)} after entry.`:'Advance to a week with competition to compare event loads.'}</p>
-  </section>
-
-  <section class="panel">
-    <h2>EQUIPMENT</h2>
-    <p>Current paddle: <strong>${escapeHtml(paddle.label)}</strong> · ${escapeHtml(paddle.description)}</p>
-    ${paddles.map(item=>{
-      const owned=career.equipment?.owned?.includes(item.id);
-      const equipped=career.equipment?.equipped===item.id;
-      const action=equipped?'<span class="tag accent">EQUIPPED</span>':owned?`<button type="button" class="secondary" data-action="equip" data-item="${item.id}">EQUIP</button>`:`<button type="button" class="secondary" data-action="buy-equipment" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
-      return `<div class="equipment-row"><div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small>${equipmentStatRows(item)}</div>${action}</div>`;
-    }).join('')}
-    ${signatureEligible(career)?'<div class="actions"><button type="button" class="secondary" data-action="create-signature">CREATE SIGNATURE PADDLE</button></div>':'<p class="hint">A Gold contract unlocks a personal signature release.</p>'}
   </section>
 
   ${renderTournament(career)}
@@ -595,7 +594,7 @@ function eventRow(event,career,gender,active=event.week===career.week){
   const divisionNote=played.length?' · completed '+played.join(', '):'';
   const loadoutPaddle=equippedPaddle(career);
   const ownedPaddles=equipmentCatalog(career).filter(item=>career.equipment?.owned?.includes(item.id));
-  const loadoutOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===loadoutPaddle.id?' selected':''}>${escapeHtml(item.label)} · ${equipmentStats(item).power}P / ${equipmentStats(item).control}C</option>`).join('');
+  const loadoutOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===loadoutPaddle.id?' selected':''}>${escapeHtml(item.label)} · ${escapeHtml(PADDLE_COLORS.find(color=>color.id===item.color)?.name??'Mint')} · ${equipmentStats(item).power}P / ${equipmentStats(item).control}C</option>`).join('');
   return `<div class="event">
     <div class="body">
       <strong>${escapeHtml(event.title)}</strong>
@@ -603,10 +602,104 @@ function eventRow(event,career,gender,active=event.week===career.week){
       <small>After entry: ${load.energyAfter} energy · ${money(load.moneyAfter)} · +${load.recovery} recovery next week</small>
       <small>Brackets: ${escapeHtml(running)}</small>
       ${locked?`<div class="lock">${escapeHtml(event.lockedReason)}</div>`:!active?'<div class="lock">Upcoming · advance the calendar to enter.</div>':blockReason?`<div class="lock">${escapeHtml(blockReason)}</div>`:options.length?`<select class="bracket" data-division="${event.id}" ${ready?'':'disabled'}>${bracketOptions(event,gender,options)}</select>`:'<div class="lock">All offered divisions are complete.</div>'}
-      <label class="event-loadout"><span>PADDLE · ${escapeHtml(loadoutPaddle.label)}</span><select data-loadout-paddle aria-label="Paddle for this match">${loadoutOptions}</select></label>
+      <label class="event-loadout"><span>PADDLE · ${escapeHtml(loadoutPaddle.label)} · ${escapeHtml(PADDLE_COLORS.find(color=>color.id===loadoutPaddle.color)?.name??'Mint')}</span><select data-loadout-paddle aria-label="Paddle for this match">${loadoutOptions}</select></label>
     </div>
     ${locked||!active||!options.length?'':`<div class="event-actions"><button type="button" class="secondary" data-action="attend" data-event="${event.id}" ${ready?'':'disabled'}>ENTER</button><button type="button" class="secondary" data-action="quick-attend" data-event="${event.id}" ${ready?'':'disabled'}>QUICK SIM</button></div>`}
   </div>`;
+}
+
+function profileDraftFor(career=app.career){
+  const athlete=career.athlete,look=athlete.appearance??{};
+  return {
+    name:athlete.name,archetypeId:athlete.archetypeId,gender:athlete.gender,
+    handedness:look.handedness??athlete.handedness??'right',
+    shirtColor:look.shirtColor??athlete.shirtColor??'green',
+    paddleColor:look.paddleColor??athlete.paddleColor??'mint',
+    highlightColor:look.highlightColor??athlete.highlightColor??'yellow',
+    hairStyle:look.hairStyle??athlete.hairStyle??'design',
+    hairColor:look.hairColor??athlete.hairColor??'brown',
+    skinColor:look.skinColor??athlete.skinColor??'medium',
+    headwear:look.headwear??athlete.headwear??'none',
+    headwearColor:look.headwearColor??athlete.headwearColor??'yellow',
+    eyewear:look.eyewear??athlete.eyewear??'none',
+    outfit:look.outfit??athlete.outfit??'performance',
+    court:look.court??athlete.court??'blue-gray',
+    height:athlete.height??177,weight:athlete.weight??80
+  };
+}
+
+function drawCareerProfilePreview(){if(app.profileDraft)drawCareerPreview('career-profile-edit-preview',app.profileDraft)}
+
+function renderProfile(){
+  if(!app.profileDraft)app.profileDraft=profileDraftFor();
+  const source=app.profileDraft,hairChoices=[{id:'design',name:'As designed'},...hairStylesFor(source.gender)],height=centimetersToFeetInches(source.height),weight=kilogramsToPounds(source.weight);
+  const head=equippedPaddle(app.career),headwear=app.career.equipment?.headwear?.equipped?HEADWEAR_CATALOG.find(item=>item.id===app.career.equipment.headwear.equipped):null;
+  return `
+  <section class="panel">
+    <div class="section-heading"><div><h2>PLAYER PROFILE</h2><p>Change your outfit, appearance and body setup at any time. Paddles and headwear are managed in the Shop.</p></div><button type="button" class="secondary" data-view="shop">OPEN SHOP</button></div>
+    <div class="career-profile-layout profile-screen-layout">
+      <div class="career-profile-preview"><canvas id="career-profile-edit-preview" width="300" height="360" aria-label="${escapeHtml(source.name)} appearance preview"></canvas><small>${escapeHtml(CHARACTERS.find(item=>item.id===source.archetypeId)?.style??'Career player')}</small></div>
+      <div class="career-profile-controls">
+        <div class="field-row">
+          <div class="field"><label for="profile-look-hand">HANDEDNESS</label><select id="profile-look-hand"><option value="right"${source.handedness==='right'?' selected':''}>Right-handed</option><option value="left"${source.handedness==='left'?' selected':''}>Left-handed</option></select></div>
+          <div class="field"><label for="profile-look-outfit">OUTFIT</label><select id="profile-look-outfit">${optionTags(OUTFIT_OPTIONS,source.outfit)}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="profile-look-hair">HAIR</label><select id="profile-look-hair">${optionTags(hairChoices,source.hairStyle)}</select></div>
+          <div class="field"><label for="profile-look-hair-color">HAIR COLOR</label><select id="profile-look-hair-color">${optionTags(HAIR_COLORS,source.hairColor)}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="profile-look-skin">SKIN TONE</label><select id="profile-look-skin">${optionTags(SKIN_COLORS,source.skinColor)}</select></div>
+          <div class="field"><label for="profile-look-shirt">KIT COLOR</label><select id="profile-look-shirt">${optionTags(CLOTHING_COLORS,source.shirtColor)}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label for="profile-look-highlight">ACCENT COLOR</label><select id="profile-look-highlight">${optionTags(PADDLE_COLORS,source.highlightColor)}</select></div>
+          <div class="field"><label for="profile-look-eyewear">EYEWEAR</label><select id="profile-look-eyewear">${optionTags(EYEWEAR_OPTIONS,source.eyewear)}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>HEIGHT · FT / IN</label><div class="measurement-pair"><input id="profile-height-ft" type="number" min="4" max="6" value="${height.feet}"><span>ft</span><input id="profile-height-in" type="number" min="0" max="11" value="${height.inches}"><span>in</span></div></div>
+          <div class="field"><label for="profile-weight-lb">WEIGHT · LBS</label><input id="profile-weight-lb" type="number" min="88" max="309" value="${weight}"></div>
+        </div>
+        <div class="profile-equipment-summary"><span>PADDLE</span><strong>${escapeHtml(head.label)} · ${escapeHtml(PADDLE_COLORS.find(item=>item.id===head.color)?.name??'Mint')}</strong><span>HEADWEAR</span><strong>${headwear?escapeHtml(headwear.label):'None'}</strong></div>
+        <button type="button" class="primary" data-action="save-profile">SAVE PROFILE</button>
+      </div>
+    </div>
+  </section>`;
+}
+
+function paddleColor(item){return PADDLE_COLORS.find(color=>color.id===item?.color)??PADDLE_COLORS.find(color=>color.id==='mint')??PADDLE_COLORS[0]}
+function paddlePicture(item){
+  const color=paddleColor(item),shape=item.shape??'hybrid';
+  return `<div class="paddle-product-picture shape-${escapeHtml(shape)}" style="--paddle-color:${color.color}" aria-label="${escapeHtml(item.label)} paddle preview"><i class="paddle-face"></i><b class="paddle-handle"></b></div>`;
+}
+function headwearPicture(item){
+  return `<div class="headwear-product-picture headwear-${escapeHtml(item.headwear)}" style="--headwear-color:${item.swatch}" aria-label="${escapeHtml(item.label)} preview"><i></i><b></b></div>`;
+}
+
+function renderEquipment(){
+  const career=app.career,catalog=equipmentCatalog(career),current=equippedPaddle(career),owned=new Set(career.equipment?.owned??[]),headwearState=career.equipment?.headwear??{owned:[],equipped:null};
+  const colorOptions=(selected)=>PADDLE_COLORS.map(color=>`<option value="${color.id}"${color.id===selected?' selected':''}>${escapeHtml(color.name)}</option>`).join('');
+  const paddleCards=catalog.map(item=>{
+    const isOwned=owned.has(item.id),isEquipped=current.id===item.id,selected=item.color??career.athlete.paddleColor??'mint';
+    const action=isEquipped?'<span class="tag accent">EQUIPPED</span>':isOwned?`<button type="button" class="secondary" data-action="equip" data-item="${item.id}">EQUIP</button>`:`<button type="button" class="secondary" data-action="buy-equipment" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
+    return `<article class="product-card paddle-product" data-product="${item.id}">${paddlePicture({...item,color:selected})}<div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small>${equipmentStatRows(item)}<label>COLOR<select data-paddle-color-option="${item.id}">${colorOptions(selected)}</select></label><div class="product-actions">${action}${isOwned?`<button type="button" class="secondary" data-action="recolor-paddle" data-item="${item.id}">SET COLOR</button>`:''}</div></div></article>`;
+  }).join('');
+  const headwearCards=HEADWEAR_CATALOG.slice(0,PADDLE_COLORS.length*3).map(item=>{
+    const isOwned=headwearState.owned.includes(item.id),isEquipped=headwearState.equipped===item.id;
+    const action=isEquipped?'<span class="tag accent">WEARING</span>':isOwned?`<button type="button" class="secondary" data-action="equip-headwear" data-item="${item.id}">WEAR</button>`:`<button type="button" class="secondary" data-action="buy-headwear" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
+    return `<article class="product-card headwear-product">${headwearPicture(item)}<div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.description)}</small><div class="product-actions">${action}</div></div></article>`;
+  }).join('');
+  return `<section class="panel shop-heading"><div class="section-heading"><div><h2>EQUIPMENT SHOP</h2><p>Every paddle and headwear item shows its actual engine colors before purchase.</p></div><div class="shop-balance">${money(career.money)}</div></div><div class="current-gear"><div><span>CURRENT PADDLE</span><strong>${escapeHtml(current.label)} · ${escapeHtml(paddleColor(current).name)}</strong>${equipmentStatRows(current)}</div><div><span>CURRENT HEADWEAR</span><strong>${headwearState.equipped?escapeHtml(HEADWEAR_CATALOG.find(item=>item.id===headwearState.equipped)?.label??'None'):'None'}</strong><button type="button" class="secondary" data-action="clear-headwear">REMOVE HEADWEAR</button></div></div></section><section class="panel"><h2>PADDLES</h2><div class="product-grid">${paddleCards}</div></section><section class="panel"><h2>HATS · VISORS · HEADBANDS</h2><div class="headwear-grid">${headwearCards}</div></section>`;
+}
+
+function renderLeague(){
+  const tournament=app.career.tournament;
+  if(!tournament||!['round-robin-league','mlp-style'].includes(tournament.kind))return '<section class="panel"><h2>LEAGUE</h2><p class="muted">No active league. Enter a Local League from the Career screen to start a season card.</p></section>';
+  const teams=tournament.teams??[],records=tournament.records??{};
+  const table=[...teams].sort((a,b)=>(records[b.id]?.wins??0)-(records[a.id]?.wins??0)||(records[a.id]?.losses??0)-(records[b.id]?.losses??0)||b.rating-a.rating).map((team,index)=>`<li><span>#${index+1} ${escapeHtml(team.name)}${team.id===tournament.playerTeamId?' · YOU':''}</span><strong>${records[team.id]?.wins??0}W ${records[team.id]?.losses??0}L</strong><em>${records[team.id]?.points??0} pts</em></li>`).join('');
+  const fixtures=(tournament.rounds??[]).flatMap((round,roundIndex)=>round.map(match=>`<li><span>Week ${match.week!=null?match.week+1:roundIndex+1}</span><strong>${escapeHtml(match.home?.name??match.homeName??'Home')} vs ${escapeHtml(match.away?.name??match.awayName??'Away')}</strong><em>${match.played?escapeHtml(match.score??'Played'):'Scheduled'}</em></li>`)).join('');
+  const next=tournament.currentMatch;
+  return `<section class="panel"><h2>${escapeHtml(tournament.label??'League')} · ${escapeHtml(tournament.bracket??'')}</h2><div class="board-head"><div><small>ROUND</small><strong>${Number(tournament.round??0)+1} / ${tournament.rounds?.length??'—'}</strong></div><div><small>STATUS</small><strong>${tournament.finished?'COMPLETE':tournament.nightComplete?'AWAITING WEEK':'ACTIVE'}</strong></div><div><small>PLACE</small><strong>${tournament.playerPlace?'#'+tournament.playerPlace:'—'}</strong></div></div>${next?`<p>Next match: <strong>${escapeHtml(next.home?.name??'Home')} vs ${escapeHtml(next.away?.name??'Away')}</strong></p>`:''}${app.career.pendingMatch?`<div class="actions"><button type="button" class="secondary" data-action="resume-tournament">PLAY MATCH →</button><button type="button" class="secondary" data-action="quick-sim">QUICK SIM</button><button type="button" class="secondary" data-action="sim-competition">SIM TO NEXT DECISION</button></div>`:''}</section><div class="grid two"><section class="panel"><h2>LEAGUE TABLE</h2><ul class="history">${table}</ul></section><section class="panel"><h2>FIXTURES & RESULTS</h2><ul class="history">${fixtures}</ul></section></div>`;
 }
 
 function renderTeam(){
@@ -1034,6 +1127,7 @@ document.addEventListener('click',event=>{
           hairColor:app.draft.hairColor,
           skinColor:app.draft.skinColor,
           headwear:app.draft.headwear,
+          headwearColor:app.draft.headwearColor,
           eyewear:app.draft.eyewear,
           outfit:app.draft.outfit,
           court:app.draft.court
@@ -1056,6 +1150,12 @@ document.addEventListener('click',event=>{
     }
     if(action==='import-career'){document.getElementById('career-import-file')?.click();return}
     if(!app.career)return;
+    if(action==='save-profile'){
+      const draft=app.profileDraft??profileDraftFor();
+      const look={handedness:draft.handedness,shirtColor:draft.shirtColor,paddleColor:draft.paddleColor,highlightColor:draft.highlightColor,hairStyle:draft.hairStyle,hairColor:draft.hairColor,skinColor:draft.skinColor,headwear:app.career.athlete.appearance?.headwear??app.career.athlete.headwear??'none',headwearColor:app.career.athlete.appearance?.headwearColor??app.career.athlete.headwearColor??'yellow',eyewear:draft.eyewear,outfit:draft.outfit,court:draft.court};
+      app.career={...app.career,athlete:{...app.career.athlete,...look,appearance:{...app.career.athlete.appearance,...look},height:draft.height,weight:draft.weight}};
+      persist();toast('Player profile saved.');render();return;
+    }
     if(action==='save-career'){
       persist();
       toast('Career saved on this device.');
@@ -1076,7 +1176,11 @@ document.addEventListener('click',event=>{
       }).catch(error=>toast(error.message,true));
       return;
     }
-    if(action==='buy-equipment'){apply(purchaseEquipment(app.career,trigger.dataset.item));return}
+    if(action==='buy-equipment'){const color=trigger.closest('.paddle-product')?.querySelector('[data-paddle-color-option]')?.value;apply(purchaseEquipment(app.career,trigger.dataset.item,{color}));return}
+    if(action==='recolor-paddle'){const color=trigger.closest('.paddle-product')?.querySelector('[data-paddle-color-option]')?.value;apply(setPaddleColor(app.career,trigger.dataset.item,color));return}
+    if(action==='buy-headwear'){apply(buyHeadwear(app.career,trigger.dataset.item));return}
+    if(action==='equip-headwear'){apply(equipHeadwear(app.career,trigger.dataset.item));return}
+    if(action==='clear-headwear'){apply(clearHeadwear(app.career));return}
     if(action==='equip'){apply(equipPaddle(app.career,trigger.dataset.item));return}
     if(action==='create-signature'){apply(createSignaturePaddle(app.career));return}
     if(action==='accept-invite'){
@@ -1198,12 +1302,19 @@ document.addEventListener('click',event=>{
   if(navButton){
     app.view=navButton.dataset.view;
     app.expandedClub=null;
+    if(app.view==='profile')app.profileDraft=profileDraftFor();
     render();
   }
 });
 
 document.addEventListener('change',async event=>{
   const id=event.target.id;
+  if(event.target.matches?.('[data-paddle-color-option]')){
+    const color=PADDLE_COLORS.find(item=>item.id===event.target.value);
+    const picture=event.target.closest('.paddle-product')?.querySelector('.paddle-product-picture');
+    if(color&&picture)picture.style.setProperty('--paddle-color',color.color);
+    return;
+  }
   if(id==='career-import-file'){
     const file=event.target.files?.[0];
     if(!file)return;
@@ -1212,6 +1323,10 @@ document.addEventListener('change',async event=>{
     else toast(imported.reason,true);
     event.target.value='';
     return;
+  }
+  if(id==='career-difficulty'){
+    app.career={...app.career,settings:{...app.career.settings,difficulty:event.target.value}};
+    persist();toast(`${event.target.value.toUpperCase()} difficulty selected for future matches.`);return;
   }
   if(id==='draft-region'){
     app.draft.regionId=event.target.value;
@@ -1244,6 +1359,21 @@ document.addEventListener('change',async event=>{
   if(id==='draft-look-highlight'){app.draft.highlightColor=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-headwear'){app.draft.headwear=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-eyewear'){app.draft.eyewear=event.target.value;drawCareerDraftPreview()}
+  if(id?.startsWith('profile-look-')){
+    const key=id.slice('profile-look-'.length),map={hand:'handedness','hair-color':'hairColor'};
+    const target=map[key]??key;
+    app.profileDraft[target]=event.target.value;
+    drawCareerProfilePreview();
+  }
+  if(id==='profile-height-ft'||id==='profile-height-in'){
+    const feet=Number(document.getElementById('profile-height-ft')?.value),inches=Number(document.getElementById('profile-height-in')?.value);
+    app.profileDraft.height=feetInchesToCentimeters(feet,inches,app.profileDraft.gender);
+    drawCareerProfilePreview();
+  }
+  if(id==='profile-weight-lb'){
+    app.profileDraft.weight=poundsToKilograms(Number(event.target.value),app.profileDraft.height,app.profileDraft.gender);
+    drawCareerProfilePreview();
+  }
   if(event.target.matches?.('[data-loadout-paddle]')){
     apply(equipPaddle(app.career,event.target.value));
     return;

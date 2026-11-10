@@ -20,6 +20,7 @@ import {recordGame,recordEventResult,eventTypeFor} from './analytics.js';
 import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js';
 import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js';
 import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js';
+import {equipmentSelection} from './equipment.js';
 import {mixSeed} from './population.js';
 import {chargeEventCosts,creditPrize} from './finance.js';
 import {rollInjury} from './injuries.js';
@@ -60,7 +61,7 @@ function matchupFor({state,tournament,match}){
   const opponentTeam=match.home.id===playerTeam.id?match.away:match.home;
   if(!opponentTeam)return null;
   const doubles=tournament.format!=='singles';
-  const player=careerProfile(state.athlete);
+  const player=careerProfile(state.athlete,equipmentSelection(state));
   if(doubles){
     const partner=careerProfile(playerTeam.members[1]??playerTeam.members[0]);
     const opponents=opponentTeam.members.slice(0,2).map(member=>careerProfile(member));
@@ -120,7 +121,7 @@ function pendingFor({state,tournament}){
     round:tournament.round,
     tournamentId:tournament.id,
     rules:matchRules(tournament),
-    difficulty:tournament.difficulty??'normal',
+    difficulty:['easy','normal','hard'].includes(state.settings?.difficulty)?state.settings.difficulty:(tournament.difficulty??'normal'),
     learning:opponentLearningForMatchup(state,matchup)??state.opponentLearning??null,
     matchup 
   };

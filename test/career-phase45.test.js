@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer,currentEvents,advanceWeek} from '../src/career/state.js';
 import {startCareerMatch,quickSimCareerMatch} from '../src/career/career-match.js';
 import {syncInbox,inboxMessages,unreadCount,markMessageRead,archiveMessage} from '../src/career/inbox.js';
-import {generateSeasonCatalog,purchaseEquipment,equipPaddle,equipmentSelection,createSignaturePaddle,equipmentStats,equipmentCatalog} from '../src/career/equipment.js';
+import {generateSeasonCatalog,purchaseEquipment,equipPaddle,equipmentSelection,createSignaturePaddle,equipmentStats,equipmentCatalog,HEADWEAR_CATALOG,buyHeadwear,equipHeadwear,clearHeadwear,setPaddleColor} from '../src/career/equipment.js';
 import {careerProfile} from '../src/career/matchmaking.js';
 import {migrateCareer,CAREER_SAVE_VERSION} from '../src/career/save.js';
 import {exportCareerPortable,importCareerPortable} from '../src/career/portable-save.js';
@@ -67,14 +67,43 @@ test('seasonal paddles can be purchased, equipped and remain engine-bounded',()=
   const base={...career(),week:4,money:2000};
   const product=generateSeasonCatalog(base.seed,base.week).find(item=>item.releaseWeek<=base.week&&item.status!=='announced');
   assert.ok(product);
-  const purchased=purchaseEquipment(base,product.id);
+  const purchased=purchaseEquipment(base,product.id,{color:'red'});
   assert.ok(purchased.ok,purchased.message);
   assert.equal(purchased.state.equipment.catalog.some(item=>item.id===product.id),true);
+  assert.equal(purchased.item.color,'red');
   const equipped=equipPaddle(purchased.state,product.id);
   assert.ok(equipped.ok,equipped.message);
   const profile=careerProfile(equipped.state.athlete,equipmentSelection(equipped.state));
   assert.equal(profile.paddle.id,product.family);
   assert.equal(profile.paddle.shapeId,product.shape);
+  assert.equal(profile.appearance.paddleColor,'red');
+});
+
+test('colored headwear can be purchased, worn and removed',()=>{
+  const base={...career(),money:1000};
+  const cap=HEADWEAR_CATALOG.find(item=>item.headwear==='cap'&&item.color==='red');
+  const visor=HEADWEAR_CATALOG.find(item=>item.headwear==='visor'&&item.color==='blue');
+  assert.ok(cap&&visor);
+  const boughtCap=buyHeadwear(base,cap.id);
+  assert.ok(boughtCap.ok,boughtCap.message);
+  assert.equal(boughtCap.state.equipment.headwear.equipped,cap.id);
+  let profile=careerProfile(boughtCap.state.athlete,equipmentSelection(boughtCap.state));
+  assert.equal(profile.appearance.headwear,'cap');
+  assert.equal(profile.appearance.headwearColor,'red');
+  const boughtVisor=buyHeadwear(boughtCap.state,visor.id);
+  assert.ok(boughtVisor.ok,boughtVisor.message);
+  const worn=equipHeadwear(boughtVisor.state,cap.id);
+  assert.ok(worn.ok,worn.message);
+  const cleared=clearHeadwear(worn.state);
+  assert.equal(cleared.state.equipment.headwear.equipped,null);
+});
+
+test('owned paddle colors can be changed after purchase',()=>{
+  const base={...career(),money:1000};
+  const recolored=setPaddleColor(base,'allcourt-hybrid','blue');
+  assert.ok(recolored.ok,recolored.message);
+  const profile=careerProfile(recolored.state.athlete,equipmentSelection(recolored.state));
+  assert.equal(profile.appearance.paddleColor,'blue');
 });
 
 test('a Gold contract unlocks one bounded signature release',()=>{
@@ -97,6 +126,18 @@ test('schema v20 careers gain the seasonal equipment catalog',()=>{
   assert.equal(migrated.version,CAREER_SAVE_VERSION);
   assert.deepEqual(migrated.state.equipment.catalog,[]);
 });
+test('schema v22 careers gain colored equipment state and settings',()=>{
+  const legacy=career();
+  legacy.equipment={...legacy.equipment,version:2};
+  delete legacy.equipment.headwear;
+  legacy.settings=undefined;
+  const migrated=migrateCareer({version:22,state:legacy});
+  assert.ok(migrated.ok,migrated.reason);
+  assert.equal(migrated.state.equipment.version,3);
+  assert.deepEqual(migrated.state.equipment.headwear,{owned:[],equipped:null});
+  assert.equal(migrated.state.settings.difficulty,'normal');
+});
+
 test('a portable career export round-trips through compression and validation',async()=>{
   const state={...career(),week:8,money:975};
   const text=await exportCareerPortable(state,{exportedAt:'2026-11-09T12:00:00.000Z'});

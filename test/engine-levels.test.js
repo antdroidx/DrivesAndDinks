@@ -10,6 +10,21 @@ test('same seed and inputs reproduce gameplay despite different displayed rankin
 test('the playable physics curve uses calibrated internal steps',()=>{assert.deepEqual(SKILL_LEVELS,{beginner:64,intermediate:66,demo:68,advanced:70});});
 
 test('level profiles change actual preparation and ability while demo stays around 68',()=>{const levels=Object.keys(SKILL_LEVELS).map(l=>levelLineup(l,seededRandom(1))[0]);for(let i=1;i<levels.length;i++){assert.ok(levels[i].abilities.speed>levels[i-1].abilities.speed);assert.ok(levels[i].abilities.reaction<levels[i-1].abilities.reaction);assert.ok(levels[i].abilities.control>levels[i-1].abilities.control)}assert.equal(levels[2].attributes.drive,68);assert.equal(buildProfile({character:'avery'}).attributes.drive,70)});
+test('a career match snapshot resumes the same live engine state',()=>{
+  const lineup=levelLineup('demo',seededRandom(8));
+  const first=new Game({seed:81});first.configure({format:'doubles'},lineup);first.mode='watch';first.recordReplay=()=>{};
+  for(let index=0;index<480;index++)first.update(C.dt);
+  const snapshot=structuredClone(first.snapshot());
+  const second=new Game({seed:999});second.configure({format:'doubles'},lineup);second.mode='watch';second.recordReplay=()=>{};
+  assert.equal(second.restore(snapshot),true);
+  assert.deepEqual(second.score.points,first.score.points);
+  assert.deepEqual(second.ball,first.ball);
+  assert.equal(second.clock,first.clock);
+  for(let index=0;index<240;index++){first.update(C.dt);second.update(C.dt)}
+  assert.deepEqual(second.score.points,first.score.points);
+  assert.deepEqual(second.ball,first.ball);
+});
+
 test('outside-kitchen jump landing restores foot fault detection',()=>{const p={team:0,x:-1,y:28,airborneTimer:0};assert.equal(kitchenFootContact(p),false);p.x=1;p.airborneTimer=.1;assert.equal(kitchenFootContact(p),false);p.airborneTimer=0;assert.equal(kitchenFootContact(p),true)});
 test('high speed incoming balls demand better contact and poor soft shots can hit the net',()=>{const p={...buildProfile({}),x:10,y:30,vx:0,vy:0},slow={x:10.7,y:29.6,z:1.4,vx:0,vy:10},fast={...slow,vy:48};assert.ok(contactQuality(p,fast,'dink').chance>contactQuality(p,slow,'dink').chance);const ball={x:10,y:30,z:1};launch(ball,10,14,'dink',{},.55);let net=false;for(let i=0;i<240;i++){if(stepBall(ball,C.dt)==='net'){net=true;break}if(ball.y<15)break}assert.equal(net,true)});
 test('new situational motions select from real contact circumstances',()=>{const p={team:0,y:30,stroke:'forehand',contactType:'volley',incomingSpeed:40};assert.equal(matchStrokeMode(p,'dink'),'resetBlock');assert.equal(matchStrokeMode(p,'drive'),'counterVolley');assert.equal(matchStrokeMode({...p,contactType:'groundstroke',contactAge:.1,contactPoint:{z:.7}},'drive'),'halfVolley');assert.equal(matchStrokeMode({...p,contactDifficulty:.8},'drive'),'wideForehand');assert.equal(matchStrokeMode({...p,stroke:'backhand',contactDifficulty:.8},'drive'),'wideBackhand')});

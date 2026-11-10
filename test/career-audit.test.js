@@ -154,7 +154,6 @@ test('career UI source covers the audited entry and handoff safeguards',()=>{
   assert.match(careerMain,/data-action="resume-tournament"/);
   assert.ok(careerMain.includes('League night complete. Advance the calendar'));
   assert.match(careerMain,/Delete this career and start over/);
-  assert.match(rootMain,/\['setup-button','difficulty','mode','restart','restart-top'\]/);
   assert.match(rootMain,/writeMatchResult\(game\.matchReport\(\),careerMatch\.matchId\)/);
 });
 

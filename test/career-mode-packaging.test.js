@@ -127,6 +127,30 @@ test('career draft selections preserve the typed player name',()=>{
   assert.match(main,/value="\$\{escapeHtml\(app\.draft\.name\)\}"/);
 });
 
+test('career has dedicated profile, equipment and league screens',()=>{
+  const page=read('career/index.html'),main=read('src/career/main.js');
+  for(const view of ['profile','shop','league'])assert.match(page,new RegExp(`data-view="${view}"`));
+  assert.match(main,/function renderProfile\(/);
+  assert.match(main,/function renderEquipment\(/);
+  assert.match(main,/function renderLeague\(/);
+  assert.match(main,/paddle-product-picture/);
+  assert.match(main,/headwear-product-picture/);
+  assert.match(main,/buy-headwear/);
+  assert.match(main,/data-paddle-color-option/);
+});
+
+test('career preview changes with body size and match controls do not restart play',()=>{
+  const careerMain=read('src/career/main.js'),gameMain=read('src/main.js'),css=read('style.css');
+  assert.match(careerMain,/applyPhysique\(base/);
+  assert.match(careerMain,/profile-height-ft/);
+  assert.match(careerMain,/profile-weight-lb/);
+  assert.match(careerMain,/career-difficulty/);
+  assert.match(gameMain,/game\.mode=game\.mode==='play'\?'watch':'play'/);
+  assert.doesNotMatch(gameMain,/game\.mode=game\.mode==='play'\?'watch':'play';[^}]*game\.reset\(\)/);
+  assert.match(gameMain,/career-exit-button/);
+  assert.match(css,/career-match-mode #setup-button/);
+});
+
 test('standings format tabs submit valid format ids',()=>{
   const main=read('src/career/main.js');
   assert.ok(main.includes('data-format="${entry}"'),'format tabs must use the string id from FORMATS');

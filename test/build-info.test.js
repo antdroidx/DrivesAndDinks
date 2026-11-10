@@ -4,6 +4,13 @@ import {readFileSync} from 'node:fs';
 
 const read=(path)=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 
+test('the in-game header uses the dashboard wordmark styling',()=>{
+ const html=read('index.html'),css=read('style.css');
+ assert.match(html,/class="game-wordmark"/);
+ assert.match(css,/\.game-wordmark\{font:800 15px\/1\.2/);
+ assert.match(css,/\.game-wordmark span\{color:var\(--accent\)\}/);
+});
+
 test('deployments expose a sequential build number at the release root and dev mirror',()=>{
  const html=read('index.html'),fallback=read('build-info.js'),workflow=read('.github/workflows/pages.yml'),main=read('src/main.js');
  assert.match(html,/id="build-label"/);
