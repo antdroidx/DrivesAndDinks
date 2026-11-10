@@ -1,0 +1,15 @@
+{
+  "name": "Drives & Dinks Career",
+  "short_name": "D&D Career",
+  "description": "Offline pickleball career simulation and playable matches.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0e1620",
+  "theme_color": "#111c2a",
+  "icons": [
+    {"src": "../assets/app-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "../assets/app-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

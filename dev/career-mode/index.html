@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="Pragma" content="no-cache">
+<meta name="Expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111c2a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Drives &amp; Dinks · Career Mode</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="career.css?v=195">
+</head>
+<body>
+<header class="career-header">
+  <div class="brand">
+    <strong>DRIVES <span>&amp;</span> DINKS</strong>
+    <small>CAREER MODE</small>
+  </div>
+  <div class="header-right">
+    <span id="career-build" class="build-label">BUILD DEV</span>
+    <button type="button" id="career-reset" class="ghost" data-action="reset" hidden>NEW CAREER</button>
+  </div>
+</header>
+
+<nav class="career-nav" id="career-nav" aria-label="Career sections" hidden>
+  <button type="button" data-view="home" class="active">CAREER</button>
+  <button type="button" data-view="team">TEAM</button>
+  <button type="button" data-view="inbox">INBOX</button>
+  <button type="button" data-view="clubs">CLUBS</button>
+  <button type="button" data-view="players">PLAYERS</button>
+  <button type="button" data-view="calendar">CALENDAR</button>
+  <button type="button" data-view="standings">STANDINGS</button>
+  <button type="button" data-view="record">RECORD</button>
+</nav>
+
+<section class="status-strip" id="career-status" aria-live="polite" hidden></section>
+
+<main id="career-view" tabindex="-1"></main>
+
+<div class="toast" id="career-toast" role="status" aria-live="polite" hidden></div>
+
+<script src="../build-info.js?v=195"></script>
+<script type="module" src="../src/career/main.js?v=195"></script>
+</body>
+</html>

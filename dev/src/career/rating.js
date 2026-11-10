@@ -1,0 +1,382 @@
+// The career rating system.
+//
+// A scale from 2.000 to 8.000 that measures current skill rather than
+// rewarding wins. The scale, the band names and the three decimal places
+// follow the conventions players already meet in published world rankings,
+// but the system in the game is ours and is simply called a rating.
+//
+// The defining idea is that a rating moves on performance measured against
+// an expectation, not on the scoreboard. An expected score is set from the
+// ratings of everyone on the court, then compared with what actually
+// happened. Win 11-8 when you were expected to win 11-3 and your rating
+// falls; lose 9-11 against a much stronger opponent and your rating can
+// rise. The system stays balanced because one side goes up while the other
+// goes down.
+//
+// This module carries both halves: the scale, bands and formatting, and the
+// calculation, so a career match can be rated this way.
+
+// The top of the published world rankings was 7.047 in October 2026, so
+// the elite end of the scale is a real place rather than a theoretical one.
+export const RATING_ELITE=7;
+export const RATING_MIN=2;
+export const RATING_MAX=8;
+export const RATING_TOP_SKILL=99;
+export const RATING_PRECISION=3;
+
+export const RATING_BANDS=Object.freeze([
+  {id:'novice',min:2,max:2.999},
+  {id:'intermediate',min:3,max:3.999},
+  {id:'advanced',min:4,max:4.999},
+  {id:'professional',min:5,max:8}
+]);
+export const RATING_LABELS=Object.freeze({
+  novice:{label:'Novice',note:'Learning the game. Club nights and training.'},
+  intermediate:{label:'Intermediate',note:'Reliable rallies. Local league ready.'},
+  advanced:{label:'Advanced',note:'Pressure the net. Regional and semi-pro ready.'},
+  professional:{label:'Professional',note:'National and international level. Pro league ready.'}
+});
+
+const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+
+export function ratingBand(rating){
+  const value=clamp(Number(rating)||RATING_MIN,RATING_MIN,RATING_MAX);
+  const match=RATING_BANDS.find(band=>value<=band.max)??RATING_BANDS.at(-1);
+  return RATING_LABELS[match.id];
+}
+export function ratingBandId(rating){return ratingBand(rating).label.toLowerCase().replace(/\s+/g,'-')}
+
+export function formatRating(rating){
+  const value=clamp(Number(rating)||RATING_MIN,RATING_MIN,RATING_MAX);
+  return value.toFixed(RATING_PRECISION);
+}
+
+// The starting rating for a player who has been assessed but has not played
+// rated matches yet. Career matches replace this with a results-driven
+// rating; until then it is the honest prior.
+export function ratingFromSkill(skillAverage){
+  const skill=clamp(Number(skillAverage)||0,0,RATING_TOP_SKILL);
+  return clamp(RATING_MIN+(skill-30)/(RATING_TOP_SKILL-30)*(RATING_ELITE-RATING_MIN),RATING_MIN,RATING_MAX);
+}
+export function skillForRating(rating){
+  const target=clamp(Number(rating)||RATING_MIN,RATING_MIN,RATING_MAX);
+  return 30+(target-RATING_MIN)/(RATING_ELITE-RATING_MIN)*(RATING_TOP_SKILL-30);
+}
+
+// The user-facing overall is a presentation scale, not the raw 0–100
+// physics coordinate. It is anchored so the advanced and professional bands
+// read intuitively while preserving the tested attribute-to-physics curve.
+export const RATING_OVERALL_ANCHORS=Object.freeze([
+  {rating:2,overall:30},
+  {rating:2.5,overall:40},
+  {rating:3,overall:50},
+  {rating:3.5,overall:60},
+  {rating:4,overall:68},
+  {rating:4.5,overall:75},
+  {rating:5,overall:81},
+  {rating:5.5,overall:86},
+  {rating:6,overall:90},
+  {rating:6.5,overall:94},
+  {rating:7,overall:97},
+  {rating:8,overall:100}
+]);
+
+export function overallForRating(rating){
+  const value=clamp(Number(rating)||RATING_MIN,RATING_MIN,RATING_MAX);
+  for(let index=1;index<RATING_OVERALL_ANCHORS.length;index++){
+    const upper=RATING_OVERALL_ANCHORS[index],lower=RATING_OVERALL_ANCHORS[index-1];
+    if(value<=upper.rating){
+      const ratio=(value-lower.rating)/(upper.rating-lower.rating);
+      return Math.round((lower.overall+(upper.overall-lower.overall)*ratio)*10)/10;
+    }
+  }
+  return RATING_OVERALL_ANCHORS.at(-1).overall;
+}
+
+export function ratingForOverall(overall){
+  const value=clamp(Number(overall)||RATING_OVERALL_ANCHORS[0].overall,RATING_OVERALL_ANCHORS[0].overall,RATING_OVERALL_ANCHORS.at(-1).overall);
+  for(let index=1;index<RATING_OVERALL_ANCHORS.length;index++){
+    const upper=RATING_OVERALL_ANCHORS[index],lower=RATING_OVERALL_ANCHORS[index-1];
+    if(value<=upper.overall){
+      const ratio=(value-lower.overall)/(upper.overall-lower.overall);
+      return lower.rating+(upper.rating-lower.rating)*ratio;
+    }
+  }
+  return RATING_OVERALL_ANCHORS.at(-1).rating;
+}
+
+// ---- the population -------------------------------------------------------
+//
+// The rated world has a centre. A player who has never been rated starts
+// near it, and the population settles around it, because every match moves
+// one player up and another down and every player who stops playing drifts
+// back toward it.
+//
+// The drift is a half life. A player who has not played for a year has
+// moved halfway back to the middle, which is what makes the calendar
+// matter: standing still costs you.
+export const POPULATION_MEAN=3.5;
+export const NEW_PLAYER_RATING=3.5;
+export const RATING_HALF_LIFE_WEEKS=52;
+
+export function regressRating(rating,weeksIdle){
+  const idle=Math.max(0,Number(weeksIdle)||0);
+  if(!idle)return rating;
+  const halves=idle/RATING_HALF_LIFE_WEEKS;
+  return POPULATION_MEAN+(rating-POPULATION_MEAN)*Math.pow(0.5,halves);
+}
+
+// How long a rating has been carried, in weeks, given the last time its
+// holder played.
+export function ratingAge(rating,lastPlayedWeek,currentWeek){
+  return Math.max(0,(Number(currentWeek)||0)-(Number(lastPlayedWeek)||0));
+}
+
+// The outcome of a match.
+//
+// The expected score comes from the two ratings, because that is what the
+// players would expect of each other. The actual score comes from their
+// underlying skill, which may be ahead of or behind where their ratings
+// say they are. The gap between the two is the performance the rating
+// system measures.
+export function simulateOutcome({mySkill,theirSkill,myRating,theirRating,random=Math.random}={}){
+  const expected=expectedScore(myRating,theirRating);
+  const skillGap=(Number(mySkill)||0)-(Number(theirSkill)||0);
+  // A wide skill gap produces a wide margin, and luck adds the rest.
+  const margin=clamp(skillGap*1.1+(random()*2-1)*6,-MAX_POINTS,MAX_POINTS);
+  const total=17+random()*6;
+  const myPoints=Math.round(clamp((total+margin)/2,0,MAX_POINTS));
+  const opponentPoints=Math.round(clamp((total-margin)/2,0,MAX_POINTS));
+  return {myPoints,opponentPoints,expected,skillGap,margin};
+}
+
+// ---- formats ----------------------------------------------------------------
+//
+// A player is rated separately in singles and in doubles, and each format
+// has its own ranking. The two diverge because the games reward different
+// things: doubles is a net and placement game, singles is a serve, receive
+// and movement game. Every athlete carries a bias toward one of them.
+
+export const FORMATS=Object.freeze(['singles','doubles','mixed']);
+export const FORMAT_LABELS=Object.freeze({
+  singles:'Singles',
+  doubles:'Doubles',
+  mixed:'Mixed Doubles'
+});
+
+// Gender doubles is played on a men's or a women's board, so the label the
+// player sees depends on who they are.
+export function formatLabel(format,gender){
+  if(format!=='doubles')return FORMAT_LABELS[format]??format;
+  return gender==='female'?"Women's Doubles":"Men's Doubles";
+}
+
+// How much of an athlete's skill carries into a format. Doubles leans on
+// the soft game and the net, singles on the serve and the feet.
+export const FORMAT_WEIGHTS=Object.freeze({
+  doubles:{dink:1.15,drop:1.15,volley:1.12,control:1.08,defense:1.08,serve:.95,agility:.95},
+  singles:{serve:1.15,agility:1.12,reach:1.1,power:1.08,defense:1.05,dink:.92,drop:.9},
+  mixed:{dink:1.08,drop:1.05,volley:1.08,serve:1.08,agility:1.06,control:1.05,reach:1.05,defense:1.05}
+});
+
+// The skill an athlete shows in a format, given their base attributes.
+export function formatSkill(attributes,format){
+  const weights=FORMAT_WEIGHTS[format]??FORMAT_WEIGHTS.doubles;
+  let total=0;
+  let weight=0;
+  for(const key of Object.keys(attributes)){
+    const factor=weights[key]??1;
+    total+=(Number(attributes[key])||0)*factor;
+    weight+=factor;
+  }
+  return weight?total/weight:0;
+}
+
+// The rating an athlete holds in a format.
+export function ratingInFormat(attributes,format,bias=0){
+  return ratingFromSkill(formatSkill(attributes,format)+bias);
+}
+
+// ---- brackets ---------------------------------------------------------------
+// Events do not gate entry on a rating. They run a bracket for each level
+// of play, and a bracket is named by the top of its range: the 3.5 bracket
+// holds players rated 3.500 to 3.999. A player signs up for a bracket and is
+// placed in it.
+export const RATING_BRACKETS=Object.freeze([
+  {id:'2.0',label:'2.0',min:2,max:2.499,level:2},
+  {id:'2.5',label:'2.5',min:2.5,max:2.999,level:2.5},
+  {id:'3.0',label:'3.0',min:3,max:3.499,level:3},
+  {id:'3.5',label:'3.5',min:3.5,max:3.999,level:3.5},
+  {id:'4.0',label:'4.0',min:4,max:4.499,level:4},
+  {id:'4.5',label:'4.5',min:4.5,max:4.999,level:4.5},
+  {id:'5.0+',label:'5.0+',min:5,max:8,level:5}
+]);
+
+// The rating a team is gated on. The normal rule reads the strongest player,
+// so a 5.0 can partner a 3.0 into a 5.0 gate; some events read the combined
+// rating instead, which is what keeps the teams level rather than the best
+// player setting the bar.
+export function gateRating(ratings,basis='highest'){
+  const list=(Array.isArray(ratings)?ratings:[ratings]).filter(Number.isFinite);
+  if(!list.length)return 0;
+  if(basis==='combined')return list.reduce((sum,value)=>sum+value,0)/list.length;
+  return Math.max(...list);
+}
+export function divisionFor(rating){
+  const value=clamp(Number(rating)||RATING_MIN,RATING_MIN,RATING_MAX);
+  return RATING_BRACKETS.find(division=>value>=division.min&&value<=division.max)??RATING_BRACKETS.at(-1);
+}
+
+// A player may enter their own bracket, one above it to play up, or one below
+// it. Playing up is the fastest way to move a rating, because the bar to
+// beat is lower; playing down risks a rating drop, because a narrow win is
+// an underperformance.
+export function availableDivisions(rating,allowedIds=null){
+  const index=RATING_BRACKETS.findIndex(division=>division.id===divisionFor(rating).id);
+  const from=Math.max(0,index-1);
+  const to=Math.min(RATING_BRACKETS.length-1,index+1);
+  const window=RATING_BRACKETS.slice(from,to+1);
+  if(!allowedIds)return window;
+  return window.filter(division=>allowedIds.includes(division.id));
+}
+
+// ---- the calculation ------------------------------------------------------
+
+// Verified, organised play carries more weight than a self-posted game.
+export const MATCH_TYPES=Object.freeze({
+  tournament:{id:'tournament',label:'Tournament',weight:1},
+  league:{id:'league',label:'League',weight:.85},
+  club:{id:'club',label:'Club',weight:.7},
+  recreational:{id:'recreational',label:'Recreational',weight:.5}
+});
+
+// A match is expected to sit around 9-9 before the margin is applied.
+export const BASE_POINTS=9;
+export const MAX_POINTS=11;
+// Publicly visible DUPR examples put a 0.5 rating gap near 11-5 and a gap
+// near 1.0 around 11-2. DUPR's production formula is proprietary, so this
+// curve is a transparent gameplay calibration rather than a claim about the
+// exact DUPR calculation. The exponential falloff passes those two anchors
+// and keeps the last points available across a much smaller range.
+export const EXPECTED_SCORE_FALLOFF=2*Math.log(4/3);
+// A single match moves a rating by at most this much, before weighting.
+export const RATING_SCALE=.35;
+// Recent matches matter more. A match from six months ago has less pull.
+export const RECENCY_HALF_LIFE=26;
+// Early results move a rating more because the history is thin.
+export const VOLUME_SCALE=10;
+
+export function teamStrength(ratings){
+  const values=(ratings??[]).filter(value=>Number.isFinite(value));
+  if(!values.length)return RATING_MIN;
+  return values.reduce((sum,value)=>sum+value,0)/values.length;
+}
+
+// The score the system expects before a match, calibrated to the public DUPR
+// score anchors while remaining transparent and reversible.
+export function expectedScore(rating,opponentRating){
+  const gap=rating-opponentRating;
+  const distance=Math.abs(gap);
+  if(distance===0)return {myPoints:BASE_POINTS,opponentPoints:BASE_POINTS,margin:0};
+  // The favourite reaches an 11-point expectation within a quarter point,
+  // while the underdog's expected score falls rapidly. This gives the public
+  // 0.5 gap roughly 11-5 and the near-1.0 gap roughly 11-2.
+  const winner=clamp(BASE_POINTS+2*Math.min(1,distance/.25),BASE_POINTS,MAX_POINTS);
+  const loser=clamp(-7+16*Math.exp(-EXPECTED_SCORE_FALLOFF*distance),1,BASE_POINTS);
+  const margin=gap>0?winner-loser:loser-winner;
+  return {
+    myPoints:gap>0?winner:loser,
+    opponentPoints:gap>0?loser:winner,
+    margin
+  };
+}
+
+// Invert the expected-score curve when setting target outcomes for level
+// profiles. For example, a target 11-5 match corresponds to a 0.5 rating gap.
+export function ratingGapForExpectedScore(loserPoints){
+  const points=clamp(Number(loserPoints)||BASE_POINTS,1,BASE_POINTS);
+  if(points===BASE_POINTS)return 0;
+  if(points===1)return 1.5;
+  return clamp(-Math.log((points+7)/16)/EXPECTED_SCORE_FALLOFF,0,1.5);
+}
+
+// How the actual result compared with the expectation. Positive is
+// overperformance, which can raise a rating even in a loss.
+export function matchPerformance({actualMyPoints,actualOpponentPoints,expectedMyPoints,expectedOpponentPoints}){
+  const mine=(actualMyPoints??0)-expectedMyPoints;
+  const theirs=(actualOpponentPoints??0)-expectedOpponentPoints;
+  return (mine-theirs)/MAX_POINTS;
+}
+
+export function matchWeight(type){
+  return (MATCH_TYPES[type]??MATCH_TYPES.club).weight;
+}
+export function recencyWeight(weeksAgo=0){
+  return Math.exp(-Math.max(0,Number(weeksAgo)||0)/RECENCY_HALF_LIFE);
+}
+export function volumeDamping(matchesPlayed=0){
+  return 1/Math.sqrt(1+Math.max(0,Number(matchesPlayed)||0)/VOLUME_SCALE);
+}
+
+// The rating change for one player in one match.
+export function updateRating({
+  rating,
+  opponentRatings=[],
+  teammateRatings=[],
+  actualMyPoints,
+  actualOpponentPoints,
+  matchType='club',
+  matchesPlayed=0,
+  weeksAgo=0
+}={}){
+  const mine=teamStrength([rating,...teammateRatings]);
+  const theirs=teamStrength(opponentRatings);
+  const expected=expectedScore(mine,theirs);
+  const performance=matchPerformance({actualMyPoints,actualOpponentPoints,expectedMyPoints:expected.myPoints,expectedOpponentPoints:expected.opponentPoints});
+  const weight=matchWeight(matchType);
+  const recency=recencyWeight(weeksAgo);
+  const damping=volumeDamping(matchesPlayed);
+  const delta=RATING_SCALE*performance*weight*recency*damping;
+  return {
+    rating:clamp(rating+delta,RATING_MIN,RATING_MAX),
+    delta,
+    performance,
+    expected,
+    weight,
+    recency,
+    damping
+  };
+}
+
+// Rates a whole match for every player on court. The two teams move in
+// opposite directions, which is what keeps the system balanced. Doubles
+// teammates share the team change in proportion to their own ratings, since
+// individual performance inside a team is not measured.
+export function rateMatch({players,actualMyPoints,actualOpponentPoints,matchType='club',weeksAgo=0}={}){
+  const list=players??[];
+  const mine=list.filter(player=>player.team==='mine');
+  const theirs=list.filter(player=>player.team==='opponent');
+  if(!mine.length||!theirs.length)return {players:list,teamDelta:0,performance:0,expected:null};
+  const myRatings=mine.map(player=>player.rating);
+  const theirRatings=theirs.map(player=>player.rating);
+  const expected=expectedScore(teamStrength(myRatings),teamStrength(theirRatings));
+  const performance=matchPerformance({actualMyPoints,actualOpponentPoints,expectedMyPoints:expected.myPoints,expectedOpponentPoints:expected.opponentPoints});
+  const weight=matchWeight(matchType);
+  const recency=recencyWeight(weeksAgo);
+  const damping=volumeDamping(Math.min(...mine.map(player=>player.matchesPlayed??0)));
+  const teamDelta=RATING_SCALE*performance*weight*recency*damping;
+  const share=(team,sign)=>{
+    const total=team.reduce((sum,player)=>sum+player.rating,0)||1;
+    return team.map(player=>({...player,rating:clamp(player.rating+sign*teamDelta*(player.rating/total),RATING_MIN,RATING_MAX),delta:sign*teamDelta*(player.rating/total)}));
+  };
+  return {players:[...share(mine,1),...share(theirs,-1)],teamDelta,performance,expected};
+}
+
+// Reliability reflects how confidently a match history supports the rating.
+// It rises with the number of rated matches played.
+export function reliability(matchesPlayed=0){
+  const count=Math.max(0,Number(matchesPlayed)||0);
+  const percent=Math.min(99,Math.round(100*(1-Math.exp(-count/12))));
+  const label=percent<40?'Low':percent<70?'Medium':'High';
+  return {percent,label,matches:count};
+}

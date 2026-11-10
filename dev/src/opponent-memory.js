@@ -2,7 +2,17 @@ const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
 // Match-local observations only. No access to an opponent's next aim or input.
 export class OpponentMemory{
- constructor(){this.players=new Map()}
+ constructor(snapshot=null){this.players=new Map();this.restore(snapshot)}
+ // Rebuilds what a previous match learned about these opponents, so a
+ // career's opponents stay readable from one match to the next.
+ restore(snapshot){
+  if(!Array.isArray(snapshot))return this;
+  for(const entry of snapshot){
+   if(!entry||entry.playerId===null||entry.playerId===undefined||!Array.isArray(entry.recent))continue;
+   this.players.set(entry.playerId,structuredClone(entry.recent).slice(-16));
+  }
+  return this;
+ }
  observe({playerId,shot,x,y}){
   if(playerId===null||playerId===undefined||!Number.isFinite(x)||!Number.isFinite(y)||x<0||x>20||y<0||y>44||String(shot).startsWith('serve'))return;
   if(!this.players.has(playerId)){if(this.players.size===4)this.players.delete(this.players.keys().next().value);this.players.set(playerId,[])}
