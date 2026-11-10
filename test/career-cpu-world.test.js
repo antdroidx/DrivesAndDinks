@@ -25,10 +25,10 @@ test('generated athletes age and develop deterministically across career weeks',
 
 test('the CPU world has active, circuit and background simulation tiers',()=>{
   const world=createCpuWorld(SEED,'north-america',0);
-  assert.equal(world.summary.population,2914);
+  assert.equal(world.summary.population,5680);
   assert.equal(world.summary.active,160);
   assert.equal(world.summary.circuit,420);
-  assert.equal(world.summary.background,2334);
+  assert.equal(world.summary.background,5100);
   assert.ok(world.summary.averageAge>30,'the generated world contains adult careers');
   assert.ok(validateCpuWorld(world).ok);
 });
@@ -42,7 +42,7 @@ test('CPU careers accumulate matches, age, stages and world turnover',()=>{
   assert.ok(records.some(record=>record.age>record.startAge),'ages advance');
   assert.ok(advanced.world.entrants.length>0||advanced.world.retired.length>0,'the world turns over');
   assert.ok(advanced.world.clubs.length>0);
-  assert.ok(advanced.world.summary.population===2914);
+  assert.ok(advanced.world.summary.population===5680);
 });
 
 test('a promising teenager can reach pro scouting before an older starter',()=>{

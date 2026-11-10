@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {buildClubIndex,buildClubRoster,buildAthlete,buildRegionRoster,findClub,mixSeed,clubsForCity} from '../src/career/population.js';
+import {buildClubIndex,buildClubRoster,buildAthlete,buildRegionRoster,findClub,mixSeed,clubsForCity,WORLD_POPULATION_TARGET,REGION_POPULATION_TARGETS} from '../src/career/population.js';
 import {RATING_KEYS} from '../src/roster.js';
 
 const SEED=20260101;
@@ -14,6 +14,16 @@ test('the club index is deterministic and covers every city in the region',()=>{
   assert.ok(cityIds.size>=40,'every city should have clubs');
   const clubIds=new Set(first.map(club=>club.id));
   assert.equal(clubIds.size,first.length,'club ids must be unique');
+});
+
+test('the generated world allocates exactly the 10,000-player target',()=>{
+  for(const seed of [SEED,4242]){
+    const north=buildClubIndex(seed,'north-america');
+    const asia=buildClubIndex(seed,'asia');
+    assert.equal(north.reduce((sum,club)=>sum+club.memberCount,0),REGION_POPULATION_TARGETS['north-america']);
+    assert.equal(asia.reduce((sum,club)=>sum+club.memberCount,0),REGION_POPULATION_TARGETS.asia);
+    assert.equal(north.reduce((sum,club)=>sum+club.memberCount,0)+asia.reduce((sum,club)=>sum+club.memberCount,0),WORLD_POPULATION_TARGET);
+  }
 });
 
 test('a different seed produces a different population',()=>{

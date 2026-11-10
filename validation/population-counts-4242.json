@@ -1,14 +1,14 @@
 {
   "seed": 4242,
-  "generatedAt": "2026-11-10T06:14:57.791Z",
+  "generatedAt": "2026-11-10T06:15:59.772Z",
   "note": "Counts are deterministic for this seed. Each region is generated independently; a career loads one region.",
   "totals": {
     "cities": 74,
     "clubs": 214,
-    "players": 5113,
-    "averagePlayersPerCity": 69.1,
-    "minimumPlayersPerCity": 40,
-    "maximumPlayersPerCity": 113
+    "players": 10000,
+    "averagePlayersPerCity": 135.1,
+    "minimumPlayersPerCity": 78,
+    "maximumPlayersPerCity": 224
   },
   "regions": [
     {
@@ -16,20 +16,20 @@
       "region": "North America",
       "cities": 42,
       "clubs": 122,
-      "players": 2914,
-      "averagePlayersPerCity": 69.4,
-      "minimumPlayersPerCity": 40,
-      "maximumPlayersPerCity": 111
+      "players": 5680,
+      "averagePlayersPerCity": 135.2,
+      "minimumPlayersPerCity": 78,
+      "maximumPlayersPerCity": 216
     },
     {
       "regionId": "asia",
       "region": "Asia",
       "cities": 32,
       "clubs": 92,
-      "players": 2199,
-      "averagePlayersPerCity": 68.7,
-      "minimumPlayersPerCity": 40,
-      "maximumPlayersPerCity": 113
+      "players": 4320,
+      "averagePlayersPerCity": 135,
+      "minimumPlayersPerCity": 78,
+      "maximumPlayersPerCity": 224
     }
   ],
   "cities": [
@@ -39,7 +39,7 @@
       "city": "Almaty",
       "country": "Kazakhstan",
       "clubs": 4,
-      "players": 92,
+      "players": 181,
       "recreational": 3,
       "competitive": 0,
       "elite": 1
@@ -50,7 +50,7 @@
       "city": "Baku",
       "country": "Azerbaijan",
       "clubs": 4,
-      "players": 109,
+      "players": 215,
       "recreational": 1,
       "competitive": 0,
       "elite": 3
@@ -61,7 +61,7 @@
       "city": "Bangkok",
       "country": "Thailand",
       "clubs": 2,
-      "players": 46,
+      "players": 90,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -72,7 +72,7 @@
       "city": "Beijing",
       "country": "China",
       "clubs": 3,
-      "players": 82,
+      "players": 162,
       "recreational": 1,
       "competitive": 1,
       "elite": 1
@@ -83,7 +83,7 @@
       "city": "Bengaluru",
       "country": "India",
       "clubs": 2,
-      "players": 44,
+      "players": 87,
       "recreational": 0,
       "competitive": 2,
       "elite": 0
@@ -94,7 +94,7 @@
       "city": "Bishkek",
       "country": "Kyrgyzstan",
       "clubs": 2,
-      "players": 51,
+      "players": 100,
       "recreational": 2,
       "competitive": 0,
       "elite": 0
@@ -105,7 +105,7 @@
       "city": "Busan",
       "country": "South Korea",
       "clubs": 4,
-      "players": 80,
+      "players": 158,
       "recreational": 3,
       "competitive": 1,
       "elite": 0
@@ -116,7 +116,7 @@
       "city": "Chennai",
       "country": "India",
       "clubs": 3,
-      "players": 80,
+      "players": 157,
       "recreational": 2,
       "competitive": 0,
       "elite": 1
@@ -127,7 +127,7 @@
       "city": "Delhi",
       "country": "India",
       "clubs": 4,
-      "players": 92,
+      "players": 180,
       "recreational": 2,
       "competitive": 2,
       "elite": 0
@@ -138,7 +138,7 @@
       "city": "Dhaka",
       "country": "Bangladesh",
       "clubs": 2,
-      "players": 50,
+      "players": 99,
       "recreational": 0,
       "competitive": 1,
       "elite": 1
@@ -149,7 +149,7 @@
       "city": "Doha",
       "country": "Qatar",
       "clubs": 4,
-      "players": 82,
+      "players": 162,
       "recreational": 2,
       "competitive": 2,
       "elite": 0
@@ -160,7 +160,7 @@
       "city": "Dubai",
       "country": "United Arab Emirates",
       "clubs": 2,
-      "players": 40,
+      "players": 78,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -171,7 +171,7 @@
       "city": "Ho Chi Minh City",
       "country": "Vietnam",
       "clubs": 3,
-      "players": 88,
+      "players": 172,
       "recreational": 0,
       "competitive": 2,
       "elite": 1
@@ -182,7 +182,7 @@
       "city": "Incheon",
       "country": "South Korea",
       "clubs": 2,
-      "players": 45,
+      "players": 88,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -193,7 +193,7 @@
       "city": "Istanbul",
       "country": "Türkiye",
       "clubs": 2,
-      "players": 48,
+      "players": 94,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -204,7 +204,7 @@
       "city": "Jakarta",
       "country": "Indonesia",
       "clubs": 2,
-      "players": 42,
+      "players": 82,
       "recreational": 0,
       "competitive": 2,
       "elite": 0
@@ -215,7 +215,7 @@
       "city": "Jeju City",
       "country": "South Korea",
       "clubs": 3,
-      "players": 60,
+      "players": 118,
       "recreational": 1,
       "competitive": 2,
       "elite": 0
@@ -226,7 +226,7 @@
       "city": "Karachi",
       "country": "Pakistan",
       "clubs": 2,
-      "players": 42,
+      "players": 82,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -237,7 +237,7 @@
       "city": "Kuala Lumpur",
       "country": "Malaysia",
       "clubs": 4,
-      "players": 83,
+      "players": 163,
       "recreational": 3,
       "competitive": 1,
       "elite": 0
@@ -248,7 +248,7 @@
       "city": "Manila",
       "country": "Philippines",
       "clubs": 2,
-      "players": 46,
+      "players": 90,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -259,7 +259,7 @@
       "city": "Mumbai",
       "country": "India",
       "clubs": 4,
-      "players": 90,
+      "players": 177,
       "recreational": 4,
       "competitive": 0,
       "elite": 0
@@ -270,7 +270,7 @@
       "city": "Riyadh",
       "country": "Saudi Arabia",
       "clubs": 2,
-      "players": 62,
+      "players": 121,
       "recreational": 0,
       "competitive": 1,
       "elite": 1
@@ -281,7 +281,7 @@
       "city": "Sapporo",
       "country": "Japan",
       "clubs": 4,
-      "players": 107,
+      "players": 210,
       "recreational": 1,
       "competitive": 2,
       "elite": 1
@@ -292,7 +292,7 @@
       "city": "Sendai",
       "country": "Japan",
       "clubs": 4,
-      "players": 86,
+      "players": 168,
       "recreational": 2,
       "competitive": 2,
       "elite": 0
@@ -303,7 +303,7 @@
       "city": "Seoul",
       "country": "South Korea",
       "clubs": 2,
-      "players": 48,
+      "players": 94,
       "recreational": 0,
       "competitive": 2,
       "elite": 0
@@ -314,7 +314,7 @@
       "city": "Shanghai",
       "country": "China",
       "clubs": 3,
-      "players": 77,
+      "players": 151,
       "recreational": 1,
       "competitive": 1,
       "elite": 1
@@ -325,7 +325,7 @@
       "city": "Shenzhen",
       "country": "China",
       "clubs": 4,
-      "players": 95,
+      "players": 186,
       "recreational": 2,
       "competitive": 2,
       "elite": 0
@@ -336,7 +336,7 @@
       "city": "Singapore",
       "country": "Singapore",
       "clubs": 2,
-      "players": 55,
+      "players": 108,
       "recreational": 0,
       "competitive": 1,
       "elite": 1
@@ -347,7 +347,7 @@
       "city": "Taipei",
       "country": "Taiwan",
       "clubs": 4,
-      "players": 113,
+      "players": 224,
       "recreational": 0,
       "competitive": 2,
       "elite": 2
@@ -358,7 +358,7 @@
       "city": "Tashkent",
       "country": "Uzbekistan",
       "clubs": 2,
-      "players": 45,
+      "players": 88,
       "recreational": 0,
       "competitive": 2,
       "elite": 0
@@ -369,7 +369,7 @@
       "city": "Tel Aviv",
       "country": "Israel",
       "clubs": 2,
-      "players": 52,
+      "players": 103,
       "recreational": 0,
       "competitive": 1,
       "elite": 1
@@ -380,7 +380,7 @@
       "city": "Tokyo",
       "country": "Japan",
       "clubs": 3,
-      "players": 67,
+      "players": 132,
       "recreational": 2,
       "competitive": 1,
       "elite": 0
@@ -391,7 +391,7 @@
       "city": "Albuquerque",
       "country": "United States",
       "clubs": 2,
-      "players": 49,
+      "players": 96,
       "recreational": 0,
       "competitive": 2,
       "elite": 0
@@ -402,7 +402,7 @@
       "city": "Atlanta",
       "country": "United States",
       "clubs": 2,
-      "players": 55,
+      "players": 106,
       "recreational": 1,
       "competitive": 0,
       "elite": 1
@@ -413,7 +413,7 @@
       "city": "Austin",
       "country": "United States",
       "clubs": 2,
-      "players": 51,
+      "players": 100,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -424,7 +424,7 @@
       "city": "Baltimore",
       "country": "United States",
       "clubs": 2,
-      "players": 40,
+      "players": 78,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -435,7 +435,7 @@
       "city": "Boston",
       "country": "United States",
       "clubs": 4,
-      "players": 96,
+      "players": 188,
       "recreational": 1,
       "competitive": 2,
       "elite": 1
@@ -446,7 +446,7 @@
       "city": "Buffalo",
       "country": "United States",
       "clubs": 2,
-      "players": 41,
+      "players": 80,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -457,7 +457,7 @@
       "city": "Calgary",
       "country": "Canada",
       "clubs": 4,
-      "players": 111,
+      "players": 216,
       "recreational": 2,
       "competitive": 1,
       "elite": 1
@@ -468,7 +468,7 @@
       "city": "Charlotte",
       "country": "United States",
       "clubs": 2,
-      "players": 46,
+      "players": 90,
       "recreational": 2,
       "competitive": 0,
       "elite": 0
@@ -479,7 +479,7 @@
       "city": "Chicago",
       "country": "United States",
       "clubs": 4,
-      "players": 109,
+      "players": 213,
       "recreational": 2,
       "competitive": 1,
       "elite": 1
@@ -490,7 +490,7 @@
       "city": "Cleveland",
       "country": "United States",
       "clubs": 3,
-      "players": 76,
+      "players": 149,
       "recreational": 3,
       "competitive": 0,
       "elite": 0
@@ -501,7 +501,7 @@
       "city": "Columbus",
       "country": "United States",
       "clubs": 4,
-      "players": 84,
+      "players": 164,
       "recreational": 4,
       "competitive": 0,
       "elite": 0
@@ -512,7 +512,7 @@
       "city": "Dallas",
       "country": "United States",
       "clubs": 3,
-      "players": 75,
+      "players": 146,
       "recreational": 0,
       "competitive": 1,
       "elite": 2
@@ -523,7 +523,7 @@
       "city": "Denver",
       "country": "United States",
       "clubs": 3,
-      "players": 75,
+      "players": 145,
       "recreational": 2,
       "competitive": 0,
       "elite": 1
@@ -534,7 +534,7 @@
       "city": "Detroit",
       "country": "United States",
       "clubs": 4,
-      "players": 99,
+      "players": 193,
       "recreational": 0,
       "competitive": 3,
       "elite": 1
@@ -545,7 +545,7 @@
       "city": "Edmonton",
       "country": "Canada",
       "clubs": 4,
-      "players": 85,
+      "players": 166,
       "recreational": 3,
       "competitive": 1,
       "elite": 0
@@ -556,7 +556,7 @@
       "city": "Houston",
       "country": "United States",
       "clubs": 3,
-      "players": 81,
+      "players": 158,
       "recreational": 2,
       "competitive": 0,
       "elite": 1
@@ -567,7 +567,7 @@
       "city": "Indianapolis",
       "country": "United States",
       "clubs": 4,
-      "players": 87,
+      "players": 170,
       "recreational": 3,
       "competitive": 1,
       "elite": 0
@@ -578,7 +578,7 @@
       "city": "Kansas City",
       "country": "United States",
       "clubs": 2,
-      "players": 43,
+      "players": 84,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -589,7 +589,7 @@
       "city": "Las Vegas",
       "country": "United States",
       "clubs": 3,
-      "players": 80,
+      "players": 155,
       "recreational": 2,
       "competitive": 0,
       "elite": 1
@@ -600,7 +600,7 @@
       "city": "Los Angeles",
       "country": "United States",
       "clubs": 3,
-      "players": 63,
+      "players": 123,
       "recreational": 0,
       "competitive": 3,
       "elite": 0
@@ -611,7 +611,7 @@
       "city": "Miami",
       "country": "United States",
       "clubs": 4,
-      "players": 77,
+      "players": 150,
       "recreational": 3,
       "competitive": 1,
       "elite": 0
@@ -622,7 +622,7 @@
       "city": "Minneapolis",
       "country": "United States",
       "clubs": 2,
-      "players": 43,
+      "players": 84,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -633,7 +633,7 @@
       "city": "Montreal",
       "country": "Canada",
       "clubs": 3,
-      "players": 73,
+      "players": 142,
       "recreational": 1,
       "competitive": 2,
       "elite": 0
@@ -644,7 +644,7 @@
       "city": "Nashville",
       "country": "United States",
       "clubs": 3,
-      "players": 75,
+      "players": 147,
       "recreational": 1,
       "competitive": 2,
       "elite": 0
@@ -655,7 +655,7 @@
       "city": "New Orleans",
       "country": "United States",
       "clubs": 2,
-      "players": 59,
+      "players": 114,
       "recreational": 0,
       "competitive": 0,
       "elite": 2
@@ -666,7 +666,7 @@
       "city": "New York",
       "country": "United States",
       "clubs": 2,
-      "players": 44,
+      "players": 85,
       "recreational": 0,
       "competitive": 2,
       "elite": 0
@@ -677,7 +677,7 @@
       "city": "Oklahoma City",
       "country": "United States",
       "clubs": 2,
-      "players": 51,
+      "players": 100,
       "recreational": 1,
       "competitive": 0,
       "elite": 1
@@ -688,7 +688,7 @@
       "city": "Orlando",
       "country": "United States",
       "clubs": 4,
-      "players": 93,
+      "players": 182,
       "recreational": 3,
       "competitive": 1,
       "elite": 0
@@ -699,7 +699,7 @@
       "city": "Ottawa",
       "country": "Canada",
       "clubs": 3,
-      "players": 74,
+      "players": 144,
       "recreational": 1,
       "competitive": 1,
       "elite": 1
@@ -710,7 +710,7 @@
       "city": "Philadelphia",
       "country": "United States",
       "clubs": 2,
-      "players": 45,
+      "players": 88,
       "recreational": 0,
       "competitive": 2,
       "elite": 0
@@ -721,7 +721,7 @@
       "city": "Phoenix",
       "country": "United States",
       "clubs": 4,
-      "players": 77,
+      "players": 150,
       "recreational": 4,
       "competitive": 0,
       "elite": 0
@@ -732,7 +732,7 @@
       "city": "Pittsburgh",
       "country": "United States",
       "clubs": 2,
-      "players": 51,
+      "players": 99,
       "recreational": 1,
       "competitive": 0,
       "elite": 1
@@ -743,7 +743,7 @@
       "city": "Portland",
       "country": "United States",
       "clubs": 4,
-      "players": 90,
+      "players": 176,
       "recreational": 2,
       "competitive": 2,
       "elite": 0
@@ -754,7 +754,7 @@
       "city": "Salt Lake City",
       "country": "United States",
       "clubs": 2,
-      "players": 65,
+      "players": 126,
       "recreational": 0,
       "competitive": 0,
       "elite": 2
@@ -765,7 +765,7 @@
       "city": "San Antonio",
       "country": "United States",
       "clubs": 2,
-      "players": 40,
+      "players": 78,
       "recreational": 1,
       "competitive": 1,
       "elite": 0
@@ -776,7 +776,7 @@
       "city": "San Diego",
       "country": "United States",
       "clubs": 3,
-      "players": 59,
+      "players": 115,
       "recreational": 2,
       "competitive": 1,
       "elite": 0
@@ -787,7 +787,7 @@
       "city": "San Francisco",
       "country": "United States",
       "clubs": 4,
-      "players": 93,
+      "players": 181,
       "recreational": 1,
       "competitive": 2,
       "elite": 1
@@ -798,7 +798,7 @@
       "city": "Seattle",
       "country": "United States",
       "clubs": 3,
-      "players": 84,
+      "players": 164,
       "recreational": 1,
       "competitive": 1,
       "elite": 1
@@ -809,7 +809,7 @@
       "city": "St. Louis",
       "country": "United States",
       "clubs": 4,
-      "players": 107,
+      "players": 207,
       "recreational": 1,
       "competitive": 1,
       "elite": 2
@@ -820,7 +820,7 @@
       "city": "Toronto",
       "country": "Canada",
       "clubs": 3,
-      "players": 74,
+      "players": 144,
       "recreational": 1,
       "competitive": 2,
       "elite": 0
@@ -831,7 +831,7 @@
       "city": "Vancouver",
       "country": "Canada",
       "clubs": 2,
-      "players": 44,
+      "players": 86,
       "recreational": 2,
       "competitive": 0,
       "elite": 0
@@ -842,7 +842,7 @@
       "city": "Washington",
       "country": "United States",
       "clubs": 2,
-      "players": 50,
+      "players": 98,
       "recreational": 1,
       "competitive": 1,
       "elite": 0

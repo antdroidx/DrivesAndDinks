@@ -82,7 +82,7 @@ Work:
 Exit condition:
 
 - The team can identify one or two remaining match feel issues with reproducible evidence.
-- Browser and phone measurements exist for the current 5,113-athlete world.
+- Browser and phone measurements exist for the current 10,000-athlete world.
 - No correctness or persistence blocker remains in the current loop.
 
 ---

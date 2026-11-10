@@ -12,6 +12,15 @@ import {FORMATS,ratingInFormat} from './rating.js';
 import {attributeAgeFactor,createDevelopmentProfile} from './age.js';
 import {trainingResponse,potentialForStartAge} from './career-lifecycle.js';
 
+// The roadmap starts with a 10,000-player world. Each region receives a
+// stable share based on its playable geography; the exact split remains
+// configurable for the 25k and 50k scaling benchmarks.
+export const WORLD_POPULATION_TARGET=10000;
+export const REGION_POPULATION_TARGETS=Object.freeze({
+  'north-america':5680,
+  asia:4320
+});
+
 export const CLUB_TIERS=Object.freeze([
   {id:'recreational',label:'Recreational',skill:52,weight:.48},
   {id:'competitive',label:'Competitive',skill:63,weight:.37},
@@ -52,7 +61,7 @@ export function clubId(cityId,index){return `${cityId}-${index}`}
 
 // The full club index for one region. Metadata only, so building it is cheap
 // enough to do on every browse.
-export function buildClubIndex(seed,regionId){
+export function buildClubIndex(seed,regionId,{populationTarget=REGION_POPULATION_TARGETS[regionId]??WORLD_POPULATION_TARGET}={}){
   const region=regionById(regionId);
   if(!region)return [];
   const random=seededRandom(mixSeed(seed,`region:${regionId}`));
@@ -66,7 +75,7 @@ export function buildClubIndex(seed,regionId){
         const prefix=pick(CLUB_PREFIXES,random);
         const suffix=pick(CLUB_SUFFIXES,random);
         const tierInfo=CLUB_TIER_BY_ID[tier];
-        const baseMembers=18+Math.floor(random()*9);
+        const memberWeight=(18+Math.floor(random()*9))*(tier==='elite'?1.55:1);
         clubs.push({
           id:clubId(city.id,index),
           name:`${prefix} ${suffix}`,
@@ -81,12 +90,27 @@ export function buildClubIndex(seed,regionId){
           tierLabel:tierInfo.label,
           surface,
           skill:tierInfo.skill,
-          memberCount:tier==='elite'?Math.round(baseMembers*1.55):baseMembers,
+          memberWeight,
           founded:1996+Math.floor(random()*28)
         });
       }
     }
   }
+  // Allocate the regional target proportionally to the generated club sizes
+  // and tiers. Flooring followed by largest-remainder assignment makes the
+  // total exact and deterministic without making every club the same size.
+  const target=Math.max(clubs.length,Math.round(Number(populationTarget)||0));
+  const totalWeight=clubs.reduce((sum,club)=>sum+club.memberWeight,0)||1;
+  const allocations=clubs.map((club,index)=>{
+    const exact=target*club.memberWeight/totalWeight;
+    return {club,index,count:Math.max(1,Math.floor(exact)),fraction:exact-Math.floor(exact)};
+  });
+  let remaining=target-allocations.reduce((sum,entry)=>sum+entry.count,0);
+  for(const entry of [...allocations].sort((a,b)=>(b.fraction-a.fraction)||(a.index-b.index))){
+    if(remaining<=0)break;
+    entry.count++;remaining--;
+  }
+  for(const entry of allocations){entry.club.memberCount=entry.count;delete entry.club.memberWeight}
   return clubs;
 }
 

@@ -29,9 +29,9 @@ These are Node measurements on the current development machine, not mobile or br
 
 | Operation | Current result |
 |---|---:|
-| Generated population | 5,113 athletes |
-| North America build | 2,914 athletes in 13.6 ms |
-| Asia build | 2,199 athletes in 6.4 ms |
+| Generated population | 10,000 athletes |
+| North America build | 5,680 athletes in 102.7 ms |
+| Asia build | 4,320 athletes in 66.9 ms |
 | Weekly world rating simulation | 220 scheduled pairings per format; p50 13.8 ms, p95 19.1 ms |
 | Generate 100 weekly calendars | 3.6 ms |
 | Build 25-player world leaders | 19.1 ms |
@@ -45,7 +45,7 @@ The lightweight generated population is fast enough today. The architectural gap
 
 | ID | Shared-chat idea | Current state | Gap and recommendation | Disposition |
 |---|---|---|---|---|
-| G01 | Start with 10,000 persistent players and allow scaling to 50,000 | 5,113 deterministic athletes across two regions | Make population size configurable and benchmark 10k/25k/50k before choosing a new storage engine. | KEEP |
+| G01 | Start with 10,000 persistent players and allow scaling to 50,000 | 10,000 deterministic athletes across two regions, with configurable regional targets | Launch target is implemented; 25k/50k scaling and target-device evidence remain under G05. | DONE — launch target; scaling tracked by G05 |
 | G02 | SQLite or IndexedDB world database with linked tables | One versioned career JSON in localStorage; population is regenerated from seed; ratings are sparse deltas | Removed from active scope. Continue deterministic generation, sparse rating deltas and versioned JSON saves. | REMOVE — user decision |
 | G03 | Three levels of simulation detail | All regional athletes use the same world-rating process; 660 scheduled matches per week across three formats | Add active, circuit and background detail levels so distant players update less often without losing stable IDs or histories. | KEEP |
 | G04 | Background worker with resumable weekly advancement | advanceWeek runs synchronously and returns one new state object | Removed from active scope. Weekly advancement remains synchronous and returns one complete state transition. | REMOVE — user decision |
