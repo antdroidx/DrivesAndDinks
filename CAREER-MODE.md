@@ -10,7 +10,7 @@ It lives at its own entry point, **`/career-mode/`**. The gameplay prototype at 
 | Entry point | `career-mode/index.html` → `https://antdroidx.github.io/DrivesAndDinks/career-mode/` |
 | Engine modules | `src/career/` |
 | Local run | `npm start` → `http://127.0.0.1:8768/career-mode/` |
-| Current milestone | **Roadmap Phases 1–7 code complete; packaged shells, human playtesting and real-device evidence next** |
+| Current milestone | **Roadmap Phases 1–7 code complete; Windows and Android packages pass emulator smoke tests; human/physical-device release evidence next** |
 | Last updated | 2026-11-09 |
 
 ---

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>DrivesAndDinks</AssemblyName>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3179.45" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\career-mode\**\*" Link="www\career-mode\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\src\**\*" Link="www\src\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\assets\**\*" Link="www\assets\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\build-info.js" Link="www\build-info.js" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\..\manifest.webmanifest" Link="www\manifest.webmanifest" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

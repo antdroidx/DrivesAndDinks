@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>24</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationId>com.drivesanddinks.career</ApplicationId>
+    <ApplicationVersion>1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <TrimMode>partial</TrimMode>
+  </PropertyGroup>
+  <ItemGroup>
+    <AndroidAsset Include="..\..\career-mode\**\*" Link="Assets\www\career-mode\%(RecursiveDir)%(Filename)%(Extension)" />
+    <AndroidAsset Include="..\..\src\**\*" Link="Assets\www\src\%(RecursiveDir)%(Filename)%(Extension)" />
+    <AndroidAsset Include="..\..\assets\**\*" Link="Assets\www\assets\%(RecursiveDir)%(Filename)%(Extension)" />
+    <AndroidAsset Include="..\..\build-info.js" Link="Assets\www\build-info.js" />
+    <AndroidAsset Include="..\..\manifest.webmanifest" Link="Assets\www\manifest.webmanifest" />
+  </ItemGroup>
+</Project>

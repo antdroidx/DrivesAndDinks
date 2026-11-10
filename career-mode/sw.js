@@ -10,13 +10,13 @@
 // a stale precache entry, while a device with no network still opens the
 // game from the cache.
 
-const CACHE='drives-dinks-career-v7';
+const CACHE='drives-dinks-career-v8';
 const PRECACHE=[
   './',
   './index.html',
   './career.css',
   '../build-info.js',
-  '../manifest.webmanifest',
+  './manifest.webmanifest',
   '../src/career/main.js',
   '../src/career/state.js',
   '../src/career/save.js',
@@ -29,7 +29,7 @@ const PRECACHE=[
   '../src/career/club-life.js',
   '../src/career/creation.js',
   '../src/career/directory.js',
-  '../src/career/opponents.js',
+  '../src/career/opponents.js',\n  '../src/career/finance.js',\n  '../src/career/planning.js',\n  '../src/career/injuries.js',\n  '../src/career/equipment.js',\n  '../src/career/cpu-careers.js',\n  '../src/career/career-lifecycle.js',\n  '../src/career/team-league.js',\n  '../src/career/invitations.js',\n  '../src/career/inbox.js',\n  '../src/career/portable-save.js',\n  '../src/career/career-archive.js',
   '../src/career/contracts.js',
   '../src/career/rating.js',
   '../src/career/tour.js',

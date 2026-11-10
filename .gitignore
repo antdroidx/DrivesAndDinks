@@ -9,3 +9,8 @@ dev-*-simulation.json
 engine-*-simulation.json
 engine-roster-results.json
 validation/scale-*.png
+
+# Packaged build outputs
+packaging/**/bin/
+packaging/**/obj/
+packaging/**/artifacts/

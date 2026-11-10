@@ -218,3 +218,7 @@ The three venue plates are contemporary: a blue-hour outdoor sports park, a mode
 The sideline replay no longer rotates the court inside the image plane. It is now the overhead court angle: the camera sits above the side of the court, the length runs across the screen, the width recedes upward and the net stands down the middle of the frame, which is how a real overhead view of a pickleball court reads. The court surface keeps the same speckle texture as the live court, the surround runs to a horizon instead of ending in a hard rectangle, and the framing reserves headroom for the ball's measured ceiling of about seven feet rather than the twenty-four feet the old camera assumed.
 
 The local dev server was also repaired: it had drifted out of serving two modules that `src/main.js` imports, so the game could not load locally at all. Modules and venue plates are now resolved from disk on every request, so a new file never needs the server restarted.
+
+## Native packages
+
+Career mode now has native Android and Windows WebView shells that bundle the complete offline app. Build commands and verification details are in [PACKAGING.md](PACKAGING.md).

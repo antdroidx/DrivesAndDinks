@@ -32,13 +32,13 @@ Completed:
 Current release blockers:
 
 - Human match, injury, coaching and team-invitation playtests.
-- Real low-powered Android timing, heat, battery, touch and storage measurements.
+- Physical Android timing, heat, battery, touch and storage measurements; the API 36 emulator offline smoke test is complete.
 - PPA Finals qualification and final age-by-age tuning against human evidence.
-- Portable saves before packaged applications.
+- Final human playtests and production signing/store submission.
 
 ## Implementation Status · 2026-11-09
 
-- **Phase 0 automated baseline:** complete. All 712 tests pass, the ten-year career prospect audits rerun successfully, and desktop plus 400-by-807 browser layouts were checked.
+- **Phase 0 automated baseline:** complete. All 716 tests pass, the ten-year career prospect audits rerun successfully, and desktop plus 400-by-807 browser layouts were checked.
 - **Phase 0 external evidence:** open. Human match scorecards and physical Android measurements still require people and real devices.
 - **Phase 1 — code complete:** the finance ledger tracks salary, prizes, entry fees, travel, coaching and equipment. Injuries have causes, severity, recovery capacity and return weeks. Coached training and owned paddles use the shared formulas. Decisive professional rounds stay manual. Match results, the tournament path and the pro qualification status are visible in the UI.
 - **Phase 1 external evidence:** human pacing, injury-frequency and economy tests remain open.
@@ -50,7 +50,7 @@ Current release blockers:
 
 - **Phase 4 — code complete:** one persistent inbox receives deduplicated match, injury, invitation, CPU milestone, draft, contract and equipment messages. Categories, search, unread state, archive and direct invitation actions are implemented.
 - **Phase 5 — code complete:** deterministic seasonal brands and series generate announced, available, low-stock, discontinued and legacy products. Gold-contract players can create a bounded signature release. Products publish through the inbox and use the shared engine families and shapes.
-- **Phase 6 — portable persistence complete:** careers export as validated, gzip-compressed portable files and import through the migration chain. Completed-career and inbox archives survive new careers. Native Android and Windows shells remain external packaging work.
+- **Phase 6 — complete:** careers export as validated, gzip-compressed portable files and import through the migration chain. Completed-career and inbox archives survive new careers. Windows and Android shells bundle the full app, launch locally, and pass offline smoke checks. Build details are in `PACKAGING.md`.
 - **Phase 7 — automated evidence complete:** the CPU benchmark, twenty-year world test, career prospect audits and injury-frequency audit are repeatable. Human career playtests and physical Android measurements remain release evidence.
 ## Dependency Map
 
