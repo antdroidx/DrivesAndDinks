@@ -5,7 +5,8 @@
 // costs progress.
 
 import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor} from '../roster.js';
-import {drawPixelCharacter,onCharacterSpritesReady} from '../pixel-character.js';
+import {onCharacterSpritesReady} from '../pixel-character.js';
+import {createAnimeGameRenderer} from '../anime-game.js';
 import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js';
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
 import {
@@ -152,10 +153,11 @@ function drawCareerDraftPreview(){
   const selection=careerDraftSelection(),profile=buildProfile(selection),ctx=canvas.getContext('2d');
   ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(2,0,0,2,0,0);ctx.imageSmoothingEnabled=false;
   ctx.fillStyle='#173039';ctx.fillRect(0,0,150,180);ctx.fillStyle='#355e60';ctx.fillRect(0,142,150,38);ctx.fillStyle='#eff3cf55';ctx.fillRect(0,150,150,2);
-  drawPixelCharacter(ctx,{personalize:true,appearance:profile.appearance,characterId:selection.character,handedness:selection.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:selection.handedness==='left'?-1:1,paddleShape:selection.paddleShape,lighting:'depth'});
+  drawCareerCharacter(ctx,{personalize:true,appearance:profile.appearance,characterId:selection.character,handedness:selection.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:selection.handedness==='left'?-1:1,paddleShape:selection.paddleShape,lighting:'depth',style:'anime',look:'storybook',outfit:selection.outfit});
   canvas.setAttribute('aria-label',`${app.draft.name||'Career player'} appearance preview`);
 }
 
+const drawCareerCharacter=createAnimeGameRenderer();
 onCharacterSpritesReady(()=>{if(!app.career)drawCareerDraftPreview()});
 
 function renderCreate(){
@@ -1266,6 +1268,10 @@ document.addEventListener('change',async event=>{
 });
 
 document.addEventListener('input',event=>{
+  if(event.target.id==='draft-name'){
+    app.draft.name=event.target.value;
+    return;
+  }
   if(event.target.id==='inbox-search'){
     app.inboxFilters.query=event.target.value;render();
     const field=document.getElementById('inbox-search');

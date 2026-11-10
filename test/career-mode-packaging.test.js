@@ -97,6 +97,8 @@ test('Pages publishes career mode beside the prototype and the dev mirror',()=>{
 test('career setup, loadout and history expose complete player information',()=>{
   const careerMain=read('src/career/main.js'),css=read('career-mode/career.css');
   assert.match(careerMain,/career-player-preview/);
+  assert.match(careerMain,/createAnimeGameRenderer/);
+  assert.doesNotMatch(careerMain,/drawPixelCharacter/);
   assert.match(careerMain,/draft-look-outfit/);
   assert.match(careerMain,/data-loadout-paddle/);
   assert.match(careerMain,/equipmentStatRows/);
@@ -116,6 +118,13 @@ test('career matches enter through a complete matchup screen and return through 
   assert.match(gameMain,/Career match complete/);
   assert.match(gameMain,/RETURN TO CAREER →/);
 
+});
+
+test('career draft selections preserve the typed player name',()=>{
+  const main=read('src/career/main.js');
+  assert.match(main,/event\.target\.id==='draft-name'/);
+  assert.match(main,/app\.draft\.name=event\.target\.value/);
+  assert.match(main,/value="\$\{escapeHtml\(app\.draft\.name\)\}"/);
 });
 
 test('standings format tabs submit valid format ids',()=>{
