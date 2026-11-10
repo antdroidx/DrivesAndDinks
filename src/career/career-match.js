@@ -68,6 +68,7 @@ function matchupFor({state,tournament,match}){
     return {
       lineup:[player,partner,opponents[0],opponents[1]],
       playerId:0,
+      playerTeamName:playerTeam.name,
       athleteIds:['player',playerTeam.members[1]?.id??null,opponentTeam.members[0]?.id??null,opponentTeam.members[1]?.id??null],
       format:'doubles',
       playerRating:state.athlete.formats[tournament.format]??0,
@@ -84,6 +85,7 @@ function matchupFor({state,tournament,match}){
   return {
     lineup:[player,opponent],
     playerId:0,
+    playerTeamName:playerTeam.name,
     athleteIds:['player',opponentTeam.members[0]?.id??null],
     format:'singles',
     playerRating:state.athlete.formats[tournament.format]??0,
@@ -107,6 +109,7 @@ function pendingFor({state,tournament}){
   if(!matchup)return null;
   return {
     eventId:tournament.eventId,
+    eventLabel:EVENT_BY_ID[tournament.eventId]?.label??tournament.label,
     optionId:tournament.optionId,
     format:tournament.format,
     divisionId:tournament.divisionId,
@@ -492,6 +495,7 @@ function finishTournament(state,tournament){
     key:`${state.week}:${tournament.eventId}:${tournament.optionId}:${tournament.format}`,
     week:state.week,
     eventId:tournament.eventId,
+    eventLabel:EVENT_BY_ID[tournament.eventId]?.label??tournament.label,
     optionId:tournament.optionId,
     label:tournament.label,
     type,

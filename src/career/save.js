@@ -19,7 +19,7 @@ import {createTeamCareer,validateTeamCareer} from './team-league.js';
 import {emptyInvitations,validateInvitations} from './invitations.js';
 import {emptyInbox,validateInbox} from './inbox.js';
 
-export const CAREER_SAVE_VERSION=21;
+export const CAREER_SAVE_VERSION=22;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -29,6 +29,29 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v22 added the full on-court character profile chosen at career creation.
+  21:state=>{
+    const athlete=state.athlete??{},look=athlete.appearance??{};
+    return {
+      ...state,
+      athlete:{
+        ...athlete,
+        appearance:{
+          handedness:look.handedness??athlete.handedness??'right',
+          shirtColor:look.shirtColor??athlete.shirtColor??'green',
+          paddleColor:look.paddleColor??athlete.paddleColor??'mint',
+          highlightColor:look.highlightColor??athlete.highlightColor??'yellow',
+          hairStyle:look.hairStyle??athlete.hairStyle??'design',
+          hairColor:look.hairColor??athlete.hairColor??'brown',
+          skinColor:look.skinColor??athlete.skinColor??'medium',
+          headwear:look.headwear??athlete.headwear??'none',
+          eyewear:look.eyewear??athlete.eyewear??'none',
+          outfit:look.outfit??athlete.outfit??'performance',
+          court:look.court??athlete.court??'blue-gray'
+        }
+      }
+    };
+  },
   // v21 added the seasonal equipment catalog and signature releases.
   20:state=>({
     ...state,
@@ -322,6 +345,7 @@ export function validateCareer(state){
   if(!Number.isFinite(athlete.weight)||athlete.weight<40||athlete.weight>140)return {ok:false,reason:'Athlete weight is invalid'};
   if(typeof athlete.experience!=='string')return {ok:false,reason:'Starting experience is invalid'};
   if(typeof athlete.startingTrait!=='string')return {ok:false,reason:'Starting trait is invalid'};
+  if(athlete.appearance!=null&&typeof athlete.appearance!=='object')return {ok:false,reason:'Character appearance is invalid'};
   if(typeof state.retired!=='boolean')return {ok:false,reason:'Retirement state is invalid'};
   if(state.allTimeBoard!=null&&!Array.isArray(state.allTimeBoard))return {ok:false,reason:'All-time board is invalid'};
   return {ok:true};

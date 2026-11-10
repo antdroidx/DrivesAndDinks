@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer,currentEvents,advanceWeek} from '../src/career/state.js';
 import {startCareerMatch,quickSimCareerMatch} from '../src/career/career-match.js';
 import {syncInbox,inboxMessages,unreadCount,markMessageRead,archiveMessage} from '../src/career/inbox.js';
-import {generateSeasonCatalog,purchaseEquipment,equipPaddle,equipmentSelection,createSignaturePaddle} from '../src/career/equipment.js';
+import {generateSeasonCatalog,purchaseEquipment,equipPaddle,equipmentSelection,createSignaturePaddle,equipmentStats,equipmentCatalog} from '../src/career/equipment.js';
 import {careerProfile} from '../src/career/matchmaking.js';
 import {migrateCareer,CAREER_SAVE_VERSION} from '../src/career/save.js';
 import {exportCareerPortable,importCareerPortable} from '../src/career/portable-save.js';
@@ -50,6 +50,17 @@ test('seasonal catalog is deterministic and rotates release status',()=>{
   const released=generateSeasonCatalog(4242,15);
   assert.ok(released.some(item=>item.status==='available'||item.status==='low-stock'));
   assert.equal(new Set(released.map(item=>item.id)).size,4);
+});
+
+test('seasonal paddles have unique brand-specific names and readable stats',()=>{
+  const seasons=[...generateSeasonCatalog(4242,0),...generateSeasonCatalog(4242,52),...generateSeasonCatalog(4242,104)];
+  assert.equal(new Set(seasons.map(item=>item.label)).size,seasons.length);
+  for(const brand of new Set(seasons.map(item=>item.brand)))assert.ok(seasons.filter(item=>item.brand===brand).every(item=>item.label.startsWith(brand+' ')));
+  const power=seasons.find(item=>item.family==='power'),control=seasons.find(item=>item.family==='control');
+  assert.ok(power&&control);
+  assert.ok(equipmentStats(power).power>equipmentStats(control).power);
+  assert.ok(equipmentStats(control).control>equipmentStats(power).control);
+  for(const item of seasons)for(const value of Object.values(equipmentStats(item)))assert.ok(value>=35&&value<=95);
 });
 
 test('seasonal paddles can be purchased, equipped and remain engine-bounded',()=>{

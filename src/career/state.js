@@ -65,7 +65,7 @@ export function startingCityId(regionId,seed){
   return pool[Math.floor(random()*pool.length)].id;
 }
 
-function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,height,weight,experience,trait}){
+function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,height,weight,experience,trait,appearance={}}){
   const archetype=CHARACTERS.find(character=>character.id===archetypeId)??CHARACTERS[0];
   const random=seededRandom(mixSeed(seed,`player:${regionId}:${archetype.id}`));
   const identity=generateIdentity({gender,random});
@@ -97,13 +97,35 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,heig
   const average=skillAverage(ratings);
   const firstRating=clamp(Math.round((experienceOption.rating+potentialRatingBonus*.35)*(resolvedAge<25?developmentAgeFactor(resolvedAge):1)*1000)/1000,2,8);
   const peakFormats=Object.fromEntries(FORMATS.map(format=>[format,clamp(experienceOption.rating+potentialRatingBonus,2,8)]));
+  const generatedHandedness=random()<.13?'left':'right';
+  const look={
+    handedness:['left','right'].includes(appearance.handedness)?appearance.handedness:generatedHandedness,
+    shirtColor:appearance.shirtColor??identity.shirtColor,
+    paddleColor:appearance.paddleColor??identity.paddleColor,
+    highlightColor:appearance.highlightColor??identity.highlightColor,
+    hairStyle:appearance.hairStyle??'design',
+    hairColor:appearance.hairColor??identity.hairColor,
+    skinColor:appearance.skinColor??identity.skinColor,
+    headwear:appearance.headwear??'none',
+    eyewear:appearance.eyewear??'none',
+    outfit:appearance.outfit??'performance',
+    court:appearance.court??'blue-gray'
+  };
   return {
     id:`player-${seed}`,
     name:resolvedName,
     citizenship:citizenshipFor(regionId,{country:city?.country},random),
-    skinColor:identity.skinColor,
-    hairColor:identity.hairColor,
-    shirtColor:identity.shirtColor,
+    skinColor:look.skinColor,
+    hairColor:look.hairColor,
+    shirtColor:look.shirtColor,
+    paddleColor:look.paddleColor,
+    highlightColor:look.highlightColor,
+    hairStyle:look.hairStyle,
+    headwear:look.headwear,
+    eyewear:look.eyewear,
+    outfit:look.outfit,
+    court:look.court,
+    appearance:{...look},
     gender:gender==='female'?'female':'male',
     age:resolvedAge,
     startAge:resolvedAge,
@@ -120,7 +142,7 @@ function buildPlayerAthlete({name,gender,archetypeId,regionId,seed,city,age,heig
     maintenance:Object.fromEntries(RATING_KEYS.map(key=>[key,0])),
     peakRatings,
     peakFormats,
-    handedness:random()<.13?'left':'right',
+    handedness:look.handedness,
     archetypeId:archetype.id,
     archetypeLabel:archetype.style,
     ratings,
@@ -151,7 +173,8 @@ export function createCareer(options={}){
     height:options.height,
     weight:options.weight,
     experience:options.experience,
-    trait:options.trait
+    trait:options.trait,
+    appearance:options.appearance
   });
   // The rival is the player nearest to you on the board when you start.
   const rival=findRival({

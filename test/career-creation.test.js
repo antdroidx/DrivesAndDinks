@@ -33,6 +33,14 @@ test('height and weight convert between imperial input and metric simulation val
   assert.equal(feetInchesToCentimeters(7,0,'male'),210);
 });
 
+test('career creation stores the chosen on-court character profile',()=>{
+  const state=base({appearance:{handedness:'left',shirtColor:'red',paddleColor:'blue',highlightColor:'yellow',hairStyle:'design',hairColor:'black',skinColor:'deep',headwear:'none',eyewear:'none',outfit:'polo',court:'blue-gray'}});
+  assert.equal(state.athlete.handedness,'left');
+  assert.equal(state.athlete.shirtColor,'red');
+  assert.equal(state.athlete.appearance.outfit,'polo');
+  assert.equal(state.athlete.appearance.skinColor,'deep');
+});
+
 test('one starting trait adds a focused bonus',()=>{
   const plain=base({trait:'none'});
   const quick=base({trait:'quick_start'});

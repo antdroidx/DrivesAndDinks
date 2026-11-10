@@ -96,8 +96,10 @@ const matchIntroDialog=document.querySelector('#match-intro'),matchIntroTeamsRoo
 const sideSwitchDialog=document.querySelector('#side-switch-dialog'),sideSwitchContinue=document.querySelector('#side-switch-continue');
 function showSideSwitchNotice(){if(sideSwitchDialog.open)return;game.setPaused(true);sideSwitchDialog.showModal()}
 sideSwitchContinue.onclick=()=>{sideSwitchDialog.close();game.setPaused(false);syncPauseButton()};sideSwitchDialog.oncancel=event=>event.preventDefault();
-function showMatchIntro(players,onBegin){
+function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH-UP',action='START MATCH →',entry=null}={}){
  matchIntroTeamsRoot.replaceChildren();
+ const introKicker=matchIntroDialog.querySelector('.intro-heading small'),introTitle=matchIntroDialog.querySelector('#match-intro-title');if(introKicker)introKicker.textContent=kicker;if(introTitle)introTitle.textContent=title;beginMatchButton.textContent=action;
+ let entrySummary=matchIntroDialog.querySelector('#match-entry-summary');if(!entrySummary){entrySummary=document.createElement('div');entrySummary.id='match-entry-summary';entrySummary.className='match-entry-summary';matchIntroDialog.querySelector('.intro-heading').after(entrySummary)}entrySummary.hidden=!entry;entrySummary.replaceChildren();if(entry){for(const line of entry){const row=document.createElement('p');row.textContent=line;entrySummary.append(row)}}
  const introTeams=matchIntroTeams(players);for(const team of introTeams){
   const section=document.createElement('section');section.className='intro-team';section.dataset.team=String(team.team);
   const heading=document.createElement('h3');heading.textContent=team.label;section.append(heading);
@@ -431,14 +433,18 @@ startScreen=setupStartScreen({onPlay:()=>selectionUI.open(),version:'0.1.0',buil
 
 // A career match arrives from the career mode with its field already drawn
 // and its lineup already built from the career athlete's own attributes.
-const careerMatch=readPendingMatch()&&new URLSearchParams(location.search).has(CAREER_MATCH_PARAM)?readPendingMatch():null;
+const careerQuery=new URLSearchParams(location.search),careerMatch=readPendingMatch()&&careerQuery.has(CAREER_MATCH_PARAM)?readPendingMatch():null;
+const careerReturnPath=careerQuery.get('career-return')==='career'?(location.pathname.startsWith('/dev/')?'../career/':'./career/'):'./career-mode/';
+let careerResultCommitted=false;
 if(careerMatch){
+  startScreen?.close();
   const screen=document.querySelector('#game-start');
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
   game.configure({format:careerMatch.matchup.format,showNameTags:true,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
   game.mode='play';
   game.setDifficulty(careerMatch.difficulty??'normal');
+  game.setPaused(true);
   for(const id of ['setup-button','difficulty','mode','restart','restart-top']){
     const control=document.getElementById(id);
     if(control){control.hidden=true;control.disabled=true;}
@@ -446,6 +452,18 @@ if(careerMatch){
   refreshVenue();
   const scoringLabel=careerMatch.rules?`First to ${careerMatch.rules.targetScore}, ${careerMatch.rules.scoring==='rally'?'rally scoring':'side-out'}, win by ${careerMatch.rules.winBy}`:'First to 11, side-out, win by 2';
   document.querySelector('#active-loadout').textContent='CAREER MATCH \u00b7 '+careerMatch.bracket+' '+careerMatch.format+' \u00b7 '+scoringLabel;
+  const teamSize=careerMatch.matchup.format==='singles'?1:2;
+  const yourPlayers=careerMatch.matchup.lineup.slice(0,teamSize).map(player=>player.name).join(' & ');
+  const opponentPlayers=careerMatch.matchup.lineup.slice(teamSize,teamSize*2).map(player=>player.name).join(' & ');
+  const yourTeamName=careerMatch.matchup.playerTeamName??'Your entry';
+  const opponentTeamName=careerMatch.matchup.team??'Opponent entry';
+  const entry=[
+    `${careerMatch.eventLabel??careerMatch.eventId??'Career event'} · ${careerMatch.bracket??'Open draw'} · ${careerMatch.format} · Round ${Number(careerMatch.round??0)+1}`,
+    yourTeamName===yourPlayers?`Your team: ${yourPlayers}`:`Your team: ${yourTeamName} — ${yourPlayers}`,
+    opponentTeamName===opponentPlayers?`Opponent: ${opponentPlayers}`:`Opponent: ${opponentTeamName} — ${opponentPlayers}`,
+    scoringLabel
+  ];
+  showMatchIntro(game.players,()=>{game.setPaused(false);beginConfiguredMatch()},{kicker:'CAREER MATCH',title:'THE MATCH-UP',action:'ENTER MATCH →',entry});
   last=0;acc=0;
 }
 
@@ -478,9 +496,18 @@ const resultDialog=document.querySelector('#match-result');
 
 function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialog.open&&!selectionUI?.isOpen()){
   if(careerMatch){
-    if(writeMatchResult(game.matchReport(),careerMatch.matchId)){
-      clearPendingMatch();resultDialog.close();location.href='./career-mode/';
+    if(!careerResultCommitted){
+      careerResultCommitted=true;
+      if(writeMatchResult(game.matchReport(),careerMatch.matchId))clearPendingMatch();
     }
+    resultDialog.querySelector('h2').textContent='Career match complete';
+    document.querySelector('#match-winner').textContent=game.score.winner===0?'Your team wins!':'Opponents win!';
+    document.querySelector('#match-score').textContent=`Your team ${game.score.points[0]} – ${game.score.points[1]} ${careerMatch.matchup.team??'Opponents'}`;
+    const contacts=game.stats.teams.reduce((n,t)=>n+t.hits,0),mishits=game.stats.teams.reduce((n,t)=>n+t.mishits,0);
+    document.querySelector('#match-analysis').textContent=`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Return to career to apply the tournament result, rating change and recovery.`;
+    document.querySelector('#rematch').hidden=true;
+    document.querySelector('#return-selection').textContent='RETURN TO CAREER →';
+    resultDialog.showModal();
     return;
   }
  const practice=game.practice;resultDialog.querySelector('h2').textContent=practice?'Practice complete':'Match ended';document.querySelector('#rematch').textContent=practice?'REPEAT DRILL':'REMATCH';
@@ -492,9 +519,9 @@ function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialo
 
 resultDialog.addEventListener('cancel',e=>e.preventDefault());
 
-document.querySelector('#rematch').onclick=()=>{resultDialog.close();if(game.practice){const {id,seed}=game.practice;game.startPractice(id,seed)}else game.reset();last=0;acc=0;setShot(game.practice?(game.practice.step.shot==='lob'?'lob':game.practice.step.shot==='drive'?'attack':'soft'):'attack');syncPauseButton()};
+document.querySelector('#rematch').onclick=()=>{if(careerMatch)return;resultDialog.close();if(game.practice){const {id,seed}=game.practice;game.startPractice(id,seed)}else game.reset();last=0;acc=0;setShot(game.practice?(game.practice.step.shot==='lob'?'lob':game.practice.step.shot==='drive'?'attack':'soft'):'attack');syncPauseButton()};
 
-document.querySelector('#return-selection').onclick=()=>{resultDialog.close();selectionUI.open()};
+document.querySelector('#return-selection').onclick=()=>{if(careerMatch){location.href=careerReturnPath;return}document.querySelector('#rematch').hidden=false;document.querySelector('#return-selection').textContent='PLAYER SELECTION';resultDialog.close();selectionUI.open()};
 
 const lesson=document.createElement("p");lesson.className="control-lesson";lesson.textContent="Movement is automatic | ← → aim · ↑ ↓ depth · Shift fine control | 1 Attack, 2 Soft, 3 Lob select AND hit | Space repeats shot | White ring = hit now";canvas.insertAdjacentElement("afterend",lesson);
 

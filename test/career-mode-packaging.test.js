@@ -94,6 +94,30 @@ test('Pages publishes career mode beside the prototype and the dev mirror',()=>{
   assert.match(workflow,/cp -R _prototype\/src _prototype\/assets _site\/prototype\//);
 });
 
+test('career setup, loadout and history expose complete player information',()=>{
+  const careerMain=read('src/career/main.js'),css=read('career-mode/career.css');
+  assert.match(careerMain,/career-player-preview/);
+  assert.match(careerMain,/draft-look-outfit/);
+  assert.match(careerMain,/data-loadout-paddle/);
+  assert.match(careerMain,/equipmentStatRows/);
+  assert.match(careerMain,/tournament-result/);
+  assert.match(careerMain,/LOAD EXISTING CAREER FILE/);
+  assert.match(careerMain,/data-action="save-career"/);
+  assert.match(css,/grid-template-columns:38px 22px minmax\(0,1fr\) auto/);
+});
+
+test('career matches enter through a complete matchup screen and return through a result screen',()=>{
+  const gameMain=read('src/main.js');
+  assert.match(gameMain,/showMatchIntro\(game\.players,\(\)=>\{game\.setPaused\(false\);beginConfiguredMatch\(\)\}/);
+  assert.match(gameMain,/careerMatch\.matchup\.playerTeamName/);
+  assert.match(gameMain,/careerMatch\.matchup\.team/);
+  assert.match(gameMain,/Your team: \$\{yourTeamName\}/);
+  assert.match(gameMain,/Opponent: \$\{opponentTeamName\}/);
+  assert.match(gameMain,/Career match complete/);
+  assert.match(gameMain,/RETURN TO CAREER →/);
+
+});
+
 test('standings format tabs submit valid format ids',()=>{
   const main=read('src/career/main.js');
   assert.ok(main.includes('data-format="${entry}"'),'format tabs must use the string id from FORMATS');
@@ -103,9 +127,10 @@ test('standings format tabs submit valid format ids',()=>{
 
 test('the career service worker precaches the app shell and the shared engine',()=>{
   const sw=read('career-mode/sw.js');
-  for(const entry of ['./index.html','./career.css','../src/career/main.js','../src/roster.js','../src/competition.js','../src/core.js']){
+  for(const entry of ['./index.html','./career.css','../src/career/main.js','../src/roster.js','../src/pixel-character.js','../src/competition.js','../src/core.js']){
     assert.ok(sw.includes(entry),`service worker must precache ${entry}`);
   }
+  assert.doesNotThrow(()=>new Function(sw));
 });
 
 test('the career entry point registers the service worker for offline use',()=>{
