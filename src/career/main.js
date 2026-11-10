@@ -68,6 +68,36 @@ const nav=document.getElementById('career-nav');
 const statusStrip=document.getElementById('career-status');
 const toastEl=document.getElementById('career-toast');
 const resetButton=document.getElementById('career-reset');
+const fullscreenButton=document.getElementById('career-fullscreen');
+const fullscreenSupported=Boolean(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+function syncCareerFullscreen(){
+  if(!fullscreenButton)return;
+  const active=Boolean(document.fullscreenElement||document.webkitFullscreenElement);
+  fullscreenButton.textContent=`FULL SCREEN: ${active?'ON':'OFF'}`;
+  fullscreenButton.setAttribute('aria-pressed',String(active));
+  fullscreenButton.disabled=!fullscreenSupported;
+  fullscreenButton.title=fullscreenSupported?'Toggle full screen':null;
+}
+if(fullscreenButton){
+  fullscreenButton.addEventListener('click',async()=>{
+    try{
+      if(document.fullscreenElement||document.webkitFullscreenElement){
+        const exit=document.exitFullscreen??document.webkitExitFullscreen;
+        if(exit)await exit.call(document);
+      }else{
+        const request=document.documentElement.requestFullscreen??document.documentElement.webkitRequestFullscreen;
+        if(!request)throw new Error('Fullscreen is unavailable');
+        await request.call(document.documentElement,{navigationUI:'hide'});
+      }
+    }catch{
+      toast('Full screen is unavailable in this browser.',true);
+    }
+    syncCareerFullscreen();
+  });
+  document.addEventListener('fullscreenchange',syncCareerFullscreen);
+  document.addEventListener('webkitfullscreenchange',syncCareerFullscreen);
+  syncCareerFullscreen();
+}
 
 const escapeHtml=(value)=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const money=value=>{const amount=Math.round(Number(value)||0);return (amount<0?'-$':'$')+Math.abs(amount).toLocaleString('en-US')};

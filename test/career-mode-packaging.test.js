@@ -47,6 +47,14 @@ test('career setup presents height and weight in American units',()=>{
   assert.match(css,/measurement-pair/);
 });
 
+test('both career entry points expose a full-screen control',()=>{
+  for(const page of ['career/index.html','career-mode/index.html'])assert.match(read(page),/id="career-fullscreen"/);
+  const main=read('src/career/main.js'),css=read('career/career.css');
+  assert.match(main,/requestFullscreen\?\?document\.documentElement\.webkitRequestFullscreen/);
+  assert.match(main,/syncCareerFullscreen/);
+  assert.match(main,/FULL SCREEN: \$\{active\?'ON':'OFF'\}/);
+  assert.match(css,/\.header-right\{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap/);
+});
 test('the career entry point loads its own stylesheet',()=>{
   const page=read('career-mode/index.html');
   const css=read('career-mode/career.css');
