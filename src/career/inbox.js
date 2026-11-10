@@ -4,9 +4,9 @@
 // message has a stable key, so the same match, injury or invitation cannot
 // appear twice after a reload or an overlapping weekly update.
 
-import {activeInjuries} from './injuries.js?v=200';
-import {pendingInvitations} from './invitations.js?v=200';
-import {generateSeasonCatalog} from './equipment.js?v=200';
+import {activeInjuries} from './injuries.js?v=202';
+import {pendingInvitations} from './invitations.js?v=202';
+import {generateSeasonCatalog} from './equipment.js?v=202';
 
 export const INBOX_VERSION=1;
 export const INBOX_LIMIT=160;

@@ -4,7 +4,7 @@
 // Energy and money stay separate, and the match estimate is based on the
 // competition shape rather than a hidden future result.
 
-import {eventFinancialCost,moneyBalance} from './finance.js?v=200';
+import {eventFinancialCost,moneyBalance} from './finance.js?v=202';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const round=value=>Math.round(value);
