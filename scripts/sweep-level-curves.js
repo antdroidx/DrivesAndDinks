@@ -29,7 +29,7 @@ function lineupFor(baseline,random){
 }
 const rows=[];
 for(const candidate of candidates.filter(entry=>!wanted||wanted.has(entry.id)))for(const format of ['singles','doubles'])for(const [low,high] of pairings){
-  const summary={candidate:candidate.id,values:candidate.values,format,levels:[low,high],gap:candidate.values[high]-candidate.values[low],games,completed:0,higherWins:0,lowerWins:0,higherPoints:0,lowerPoints:0};
+  const summary={candidate:candidate.id,values:candidate.values,format,levels:[low,high],gap:candidate.values[high]-candidate.values[low],games,completed:0,higherWins:0,lowerWins:0,higherPoints:0,lowerPoints:0,lowerShutouts:0,lowerAtMostTwo:0,lowerScoreHistogram:{}};
   for(let seed=1;seed<=games;seed++){
     const rng=seededRandom(seed),lower=lineupFor(candidate.values[low],rng),higher=lineupFor(candidate.values[high],rng);
     const highTeam=((seed-1)%2)===0?1:0,lowTeam=1-highTeam;
@@ -41,6 +41,7 @@ for(const candidate of candidates.filter(entry=>!wanted||wanted.has(entry.id)))f
     summary.completed++;
     if(g.score.winner===highTeam)summary.higherWins++;else summary.lowerWins++;
     summary.higherPoints+=g.score.points[highTeam];summary.lowerPoints+=g.score.points[lowTeam];
+    const lowerScore=g.score.points[lowTeam];summary.lowerShutouts+=lowerScore===0?1:0;summary.lowerAtMostTwo+=lowerScore<=2?1:0;summary.lowerScoreHistogram[lowerScore]=(summary.lowerScoreHistogram[lowerScore]??0)+1;
   }
   summary.higherWinRate=summary.higherWins/summary.completed;
   rows.push(summary);console.log(JSON.stringify(summary));

@@ -1,6 +1,6 @@
 # Gameplay Engine Balance Report
 
-Generated: 2026-11-10T03:16:27.459Z
+Generated: 2026-11-10T05:32:25.505Z
 
 ## Method
 
@@ -58,19 +58,21 @@ Every higher level won all 20 cross-level matches in both formats. Several lower
 
 - **6–10 point adjacent gaps** still produce 90–100% win rates in most adjacent matchups.
 - **2 point gaps** still produce a mostly decisive advantage: about 70–92.5% across the 40-game confirmation.
-- **1 point gaps** produce the most usable adjacent range: 50–72.5%, averaging 60%.
-- A two-level gap in the one-point curve ranges from 55% to 95%, while a three-level gap is 95–100%.
+- **1 point gaps** average 60% and are suitable when adjacent labels represent only a quarter DUPR point.
+- **2 point gaps** average 77.9% in the 40-game confirmation and leave the lower side about 6.1 points, making them the best fit for half-DUPR level steps.
+- A two-level gap in the two-point curve averages 91.3%, close to the decisive full-DUPR target.
 
 ## Verdict
 
 **The gameplay engine itself is stable, but the level curve and rating-to-ability conversion are over-steep.**
 
-The problem is not one level label. Multiple movement, reaction, control and shot abilities scale together, causing differences to compound. A two-point rating gap already changes match outcomes substantially, so the current 15–20 point gaps cannot support competitive cross-level play.
+The problem is not one level label. Multiple movement, reaction, control and shot abilities scale together, causing differences to compound. The current 35 / 55 / 70 / 85 profile values correspond to 1.09–1.45 rating steps under the game's skill conversion, which is full-point-or-wider separation in DUPR terms. That conversion explains the shutout sweep.
 
 ## Recommended direction
 
-1. With the current engine conversion, map the four internal levels to **67 / 68 / 69 / 70** as the safest tested starting point.
-2. If the labels need a wider numeric spread, first reduce compounding in the rating-to-ability conversion rather than stretching the level values.
-3. Target adjacent win rates around 55–70%, two-level gaps around 80–90%, and three-level gaps around 95–100%.
-4. Separate archetype differences from level differences so players remain stylistically distinct instead of every ability scaling together.
-5. Re-run node scripts/validate-levels-mirrored.js 40 --output validation/gameplay-balance-mirrored.json after tuning.
+1. Use **64 / 66 / 68 / 70** as the current best physics curve when adjacent gameplay labels are 0.5 DUPR apart.
+2. Separate the raw physics coordinate from the displayed career rating; the same one-point skill change is not a constant DUPR change.
+3. Target adjacent win rates around 80–85%, a typical 11–5 to 11–7 score, and a full-rating-point gap around 11–2 or 11–3.
+4. Keep controlled match-to-match form variance so the lower side can still reach 5–8 points in a good game, or be nearly shut out in a poor one.
+5. Separate archetype differences from level differences so players remain stylistically distinct instead of every ability scaling together.
+6. Re-run this audit and `npm run audit:dupr` after tuning. See DUPR-CALIBRATION.md for the public anchors, proxy curve and scatter results.

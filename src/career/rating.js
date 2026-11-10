@@ -208,13 +208,15 @@ export const MATCH_TYPES=Object.freeze({
   recreational:{id:'recreational',label:'Recreational',weight:.5}
 });
 
-// A rating gap of one point is worth about this many match points of margin.
-// A 4.5 narrowly beating a 3.0 is a comfortable expectation, which is why a
-// narrow win there is underperformance.
-export const MARGIN_PER_RATING=4.5;
 // A match is expected to sit around 9-9 before the margin is applied.
 export const BASE_POINTS=9;
 export const MAX_POINTS=11;
+// Publicly visible DUPR examples put a 0.5 rating gap near 11-5 and a gap
+// near 1.0 around 11-2. DUPR's production formula is proprietary, so this
+// curve is a transparent gameplay calibration rather than a claim about the
+// exact DUPR calculation. The exponential falloff passes those two anchors
+// and keeps the last points available across a much smaller range.
+export const EXPECTED_SCORE_FALLOFF=2*Math.log(4/3);
 // A single match moves a rating by at most this much, before weighting.
 export const RATING_SCALE=.35;
 // Recent matches matter more. A match from six months ago has less pull.
@@ -228,16 +230,32 @@ export function teamStrength(ratings){
   return values.reduce((sum,value)=>sum+value,0)/values.length;
 }
 
-// The score the system expects before a match. A 4.5 against a 3.0 is expected to
-// be won comfortably; a 3.5 against a 4.0 is expected to be close.
+// The score the system expects before a match, calibrated to the public DUPR
+// score anchors while remaining transparent and reversible.
 export function expectedScore(rating,opponentRating){
   const gap=rating-opponentRating;
-  const margin=clamp(gap*MARGIN_PER_RATING,-MAX_POINTS,MAX_POINTS);
+  const distance=Math.abs(gap);
+  if(distance===0)return {myPoints:BASE_POINTS,opponentPoints:BASE_POINTS,margin:0};
+  // The favourite reaches an 11-point expectation within a quarter point,
+  // while the underdog's expected score falls rapidly. This gives the public
+  // 0.5 gap roughly 11-5 and the near-1.0 gap roughly 11-2.
+  const winner=clamp(BASE_POINTS+2*Math.min(1,distance/.25),BASE_POINTS,MAX_POINTS);
+  const loser=clamp(-7+16*Math.exp(-EXPECTED_SCORE_FALLOFF*distance),1,BASE_POINTS);
+  const margin=gap>0?winner-loser:loser-winner;
   return {
-    myPoints:clamp(BASE_POINTS+margin/2,0,MAX_POINTS),
-    opponentPoints:clamp(BASE_POINTS-margin/2,0,MAX_POINTS),
+    myPoints:gap>0?winner:loser,
+    opponentPoints:gap>0?loser:winner,
     margin
   };
+}
+
+// Invert the expected-score curve when setting target outcomes for level
+// profiles. For example, a target 11-5 match corresponds to a 0.5 rating gap.
+export function ratingGapForExpectedScore(loserPoints){
+  const points=clamp(Number(loserPoints)||BASE_POINTS,1,BASE_POINTS);
+  if(points===BASE_POINTS)return 0;
+  if(points===1)return 1.5;
+  return clamp(-Math.log((points+7)/16)/EXPECTED_SCORE_FALLOFF,0,1.5);
 }
 
 // How the actual result compared with the expectation. Positive is

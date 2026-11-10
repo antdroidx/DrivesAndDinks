@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   RATING_MIN,RATING_MAX,RATING_ELITE,RATING_BANDS,RATING_PRECISION,
   ratingFromSkill,ratingBand,formatRating,skillForRating,reliability,
-  MATCH_TYPES,expectedScore,matchPerformance,updateRating,rateMatch,
+  MATCH_TYPES,expectedScore,ratingGapForExpectedScore,matchPerformance,updateRating,rateMatch,
   teamStrength,MATCH_TYPES as TYPES
 } from '../src/career/rating.js';
 
@@ -57,6 +57,27 @@ test('a rating gap produces an expected margin',()=>{
   assert.equal(even.margin,0);
 });
 
+test('expected scores follow the public half-point and full-point DUPR anchors',()=>{
+  const halfPoint=expectedScore(4,3.5);
+  assert.equal(halfPoint.myPoints,11);
+  assert.ok(Math.abs(halfPoint.opponentPoints-5)<1e-9);
+  const fullPoint=expectedScore(4,3);
+  assert.equal(fullPoint.myPoints,11);
+  assert.ok(Math.abs(fullPoint.opponentPoints-2)<1e-9);
+  const reversal=expectedScore(3,4);
+  assert.ok(reversal.margin<0);
+  assert.equal(reversal.myPoints,fullPoint.opponentPoints);
+  assert.equal(reversal.opponentPoints,fullPoint.myPoints);
+});
+
+test('expected score gaps can be inverted when calibrating gameplay levels',()=>{
+  assert.equal(ratingGapForExpectedScore(9),0);
+  assert.ok(Math.abs(ratingGapForExpectedScore(5)-.5)<1e-9);
+  assert.ok(Math.abs(ratingGapForExpectedScore(2)-1)<1e-9);
+  assert.ok(Math.abs(ratingGapForExpectedScore(7)-.25)<.2);
+  assert.equal(ratingGapForExpectedScore(1),1.5);
+});
+
 test('a narrow win against a much lower rated opponent lowers the rating',()=>{
   // The case rating is asked about most: expected to win comfortably, won narrowly.
   const result=updateRating({rating:4.5,opponentRatings:[3.0],actualMyPoints:11,actualOpponentPoints:8});
@@ -76,9 +97,9 @@ test('winning exactly as expected barely moves the rating',()=>{
 });
 
 test('overperforming is rewarded more than meeting expectations',()=>{
-  const expected=expectedScore(4.5,3.0);
-  const routine=updateRating({rating:4.5,opponentRatings:[3.0],actualMyPoints:Math.round(expected.myPoints),actualOpponentPoints:Math.round(expected.opponentPoints)});
-  const better=updateRating({rating:4.5,opponentRatings:[3.0],actualMyPoints:11,actualOpponentPoints:3});
+  const expected=expectedScore(4.5,4.0);
+  const routine=updateRating({rating:4.5,opponentRatings:[4.0],actualMyPoints:Math.round(expected.myPoints),actualOpponentPoints:Math.round(expected.opponentPoints)});
+  const better=updateRating({rating:4.5,opponentRatings:[4.0],actualMyPoints:11,actualOpponentPoints:2});
   assert.ok(better.delta>routine.delta);
 });
 
@@ -91,7 +112,7 @@ test('the system stays balanced: one side rises and the other falls',()=>{
       {id:'them2',team:'opponent',rating:3.4,matchesPlayed:10}
     ],
     actualMyPoints:11,
-    actualOpponentPoints:7
+    actualOpponentPoints:2
   });
   const mine=rated.players.filter(player=>player.team==='mine');
   const theirs=rated.players.filter(player=>player.team==='opponent');

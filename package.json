@@ -17,9 +17,11 @@
     "audit:career": "node scripts/audit-career-prospects.js",
     "audit:cpu": "node scripts/audit-cpu-careers.js",
     "benchmark:cpu": "node scripts/benchmark-cpu-world.js",
-    "audit:injuries": "node scripts/audit-injuries.js",\n    "audit:career-groups": "node scripts/audit-career-groups.js",\n    "audit:gameplay-levels": "node scripts/audit-gameplay-levels.js",
+    "audit:injuries": "node scripts/audit-injuries.js",
+    "audit:career-groups": "node scripts/audit-career-groups.js",
+    "audit:gameplay-levels": "node scripts/audit-gameplay-levels.js",
     "package:windows": "powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1",
-    "package:android": "powershell -ExecutionPolicy Bypass -File scripts/package-android.ps1"
+    "package:android": "powershell -ExecutionPolicy Bypass -File scripts/package-android.ps1",
+    "audit:dupr": "node scripts/audit-dupr-expectations.js"
   }
 }
-
