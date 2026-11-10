@@ -614,7 +614,7 @@ function eventRow(event,career,gender,active=event.week===career.week){
 }
 
 function profileDraftFor(career=app.career){
-  const athlete=career.athlete,look=athlete.appearance??{};
+  const athlete=career.athlete,look=athlete.appearance??{},equippedHeadwear=career.equipment?.headwear?.equipped?HEADWEAR_CATALOG.find(item=>item.id===career.equipment.headwear.equipped):null;
   return {
     name:athlete.name,archetypeId:athlete.archetypeId,gender:athlete.gender,
     handedness:look.handedness??athlete.handedness??'right',
@@ -624,8 +624,8 @@ function profileDraftFor(career=app.career){
     hairStyle:look.hairStyle??athlete.hairStyle??'design',
     hairColor:look.hairColor??athlete.hairColor??'brown',
     skinColor:look.skinColor??athlete.skinColor??'medium',
-    headwear:look.headwear??athlete.headwear??'none',
-    headwearColor:look.headwearColor??athlete.headwearColor??'yellow',
+    headwear:equippedHeadwear?.headwear??look.headwear??athlete.headwear??'none',
+    headwearColor:equippedHeadwear?.color??look.headwearColor??athlete.headwearColor??'yellow',
     eyewear:look.eyewear??athlete.eyewear??'none',
     outfit:look.outfit??athlete.outfit??'performance',
     court:look.court??athlete.court??'blue-gray',
@@ -638,10 +638,10 @@ function drawCareerProfilePreview(){if(app.profileDraft)drawCareerPreview('caree
 function renderProfile(){
   if(!app.profileDraft)app.profileDraft=profileDraftFor();
   const source=app.profileDraft,hairChoices=[{id:'design',name:'As designed'},...hairStylesFor(source.gender)],height=centimetersToFeetInches(source.height),weight=kilogramsToPounds(source.weight);
-  const head=equippedPaddle(app.career),headwear=app.career.equipment?.headwear?.equipped?HEADWEAR_CATALOG.find(item=>item.id===app.career.equipment.headwear.equipped):null;
+  const head=equippedPaddle(app.career),headwearState=app.career.equipment?.headwear??{owned:[],equipped:null},ownedHeadwear=headwearState.owned.map(id=>HEADWEAR_CATALOG.find(item=>item.id===id)).filter(Boolean),headwear=headwearState.equipped?HEADWEAR_CATALOG.find(item=>item.id===headwearState.equipped):null;
   return `
   <section class="panel">
-    <div class="section-heading"><div><h2>PLAYER PROFILE</h2><p>Change your outfit, appearance and body setup at any time. Paddles and headwear are managed in the Shop.</p></div><button type="button" class="secondary" data-view="shop">OPEN SHOP</button></div>
+    <div class="section-heading"><div><h2>PLAYER PROFILE</h2><p>Change your outfit, appearance, body setup and owned headwear at any time. Buy new headwear styles and colors in the Shop.</p></div><button type="button" class="secondary" data-view="shop">OPEN SHOP</button></div>
     <div class="career-profile-layout profile-screen-layout">
       <div class="career-profile-preview"><canvas id="career-profile-edit-preview" width="300" height="360" aria-label="${escapeHtml(source.name)} appearance preview"></canvas><small>${escapeHtml(CHARACTERS.find(item=>item.id===source.archetypeId)?.style??'Career player')}</small></div>
       <div class="career-profile-controls">
@@ -662,6 +662,7 @@ function renderProfile(){
           <div class="field"><label for="profile-look-eyewear">EYEWEAR</label><select id="profile-look-eyewear">${optionTags(EYEWEAR_OPTIONS,source.eyewear)}</select></div>
         </div>
         <div class="field-row">
+          <div class="field"><label for="profile-headwear">HEADWEAR · OWNED</label><select id="profile-headwear"><option value="none"${!headwear?' selected':''}>No headwear</option>${ownedHeadwear.map(item=>`<option value="${item.id}"${item.id===headwear?.id?' selected':''}>${escapeHtml(item.colorLabel)} ${escapeHtml(item.headwearLabel)}</option>`).join('')}</select><small>${ownedHeadwear.length?'Equip any color already owned.':'No headwear owned yet. Open the Shop to add one.'}</small></div>
           <div class="field"><label>HEIGHT · FT / IN</label><div class="measurement-pair"><input id="profile-height-ft" type="number" min="4" max="6" value="${height.feet}"><span>ft</span><input id="profile-height-in" type="number" min="0" max="11" value="${height.inches}"><span>in</span></div></div>
           <div class="field"><label for="profile-weight-lb">WEIGHT · LBS</label><input id="profile-weight-lb" type="number" min="88" max="309" value="${weight}"></div>
         </div>
@@ -1256,7 +1257,7 @@ document.addEventListener('click',event=>{
     if(!app.career)return;
     if(action==='save-profile'){
       const draft=app.profileDraft??profileDraftFor();
-      const look={handedness:draft.handedness,shirtColor:draft.shirtColor,paddleColor:draft.paddleColor,highlightColor:draft.highlightColor,hairStyle:draft.hairStyle,hairColor:draft.hairColor,skinColor:draft.skinColor,headwear:app.career.athlete.appearance?.headwear??app.career.athlete.headwear??'none',headwearColor:app.career.athlete.appearance?.headwearColor??app.career.athlete.headwearColor??'yellow',eyewear:draft.eyewear,outfit:draft.outfit,court:draft.court};
+      const equippedHeadwear=app.career.equipment?.headwear?.equipped?HEADWEAR_CATALOG.find(item=>item.id===app.career.equipment.headwear.equipped):null;const look={handedness:draft.handedness,shirtColor:draft.shirtColor,paddleColor:draft.paddleColor,highlightColor:draft.highlightColor,hairStyle:draft.hairStyle,hairColor:draft.hairColor,skinColor:draft.skinColor,headwear:equippedHeadwear?.headwear??'none',headwearColor:equippedHeadwear?.color??'yellow',eyewear:draft.eyewear,outfit:draft.outfit,court:draft.court};
       app.career={...app.career,athlete:{...app.career.athlete,...look,appearance:{...app.career.athlete.appearance,...look},height:draft.height,weight:draft.weight}};
       persist();toast('Player profile saved.');render();return;
     }
@@ -1476,6 +1477,16 @@ document.addEventListener('change',async event=>{
   if(id==='draft-look-highlight'){app.draft.highlightColor=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-headwear'){app.draft.headwear=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-eyewear'){app.draft.eyewear=event.target.value;drawCareerDraftPreview()}
+  if(id==='profile-headwear'){
+    if(event.target.value==='none'){
+      const cleared=clearHeadwear(app.career);
+      if(cleared.ok){app.career=cleared.state;persist();app.profileDraft=profileDraftFor();render();toast(cleared.message);}
+    }else{
+      const equipped=equipHeadwear(app.career,event.target.value);
+      if(equipped.ok){app.career=equipped.state;persist();app.profileDraft=profileDraftFor();render();toast(equipped.message);}else toast(equipped.message,true);
+    }
+    return;
+  }
   if(id?.startsWith('profile-look-')){
     const key=id.slice('profile-look-'.length),map={hand:'handedness','hair-color':'hairColor'};
     const target=map[key]??key;

@@ -202,3 +202,11 @@ test('dashboard fills the ratings column with move, matches and recent',()=>{
   assert.match(main,/home-side-stack/);
   assert.match(css,/\.home-side-stack\{display:grid/);
 });
+test('profile-owned headwear matches the displayed and rendered color',()=>{
+  const main=read('src/career/main.js'),anime=read('src/anime-character.js'),profile=read('src/profile-athlete.js');
+  assert.match(main,/id="profile-headwear"/);
+  assert.match(main,/equippedHeadwear\?\.headwear/);
+  assert.match(main,/equipHeadwear\(app\.career,event\.target\.value\)/);
+  assert.match(anime,/const capColor=d\.headwearColor\?\?d\.trim/);
+  assert.match(profile,/const capColor=d\.headwearColor\?\?d\.trim/);
+});
