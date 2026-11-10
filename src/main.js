@@ -1,42 +1,42 @@
-import {seededRandom} from './competition.js?v=204';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=204';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=204';
-import {playerFeet,footSole} from './player-feet.js?v=204';
+import {seededRandom} from './competition.js?v=205';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=205';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=205';
+import {playerFeet,footSole} from './player-feet.js?v=205';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=204';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=205';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=204';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=205';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=204';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=205';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=204';
+import {createAnimeGameRenderer} from './anime-game.js?v=205';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=204';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=205';
 
-import {setupCourtDisplay} from './court-display.js?v=204';
+import {setupCourtDisplay} from './court-display.js?v=205';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=204';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=205';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=204';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=204';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=205';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=205';
 
-import {movingStance} from './detailed-character.js?v=204';
+import {movingStance} from './detailed-character.js?v=205';
 
-import {sampleMatchAnimation} from './match-animation.js?v=204';
+import {sampleMatchAnimation} from './match-animation.js?v=205';
 
-import {setupSelection} from './selection.js?v=204';
-import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM,writeEngineState,readEngineState,clearEngineState} from './career/handshake.js?v=204';import {setupStartScreen} from './start-screen.js?v=204';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=204';
+import {setupSelection} from './selection.js?v=205';
+import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM,writeEngineState,readEngineState,clearEngineState} from './career/handshake.js?v=205';import {setupStartScreen} from './start-screen.js?v=205';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=205';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=204';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=205';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=204';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=205';
 
-import {Game} from './game.js?v=204';
-import {C} from './core.js?v=204';
+import {Game} from './game.js?v=205';
+import {C} from './core.js?v=205';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=204';import {playerEmotionState} from './player-emotion.js?v=204';import {PerformanceMonitor} from './performance-monitor.js?v=204';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=205';import {playerEmotionState} from './player-emotion.js?v=205';import {PerformanceMonitor} from './performance-monitor.js?v=205';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=204';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=205';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -96,8 +96,22 @@ const matchIntroDialog=document.querySelector('#match-intro'),matchIntroTeamsRoo
 const sideSwitchDialog=document.querySelector('#side-switch-dialog'),sideSwitchContinue=document.querySelector('#side-switch-continue');
 function showSideSwitchNotice(){if(sideSwitchDialog.open)return;game.setPaused(true);sideSwitchDialog.showModal()}
 sideSwitchContinue.onclick=()=>{sideSwitchDialog.close();game.setPaused(false);syncPauseButton()};sideSwitchDialog.oncancel=event=>event.preventDefault();
+function syncMatchIntroSettings(){
+ const difficulty=document.querySelector('#intro-difficulty'),mode=document.querySelector('#intro-mode'),nameTags=document.querySelector('#intro-name-tags'),replays=document.querySelector('#intro-replays'),ballControl=document.querySelector('#intro-ball-control'),sound=document.querySelector('#intro-sound');
+ if(difficulty)difficulty.value=game.difficulty;if(mode)mode.value=game.mode==='watch'?'watch':'play';if(nameTags)nameTags.checked=game.showNameTags!==false;if(replays)replays.checked=replayEnabled;if(ballControl)ballControl.checked=ballControlVisible;if(sound)sound.checked=soundEnabled;
+}
+function bindMatchIntroSettings(){
+ const difficulty=document.querySelector('#intro-difficulty'),mode=document.querySelector('#intro-mode'),nameTags=document.querySelector('#intro-name-tags'),replays=document.querySelector('#intro-replays'),ballControl=document.querySelector('#intro-ball-control'),sound=document.querySelector('#intro-sound');
+ if(difficulty)difficulty.onchange=event=>setDifficulty(event.target.value);
+ if(mode)mode.onchange=event=>{game.mode=event.target.value==='watch'?'watch':'play';document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncMatchIntroSettings()};
+ if(nameTags)nameTags.onchange=event=>setNameTags(event.target.checked);
+ if(replays)replays.onchange=event=>setReplayEnabled(event.target.checked);
+ if(ballControl)ballControl.onchange=event=>setBallControlVisible(event.target.checked);
+ if(sound)sound.onchange=event=>setSoundEnabled(event.target.checked);
+}
 function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH-UP',action='START MATCH →',entry=null}={}){
  matchIntroTeamsRoot.replaceChildren();
+ syncMatchIntroSettings();bindMatchIntroSettings();
  const introKicker=matchIntroDialog.querySelector('.intro-heading small'),introTitle=matchIntroDialog.querySelector('#match-intro-title');if(introKicker)introKicker.textContent=kicker;if(introTitle)introTitle.textContent=title;beginMatchButton.textContent=action;
  let entrySummary=matchIntroDialog.querySelector('#match-entry-summary');if(!entrySummary){entrySummary=document.createElement('div');entrySummary.id='match-entry-summary';entrySummary.className='match-entry-summary';matchIntroDialog.querySelector('.intro-heading').after(entrySummary)}entrySummary.hidden=!entry;entrySummary.replaceChildren();if(entry){for(const line of entry){const row=document.createElement('p');row.textContent=line;entrySummary.append(row)}}
  const introTeams=matchIntroTeams(players);for(const team of introTeams){
@@ -119,7 +133,7 @@ function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH
  }
  matchIntroDialog.oncancel=event=>event.preventDefault();
  beginMatchButton.onclick=()=>{matchIntroDialog.close();onBegin()};
- matchIntroDialog.showModal();
+ syncMatchIntroSettings();matchIntroDialog.showModal();
   const introHeading=matchIntroDialog.querySelector('.intro-heading');introHeading.tabIndex=-1;introHeading.focus({preventScroll:true});matchIntroDialog.scrollTop=0;
 }
 
@@ -146,11 +160,12 @@ if(detailedArtAvailable){
 
 }
 
+const NAME_TAGS_KEY='drives-dinks.name-tags.v1';
 const nameTagsButton=document.createElement('button');nameTagsButton.id='name-tags-button';nameTagsButton.type='button';
-function syncNameTagsButton(){nameTagsButton.textContent=`NAME TAGS: ${game.showNameTags?'ON':'OFF'}`;nameTagsButton.setAttribute('aria-pressed',String(game.showNameTags))}
-nameTagsButton.onclick=()=>{game.showNameTags=!game.showNameTags;try{localStorage.setItem('drives-dinks.name-tags.v1',String(game.showNameTags))}catch{}syncNameTagsButton()};
-try{const savedNameTags=localStorage.getItem('drives-dinks.name-tags.v1');if(savedNameTags!==null)game.showNameTags=savedNameTags!=='false'}catch{}
- syncNameTagsButton();document.querySelector('.header-actions').append(nameTagsButton);
+function syncNameTagsButton(){nameTagsButton.textContent=`NAME TAGS: ${game.showNameTags?'ON':'OFF'}`;nameTagsButton.setAttribute('aria-pressed',String(game.showNameTags));const control=document.querySelector('#intro-name-tags');if(control)control.checked=game.showNameTags!==false}
+function setNameTags(enabled,persist=true){game.showNameTags=Boolean(enabled);if(persist)try{localStorage.setItem(NAME_TAGS_KEY,String(game.showNameTags))}catch{}syncNameTagsButton()}
+try{const savedNameTags=localStorage.getItem(NAME_TAGS_KEY);if(savedNameTags!==null)setNameTags(savedNameTags!=='false',false)}catch{}
+ syncNameTagsButton();document.querySelector('.header-actions').append(nameTagsButton);nameTagsButton.onclick=()=>setNameTags(game.showNameTags===false);
 const pauseButton=document.querySelector('#pause-button');
 
 const buildLabel=document.querySelector('#build-label'),buildNumber=globalThis.DRIVES_DINKS_BUILD||'dev';buildLabel.textContent=`BUILD ${buildNumber}`;buildLabel.setAttribute('aria-label',`Game build ${buildNumber}`);
@@ -187,7 +202,8 @@ async function unlockAudio(){if(!soundEnabled)return;try{audioContext??=new(wind
 
 window.addEventListener('pointerdown',unlockAudio);window.addEventListener('keydown',unlockAudio);
 
-soundButton.onclick=()=>{soundEnabled=!soundEnabled;soundButton.textContent=soundEnabled?'SOUND: ON':'SOUND: OFF';soundButton.setAttribute('aria-pressed',String(soundEnabled));if(soundEnabled)unlockAudio()};
+function setSoundEnabled(enabled){soundEnabled=Boolean(enabled);soundButton.textContent=soundEnabled?'SOUND: ON':'SOUND: OFF';soundButton.setAttribute('aria-pressed',String(soundEnabled));const control=document.querySelector('#intro-sound');if(control)control.checked=soundEnabled;if(soundEnabled)unlockAudio()}
+soundButton.onclick=()=>setSoundEnabled(!soundEnabled);
 
 function playEffect(event){if(!['hit','bounce','net'].includes(event.type))return;if(!soundEnabled||audioContext?.state!=='running')return;const t=audioContext.currentTime,gain=audioContext.createGain(),osc=audioContext.createOscillator();const hit=event.type==='hit',net=event.type==='net';osc.type=net?'sawtooth':hit?'triangle':'sine';osc.frequency.setValueAtTime(net?125:hit?(event.shot==='drive'?760:540):220,t);osc.frequency.exponentialRampToValueAtTime(net?60:hit?180:85,t+.065);gain.gain.setValueAtTime(.0001,t);gain.gain.exponentialRampToValueAtTime(hit?.075:.045,t+.004);gain.gain.exponentialRampToValueAtTime(.0001,t+.09);osc.connect(gain);gain.connect(audioContext.destination);osc.start(t);osc.stop(t+.1)}
 
@@ -337,7 +353,7 @@ function renderFrame(game=liveGame){setCourtSideSwitched(Boolean(game.sideSwitch
 
 const liveGame=game;
 
-let replayEnabled=true,replayPlayback=null,replayStarted=0,replayAngle='overview';
+const REPLAYS_KEY='drives-dinks.replays.v1';let replayEnabled=true,replayPlayback=null,replayStarted=0,replayAngle='overview';
 const drawSideReplay=createSideReplayRenderer(),replayClock=new ReplayClock();
 
 const automaticallyReplayedPoints=new WeakSet();
@@ -376,7 +392,10 @@ watchPointReplay.onclick=()=>beginReplay(game.pointReplay);
 
 skipReplay.onclick=finishReplay;
 
-const replayToggle=document.createElement('button');replayToggle.id='replay-toggle';replayToggle.textContent='REPLAYS: ON';document.querySelector('.header-actions').append(replayToggle);replayToggle.onclick=()=>{replayEnabled=!replayEnabled;replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;finishReplay()};
+const replayToggle=document.createElement('button');replayToggle.id='replay-toggle';document.querySelector('.header-actions').append(replayToggle);
+function setReplayEnabled(enabled,persist=true){replayEnabled=Boolean(enabled);replayToggle.textContent=`REPLAYS: ${replayEnabled?'ON':'OFF'}`;replayToggle.setAttribute('aria-pressed',String(replayEnabled));const control=document.querySelector('#intro-replays');if(control)control.checked=replayEnabled;if(!replayEnabled)finishReplay();if(persist)try{localStorage.setItem(REPLAYS_KEY,String(replayEnabled))}catch{}}
+try{const savedReplay=localStorage.getItem(REPLAYS_KEY);if(savedReplay!==null)setReplayEnabled(savedReplay!=='false',false)}catch{}
+setReplayEnabled(replayEnabled,false);replayToggle.onclick=()=>setReplayEnabled(!replayEnabled);
 
 function playReplay(t){
 
@@ -405,7 +424,11 @@ window.addEventListener('keydown',event=>{if(replayPlayback){if(event.key==='Tab
 let previousStatus='',performancePanel=null,performanceRefresh=0;if(balanceQuery.get('test')==='performance'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))){performancePanel=document.createElement('output');performancePanel.id='performance-panel';performancePanel.setAttribute('aria-live','off');document.querySelector('.game').append(performancePanel)}window.__DRIVES_DINKS_PERFORMANCE__=()=>performanceMonitor.snapshot();
 function frame(t){performanceMonitor.frame(t);performanceMonitor.nextFrameAfterInput(t);if(performancePanel&&performanceRefresh++%120===0){const report=performanceMonitor.snapshot();performancePanel.textContent='PERF '+(report.fps?report.fps.toFixed(0):'--')+' FPS · RENDER '+(report.renderMs.p95?report.renderMs.p95.toFixed(1):'--')+' MS P95 · LONG '+report.longTasks.count}if(playReplay(t)){requestAnimationFrame(frame);return}if(matchIntroDialog.open){last=t;acc=0;render();requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(startScreen?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;for(const event of game.events.splice(0)){if(event.type==='side-switch')showSideSwitchNotice();else playEffect(event)}if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 
+const BALL_CONTROL_KEY='drives-dinks.ball-control.v1';let ballControlVisible=true;
 const aimPad=document.querySelector('#aim-pad'),aimTrack=aimPad.querySelector('.aim-pad-track'),aimThumb=aimPad.querySelector('.aim-pad-thumb'),depthLabel=document.querySelector('#depth-label');
+function setBallControlVisible(enabled,persist=true){ballControlVisible=Boolean(enabled);aimPad.classList.toggle('ball-control-hidden',!ballControlVisible);aimPad.setAttribute('aria-hidden',String(!ballControlVisible));const control=document.querySelector('#intro-ball-control');if(control)control.checked=ballControlVisible;if(persist)try{localStorage.setItem(BALL_CONTROL_KEY,String(ballControlVisible))}catch{}}
+try{const savedBallControl=localStorage.getItem(BALL_CONTROL_KEY);if(savedBallControl!==null)ballControlVisible=savedBallControl!=='false'}catch{}
+setBallControlVisible(ballControlVisible,false);
 
 function syncAimPad(){const displayAim=game.phase==='serve'?serveAim(game.server,game.aim):game.aim,percent=((displayAim-1)/18)*100;const serving=game.phase==='serve',depth=serving?.5:game.depth,depthName=depth<.35?'SHORT':depth>.65?'DEEP':'NORMAL';aimThumb.style.left=`${percent}%`;aimThumb.style.top=`${(1-depth)*100}%`;aimPad.setAttribute('aria-valuenow',String(Math.round(displayAim*10)/10));aimPad.setAttribute('aria-valuetext',`Aim ${Math.round(displayAim)}, ${serving?'serve depth automatic':`${depthName.toLowerCase()} depth ${Math.round(depth*100)}%`}`);depthLabel.textContent=serving?'SERVE · AIM ONLY':`DEPTH ${depthName}`;aimPad.classList.toggle('serve-aim',serving)}
 
@@ -441,7 +464,7 @@ if(careerMatch){
   const screen=document.querySelector('#game-start');
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
-  game.configure({format:careerMatch.matchup.format,showNameTags:true,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
+  game.configure({format:careerMatch.matchup.format,showNameTags:game.showNameTags!==false,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
   const savedEngineState=readEngineState(careerMatch.matchId);if(savedEngineState)game.restore(savedEngineState);
   game.mode='play';
   game.setDifficulty(careerMatch.difficulty??'normal');syncDifficultyButton();

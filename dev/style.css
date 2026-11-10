@@ -250,7 +250,7 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app .game #shots [data-shot="lob"]{grid-column:2;grid-row:2}
 .court-app main[data-court-layout] .game #shots button.active,.court-app main[data-court-layout] .game #shots button:active{background:#c18a3580;border-color:#ffe6a9;color:#fff9df}
 .court-app .game #shots button:focus-visible{outline:2px solid #fff5bc;outline-offset:2px}
-.court-app .game #aim-pad,.court-app main[data-court-layout="stacked"] .game #aim-pad{position:absolute;left:2.5%;bottom:3%;top:auto;transform:none;width:clamp(100px,27cqw,170px);height:clamp(68px,18cqw,100px);padding:7px;border:1px solid #a9e9ee9c;border-radius:18px;background:#103c4370;box-shadow:0 2px 8px #07151f40;pointer-events:auto}
+.court-app .game #aim-pad:not(.ball-control-hidden){display:grid!important;visibility:visible!important;opacity:1}.court-app .game #aim-pad.ball-control-hidden{display:none!important}.court-app .game #aim-pad,.court-app main[data-court-layout="stacked"] .game #aim-pad{position:absolute;left:2.5%;bottom:3%;top:auto;transform:none;width:clamp(100px,27cqw,170px);height:clamp(68px,18cqw,100px);padding:7px;border:1px solid #a9e9ee9c;border-radius:18px;background:#103c4370;box-shadow:0 2px 8px #07151f40;pointer-events:auto}
 .court-app .game #aim-pad strong{font-size:clamp(8px,1.7cqw,11px);color:#e8fff7;text-shadow:0 1px 3px #07151f}
 .court-app .game #aim-pad small{font-size:clamp(7px,1.4cqw,9px);color:#d6e9e3}
 .court-app .game .aim-pad-track{background:#23444c66;height:18px;border-width:1px}.court-app .game .aim-pad-thumb{width:24px;height:24px;background:#65d7e0bc}
@@ -359,6 +359,12 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 #match-intro .intro-heading small{letter-spacing:2px}
 #match-intro h2{margin:3px 0 0;font-size:clamp(25px,4vw,38px)}
 .match-intro-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:start;gap:18px}
+.intro-game-settings{display:grid;grid-template-columns:repeat(2,minmax(150px,220px)) repeat(4,minmax(100px,1fr));gap:8px;margin:16px auto 0;padding:12px;max-width:900px;border:1px solid #456a70;border-radius:10px;background:#122a33}
+.intro-game-settings>label{display:grid;gap:4px;min-width:0;color:#a9c8bd;font-size:9px;letter-spacing:.12em}
+.intro-game-settings select{width:100%;min-height:39px;padding:7px 9px;border:1px solid #6f9999;border-radius:7px;background:#203d46;color:#fff3da;font:700 11px/1.2 "Trebuchet MS","Segoe UI",sans-serif}
+.intro-game-settings .intro-toggle{display:flex;align-items:center;justify-content:center;gap:7px;min-height:39px;padding:8px;border:1px solid #53767a;border-radius:7px;background:#19343d;cursor:pointer}
+.intro-game-settings .intro-toggle input{width:16px;height:16px;margin:0;accent-color:#65d7c2}
+.intro-game-settings .intro-toggle:has(input:checked){border-color:#65d7c2;color:#eafff4;background:#1b4145}
 .intro-team{display:grid;gap:12px;min-width:0}
 .intro-team>h3{margin:0;color:#f2c665;text-align:center;font-size:13px;letter-spacing:1.5px}
 .intro-vs{align-self:center;color:#f2c665;font:800 24px/1 system-ui}
@@ -389,6 +395,10 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
  .intro-overall strong{font-size:15px}
  .intro-rating{grid-template-columns:28px 1fr 17px;gap:2px;margin:1px 0;font-size:7px}
  .intro-rating .intro-meter,.intro-rating i{height:4px}
+ .intro-game-settings{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin-top:8px;padding:7px}
+ .intro-game-settings>label{font-size:8px}
+ .intro-game-settings select{min-height:34px;padding:5px;font-size:10px}
+ .intro-game-settings .intro-toggle{min-height:34px;padding:5px;font-size:9px;letter-spacing:.06em}
  #match-intro .start-match{min-width:150px;min-height:38px;margin:7px auto 0;padding:7px;font-size:10px}
 }
 @media(max-width:350px){.intro-team{grid-template-columns:1fr}.intro-player{grid-template-columns:82px minmax(0,1fr);text-align:left}.intro-player canvas{width:82px}}
