@@ -23,6 +23,7 @@ import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js';
 import {mixSeed} from './population.js';
 import {chargeEventCosts,creditPrize} from './finance.js';
 import {rollInjury} from './injuries.js';
+import {syncInbox} from './inbox.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
 
@@ -412,7 +413,7 @@ export function finishCareerMatch(state,report){
       next={...next,lastMatchResult:{...next.lastMatchResult,tournamentStatus:'League card complete; next card next week.'}};
       return {
         ok:true,
-        state:next,
+        state:syncInbox(next),
         record,
         message:(outcome.won?'Won ':'Lost ')+record.score+'. League night complete — advance the week for the next night.'
       };
@@ -429,7 +430,7 @@ export function finishCareerMatch(state,report){
     next={...next,lastMatchResult:{...next.lastMatchResult,nextOpponent:pendingNext?.matchup?.team??null,tournamentStatus:pendingNext?'Next round ready':'Competition continuing'}};
     return {
       ok:true,
-      state:next,
+      state:syncInbox(next),
       record,
       message:(outcome.won?'Won ':'Lost ')+record.score+'. '+(pendingNext?'Next round ready.':'Tournament continuing.')
     };
@@ -437,7 +438,7 @@ export function finishCareerMatch(state,report){
 
   const finished=finishTournament(next,tournament,{reason:'done'});
   const withResult={...finished,lastMatchResult:{...finished.lastMatchResult,tournamentStatus:finished.tournament?.placeText??'Competition complete'}};
-  return {ok:true,state:withResult,record,message:(outcome.won?'Won ':'Lost ')+record.score+'. '+finished.tournament?.placeText};
+  return {ok:true,state:syncInbox(withResult),record,message:(outcome.won?'Won ':'Lost ')+record.score+'. '+finished.tournament?.placeText};
 }
 
 // Closes a tournament: awards the points and the prize the finish is worth,

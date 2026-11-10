@@ -38,7 +38,7 @@ Current release blockers:
 
 ## Implementation Status · 2026-11-09
 
-- **Phase 0 automated baseline:** complete. All 702 tests pass, the ten-year career prospect audits rerun successfully, and desktop plus 400-by-807 browser layouts were checked.
+- **Phase 0 automated baseline:** complete. All 712 tests pass, the ten-year career prospect audits rerun successfully, and desktop plus 400-by-807 browser layouts were checked.
 - **Phase 0 external evidence:** open. Human match scorecards and physical Android measurements still require people and real devices.
 - **Phase 1 — code complete:** the finance ledger tracks salary, prizes, entry fees, travel, coaching and equipment. Injuries have causes, severity, recovery capacity and return weeks. Coached training and owned paddles use the shared formulas. Decisive professional rounds stay manual. Match results, the tournament path and the pro qualification status are visible in the UI.
 - **Phase 1 external evidence:** human pacing, injury-frequency and economy tests remain open.
@@ -48,6 +48,10 @@ Current release blockers:
 - **Phase 3 — code complete:** eight CPU-managed MLP franchises run bounded background seasons and annual drafts. MiLP club fixtures schedule and resolve without commissioner work. Users can accept team and partner invitations, decline or withdraw them, invite club mates and build relationship history. The TEAM screen exposes roster, standings, schedule, MiLP results and invitation actions.
 - **Phase 3 external evidence:** human team-season and invitation-flow playtests remain open.
 
+- **Phase 4 — code complete:** one persistent inbox receives deduplicated match, injury, invitation, CPU milestone, draft, contract and equipment messages. Categories, search, unread state, archive and direct invitation actions are implemented.
+- **Phase 5 — code complete:** deterministic seasonal brands and series generate announced, available, low-stock, discontinued and legacy products. Gold-contract players can create a bounded signature release. Products publish through the inbox and use the shared engine families and shapes.
+- **Phase 6 — portable persistence complete:** careers export as validated, gzip-compressed portable files and import through the migration chain. Completed-career and inbox archives survive new careers. Native Android and Windows shells remain external packaging work.
+- **Phase 7 — automated evidence complete:** the CPU benchmark, twenty-year world test, career prospect audits and injury-frequency audit are repeatable. Human career playtests and physical Android measurements remain release evidence.
 ## Dependency Map
 
 1. **Phase 0** establishes trustworthy baselines.

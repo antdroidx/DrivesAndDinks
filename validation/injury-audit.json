@@ -1,0 +1,128 @@
+{
+  "generatedAt": "2026-11-10T01:50:29.465Z",
+  "model": "Shared player injury engine",
+  "trialsPerRow": 20000,
+  "rows": [
+    {
+      "label": "Normal match",
+      "activity": "match",
+      "trials": 20000,
+      "rate": 0.02895,
+      "severities": {
+        "minor": 574,
+        "moderate": 5,
+        "major": 0
+      },
+      "areas": {
+        "back": 109,
+        "knee": 88,
+        "elbow": 99,
+        "wrist": 108,
+        "shoulder": 91,
+        "ankle": 84
+      },
+      "averageWeeks": 1.5682210708117443
+    },
+    {
+      "label": "Low-energy match",
+      "activity": "match",
+      "trials": 20000,
+      "rate": 0.0635,
+      "severities": {
+        "minor": 1262,
+        "moderate": 7,
+        "major": 1
+      },
+      "areas": {
+        "ankle": 200,
+        "shoulder": 186,
+        "elbow": 215,
+        "knee": 216,
+        "back": 232,
+        "wrist": 221
+      },
+      "averageWeeks": 1.604724409448819
+    },
+    {
+      "label": "Age 46 match",
+      "activity": "match",
+      "trials": 20000,
+      "rate": 0.04525,
+      "severities": {
+        "minor": 895,
+        "moderate": 8,
+        "major": 2
+      },
+      "areas": {
+        "ankle": 157,
+        "wrist": 141,
+        "shoulder": 128,
+        "back": 137,
+        "knee": 180,
+        "elbow": 162
+      },
+      "averageWeeks": 1.6022099447513811
+    },
+    {
+      "label": "Low-energy age 50 match",
+      "activity": "match",
+      "trials": 20000,
+      "rate": 0.08015,
+      "severities": {
+        "minor": 1587,
+        "moderate": 16,
+        "major": 0
+      },
+      "areas": {
+        "shoulder": 269,
+        "elbow": 247,
+        "wrist": 271,
+        "knee": 272,
+        "ankle": 249,
+        "back": 295
+      },
+      "averageWeeks": 1.6225826575171554
+    },
+    {
+      "label": "Normal training",
+      "activity": "training",
+      "trials": 20000,
+      "rate": 0.01135,
+      "severities": {
+        "minor": 222,
+        "moderate": 5,
+        "major": 0
+      },
+      "areas": {
+        "knee": 37,
+        "wrist": 37,
+        "shoulder": 36,
+        "ankle": 35,
+        "elbow": 47,
+        "back": 35
+      },
+      "averageWeeks": 1.6123348017621146
+    },
+    {
+      "label": "Low-energy training",
+      "activity": "training",
+      "trials": 20000,
+      "rate": 0.02665,
+      "severities": {
+        "minor": 530,
+        "moderate": 3,
+        "major": 0
+      },
+      "areas": {
+        "ankle": 84,
+        "shoulder": 99,
+        "wrist": 97,
+        "back": 89,
+        "knee": 85,
+        "elbow": 79
+      },
+      "averageWeeks": 1.6060037523452158
+    }
+  ],
+  "note": "Game-balance measurements, not medical risk estimates."
+}

@@ -10,7 +10,7 @@ It lives at its own entry point, **`/career-mode/`**. The gameplay prototype at 
 | Entry point | `career-mode/index.html` → `https://antdroidx.github.io/DrivesAndDinks/career-mode/` |
 | Engine modules | `src/career/` |
 | Local run | `npm start` → `http://127.0.0.1:8768/career-mode/` |
-| Current milestone | **Roadmap Phases 1–3 code complete; human playtesting and real-device evidence next** |
+| Current milestone | **Roadmap Phases 1–7 code complete; packaged shells, human playtesting and real-device evidence next** |
 | Last updated | 2026-11-09 |
 
 ---
@@ -71,6 +71,9 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/cpu-careers.js` | Persistent CPU deltas, active/circuit/background simulation, dynamic tournaments and bounded query scopes. |
 | `src/career/team-league.js` | CPU-managed MLP seasons, annual drafts, franchise rosters and MiLP fixtures. |
 | `src/career/invitations.js` | Team and partner invitations, expiry, decisions, relationship history and club-mate requests. |
+| `src/career/inbox.js` | Deduplicated career news, unread/archive state, search and actionable messages. |
+| `src/career/portable-save.js` | Validated compressed career export and import. |
+| `src/career/career-archive.js` | Cross-career all-time board and inbox archive. |
 | `src/career/opponents.js` | Persistent opponent memory and head-to-head history. |
 | `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
 | `src/career/career-match.js` | The handoff between a career tournament and the shared match engine. |
@@ -325,7 +328,7 @@ The order is a dependency chain. A ranking measures the rounds a player reached,
 The milestone this branch delivers.
 
 - [x] Isolated `/career-mode/` entry point; root prototype untouched and still publishing unchanged
-- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 19`, eighteen migrations in place)
+- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 21`, twenty migrations in place)
 - [x] Corruption recovery: a damaged file falls back to the last verified save, and an unreadable file with no backup is quarantined rather than silently reset
 - [x] Stable ids for athletes, clubs and events, guaranteed by seed derivation
 - [x] North America and Asia, split into 14 areas and 74 cities

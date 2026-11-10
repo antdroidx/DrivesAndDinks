@@ -12,6 +12,8 @@ import {
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
 } from './state.js';
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js';
 import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js';
 import {isPlayerDone} from './tournament.js';
 import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js';
@@ -29,9 +31,10 @@ import {financeSummary,COACHING_FEE} from './finance.js';
 import {weeklyActivityPlan,projectEventLoad} from './planning.js';
 import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js';
 import {currentInjury,activeInjuries} from './injuries.js';
-import {PADDLE_CATALOG,purchaseEquipment,equipPaddle,equippedPaddle} from './equipment.js';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle} from './equipment.js';
 import {teamCareerSummary} from './team-league.js';
 import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -48,6 +51,7 @@ const app={
   filters:{areaId:'',cityId:'',tier:'',query:'',gender:'',bracket:'',minAge:'',maxAge:'',sort:'rating-desc',page:0},
   move:{regionId:'',cityId:''},
   standingsFormat:null,
+  inboxFilters:{category:'',query:'',archived:false},
   expandedClub:null,
   directoryCache:null,
   storage:careerStorage()
@@ -91,7 +95,9 @@ function render(){
   resetButton.hidden=!hasCareer;
   if(hasCareer)renderStatus();
   for(const button of nav.querySelectorAll('button'))button.classList.toggle('active',button.dataset.view===app.view);
-  const renderer={home:renderHome,clubs:renderClubs,team:renderTeam,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
+  const inboxButton=nav.querySelector('[data-view="inbox"]');
+  if(inboxButton){const unread=hasCareer?unreadCount(app.career):0;inboxButton.textContent=unread?`INBOX · ${unread}`:'INBOX';}
+  const renderer={home:renderHome,clubs:renderClubs,team:renderTeam,inbox:renderInbox,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
   view.innerHTML=hasCareer?renderer():renderCreate();
 }
 
@@ -246,6 +252,7 @@ function renderHome(){
   const world=cpuWorldSummary(career.cpuWorld);
   const injury=currentInjury(career);
   const paddle=equippedPaddle(career);
+  const paddles=equipmentCatalog(career).filter(item=>item.id!=='allcourt-hybrid');
   const retirement=retirementAdvice(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
@@ -332,6 +339,9 @@ function renderHome(){
       <button type="button" class="secondary" data-action="train" ${trainReady&&!career.retired?'':'disabled'} style="flex:1 1 160px;align-self:flex-end">TRAIN · ${trainingCost(career)} ENERGY</button>
       <button type="button" class="secondary" data-action="advance" style="flex:1 1 160px;align-self:flex-end" ${career.retired?'disabled':''}>ADVANCE WEEK →</button>
       <button type="button" class="secondary" data-action="next-event" style="flex:1 1 190px;align-self:flex-end" ${career.retired?'disabled':''}>NEXT EVENT →</button>
+      <button type="button" class="secondary" data-action="export-career" style="flex:1 1 150px;align-self:flex-end">EXPORT SAVE</button>
+      <button type="button" class="secondary" data-action="import-career" style="flex:1 1 150px;align-self:flex-end">IMPORT SAVE</button>
+      <input id="career-import-file" type="file" accept=".dnd,.txt,.json" hidden>
     </div>
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. Coached training adds another point and costs $${COACHING_FEE}. Training capacity is ${sessionLimit} sessions at age ${career.athlete.age}.</div>
   </section>
@@ -366,12 +376,13 @@ function renderHome(){
   <section class="panel">
     <h2>EQUIPMENT</h2>
     <p>Current paddle: <strong>${escapeHtml(paddle.label)}</strong> · ${escapeHtml(paddle.description)}</p>
-    ${PADDLE_CATALOG.map(item=>{
+    ${paddles.map(item=>{
       const owned=career.equipment?.owned?.includes(item.id);
       const equipped=career.equipment?.equipped===item.id;
       const action=equipped?'<span class="tag accent">EQUIPPED</span>':owned?`<button type="button" class="secondary" data-action="equip" data-item="${item.id}">EQUIP</button>`:`<button type="button" class="secondary" data-action="buy-equipment" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
       return `<div class="equipment-row"><div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small></div>${action}</div>`;
     }).join('')}
+    ${signatureEligible(career)?'<div class="actions"><button type="button" class="secondary" data-action="create-signature">CREATE SIGNATURE PADDLE</button></div>':'<p class="hint">A Gold contract unlocks a personal signature release.</p>'}
   </section>
 
   ${renderTournament(career)}
@@ -535,6 +546,32 @@ function renderTeam(){
   <section class="panel">
     <h2>INVITE A CLUB MATE</h2>
     ${partner.length?partner.map(member=>`<div class="invitation-row"><div><strong>${escapeHtml(member.name)}</strong><small>Doubles ${formatRating(member.formats?.doubles??0)} · ${escapeHtml(member.archetypeLabel??'club mate')}</small></div><button type="button" class="secondary" data-action="invite-mate" data-athlete="${member.id}" data-format="doubles">INVITE</button></div>`).join(''):'<p class="muted">Join a club to invite a doubles partner.</p>'}
+  </section>`;
+}
+function renderInbox(){
+  const career=app.career;
+  const filters=app.inboxFilters;
+  const messages=inboxMessages(career,filters);
+  const categoryOptions=INBOX_CATEGORIES.map(category=>`<option value="${category}"${filters.category===category?' selected':''}>${escapeHtml(category[0].toUpperCase()+category.slice(1))}</option>`).join('');
+  return `
+  <section class="panel">
+    <h2>CAREER INBOX · ${unreadCount(career)} UNREAD</h2>
+    <div class="filters">
+      <input id="inbox-search" type="search" placeholder="Search news and messages" value="${escapeHtml(filters.query)}">
+      <select id="inbox-category"><option value="">All categories</option>${categoryOptions}</select>
+      <select id="inbox-archive"><option value="">Active</option><option value="true"${filters.archived?' selected':''}>Archived</option></select>
+    </div>
+    ${messages.length?messages.map(item=>`<article class="inbox-message${item.read?' read':''}">
+      <div class="inbox-top"><span class="tag">${escapeHtml(item.category.toUpperCase())}</span><small>Week ${item.week+1}</small></div>
+      <h3>${escapeHtml(item.title)}</h3>
+      <p>${escapeHtml(item.body)}</p>
+      <div class="actions">
+        ${!item.read?`<button type="button" class="secondary" data-action="read-message" data-key="${escapeHtml(item.key)}">MARK READ</button>`:''}
+        ${item.action?.type==='view'?`<button type="button" class="secondary" data-action="open-message" data-key="${escapeHtml(item.key)}" data-view="${escapeHtml(item.action.view)}">OPEN</button>`:''}
+        ${item.action?.type==='invitation'?`<button type="button" class="secondary" data-action="accept-invite" data-invite="${escapeHtml(item.action.invitationId)}">ACCEPT</button><button type="button" class="secondary" data-action="decline-invite" data-invite="${escapeHtml(item.action.invitationId)}">DECLINE</button>`:''}
+        ${!filters.archived?`<button type="button" class="secondary" data-action="archive-message" data-key="${escapeHtml(item.key)}">ARCHIVE</button>`:''}
+      </div>
+    </article>`).join(''):'<p class="muted">No messages match these filters.</p>'}
   </section>`;
 }
 function renderClubs(){
@@ -855,7 +892,7 @@ document.addEventListener('click',event=>{
     if(action==='create'){
       const name=document.getElementById('draft-name')?.value?.trim();
       if(!name){toast('Enter a player name first.',true);return}
-      app.career=createCareer({
+      app.career=hydrateCareerWithArchive(createCareer({
         name,
         gender:document.getElementById('draft-gender')?.value,
         archetypeId:document.getElementById('draft-archetype')?.value,
@@ -866,7 +903,7 @@ document.addEventListener('click',event=>{
         weight:Number(document.getElementById('draft-weight')?.value),
         experience:document.getElementById('draft-experience')?.value,
         trait:document.getElementById('draft-trait')?.value
-      });
+      }),app.storage);
       persist();
       toast(`Career started in ${app.career.cityLabel}.`);
       render();
@@ -889,20 +926,58 @@ document.addEventListener('click',event=>{
       apply(train(app.career,focus,{coached}));
       return;
     }
+    if(action==='export-career'){
+      exportCareerPortable(app.career).then(text=>{
+        const blob=new Blob([text],{type:'text/plain'});const url=URL.createObjectURL(blob);
+        const link=document.createElement('a');link.href=url;link.download=`drives-dinks-${app.career.athlete.name.replace(/[^a-z0-9]+/gi,'-').toLowerCase()}.dnd`;
+        link.click();URL.revokeObjectURL(url);toast('Portable career exported.');
+      }).catch(error=>toast(error.message,true));
+      return;
+    }
+    if(action==='import-career'){document.getElementById('career-import-file')?.click();return}
     if(action==='buy-equipment'){apply(purchaseEquipment(app.career,trigger.dataset.item));return}
     if(action==='equip'){apply(equipPaddle(app.career,trigger.dataset.item));return}
-    if(action==='accept-invite'){apply(acceptInvitation(app.career,trigger.dataset.invite));return}
-    if(action==='decline-invite'){apply(declineInvitation(app.career,trigger.dataset.invite));return}
+    if(action==='create-signature'){apply(createSignaturePaddle(app.career));return}
+    if(action==='accept-invite'){
+      const result=acceptInvitation(app.career,trigger.dataset.invite);
+      if(result.ok)app.career=archiveMessage(result.state,`invite:${trigger.dataset.invite}`);
+      persist();render();toast(result.message,!result.ok);return;
+    }
+    if(action==='decline-invite'){
+      const result=declineInvitation(app.career,trigger.dataset.invite);
+      if(result.ok)app.career=archiveMessage(result.state,`invite:${trigger.dataset.invite}`);
+      persist();render();toast(result.message,!result.ok);return;
+    }
     if(action==='withdraw-invite'){apply(withdrawInvitation(app.career,trigger.dataset.invite));return}
     if(action==='invite-mate'){apply(inviteClubMate(app.career,trigger.dataset.athlete,trigger.dataset.format,'local-league'));return}
-    if(action==='accept-invite'){apply(acceptInvitation(app.career,trigger.dataset.invite));return}
-    if(action==='decline-invite'){apply(declineInvitation(app.career,trigger.dataset.invite));return}
+    if(action==='read-message'){app.career=markMessageRead(app.career,trigger.dataset.key);persist();render();return}
+    if(action==='archive-message'){app.career=archiveMessage(app.career,trigger.dataset.key);persist();render();return}
+    if(action==='open-message'){
+      app.career=markMessageRead(app.career,trigger.dataset.key);
+      app.view=trigger.dataset.view??'home';persist();render();return;
+    }
+    if(action==='accept-invite'){
+      const result=acceptInvitation(app.career,trigger.dataset.invite);
+      if(result.ok)app.career=archiveMessage(result.state,`invite:${trigger.dataset.invite}`);
+      persist();render();toast(result.message,!result.ok);return;
+    }
+    if(action==='decline-invite'){
+      const result=declineInvitation(app.career,trigger.dataset.invite);
+      if(result.ok)app.career=archiveMessage(result.state,`invite:${trigger.dataset.invite}`);
+      persist();render();toast(result.message,!result.ok);return;
+    }
     if(action==='withdraw-invite'){apply(withdrawInvitation(app.career,trigger.dataset.invite));return}
     if(action==='invite-mate'){apply(inviteClubMate(app.career,trigger.dataset.athlete,trigger.dataset.format,'local-league'));return}
+    if(action==='read-message'){app.career=markMessageRead(app.career,trigger.dataset.key);persist();render();return}
+    if(action==='archive-message'){app.career=archiveMessage(app.career,trigger.dataset.key);persist();render();return}
+    if(action==='open-message'){
+      app.career=markMessageRead(app.career,trigger.dataset.key);
+      app.view=trigger.dataset.view??'home';persist();render();return;
+    }
     if(action==='retire'){
       if(!confirm('Retire from competition? This career record becomes final.'))return;
       const ended=retire(app.career,'voluntary');
-      if(ended.ok){app.career=ended.state;app.view='record';persist();render();toast(ended.message);}else toast(ended.message,true);
+      if(ended.ok){app.career=ended.state;archiveCareer(app.career,app.storage);app.view='record';persist();render();toast(ended.message);}else toast(ended.message,true);
       return;
     }
     if(action==='advance'){apply(advanceWeek(app.career));return}
@@ -986,8 +1061,17 @@ document.addEventListener('click',event=>{
   }
 });
 
-document.addEventListener('change',event=>{
+document.addEventListener('change',async event=>{
   const id=event.target.id;
+  if(id==='career-import-file'){
+    const file=event.target.files?.[0];
+    if(!file)return;
+    const imported=await importCareerPortable(await file.text());
+    if(imported.ok){app.career=imported.state;persist();app.view='home';render();toast('Portable career imported.');}
+    else toast(imported.reason,true);
+    event.target.value='';
+    return;
+  }
   if(id==='draft-region'){
     app.draft.regionId=event.target.value;
     app.draft.cityId='';
@@ -1016,9 +1100,17 @@ document.addEventListener('change',event=>{
   if(id==='filter-age-max'){app.filters.maxAge=event.target.value;app.filters.page=0;render()}
   if(id==='move-region'){app.move.regionId=event.target.value;app.move.cityId='';render()}
   if(id==='move-city'){app.move.cityId=event.target.value}
+  if(id==='inbox-category'){app.inboxFilters.category=event.target.value;render()}
+  if(id==='inbox-archive'){app.inboxFilters.archived=event.target.value==='true';render()}
 });
 
 document.addEventListener('input',event=>{
+  if(event.target.id==='inbox-search'){
+    app.inboxFilters.query=event.target.value;render();
+    const field=document.getElementById('inbox-search');
+    if(field){field.focus();field.setSelectionRange(field.value.length,field.value.length)}
+    return;
+  }
   if(event.target.id==='player-search'){
     app.filters.query=event.target.value;
     app.filters.page=0;
@@ -1036,7 +1128,7 @@ const buildLabel=document.getElementById('career-build');
 if(buildLabel&&build)buildLabel.textContent=`BUILD ${build}`;
 
 const loaded=loadCareer(app.storage);
-if(loaded.state){app.career=loaded.state}
+if(loaded.state){app.career=hydrateCareerWithArchive(loaded.state,app.storage)}
 if(loaded.reason)toast(loaded.reason,true);
 
 // A match played on the engine page comes back here to be scored.

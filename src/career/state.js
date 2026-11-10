@@ -26,6 +26,7 @@ import {potentialForStartAge} from './career-lifecycle.js';
 import {emptyCpuWorld,createCpuWorld,advanceCpuWorld} from './cpu-careers.js';
 import {createTeamCareer,advanceTeamCareer} from './team-league.js';
 import {emptyInvitations,advanceInvitations} from './invitations.js';
+import {emptyInbox,syncInbox} from './inbox.js';
 import {eventEntryCost} from './planning.js';
 
 // The neutral adult creation baseline is 3.500. Experience can move this
@@ -207,6 +208,7 @@ export function createCareer(options={}){
     cpuWorld:emptyCpuWorld(),
     teamCareer:createTeamCareer(seed,regionId,0),
     invitations:emptyInvitations(),
+    inbox:emptyInbox(),
     rivalId:rival?.id??null,
     // Wild cards earned by winning a Challenger event.
     wildCards:0,
@@ -775,7 +777,7 @@ export function advanceWeek(state){
   if(salary.ok)advanced=salary.state;
   const injuryNote=weeklyInjuries.healed?.length?` Recovered from ${weeklyInjuries.healed.map(entry=>entry.areaLabel.toLowerCase()).join(' and ')}.`:'';
   const moved=pushHistory(advanced,`Week ${week+1} begins.`);
-  const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.${seasonNote}${injuryNote}`);
+  const next=syncInbox(pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.${seasonNote}${injuryNote}`));
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }
 

@@ -14,11 +14,12 @@ import {peakAgeFor,createDevelopmentProfile} from './age.js';
 import {emptyFinance,validateFinance} from './finance.js';
 import {emptyCpuWorld,validateCpuWorld} from './cpu-careers.js';
 import {emptyInjuries,validateInjuries} from './injuries.js';
-import {emptyEquipment,validateEquipment} from './equipment.js';
+import {emptyEquipment,normalizeEquipment,validateEquipment} from './equipment.js';
 import {createTeamCareer,validateTeamCareer} from './team-league.js';
 import {emptyInvitations,validateInvitations} from './invitations.js';
+import {emptyInbox,validateInbox} from './inbox.js';
 
-export const CAREER_SAVE_VERSION=19;
+export const CAREER_SAVE_VERSION=21;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -28,6 +29,16 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v21 added the seasonal equipment catalog and signature releases.
+  20:state=>({
+    ...state,
+    equipment:normalizeEquipment(state.equipment)
+  }),
+  // v20 added the persistent career inbox and generated news.
+  19:state=>({
+    ...state,
+    inbox:state.inbox??emptyInbox()
+  }),
   // v19 added background MLP/MiLP seasons and persistent invitations.
   18:state=>({
     ...state,
@@ -263,6 +274,8 @@ export function validateCareer(state){
   if(!team.ok)return {ok:false,reason:team.reason};
   const invitations=validateInvitations(state);
   if(!invitations.ok)return {ok:false,reason:invitations.reason};
+  const inbox=validateInbox(state);
+  if(!inbox.ok)return {ok:false,reason:inbox.reason};
   if(!RATING_KEYS.includes(state.trainingFocus))return {ok:false,reason:`Unknown training focus "${state.trainingFocus}"`};
   if(typeof state.coachingEnabled!=='boolean')return {ok:false,reason:'Coaching preference is invalid'};
   if(state.coachingHistory!=null&&!Array.isArray(state.coachingHistory))return {ok:false,reason:'Coaching history is invalid'};
