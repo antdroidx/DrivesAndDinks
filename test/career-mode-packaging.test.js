@@ -15,6 +15,26 @@ test('career mode has its own entry point that leaves the root prototype alone',
   assert.match(root,/src="src\/main\.js"/);
 });
 
+test('the standalone career test build uses local source and assets',()=>{
+  assert.ok(existsSync(new URL('../career/index.html',import.meta.url)));
+  const page=read('career/index.html');
+  assert.match(page,/src="src\/career\/main\.js"/);
+  assert.match(page,/src="build-info.js"/);
+  assert.match(page,/href="career\.css"/);
+  const manifest=JSON.parse(read('career/manifest.webmanifest'));
+  assert.match(manifest.icons[0].src,/^assets\//);
+  const sw=read('career/sw.js');
+  assert.match(sw,/\.\/src\/career\/main\.js/);
+  assert.match(sw,/\.\/src\/roster\.js/);
+});
+
+test('Pages publishes the standalone career folder with the current source',()=>{
+  const workflow=read('.github/workflows/pages.yml');
+  assert.match(workflow,/rm -rf _site\/career/);
+  assert.match(workflow,/cp -R src assets _site\/career\//);
+  assert.match(workflow,/version-build\.js "\$\{\{ github\.run_number \}\}" _site\/career --career/);
+});
+
 test('the career entry point loads its own stylesheet',()=>{
   const page=read('career-mode/index.html');
   const css=read('career-mode/career.css');
@@ -35,6 +55,14 @@ test('the dev server serves the career entry point and its nested modules',()=>{
   assert.match(server,/career-mode\/career\.css/);
   assert.match(server,/career-mode\/sw\.js/);
   assert.match(server,/\^\\\/src\\\/career\\\//);
+});
+
+test('the dev server serves the standalone career test build',()=>{
+  const server=read('scripts/serve.js');
+  assert.match(server,/\['\/career\/',/);
+  assert.match(server,/career\/build-info\.js/);
+  assert.match(server,/career\\\/src\\\/career/);
+  assert.match(server,/career\\\/assets/);
 });
 
 test('the build numbers the career page and its nested modules',()=>{

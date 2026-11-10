@@ -3,13 +3,35 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,mkdirSync,readFileSync,rmSync,writeFileSync} from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import {versionModuleImports,versionSite} from '../scripts/version-build.js';
+import {versionCareerSite,versionModuleImports,versionSite} from '../scripts/version-build.js';
 
 test('module imports receive the deployment build query',()=>{
   const source="import {x} from './core.js';\nconst lazy=()=>import('./game.js');\n";
   const result=versionModuleImports(source,'23');
   assert.match(result,/from '\.\/core\.js\?v=23'/);
   assert.match(result,/import\('\.\/game\.js\?v=23'\)/);
+});
+
+test('standalone career build versions its local shell and source tree',()=>{
+  const root=mkdtempSync(path.join(os.tmpdir(),'drives-dinks-career-version-'));
+  try{
+    mkdirSync(path.join(root,'src','career'),{recursive:true});
+    writeFileSync(path.join(root,'index.html'),'<link href="career.css"><script src="build-info.js"></script><script type="module" src="src/career/main.js"></script>');
+    writeFileSync(path.join(root,'src','career','main.js'),"import {Game} from '../game.js';\n");
+    writeFileSync(path.join(root,'src','game.js'),'export const Game=1;\n');
+    writeFileSync(path.join(root,'sw.js'),"const CACHE='drives-dinks-career-v8';const URL='./src/career/main.js';");
+    versionCareerSite(root,'31');
+    const html=readFileSync(path.join(root,'index.html'),'utf8');
+    assert.match(html,/career\.css\?v=31/);
+    assert.match(html,/build-info\.js\?v=31/);
+    assert.match(html,/src\/career\/main\.js\?v=31/);
+    assert.match(readFileSync(path.join(root,'src','career','main.js'),'utf8'),/\.\.\/game\.js\?v=31/);
+    const sw=readFileSync(path.join(root,'sw.js'),'utf8');
+    assert.match(sw,/drives-dinks-career-v31/);
+    assert.match(sw,/src\/career\/main\.js\?v=31/);
+  }finally{
+    rmSync(root,{recursive:true,force:true});
+  }
 });
 
 test('static build versions the page and all module entry points',()=>{

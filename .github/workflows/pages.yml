@@ -63,6 +63,12 @@ jobs:
             if [ -f character-lab.html ]; then cp character-lab.html character-lab.css _site/dev/; fi
             if [ -f style-lab.html ]; then cp style-lab.html _site/dev/; fi
             node scripts/version-build.js "${{ github.run_number }}" _site/dev
+            rm -rf _site/career
+            mkdir -p _site/career
+            cp career/index.html career/career.css career/manifest.webmanifest career/sw.js _site/career/
+            cp -R src assets _site/career/
+            printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/career/build-info.js
+            node scripts/version-build.js "${{ github.run_number }}" _site/career --career
             touch _site/.nojekyll
           else
             mkdir -p _site/archive/build-15 _site/archive/build-122 _site/prototype _site/dev
@@ -87,6 +93,12 @@ jobs:
             if [ -f _release/character-lab.html ]; then cp _release/character-lab.html _release/character-lab.css _site/; fi
             if [ -f _release/style-lab.html ]; then cp _release/style-lab.html _site/; fi
             node scripts/version-build.js "${{ github.run_number }}" _site
+            rm -rf _site/career
+            mkdir -p _site/career
+            cp career/index.html career/career.css career/manifest.webmanifest career/sw.js _site/career/
+            cp -R src assets _site/career/
+            printf 'globalThis.DRIVES_DINKS_BUILD = "%s";\n' "${{ github.run_number }}" > _site/career/build-info.js
+            node scripts/version-build.js "${{ github.run_number }}" _site/career --career
             touch _site/.nojekyll
           fi
       - name: Publish GitHub Pages

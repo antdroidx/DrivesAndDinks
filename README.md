@@ -15,6 +15,7 @@ The server prints its local URL (normally `http://127.0.0.1:8768`). Both `/` and
 - Dev mirror: `https://antdroidx.github.io/DrivesAndDinks/dev/` — the same current source with development diagnostics.
 - Motion studio: `https://antdroidx.github.io/DrivesAndDinks/studio.html`.
 - Career mode: `https://antdroidx.github.io/DrivesAndDinks/career-mode/` — an offline player career with its own save, world and calendar. See [CAREER-MODE.md](CAREER-MODE.md) for the roadmap.
+- Career test build: \https://antdroidx.github.io/DrivesAndDinks/career/\ — a standalone copy assembled from the current career branch for immediate browser testing.
 - Build 48 prototype: `https://antdroidx.github.io/DrivesAndDinks/prototype/`.
 - Build 15 archive: `https://antdroidx.github.io/DrivesAndDinks/archive/build-15/`.
 
