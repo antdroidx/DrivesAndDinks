@@ -173,3 +173,13 @@ test('the career entry point registers the service worker for offline use',()=>{
   const main=read('src/career/main.js');
   assert.match(main,/serviceWorker\.register\('\.\/sw\.js'/);
 });
+
+test('match-up settings control gameplay before the first serve',()=>{
+  const html=read('index.html'),main=read('src/main.js'),css=read('style.css');
+  for(const id of ['intro-difficulty','intro-mode','intro-name-tags','intro-replays','intro-ball-control','intro-sound'])assert.match(html,new RegExp(`id="${id}"`));
+  assert.match(main,/function syncMatchIntroSettings\(/);
+  assert.match(main,/function bindMatchIntroSettings\(/);
+  assert.match(main,/setBallControlVisible\(event\.target\.checked\)/);
+  assert.match(main,/setReplayEnabled\(event\.target\.checked\)/);
+  assert.match(css,/\.court-app \.game #aim-pad:not\(\.ball-control-hidden\)\{display:grid!important/);
+});
