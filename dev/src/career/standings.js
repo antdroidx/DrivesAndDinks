@@ -5,11 +5,11 @@
 // player stands, who is next to them, whether they have qualified for the
 // rounds above, and what the year has paid.
 
-import {buildRegionSkills,buildAthlete} from './population.js?v=195';
-import {currentRatings} from './world.js?v=195';
-import {tourFor,tourRank,worldRank,PRO_TOUR_SIZE,PRO_FLOOR_RATING,EVENT_POINTS} from './tour.js?v=195';
-import {summarizeCareerForm} from './match-record.js?v=195';
-import {REGIONS} from './geography.js?v=195';
+import {buildRegionSkills,buildAthlete} from './population.js?v=196';
+import {currentRatings} from './world.js?v=196';
+import {tourFor,tourRank,worldRank,PRO_TOUR_SIZE,PRO_FLOOR_RATING,EVENT_POINTS} from './tour.js?v=196';
+import {summarizeCareerForm} from './match-record.js?v=196';
+import {REGIONS} from './geography.js?v=196';
 
 // The rounds a player has to earn their way into.
 export const QUALIFICATION_POINTS=Object.freeze({

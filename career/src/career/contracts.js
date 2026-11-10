@@ -10,8 +10,8 @@
 // least three appearances in two different disciplines. It keeps the
 // complete-player pressure while remaining attainable.
 
-import {positions,challengerPoints} from './ranking.js?v=195';
-import {PRO_FLOOR_RATING} from './tour.js?v=195';
+import {positions,challengerPoints} from './ranking.js?v=196';
+import {PRO_FLOOR_RATING} from './tour.js?v=196';
 
 export const SEASON_WEEKS=52;
 export const CONTRACT_RANK=50;

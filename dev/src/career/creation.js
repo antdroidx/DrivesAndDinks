@@ -23,6 +23,27 @@ export const STARTING_TRAITS=Object.freeze([
 ]);
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
+const CM_PER_INCH=2.54;
+const KG_PER_POUND=0.45359237;
+
+export function centimetersToFeetInches(centimeters){
+  const totalInches=Math.round((Number(centimeters)||0)/CM_PER_INCH);
+  const feet=Math.floor(totalInches/12);
+  return {feet,inches:totalInches-feet*12};
+}
+
+export function feetInchesToCentimeters(feet,inches,gender='male'){
+  const totalInches=Math.max(0,Number(feet)||0)*12+Math.max(0,Number(inches)||0);
+  return normalizeHeight(totalInches*CM_PER_INCH,gender);
+}
+
+export function kilogramsToPounds(kilograms){
+  return Math.round((Number(kilograms)||0)/KG_PER_POUND);
+}
+
+export function poundsToKilograms(pounds,height=177,gender='male'){
+  return normalizeWeight((Number(pounds)||0)*KG_PER_POUND,height,gender);
+}
 
 export function normalizeHeight(value,gender='male'){
   const fallback=gender==='female'?164:177;

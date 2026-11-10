@@ -4,11 +4,11 @@
 // athlete and the opponents drawn from the bracket into lineups the engine
 // can play, and records the match so the result can be rated afterwards.
 
-import {buildProfile} from '../roster.js?v=195';
-import {opponentsInBracket} from './world.js?v=195';
-import {mixSeed} from './population.js?v=195';
-import {seededRandom} from '../competition.js?v=195';
-import {equipmentSelection} from './equipment.js?v=195';
+import {buildProfile} from '../roster.js?v=196';
+import {opponentsInBracket} from './world.js?v=196';
+import {mixSeed} from './population.js?v=196';
+import {seededRandom} from '../competition.js?v=196';
+import {equipmentSelection} from './equipment.js?v=196';
 
 // The engine caps injected attributes so a profile can never run away with
 // them. The career allows attributes up to 99, and the engine's ability

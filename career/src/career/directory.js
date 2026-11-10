@@ -1,6 +1,6 @@
 // Career player directory filtering and pagination.
 
-import {divisionFor} from './rating.js?v=195';
+import {divisionFor} from './rating.js?v=196';
 
 export const DIRECTORY_PAGE_SIZE=40;
 
