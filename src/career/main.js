@@ -34,6 +34,7 @@ import {weeklyActivityPlan,projectEventLoad} from './planning.js';
 import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js';
 import {currentInjury,activeInjuries} from './injuries.js';
 import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js';
+import {careerProfile} from './matchmaking.js';
 import {teamCareerSummary} from './team-league.js';
 import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js';
 import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js';
@@ -57,6 +58,7 @@ const app={
   inboxFilters:{category:'',query:'',archived:false},
   expandedClub:null,
   profileDraft:null,
+  playerProfileId:null,
   directoryCache:null,
   storage:careerStorage()
 };
@@ -106,10 +108,11 @@ function render(){
   for(const button of nav.querySelectorAll('button'))button.classList.toggle('active',button.dataset.view===app.view);
   const inboxButton=nav.querySelector('[data-view="inbox"]');
   if(inboxButton){const unread=hasCareer?unreadCount(app.career):0;inboxButton.textContent=unread?`INBOX · ${unread}`:'INBOX';}
-  const renderer={home:renderHome,profile:renderProfile,shop:renderEquipment,league:renderLeague,clubs:renderClubs,team:renderTeam,inbox:renderInbox,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
+  const renderer={home:renderHome,profile:renderProfile,athlete:renderAthleteProfile,shop:renderEquipment,league:renderLeague,clubs:renderClubs,team:renderTeam,inbox:renderInbox,players:renderPlayers,calendar:renderCalendar,standings:renderStandings,record:renderRecord}[app.view]??renderHome;
   view.innerHTML=hasCareer?renderer():renderCreate();
   if(!hasCareer)requestAnimationFrame(drawCareerDraftPreview);
   else if(app.view==='profile')requestAnimationFrame(drawCareerProfilePreview);
+  else if(app.view==='athlete')requestAnimationFrame(drawAthleteProfilePreview);
 }
 
 function renderStatus(){
@@ -667,6 +670,87 @@ function renderProfile(){
   </section>`;
 }
 
+function profileAthleteById(id){
+  if(!id||!app.career)return null;
+  return playerDirectory(app.career).find(athlete=>athlete.id===id)??null;
+}
+
+function drawAthleteProfilePreview(){
+  const canvas=document.getElementById('athlete-profile-preview'),athlete=profileAthleteById(app.playerProfileId);
+  if(!canvas||!athlete)return;
+  const profile=careerProfile(athlete),ctx=canvas.getContext('2d');
+  ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(2,0,0,2,0,0);ctx.imageSmoothingEnabled=false;
+  ctx.fillStyle='#173039';ctx.fillRect(0,0,150,180);ctx.fillStyle='#355e60';ctx.fillRect(0,142,150,38);ctx.fillStyle='#eff3cf55';ctx.fillRect(0,150,150,2);
+  drawCareerCharacter(ctx,{personalize:false,appearance:{...profile.appearance,headwearColor:athlete.appearance?.headwearColor??profile.appearance.headwearColor},characterId:athlete.archetypeId,handedness:athlete.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:athlete.handedness==='left'?-1:1,paddleShape:profile.paddle?.shapeId??'hybrid',lighting:'depth',style:'anime',look:'storybook',outfit:profile.appearance.outfit});
+  canvas.setAttribute('aria-label',`${athlete.name} player appearance`);
+}
+
+function namedOption(options,id,fallback='—'){
+  return options.find(option=>option.id===id)?.name??fallback;
+}
+
+function renderAthleteProfile(){
+  const athlete=profileAthleteById(app.playerProfileId);
+  if(!athlete)return '<section class="panel"><h2>PLAYER NOT FOUND</h2><p>That player is no longer in this region.</p><div class="actions"><button type="button" class="secondary" data-view="players">← BACK TO PLAYERS</button></div></section>';
+  const career=app.career,look=athlete.appearance??{},record=career.cpuWorld?.records?.[athlete.id]??null;
+  const formatRows=FORMATS.map(format=>{
+    const rating=athlete.formats?.[format]??0,band=ratingBand(rating);
+    return `<div class="format-line"><strong>${formatRating(rating)}</strong><span>${escapeHtml(formatLabel(format,athlete.gender))}</span><small>${escapeHtml(band.label)}</small></div>`;
+  }).join('');
+  const ratingGroups=RATING_GROUPS.map(group=>`<section class="rating-group"><h3>${escapeHtml(group.label.toUpperCase())}</h3>${group.keys.map(key=>`<div class="rating${(athlete.ratings?.[key]??0)>=85?' hi':''}"><span>${escapeHtml(RATING_LABELS[key]??key)}</span><div class="bar"><b style="width:${Math.max(2,athlete.ratings?.[key]??0)}%"></b></div><i>${athlete.ratings?.[key]??0}</i></div>`).join('')}</section>`).join('');
+  const tracked=FORMATS.map(format=>{
+    const entry=career.worldRatings?.[format]?.[athlete.id];
+    return entry?{format,rating:entry[0],week:entry[1],matches:entry[2]??0,label:formatLabel(format,athlete.gender)}:null;
+  }).filter(Boolean);
+  const trackedMatches=tracked.reduce((total,entry)=>total+entry.matches,0);
+  const opponents=Object.values(career.opponents??{}),headToHead=opponents.find(entry=>entry.id===athlete.id)??career.opponents?.[athlete.id]??null;
+  const losses=record?Math.max(0,(record.matches??0)-(record.wins??0)):null;
+  const historyRows=record?[
+    ['Matches',record.matches??0],['Record',`${record.wins??0}W · ${losses}L`],['Events',record.events??0],['Tour points',Math.round(record.tourPoints??0).toLocaleString('en-US')],['Stage',record.stage??record.detail??'background'],['Contract',record.contract??'none'],['Form',record.form??0],['Fatigue',`${Math.round(record.fatigue??0)}%`]
+  ]:[['Matches tracked in this career',trackedMatches],['Current history',trackedMatches?'Rating and match updates are tracked from played events.':'No recorded matches in this save yet.']];
+  const height=Number(look.height)||177,feet=Math.floor((height/2.54)/12),inches=Math.round((height/2.54)%12);
+  const outfit=namedOption(OUTFIT_OPTIONS,look.outfit,'Performance kit');
+  const hair=namedOption(hairStylesFor(athlete.gender),look.hairStyle,'Default hair');
+  const headwear=namedOption(HEADWEAR_OPTIONS,look.headwear,'No headwear');
+  const eyewear=namedOption(EYEWEAR_OPTIONS,look.eyewear,'No glasses');
+  const paddleColor=namedOption(PADDLE_COLORS,look.paddleColor,'Mint');
+  return `
+  <section class="panel athlete-profile-header">
+    <div><small>PLAYER PROFILE · ${escapeHtml(athlete.regionId==='asia'?'ASIA':'NORTH AMERICA')}</small><h2>${escapeHtml(athlete.name)}</h2><p>${escapeHtml(athlete.archetypeLabel)} · ${escapeHtml(athlete.gender)} · age ${athlete.age} · ${escapeHtml(athlete.handedness)}-handed</p></div>
+    <button type="button" class="secondary" data-view="players">← BACK TO PLAYERS</button>
+  </section>
+  <div class="grid two athlete-profile-top">
+    <section class="panel">
+      <div class="career-profile-preview"><canvas id="athlete-profile-preview" width="300" height="360" aria-label="${escapeHtml(athlete.name)} player appearance"></canvas><small>${escapeHtml(athlete.archetypeLabel)}</small></div>
+      <div class="athlete-look-grid">
+        <div><span>OUTFIT</span><strong>${escapeHtml(outfit)}</strong></div>
+        <div><span>HAIR</span><strong>${escapeHtml(hair)}</strong></div>
+        <div><span>HEADWEAR</span><strong>${escapeHtml(headwear)} · ${escapeHtml(namedOption(PADDLE_COLORS,look.headwearColor,'None'))}</strong></div>
+        <div><span>EYEWEAR</span><strong>${escapeHtml(eyewear)}</strong></div>
+        <div><span>PADDLE COLOR</span><strong>${escapeHtml(paddleColor)}</strong></div>
+        <div><span>BODY</span><strong>${feet} ft ${inches} in · build ${Math.round((Number(look.build)||.5)*100)}</strong></div>
+      </div>
+    </section>
+    <section class="panel">
+      <h2>PLAYER RATINGS</h2>
+      <div class="player-profile-formats">${formatRows}</div>
+      <div class="athlete-identity-grid">
+        <div><span>CITY</span><strong>${escapeHtml(athlete.cityLabel??'—')}</strong></div>
+        <div><span>CITIZENSHIP</span><strong>${escapeHtml(athlete.citizenship??'—')}</strong></div>
+        <div><span>CLUB</span><strong>${escapeHtml(athlete.clubName??'—')}</strong></div>
+        <div><span>TOP SKILL</span><strong>${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</strong></div>
+        <div><span>POTENTIAL</span><strong>${athlete.potential??'—'}</strong></div>
+        <div><span>EXPERIENCE</span><strong>${record?.matches??trackedMatches} tracked matches</strong></div>
+      </div>
+      ${headToHead?`<div class="player-rivalry"><small>HEAD TO HEAD VS YOU</small><strong>${headToHead.wins??0}W · ${headToHead.losses??0}L</strong><span>Last ${escapeHtml(headToHead.lastResult??'—')} · Week ${(headToHead.lastWeek??career.week)+1}</span></div>`:''}
+    </section>
+  </div>
+  <div class="grid two">
+    <section class="panel"><h2>ATTRIBUTES</h2>${ratingGroups}</section>
+    <section class="panel"><h2>CAREER HISTORY</h2><ul class="history">${historyRows.map(([label,value])=>`<li><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></li>`).join('')}</ul>${tracked.length?`<h3>RATING TRACKING</h3><ul class="history">${tracked.map(entry=>`<li><span>${escapeHtml(entry.label)}</span><strong>${formatRating(entry.rating)}</strong><em>${entry.matches} matches · week ${entry.week+1}</em></li>`).join('')}</ul>`:''}</section>
+  </div>`;
+}
+
 function paddleColor(item){return PADDLE_COLORS.find(color=>color.id===item?.color)??PADDLE_COLORS.find(color=>color.id==='mint')??PADDLE_COLORS[0]}
 function paddlePicture(item){
   const color=paddleColor(item),shape=['widebody','elongated'].includes(item.shape)?item.shape:'hybrid',label=escapeHtml(item.label),artworkId=String(item.id).replace(/[^a-zA-Z0-9_-]/g,'-');
@@ -1004,7 +1088,7 @@ function renderStandings(){
     <p>Highest current ${escapeHtml(formatLabel(format,career.athlete.gender))} ratings across North America and Asia. This is the rating board; PPA tour points decide event entry and qualification.</p>
     ${leaders.map(entry=>`<div class="club">
       <div class="body"><strong>#${entry.rank} ${escapeHtml(entry.name)}</strong><small>${escapeHtml(entry.cityLabel)} · ${escapeHtml(entry.regionId==='asia'?'Asia':'North America')} · ${escapeHtml(entry.citizenship)} · Rating ${formatRating(entry.rating)}</small></div>
-      <div class="actions"><span class="need">World ${entry.worldRank.toLocaleString('en-US')}</span></div>
+      <div class="actions"><span class="need">World ${entry.worldRank.toLocaleString('en-US')}</span><button type="button" class="secondary" data-action="open-player" data-player="${entry.id}">PROFILE</button></div>
     </div>`).join('')}
   </section>
 
@@ -1016,7 +1100,7 @@ function renderStandings(){
         <strong>${escapeHtml(entry.name)}</strong>
         <small>${escapeHtml(entry.citizenship)} · Rating ${formatRating(entry.rating)}</small>
       </div>
-      <div class="actions"><span class="need">World ${entry.worldRank.toLocaleString('en-US')}</span></div>
+      <div class="actions"><span class="need">World ${entry.worldRank.toLocaleString('en-US')}</span><button type="button" class="secondary" data-action="open-player" data-player="${entry.id}">PROFILE</button></div>
     </div>`).join('')}
   </section>`;
 }
@@ -1069,6 +1153,7 @@ function renderPlayers(){
         <small>${escapeHtml(athlete.archetypeLabel)} · ${athlete.gender} · age ${athlete.age} · ${escapeHtml(athlete.cityLabel)}, ${escapeHtml(athlete.citizenship ?? '')} · ${escapeHtml(athlete.clubName)}</small>
         <small>Doubles ${formatRating(athlete.formats?.doubles??0)} · Singles ${formatRating(athlete.formats?.singles??0)} · Mixed ${formatRating(athlete.formats?.mixed??0)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
       </div>
+      <div class="actions"><button type="button" class="secondary" data-action="open-player" data-player="${athlete.id}">PROFILE</button></div>
     </div>`).join(''):'<p class="muted">No players match those filters.</p>'}
     <div class="actions">
       <button type="button" class="secondary" data-action="players-page" data-page="${directory.page-1}" ${directory.page<=0?'disabled':''}>← PREVIOUS</button>
@@ -1248,6 +1333,12 @@ document.addEventListener('click',event=>{
       return;
     }
     if(action==='advance'){apply(advanceWeek(app.career));return}
+    if(action==='open-player'){
+      app.playerProfileId=trigger.dataset.player;
+      app.view='athlete';
+      render();
+      return;
+    }
     if(action==='players-page'){
       app.filters.page=Math.max(0,Number(trigger.dataset.page)||0);
       render();

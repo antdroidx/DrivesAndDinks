@@ -5,7 +5,7 @@
 // athlete and club id is reproduced exactly on demand. That keeps saves small
 // and guarantees the stable ids a career needs across weeks and seasons.
 
-import {CHARACTERS,generateIdentity,skillAverage} from '../roster.js';
+import {CHARACTERS,COURT_PALETTES,OUTFIT_OPTIONS,generateIdentity,hairStylesFor,sampleAthleteBody,skillAverage} from '../roster.js';
 import {seededRandom} from '../competition.js';
 import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js';
 import {FORMATS,ratingInFormat} from './rating.js';
@@ -171,6 +171,27 @@ export function buildAthleteSkill(seed,club,index,week=0,startAgeOverride=null){
   return {archetype,baseRatings,peakRatings,maintenance,development,startAge,age,potential,ratings,average:skillAverage(ratings),formatBias,gender};
 }
 
+function generatedAppearance(gender,identity,random){
+  const body=sampleAthleteBody(gender,random);
+  const headwearRoll=random();
+  const headwear=headwearRoll<.23?'cap':headwearRoll<.36?'visor':headwearRoll<.48?'headband':'none';
+  return {
+    shirtColor:identity.shirtColor,
+    paddleColor:identity.paddleColor,
+    highlightColor:identity.highlightColor,
+    headwearColor:identity.highlightColor,
+    hairStyle:pick(hairStylesFor(gender),random).id,
+    hairColor:identity.hairColor,
+    skinColor:identity.skinColor,
+    headwear,
+    eyewear:random()<.18?'glasses':'none',
+    outfit:pick(OUTFIT_OPTIONS,random).id,
+    court:pick(COURT_PALETTES,random).id,
+    height:body.height,
+    build:body.build
+  };
+}
+
 export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
   const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}:identity`));
   const {archetype,baseRatings,peakRatings,maintenance,development,startAge,age,potential,ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index,week,startAgeOverride);
@@ -180,6 +201,7 @@ export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
   const identity=generateIdentity({gender,culture,random});
   const citizenship=citizenshipFor(club.regionId,{country:club.country},random);
   const handedness=random()<.13?'left':'right';
+  const appearance=generatedAppearance(gender,identity,random);
   const formats={};
   for(const format of FORMATS){
     const bias=format==='doubles'?formatBias:-formatBias;
@@ -203,6 +225,7 @@ export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
     maintenance,
     potential,
     handedness,
+    appearance,
     archetypeId:archetype.id,
     archetypeLabel:archetype.style,
     ratings,

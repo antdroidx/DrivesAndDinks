@@ -183,3 +183,14 @@ test('match-up settings control gameplay before the first serve',()=>{
   assert.match(main,/setReplayEnabled\(event\.target\.checked\)/);
   assert.match(css,/\.court-app \.game #aim-pad:not\(\.ball-control-hidden\)\{display:grid!important/);
 });
+test('generated player profiles expose look, ratings and career history',()=>{
+  const main=read('src/career/main.js'),population=read('src/career/population.js'),css=read('career/career.css');
+  assert.match(main,/function renderAthleteProfile\(/);
+  assert.match(main,/data-action="open-player"/);
+  assert.match(main,/athlete-profile-preview/);
+  assert.match(main,/CAREER HISTORY/);
+  assert.match(main,/RATING TRACKING/);
+  assert.match(population,/function generatedAppearance\(/);
+  assert.match(population,/headwearRoll/);
+  assert.match(css,/\.athlete-profile-header/);
+});

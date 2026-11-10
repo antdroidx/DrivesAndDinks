@@ -47,6 +47,19 @@ test('a club roster matches its advertised member count',()=>{
   assert.equal(new Set(roster.map(athlete=>athlete.id)).size,roster.length);
 });
 
+test('generated athletes vary their outfits, colors, hairstyles and accessories',()=>{
+  const club=buildClubIndex(SEED,'north-america')[0];
+  const roster=buildClubRoster(SEED,club);
+  const values=key=>new Set(roster.map(player=>player.appearance?.[key]));
+  assert.ok(values('outfit').size>=2,'outfits should vary');
+  assert.ok(values('shirtColor').size>=3,'kit colors should vary');
+  assert.ok(values('hairStyle').size>=4,'hairstyles should vary');
+  assert.ok(values('headwear').size>=2,'headwear should vary');
+  assert.ok(values('eyewear').size>=2,'eyewear should vary');
+  assert.ok(values('paddleColor').size>=4,'paddle colors should vary');
+  assert.ok(Math.max(...roster.map(player=>player.appearance.height))-Math.min(...roster.map(player=>player.appearance.height))>10,'body sizes should vary');
+  assert.deepEqual(buildAthlete(SEED,club,0),buildAthlete(SEED,club,0),'appearance remains deterministic');
+});
 test('generated athletes are stable, fully rated and inside the rating band',()=>{
   const clubs=buildClubIndex(SEED,'north-america');
   const club=clubs[3];
