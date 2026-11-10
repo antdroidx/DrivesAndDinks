@@ -110,7 +110,7 @@ test('career setup, loadout and history expose complete player information',()=>
 
 test('career matches enter through a complete matchup screen and return through a result screen',()=>{
   const gameMain=read('src/main.js');
-  assert.match(gameMain,/showMatchIntro\(game\.players,\(\)=>\{game\.setPaused\(false\);beginConfiguredMatch\(\)\}/);
+  assert.match(gameMain,/showMatchIntro\(game\.players,savedEngineState\?beginSaved:beginFresh/);
   assert.match(gameMain,/careerMatch\.matchup\.playerTeamName/);
   assert.match(gameMain,/careerMatch\.matchup\.team/);
   assert.match(gameMain,/Your team: \$\{yourTeamName\}/);
@@ -211,4 +211,14 @@ test('profile-owned headwear matches the displayed and rendered color',()=>{
   assert.match(main,/equipHeadwear\(app\.career,event\.target\.value\)/);
   assert.match(anime,/const capColor=d\.headwearColor\?\?d\.trim/);
   assert.match(profile,/const capColor=d\.headwearColor\?\?d\.trim/);
+});
+test('career match handoff preserves route and offers resume or restart',()=>{
+  const html=read('index.html'),main=read('src/main.js'),careerMain=read('src/career/main.js');
+  assert.match(html,/id="restart-match"/);
+  assert.match(careerMain,/'career-return-path':location\.pathname/);
+  assert.match(careerMain,/location\.pathname\.includes\('\/dev\/'\)\?'\.\.\/'/);
+  assert.match(main,/career-return-path/);
+  assert.match(main,/savedEngineState\?'RESUME MATCH →':'ENTER MATCH →'/);
+  assert.match(main,/savedEngineState\?'RESTART MATCH':null/);
+  assert.match(main,/const beginFresh=\(\)=>\{clearEngineState\(\)/);
 });

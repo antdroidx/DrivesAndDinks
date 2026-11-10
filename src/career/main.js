@@ -1187,8 +1187,8 @@ function renderCalendar(){
 // ---- events ---------------------------------------------------------------
 
 function careerMatchUrl(){
-  const standalone=location.pathname.includes('/career/');
-  return standalone?'../dev/?career-match=1&career-return=career':'../?career-match=1&career-return=career-mode';
+  const standalone=location.pathname.includes('/career/'),gamePath=standalone?(location.pathname.includes('/dev/')?'../':'../dev/'):'../',params=new URLSearchParams({'career-match':'1','career-return':standalone?'career':'career-mode','career-return-path':location.pathname});
+  return `${gamePath}?${params}`;
 }
 
 function apply(result){

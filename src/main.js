@@ -92,7 +92,7 @@ function drawPlayerNameplate(p,q,height){
 }
 function drawPlayer(c,options){const custom=options.personalize?{customHeight:artPreferences.height===''?undefined:Number(artPreferences.height),customBuild:artPreferences.build===''?undefined:.05+Number(artPreferences.build)*.0105}:{};return detailedArtAvailable?drawAnimeGame(c,{...options,...custom,style:artPreferences.style,look:artPreferences.look,outfit:options.outfit??options.appearance?.outfit??artPreferences.outfit}):drawPixelCharacter(c,options)}
 
-const matchIntroDialog=document.querySelector('#match-intro'),matchIntroTeamsRoot=document.querySelector('#match-intro-teams'),beginMatchButton=document.querySelector('#begin-match');
+const matchIntroDialog=document.querySelector('#match-intro'),matchIntroTeamsRoot=document.querySelector('#match-intro-teams'),beginMatchButton=document.querySelector('#begin-match'),restartMatchButton=document.querySelector('#restart-match');
 const sideSwitchDialog=document.querySelector('#side-switch-dialog'),sideSwitchContinue=document.querySelector('#side-switch-continue');
 function showSideSwitchNotice(){if(sideSwitchDialog.open)return;game.setPaused(true);sideSwitchDialog.showModal()}
 sideSwitchContinue.onclick=()=>{sideSwitchDialog.close();game.setPaused(false);syncPauseButton()};sideSwitchDialog.oncancel=event=>event.preventDefault();
@@ -109,10 +109,10 @@ function bindMatchIntroSettings(){
  if(ballControl)ballControl.onchange=event=>setBallControlVisible(event.target.checked);
  if(sound)sound.onchange=event=>setSoundEnabled(event.target.checked);
 }
-function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH-UP',action='START MATCH →',entry=null}={}){
+function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH-UP',action='START MATCH →',secondaryAction=null,onSecondary=null,entry=null}={}){
  matchIntroTeamsRoot.replaceChildren();
  syncMatchIntroSettings();bindMatchIntroSettings();
- const introKicker=matchIntroDialog.querySelector('.intro-heading small'),introTitle=matchIntroDialog.querySelector('#match-intro-title');if(introKicker)introKicker.textContent=kicker;if(introTitle)introTitle.textContent=title;beginMatchButton.textContent=action;
+ const introKicker=matchIntroDialog.querySelector('.intro-heading small'),introTitle=matchIntroDialog.querySelector('#match-intro-title');if(introKicker)introKicker.textContent=kicker;if(introTitle)introTitle.textContent=title;beginMatchButton.textContent=action;restartMatchButton.hidden=!secondaryAction;restartMatchButton.textContent=secondaryAction??'RESTART MATCH';
  let entrySummary=matchIntroDialog.querySelector('#match-entry-summary');if(!entrySummary){entrySummary=document.createElement('div');entrySummary.id='match-entry-summary';entrySummary.className='match-entry-summary';matchIntroDialog.querySelector('.intro-heading').after(entrySummary)}entrySummary.hidden=!entry;entrySummary.replaceChildren();if(entry){for(const line of entry){const row=document.createElement('p');row.textContent=line;entrySummary.append(row)}}
  const introTeams=matchIntroTeams(players);for(const team of introTeams){
   const section=document.createElement('section');section.className='intro-team';section.dataset.team=String(team.team);
@@ -132,7 +132,7 @@ function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH
   if(team.team===0&&introTeams.some(entry=>entry.team===1)){const versus=document.createElement('div');versus.className='intro-vs';versus.textContent='VS';matchIntroTeamsRoot.append(versus)}
  }
  matchIntroDialog.oncancel=event=>event.preventDefault();
- beginMatchButton.onclick=()=>{matchIntroDialog.close();onBegin()};
+ beginMatchButton.onclick=()=>{matchIntroDialog.close();onBegin()};restartMatchButton.onclick=()=>{if(!onSecondary)return;matchIntroDialog.close();onSecondary()};
  syncMatchIntroSettings();matchIntroDialog.showModal();
   const introHeading=matchIntroDialog.querySelector('.intro-heading');introHeading.tabIndex=-1;introHeading.focus({preventScroll:true});matchIntroDialog.scrollTop=0;
 }
@@ -457,7 +457,7 @@ startScreen=setupStartScreen({onPlay:()=>selectionUI.open(),version:'0.1.0',buil
 // A career match arrives from the career mode with its field already drawn
 // and its lineup already built from the career athlete's own attributes.
 const careerQuery=new URLSearchParams(location.search),careerMatch=readPendingMatch()&&careerQuery.has(CAREER_MATCH_PARAM)?readPendingMatch():null;
-const careerReturnPath=careerQuery.get('career-return')==='career'?(location.pathname.startsWith('/dev/')?'../career/':'./career/'):'./career-mode/';
+const requestedCareerReturnPath=careerQuery.get('career-return-path'),careerReturnPath=requestedCareerReturnPath?.startsWith('/')?requestedCareerReturnPath:(careerQuery.get('career-return')==='career'?(location.pathname.startsWith('/dev/')?'../career/':'./career/'):'./career-mode/');
 let careerResultCommitted=false;
 if(careerMatch){
   startScreen?.close();
@@ -465,7 +465,7 @@ if(careerMatch){
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
   game.configure({format:careerMatch.matchup.format,showNameTags:game.showNameTags!==false,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
-  const savedEngineState=readEngineState(careerMatch.matchId);if(savedEngineState)game.restore(savedEngineState);
+  const savedEngineState=readEngineState(careerMatch.matchId);
   game.mode='play';
   game.setDifficulty(careerMatch.difficulty??'normal');syncDifficultyButton();
   game.setPaused(true);
@@ -488,7 +488,9 @@ if(careerMatch){
     opponentTeamName===opponentPlayers?`Opponent: ${opponentPlayers}`:`Opponent: ${opponentTeamName} — ${opponentPlayers}`,
     scoringLabel
   ];
-  showMatchIntro(game.players,()=>{game.setPaused(false);beginConfiguredMatch()},{kicker:'CAREER MATCH',title:'THE MATCH-UP',action:'ENTER MATCH →',entry});
+  const beginFresh=()=>{clearEngineState();game.setPaused(false);beginConfiguredMatch()};
+  const beginSaved=()=>{if(savedEngineState)game.restore(savedEngineState);game.setPaused(false);beginConfiguredMatch()};
+  showMatchIntro(game.players,savedEngineState?beginSaved:beginFresh,{kicker:'CAREER MATCH',title:'THE MATCH-UP',action:savedEngineState?'RESUME MATCH →':'ENTER MATCH →',secondaryAction:savedEngineState?'RESTART MATCH':null,onSecondary:savedEngineState?beginFresh:null,entry});
   last=0;acc=0;
 }
 
