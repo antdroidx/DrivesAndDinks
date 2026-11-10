@@ -1,0 +1,5458 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-11-10T02:58:09.424Z",
+  "methodology": {
+    "scope": "Statistical career prospect model using the branch creation, aging, training, rating, ranking, contract and finance functions. Matches and event placements are batch-sampled from the same skill-gap model; this is not a human playtest and does not run full engine rallies.",
+    "ages": [
+      15,
+      20,
+      30,
+      40,
+      50
+    ],
+    "samplesPerCohort": 100,
+    "years": 10,
+    "horizonWeeks": 520,
+    "experience": "casual",
+    "policies": [
+      "Trains up to the age cap every week and plays one strongest eligible event or division weekly, respecting one active league and two amateur tournaments per month.",
+      "Trains once a fortnight and plays one doubles event a fortnight."
+    ],
+    "ratingProDefinition": "First time any discipline rating reaches the 4.95 tour floor.",
+    "contractDefinition": "First automatic Futures contract offer under the current top-50/recommendation rules.",
+    "proEventDefinition": "First Pro League or MLP appearance.",
+    "rawSamplesIncluded": false,
+    "longScoreRating": "Current corrected mode: long scores are normalized to the 11-point rating scale.",
+    "caveats": [
+      "The selected experience profile sets the provisional starting level; compare separate runs before generalizing across player backgrounds.",
+      "The model assumes disciplined weekly training and event play for the committed cohort.",
+      "CPU opponents are sampled around the entered division rather than replaying the entire regional world.",
+      "Full engine rally quality and human input skill are separate variables not modeled here."
+    ]
+  },
+  "summary": [
+    {
+      "age": 15,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 51,
+          "tourPoints": 0,
+          "national": 234,
+          "contract": 51,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.396,
+          "bestRatingP10": 5.093,
+          "bestRatingP50": 5.299,
+          "bestRatingP90": 6.255,
+          "worldRankMedian": 493,
+          "matchesMean": 836.94,
+          "eventsMean": 177.58,
+          "trainingSessionsMean": 542.69
+        }
+      }
+    },
+    {
+      "age": 20,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 38,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 38,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.473,
+          "bestRatingP10": 5.223,
+          "bestRatingP50": 5.303,
+          "bestRatingP90": 6.324,
+          "worldRankMedian": 488,
+          "matchesMean": 832.52,
+          "eventsMean": 175.36,
+          "trainingSessionsMean": 529.76
+        }
+      }
+    },
+    {
+      "age": 30,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 44,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 44,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.515,
+          "bestRatingP10": 5.117,
+          "bestRatingP50": 5.327,
+          "bestRatingP90": 6.395,
+          "worldRankMedian": 493,
+          "matchesMean": 844.63,
+          "eventsMean": 178.93,
+          "trainingSessionsMean": 536.38
+        }
+      }
+    },
+    {
+      "age": 40,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 68,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 68,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.183,
+          "bestRatingP10": 4.83,
+          "bestRatingP50": 5.235,
+          "bestRatingP90": 5.369,
+          "worldRankMedian": 499,
+          "matchesMean": 824.95,
+          "eventsMean": 177.72,
+          "trainingSessionsMean": 547.34
+        }
+      }
+    },
+    {
+      "age": 50,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 75,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 75,
+          "proEvent": 79,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.157,
+          "bestRatingP10": 4.818,
+          "bestRatingP50": 5.218,
+          "bestRatingP90": 5.348,
+          "worldRankMedian": 502,
+          "matchesMean": 803.96,
+          "eventsMean": 174.18,
+          "trainingSessionsMean": 546.66
+        }
+      }
+    },
+    {
+      "age": 15,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "proEvent": {
+          "count": 94,
+          "trials": 100,
+          "rate": 0.94,
+          "ci95": [
+            0.8752303146877748,
+            0.9722142547333433
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 155,
+          "tourPoints": 1,
+          "national": 246,
+          "contract": 211,
+          "proEvent": 231,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.276,
+          "bestRatingP10": 4.797,
+          "bestRatingP50": 5.079,
+          "bestRatingP90": 6.041,
+          "worldRankMedian": 677,
+          "matchesMean": 668.36,
+          "eventsMean": 140.05,
+          "trainingSessionsMean": 259.69
+        }
+      }
+    },
+    {
+      "age": 20,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "proEvent": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 92,
+          "tourPoints": 0,
+          "national": 138,
+          "contract": 141,
+          "proEvent": 179,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.52,
+          "bestRatingP10": 4.879,
+          "bestRatingP50": 5.22,
+          "bestRatingP90": 6.43,
+          "worldRankMedian": 680,
+          "matchesMean": 667.98,
+          "eventsMean": 140.07,
+          "trainingSessionsMean": 259.66
+        }
+      }
+    },
+    {
+      "age": 30,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 98,
+          "trials": 100,
+          "rate": 0.98,
+          "ci95": [
+            0.9299868370580063,
+            0.9944981477650318
+          ]
+        },
+        "proEvent": {
+          "count": 96,
+          "trials": 100,
+          "rate": 0.96,
+          "ci95": [
+            0.9016278276739262,
+            0.984336949448152
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 116,
+          "tourPoints": 0,
+          "national": 186,
+          "contract": 158,
+          "proEvent": 179,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.407,
+          "bestRatingP10": 4.859,
+          "bestRatingP50": 5.336,
+          "bestRatingP90": 6.04,
+          "worldRankMedian": 662,
+          "matchesMean": 665.77,
+          "eventsMean": 138.83,
+          "trainingSessionsMean": 259.68
+        }
+      }
+    },
+    {
+      "age": 40,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "proEvent": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 139,
+          "tourPoints": 0,
+          "national": 294,
+          "contract": 188,
+          "proEvent": 230,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.046,
+          "bestRatingP10": 4.754,
+          "bestRatingP50": 4.972,
+          "bestRatingP90": 5.463,
+          "worldRankMedian": 717,
+          "matchesMean": 656.13,
+          "eventsMean": 138.17,
+          "trainingSessionsMean": 259.64
+        }
+      }
+    },
+    {
+      "age": 50,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 97,
+          "trials": 100,
+          "rate": 0.97,
+          "ci95": [
+            0.915479219195973,
+            0.9897456617765851
+          ]
+        },
+        "proEvent": {
+          "count": 96,
+          "trials": 100,
+          "rate": 0.96,
+          "ci95": [
+            0.9016278276739262,
+            0.984336949448152
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 147,
+          "tourPoints": 1,
+          "national": 342,
+          "contract": 227,
+          "proEvent": 233,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 4.9,
+          "bestRatingP10": 4.714,
+          "bestRatingP50": 4.872,
+          "bestRatingP90": 5.145,
+          "worldRankMedian": 729,
+          "matchesMean": 658.99,
+          "eventsMean": 139.22,
+          "trainingSessionsMean": 259.6
+        }
+      }
+    }
+  ],
+  "results": [
+    {
+      "age": 15,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 51,
+          "tourPoints": 0,
+          "national": 234,
+          "contract": 51,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.396,
+          "bestRatingP10": 5.093,
+          "bestRatingP50": 5.299,
+          "bestRatingP90": 6.255,
+          "worldRankMedian": 493,
+          "matchesMean": 836.94,
+          "eventsMean": 177.58,
+          "trainingSessionsMean": 542.69
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150000,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.022,
+            "mixed": 2.515
+          },
+          "bestRating": 5.022,
+          "finalSkillAverage": 94,
+          "finalRank": 524,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 50,
+            "tourPoints": 0,
+            "national": 234,
+            "contract": 50,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 796,
+          "events": 169,
+          "training": 538,
+          "rejectedHighTier": 206,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150010,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.093,
+            "mixed": 2.515
+          },
+          "bestRating": 5.093,
+          "finalSkillAverage": 97,
+          "finalRank": 571,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 51,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 51,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 871,
+          "events": 182,
+          "training": 536,
+          "rejectedHighTier": 196,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150020,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 6.255,
+            "mixed": 2.515
+          },
+          "bestRating": 6.255,
+          "finalSkillAverage": 88,
+          "finalRank": 480,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 62,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 62,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 737,
+          "events": 158,
+          "training": 551,
+          "rejectedHighTier": 214,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150030,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 6.338,
+            "mixed": 2.515
+          },
+          "bestRating": 6.338,
+          "finalSkillAverage": 97,
+          "finalRank": 450,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": 234,
+            "contract": 44,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 676,
+          "events": 144,
+          "training": 541,
+          "rejectedHighTier": 218,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150040,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 6.386,
+            "mixed": 2.515
+          },
+          "bestRating": 6.386,
+          "finalSkillAverage": 93,
+          "finalRank": 496,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 50,
+            "tourPoints": 0,
+            "national": 234,
+            "contract": 50,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 694,
+          "events": 148,
+          "training": 534,
+          "rejectedHighTier": 217,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150050,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.246,
+            "mixed": 2.515
+          },
+          "bestRating": 5.246,
+          "finalSkillAverage": 92,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": 234,
+            "contract": 44,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 794,
+          "events": 167,
+          "training": 541,
+          "rejectedHighTier": 207,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150060,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.288,
+            "mixed": 2.515
+          },
+          "bestRating": 5.288,
+          "finalSkillAverage": 98,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 51,
+            "tourPoints": 0,
+            "national": 246,
+            "contract": 51,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 852,
+          "events": 180,
+          "training": 546,
+          "rejectedHighTier": 200,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150070,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.334,
+            "mixed": 2.515
+          },
+          "bestRating": 5.334,
+          "finalSkillAverage": 92,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 59,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 59,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 835,
+          "events": 179,
+          "training": 548,
+          "rejectedHighTier": 200,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150080,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.353,
+            "mixed": 2.515
+          },
+          "bestRating": 5.353,
+          "finalSkillAverage": 99,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 62,
+            "tourPoints": 2,
+            "national": 126,
+            "contract": 62,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 857,
+          "events": 181,
+          "training": 538,
+          "rejectedHighTier": 198,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150090,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.343,
+            "mixed": 2.515
+          },
+          "bestRating": 5.343,
+          "finalSkillAverage": 96,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 51,
+            "tourPoints": 0,
+            "national": 234,
+            "contract": 51,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 819,
+          "events": 173,
+          "training": 540,
+          "rejectedHighTier": 204,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150100,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.297,
+            "mixed": 2.515
+          },
+          "bestRating": 5.297,
+          "finalSkillAverage": 95,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 153,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 153,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 918,
+          "events": 204,
+          "training": 544,
+          "rejectedHighTier": 181,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "committed",
+          "seed": 1150110,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.358,
+            "mixed": 2.515
+          },
+          "bestRating": 5.358,
+          "finalSkillAverage": 94,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 104,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 104,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 835,
+          "events": 187,
+          "training": 533,
+          "rejectedHighTier": 181,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 20,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 38,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 38,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.473,
+          "bestRatingP10": 5.223,
+          "bestRatingP50": 5.303,
+          "bestRatingP90": 6.324,
+          "worldRankMedian": 488,
+          "matchesMean": 832.52,
+          "eventsMean": 175.36,
+          "trainingSessionsMean": 529.76
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200000,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.288,
+            "mixed": 2.997
+          },
+          "bestRating": 5.288,
+          "finalSkillAverage": 99,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 297,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 297,
+            "proEvent": 335,
+            "finals": null
+          },
+          "matches": 1073,
+          "events": 245,
+          "training": 532,
+          "rejectedHighTier": 145,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200010,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.393,
+            "mixed": 2.997
+          },
+          "bestRating": 5.393,
+          "finalSkillAverage": 99,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 38,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 38,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 820,
+          "events": 171,
+          "training": 528,
+          "rejectedHighTier": 200,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200020,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.357,
+            "mixed": 2.997
+          },
+          "bestRating": 5.357,
+          "finalSkillAverage": 99,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 109,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 128,
+            "proEvent": 129,
+            "finals": null
+          },
+          "matches": 874,
+          "events": 189,
+          "training": 526,
+          "rejectedHighTier": 187,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200030,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.274,
+            "mixed": 2.997
+          },
+          "bestRating": 5.274,
+          "finalSkillAverage": 99,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 35,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 35,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 820,
+          "events": 172,
+          "training": 528,
+          "rejectedHighTier": 199,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200040,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.362,
+            "mixed": 2.997
+          },
+          "bestRating": 5.362,
+          "finalSkillAverage": 99,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 35,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 35,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 841,
+          "events": 175,
+          "training": 532,
+          "rejectedHighTier": 197,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200050,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.285,
+            "mixed": 2.997
+          },
+          "bestRating": 5.285,
+          "finalSkillAverage": 99,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 29,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 29,
+            "proEvent": 31,
+            "finals": null
+          },
+          "matches": 798,
+          "events": 170,
+          "training": 528,
+          "rejectedHighTier": 194,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200060,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.265,
+            "mixed": 2.997
+          },
+          "bestRating": 5.265,
+          "finalSkillAverage": 99,
+          "finalRank": 499,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 43,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 43,
+            "proEvent": 75,
+            "finals": null
+          },
+          "matches": 860,
+          "events": 179,
+          "training": 535,
+          "rejectedHighTier": 197,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200070,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.303,
+            "mixed": 2.997
+          },
+          "bestRating": 5.303,
+          "finalSkillAverage": 99,
+          "finalRank": 502,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 44,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 848,
+          "events": 176,
+          "training": 536,
+          "rejectedHighTier": 197,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200080,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.335,
+            "mixed": 2.997
+          },
+          "bestRating": 5.335,
+          "finalSkillAverage": 99,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 35,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 35,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 814,
+          "events": 171,
+          "training": 531,
+          "rejectedHighTier": 200,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200090,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.348,
+            "mixed": 2.997
+          },
+          "bestRating": 5.348,
+          "finalSkillAverage": 99,
+          "finalRank": 511,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 29,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 29,
+            "proEvent": 31,
+            "finals": null
+          },
+          "matches": 826,
+          "events": 171,
+          "training": 531,
+          "rejectedHighTier": 200,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200100,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 6.563,
+            "mixed": 2.997
+          },
+          "bestRating": 6.563,
+          "finalSkillAverage": 99,
+          "finalRank": 566,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 38,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 38,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 722,
+          "events": 152,
+          "training": 530,
+          "rejectedHighTier": 206,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "committed",
+          "seed": 1200110,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 6.212,
+            "mixed": 2.997
+          },
+          "bestRating": 6.212,
+          "finalSkillAverage": 99,
+          "finalRank": 385,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 35,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 35,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 893,
+          "events": 201,
+          "training": 530,
+          "rejectedHighTier": 179,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 30,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 44,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 44,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.515,
+          "bestRatingP10": 5.117,
+          "bestRatingP50": 5.327,
+          "bestRatingP90": 6.395,
+          "worldRankMedian": 493,
+          "matchesMean": 844.63,
+          "eventsMean": 178.93,
+          "trainingSessionsMean": 536.38
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300000,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 6.292,
+            "mixed": 3
+          },
+          "bestRating": 6.292,
+          "finalSkillAverage": 92,
+          "finalRank": 450,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 51,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 51,
+            "proEvent": 77,
+            "finals": null
+          },
+          "matches": 745,
+          "events": 156,
+          "training": 526,
+          "rejectedHighTier": 207,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300010,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 6.301,
+            "mixed": 3
+          },
+          "bestRating": 6.301,
+          "finalSkillAverage": 98,
+          "finalRank": 434,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 51,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 51,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 750,
+          "events": 160,
+          "training": 535,
+          "rejectedHighTier": 202,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300020,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.025,
+            "mixed": 3
+          },
+          "bestRating": 5.025,
+          "finalSkillAverage": 92,
+          "finalRank": 553,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 44,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 837,
+          "events": 175,
+          "training": 539,
+          "rejectedHighTier": 198,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300030,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.401,
+            "mixed": 3
+          },
+          "bestRating": 5.401,
+          "finalSkillAverage": 95,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 44,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 846,
+          "events": 176,
+          "training": 535,
+          "rejectedHighTier": 199,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300040,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.396,
+            "mixed": 3
+          },
+          "bestRating": 5.396,
+          "finalSkillAverage": 94,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 188,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 188,
+            "proEvent": 230,
+            "finals": null
+          },
+          "matches": 990,
+          "events": 218,
+          "training": 536,
+          "rejectedHighTier": 167,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300050,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.383,
+            "mixed": 3
+          },
+          "bestRating": 5.383,
+          "finalSkillAverage": 94,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 44,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 856,
+          "events": 179,
+          "training": 540,
+          "rejectedHighTier": 198,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300060,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.401,
+            "mixed": 3
+          },
+          "bestRating": 5.401,
+          "finalSkillAverage": 99,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 117,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 117,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 887,
+          "events": 191,
+          "training": 528,
+          "rejectedHighTier": 184,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300070,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.235,
+            "mixed": 3
+          },
+          "bestRating": 5.235,
+          "finalSkillAverage": 89,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 38,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 38,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 846,
+          "events": 176,
+          "training": 535,
+          "rejectedHighTier": 197,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300080,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 6.395,
+            "mixed": 3
+          },
+          "bestRating": 6.395,
+          "finalSkillAverage": 96,
+          "finalRank": 480,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 43,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 43,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 737,
+          "events": 154,
+          "training": 534,
+          "rejectedHighTier": 211,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300090,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.327,
+            "mixed": 3
+          },
+          "bestRating": 5.327,
+          "finalSkillAverage": 93,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 44,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 840,
+          "events": 176,
+          "training": 528,
+          "rejectedHighTier": 198,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300100,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.323,
+            "mixed": 3
+          },
+          "bestRating": 5.323,
+          "finalSkillAverage": 93,
+          "finalRank": 517,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 43,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 43,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 860,
+          "events": 179,
+          "training": 535,
+          "rejectedHighTier": 196,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "committed",
+          "seed": 1300110,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 6.306,
+            "mixed": 3
+          },
+          "bestRating": 6.306,
+          "finalSkillAverage": 99,
+          "finalRank": 467,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 44,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 44,
+            "proEvent": 80,
+            "finals": null
+          },
+          "matches": 732,
+          "events": 153,
+          "training": 529,
+          "rejectedHighTier": 213,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 40,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 68,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 68,
+          "proEvent": 74,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.183,
+          "bestRatingP10": 4.83,
+          "bestRatingP50": 5.235,
+          "bestRatingP90": 5.369,
+          "worldRankMedian": 499,
+          "matchesMean": 824.95,
+          "eventsMean": 177.72,
+          "trainingSessionsMean": 547.34
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400000,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.227,
+            "mixed": 2.956
+          },
+          "bestRating": 5.227,
+          "finalSkillAverage": 75,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 116,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 116,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 891,
+          "events": 184,
+          "training": 553,
+          "rejectedHighTier": 200,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400010,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.272,
+            "mixed": 2.956
+          },
+          "bestRating": 5.272,
+          "finalSkillAverage": 84,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 51,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 51,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 888,
+          "events": 185,
+          "training": 547,
+          "rejectedHighTier": 195,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400020,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.235,
+            "mixed": 2.956
+          },
+          "bestRating": 5.235,
+          "finalSkillAverage": 68,
+          "finalRank": 499,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 75,
+            "tourPoints": 0,
+            "national": 138,
+            "contract": 75,
+            "proEvent": 79,
+            "finals": null
+          },
+          "matches": 856,
+          "events": 183,
+          "training": 546,
+          "rejectedHighTier": 202,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400030,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.981,
+            "mixed": 2.956
+          },
+          "bestRating": 4.981,
+          "finalSkillAverage": 75,
+          "finalRank": 553,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 83,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 83,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 914,
+          "events": 191,
+          "training": 537,
+          "rejectedHighTier": 190,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400040,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.83,
+            "mixed": 2.956
+          },
+          "bestRating": 4.83,
+          "finalSkillAverage": 73,
+          "finalRank": 608,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 140,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 140,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 890,
+          "events": 195,
+          "training": 539,
+          "rejectedHighTier": 182,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400050,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.988,
+            "mixed": 2.956
+          },
+          "bestRating": 4.988,
+          "finalSkillAverage": 69,
+          "finalRank": 517,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 67,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 67,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 739,
+          "events": 159,
+          "training": 545,
+          "rejectedHighTier": 209,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400060,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.271,
+            "mixed": 2.956
+          },
+          "bestRating": 5.271,
+          "finalSkillAverage": 83,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 92,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 92,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 933,
+          "events": 201,
+          "training": 553,
+          "rejectedHighTier": 181,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400070,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.834,
+            "mixed": 2.956
+          },
+          "bestRating": 4.834,
+          "finalSkillAverage": 67,
+          "finalRank": 806,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 201,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 201,
+            "proEvent": 230,
+            "finals": null
+          },
+          "matches": 860,
+          "events": 193,
+          "training": 556,
+          "rejectedHighTier": 182,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400080,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.923,
+            "mixed": 2.956
+          },
+          "bestRating": 5.923,
+          "finalSkillAverage": 76,
+          "finalRank": 496,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 171,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 171,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 918,
+          "events": 199,
+          "training": 531,
+          "rejectedHighTier": 176,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400090,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.236,
+            "mixed": 2.956
+          },
+          "bestRating": 5.236,
+          "finalSkillAverage": 72,
+          "finalRank": 476,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 62,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 62,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 833,
+          "events": 177,
+          "training": 548,
+          "rejectedHighTier": 205,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400100,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.276,
+            "mixed": 2.956
+          },
+          "bestRating": 5.276,
+          "finalSkillAverage": 67,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 74,
+            "tourPoints": 0,
+            "national": 282,
+            "contract": 74,
+            "proEvent": 75,
+            "finals": null
+          },
+          "matches": 682,
+          "events": 147,
+          "training": 557,
+          "rejectedHighTier": 221,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "committed",
+          "seed": 1400110,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.19,
+            "mixed": 2.956
+          },
+          "bestRating": 5.19,
+          "finalSkillAverage": 81,
+          "finalRank": 524,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 59,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 59,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 842,
+          "events": 177,
+          "training": 546,
+          "rejectedHighTier": 203,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 50,
+      "policy": "committed",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "proEvent": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 75,
+          "tourPoints": 0,
+          "national": 126,
+          "contract": 75,
+          "proEvent": 79,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.157,
+          "bestRatingP10": 4.818,
+          "bestRatingP50": 5.218,
+          "bestRatingP90": 5.348,
+          "worldRankMedian": 502,
+          "matchesMean": 803.96,
+          "eventsMean": 174.18,
+          "trainingSessionsMean": 546.66
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500000,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.188,
+            "mixed": 2.956
+          },
+          "bestRating": 5.188,
+          "finalSkillAverage": 64,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 93,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 155,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 892,
+          "events": 197,
+          "training": 546,
+          "rejectedHighTier": 192,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500010,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.635,
+            "mixed": 2.956
+          },
+          "bestRating": 5.635,
+          "finalSkillAverage": 76,
+          "finalRank": 497,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 53,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 53,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 725,
+          "events": 149,
+          "training": 553,
+          "rejectedHighTier": 216,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500020,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.207,
+            "mixed": 2.956
+          },
+          "bestRating": 5.207,
+          "finalSkillAverage": 63,
+          "finalRank": 517,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 86,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 86,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 868,
+          "events": 186,
+          "training": 564,
+          "rejectedHighTier": 196,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500030,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.207,
+            "mixed": 2.956
+          },
+          "bestRating": 5.207,
+          "finalSkillAverage": 67,
+          "finalRank": 508,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 92,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 92,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 895,
+          "events": 191,
+          "training": 542,
+          "rejectedHighTier": 191,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500040,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.233,
+            "mixed": 2.956
+          },
+          "bestRating": 5.233,
+          "finalSkillAverage": 65,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 62,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 62,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 813,
+          "events": 174,
+          "training": 545,
+          "rejectedHighTier": 207,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500050,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.184,
+            "mixed": 2.956
+          },
+          "bestRating": 5.184,
+          "finalSkillAverage": 65,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 171,
+            "tourPoints": 2,
+            "national": 234,
+            "contract": 171,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 891,
+          "events": 202,
+          "training": 541,
+          "rejectedHighTier": 181,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500060,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.291,
+            "mixed": 2.956
+          },
+          "bestRating": 5.291,
+          "finalSkillAverage": 69,
+          "finalRank": 482,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 93,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 93,
+            "proEvent": 127,
+            "finals": null
+          },
+          "matches": 920,
+          "events": 192,
+          "training": 546,
+          "rejectedHighTier": 189,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500070,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.902,
+            "mixed": 2.956
+          },
+          "bestRating": 4.902,
+          "finalSkillAverage": 63,
+          "finalRank": 578,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 75,
+            "tourPoints": 0,
+            "national": 138,
+            "contract": 75,
+            "proEvent": 79,
+            "finals": null
+          },
+          "matches": 830,
+          "events": 178,
+          "training": 550,
+          "rejectedHighTier": 204,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500080,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.981,
+            "mixed": 2.956
+          },
+          "bestRating": 4.981,
+          "finalSkillAverage": 68,
+          "finalRank": 641,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 51,
+            "tourPoints": 0,
+            "national": 234,
+            "contract": 51,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 760,
+          "events": 162,
+          "training": 542,
+          "rejectedHighTier": 212,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500090,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.304,
+            "mixed": 2.956
+          },
+          "bestRating": 5.304,
+          "finalSkillAverage": 65,
+          "finalRank": 493,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 62,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 62,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 816,
+          "events": 183,
+          "training": 542,
+          "rejectedHighTier": 196,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500100,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.223,
+            "mixed": 2.956
+          },
+          "bestRating": 5.223,
+          "finalSkillAverage": 64,
+          "finalRank": 488,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 104,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 104,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 915,
+          "events": 198,
+          "training": 555,
+          "rejectedHighTier": 191,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "committed",
+          "seed": 1500110,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.21,
+            "mixed": 2.956
+          },
+          "bestRating": 5.21,
+          "finalSkillAverage": 75,
+          "finalRank": 533,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 59,
+            "tourPoints": 0,
+            "national": 126,
+            "contract": 59,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 880,
+          "events": 185,
+          "training": 552,
+          "rejectedHighTier": 196,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 15,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "proEvent": {
+          "count": 94,
+          "trials": 100,
+          "rate": 0.94,
+          "ci95": [
+            0.8752303146877748,
+            0.9722142547333433
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 155,
+          "tourPoints": 1,
+          "national": 246,
+          "contract": 211,
+          "proEvent": 231,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.276,
+          "bestRatingP10": 4.797,
+          "bestRatingP50": 5.079,
+          "bestRatingP90": 6.041,
+          "worldRankMedian": 677,
+          "matchesMean": 668.36,
+          "eventsMean": 140.05,
+          "trainingSessionsMean": 259.69
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150001,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 6.12,
+            "mixed": 2.515
+          },
+          "bestRating": 6.12,
+          "finalSkillAverage": 80,
+          "finalRank": 708,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 125,
+            "tourPoints": 4,
+            "national": null,
+            "contract": 307,
+            "proEvent": 335,
+            "finals": null
+          },
+          "matches": 664,
+          "events": 139,
+          "training": 260,
+          "rejectedHighTier": 69,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150011,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 4.724,
+            "mixed": 2.515
+          },
+          "bestRating": 4.724,
+          "finalSkillAverage": 80,
+          "finalRank": 876,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 110,
+            "tourPoints": 0,
+            "national": 186,
+            "contract": 115,
+            "proEvent": 127,
+            "finals": null
+          },
+          "matches": 636,
+          "events": 135,
+          "training": 260,
+          "rejectedHighTier": 67,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150021,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.016,
+            "mixed": 2.515
+          },
+          "bestRating": 5.016,
+          "finalSkillAverage": 77,
+          "finalRank": 677,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 171,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 347,
+            "proEvent": 387,
+            "finals": null
+          },
+          "matches": 733,
+          "events": 152,
+          "training": 260,
+          "rejectedHighTier": 58,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150031,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 4.776,
+            "mixed": 2.515
+          },
+          "bestRating": 4.776,
+          "finalSkillAverage": 83,
+          "finalRank": 824,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 147,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 212,
+            "proEvent": 232,
+            "finals": null
+          },
+          "matches": 720,
+          "events": 150,
+          "training": 260,
+          "rejectedHighTier": 67,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150041,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 4.93,
+            "mixed": 2.515
+          },
+          "bestRating": 4.93,
+          "finalSkillAverage": 80,
+          "finalRank": 652,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 115,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 115,
+            "proEvent": 129,
+            "finals": null
+          },
+          "matches": 654,
+          "events": 136,
+          "training": 260,
+          "rejectedHighTier": 71,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150051,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.083,
+            "mixed": 2.515
+          },
+          "bestRating": 5.083,
+          "finalSkillAverage": 80,
+          "finalRank": 748,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 134,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 137,
+            "proEvent": 138,
+            "finals": null
+          },
+          "matches": 664,
+          "events": 148,
+          "training": 260,
+          "rejectedHighTier": 58,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150061,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.05,
+            "mixed": 2.515
+          },
+          "bestRating": 5.05,
+          "finalSkillAverage": 82,
+          "finalRank": 765,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 163,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 260,
+            "proEvent": 285,
+            "finals": null
+          },
+          "matches": 678,
+          "events": 135,
+          "training": 260,
+          "rejectedHighTier": 63,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150071,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.003,
+            "mixed": 2.515
+          },
+          "bestRating": 5.003,
+          "finalSkillAverage": 77,
+          "finalRank": 702,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 171,
+            "tourPoints": 4,
+            "national": 390,
+            "contract": 188,
+            "proEvent": 231,
+            "finals": null
+          },
+          "matches": 629,
+          "events": 137,
+          "training": 259,
+          "rejectedHighTier": 90,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150081,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.366,
+            "mixed": 2.515
+          },
+          "bestRating": 5.366,
+          "finalSkillAverage": 86,
+          "finalRank": 872,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 171,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 211,
+            "proEvent": 230,
+            "finals": null
+          },
+          "matches": 612,
+          "events": 120,
+          "training": 260,
+          "rejectedHighTier": 65,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150091,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 5.038,
+            "mixed": 2.515
+          },
+          "bestRating": 5.038,
+          "finalSkillAverage": 82,
+          "finalRank": 663,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 146,
+            "tourPoints": 0,
+            "national": 246,
+            "contract": 188,
+            "proEvent": 190,
+            "finals": null
+          },
+          "matches": 735,
+          "events": 159,
+          "training": 260,
+          "rejectedHighTier": 57,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150101,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 4.823,
+            "mixed": 2.515
+          },
+          "bestRating": 4.823,
+          "finalSkillAverage": 79,
+          "finalRank": 781,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 188,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 236,
+            "proEvent": 241,
+            "finals": null
+          },
+          "matches": 710,
+          "events": 154,
+          "training": 260,
+          "rejectedHighTier": 64,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 15,
+          "policy": "light",
+          "seed": 1150111,
+          "startRatings": {
+            "singles": 2.515,
+            "doubles": 2.515,
+            "mixed": 2.515
+          },
+          "finalRatings": {
+            "singles": 2.515,
+            "doubles": 6.156,
+            "mixed": 2.515
+          },
+          "bestRating": 6.156,
+          "finalSkillAverage": 82,
+          "finalRank": 654,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 206,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 427,
+            "proEvent": 439,
+            "finals": null
+          },
+          "matches": 699,
+          "events": 141,
+          "training": 260,
+          "rejectedHighTier": 47,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 20,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "proEvent": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 92,
+          "tourPoints": 0,
+          "national": 138,
+          "contract": 141,
+          "proEvent": 179,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.52,
+          "bestRatingP10": 4.879,
+          "bestRatingP50": 5.22,
+          "bestRatingP90": 6.43,
+          "worldRankMedian": 680,
+          "matchesMean": 667.98,
+          "eventsMean": 140.07,
+          "trainingSessionsMean": 259.66
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200001,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.892,
+            "mixed": 2.997
+          },
+          "bestRating": 5.892,
+          "finalSkillAverage": 87,
+          "finalRank": 708,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 75,
+            "tourPoints": 0,
+            "national": 138,
+            "contract": 75,
+            "proEvent": 80,
+            "finals": null
+          },
+          "matches": 511,
+          "events": 103,
+          "training": 259,
+          "rejectedHighTier": 85,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200011,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 6.339,
+            "mixed": 2.997
+          },
+          "bestRating": 6.339,
+          "finalSkillAverage": 90,
+          "finalRank": 654,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 131,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 429,
+            "proEvent": 439,
+            "finals": null
+          },
+          "matches": 716,
+          "events": 150,
+          "training": 259,
+          "rejectedHighTier": 58,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200021,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 4.897,
+            "mixed": 2.997
+          },
+          "bestRating": 4.897,
+          "finalSkillAverage": 86,
+          "finalRank": 710,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 92,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 236,
+            "proEvent": 239,
+            "finals": null
+          },
+          "matches": 694,
+          "events": 141,
+          "training": 260,
+          "rejectedHighTier": 57,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200031,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.013,
+            "mixed": 2.997
+          },
+          "bestRating": 5.013,
+          "finalSkillAverage": 92,
+          "finalRank": 742,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 59,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 62,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 604,
+          "events": 126,
+          "training": 259,
+          "rejectedHighTier": 81,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200041,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.093,
+            "mixed": 2.997
+          },
+          "bestRating": 5.093,
+          "finalSkillAverage": 90,
+          "finalRank": 633,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 67,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 68,
+            "proEvent": 74,
+            "finals": null
+          },
+          "matches": 604,
+          "events": 117,
+          "training": 259,
+          "rejectedHighTier": 97,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200051,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 6.187,
+            "mixed": 2.997
+          },
+          "bestRating": 6.187,
+          "finalSkillAverage": 87,
+          "finalRank": 846,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 92,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 139,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 595,
+          "events": 121,
+          "training": 259,
+          "rejectedHighTier": 58,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200061,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.492,
+            "mixed": 2.997
+          },
+          "bestRating": 5.492,
+          "finalSkillAverage": 90,
+          "finalRank": 643,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 123,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 212,
+            "proEvent": 230,
+            "finals": null
+          },
+          "matches": 603,
+          "events": 122,
+          "training": 260,
+          "rejectedHighTier": 63,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200071,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 6.43,
+            "mixed": 2.997
+          },
+          "bestRating": 6.43,
+          "finalSkillAverage": 85,
+          "finalRank": 546,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 116,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 149,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 639,
+          "events": 132,
+          "training": 260,
+          "rejectedHighTier": 84,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200081,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.163,
+            "mixed": 2.997
+          },
+          "bestRating": 5.163,
+          "finalSkillAverage": 94,
+          "finalRank": 717,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 62,
+            "tourPoints": 1,
+            "national": 138,
+            "contract": 62,
+            "proEvent": 76,
+            "finals": null
+          },
+          "matches": 655,
+          "events": 145,
+          "training": 260,
+          "rejectedHighTier": 63,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200091,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 5.017,
+            "mixed": 2.997
+          },
+          "bestRating": 5.017,
+          "finalSkillAverage": 90,
+          "finalRank": 742,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 113,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 254,
+            "proEvent": 282,
+            "finals": null
+          },
+          "matches": 777,
+          "events": 170,
+          "training": 260,
+          "rejectedHighTier": 59,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200101,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 4.948,
+            "mixed": 2.997
+          },
+          "bestRating": 4.948,
+          "finalSkillAverage": 88,
+          "finalRank": 589,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 115,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 123,
+            "proEvent": 128,
+            "finals": null
+          },
+          "matches": 725,
+          "events": 154,
+          "training": 260,
+          "rejectedHighTier": 62,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 20,
+          "policy": "light",
+          "seed": 1200111,
+          "startRatings": {
+            "singles": 2.997,
+            "doubles": 2.997,
+            "mixed": 2.997
+          },
+          "finalRatings": {
+            "singles": 2.997,
+            "doubles": 4.914,
+            "mixed": 2.997
+          },
+          "bestRating": 4.914,
+          "finalSkillAverage": 90,
+          "finalRank": 742,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 75,
+            "tourPoints": 0,
+            "national": 138,
+            "contract": 75,
+            "proEvent": 79,
+            "finals": null
+          },
+          "matches": 628,
+          "events": 131,
+          "training": 260,
+          "rejectedHighTier": 64,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 30,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 98,
+          "trials": 100,
+          "rate": 0.98,
+          "ci95": [
+            0.9299868370580063,
+            0.9944981477650318
+          ]
+        },
+        "proEvent": {
+          "count": 96,
+          "trials": 100,
+          "rate": 0.96,
+          "ci95": [
+            0.9016278276739262,
+            0.984336949448152
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 116,
+          "tourPoints": 0,
+          "national": 186,
+          "contract": 158,
+          "proEvent": 179,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.407,
+          "bestRatingP10": 4.859,
+          "bestRatingP50": 5.336,
+          "bestRatingP90": 6.04,
+          "worldRankMedian": 662,
+          "matchesMean": 665.77,
+          "eventsMean": 138.83,
+          "trainingSessionsMean": 259.68
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300001,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.86,
+            "mixed": 3
+          },
+          "bestRating": 5.86,
+          "finalSkillAverage": 81,
+          "finalRank": 657,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 99,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 131,
+            "proEvent": 136,
+            "finals": null
+          },
+          "matches": 578,
+          "events": 121,
+          "training": 260,
+          "rejectedHighTier": 69,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300011,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 4.829,
+            "mixed": 3
+          },
+          "bestRating": 4.829,
+          "finalSkillAverage": 89,
+          "finalRank": 750,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 147,
+            "tourPoints": 2,
+            "national": null,
+            "contract": null,
+            "proEvent": null,
+            "finals": null
+          },
+          "matches": 814,
+          "events": 172,
+          "training": 260,
+          "rejectedHighTier": 46,
+          "madeRatingPro": true,
+          "madeContract": false,
+          "playedProEvent": false,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300021,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 6.01,
+            "mixed": 3
+          },
+          "bestRating": 6.01,
+          "finalSkillAverage": 77,
+          "finalRank": 592,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 147,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 315,
+            "proEvent": 335,
+            "finals": null
+          },
+          "matches": 691,
+          "events": 143,
+          "training": 260,
+          "rejectedHighTier": 76,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300031,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.059,
+            "mixed": 3
+          },
+          "bestRating": 5.059,
+          "finalSkillAverage": 85,
+          "finalRank": 637,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 123,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 140,
+            "proEvent": 181,
+            "finals": null
+          },
+          "matches": 673,
+          "events": 143,
+          "training": 260,
+          "rejectedHighTier": 59,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300041,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.861,
+            "mixed": 3
+          },
+          "bestRating": 5.861,
+          "finalSkillAverage": 81,
+          "finalRank": 593,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 123,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 182,
+            "proEvent": 183,
+            "finals": null
+          },
+          "matches": 557,
+          "events": 116,
+          "training": 260,
+          "rejectedHighTier": 76,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300051,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 4.74,
+            "mixed": 3
+          },
+          "bestRating": 4.74,
+          "finalSkillAverage": 80,
+          "finalRank": 796,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 123,
+            "tourPoints": 3,
+            "national": null,
+            "contract": 155,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 704,
+          "events": 147,
+          "training": 260,
+          "rejectedHighTier": 68,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300061,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 6.013,
+            "mixed": 3
+          },
+          "bestRating": 6.013,
+          "finalSkillAverage": 90,
+          "finalRank": 680,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 123,
+            "tourPoints": 3,
+            "national": null,
+            "contract": 147,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 632,
+          "events": 131,
+          "training": 260,
+          "rejectedHighTier": 77,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300071,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.939,
+            "mixed": 3
+          },
+          "bestRating": 5.939,
+          "finalSkillAverage": 77,
+          "finalRank": 586,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 99,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 99,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 591,
+          "events": 120,
+          "training": 260,
+          "rejectedHighTier": 81,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300081,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.947,
+            "mixed": 3
+          },
+          "bestRating": 5.947,
+          "finalSkillAverage": 88,
+          "finalRank": 806,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 92,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 92,
+            "proEvent": 128,
+            "finals": null
+          },
+          "matches": 590,
+          "events": 118,
+          "training": 260,
+          "rejectedHighTier": 70,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300091,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.336,
+            "mixed": 3
+          },
+          "bestRating": 5.336,
+          "finalSkillAverage": 80,
+          "finalRank": 790,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 122,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 211,
+            "proEvent": 230,
+            "finals": null
+          },
+          "matches": 563,
+          "events": 119,
+          "training": 260,
+          "rejectedHighTier": 87,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300101,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.132,
+            "mixed": 3
+          },
+          "bestRating": 5.132,
+          "finalSkillAverage": 79,
+          "finalRank": 748,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 155,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 403,
+            "proEvent": 440,
+            "finals": null
+          },
+          "matches": 709,
+          "events": 149,
+          "training": 260,
+          "rejectedHighTier": 53,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 30,
+          "policy": "light",
+          "seed": 1300111,
+          "startRatings": {
+            "singles": 3,
+            "doubles": 3,
+            "mixed": 3
+          },
+          "finalRatings": {
+            "singles": 3,
+            "doubles": 5.019,
+            "mixed": 3
+          },
+          "bestRating": 5.019,
+          "finalSkillAverage": 90,
+          "finalRank": 699,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 164,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 323,
+            "proEvent": 339,
+            "finals": null
+          },
+          "matches": 737,
+          "events": 160,
+          "training": 258,
+          "rejectedHighTier": 54,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 40,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "proEvent": {
+          "count": 95,
+          "trials": 100,
+          "rate": 0.95,
+          "ci95": [
+            0.8882480347279118,
+            0.9784566385436864
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 139,
+          "tourPoints": 0,
+          "national": 294,
+          "contract": 188,
+          "proEvent": 230,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 5.046,
+          "bestRatingP10": 4.754,
+          "bestRatingP50": 4.972,
+          "bestRatingP90": 5.463,
+          "worldRankMedian": 717,
+          "matchesMean": 656.13,
+          "eventsMean": 138.17,
+          "trainingSessionsMean": 259.64
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400001,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.154,
+            "mixed": 2.956
+          },
+          "bestRating": 5.154,
+          "finalSkillAverage": 70,
+          "finalRank": 756,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 116,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 147,
+            "proEvent": 179,
+            "finals": null
+          },
+          "matches": 658,
+          "events": 135,
+          "training": 260,
+          "rejectedHighTier": 67,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400011,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.726,
+            "mixed": 2.956
+          },
+          "bestRating": 5.726,
+          "finalSkillAverage": 81,
+          "finalRank": 512,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 140,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 230,
+            "proEvent": 231,
+            "finals": null
+          },
+          "matches": 704,
+          "events": 147,
+          "training": 260,
+          "rejectedHighTier": 64,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400021,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.14,
+            "mixed": 2.956
+          },
+          "bestRating": 5.14,
+          "finalSkillAverage": 66,
+          "finalRank": 677,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 188,
+            "tourPoints": 1,
+            "national": 342,
+            "contract": 285,
+            "proEvent": 287,
+            "finals": null
+          },
+          "matches": 683,
+          "events": 147,
+          "training": 260,
+          "rejectedHighTier": 57,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400031,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.093,
+            "mixed": 2.956
+          },
+          "bestRating": 5.093,
+          "finalSkillAverage": 76,
+          "finalRank": 654,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 110,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 170,
+            "proEvent": 178,
+            "finals": null
+          },
+          "matches": 640,
+          "events": 131,
+          "training": 260,
+          "rejectedHighTier": 69,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400041,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.937,
+            "mixed": 2.956
+          },
+          "bestRating": 4.937,
+          "finalSkillAverage": 70,
+          "finalRank": 853,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 131,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 179,
+            "proEvent": 183,
+            "finals": null
+          },
+          "matches": 709,
+          "events": 152,
+          "training": 260,
+          "rejectedHighTier": 63,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400051,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.959,
+            "mixed": 2.956
+          },
+          "bestRating": 4.959,
+          "finalSkillAverage": 67,
+          "finalRank": 670,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 163,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 326,
+            "proEvent": 338,
+            "finals": null
+          },
+          "matches": 707,
+          "events": 150,
+          "training": 260,
+          "rejectedHighTier": 61,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400061,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.982,
+            "mixed": 2.956
+          },
+          "bestRating": 4.982,
+          "finalSkillAverage": 80,
+          "finalRank": 635,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 149,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 188,
+            "proEvent": 230,
+            "finals": null
+          },
+          "matches": 725,
+          "events": 152,
+          "training": 259,
+          "rejectedHighTier": 61,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400071,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.128,
+            "mixed": 2.956
+          },
+          "bestRating": 5.128,
+          "finalSkillAverage": 66,
+          "finalRank": 652,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 187,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 195,
+            "proEvent": 231,
+            "finals": null
+          },
+          "matches": 593,
+          "events": 123,
+          "training": 260,
+          "rejectedHighTier": 90,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400081,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.201,
+            "mixed": 2.956
+          },
+          "bestRating": 5.201,
+          "finalSkillAverage": 74,
+          "finalRank": 759,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 110,
+            "tourPoints": 0,
+            "national": 186,
+            "contract": 110,
+            "proEvent": 126,
+            "finals": null
+          },
+          "matches": 595,
+          "events": 126,
+          "training": 259,
+          "rejectedHighTier": 80,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400091,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.88,
+            "mixed": 2.956
+          },
+          "bestRating": 4.88,
+          "finalSkillAverage": 70,
+          "finalRank": 859,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 122,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 155,
+            "proEvent": 180,
+            "finals": null
+          },
+          "matches": 586,
+          "events": 123,
+          "training": 260,
+          "rejectedHighTier": 73,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400101,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.969,
+            "mixed": 2.956
+          },
+          "bestRating": 4.969,
+          "finalSkillAverage": 68,
+          "finalRank": 717,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 134,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 203,
+            "proEvent": 230,
+            "finals": null
+          },
+          "matches": 636,
+          "events": 138,
+          "training": 260,
+          "rejectedHighTier": 71,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 40,
+          "policy": "light",
+          "seed": 1400111,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.066,
+            "mixed": 2.956
+          },
+          "bestRating": 5.066,
+          "finalSkillAverage": 78,
+          "finalRank": 571,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 131,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 404,
+            "proEvent": 439,
+            "finals": null
+          },
+          "matches": 760,
+          "events": 160,
+          "training": 260,
+          "rejectedHighTier": 65,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    },
+    {
+      "age": 50,
+      "policy": "light",
+      "summary": {
+        "ratingPro": {
+          "count": 100,
+          "trials": 100,
+          "rate": 1,
+          "ci95": [
+            0.9630051925239981,
+            0.9999999999999999
+          ]
+        },
+        "contract": {
+          "count": 97,
+          "trials": 100,
+          "rate": 0.97,
+          "ci95": [
+            0.915479219195973,
+            0.9897456617765851
+          ]
+        },
+        "proEvent": {
+          "count": 96,
+          "trials": 100,
+          "rate": 0.96,
+          "ci95": [
+            0.9016278276739262,
+            0.984336949448152
+          ]
+        },
+        "finals": {
+          "count": 0,
+          "trials": 100,
+          "rate": 0,
+          "ci95": [
+            0,
+            0.03699480747600191
+          ]
+        },
+        "medianWeeksTo": {
+          "ratingFloor": 147,
+          "tourPoints": 1,
+          "national": 342,
+          "contract": 227,
+          "proEvent": 233,
+          "finals": null
+        },
+        "end": {
+          "bestRatingMean": 4.9,
+          "bestRatingP10": 4.714,
+          "bestRatingP50": 4.872,
+          "bestRatingP90": 5.145,
+          "worldRankMedian": 729,
+          "matchesMean": 658.99,
+          "eventsMean": 139.22,
+          "trainingSessionsMean": 259.6
+        }
+      },
+      "samplePreview": [
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500001,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.006,
+            "mixed": 2.956
+          },
+          "bestRating": 5.006,
+          "finalSkillAverage": 63,
+          "finalRank": 712,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 147,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 147,
+            "proEvent": 179,
+            "finals": null
+          },
+          "matches": 734,
+          "events": 165,
+          "training": 260,
+          "rejectedHighTier": 58,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500011,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.264,
+            "mixed": 2.956
+          },
+          "bestRating": 5.264,
+          "finalSkillAverage": 75,
+          "finalRank": 682,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 171,
+            "tourPoints": 2,
+            "national": null,
+            "contract": 230,
+            "proEvent": 233,
+            "finals": null
+          },
+          "matches": 666,
+          "events": 135,
+          "training": 260,
+          "rejectedHighTier": 66,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500021,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.03,
+            "mixed": 2.956
+          },
+          "bestRating": 5.03,
+          "finalSkillAverage": 60,
+          "finalRank": 717,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 179,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 188,
+            "proEvent": 235,
+            "finals": null
+          },
+          "matches": 613,
+          "events": 133,
+          "training": 259,
+          "rejectedHighTier": 69,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500031,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.762,
+            "mixed": 2.956
+          },
+          "bestRating": 4.762,
+          "finalSkillAverage": 69,
+          "finalRank": 784,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 110,
+            "tourPoints": 0,
+            "national": null,
+            "contract": null,
+            "proEvent": null,
+            "finals": null
+          },
+          "matches": 746,
+          "events": 168,
+          "training": 259,
+          "rejectedHighTier": 56,
+          "madeRatingPro": true,
+          "madeContract": false,
+          "playedProEvent": false,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500041,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.884,
+            "mixed": 2.956
+          },
+          "bestRating": 4.884,
+          "finalSkillAverage": 67,
+          "finalRank": 855,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 147,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 363,
+            "proEvent": 387,
+            "finals": null
+          },
+          "matches": 724,
+          "events": 148,
+          "training": 260,
+          "rejectedHighTier": 62,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500051,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.752,
+            "mixed": 2.956
+          },
+          "bestRating": 4.752,
+          "finalSkillAverage": 63,
+          "finalRank": 638,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 140,
+            "tourPoints": 4,
+            "national": null,
+            "contract": 260,
+            "proEvent": 283,
+            "finals": null
+          },
+          "matches": 664,
+          "events": 140,
+          "training": 260,
+          "rejectedHighTier": 72,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500061,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.807,
+            "mixed": 2.956
+          },
+          "bestRating": 4.807,
+          "finalSkillAverage": 65,
+          "finalRank": 1200,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 123,
+            "tourPoints": 0,
+            "national": 186,
+            "contract": 123,
+            "proEvent": 131,
+            "finals": null
+          },
+          "matches": 575,
+          "events": 124,
+          "training": 260,
+          "rejectedHighTier": 70,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500071,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.706,
+            "mixed": 2.956
+          },
+          "bestRating": 4.706,
+          "finalSkillAverage": 63,
+          "finalRank": 1200,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 206,
+            "tourPoints": 1,
+            "national": null,
+            "contract": 435,
+            "proEvent": 441,
+            "finals": null
+          },
+          "matches": 685,
+          "events": 145,
+          "training": 259,
+          "rejectedHighTier": 57,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500081,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.274,
+            "mixed": 2.956
+          },
+          "bestRating": 5.274,
+          "finalSkillAverage": 70,
+          "finalRank": 657,
+          "contract": "futures",
+          "milestones": {
+            "ratingFloor": 140,
+            "tourPoints": 4,
+            "national": 342,
+            "contract": 265,
+            "proEvent": 282,
+            "finals": null
+          },
+          "matches": 655,
+          "events": 127,
+          "training": 260,
+          "rejectedHighTier": 62,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500091,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.811,
+            "mixed": 2.956
+          },
+          "bestRating": 4.811,
+          "finalSkillAverage": 63,
+          "finalRank": 784,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 158,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 266,
+            "proEvent": 284,
+            "finals": null
+          },
+          "matches": 654,
+          "events": 144,
+          "training": 260,
+          "rejectedHighTier": 59,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500101,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 4.788,
+            "mixed": 2.956
+          },
+          "bestRating": 4.788,
+          "finalSkillAverage": 63,
+          "finalRank": 806,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 179,
+            "tourPoints": 8,
+            "national": null,
+            "contract": 395,
+            "proEvent": 399,
+            "finals": null
+          },
+          "matches": 699,
+          "events": 152,
+          "training": 260,
+          "rejectedHighTier": 64,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        },
+        {
+          "age": 50,
+          "policy": "light",
+          "seed": 1500111,
+          "startRatings": {
+            "singles": 2.956,
+            "doubles": 2.956,
+            "mixed": 2.956
+          },
+          "finalRatings": {
+            "singles": 2.956,
+            "doubles": 5.171,
+            "mixed": 2.956
+          },
+          "bestRating": 5.171,
+          "finalSkillAverage": 69,
+          "finalRank": 641,
+          "contract": "none",
+          "milestones": {
+            "ratingFloor": 123,
+            "tourPoints": 0,
+            "national": null,
+            "contract": 134,
+            "proEvent": 135,
+            "finals": null
+          },
+          "matches": 696,
+          "events": 139,
+          "training": 260,
+          "rejectedHighTier": 64,
+          "madeRatingPro": true,
+          "madeContract": true,
+          "playedProEvent": true,
+          "reachedFinals": false
+        }
+      ]
+    }
+  ],
+  "runtimeMs": 81835
+}

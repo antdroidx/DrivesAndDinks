@@ -222,3 +222,7 @@ The local dev server was also repaired: it had drifted out of serving two module
 ## Native packages
 
 Career mode now has native Android and Windows WebView shells that bundle the complete offline app. Build commands and verification details are in [PACKAGING.md](PACKAGING.md).
+
+## Career balance simulation
+
+Run `npm run audit:career-groups` to regenerate the five experience-level, age, schedule, CPU and workload cohorts. The latest findings are in [CAREER-GROUP-REPORT.md](CAREER-GROUP-REPORT.md).
