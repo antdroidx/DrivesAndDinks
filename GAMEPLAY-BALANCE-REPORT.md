@@ -1,6 +1,6 @@
 # Gameplay Engine Balance Report
 
-Generated: 2026-11-10T05:38:21.136Z
+Generated: 2026-11-10T06:14:02.661Z
 
 ## Method
 
@@ -23,7 +23,7 @@ This is a real physics-engine test. Each Game object runs in CPU watch mode thro
 
 Equal-level results remain inside a playable 40–60% side range. There is no evidence that one court side is systematically dominant.
 
-## Cross-level outcomes — applied half-point settings
+## Cross-level outcomes — applied internal-tier settings
 
 40 matches per matchup per format.
 
@@ -42,7 +42,7 @@ Equal-level results remain inside a playable 40–60% side range. There is no ev
 | doubles | Intermediate vs Advanced | 85.0% | +4.9 |
 | doubles | Demo vs Advanced | 75.0% | +3.4 |
 
-The shipped 64 / 66 / 68 / 70 profiles now produce a competitive adjacent ladder. One-step half-point matchups leave the lower level 67.5–92.5% wins against, while two steps are mostly decisive and three steps are near-certain.
+The shipped 64 / 66 / 68 / 70 profiles now produce a competitive adjacent ladder. One internal-tier step leaves the lower level 67.5–92.5% wins against, while two steps are mostly decisive and three steps are near-certain.
 
 ## Candidate level curves
 
@@ -57,20 +57,20 @@ The shipped 64 / 66 / 68 / 70 profiles now produce a competitive adjacent ladder
 | tight-1 | 67/68/69/70 | 50.0%–72.5% | 60.0% |
 
 - **3–10 point adjacent gaps** produce 80–100% win rates in most adjacent matchups.
-- **1 point gaps** average 60% and are suitable when adjacent labels represent only a quarter DUPR point.
-- **2 point gaps** average 77.9% in the 40-game confirmation and leave the lower side about 6.1 points, making them the best fit for half-DUPR level steps.
-- A two-level gap in the two-point curve averages 91.3%, close to the decisive full-DUPR target.
+- **1 point gaps** average 60% and form the micro-step curve for testing very small internal changes.
+- **2 point gaps** average 77.9% in the 40-game confirmation and leave the lower side about 6.1 points, making them the best tested adjacent physics tiers.
+- A two-tier gap in the two-point curve averages 91.3% and behaves as largely decisive.
 
 ## Verdict
 
-**The gameplay engine is stable and the shipped half-point level curve is competitive.**
+**The gameplay engine is stable and the shipped internal-tier curve is competitive.**
 
-The previous 35 / 55 / 70 / 85 profiles corresponded to 1.09–1.45 rating steps under the game's skill conversion and produced total cross-level sweeps. The new profiles separate raw physics ability from displayed rating, preventing a claimed half-DUPR step from compounding every movement, reaction, control and shot attribute.
+The previous 35 / 55 / 70 / 85 profiles corresponded to 1.09–1.45 rating steps under the game's skill conversion and produced total cross-level sweeps. The new 64 / 66 / 68 / 70 profiles are internal physics tiers; they are not direct DUPR band labels. Raw ability is translated into a separate public overall scale for display.
 
 ## Recommended direction
 
-1. The shipped curve uses **64 / 66 / 68 / 70** when adjacent gameplay labels are 0.5 DUPR apart.
-2. Separate the raw physics coordinate from the displayed career rating; the same one-point skill change is not a constant DUPR change.
+1. The shipped physics curve uses internal tiers **64 / 66 / 68 / 70**.
+2. Keep the raw physics coordinate separate from competition rating. The public overall calibration displays 4.5 as roughly 75.
 3. Target adjacent win rates around 80–85%, a typical 11–5 to 11–7 score, and a full-rating-point gap around 11–2 or 11–3.
 4. Keep controlled match-to-match form variance so the lower side can still reach 5–8 points in a good game, or be nearly shut out in a poor one.
 5. Separate archetype differences from level differences so players remain stylistically distinct instead of every ability scaling together.

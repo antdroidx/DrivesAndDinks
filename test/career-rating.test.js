@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   RATING_MIN,RATING_MAX,RATING_ELITE,RATING_BANDS,RATING_PRECISION,
   ratingFromSkill,ratingBand,formatRating,skillForRating,reliability,
-  MATCH_TYPES,expectedScore,ratingGapForExpectedScore,matchPerformance,updateRating,rateMatch,
+  MATCH_TYPES,expectedScore,ratingGapForExpectedScore,overallForRating,ratingForOverall,matchPerformance,updateRating,rateMatch,
   teamStrength,MATCH_TYPES as TYPES
 } from '../src/career/rating.js';
 
@@ -38,6 +38,16 @@ test('the starting rating is derived from skill and reaches the elite anchor',()
   assert.ok(ratingFromSkill(74)>5&&ratingFromSkill(74)<5.5);
   assert.ok(ratingFromSkill(0)>=RATING_MIN);
   assert.ok(ratingFromSkill(200)<=RATING_MAX);
+});
+
+test('displayed overall uses an intuitive nonlinear rating scale',()=>{
+  assert.equal(overallForRating(2),30);
+  assert.equal(overallForRating(3),50);
+  assert.equal(overallForRating(4),68);
+  assert.equal(overallForRating(4.5),75);
+  assert.equal(overallForRating(7),97);
+  assert.equal(ratingForOverall(75),4.5);
+  for(let index=1;index<=60;index++)assert.ok(overallForRating(2+index/10)>=overallForRating(2+(index-1)/10));
 });
 
 test('the skill scale inverts back into a rating',()=>{

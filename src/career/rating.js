@@ -63,6 +63,48 @@ export function skillForRating(rating){
   return 30+(target-RATING_MIN)/(RATING_ELITE-RATING_MIN)*(RATING_TOP_SKILL-30);
 }
 
+// The user-facing overall is a presentation scale, not the raw 0–100
+// physics coordinate. It is anchored so the advanced and professional bands
+// read intuitively while preserving the tested attribute-to-physics curve.
+export const RATING_OVERALL_ANCHORS=Object.freeze([
+  {rating:2,overall:30},
+  {rating:2.5,overall:40},
+  {rating:3,overall:50},
+  {rating:3.5,overall:60},
+  {rating:4,overall:68},
+  {rating:4.5,overall:75},
+  {rating:5,overall:81},
+  {rating:5.5,overall:86},
+  {rating:6,overall:90},
+  {rating:6.5,overall:94},
+  {rating:7,overall:97},
+  {rating:8,overall:100}
+]);
+
+export function overallForRating(rating){
+  const value=clamp(Number(rating)||RATING_MIN,RATING_MIN,RATING_MAX);
+  for(let index=1;index<RATING_OVERALL_ANCHORS.length;index++){
+    const upper=RATING_OVERALL_ANCHORS[index],lower=RATING_OVERALL_ANCHORS[index-1];
+    if(value<=upper.rating){
+      const ratio=(value-lower.rating)/(upper.rating-lower.rating);
+      return Math.round((lower.overall+(upper.overall-lower.overall)*ratio)*10)/10;
+    }
+  }
+  return RATING_OVERALL_ANCHORS.at(-1).overall;
+}
+
+export function ratingForOverall(overall){
+  const value=clamp(Number(overall)||RATING_OVERALL_ANCHORS[0].overall,RATING_OVERALL_ANCHORS[0].overall,RATING_OVERALL_ANCHORS.at(-1).overall);
+  for(let index=1;index<RATING_OVERALL_ANCHORS.length;index++){
+    const upper=RATING_OVERALL_ANCHORS[index],lower=RATING_OVERALL_ANCHORS[index-1];
+    if(value<=upper.overall){
+      const ratio=(value-lower.overall)/(upper.overall-lower.overall);
+      return lower.rating+(upper.rating-lower.rating)*ratio;
+    }
+  }
+  return RATING_OVERALL_ANCHORS.at(-1).rating;
+}
+
 // ---- the population -------------------------------------------------------
 //
 // The rated world has a centre. A player who has never been rated starts

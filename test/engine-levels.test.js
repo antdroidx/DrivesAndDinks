@@ -1,13 +1,13 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {competitionRecord,recordResult,seededRandom} from '../src/competition.js';
-import {levelLineup,buildProfile,SKILL_LEVELS,GAMEPLAY_LEVEL_RATINGS} from '../src/roster.js';
+import {levelLineup,buildProfile,SKILL_LEVELS} from '../src/roster.js';
 import {Game} from '../src/game.js';
 import {C,contactQuality,kitchenFootContact,launch,stepBall,selectShot} from '../src/core.js';
 import {matchStrokeMode} from '../src/match-animation.js';
 test('competitive history changes rating and confidence without mutating abilities',()=>{const p=buildProfile({character:'avery'}),before=structuredClone(p.abilities);p.competition=recordResult(p.competition,5,true);assert.ok(p.competition.value>3);assert.equal(p.competition.wins,1);assert.ok(p.competition.confidence>0);assert.deepEqual(p.abilities,before);const r=competitionRecord(5);assert.ok(recordResult(r,2,false).value<5)});
 test('same seed and inputs reproduce gameplay despite different displayed rankings',()=>{const lineup=levelLineup('demo',seededRandom(11)),a=new Game({seed:42}),b=new Game({seed:42});a.configure({},lineup);const changed=structuredClone(lineup);changed.forEach((p,i)=>p.competition.value=i%2?7:1);b.configure({},changed);a.mode=b.mode='watch';a.recordReplay=b.recordReplay=()=>{};for(let i=0;i<120*45;i++){a.update(C.dt);b.update(C.dt)}assert.deepEqual(a.ball,b.ball);assert.deepEqual(a.score,b.score);assert.deepEqual(a.stats,b.stats);assert.equal(a.random.state(),b.random.state())});
-test('the playable level curve uses calibrated half-rating steps',()=>{assert.deepEqual(SKILL_LEVELS,{beginner:64,intermediate:66,demo:68,advanced:70});assert.deepEqual(GAMEPLAY_LEVEL_RATINGS,{beginner:3,intermediate:3.5,demo:4,advanced:4.5});});
+test('the playable physics curve uses calibrated internal steps',()=>{assert.deepEqual(SKILL_LEVELS,{beginner:64,intermediate:66,demo:68,advanced:70});});
 
 test('level profiles change actual preparation and ability while demo stays around 68',()=>{const levels=Object.keys(SKILL_LEVELS).map(l=>levelLineup(l,seededRandom(1))[0]);for(let i=1;i<levels.length;i++){assert.ok(levels[i].abilities.speed>levels[i-1].abilities.speed);assert.ok(levels[i].abilities.reaction<levels[i-1].abilities.reaction);assert.ok(levels[i].abilities.control>levels[i-1].abilities.control)}assert.equal(levels[2].attributes.drive,68);assert.equal(buildProfile({character:'avery'}).attributes.drive,70)});
 test('outside-kitchen jump landing restores foot fault detection',()=>{const p={team:0,x:-1,y:28,airborneTimer:0};assert.equal(kitchenFootContact(p),false);p.x=1;p.airborneTimer=.1;assert.equal(kitchenFootContact(p),false);p.airborneTimer=0;assert.equal(kitchenFootContact(p),true)});
