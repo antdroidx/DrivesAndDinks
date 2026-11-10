@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=212';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=212';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=212';
+import {sampleCharacterPose,solveArm3D,paddleCutout,paddleOutline} from './pixel-character.js?v=213';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=213';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=213';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -217,7 +217,7 @@ export function drawProfileAthlete(c,d,mode,phase,cx,baseline,scale,options={}){
  const drawPaddle=()=>{
   line(c,[p.hand,p.paddle],'#494047',1.35);
   c.save();c.translate(p.paddle.x,p.paddle.y);c.rotate(Math.atan2(-(p.hand.x-p.paddle.x),p.hand.y-p.paddle.y));
-  const shape=paddleOutline(options.paddleShape??'hybrid'),scale=.72,drawFace=(factor,fill,stroke=null)=>{const points=shape.map(([x,y])=>({x:x*factor*scale,y:y*factor*scale}));roundedShape(c,points,fill,stroke,.35,.45)};
+  const paddleShape=options.paddleShape??'hybrid-flat',shape=paddleOutline(paddleShape),cutout=paddleCutout(paddleShape),scale=.72,drawFace=(factor,fill,stroke=null,points=shape)=>{const scaled=points.map(([x,y])=>({x:x*factor*scale,y:y*factor*scale}));roundedShape(c,scaled,fill,stroke,.35,.45)};
   drawFace(1,tone(d.paddleColor??d.trim,-.18),ink);drawFace(.84,'#1c2430',ink);drawFace(.62,'#101722');
   line(c,[{x:-1.5*scale,y:-2.3*scale},{x:-.3*scale,y:-3*scale},{x:.9*scale,y:-2.8*scale}], '#ffffff28',.38);
   c.restore();

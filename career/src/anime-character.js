@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=212';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=212';
-import {legDimensions,plantFeet} from './detailed-character.js?v=212';
+import {sampleCharacterPose,solveArm3D,paddleCutout,paddleOutline} from './pixel-character.js?v=213';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=213';
+import {legDimensions,plantFeet} from './detailed-character.js?v=213';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -332,7 +332,7 @@ export function drawAnimeAthlete(c,design,mode,phase,view,cx,baseline,scale,opti
    line(c,[point(cx+uy*half,cy-ux*half),point(cx-uy*half,cy+ux*half)],d.trim,1.7);
   }
  }
- function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const shape=paddleOutline(options.paddleShape??'hybrid'),scale=.76,drawFace=(factor,fill,stroke=null)=>{c.beginPath();shape.forEach(([x,y],index)=>{const point={x:x*factor*scale,y:y*factor*scale};index?c.lineTo(point.x,point.y):c.moveTo(point.x,point.y)});c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.38;c.lineJoin='round';c.stroke()}};drawFace(1,d.paddleColor??d.trim,ink);drawFace(.84,'#1c2430');drawFace(.62,'#101722');line(c,[point(-1.5*scale,-2.3*scale),point(-.3*scale,-3*scale),point(.9*scale,-2.8*scale)], '#ffffff28',.38);c.restore()}
+ function paddle(){const q=p.paddle;line(c,[p.hand,q],'#494047',1.5);c.save();c.translate(q.x,q.y);c.rotate(raw.angle);const paddleShape=options.paddleShape??'hybrid-flat',shape=paddleOutline(paddleShape),cutout=paddleCutout(paddleShape),scale=.76,drawPoints=(points,factor,fill,stroke=null)=>{c.beginPath();points.forEach(([x,y],index)=>{const point={x:x*factor*scale,y:y*factor*scale};index?c.lineTo(point.x,point.y):c.moveTo(point.x,point.y)});c.closePath();c.fillStyle=fill;c.fill();if(stroke){c.strokeStyle=stroke;c.lineWidth=.38;c.lineJoin='round';c.stroke()}};drawPoints(shape,1,d.paddleColor??d.trim,ink);drawPoints(shape,.84,'#1c2430');drawPoints(shape,.62,'#101722');if(cutout)drawPoints(cutout,.58,'#10232d','#e7f1ed55');line(c,[point(-1.5*scale,-2.3*scale),point(-.3*scale,-3*scale),point(.9*scale,-2.8*scale)], '#ffffff28',.38);c.restore()}
 
  const layers=raw.arms.map((chain,i)=>({i,back:chain[1].depth<raw.neck.depth}));layers.filter(a=>a.back).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
  ribbon(c,[point(n.x,n.y-.6),point(n.x,n.y+2.8)],[3.4,3.8],d.skin,ink,skin);
