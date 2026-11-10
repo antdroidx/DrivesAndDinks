@@ -1,16 +1,16 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=203';
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=203';
-import {MatchJournal} from './match-journal.js?v=203';import {summarizePlaytest} from './playtest-summary.js?v=203';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=203';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=203';
-import {seededRandom} from './competition.js?v=203';
-import {kitchenFootContact,normalizeScoringRules} from './core.js?v=203';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=203';
-import {strokeForContact} from './player-facing.js?v=203';
-import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=203';
-import {createLineup,applyPhysique} from './roster.js?v=203';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=203';
-import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=203';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=203';
+import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=204';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=204';
+import {MatchJournal} from './match-journal.js?v=204';import {summarizePlaytest} from './playtest-summary.js?v=204';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=204';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=204';
+import {seededRandom} from './competition.js?v=204';
+import {kitchenFootContact,normalizeScoringRules} from './core.js?v=204';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=204';
+import {strokeForContact} from './player-facing.js?v=204';
+import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=204';
+import {createLineup,applyPhysique} from './roster.js?v=204';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=204';
+import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=204';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=204';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=true;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.rules=normalizeScoringRules();this.learningSnapshot=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.sideSwitched=false;this.sideSwitchThreshold=6;this.sideSwitchCount=0;this.reset()}
  configure(selection,lineup=null){this.showNameTags=selection?.showNameTags!==false&&selection?.showNameTags!=='false';this.learningSnapshot=selection?.learning??null;if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';if(selection?.rules)this.rules=normalizeScoringRules({...this.rules,...selection.rules});this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}

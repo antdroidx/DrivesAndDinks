@@ -222,9 +222,9 @@ export {
   ratingFromSkill,ratingBand,formatRating,skillForRating,reliability,divisionFor,
   RATING_BRACKETS,FORMATS,FORMAT_LABELS,formatLabel,
 MATCH_TYPES,expectedScore,matchPerformance,updateRating,rateMatch,regressRating,simulateOutcome
-} from './rating.js?v=203';
+} from './rating.js?v=204';
 
 export {
   PRO_TOURS,tourFor,tourRank,onTheTour,pointsForEntry,pointsInWindow,addPoints,
   EVENT_POINTS,TOUR_POINTS_WINDOW,PLAY_UP_MULTIPLIER,PRO_FLOOR_RATING
-} from './tour.js?v=203';
+} from './tour.js?v=204';
