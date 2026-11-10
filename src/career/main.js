@@ -526,11 +526,12 @@ function renderHome(){
     </section>
   </div>
 
-  <div class="grid two">
+  <div class="grid wide home-dashboard-main">
     <section class="panel">
       <h2>RATINGS</h2>
       ${groups}
     </section>
+    <div class="home-side-stack">
     <section class="panel">
       <h2>MOVE</h2>
       <p>Pick the tour up in another city, or in the other region. Moving clears your club.</p>
@@ -559,6 +560,7 @@ function renderHome(){
         ${[...career.log].reverse().slice(0,8).map(entry=>`<li><span>${escapeHtml(weekLabel(entry.week).split(' · ')[0])}</span>${escapeHtml(entry.text)}</li>`).join('')||'<li>Nothing yet.</li>'}
       </ul>
     </section>
+    </div>
   </div>`;
 }
 

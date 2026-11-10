@@ -194,3 +194,9 @@ test('generated player profiles expose look, ratings and career history',()=>{
   assert.match(population,/headwearRoll/);
   assert.match(css,/\.athlete-profile-header/);
 });
+test('dashboard fills the ratings column with move, matches and recent',()=>{
+  const main=read('src/career/main.js'),css=read('career/career.css');
+  assert.match(main,/home-dashboard-main/);
+  assert.match(main,/home-side-stack/);
+  assert.match(css,/\.home-side-stack\{display:grid/);
+});

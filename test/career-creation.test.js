@@ -12,6 +12,13 @@ test('experience controls the provisional starting level',()=>{
   assert.deepEqual(ratings,[2.5,3,3.5,4,4.5]);
 });
 
+test('one-pound spinner steps survive the metric round trip',()=>{
+  for(const pounds of [88,89,140,141,142,143,308,309]){
+    const kilograms=poundsToKilograms(pounds,177,'male');
+    assert.equal(kilogramsToPounds(kilograms),pounds,`${pounds} lb changed to ${kilogramsToPounds(kilograms)} lb`);
+  }
+});
+
 test('height and weight modify physical attributes relative to body size',()=>{
   const compact=bodyAttributeModifiers({height:165,weight:62});
   const tallHeavy=bodyAttributeModifiers({height:198,weight:110});
@@ -28,7 +35,7 @@ test('height and weight convert between imperial input and metric simulation val
   assert.deepEqual(centimetersToFeetInches(177),{feet:5,inches:10});
   assert.equal(feetInchesToCentimeters(5,10,'male'),178);
   assert.equal(kilogramsToPounds(80),176);
-  assert.equal(poundsToKilograms(176,178,'male'),80);
+  assert.ok(Math.abs(poundsToKilograms(176,178,'male')-79.83)<.001);
   assert.equal(feetInchesToCentimeters(4,0,'male'),145);
   assert.equal(feetInchesToCentimeters(7,0,'male'),210);
 });
