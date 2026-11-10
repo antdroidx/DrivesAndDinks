@@ -13,8 +13,12 @@ import {emptyAnalytics} from './analytics.js';
 import {peakAgeFor,createDevelopmentProfile} from './age.js';
 import {emptyFinance,validateFinance} from './finance.js';
 import {emptyCpuWorld,validateCpuWorld} from './cpu-careers.js';
+import {emptyInjuries,validateInjuries} from './injuries.js';
+import {emptyEquipment,validateEquipment} from './equipment.js';
+import {createTeamCareer,validateTeamCareer} from './team-league.js';
+import {emptyInvitations,validateInvitations} from './invitations.js';
 
-export const CAREER_SAVE_VERSION=17;
+export const CAREER_SAVE_VERSION=19;
 export const CAREER_SAVE_KEY='drives-dinks:career';
 export const CAREER_BACKUP_KEY='drives-dinks:career:backup';
 export const CAREER_QUARANTINE_KEY='drives-dinks:career:quarantine';
@@ -24,6 +28,22 @@ const REGION_IDS=REGIONS.map(region=>region.id);
 // Migrations are keyed by the version they upgrade from. Each one receives the
 // state and returns the next version's state.
 export const CAREER_MIGRATIONS=Object.freeze({
+  // v19 added background MLP/MiLP seasons and persistent invitations.
+  18:state=>({
+    ...state,
+    teamCareer:state.teamCareer??createTeamCareer(state.seed,state.regionId,state.week??0),
+    invitations:state.invitations??emptyInvitations()
+  }),
+  // v18 added player injuries, coached training and owned equipment.
+  17:state=>({
+    ...state,
+    injuries:state.injuries??emptyInjuries(),
+    equipment:state.equipment??emptyEquipment(),
+    coachingEnabled:state.coachingEnabled??false,
+    lastCoachingWeek:state.lastCoachingWeek??null,
+    coachingHistory:state.coachingHistory??[],
+    lastMatchResult:state.lastMatchResult??null
+  }),
   // v17 added compact CPU career and dynamic-world deltas.
   16:state=>({
     ...state,
@@ -235,7 +255,17 @@ export function validateCareer(state){
   if(!finance.ok)return {ok:false,reason:finance.reason};
   const cpuWorld=validateCpuWorld(state.cpuWorld);
   if(!cpuWorld.ok)return {ok:false,reason:cpuWorld.reason};
+  const injuries=validateInjuries(state);
+  if(!injuries.ok)return {ok:false,reason:injuries.reason};
+  const equipment=validateEquipment(state);
+  if(!equipment.ok)return {ok:false,reason:equipment.reason};
+  const team=validateTeamCareer(state.teamCareer);
+  if(!team.ok)return {ok:false,reason:team.reason};
+  const invitations=validateInvitations(state);
+  if(!invitations.ok)return {ok:false,reason:invitations.reason};
   if(!RATING_KEYS.includes(state.trainingFocus))return {ok:false,reason:`Unknown training focus "${state.trainingFocus}"`};
+  if(typeof state.coachingEnabled!=='boolean')return {ok:false,reason:'Coaching preference is invalid'};
+  if(state.coachingHistory!=null&&!Array.isArray(state.coachingHistory))return {ok:false,reason:'Coaching history is invalid'};
   if(state.clubId!=null&&typeof state.clubId!=='string')return {ok:false,reason:'Club reference is invalid'};
   if(state.areaId!=null&&typeof state.areaId!=='string')return {ok:false,reason:'Area reference is invalid'};
   if(state.cityId!=null&&typeof state.cityId!=='string')return {ok:false,reason:'City reference is invalid'};
@@ -261,7 +291,8 @@ export function validateCareer(state){
   if(state.contractEventLog!=null&&!Array.isArray(state.contractEventLog))return {ok:false,reason:'Contract history is invalid'};
   if(state.reentryEventIds!=null&&!Array.isArray(state.reentryEventIds))return {ok:false,reason:'Re-entry history is invalid'};
   if(state.eventEntries!=null&&!Array.isArray(state.eventEntries))return {ok:false,reason:'Event entry history is invalid'};
-  if(state.eventHistory!=null&&!Array.isArray(state.eventHistory))return {ok:false,reason:'Event history is invalid'};
+  if(state.eventHistory!=null&&!Array.isArray(state.eventHistory))return {ok:false,reason:'Event history is invalid'}
+  if(state.lastMatchResult!=null&&typeof state.lastMatchResult!=='object')return {ok:false,reason:'Last match result is invalid'};
   if(state.ratingHistory!=null&&!Array.isArray(state.ratingHistory))return {ok:false,reason:'Rating history is invalid'};
   if(state.analytics!=null&&(!state.analytics||typeof state.analytics!=='object'))return {ok:false,reason:'Career analytics are invalid'};
   if(!state.partners||typeof state.partners!=='object')return {ok:false,reason:'Club partners are invalid'};

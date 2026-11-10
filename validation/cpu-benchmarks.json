@@ -1,0 +1,73 @@
+{
+  "generatedAt": "2026-11-10T01:17:48.697Z",
+  "runtime": "Node.js reference harness",
+  "methodology": "Synthetic compact records benchmark query, sorting, serialization and heap growth. The final weekly advance uses the real configured CPU world.",
+  "sizes": [
+    1000,
+    5000,
+    10000,
+    25000,
+    50000
+  ],
+  "weeks": 8,
+  "synthetic": [
+    {
+      "population": 1000,
+      "buildMs": 1.52,
+      "leaderboardMs": 0.5,
+      "queryPageMs": 3.78,
+      "serializeMs": 1.65,
+      "serializedMb": 0.68,
+      "heapDeltaMb": 2.09,
+      "pageTotal": 1000
+    },
+    {
+      "population": 5000,
+      "buildMs": 2.94,
+      "leaderboardMs": 11.34,
+      "queryPageMs": 17.54,
+      "serializeMs": 7.77,
+      "serializedMb": 3.39,
+      "heapDeltaMb": 8.49,
+      "pageTotal": 5000
+    },
+    {
+      "population": 10000,
+      "buildMs": 11.15,
+      "leaderboardMs": 6.43,
+      "queryPageMs": 37.31,
+      "serializeMs": 15.21,
+      "serializedMb": 6.79,
+      "heapDeltaMb": 8.91,
+      "pageTotal": 10000
+    },
+    {
+      "population": 25000,
+      "buildMs": 13.53,
+      "leaderboardMs": 17.69,
+      "queryPageMs": 39.25,
+      "serializeMs": 36.07,
+      "serializedMb": 17.01,
+      "heapDeltaMb": 64.24,
+      "pageTotal": 10000
+    },
+    {
+      "population": 50000,
+      "buildMs": 38.21,
+      "leaderboardMs": 45.91,
+      "queryPageMs": 46.41,
+      "serializeMs": 82.01,
+      "serializedMb": 34.04,
+      "heapDeltaMb": 6.92,
+      "pageTotal": 10000
+    }
+  ],
+  "actualWorld": {
+    "active": 184,
+    "circuit": 449,
+    "background": 2281,
+    "weeklyAdvanceMs": 7.47,
+    "serializedMb": 0.85
+  },
+  "externalRequired": "Run the same report on representative browser and Android devices before claiming Phase 2 performance exit."
+}\n

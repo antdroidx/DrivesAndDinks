@@ -31,21 +31,22 @@ Completed:
 
 Current release blockers:
 
-- Human match playtests and real-device performance evidence.
-- Human pacing validation for quick simulation and shortened league cards.
-- Age differentiation under the revised schedule.
-- Persistent CPU careers and believable world turnover.
+- Human match, injury, coaching and team-invitation playtests.
+- Real low-powered Android timing, heat, battery, touch and storage measurements.
+- PPA Finals qualification and final age-by-age tuning against human evidence.
 - Portable saves before packaged applications.
 
 ## Implementation Status · 2026-11-09
 
-- **Phase 0 automated baseline:** complete. All 683 tests pass, the ten-year career prospect audit reruns successfully, and desktop plus 400-by-807 browser layouts were checked.
-- **Phase 0 external evidence:** open. Human match scorecards and real low-powered Android timing, heat, battery and touch measurements still require people and physical devices.
-- **Phase 1 finance, planning and workload:** in progress. A versioned dated ledger tracks salary, prizes, entry fees and travel. Event entry shows projected energy, money, recovery and player match workload before commitment. Quick Sim preserves real rating, world, record, analytics and tournament transitions; Sim to End can complete a tournament or advance through a shortened league. Career leagues now use three or four one-opponent cards instead of a full seven-round draw.
-- **Phase 1 remaining:** injury generation and healing, coached-training choices, equipment purchases, selective tournament-round policy and age-by-age balance targets.
-- **Phase 2 CPU world:** core complete. Generated athletes now age and develop from stable identities; active, circuit and background tiers share lifecycle rules; CPU records track matches, tour points, pro invites, contracts and retirement; entrants, promotions, demotions and club/tournament outlooks advance with the weekly world.
+- **Phase 0 automated baseline:** complete. All 702 tests pass, the ten-year career prospect audits rerun successfully, and desktop plus 400-by-807 browser layouts were checked.
+- **Phase 0 external evidence:** open. Human match scorecards and physical Android measurements still require people and real devices.
+- **Phase 1 — code complete:** the finance ledger tracks salary, prizes, entry fees, travel, coaching and equipment. Injuries have causes, severity, recovery capacity and return weeks. Coached training and owned paddles use the shared formulas. Decisive professional rounds stay manual. Match results, the tournament path and the pro qualification status are visible in the UI.
+- **Phase 1 external evidence:** human pacing, injury-frequency and economy tests remain open.
+- **Phase 2 — code complete:** CPU careers use the shared age, load, fatigue, form, injury, equipment and retirement rules. Active, circuit and background tiers remain bounded. Club outlooks and dynamic tournaments evolve with the week. Query scopes and caches are available. The twenty-year configurable-world test passes in the automated suite.
+- **Phase 2 performance evidence:** `npm run benchmark:cpu` produces a repeatable 1k/5k/10k/25k/50k report in `validation/cpu-benchmarks.json`. Representative browser and Android runs remain external evidence.
 - **Phase 2 age cohort evidence:** 240 samples per age and detail tier over ten years. Active median pro-invite timing is week 27 for ages 25/30, week 30 for 35, week 33 for 20, week 41 for 40 and week 80 for 15. Circuit timing is week 54 for 25/30, week 60 for 35, week 66 for 20, week 78 for 15 and week 82 for 40. Year-10 professional share is 49% for active ages 25/30 and 40% for age 40; age 15 remains mostly challenger.
-- **Phase 2 remaining:** repeatable 1k/5k/10k/25k/50k browser and Android benchmarks, twenty-year regional growth checks and long-history retention measurements.
+- **Phase 3 — code complete:** eight CPU-managed MLP franchises run bounded background seasons and annual drafts. MiLP club fixtures schedule and resolve without commissioner work. Users can accept team and partner invitations, decline or withdraw them, invite club mates and build relationship history. The TEAM screen exposes roster, standings, schedule, MiLP results and invitation actions.
+- **Phase 3 external evidence:** human team-season and invitation-flow playtests remain open.
 
 ## Dependency Map
 
@@ -167,9 +168,9 @@ Implementation:
 1. Add a simple dated finance ledger with salary, prizes, entry fees, travel, coaching and equipment.
 2. Add weekly activity planning with projected energy and money cost. **Complete.**
 3. Add Quick Sim and selective round simulation for low-stakes or completed matches. **Core complete:** current-match quick simulation and simulation through the remaining competition.
-4. Add injury generation, healing duration, availability and return notifications.
-5. Connect coaching and equipment to the training and match formulas above.
-6. Show projected matches, energy, money and recovery before registration.
+4. Add injury generation, healing duration, availability and return notifications. **Complete.**
+5. Connect coaching and equipment to the training and match formulas above. **Complete.**
+6. Show projected matches, energy, money and recovery before registration. **Complete.**
 
 Exit condition:
 

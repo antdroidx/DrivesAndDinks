@@ -19,9 +19,13 @@ import {emptyAnalytics} from './analytics.js';
 import {clubAccess,clearPartners} from './club-life.js';
 import {normalizeHeight,normalizeWeight,experienceById,traitById,startingModifiers} from './creation.js';
 import {normalizeStartAge,createDevelopmentProfile,developmentAgeFactor,attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,noteSkillPeaks,noteTrainingMaintenance,advanceAgeYear,capRatingForAge,capAttributeForAge} from './age.js';
-import {emptyFinance,eventFinancialCost,chargeEventCosts,chargeMove,paySalary} from './finance.js';
+import {emptyFinance,eventFinancialCost,chargeEventCosts,chargeMove,paySalary,chargeCoaching} from './finance.js';
+import {emptyInjuries,currentInjury,injuryBlockReason,injuryRecoveryFactor,healInjuries,rollInjury} from './injuries.js';
+import {emptyEquipment} from './equipment.js';
 import {potentialForStartAge} from './career-lifecycle.js';
 import {emptyCpuWorld,createCpuWorld,advanceCpuWorld} from './cpu-careers.js';
+import {createTeamCareer,advanceTeamCareer} from './team-league.js';
+import {emptyInvitations,advanceInvitations} from './invitations.js';
 import {eventEntryCost} from './planning.js';
 
 // The neutral adult creation baseline is 3.500. Experience can move this
@@ -172,6 +176,11 @@ export function createCareer(options={}){
     clubReputation:0,
     opponents:{},
     coachFeedback:null,
+    injuries:emptyInjuries(),
+    equipment:emptyEquipment(),
+    coachingEnabled:false,
+    lastCoachingWeek:null,
+    coachingHistory:[],
     week:0,
     energy:MAX_ENERGY,
     trainingFocus:'drive',
@@ -186,6 +195,7 @@ export function createCareer(options={}){
     stats:{weeks:0,sessions:0,entries:0,moves:0,matches:0},
     worldRatings:{},
     matches:[],
+    lastMatchResult:null,
     // Durable career totals survive after detailed match reports roll off.
     analytics:emptyAnalytics(athlete.formats),
     eventHistory:[],
@@ -195,6 +205,8 @@ export function createCareer(options={}){
     money:250,
     finance:emptyFinance(250),
     cpuWorld:emptyCpuWorld(),
+    teamCareer:createTeamCareer(seed,regionId,0),
+    invitations:emptyInvitations(),
     rivalId:rival?.id??null,
     // Wild cards earned by winning a Challenger event.
     wildCards:0,
@@ -241,7 +253,8 @@ export function trainingCost(state){
 export function weeklyRecovery(state){
   if(!state)return RECOVERY_BASE;
   const base=clamp(Math.round(RECOVERY_BASE+(careerRating(state)-3)*RECOVERY_PER_LEVEL),RECOVERY_BASE,RECOVERY_MAX);
-  return Math.max(10,Math.round(base*recoveryAgeFactor(state.athlete?.age??25,state.athlete?.development)));
+  const ageFactor=recoveryAgeFactor(state.athlete?.age??25,state.athlete?.development);
+  return Math.max(10,Math.round(base*ageFactor*injuryRecoveryFactor(state)));
 }
 // Training moves an attribute by a single point. It is deliberately
 // small: the rating belongs to playing, not to drilling.
@@ -287,10 +300,12 @@ export function trainingSessionsThisWeek(state){
   return state.trainingWeek===state.week?(state.trainingSessions??0):0;
 }
 export function canTrain(state){
-  return !state.retired&&trainingSessionsThisWeek(state)<trainingSessionsLimit(state)&&state.energy>=trainingCost(state);
+  return !state.retired&&!currentInjury(state)&&trainingSessionsThisWeek(state)<trainingSessionsLimit(state)&&state.energy>=trainingCost(state);
 }
 export function trainBlockReason(state){
   if(state.retired)return 'This career has ended.';
+  const injury=injuryBlockReason(state);
+  if(injury)return injury;
   const limit=trainingSessionsLimit(state);
   if(trainingSessionsThisWeek(state)>=limit){
     return `You have trained ${limit} times this week. Advance the calendar to train again.`;
@@ -340,7 +355,7 @@ export function formatsPlayed(state,eventId,week=state?.week??0){
 }
 export {eventEntryCost};
 export function canEnterEvent(state,event=null){
-  if(state.retired)return false;
+  if(state.retired||currentInjury(state))return false;
   const tournament=state.tournament;
   if(tournament&&!tournament.finished&&!tournament.playerOut&&!tournament.inConsolation)return false;
   if(event&&eventFinancialCost(state,event).total>(Number(state.money)||0))return false;
@@ -360,6 +375,8 @@ export function canEnterEvent(state,event=null){
 }
 export function eventBlockReason(state,event=null){
   if(state.retired)return 'This career has ended.';
+  const injury=injuryBlockReason(state);
+  if(injury)return injury;
   const tournament=state.tournament;
   if(tournament&&!tournament.finished&&!tournament.playerOut&&!tournament.inConsolation){
     return 'Finish the competition already in progress before entering another event.';
@@ -410,23 +427,53 @@ export function pushLog(state,text){
   return {...state,log:[...state.log,{week:state.week,text}].slice(-LOG_LIMIT)};
 }
 
-export function train(state,focus){
+export function train(state,focus,{coached=state.coachingEnabled}={}){
   if(!RATING_KEYS.includes(focus))return {ok:false,state,message:`Unknown focus "${focus}"`};
   if(!canTrain(state))return {ok:false,state,message:trainBlockReason(state)};
   const cost=trainingCost(state);
-  const gain=trainingGain(state,focus);
-  const ratings={...state.athlete.ratings};
-  const maintenance=noteTrainingMaintenance(state.athlete,[focus,'control'],.12);
-  const trainingAthlete={...state.athlete,maintenance};
+  let paid=state;
+  let coachingCharge=null;
+  if(coached){
+    coachingCharge=chargeCoaching(state,{focus,reference:`training:${state.week}:${focus}`});
+    if(!coachingCharge.ok)return {ok:false,state,message:coachingCharge.message};
+    paid=coachingCharge.state;
+  }
+  if(paid.energy<cost)return {ok:false,state,message:`Training needs ${cost} energy. You have ${paid.energy}.`};
+  const gain=trainingGain(state,focus)+(coached?1:0);
+  const ratings={...paid.athlete.ratings};
+  const maintenance=noteTrainingMaintenance(paid.athlete,[focus,'control'],coached?.2:.12);
+  const trainingAthlete={...paid.athlete,maintenance};
   ratings[focus]=capAttributeForAge(trainingAthlete,focus,clamp(ratings[focus]+gain,0,99));
   ratings.control=capAttributeForAge(trainingAthlete,'control',clamp(ratings.control+1,0,99));
-  const next=withAthlete(state,ratings);
+  let next=withAthlete(paid,ratings);
   next.athlete.maintenance=maintenance;
-  next.athlete.peakRatings=noteSkillPeaks(state.athlete,ratings);
-  const moved=pushHistory(pushLog(next,`Trained ${focus} — +${gain} ${focus}.`),`Trained ${focus}`);
+  next.athlete.peakRatings=noteSkillPeaks(paid.athlete,ratings);
+  const injuryRoll=rollInjury(next,{
+    activity:'training',
+    random:seededRandom(mixSeed(state.seed,`training-injury:${state.week}:${focus}:${trainingSessionsThisWeek(state)}`))
+  });
+  if(injuryRoll.ok)next=injuryRoll.state;
+  const coachNote=coached?' · coached':'';
+  const injuryNote=injuryRoll.injury?` Injury: ${injuryRoll.injury.severityLabel.toLowerCase()} (${injuryRoll.injury.areaLabel}); available ${injuryRoll.injury.returnLabel}.`:'';
+  const moved=pushHistory(pushLog(next,`Trained ${focus}${coachNote} — +${gain} ${focus}.${injuryNote}`),`Trained ${focus}`);
   const sessions=trainingSessionsThisWeek(state)+1;
   const limit=trainingSessionsLimit(state);
-  return {ok:true,state:{...moved,energy:state.energy-cost,lastActionWeek:state.week,trainingWeek:state.week,trainingSessions:sessions,trainingFocus:focus,stats:{...state.stats,sessions:state.stats.sessions+1}},message:`Trained ${focus}. +${gain} ${focus}, +1 control. ${sessions}/${limit} sessions this week.`};
+  return {
+    ok:true,
+    state:{
+      ...moved,
+      energy:paid.energy-cost,
+      lastActionWeek:state.week,
+      trainingWeek:state.week,
+      trainingSessions:sessions,
+      trainingFocus:focus,
+      coachingEnabled:coached,
+      lastCoachingWeek:coached?state.week:moved.lastCoachingWeek??null,
+      coachingHistory:coached?[...(moved.coachingHistory??[]),{week:state.week,focus,cost:40}].slice(-16):moved.coachingHistory??[],
+      stats:{...paid.stats,sessions:paid.stats.sessions+1}
+    },
+    message:`Trained ${focus}${coachNote}. +${gain} ${focus}, +1 control. ${sessions}/${limit} sessions this week.${injuryNote}`
+  };
 }
 
 export function currentEvents(state){return state.retired?[]:generateWeekEvents(state,state.week)}
@@ -672,10 +719,12 @@ export function advanceToNextEvent(state,{maxWeeks=52}={}){
 export function advanceWeek(state){
   if(state.retired)return {ok:false,state,message:'This career has ended.'};
   const week=state.week+1;
+  const weeklyInjuries=healInjuries(state,week);
+  const healthyState=weeklyInjuries.ok?weeklyInjuries.state:state;
   // What the player takes back next week. Spending more than this in a week
   // carries the rest into the next one as fatigue.
-  const recovery=weeklyRecovery(state);
-  const energy=clamp(state.energy+recovery,0,MAX_ENERGY);
+  const recovery=weeklyRecovery(healthyState);
+  const energy=clamp(healthyState.energy+recovery,0,MAX_ENERGY);
   const world=advanceWorld({
     seed:state.seed,
     regionId:state.regionId,
@@ -694,15 +743,19 @@ export function advanceWeek(state){
     ?{...state.tournament,nightComplete:false}
     :state.tournament;
   const circuit=cpu.world.circuit;
+  const team=advanceTeamCareer({...state,week}, {seed:state.seed,regionId:state.regionId,week});
+  const invitations=advanceInvitations(team.state,{seed:state.seed,week});
   const birthday=advanceAgeYear(state.athlete,week);
   let advanced={
-    ...state,week,energy,
+    ...state,...healthyState,week,energy,
     athlete:birthday.athlete,
     lastActionWeek:-1,lastEventWeek:-1,lastClubWeek:-1,lastLeagueWeek:-1,lastTravelWeek:-1,tournament,
     trainingWeek:week,trainingSessions:0,
     worldRatings:world.ratings,
     cpuWorld:cpu.world,
     circuit,
+    teamCareer:team.state.teamCareer,
+    invitations:invitations.state.invitations,
     stats:{...state.stats,weeks:state.stats.weeks+1}
   };
   // The season boundary decides whether a contract is kept.
@@ -720,8 +773,9 @@ export function advanceWeek(state){
   }
   const salary=paySalary(advanced,{week,contract:advanced.contract});
   if(salary.ok)advanced=salary.state;
+  const injuryNote=weeklyInjuries.healed?.length?` Recovered from ${weeklyInjuries.healed.map(entry=>entry.areaLabel.toLowerCase()).join(' and ')}.`:'';
   const moved=pushHistory(advanced,`Week ${week+1} begins.`);
-  const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.${seasonNote}`);
+  const next=pushLog(moved,`${weekLabel(week)}. Energy restored to ${energy}.${seasonNote}${injuryNote}`);
   return {ok:true,state:next,message:`${weekLabel(week)}. Energy restored to ${energy}.`};
 }
 
@@ -730,3 +784,7 @@ export function setTrainingFocus(state,focus){
   return {ok:true,state:{...state,trainingFocus:focus},message:`Training focus set to ${focus}.`};
 }
 
+
+export function setCoachingEnabled(state,enabled){
+  return {ok:true,state:{...state,coachingEnabled:Boolean(enabled)},message:enabled?'Coached training enabled.':'Standard training enabled.'};
+}

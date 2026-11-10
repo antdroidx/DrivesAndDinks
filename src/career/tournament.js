@@ -25,6 +25,7 @@ import {mixSeed} from './population.js';
 import {pointsForFinish} from './tour.js';
 import {entryStatus} from './calendar.js';
 import {resolvePartner} from './club-life.js';
+import {equipmentSelection} from './equipment.js';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 

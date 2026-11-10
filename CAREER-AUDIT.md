@@ -83,7 +83,7 @@ Expenditures:
 
 Do not model taxes, insurance, investments, detailed budgets, or cash-flow statements. The useful decision is whether the player can afford the next event, paddle or coaching session.
 
-Current implementation has a dated ledger for prizes, contract salary, entry fees and travel. Event entry is blocked when those costs exceed the balance. The prospect harness applies the same transactions. Paddle, coaching and equipment purchases remain future work.
+Current implementation has a dated ledger for prizes, contract salary, entry fees, travel, coaching and equipment. Event entry and purchases are blocked when costs exceed the balance. The prospect harness applies the same entry and income transactions. Coaching improves focused training growth, and equipped paddles feed the shared engine.
 
 The future finance model must share one balance contract with energy. Energy controls physical activity; money controls access to coaching, travel, entries and equipment. Coaching improves the effectiveness of energy spent but does not restore energy. Entry and travel consume both resources. Paddle purchases affect bounded match performance but do not reverse age decline. Age and injuries cap recovery and growth regardless of available money.
 
@@ -164,7 +164,7 @@ Regression coverage is in `test/career-audit.test.js` and the existing career su
 - Add rating/ranking trends and match-report drilldown.
 - Add save export/import and preserve the all-time board outside the active save.
 - Keep the selected rival stable.
-- Add coaching and equipment purchase flows on top of the finance ledger.
+- Extend equipment into the Phase 5 seasonal catalog and signature releases.
 - Add expanded paddle shapes after the core career loop is stable.
 
 ## Recommended Order
@@ -172,6 +172,6 @@ Regression coverage is in `test/career-audit.test.js` and the existing career su
 1. Validate the shortened league cards and Quick Sim workload with human playtests.
 2. Review PPA Finals qualification and explicit age-by-age targets.
 3. Complete post-match, tournament and professional-status UX.
-4. Add injuries, coached training and equipment purchases.
+4. Validate injuries, coached training and equipment with human playtests.
 5. Add the expanded paddle catalog and shapes.
 6. Re-run this audit and full engine playtests before broader world or career features.

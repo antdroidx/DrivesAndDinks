@@ -226,5 +226,5 @@ MATCH_TYPES,expectedScore,matchPerformance,updateRating,rateMatch,regressRating,
 
 export {
   PRO_TOURS,tourFor,tourRank,onTheTour,pointsForEntry,pointsInWindow,addPoints,
-  EVENT_POINTS,TOUR_POINTS_WINDOW,PLAY_UP_MULTIPLIER
+  EVENT_POINTS,TOUR_POINTS_WINDOW,PLAY_UP_MULTIPLIER,PRO_FLOOR_RATING
 } from './tour.js';

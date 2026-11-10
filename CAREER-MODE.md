@@ -10,7 +10,7 @@ It lives at its own entry point, **`/career-mode/`**. The gameplay prototype at 
 | Entry point | `career-mode/index.html` → `https://antdroidx.github.io/DrivesAndDinks/career-mode/` |
 | Engine modules | `src/career/` |
 | Local run | `npm start` → `http://127.0.0.1:8768/career-mode/` |
-| Current milestone | **Roadmap Phase 2 core complete: CPU careers and dynamic world; scale/device benchmarks next** |
+| Current milestone | **Roadmap Phases 1–3 code complete; human playtesting and real-device evidence next** |
 | Last updated | 2026-11-09 |
 
 ---
@@ -66,6 +66,11 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/creation.js` | Experience levels, body-size modifiers and one starting trait. |
 | `src/career/directory.js` | Browsable player filters, sorting and pagination. |
 | `src/career/club-life.js` | Club reputation, persistent partners, partner gates and coach feedback. |
+| `src/career/injuries.js` | Sparse injury records, temporary availability, healing and recovery capacity. |
+| `src/career/equipment.js` | Starter and purchasable paddles, ownership, equipping and engine selection. |
+| `src/career/cpu-careers.js` | Persistent CPU deltas, active/circuit/background simulation, dynamic tournaments and bounded query scopes. |
+| `src/career/team-league.js` | CPU-managed MLP seasons, annual drafts, franchise rosters and MiLP fixtures. |
+| `src/career/invitations.js` | Team and partner invitations, expiry, decisions, relationship history and club-mate requests. |
 | `src/career/opponents.js` | Persistent opponent memory and head-to-head history. |
 | `src/career/tournament.js` | Field construction, seeding, qualifiers, tournament shapes and round-by-round state. |
 | `src/career/career-match.js` | The handoff between a career tournament and the shared match engine. |
@@ -86,13 +91,13 @@ Career ratings are the **same 14 values** the match engine simulates with, so a 
 
 ### The seed rule
 
-**Nothing about the population is stored.** A career save holds a seed; every club and athlete id is reproduced from `(seed, id)` on demand. Consequences:
+**The population is generated from a seed; only compact career deltas are stored.** Every club and athlete id is reproduced from `(seed, id)` on demand. CPU records retain sparse rating, age, contract, injury and participation deltas; MLP franchises retain only their active rosters and season summaries. Consequences:
 
-- A save file stays a few kilobytes instead of holding a thousand athletes.
 - Athlete ids are stable for the life of a career, because they are a function of the id, not of an enumeration order.
 - Adding a club to a region cannot renumber another club's roster.
+- Long histories are bounded independently of the generated population.
 
-The cost is that the population must be regenerated on demand. A full region roster now holds roughly two thousand to three thousand athletes and rebuilds in tens of milliseconds, so browsing stays live rather than paged.
+The cost is that inactive population data must be regenerated on demand. A full region roster now holds roughly two thousand to three thousand athletes and rebuilds in tens of milliseconds. The CPU world caches generated skill cohorts by career year, bounded query scopes avoid full rebuilds in the UI and the save remains compact as the world ages.
 
 ### Data flow
 
@@ -320,7 +325,7 @@ The order is a dependency chain. A ranking measures the rounds a player reached,
 The milestone this branch delivers.
 
 - [x] Isolated `/career-mode/` entry point; root prototype untouched and still publishing unchanged
-- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 14`, thirteen migrations in place)
+- [x] Versioned save schema with a migration chain (`CAREER_SAVE_VERSION = 19`, eighteen migrations in place)
 - [x] Corruption recovery: a damaged file falls back to the last verified save, and an unreadable file with no backup is quarantined rather than silently reset
 - [x] Stable ids for athletes, clubs and events, guaranteed by seed derivation
 - [x] North America and Asia, split into 14 areas and 74 cities
@@ -518,6 +523,8 @@ Retirement is the endpoint of a career. Everything above is a stage a career pas
 | 2026-11-08 | The player directory browses by filters rather than requiring a name | Region athletes are cached locally, then filtered by area, city, gender, age, doubles bracket and optional name. Sorting and 40-player pagination keep browsing usable. |
 | 2026-11-09 | Quick Sim uses the same career transitions as a played match | A quick result still moves the format rating, opponent world ratings, match archive, analytics, tournament history, points and purse. A league quick-sim completes the current best-of-three. Sim to End advances shortened league cards week by week and closes the event. |
 | 2026-11-09 | Career leagues are bounded cards rather than full round-robin schedules | Local League uses three one-opponent cards, Amateur MLP and Semi-Pro use four, and MLP uses three. The field still rotates opponents and preserves the same league scoring and standing rules. |
+| 2026-11-09 | Injuries, coaching and owned equipment share player and CPU rules | Injuries temporarily reduce recovery and block new activity without changing permanent rating. Coached training costs money and improves growth. Owned paddles use the existing engine families and shapes. |
+| 2026-11-09 | MLP and MiLP are CPU-managed background leagues | The user is a roster athlete. Franchises run short seasons and annual drafts; clubs schedule MiLP fixtures; invitations expire and support accept, decline and withdrawal. |
 
 ---
 

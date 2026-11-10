@@ -15,7 +15,8 @@
     "venue:perspective": "node scripts/venue-perspective.js",
     "profile:engine": "node scripts/profile-engine.js 60",
     "audit:career": "node scripts/audit-career-prospects.js",
-    "audit:cpu": "node scripts/audit-cpu-careers.js"
+    "audit:cpu": "node scripts/audit-cpu-careers.js",
+    "benchmark:cpu": "node scripts/benchmark-cpu-world.js"
   }
 }
 

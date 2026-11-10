@@ -22,10 +22,23 @@ import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-l
 import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js';
 import {mixSeed} from './population.js';
 import {chargeEventCosts,creditPrize} from './finance.js';
+import {rollInjury} from './injuries.js';
 import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
+export function matchSimulationPolicy(pending,tournament=null){
+  const event=EVENT_BY_ID[pending?.eventId];
+  const tier=event?.tier??'local';
+  const decisiveTier=['cup','major','world'].includes(tier);
+  const bracketRounds=tournament?.size?Math.ceil(Math.log2(tournament.size)):null;
+  const finalRound=bracketRounds!=null&&Number(pending?.round)>=bracketRounds-1;
+  const leagueFinal=tournament?.rounds?.length&&Number(pending?.round)>=tournament.rounds.length-1;
+  const important=decisiveTier&&(finalRound||leagueFinal);
+  return important
+    ?{allowed:false,label:'Decisive professional round',reason:`${pending.bracket??'This'} final rounds are reserved for manual play.`}
+    :{allowed:true,label:'Quick simulation available',reason:null};
+}
 
 // The share of the purse a finish is worth.
 const PRIZE_FACTORS=Object.freeze([1,.6,.35,.15]);
@@ -208,9 +221,11 @@ function quickReportFor({pending,tournament,random}){
 // rating, world-rating, record, finance, and tournament transitions as an
 // engine result. A league quick-sim completes the current best-of-three so a
 // single action never leaves a half-finished card.
-export function quickSimCareerMatch(state,{finishSeries=true}={}){
+export function quickSimCareerMatch(state,{finishSeries=true,force=false}={}){
   if(!state?.pendingMatch)return {ok:false,state,message:'There is no match waiting to be simulated.'};
   const first=state.pendingMatch;
+  const policy=matchSimulationPolicy(first,state.tournament);
+  if(!policy.allowed&&!force)return {ok:false,state,message:policy.reason};
   let current=state;
   let last=null;
   let games=0;
@@ -250,6 +265,8 @@ export function simulateCompetitionToEnd(state,{maxMatches=40,maxWeeks=52}={}){
     }
     if(current.pendingMatch){
       if(games>=maxMatches)break;
+      const policy=matchSimulationPolicy(current.pendingMatch,current.tournament);
+      if(!policy.allowed)return {ok:true,state:current,games,weeks,partial:true,manualRequired:true,message:`${policy.reason} Play this match to continue.`};
       const simulated=quickSimCareerMatch(current);
       if(!simulated.ok)return simulated;
       current=simulated.state;
@@ -361,6 +378,19 @@ export function finishCareerMatch(state,report){
     rating:outcome.playerRating,
     delta:outcome.delta
   });
+  const injuryRoll=rollInjury(next,{
+    activity:'match',
+    random:seededRandom(mixSeed(state.seed,`match-injury:${state.week}:${pending.eventId}:${pending.round}:${record.score}`))
+  });
+  next=injuryRoll.state;
+  const lastMatchResult={
+    week:state.week,eventId:pending.eventId,label:event?.label??pending.eventId,
+    bracket:pending.bracket,format:pending.format,score:record.score,won:outcome.won,
+    rating:outcome.playerRating,delta:Number(outcome.delta.toFixed(3)),
+    injury:injuryRoll.injury?{severity:injuryRoll.injury.severityLabel,area:injuryRoll.injury.areaLabel,returnLabel:injuryRoll.injury.returnLabel}:null,
+    nextOpponent:null,tournamentStatus:'In progress'
+  };
+  next={...next,lastMatchResult};
   // Record the result in the tournament and play the rest of the round.
   const tournament=next.tournament;
   if(tournament){
@@ -379,6 +409,7 @@ export function finishCareerMatch(state,report){
     next=Object.assign({},next,{tournament});
     // A league night pauses the season until the week advances.
     if(tournament.nightComplete&&!tournament.finished){
+      next={...next,lastMatchResult:{...next.lastMatchResult,tournamentStatus:'League card complete; next card next week.'}};
       return {
         ok:true,
         state:next,
@@ -388,12 +419,14 @@ export function finishCareerMatch(state,report){
     }
   }
 
+  const injuryNote=injuryRoll.injury?` Injury: ${injuryRoll.injury.severityLabel.toLowerCase()} (${injuryRoll.injury.areaLabel}); available ${injuryRoll.injury.returnLabel}.`:'';
   const note=record.label+' · '+record.bracket+' '+pending.format+' bracket · '+record.score;
-  next=pushHistory(pushLog(next,note+'. Rating '+formatRating(outcome.playerRating)+' ('+signed(outcome.delta)+').'),note);
+  next=pushHistory(pushLog(next,note+'. Rating '+formatRating(outcome.playerRating)+' ('+signed(outcome.delta)+').'+injuryNote),note);
 
   if(tournament&&!isPlayerDone(tournament)){
     const pendingNext=pendingFor({state:next,tournament});
     if(pendingNext)next=Object.assign({},next,{pendingMatch:pendingNext});
+    next={...next,lastMatchResult:{...next.lastMatchResult,nextOpponent:pendingNext?.matchup?.team??null,tournamentStatus:pendingNext?'Next round ready':'Competition continuing'}};
     return {
       ok:true,
       state:next,
@@ -403,7 +436,8 @@ export function finishCareerMatch(state,report){
   }
 
   const finished=finishTournament(next,tournament,{reason:'done'});
-  return {ok:true,state:finished,record,message:(outcome.won?'Won ':'Lost ')+record.score+'. '+finished.tournament?.placeText};
+  const withResult={...finished,lastMatchResult:{...finished.lastMatchResult,tournamentStatus:finished.tournament?.placeText??'Competition complete'}};
+  return {ok:true,state:withResult,record,message:(outcome.won?'Won ':'Lost ')+record.score+'. '+finished.tournament?.placeText};
 }
 
 // Closes a tournament: awards the points and the prize the finish is worth,

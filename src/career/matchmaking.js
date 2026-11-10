@@ -8,6 +8,7 @@ import {buildProfile} from '../roster.js';
 import {opponentsInBracket} from './world.js';
 import {mixSeed} from './population.js';
 import {seededRandom} from '../competition.js';
+import {equipmentSelection} from './equipment.js';
 
 // The engine caps injected attributes so a profile can never run away with
 // them. The career allows attributes up to 99, and the engine's ability
@@ -65,7 +66,7 @@ export function careerProfile(athlete,{paddle=DEFAULT_PADDLE,shape=DEFAULT_SHAPE
 // The engine orders players as 0 and 1 on team one and 2 and 3 on team two,
 // and in singles as 0 and 2.
 export function buildCareerMatchup({state,event,option,opponents,partner}){
-  const player=careerProfile(state.athlete);
+  const player=careerProfile(state.athlete,equipmentSelection(state));
   const doubles=option.format!=='singles';
   const fields=opponents.map(opponent=>careerProfile(opponent));
   const lineup=doubles

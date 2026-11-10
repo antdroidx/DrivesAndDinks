@@ -19,6 +19,7 @@ import {
   developmentProfileFor
 } from './career-lifecycle.js';
 import {capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance,attributeAgeFactor} from './age.js';
+import {emptyInjuries,normalizeInjuries,activeInjuries,createInjury,healInjuries} from './injuries.js';
 
 export const CPU_WORLD_VERSION=1;
 export const CPU_ACTIVE_LIMIT=160;
@@ -30,6 +31,19 @@ const round3=value=>Math.round(value*1000)/1000;
 const pick=(items,random)=>items[Math.min(items.length-1,Math.floor(random()*items.length))];
 
 const ENTRANT_NAMES=['Ari Chen','Noah Park','Mina Torres','Luca Reed','Sana Patel','Theo Kim','Ivy Morgan','Mateo Silva','Rina Shah','Evan Brooks','Zoe Nguyen','Owen Price'];
+const SKILL_CACHE=new Map();
+
+function skillsForWeek(seed,regionId,week){
+  const year=Math.max(0,Math.floor(week/52));
+  const key=`${seed}:${regionId}:${year}`;
+  let skills=SKILL_CACHE.get(key);
+  if(!skills){
+    skills=buildRegionSkills(seed,regionId,year*52);
+    SKILL_CACHE.set(key,skills);
+    if(SKILL_CACHE.size>8)SKILL_CACHE.delete(SKILL_CACHE.keys().next().value);
+  }
+  return skills;
+}
 
 export function emptyCpuWorld(){
   return {
@@ -40,11 +54,13 @@ export function emptyCpuWorld(){
     entrants:[],
     stories:[],
     clubs:[],
+    tournaments:[],
+    limits:{active:CPU_ACTIVE_LIMIT,circuit:CPU_CIRCUIT_LIMIT},
     summary:{
       population:0,active:0,circuit:0,background:0,professionals:0,
       tourInvites:0,retired:0,entrants:0,averageAge:0,averageRating:0
     },
-    circuit:{promoted:0,demoted:0,waves:0,retired:0,entrants:0,proInvites:0}
+    circuit:{promoted:0,demoted:0,waves:0,retired:0,entrants:0,proInvites:0,injuries:0,recoveries:0}
   };
 }
 
@@ -82,6 +98,12 @@ function compactRecord(record){
     contract:record.contract,
     proInviteWeek:record.proInviteWeek,
     proWeek:record.proWeek,
+    fatigue:record.fatigue??0,
+    form:record.form??0,
+    injuries:normalizeInjuries(record.injuries),
+    equipmentId:record.equipmentId??'allcourt-hybrid',
+    sponsorId:record.sponsorId??null,
+    teamId:record.teamId??null,
     retired:record.retired,
     retiredWeek:record.retiredWeek,
     lastActiveWeek:record.lastActiveWeek,
@@ -117,6 +139,8 @@ export function createCpuCareerRecord(skill,week=0,detail='background',regionId=
     matches:0,wins:0,events:0,
     tourPoints:0,tourPointsHistory:[],
     contract:'none',proInviteWeek:null,proWeek:null,
+    fatigue:0,form:0,injuries:emptyInjuries(),
+    equipmentId:'allcourt-hybrid',sponsorId:null,teamId:null,
     retired:false,retiredWeek:null,
     lastActiveWeek:week,lastTrainedWeek:null,lastMatchWeek:null,lastEventWeek:week,
     stage:'prospect'
@@ -148,7 +172,7 @@ function scoreForSelection(skill,random){
 
 export function createCpuWorld(seed,regionId,week=0,{activeLimit=CPU_ACTIVE_LIMIT,circuitLimit=CPU_CIRCUIT_LIMIT}={}){
   const random=seededRandom(mixSeed(seed,`cpu-world:${regionId}:${week}`));
-  const skills=buildRegionSkills(seed,regionId,week);
+  const skills=skillsForWeek(seed,regionId,week);
   const ranked=skills.map(skill=>({skill,score:scoreForSelection(skill,random)})).sort((a,b)=>b.score-a.score).map(entry=>entry.skill);
   const active=ranked.slice(0,Math.max(0,activeLimit));
   const circuit=ranked.slice(active.length,active.length+Math.max(0,circuitLimit));
@@ -158,8 +182,10 @@ export function createCpuWorld(seed,regionId,week=0,{activeLimit=CPU_ACTIVE_LIMI
   const world=emptyCpuWorld();
   world.records=records;
   world.lastWeek=week;
+  world.limits={active:Math.max(0,activeLimit),circuit:Math.max(0,circuitLimit)};
   world.summary=cpuSummary(world,skills,week);
   world.clubs=clubOutlook(seed,regionId,week,skills,regionalTemplate(regionId));
+  world.tournaments=tournamentOutlook(seed,regionId,week,world.clubs,regionalTemplate(regionId));
   return world;
 }
 
@@ -197,6 +223,23 @@ function eventPointsFor(record,format,week,random,template,detail){
   return {tier,place,points};
 }
 
+function cpuInjuryRisk(record,age){
+  const detail=record.detail==='active'?1.2:record.detail==='circuit'?.65:.3;
+  const fatigue=(record.fatigue??0)/100;
+  const ageRisk=age>=45?1.45:age>=38?1.2:1;
+  return clamp((.008+fatigue*.018)*detail*ageRisk,.001,.055);
+}
+
+function attachCpuInjury(record,week,random){
+  const severity=random()<.012?'major':random()<.16?'moderate':'minor';
+  const injury=createInjury({week,activity:'cpu-match',severity,random});
+  const injuries=normalizeInjuries(record.injuries);
+  return {
+    ...record,
+    injuries:{...injuries,active:[...injuries.active,injury].slice(-3),lastInjuryWeek:week}
+  };
+}
+
 function applyMatch(record,skill,week,cadence,template,random){
   const since=record.lastMatchWeek??week-cadence.matchEvery;
   if(week-since<cadence.matchEvery)return record;
@@ -222,6 +265,8 @@ function applyMatch(record,skill,week,cadence,template,random){
     formats:{...record.formats,[format]:round3(clamp(rating+ratingDelta,RATING_MIN,RATING_MAX))},
     matches:record.matches+1,
     wins:record.wins+(outcome.myPoints>outcome.opponentPoints?1:0),
+    fatigue:clamp((record.fatigue??0)+7+Math.round(random()*10),0,100),
+    form:clamp((record.form??0)+(outcome.myPoints>outcome.opponentPoints?5:-4),-20,20),
     lastMatchWeek:week,
     lastActiveWeek:week
   };
@@ -234,16 +279,24 @@ function applyMatch(record,skill,week,cadence,template,random){
     next.tourPoints=pointsInWindow(history,week);
     next.lastEventWeek=week;
   }
-  return next;
+  return random()<cpuInjuryRisk(next,skill.age??record.age)?attachCpuInjury(next,week,random):next;
 }
 
 export function advanceCpuCareer(record,skill,week,random,template=REGIONAL_TEMPLATES['north-america']){
   if(!record||record.retired)return record;
   const detail=CPU_DETAIL_TIERS[record.detail]??CPU_DETAIL_TIERS.background;
   const cadence=activityCadence(record.detail,template,skill.age??record.age);
-  let next={...record,age:skill.age??record.age,development:skill.development??record.development,ratings:{...record.ratings},formats:{...record.formats},maintenance:{...record.maintenance}};
-  next=applyTraining(next,skill,week,cadence,template,random);
-  next=applyMatch(next,skill,week,cadence,template,random);
+  const healed=healInjuries({...record,week},week);
+  let next={
+    ...healed.state,age:skill.age??record.age,development:skill.development??record.development,
+    ratings:{...record.ratings},formats:{...record.formats},maintenance:{...record.maintenance},
+    fatigue:clamp((record.fatigue??0)-Math.max(4,Math.round(6+trainingResponse(skill.age??record.age,record.development)*6)),0,100),
+    form:clamp((record.form??0)*.85,-20,20)
+  };
+  if(!activeInjuries(next).length){
+    next=applyTraining(next,skill,week,cadence,template,random);
+    next=applyMatch(next,skill,week,cadence,template,random);
+  }
   const best=bestFormatRating(next.formats);
   const invite=proInviteStatus({rating:best,tourPoints:next.tourPoints,matches:next.matches,age:next.age,potential:next.potential,proInviteWeek:next.proInviteWeek});
   if(invite.invited&&next.proInviteWeek==null)next.proInviteWeek=week;
@@ -304,6 +357,25 @@ function clubOutlook(seed,regionId,week,skills,template){
   });
 }
 
+function tournamentOutlook(seed,regionId,week,clubs,template){
+  const ranked=[...clubs].sort((a,b)=>(b.averageRating-a.averageRating)||(b.capacity-a.capacity));
+  return ranked.slice(0,12).map((club,index)=>{
+    const random=seededRandom(mixSeed(seed,`cpu-tournament:${regionId}:${club.id}:${Math.floor(week/4)}`));
+    const tier=club.averageRating>=4.6?'open':club.averageRating>=4.15?'challenger':'local';
+    const cadence=tier==='open'?12:tier==='challenger'?8:4;
+    const slot=Math.floor(week/cadence)%4;
+    return {
+      id:`cpu-event:${regionId}:${club.id}:${slot}:${index}`,
+      label:`${club.name} ${tier==='open'?'Open Circuit':tier==='challenger'?'Challenger':'Club Cup'}`,
+      clubId:club.id,cityId:club.cityId,regionId,tier,
+      fieldSize:tier==='open'?32:tier==='challenger'?16:8,
+      startsWeek:week+2+Math.floor(random()*4),
+      participation:round3(clamp(.45+(club.averageRating-3.5)*.12+(template.participation-1)*.08,.3,.95)),
+      projectedEntries:Math.max(8,Math.round((tier==='open'?32:tier==='challenger'?16:8)*clamp(club.capacity/160,.45,1)))
+    };
+  });
+}
+
 function cpuSummary(world,skills,week){
   const records=Object.values(world.records);
   const ages=skills.map(skill=>skill.age??0);
@@ -317,6 +389,7 @@ function cpuSummary(world,skills,week){
     background:Math.max(0,skills.length-records.length),
     professionals:pros,
     tourInvites:invited,
+    injured:records.filter(record=>activeInjuries({...record,week}).length).length,
     retired:world.retired.length,
     entrants:world.entrants.length,
     averageAge:ages.length?round3(ages.reduce((sum,value)=>sum+value,0)/ages.length):0,
@@ -327,17 +400,18 @@ function cpuSummary(world,skills,week){
 export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
   const previous=cpuWorld&&cpuWorld.version===CPU_WORLD_VERSION?cpuWorld:emptyCpuWorld();
   const random=seededRandom(mixSeed(seed,`cpu-advance:${regionId}:${week}`));
-  const skills=buildRegionSkills(seed,regionId,week);
+  const skills=skillsForWeek(seed,regionId,week);
   const skillById=new Map(skills.map(skill=>[skill.id,skill]));
   const template=regionalTemplate(regionId);
   const records={...(previous.records??{})};
   const retired=[...(previous.retired??[])];
   const entrants=[...(previous.entrants??[])];
   const stories=[...(previous.stories??[])];
-  const circuit={...(previous.circuit??{promoted:0,demoted:0,waves:0,retired:0,entrants:0,proInvites:0})};
+  const circuit={...(previous.circuit??{promoted:0,demoted:0,waves:0,retired:0,entrants:0,proInvites:0,injuries:0,recoveries:0})};
 
   for(const id of Object.keys(records)){
     const record=records[id];
+    const beforeInjured=activeInjuries({...record,week}).length>0;
     const skill=skillById.get(id)??athleteForRecord(seed,record,week)??recordSkill(record);
     if(!skill){
       record.retired=true;
@@ -345,6 +419,15 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
     }
     const before=record;
     const next=advanceCpuCareer(record,skill,week,random,template);
+    const afterInjured=activeInjuries({...next,week}).length>0;
+    if(!beforeInjured&&afterInjured){
+      circuit.injuries=(circuit.injuries??0)+1;
+      stories.push({week,type:'injury',id,name:next.name,age:next.age});
+    }
+    if(beforeInjured&&!afterInjured){
+      circuit.recoveries=(circuit.recoveries??0)+1;
+      stories.push({week,type:'recovery',id,name:next.name,age:next.age});
+    }
     if(next.proInviteWeek!=null&&before.proInviteWeek==null){
       circuit.proInvites++;
       stories.push({week,type:'pro-invite',id,name:next.name,age:next.age});
@@ -377,17 +460,19 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
     }
   }
 
-  const targetActive=CPU_ACTIVE_LIMIT;
-  const targetCircuit=CPU_CIRCUIT_LIMIT;
+  const targetActive=Math.max(0,Number(previous.limits?.active??CPU_ACTIVE_LIMIT));
+  const targetCircuit=Math.max(0,Number(previous.limits?.circuit??CPU_CIRCUIT_LIMIT));
   const currentActive=Object.values(records).filter(record=>!record.retired&&record.detail==='active').length;
   const currentCircuit=Object.values(records).filter(record=>!record.retired&&record.detail==='circuit').length;
   let newEntrants=0;
-  while(currentActive+currentCircuit<targetActive+targetCircuit&&newEntrants<12){
+  let liveCount=currentActive+currentCircuit;
+  while(liveCount<targetActive+targetCircuit&&newEntrants<12){
     const entrant=makeEntrant(seed,regionId,week,newEntrants,template);
     records[entrant.id]=entrant;
     entrants.push({week,id:entrant.id,name:entrant.name,age:entrant.age,detail:entrant.detail});
     stories.push({week,type:'entrant',id:entrant.id,name:entrant.name,age:entrant.age});
     newEntrants++;
+    liveCount++;
   }
   circuit.entrants+=newEntrants;
 
@@ -409,8 +494,11 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={}}={}){
     stories:stories.slice(-CPU_HISTORY_LIMIT),
     clubs:clubOutlook(seed,regionId,week,skills,template),
     circuit,
+    limits:{active:targetActive,circuit:targetCircuit},
+    tournaments:[],
     summary:null
   };
+  world.tournaments=tournamentOutlook(seed,regionId,week,world.clubs,template);
   world.summary=cpuSummary(world,skills,week);
   return {world,ratings:nextRatings,summary:world.summary,circuit:world.circuit,stories:world.stories.slice(-12)};
 }
@@ -430,6 +518,7 @@ export function validateCpuWorld(value){
   }
   if(!Array.isArray(value.retired)||!Array.isArray(value.entrants)||!Array.isArray(value.stories))return {ok:false,reason:'CPU world history is invalid'};
   if(!Array.isArray(value.clubs))return {ok:false,reason:'CPU club outlook is invalid'};
+  if(value.tournaments!=null&&!Array.isArray(value.tournaments))return {ok:false,reason:'CPU tournament outlook is invalid'};
   return {ok:true};
 }
 
@@ -438,3 +527,32 @@ export function cpuWorldSummary(cpuWorld){
 }
 
 export {REGIONAL_TEMPLATES,CPU_DETAIL_TIERS};
+
+export function cpuLeaders(world,{format='doubles',limit=25,regionId=null}={}){
+  return Object.values(world?.records??{})
+    .filter(record=>!record.retired&&(!regionId||record.regionId===regionId))
+    .sort((a,b)=>(b.formats?.[format]??0)-(a.formats?.[format]??0)||a.name.localeCompare(b.name))
+    .slice(0,Math.max(0,limit));
+}
+
+export function cpuPlayerPage(world,{
+  query='',detail='',stage='',minAge=10,maxAge=100,page=0,pageSize=40
+}={}){
+  const needle=String(query??'').trim().toLowerCase();
+  const filtered=Object.values(world?.records??{}).filter(record=>{
+    if(record.retired)return false;
+    if(needle&&!String(record.name??'').toLowerCase().includes(needle))return false;
+    if(detail&&record.detail!==detail)return false;
+    if(stage&&record.stage!==stage)return false;
+    if(record.age<minAge||record.age>maxAge)return false;
+    return true;
+  }).sort((a,b)=>bestFormatRating(b.formats)-bestFormatRating(a.formats)||a.name.localeCompare(b.name));
+  const size=Math.max(1,Math.min(100,Number(pageSize)||40));
+  const pages=Math.max(1,Math.ceil(filtered.length/size));
+  const current=clamp(Number(page)||0,0,pages-1);
+  return {total:filtered.length,page:current,pages,items:filtered.slice(current*size,(current+1)*size)};
+}
+
+export function cpuTournamentOutlook(world,tier=null){
+  return [...(world?.tournaments??[])].filter(event=>!tier||event.tier===tier).sort((a,b)=>a.startsWeek-b.startsWeek||b.projectedEntries-a.projectedEntries);
+}
