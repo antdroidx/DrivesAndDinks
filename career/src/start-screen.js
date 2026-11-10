@@ -1,4 +1,4 @@
-import {toggleFullscreen} from './court-display.js?v=209';
+import {toggleFullscreen} from './court-display.js?v=210';
 
 export function formatGameVersion(version,build){
  return `VERSION ${version} · BUILD ${String(build).toUpperCase()}`;

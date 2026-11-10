@@ -5,12 +5,12 @@
 // athlete and club id is reproduced exactly on demand. That keeps saves small
 // and guarantees the stable ids a career needs across weeks and seasons.
 
-import {CHARACTERS,COURT_PALETTES,OUTFIT_OPTIONS,generateIdentity,hairStylesFor,sampleAthleteBody,skillAverage} from '../roster.js?v=209';
-import {seededRandom} from '../competition.js?v=209';
-import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=209';
-import {FORMATS,ratingInFormat} from './rating.js?v=209';
-import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=209';
-import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=209';
+import {CHARACTERS,COURT_PALETTES,OUTFIT_OPTIONS,PADDLES,PADDLE_SHAPES,generateIdentity,hairStylesFor,sampleAthleteBody,skillAverage} from '../roster.js?v=210';
+import {seededRandom} from '../competition.js?v=210';
+import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=210';
+import {FORMATS,ratingInFormat} from './rating.js?v=210';
+import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=210';
+import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=210';
 
 // The roadmap starts with a 10,000-player world. Each region receives a
 // stable share based on its playable geography; the exact split remains
@@ -178,6 +178,9 @@ function generatedAppearance(gender,identity,random){
   return {
     shirtColor:identity.shirtColor,
     paddleColor:identity.paddleColor,
+    paddleFamily:pick(PADDLES,random).id,
+    paddleShape:pick(PADDLE_SHAPES,random).id,
+    paddleThickness:random()<.5?14:16,
     highlightColor:identity.highlightColor,
     headwearColor:identity.highlightColor,
     hairStyle:pick(hairStylesFor(gender),random).id,
