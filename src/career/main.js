@@ -5,7 +5,7 @@
 // costs progress.
 
 import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js';
-import {onCharacterSpritesReady} from '../pixel-character.js';
+import {onCharacterSpritesReady,paddleOutline} from '../pixel-character.js';
 import {createAnimeGameRenderer} from '../anime-game.js';
 import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js';
 import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
@@ -138,7 +138,7 @@ function careerSelectionFor(source){
     handedness:source.handedness,
     customName:source.name,
     paddle:'balanced',
-    paddleShape:'hybrid',
+    paddleShape:'hybrid-flat',
     shirtColor:source.shirtColor,
     paddleColor:source.paddleColor,
     highlightColor:source.highlightColor,
@@ -349,7 +349,7 @@ function renderHome(){
   const catalog=equipmentCatalog(career);
   const ownedPaddles=catalog.filter(item=>career.equipment?.owned?.includes(item.id));
   const paddles=catalog.filter(item=>item.id!=='allcourt-hybrid');
-  const loadoutPaddleOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===paddle.id?' selected':''}>${escapeHtml(item.label)} · ${escapeHtml(PADDLE_COLORS.find(color=>color.id===item.color)?.name??'Mint')}</option>`).join('');
+  const loadoutPaddleOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===paddle.id?' selected':''}>${escapeHtml(item.label)} · ${Number(item.thickness)||16} mm · ${escapeHtml(PADDLE_COLORS.find(color=>color.id===item.color)?.name??'Mint')}</option>`).join('');
   const retirement=retirementAdvice(career);
   const formatRows=FORMATS.map(format=>{
     const rating=career.athlete.formats[format]??0;
@@ -455,7 +455,7 @@ function renderHome(){
       <div>
         <small class="muted">CURRENT PADDLE</small>
         <strong>${escapeHtml(paddle.label)}</strong>
-        <p>${escapeHtml(PADDLE_COLORS.find(color=>color.id===paddle.color)?.name??'Mint')} · ${escapeHtml(paddle.familyLabel)} face · ${escapeHtml(paddle.shapeLabel)} shape · ${escapeHtml(paddle.description)}</p>
+        <p>${escapeHtml(PADDLE_COLORS.find(color=>color.id===paddle.color)?.name??'Mint')} · ${Number(paddle.thickness)||16} mm · ${escapeHtml(paddle.familyLabel)} face · ${escapeHtml(paddle.shapeLabel)} shape · ${escapeHtml(paddle.description)}</p>
         ${equipmentStatRows(paddle)}
       </div>
       <div>
@@ -599,7 +599,7 @@ function eventRow(event,career,gender,active=event.week===career.week){
   const divisionNote=played.length?' · completed '+played.join(', '):'';
   const loadoutPaddle=equippedPaddle(career);
   const ownedPaddles=equipmentCatalog(career).filter(item=>career.equipment?.owned?.includes(item.id));
-  const loadoutOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===loadoutPaddle.id?' selected':''}>${escapeHtml(item.label)} · ${escapeHtml(PADDLE_COLORS.find(color=>color.id===item.color)?.name??'Mint')} · ${equipmentStats(item).power}P / ${equipmentStats(item).control}C</option>`).join('');
+  const loadoutOptions=ownedPaddles.map(item=>`<option value="${item.id}"${item.id===loadoutPaddle.id?' selected':''}>${escapeHtml(item.label)} · ${Number(item.thickness)||16} mm · ${escapeHtml(PADDLE_COLORS.find(color=>color.id===item.color)?.name??'Mint')} · ${equipmentStats(item).power}P / ${equipmentStats(item).control}C</option>`).join('');
   return `<div class="event">
     <div class="body">
       <strong>${escapeHtml(event.title)}</strong>
@@ -665,7 +665,7 @@ function renderProfile(){
           <div class="field"><label>HEIGHT · FT / IN</label><div class="measurement-pair"><input id="profile-height-ft" type="number" min="4" max="6" value="${height.feet}"><span>ft</span><input id="profile-height-in" type="number" min="0" max="11" value="${height.inches}"><span>in</span></div></div>
           <div class="field"><label for="profile-weight-lb">WEIGHT · LBS</label><input id="profile-weight-lb" type="number" min="88" max="309" value="${weight}"></div>
         </div>
-        <div class="profile-equipment-summary"><span>PADDLE</span><strong>${escapeHtml(head.label)} · ${escapeHtml(PADDLE_COLORS.find(item=>item.id===head.color)?.name??'Mint')}</strong><span>HEADWEAR</span><strong>${headwear?escapeHtml(headwear.label):'None'}</strong></div>
+        <div class="profile-equipment-summary"><span>PADDLE</span><strong>${escapeHtml(head.label)} · ${Number(head.thickness)||16} mm · ${escapeHtml(PADDLE_COLORS.find(item=>item.id===head.color)?.name??'Mint')}</strong><span>HEADWEAR</span><strong>${headwear?escapeHtml(headwear.label):'None'}</strong></div>
         <button type="button" class="primary" data-action="save-profile">SAVE PROFILE</button>
       </div>
     </div>
@@ -683,7 +683,7 @@ function drawAthleteProfilePreview(){
   const profile=careerProfile(athlete),ctx=canvas.getContext('2d');
   ctx.setTransform(1,0,0,1,0,0);ctx.clearRect(0,0,canvas.width,canvas.height);ctx.setTransform(2,0,0,2,0,0);ctx.imageSmoothingEnabled=false;
   ctx.fillStyle='#173039';ctx.fillRect(0,0,150,180);ctx.fillStyle='#355e60';ctx.fillRect(0,142,150,38);ctx.fillStyle='#eff3cf55';ctx.fillRect(0,150,150,2);
-  drawCareerCharacter(ctx,{personalize:false,appearance:{...profile.appearance,headwearColor:athlete.appearance?.headwearColor??profile.appearance.headwearColor},characterId:athlete.archetypeId,handedness:athlete.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:athlete.handedness==='left'?-1:1,paddleShape:profile.paddle?.shapeId??'hybrid',lighting:'depth',style:'anime',look:'storybook',outfit:profile.appearance.outfit});
+  drawCareerCharacter(ctx,{personalize:false,appearance:{...profile.appearance,headwearColor:athlete.appearance?.headwearColor??profile.appearance.headwearColor},characterId:athlete.archetypeId,handedness:athlete.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:athlete.handedness==='left'?-1:1,paddleShape:profile.paddle?.shapeId??'hybrid-flat',lighting:'depth',style:'anime',look:'storybook',outfit:profile.appearance.outfit});
   canvas.setAttribute('aria-label',`${athlete.name} player appearance`);
 }
 
@@ -755,22 +755,18 @@ function renderAthleteProfile(){
 
 function paddleColor(item){return PADDLE_COLORS.find(color=>color.id===item?.color)??PADDLE_COLORS.find(color=>color.id==='mint')??PADDLE_COLORS[0]}
 function paddlePicture(item){
-  const color=paddleColor(item),shape=['widebody','elongated'].includes(item.shape)?item.shape:'hybrid',label=escapeHtml(item.label),artworkId=String(item.id).replace(/[^a-zA-Z0-9_-]/g,'-');
-  const faces={
-    widebody:'M16 13 Q16 5 27 5 H93 Q104 5 104 13 V76 Q104 94 87 99 H33 Q16 94 16 76 Z',
-    hybrid:'M21 12 Q21 5 31 5 H89 Q99 5 99 12 V86 Q99 103 83 108 H37 Q21 103 21 86 Z',
-    elongated:'M28 10 Q28 5 36 5 H84 Q92 5 92 10 V98 Q92 114 77 120 H43 Q28 114 28 98 Z'
-  };
-  const face=faces[shape];
-  const bottom=shape==='widebody'?99:shape==='hybrid'?108:120;
-  const handleTop=bottom-3;
+  const color=paddleColor(item),shape=item.shape??'hybrid-flat',shapeInfo=PADDLE_SHAPES.find(entry=>entry.id===shape)??PADDLE_SHAPES.find(entry=>entry.id==='hybrid-flat')??PADDLE_SHAPES[0],label=escapeHtml(item.label),artworkId=String(item.id).replace(/[^a-zA-Z0-9_-]/g,'-');
+  const points=paddleOutline(shape).map(([x,y])=>[60+x*6.6,72+y*7]);
+  const path=`M${points.map(([x,y])=>`${x.toFixed(1)} ${y.toFixed(1)}`).join(' L')} Z`;
+  const top=Math.min(...points.map(point=>point[1])),bottom=Math.max(...points.map(point=>point[1])),handleTop=bottom-2,edgeWidth=Number(item.thickness)===16?7:5;
   const patterns={
-    balanced:'<path d="M31 38H89M28 46H92M28 74H92" stroke="#ffffff" stroke-opacity=".18" stroke-width="2"/><circle cx="60" cy="61" r="18" fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="2"/>',
-    power:'<path d="M67 26 47 55h13l-7 29 25-40H65l9-18Z" fill="#fff" fill-opacity=".23"/><path d="M25 80H95" stroke="#ffd166" stroke-opacity=".55" stroke-width="3"/>',
-    control:'<g fill="#07141a" fill-opacity=".25"><circle cx="43" cy="39" r="5"/><circle cx="60" cy="39" r="5"/><circle cx="77" cy="39" r="5"/><circle cx="51" cy="54" r="5"/><circle cx="69" cy="54" r="5"/><circle cx="43" cy="69" r="5"/><circle cx="60" cy="69" r="5"/><circle cx="77" cy="69" r="5"/></g>'
+    balanced:'<path d="M22 45H98M20 55H100M20 85H100" stroke="#ffffff" stroke-opacity=".17" stroke-width="2"/><circle cx="60" cy="68" r="22" fill="none" stroke="#ffffff" stroke-opacity=".13" stroke-width="2"/>',
+    power:'<path d="M69 28 45 62h15l-8 34 31-49H66l10-19Z" fill="#fff" fill-opacity=".22"/><path d="M18 91H102" stroke="#ffd166" stroke-opacity=".58" stroke-width="3"/>',
+    control:'<g fill="#07141a" fill-opacity=".25"><circle cx="42" cy="47" r="5"/><circle cx="60" cy="47" r="5"/><circle cx="78" cy="47" r="5"/><circle cx="51" cy="63" r="5"/><circle cx="69" cy="63" r="5"/><circle cx="42" cy="79" r="5"/><circle cx="60" cy="79" r="5"/><circle cx="78" cy="79" r="5"/></g>'
   };
-  return `<svg class="paddle-product-picture shape-${escapeHtml(shape)}" viewBox="0 0 120 180" style="--paddle-color:${color.color}" role="img" aria-label="${label} paddle preview"><title>${label}</title><defs><linearGradient id="handle-${artworkId}" x1="0" x2="1"><stop stop-color="#11181e"/><stop offset=".5" stop-color="#46505a"/><stop offset="1" stop-color="#171e25"/></linearGradient><linearGradient id="shine-${artworkId}" x1="0" x2="1"><stop stop-color="#fff" stop-opacity=".22"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient></defs><rect x="52" y="${handleTop}" width="16" height="57" rx="6" fill="url(#handle-${artworkId})" stroke="#0c141a" stroke-width="4"/><g stroke="#8d99a1" stroke-opacity=".55" stroke-width="1.5"><path d="M53 ${handleTop+9}l14 5M53 ${handleTop+18}l14 5M53 ${handleTop+27}l14 5M53 ${handleTop+36}l14 5M53 ${handleTop+45}l14 5"/></g><rect x="47" y="169" width="26" height="9" rx="4" fill="#11181e" stroke="#60707a" stroke-width="2"/><path d="${face}" fill="var(--paddle-color)" stroke="#101820" stroke-width="5"/><path d="${face}" fill="url(#shine-${artworkId})"/><path d="${face}" fill="none" stroke="#e7f1ed" stroke-opacity=".28" stroke-width="2"/><rect x="${shape==='elongated'?'35':shape==='hybrid'?'28':'23'}" y="13" width="${shape==='elongated'?'50':shape==='hybrid'?'64':'74'}" height="11" rx="5" fill="#07141a" fill-opacity=".72"/>${patterns[item.family]??patterns.balanced}<text x="60" y="21" text-anchor="middle" fill="#f7f4e8" font-family="Trebuchet MS,sans-serif" font-size="6.5" font-weight="700" letter-spacing=".8">${escapeHtml((item.familyLabel??'ALLCOURT').toUpperCase())}</text></svg>`;
+  return `<svg class="paddle-product-picture shape-${escapeHtml(shape)}" viewBox="0 0 120 180" style="--paddle-color:${color.color}" role="img" aria-label="${label}, ${escapeHtml(shapeInfo.name)}, ${Number(item.thickness)||16} millimeter thickness"><title>${label} · ${escapeHtml(shapeInfo.name)} · ${Number(item.thickness)||16} mm</title><defs><linearGradient id="handle-${artworkId}" x1="0" x2="1"><stop stop-color="#11181e"/><stop offset=".5" stop-color="#46505a"/><stop offset="1" stop-color="#171e25"/></linearGradient><linearGradient id="shine-${artworkId}" x1="0" x2="1"><stop stop-color="#fff" stop-opacity=".24"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient><clipPath id="face-${artworkId}"><path d="${path}"/></clipPath></defs><rect x="52" y="${handleTop}" width="16" height="${174-handleTop}" rx="6" fill="url(#handle-${artworkId})" stroke="#0c141a" stroke-width="4"/><g stroke="#8d99a1" stroke-opacity=".55" stroke-width="1.5"><path d="M53 ${handleTop+11}l14 5M53 ${handleTop+21}l14 5M53 ${handleTop+31}l14 5M53 ${handleTop+41}l14 5M53 ${handleTop+51}l14 5"/></g><rect x="47" y="169" width="26" height="9" rx="4" fill="#11181e" stroke="#60707a" stroke-width="2"/><path d="${path}" fill="var(--paddle-color)" stroke="#101820" stroke-width="${edgeWidth}"/><path d="${path}" fill="url(#shine-${artworkId})"/><g clip-path="url(#face-${artworkId})">${patterns[item.family]??patterns.balanced}</g><path d="${path}" fill="none" stroke="#e7f1ed" stroke-opacity=".32" stroke-width="2"/><rect x="25" y="${top+8}" width="70" height="11" rx="5" fill="#07141a" fill-opacity=".75"/><text x="60" y="${top+16}" text-anchor="middle" fill="#f7f4e8" font-family="Trebuchet MS,sans-serif" font-size="6.3" font-weight="700" letter-spacing=".7">${escapeHtml((item.familyLabel??'ALLCOURT').toUpperCase())}</text></svg>`;
 }
+
 function headwearPicture(item){
   return `<div class="headwear-product-picture headwear-${escapeHtml(item.headwear)}" style="--headwear-color:${item.swatch}" aria-label="${escapeHtml(item.label)} preview"><i></i><b></b></div>`;
 }
@@ -785,7 +781,7 @@ function renderEquipment(){
   const paddleCards=catalog.map(item=>{
     const isOwned=owned.has(item.id),isEquipped=current.id===item.id,selected=item.color??career.athlete.paddleColor??'mint';
     const action=isEquipped?'<span class="tag accent">EQUIPPED</span>':isOwned?`<button type="button" class="secondary" data-action="equip" data-item="${item.id}">EQUIP</button>`:`<button type="button" class="secondary" data-action="buy-equipment" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
-    return `<article class="product-card paddle-product" data-product="${item.id}">${paddlePicture({...item,color:selected})}<div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small>${equipmentStatRows(item)}<label>COLOR<select data-paddle-color-option="${item.id}">${colorOptions(selected)}</select></label><div class="product-actions">${action}${isOwned?`<button type="button" class="secondary" data-action="recolor-paddle" data-item="${item.id}">SET COLOR</button>`:''}</div></div></article>`;
+    return `<article class="product-card paddle-product" data-product="${item.id}"><span class="thickness-badge">${Number(item.thickness)||16} MM</span>${paddlePicture({...item,color:selected})}<div><strong>${escapeHtml(item.label)} · ${Number(item.thickness)||16} mm</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small>${equipmentStatRows(item)}<label>COLOR<select data-paddle-color-option="${item.id}">${colorOptions(selected)}</select></label><div class="product-actions">${action}${isOwned?`<button type="button" class="secondary" data-action="recolor-paddle" data-item="${item.id}">SET COLOR</button>`:''}</div></div></article>`;
   }).join('');
   const headwearCards=HEADWEAR_STYLES.map(style=>{
     const options=HEADWEAR_CATALOG.filter(item=>item.headwear===style.headwear);
@@ -796,7 +792,7 @@ function renderEquipment(){
     const initial=selectedEquipped?'<span class="tag accent">WEARING</span>':`<button type="button" class="secondary" data-action="select-headwear" data-style="${style.headwear}" ${disabled?'disabled':''}>${headwearButtonLabel({dataset:{owned:String(selectedOwned),equipped:String(selectedEquipped),price:String(selected.price)}})}</button>`;
     return `<article class="product-card headwear-product" data-headwear-product="${style.headwear}">${headwearPicture(selected)}<div><strong>${escapeHtml(style.label)}</strong><small>Choose a game-renderer color. Each color is purchased once.</small><label>COLOR<select data-headwear-color-option="${style.headwear}">${colors}</select></label><div class="product-actions">${initial}</div></div></article>`;
   }).join('');
-  return `<section class="panel shop-heading"><div class="section-heading"><div><h2>EQUIPMENT SHOP</h2><p>Paddle previews use the engine's face shapes, family styling and live color palette.</p></div><div class="shop-balance">${money(career.money)}</div></div><div class="current-gear"><div><span>CURRENT PADDLE</span><strong>${escapeHtml(current.label)} · ${escapeHtml(paddleColor(current).name)}</strong>${equipmentStatRows(current)}</div><div><span>CURRENT HEADWEAR</span><strong>${headwearState.equipped?escapeHtml(HEADWEAR_CATALOG.find(item=>item.id===headwearState.equipped)?.label??'None'):'None'}</strong><button type="button" class="secondary" data-action="clear-headwear">REMOVE HEADWEAR</button></div></div></section><section class="panel"><h2>PADDLES</h2><div class="product-grid">${paddleCards}</div></section><section class="panel"><h2>HATS · VISORS · HEADBANDS</h2><div class="headwear-grid">${headwearCards}</div></section>`;
+  return `<section class="panel shop-heading"><div class="section-heading"><div><h2>EQUIPMENT SHOP</h2><p>Paddle previews use the same face geometry as the live character renderer. Each card shows its available face shape and 14 mm or 16 mm construction.</p></div><div class="shop-balance">${money(career.money)}</div></div><div class="current-gear"><div><span>CURRENT PADDLE</span><strong>${escapeHtml(current.label)} · ${Number(current.thickness)||16} mm · ${escapeHtml(paddleColor(current).name)}</strong>${equipmentStatRows(current)}</div><div><span>CURRENT HEADWEAR</span><strong>${headwearState.equipped?escapeHtml(HEADWEAR_CATALOG.find(item=>item.id===headwearState.equipped)?.label??'None'):'None'}</strong><button type="button" class="secondary" data-action="clear-headwear">REMOVE HEADWEAR</button></div></div></section><section class="panel"><h2>PADDLES</h2><div class="product-grid">${paddleCards}</div></section><section class="panel"><h2>HATS · VISORS · HEADBANDS</h2><div class="headwear-grid">${headwearCards}</div></section>`;
 }
 
 function renderLeague(){

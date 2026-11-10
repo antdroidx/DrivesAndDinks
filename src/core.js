@@ -7,14 +7,24 @@ export function venueConditions(surfaceKind='outdoor',random=Math.random){
  return {type:'outdoor',label:`OUTDOOR · LIGHT WIND · ${humidity>.68?'HUMID':'MILD'}`,wind:Number(wind.toFixed(3)),humidity:Number(humidity.toFixed(3))};
 }
 export const DEFAULT_ABILITIES=Object.freeze({speed:12,acceleration:45,reach:1,control:1,reaction:.09,serve:1,power:1,spin:1,drive:1,volley:1,drop:1,dink:1,lob:1,smash:1,defense:1,courtIQ:1,aggression:1});
-export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
+export const DEFAULT_PADDLE=Object.freeze({power:1,control:1,spin:1,shapeId:'hybrid-flat',shapePower:1,shapeControl:1,shapeReach:1,shapeHandSpeed:1,shapeSweetSpot:1});
 const DEFAULT_SHAPE_MODIFIERS=Object.freeze({power:1,control:1,reach:1,handSpeed:1,sweetSpot:1});
-export const PADDLE_SWEET_SPOT_PROFILES=Object.freeze({
- wide:Object.freeze({centerX:0,centerZ:0,radiusX:1.2,radiusZ:1,powerGain:.96,controlGain:1.05,spinGain:.96,edgePenalty:.82}),
- elongated:Object.freeze({centerX:0,centerZ:.55,radiusX:.8,radiusZ:1.3,powerGain:1.12,controlGain:.95,spinGain:1.08,edgePenalty:1.15}),
- hybrid:Object.freeze({centerX:0,centerZ:.1,radiusX:1,radiusZ:1.15,powerGain:1.03,controlGain:1,spinGain:1,edgePenalty:1})
-});
-export function paddleSweetSpotProfile(shapeId='hybrid'){return PADDLE_SWEET_SPOT_PROFILES[shapeId]??PADDLE_SWEET_SPOT_PROFILES.hybrid}
+const PADDLE_SWEET_SPOT_PROFILES_DATA={
+ widebody:Object.freeze({centerX:0,centerZ:0,radiusX:1.2,radiusZ:1,powerGain:.96,controlGain:1.05,spinGain:.96,edgePenalty:.82}),
+ 'hybrid-aero':Object.freeze({centerX:0,centerZ:.05,radiusX:1.04,radiusZ:1.12,powerGain:1.02,controlGain:1.02,spinGain:1,edgePenalty:.98}),
+ 'hybrid-flat':Object.freeze({centerX:0,centerZ:.1,radiusX:1,radiusZ:1.15,powerGain:1.03,controlGain:1,spinGain:1,edgePenalty:1}),
+ 'elongated-flat':Object.freeze({centerX:0,centerZ:.55,radiusX:.8,radiusZ:1.3,powerGain:1.12,controlGain:.95,spinGain:1.08,edgePenalty:1.15}),
+ 'elongated-aero':Object.freeze({centerX:0,centerZ:.5,radiusX:.82,radiusZ:1.28,powerGain:1.11,controlGain:.96,spinGain:1.08,edgePenalty:1.1}),
+ 'elongated-short-handle':Object.freeze({centerX:0,centerZ:.42,radiusX:.86,radiusZ:1.24,powerGain:1.1,controlGain:.98,spinGain:1.05,edgePenalty:1.08}),
+ 'widebody-cutout':Object.freeze({centerX:0,centerZ:.02,radiusX:1.12,radiusZ:1.04,powerGain:.99,controlGain:1.04,spinGain:.99,edgePenalty:.88}),
+ 'elongated-cutout':Object.freeze({centerX:0,centerZ:.48,radiusX:.82,radiusZ:1.28,powerGain:1.1,controlGain:.97,spinGain:1.06,edgePenalty:1.07}),
+ round:Object.freeze({centerX:0,centerZ:0,radiusX:1.16,radiusZ:1.16,powerGain:.96,controlGain:1.06,spinGain:.98,edgePenalty:.84}),
+ tennis:Object.freeze({centerX:0,centerZ:.12,radiusX:1.02,radiusZ:1.16,powerGain:1.04,controlGain:1.01,spinGain:1.03,edgePenalty:.98}),
+ 'tennis-extended-handle':Object.freeze({centerX:0,centerZ:.35,radiusX:.9,radiusZ:1.22,powerGain:1.08,controlGain:.97,spinGain:1.02,edgePenalty:1.06})
+};
+Object.assign(PADDLE_SWEET_SPOT_PROFILES_DATA,{wide:PADDLE_SWEET_SPOT_PROFILES_DATA.widebody,hybrid:PADDLE_SWEET_SPOT_PROFILES_DATA['hybrid-flat'],elongated:PADDLE_SWEET_SPOT_PROFILES_DATA['elongated-flat']});
+export const PADDLE_SWEET_SPOT_PROFILES=Object.freeze(PADDLE_SWEET_SPOT_PROFILES_DATA);
+export function paddleSweetSpotProfile(shapeId='hybrid-flat'){return PADDLE_SWEET_SPOT_PROFILES[shapeId]??PADDLE_SWEET_SPOT_PROFILES['hybrid-flat']}
 export function paddleShapeModifiers(playerOrPaddle={}){
  const paddle=playerOrPaddle?.paddle??playerOrPaddle??{};
   const spot=paddleSweetSpotProfile(paddle.shapeId);

@@ -16,7 +16,7 @@ import {equipmentSelection} from './equipment.js';
 export const MAX_INJECTED_ATTRIBUTE=99;
 
 const DEFAULT_PADDLE='balanced';
-const DEFAULT_SHAPE='hybrid';
+const DEFAULT_SHAPE='hybrid-flat';
 
 function selectionFor(athlete,paddle,shape,color,headwear){
   const look=athlete.appearance??{};
@@ -67,6 +67,11 @@ export function careerProfile(athlete,{paddle=DEFAULT_PADDLE,shape=DEFAULT_SHAPE
   const rendered=applyPhysique(profile,{...profile.appearance,...athlete.appearance,paddleColor:color??profile.appearance.paddleColor,headwear:headwear?.headwear??profile.appearance.headwear,headwearColor:headwear?.color??profile.appearance.headwearColor,height,build});
   rendered.paddle.equipmentName=item?.label??rendered.paddle.equipmentName??'';
   rendered.paddle.color=color??rendered.appearance.paddleColor;
+  const thickness=Number(item?.thickness)===14?14:16;
+  rendered.paddle.thickness=thickness;
+  rendered.paddle.power*=thickness===14?1.03:.985;
+  rendered.paddle.control*=thickness===14?.98:1.03;
+  rendered.paddle.ratingModifiers={...rendered.paddle.ratingModifiers,power:(rendered.paddle.ratingModifiers?.power??0)+(thickness===14?2:-1),control:(rendered.paddle.ratingModifiers?.control??0)+(thickness===14?-1:2)};
   return rendered;
 }
 

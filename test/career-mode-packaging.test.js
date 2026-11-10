@@ -137,6 +137,8 @@ test('career has dedicated profile, equipment and league screens',()=>{
   assert.match(main,/headwear-product-picture/);
   assert.match(main,/buy-headwear/);
   assert.match(main,/data-paddle-color-option/);
+  assert.match(main,/paddleOutline\(shape\)/);
+  assert.match(main,/thickness-badge/);
   assert.match(main,/HEADWEAR_STYLES\.map/);
   assert.match(main,/data-headwear-color-option/);
   assert.match(main,/viewBox="0 0 120 180"/);

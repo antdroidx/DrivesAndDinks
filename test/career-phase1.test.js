@@ -46,7 +46,7 @@ test('purchasing and equipping a paddle charges once and changes the engine prof
   const equipped=equipPaddle(purchased.state,'ignite-elongated').state;
   const profile=careerProfile(equipped.athlete,equipmentSelection(equipped));
   assert.equal(profile.paddle.id,'power');
-  assert.equal(profile.paddle.shapeId,'elongated');
+  assert.equal(profile.paddle.shapeId,'elongated-aero');
   assert.equal(purchaseEquipment(equipped,'ignite-elongated').ok,false,'a paddle cannot be bought twice');
 });
 

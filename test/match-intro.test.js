@@ -11,10 +11,10 @@ test('match intro cards include identity, overall and core ratings',()=>{
 
 test('match intro labels paddle family and shape while applying equipment rating modifiers',()=>{
  const base=matchIntroCards(players)[0],equipped={...players[0],paddle:{id:'power',shapeId:'elongated',ratingModifiers:{power:10,control:-5},shapeRatingModifiers:{power:6,reach:6,volley:-5}}},card=matchIntroCards([equipped])[0];
- assert.equal(base.paddleLabel,'Allcourt · Hybrid');
- assert.equal(card.paddleLabel,'Ignite · Elongated');
+ assert.equal(base.paddleLabel,'Allcourt · Hybrid - Flat Top · 16 mm');
+ assert.equal(card.paddleLabel,'Ignite · Elongated - Flat Top · 16 mm');
  assert.equal(card.paddleName,'Ignite');
- assert.equal(card.paddleShapeName,'Elongated');
+ assert.equal(card.paddleShapeName,'Elongated - Flat Top');
  assert.equal(card.ratings.power,100);
  assert.equal(card.ratings.reach,58);
  assert.ok(card.overall>=base.overall);

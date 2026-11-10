@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer,currentEvents,advanceWeek} from '../src/career/state.js';
 import {startCareerMatch,quickSimCareerMatch} from '../src/career/career-match.js';
 import {syncInbox,inboxMessages,unreadCount,markMessageRead,archiveMessage} from '../src/career/inbox.js';
-import {generateSeasonCatalog,purchaseEquipment,equipPaddle,equipmentSelection,createSignaturePaddle,equipmentStats,equipmentCatalog,HEADWEAR_CATALOG,buyHeadwear,equipHeadwear,clearHeadwear,setPaddleColor} from '../src/career/equipment.js';
+import {PADDLE_CATALOG,generateSeasonCatalog,purchaseEquipment,equipPaddle,equipmentSelection,createSignaturePaddle,equipmentStats,equipmentCatalog,HEADWEAR_CATALOG,buyHeadwear,equipHeadwear,clearHeadwear,setPaddleColor} from '../src/career/equipment.js';
 import {careerProfile} from '../src/career/matchmaking.js';
 import {migrateCareer,CAREER_SAVE_VERSION} from '../src/career/save.js';
 import {exportCareerPortable,importCareerPortable} from '../src/career/portable-save.js';
@@ -98,6 +98,33 @@ test('colored headwear can be purchased, worn and removed',()=>{
   assert.equal(cleared.state.equipment.headwear.equipped,null);
 });
 
+test('the retail catalog covers every roadmap shape and thickness availability',()=>{
+  const shapes=new Set(PADDLE_CATALOG.map(item=>item.shape));
+  assert.deepEqual([...shapes].sort(),['elongated-aero','elongated-cutout','elongated-flat','elongated-short-handle','hybrid-aero','hybrid-flat','round','tennis','tennis-extended-handle','widebody','widebody-cutout'].sort());
+  const grouped=Map.groupBy(PADDLE_CATALOG,item=>item.baseId);
+  assert.ok([...grouped.values()].some(items=>new Set(items.map(item=>item.thickness)).size===2),'some paddles should ship in both thicknesses');
+  assert.ok([...grouped.values()].some(items=>items.length===1),'some paddles should ship in only one thickness');
+});
+
+test('14 mm paddles trade control for pop while 16 mm paddles favor control',()=>{
+  const base={...career(),money:2000},thin=PADDLE_CATALOG.find(item=>item.id==='ignite-widebody-14'),thick=PADDLE_CATALOG.find(item=>item.id==='ignite-widebody');
+  assert.ok(thin&&thick);
+  assert.equal(thin.thickness,14);
+  assert.equal(thick.thickness,16);
+  assert.ok(equipmentStats(thin).power>equipmentStats(thick).power);
+  assert.ok(equipmentStats(thick).control>equipmentStats(thin).control);
+  const boughtThin=purchaseEquipment(base,thin.id,{color:'blue'});
+  assert.ok(boughtThin.ok,boughtThin.message);
+  const boughtBoth=purchaseEquipment(boughtThin.state,thick.id,{color:'red'});
+  assert.ok(boughtBoth.ok,boughtBoth.message);
+  const thinProfile=careerProfile(boughtBoth.state.athlete,equipmentSelection({...boughtBoth.state,equipment:{...boughtBoth.state.equipment,equipped:thin.id}}));
+  const thickProfile=careerProfile(boughtBoth.state.athlete,equipmentSelection(boughtBoth.state));
+  assert.equal(thinProfile.paddle.thickness,14);
+  assert.equal(thickProfile.paddle.thickness,16);
+  assert.ok(thinProfile.paddle.power>thickProfile.paddle.power);
+  assert.ok(thickProfile.paddle.control>thinProfile.paddle.control);
+});
+
 test('owned paddle colors can be changed after purchase',()=>{
   const base={...career(),money:1000};
   const recolored=setPaddleColor(base,'allcourt-hybrid','blue');
@@ -133,7 +160,7 @@ test('schema v22 careers gain colored equipment state and settings',()=>{
   legacy.settings=undefined;
   const migrated=migrateCareer({version:22,state:legacy});
   assert.ok(migrated.ok,migrated.reason);
-  assert.equal(migrated.state.equipment.version,3);
+  assert.equal(migrated.state.equipment.version,4);
   assert.deepEqual(migrated.state.equipment.headwear,{owned:[],equipped:null});
   assert.equal(migrated.state.settings.difficulty,'normal');
 });
