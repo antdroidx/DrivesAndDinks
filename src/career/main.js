@@ -33,7 +33,7 @@ import {financeSummary,COACHING_FEE} from './finance.js';
 import {weeklyActivityPlan,projectEventLoad} from './planning.js';
 import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js';
 import {currentInjury,activeInjuries} from './injuries.js';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG} from './equipment.js';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js';
 import {teamCareerSummary} from './team-league.js';
 import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js';
 import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js';
@@ -117,7 +117,7 @@ function renderStatus(){
   statusStrip.innerHTML=`
     <div><small>WEEK</small><strong>${career.week+1}</strong></div>
     <div><small>ENERGY</small><strong>${career.energy}</strong></div>
-    <div><small>BEST RATING</small><strong>${formatRating(Math.max(...Object.values(career.athlete.formats??{doubles:0})))}</strong></div>
+    <div><small>${career.athlete.record?.matches?'BEST RATING':'PROVISIONAL RATING'}</small><strong>${formatRating(Math.max(...Object.values(career.athlete.formats??{doubles:0})))}</strong></div>
     <div><small>LOCATION</small><strong>${escapeHtml(career.cityLabel)}</strong></div>
     <div><small>TOUR</small><strong>${escapeHtml(contractLevel(career)==='none'?'NO CONTRACT':contractLevel(career).toUpperCase())}</strong></div>
     <div><small>MONEY</small><strong>${money(career.money)}</strong></div>
@@ -669,11 +669,28 @@ function renderProfile(){
 
 function paddleColor(item){return PADDLE_COLORS.find(color=>color.id===item?.color)??PADDLE_COLORS.find(color=>color.id==='mint')??PADDLE_COLORS[0]}
 function paddlePicture(item){
-  const color=paddleColor(item),shape=item.shape??'hybrid';
-  return `<div class="paddle-product-picture shape-${escapeHtml(shape)}" style="--paddle-color:${color.color}" aria-label="${escapeHtml(item.label)} paddle preview"><i class="paddle-face"></i><b class="paddle-handle"></b></div>`;
+  const color=paddleColor(item),shape=['widebody','elongated'].includes(item.shape)?item.shape:'hybrid',label=escapeHtml(item.label),artworkId=String(item.id).replace(/[^a-zA-Z0-9_-]/g,'-');
+  const faces={
+    widebody:'M16 13 Q16 5 27 5 H93 Q104 5 104 13 V76 Q104 94 87 99 H33 Q16 94 16 76 Z',
+    hybrid:'M21 12 Q21 5 31 5 H89 Q99 5 99 12 V86 Q99 103 83 108 H37 Q21 103 21 86 Z',
+    elongated:'M28 10 Q28 5 36 5 H84 Q92 5 92 10 V98 Q92 114 77 120 H43 Q28 114 28 98 Z'
+  };
+  const face=faces[shape];
+  const bottom=shape==='widebody'?99:shape==='hybrid'?108:120;
+  const handleTop=bottom-3;
+  const patterns={
+    balanced:'<path d="M31 38H89M28 46H92M28 74H92" stroke="#ffffff" stroke-opacity=".18" stroke-width="2"/><circle cx="60" cy="61" r="18" fill="none" stroke="#ffffff" stroke-opacity=".14" stroke-width="2"/>',
+    power:'<path d="M67 26 47 55h13l-7 29 25-40H65l9-18Z" fill="#fff" fill-opacity=".23"/><path d="M25 80H95" stroke="#ffd166" stroke-opacity=".55" stroke-width="3"/>',
+    control:'<g fill="#07141a" fill-opacity=".25"><circle cx="43" cy="39" r="5"/><circle cx="60" cy="39" r="5"/><circle cx="77" cy="39" r="5"/><circle cx="51" cy="54" r="5"/><circle cx="69" cy="54" r="5"/><circle cx="43" cy="69" r="5"/><circle cx="60" cy="69" r="5"/><circle cx="77" cy="69" r="5"/></g>'
+  };
+  return `<svg class="paddle-product-picture shape-${escapeHtml(shape)}" viewBox="0 0 120 180" style="--paddle-color:${color.color}" role="img" aria-label="${label} paddle preview"><title>${label}</title><defs><linearGradient id="handle-${artworkId}" x1="0" x2="1"><stop stop-color="#11181e"/><stop offset=".5" stop-color="#46505a"/><stop offset="1" stop-color="#171e25"/></linearGradient><linearGradient id="shine-${artworkId}" x1="0" x2="1"><stop stop-color="#fff" stop-opacity=".22"/><stop offset=".45" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".18"/></linearGradient></defs><rect x="52" y="${handleTop}" width="16" height="57" rx="6" fill="url(#handle-${artworkId})" stroke="#0c141a" stroke-width="4"/><g stroke="#8d99a1" stroke-opacity=".55" stroke-width="1.5"><path d="M53 ${handleTop+9}l14 5M53 ${handleTop+18}l14 5M53 ${handleTop+27}l14 5M53 ${handleTop+36}l14 5M53 ${handleTop+45}l14 5"/></g><rect x="47" y="169" width="26" height="9" rx="4" fill="#11181e" stroke="#60707a" stroke-width="2"/><path d="${face}" fill="var(--paddle-color)" stroke="#101820" stroke-width="5"/><path d="${face}" fill="url(#shine-${artworkId})"/><path d="${face}" fill="none" stroke="#e7f1ed" stroke-opacity=".28" stroke-width="2"/><rect x="${shape==='elongated'?'35':shape==='hybrid'?'28':'23'}" y="13" width="${shape==='elongated'?'50':shape==='hybrid'?'64':'74'}" height="11" rx="5" fill="#07141a" fill-opacity=".72"/>${patterns[item.family]??patterns.balanced}<text x="60" y="21" text-anchor="middle" fill="#f7f4e8" font-family="Trebuchet MS,sans-serif" font-size="6.5" font-weight="700" letter-spacing=".8">${escapeHtml((item.familyLabel??'ALLCOURT').toUpperCase())}</text></svg>`;
 }
 function headwearPicture(item){
   return `<div class="headwear-product-picture headwear-${escapeHtml(item.headwear)}" style="--headwear-color:${item.swatch}" aria-label="${escapeHtml(item.label)} preview"><i></i><b></b></div>`;
+}
+
+function headwearButtonLabel(option){
+  return option?.dataset.equipped==='true'?'WEARING':option?.dataset.owned==='true'?'WEAR SELECTED':`BUY · ${money(Number(option?.dataset.price)||0)}`;
 }
 
 function renderEquipment(){
@@ -684,12 +701,16 @@ function renderEquipment(){
     const action=isEquipped?'<span class="tag accent">EQUIPPED</span>':isOwned?`<button type="button" class="secondary" data-action="equip" data-item="${item.id}">EQUIP</button>`:`<button type="button" class="secondary" data-action="buy-equipment" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
     return `<article class="product-card paddle-product" data-product="${item.id}">${paddlePicture({...item,color:selected})}<div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.familyLabel)} · ${escapeHtml(item.shapeLabel)} · ${escapeHtml(item.description)}</small>${equipmentStatRows(item)}<label>COLOR<select data-paddle-color-option="${item.id}">${colorOptions(selected)}</select></label><div class="product-actions">${action}${isOwned?`<button type="button" class="secondary" data-action="recolor-paddle" data-item="${item.id}">SET COLOR</button>`:''}</div></div></article>`;
   }).join('');
-  const headwearCards=HEADWEAR_CATALOG.slice(0,PADDLE_COLORS.length*3).map(item=>{
-    const isOwned=headwearState.owned.includes(item.id),isEquipped=headwearState.equipped===item.id;
-    const action=isEquipped?'<span class="tag accent">WEARING</span>':isOwned?`<button type="button" class="secondary" data-action="equip-headwear" data-item="${item.id}">WEAR</button>`:`<button type="button" class="secondary" data-action="buy-headwear" data-item="${item.id}" ${career.money>=item.price?'':'disabled'}>BUY · ${money(item.price)}</button>`;
-    return `<article class="product-card headwear-product">${headwearPicture(item)}<div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml(item.description)}</small><div class="product-actions">${action}</div></div></article>`;
+  const headwearCards=HEADWEAR_STYLES.map(style=>{
+    const options=HEADWEAR_CATALOG.filter(item=>item.headwear===style.headwear);
+    const selected=options.find(item=>item.id===headwearState.equipped)??options[0];
+    const colors=options.map(item=>`<option value="${item.id}" data-price="${item.price}" data-owned="${headwearState.owned.includes(item.id)}" data-equipped="${headwearState.equipped===item.id}" data-swatch="${item.swatch}"${item.id===selected.id?' selected':''}>${escapeHtml(item.colorLabel)}</option>`).join('');
+    const selectedOwned=headwearState.owned.includes(selected.id),selectedEquipped=headwearState.equipped===selected.id;
+    const disabled=!selectedOwned&&career.money<selected.price;
+    const initial=selectedEquipped?'<span class="tag accent">WEARING</span>':`<button type="button" class="secondary" data-action="select-headwear" data-style="${style.headwear}" ${disabled?'disabled':''}>${headwearButtonLabel({dataset:{owned:String(selectedOwned),equipped:String(selectedEquipped),price:String(selected.price)}})}</button>`;
+    return `<article class="product-card headwear-product" data-headwear-product="${style.headwear}">${headwearPicture(selected)}<div><strong>${escapeHtml(style.label)}</strong><small>Choose a game-renderer color. Each color is purchased once.</small><label>COLOR<select data-headwear-color-option="${style.headwear}">${colors}</select></label><div class="product-actions">${initial}</div></div></article>`;
   }).join('');
-  return `<section class="panel shop-heading"><div class="section-heading"><div><h2>EQUIPMENT SHOP</h2><p>Every paddle and headwear item shows its actual engine colors before purchase.</p></div><div class="shop-balance">${money(career.money)}</div></div><div class="current-gear"><div><span>CURRENT PADDLE</span><strong>${escapeHtml(current.label)} · ${escapeHtml(paddleColor(current).name)}</strong>${equipmentStatRows(current)}</div><div><span>CURRENT HEADWEAR</span><strong>${headwearState.equipped?escapeHtml(HEADWEAR_CATALOG.find(item=>item.id===headwearState.equipped)?.label??'None'):'None'}</strong><button type="button" class="secondary" data-action="clear-headwear">REMOVE HEADWEAR</button></div></div></section><section class="panel"><h2>PADDLES</h2><div class="product-grid">${paddleCards}</div></section><section class="panel"><h2>HATS · VISORS · HEADBANDS</h2><div class="headwear-grid">${headwearCards}</div></section>`;
+  return `<section class="panel shop-heading"><div class="section-heading"><div><h2>EQUIPMENT SHOP</h2><p>Paddle previews use the engine's face shapes, family styling and live color palette.</p></div><div class="shop-balance">${money(career.money)}</div></div><div class="current-gear"><div><span>CURRENT PADDLE</span><strong>${escapeHtml(current.label)} · ${escapeHtml(paddleColor(current).name)}</strong>${equipmentStatRows(current)}</div><div><span>CURRENT HEADWEAR</span><strong>${headwearState.equipped?escapeHtml(HEADWEAR_CATALOG.find(item=>item.id===headwearState.equipped)?.label??'None'):'None'}</strong><button type="button" class="secondary" data-action="clear-headwear">REMOVE HEADWEAR</button></div></div></section><section class="panel"><h2>PADDLES</h2><div class="product-grid">${paddleCards}</div></section><section class="panel"><h2>HATS · VISORS · HEADBANDS</h2><div class="headwear-grid">${headwearCards}</div></section>`;
 }
 
 function renderLeague(){
@@ -1180,6 +1201,7 @@ document.addEventListener('click',event=>{
     if(action==='recolor-paddle'){const color=trigger.closest('.paddle-product')?.querySelector('[data-paddle-color-option]')?.value;apply(setPaddleColor(app.career,trigger.dataset.item,color));return}
     if(action==='buy-headwear'){apply(buyHeadwear(app.career,trigger.dataset.item));return}
     if(action==='equip-headwear'){apply(equipHeadwear(app.career,trigger.dataset.item));return}
+    if(action==='select-headwear'){const itemId=trigger.closest('.headwear-product')?.querySelector('[data-headwear-color-option]')?.value;const isOwned=app.career.equipment?.headwear?.owned?.includes(itemId);apply(isOwned?equipHeadwear(app.career,itemId):buyHeadwear(app.career,itemId));return}
     if(action==='clear-headwear'){apply(clearHeadwear(app.career));return}
     if(action==='equip'){apply(equipPaddle(app.career,trigger.dataset.item));return}
     if(action==='create-signature'){apply(createSignaturePaddle(app.career));return}
@@ -1313,6 +1335,12 @@ document.addEventListener('change',async event=>{
     const color=PADDLE_COLORS.find(item=>item.id===event.target.value);
     const picture=event.target.closest('.paddle-product')?.querySelector('.paddle-product-picture');
     if(color&&picture)picture.style.setProperty('--paddle-color',color.color);
+    return;
+  }
+  if(event.target.matches?.('[data-headwear-color-option]')){
+    const card=event.target.closest('.headwear-product'),option=event.target.selectedOptions?.[0],button=card?.querySelector('[data-action="select-headwear"]');
+    card?.querySelector('.headwear-product-picture')?.style.setProperty('--headwear-color',option?.dataset.swatch??'#4be3c2');
+    if(button){const equipped=option?.dataset.equipped==='true',owned=option?.dataset.owned==='true',price=Number(option?.dataset.price)||0;button.disabled=!owned&&app.career.money<price;button.textContent=equipped?'WEARING':owned?'WEAR SELECTED':`BUY · ${money(price)}`}
     return;
   }
   if(id==='career-import-file'){

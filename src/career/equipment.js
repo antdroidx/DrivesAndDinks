@@ -37,7 +37,7 @@ const SHAPES=Object.freeze([
   {shape:'widebody',shapeLabel:'Widebody'},{shape:'hybrid',shapeLabel:'Hybrid'},{shape:'elongated',shapeLabel:'Elongated'}
 ]);
 
-const HEADWEAR_STYLES=Object.freeze([
+export const HEADWEAR_STYLES=Object.freeze([
   {headwear:'cap',label:'Cap',price:40},
   {headwear:'visor',label:'Visor',price:45},
   {headwear:'headband',label:'Headband',price:30}
