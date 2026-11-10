@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=208';
-import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=208';
-import {thighGarment,skirtGarment} from './character-concepts.js?v=208';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=209';
+import {animeBodyDimensions,skinPalette,tone,animePixelPalette,drawAnimeRibbon} from './anime-character.js?v=209';
+import {thighGarment,skirtGarment} from './character-concepts.js?v=209';
 
 function polygon(c,points,color,ink='#4c453d',width=.35){
  c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();
@@ -170,14 +170,16 @@ function profileHead(c,d,neck,direction,rawEmotion,sweat,clock,headwearBackwards
  else if(emotion==='fatigue')line(c,[{x:2.3,y:3.5},{x:3.2,y:3.7}],skin.deep,.35);
  else line(c,[{x:2.2,y:3.55},{x:3.35,y:3.45}],skin.deep,.35);
  if(d.headwear==='cap'){
-  polygon(c,[{x:-5.3,y:-2.1},{x:-4.8,y:-6.8},{x:0,y:-7.8},{x:4.3,y:-4.8},{x:4.6,y:-1.8}],d.trim,ink,.4);
-  for(const [hx,hy] of [[-3,-4],[-1.2,-5],[.8,-5.2],[2.6,-4.3],[3.5,-2.8]])oval(c,hx,hy,.14,.2,tone(d.trim,-.25));
-  const brim=headwearBackwards?-1:1;polygon(c,[{x:brim*1,y:-2.4},{x:brim*7.6,y:-1.6},{x:brim*8,y:-.4},{x:brim*2,y:-.9}],tone(d.trim,-.12),ink,.3);
-  line(c,[{x:0,y:-6.8},{x:.4,y:-2.8}],tone(d.trim,-.2),.3);
- }else if(d.headwear==='visor'){const brim=headwearBackwards?-1:1;polygon(c,[{x:-4.8,y:-3},{x:brim*3.9,y:-3},{x:brim*7.5,y:-1.7},{x:brim*2.4,y:-1.5},{x:-4.5,y:-1.7}],d.trim,ink,.35)
+  const capColor=d.headwearColor??d.trim;
+  polygon(c,[{x:-5.3,y:-2.1},{x:-4.8,y:-6.8},{x:0,y:-7.8},{x:4.3,y:-4.8},{x:4.6,y:-1.8}],capColor,ink,.4);
+  for(const [hx,hy] of [[-3,-4],[-1.2,-5],[.8,-5.2],[2.6,-4.3],[3.5,-2.8]])oval(c,hx,hy,.14,.2,tone(capColor,-.25));
+  const brim=headwearBackwards?-1:1;polygon(c,[{x:brim*1,y:-2.4},{x:brim*7.6,y:-1.6},{x:brim*8,y:-.4},{x:brim*2,y:-.9}],tone(capColor,-.12),ink,.3);
+  line(c,[{x:0,y:-6.8},{x:.4,y:-2.8}],tone(capColor,-.2),.3);
+ }else if(d.headwear==='visor'){const brim=headwearBackwards?-1:1,visorColor=d.headwearColor??d.trim;polygon(c,[{x:-4.8,y:-3},{x:brim*3.9,y:-3},{x:brim*7.5,y:-1.7},{x:brim*2.4,y:-1.5},{x:-4.5,y:-1.7}],visorColor,ink,.35)
  }else if(d.headwear==='headband'){
-  line(c,[{x:-5,y:-3.4},{x:3.2,y:-4}],d.trim,1.25);
-  line(c,[{x:-4.6,y:-3.65},{x:2.8,y:-4.25}],tone(d.trim,.2),.3);
+  const bandColor=d.headwearColor??d.trim;
+  line(c,[{x:-5,y:-3.4},{x:3.2,y:-4}],bandColor,1.25);
+  line(c,[{x:-4.6,y:-3.65},{x:2.8,y:-4.25}],tone(bandColor,.2),.3);
  }
  if(d.eyewear==='glasses'){
   c.strokeStyle=ink;c.lineWidth=.45;c.beginPath();c.ellipse(2,.2,1.65,1.5,0,0,Math.PI*2);c.stroke();

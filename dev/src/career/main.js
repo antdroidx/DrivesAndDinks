@@ -4,40 +4,40 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js?v=208';
-import {onCharacterSpritesReady,paddleOutline} from '../pixel-character.js?v=208';
-import {createAnimeGameRenderer} from '../anime-game.js?v=208';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=208';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=208';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js?v=209';
+import {onCharacterSpritesReady,paddleOutline} from '../pixel-character.js?v=209';
+import {createAnimeGameRenderer} from '../anime-game.js?v=209';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=209';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=209';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=208';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=208';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=208';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=208';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=208';
-import {isPlayerDone} from './tournament.js?v=208';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=208';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=208';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=208';
-import {rankingSummary} from './ranking.js?v=208';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=208';
-import {analyticsSummary} from './analytics.js?v=208';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=208';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=208';
-import {opponentHistory} from './opponents.js?v=208';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=208';
-import {directoryPage} from './directory.js?v=208';
-import {financeSummary,COACHING_FEE} from './finance.js?v=208';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=208';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=208';
-import {currentInjury,activeInjuries} from './injuries.js?v=208';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=208';
-import {careerProfile} from './matchmaking.js?v=208';
-import {teamCareerSummary} from './team-league.js?v=208';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=208';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=208';
+} from './state.js?v=209';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=209';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=209';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=209';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=209';
+import {isPlayerDone} from './tournament.js?v=209';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=209';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=209';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=209';
+import {rankingSummary} from './ranking.js?v=209';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=209';
+import {analyticsSummary} from './analytics.js?v=209';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=209';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=209';
+import {opponentHistory} from './opponents.js?v=209';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=209';
+import {directoryPage} from './directory.js?v=209';
+import {financeSummary,COACHING_FEE} from './finance.js?v=209';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=209';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=209';
+import {currentInjury,activeInjuries} from './injuries.js?v=209';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=209';
+import {careerProfile} from './matchmaking.js?v=209';
+import {teamCareerSummary} from './team-league.js?v=209';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=209';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=209';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -614,7 +614,7 @@ function eventRow(event,career,gender,active=event.week===career.week){
 }
 
 function profileDraftFor(career=app.career){
-  const athlete=career.athlete,look=athlete.appearance??{};
+  const athlete=career.athlete,look=athlete.appearance??{},equippedHeadwear=career.equipment?.headwear?.equipped?HEADWEAR_CATALOG.find(item=>item.id===career.equipment.headwear.equipped):null;
   return {
     name:athlete.name,archetypeId:athlete.archetypeId,gender:athlete.gender,
     handedness:look.handedness??athlete.handedness??'right',
@@ -624,8 +624,8 @@ function profileDraftFor(career=app.career){
     hairStyle:look.hairStyle??athlete.hairStyle??'design',
     hairColor:look.hairColor??athlete.hairColor??'brown',
     skinColor:look.skinColor??athlete.skinColor??'medium',
-    headwear:look.headwear??athlete.headwear??'none',
-    headwearColor:look.headwearColor??athlete.headwearColor??'yellow',
+    headwear:equippedHeadwear?.headwear??look.headwear??athlete.headwear??'none',
+    headwearColor:equippedHeadwear?.color??look.headwearColor??athlete.headwearColor??'yellow',
     eyewear:look.eyewear??athlete.eyewear??'none',
     outfit:look.outfit??athlete.outfit??'performance',
     court:look.court??athlete.court??'blue-gray',
@@ -638,10 +638,10 @@ function drawCareerProfilePreview(){if(app.profileDraft)drawCareerPreview('caree
 function renderProfile(){
   if(!app.profileDraft)app.profileDraft=profileDraftFor();
   const source=app.profileDraft,hairChoices=[{id:'design',name:'As designed'},...hairStylesFor(source.gender)],height=centimetersToFeetInches(source.height),weight=kilogramsToPounds(source.weight);
-  const head=equippedPaddle(app.career),headwear=app.career.equipment?.headwear?.equipped?HEADWEAR_CATALOG.find(item=>item.id===app.career.equipment.headwear.equipped):null;
+  const head=equippedPaddle(app.career),headwearState=app.career.equipment?.headwear??{owned:[],equipped:null},ownedHeadwear=headwearState.owned.map(id=>HEADWEAR_CATALOG.find(item=>item.id===id)).filter(Boolean),headwear=headwearState.equipped?HEADWEAR_CATALOG.find(item=>item.id===headwearState.equipped):null;
   return `
   <section class="panel">
-    <div class="section-heading"><div><h2>PLAYER PROFILE</h2><p>Change your outfit, appearance and body setup at any time. Paddles and headwear are managed in the Shop.</p></div><button type="button" class="secondary" data-view="shop">OPEN SHOP</button></div>
+    <div class="section-heading"><div><h2>PLAYER PROFILE</h2><p>Change your outfit, appearance, body setup and owned headwear at any time. Buy new headwear styles and colors in the Shop.</p></div><button type="button" class="secondary" data-view="shop">OPEN SHOP</button></div>
     <div class="career-profile-layout profile-screen-layout">
       <div class="career-profile-preview"><canvas id="career-profile-edit-preview" width="300" height="360" aria-label="${escapeHtml(source.name)} appearance preview"></canvas><small>${escapeHtml(CHARACTERS.find(item=>item.id===source.archetypeId)?.style??'Career player')}</small></div>
       <div class="career-profile-controls">
@@ -662,6 +662,7 @@ function renderProfile(){
           <div class="field"><label for="profile-look-eyewear">EYEWEAR</label><select id="profile-look-eyewear">${optionTags(EYEWEAR_OPTIONS,source.eyewear)}</select></div>
         </div>
         <div class="field-row">
+          <div class="field"><label for="profile-headwear">HEADWEAR · OWNED</label><select id="profile-headwear"><option value="none"${!headwear?' selected':''}>No headwear</option>${ownedHeadwear.map(item=>`<option value="${item.id}"${item.id===headwear?.id?' selected':''}>${escapeHtml(item.colorLabel)} ${escapeHtml(item.headwearLabel)}</option>`).join('')}</select><small>${ownedHeadwear.length?'Equip any color already owned.':'No headwear owned yet. Open the Shop to add one.'}</small></div>
           <div class="field"><label>HEIGHT · FT / IN</label><div class="measurement-pair"><input id="profile-height-ft" type="number" min="4" max="6" value="${height.feet}"><span>ft</span><input id="profile-height-in" type="number" min="0" max="11" value="${height.inches}"><span>in</span></div></div>
           <div class="field"><label for="profile-weight-lb">WEIGHT · LBS</label><input id="profile-weight-lb" type="number" min="88" max="309" value="${weight}"></div>
         </div>
@@ -1256,7 +1257,7 @@ document.addEventListener('click',event=>{
     if(!app.career)return;
     if(action==='save-profile'){
       const draft=app.profileDraft??profileDraftFor();
-      const look={handedness:draft.handedness,shirtColor:draft.shirtColor,paddleColor:draft.paddleColor,highlightColor:draft.highlightColor,hairStyle:draft.hairStyle,hairColor:draft.hairColor,skinColor:draft.skinColor,headwear:app.career.athlete.appearance?.headwear??app.career.athlete.headwear??'none',headwearColor:app.career.athlete.appearance?.headwearColor??app.career.athlete.headwearColor??'yellow',eyewear:draft.eyewear,outfit:draft.outfit,court:draft.court};
+      const equippedHeadwear=app.career.equipment?.headwear?.equipped?HEADWEAR_CATALOG.find(item=>item.id===app.career.equipment.headwear.equipped):null;const look={handedness:draft.handedness,shirtColor:draft.shirtColor,paddleColor:draft.paddleColor,highlightColor:draft.highlightColor,hairStyle:draft.hairStyle,hairColor:draft.hairColor,skinColor:draft.skinColor,headwear:equippedHeadwear?.headwear??'none',headwearColor:equippedHeadwear?.color??'yellow',eyewear:draft.eyewear,outfit:draft.outfit,court:draft.court};
       app.career={...app.career,athlete:{...app.career.athlete,...look,appearance:{...app.career.athlete.appearance,...look},height:draft.height,weight:draft.weight}};
       persist();toast('Player profile saved.');render();return;
     }
@@ -1476,6 +1477,16 @@ document.addEventListener('change',async event=>{
   if(id==='draft-look-highlight'){app.draft.highlightColor=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-headwear'){app.draft.headwear=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-eyewear'){app.draft.eyewear=event.target.value;drawCareerDraftPreview()}
+  if(id==='profile-headwear'){
+    if(event.target.value==='none'){
+      const cleared=clearHeadwear(app.career);
+      if(cleared.ok){app.career=cleared.state;persist();app.profileDraft=profileDraftFor();render();toast(cleared.message);}
+    }else{
+      const equipped=equipHeadwear(app.career,event.target.value);
+      if(equipped.ok){app.career=equipped.state;persist();app.profileDraft=profileDraftFor();render();toast(equipped.message);}else toast(equipped.message,true);
+    }
+    return;
+  }
   if(id?.startsWith('profile-look-')){
     const key=id.slice('profile-look-'.length),map={hand:'handedness','hair-color':'hairColor'};
     const target=map[key]??key;

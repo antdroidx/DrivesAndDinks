@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=208';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=208';
-import {legDimensions,plantFeet} from './detailed-character.js?v=208';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=209';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=209';
+import {legDimensions,plantFeet} from './detailed-character.js?v=209';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -272,13 +272,13 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
   if(!['pixie','long','bob','spiky'].includes(d.hair))for(const sign of [-1,1]){c.beginPath();c.moveTo(x+sign*.6,y-6.1);c.quadraticCurveTo(x+sign*3.5,y-4.4,x+sign*4.2,y-1.2);c.strokeStyle=tone(hair,-.25);c.lineWidth=.3;c.stroke()}
  }
  if(d.headwear==='cap'){
-  c.beginPath();c.moveTo(x-6,y-1.8);c.quadraticCurveTo(x-5.5,y-8.6,x,y-7.8);c.quadraticCurveTo(x+6,y-8.4,x+6,y-1.8);c.closePath();c.fillStyle=d.trim;c.fill();c.strokeStyle=ink;c.lineWidth=.45;c.stroke();
-  for(const [hx,hy] of [[-3.3,-4.8],[-1.5,-5.8],[.4,-5.9],[2.3,-5.2],[3.7,-3.8],[-2.2,-2.9],[1.4,-3.1]])oval(c,x+hx,y+hy,.16,.22,tone(d.trim,-.28));
+  const capColor=d.headwearColor??d.trim;
+  c.beginPath();c.moveTo(x-6,y-1.8);c.quadraticCurveTo(x-5.5,y-8.6,x,y-7.8);c.quadraticCurveTo(x+6,y-8.4,x+6,y-1.8);c.closePath();c.fillStyle=capColor;c.fill();c.strokeStyle=ink;c.lineWidth=.45;c.stroke();
+  for(const [hx,hy] of [[-3.3,-4.8],[-1.5,-5.8],[.4,-5.9],[2.3,-5.2],[3.7,-3.8],[-2.2,-2.9],[1.4,-3.1]])oval(c,x+hx,y+hy,.16,.22,tone(capColor,-.28));
   if(!near){
-   path(c,[point(x-5.8,y-2),point(x+5.5,y-2.2),point(x+7.3,y-.4),point(x+1,y-.2)],tone(d.trim,-.12),ink);
-   // line removed for cap orientation fix
+   path(c,[point(x-5.8,y-2),point(x+5.5,y-2.2),point(x+7.3,y-.4),point(x+1,y-.2)],tone(capColor,-.12),ink);
   }else{
-   path(c,[point(x-3.4,y-2.4),point(x+3.4,y-2.4),point(x+3,y-.3),point(x-3,y-.3)],tone(d.trim,-.12),ink,.3);
+   path(c,[point(x-3.4,y-2.4),point(x+3.4,y-2.4),point(x+3,y-.3),point(x-3,y-.3)],tone(capColor,-.12),ink,.3);
    line(c,[point(x-2.4,y-1.4),point(x+2.4,y-1.4)],ink,.28);
    for(const hx of [-1.4,-.5,.5,1.4])oval(c,x+hx,y-1.35,.12,.12,ink);
   }
