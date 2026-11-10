@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {buildClubIndex,buildClubRoster,buildAthlete,buildRegionRoster,findClub,mixSeed,clubsForCity,WORLD_POPULATION_TARGET,REGION_POPULATION_TARGETS} from '../src/career/population.js';
-import {RATING_KEYS} from '../src/roster.js';
+import {NAME_BANKS,RATING_KEYS} from '../src/roster.js';
 import {careerProfile} from '../src/career/matchmaking.js';
 
 const SEED=20260101;
@@ -137,4 +137,21 @@ test('club lookups find by id and reject unknown ids',()=>{
 test('the seed mixer separates streams for different keys',()=>{
   assert.notEqual(mixSeed(1,'a'),mixSeed(1,'b'));
   assert.equal(mixSeed(1,'a'),mixSeed(1,'a'));
+});
+
+
+test('the expanded name banks are large enough for the full world and both genders',()=>{
+  assert.ok(NAME_BANKS.male.length>=6000,NAME_BANKS.male.length);
+  assert.ok(NAME_BANKS.female.length>=6000,NAME_BANKS.female.length);
+  assert.ok(NAME_BANKS.last.length>=12000,NAME_BANKS.last.length);
+});
+
+test('all 10,000 generated athletes have unique full names',()=>{
+  const names=[];
+  for(const regionId of ['north-america','asia']){
+    const {athletes}=buildRegionRoster(SEED,regionId);
+    names.push(...athletes.map(athlete=>athlete.name));
+  }
+  assert.equal(names.length,WORLD_POPULATION_TARGET);
+  assert.equal(new Set(names).size,names.length);
 });

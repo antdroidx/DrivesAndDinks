@@ -86,6 +86,9 @@ test('cut-out paddles use a smooth outer silhouette with a centered opening',()=
     assert.ok(outline.length>=12);
     assert.ok(cutout&&cutout.length>=7);
     assert.equal(cutout[0][0],0);
+    const cutoutWidth=span(cutout,0),cutoutHeight=span(cutout,1);
+    assert.ok(cutout[0][1]>Math.min(...cutout.map(point=>point[1])),'the rounded triangle points toward the handle');
+    assert.ok(cutoutWidth>cutoutHeight,'the inverted opening should be wide and short');
     assert.ok(Math.max(...cutout.map(point=>point[1]))<Math.max(...outline.map(point=>point[1])));
   }
 });

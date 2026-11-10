@@ -4,7 +4,7 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js';
 import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js';
 import {createAnimeGameRenderer} from '../anime-game.js';
 import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js';
@@ -1139,7 +1139,9 @@ function renderPlayers(){
       <select id="filter-bracket"><option value="">Any doubles rating</option>${bracketOptions}</select>
       <select id="filter-sort">
         <option value="rating-desc"${app.filters.sort==='rating-desc'?' selected':''}>Highest rating</option>
-        <option value="rating-asc"${app.filters.sort==='rating-asc'?' selected':''}>Lowest rating</option>
+        <option value="rating-asc"${app.filters.sort==='rating-asc'?' selected':''}>Lowest DUPR rating</option>
+        <option value="overall-desc"${app.filters.sort==='overall-desc'?' selected':''}>Highest overall attribute</option>
+        <option value="overall-asc"${app.filters.sort==='overall-asc'?' selected':''}>Lowest overall attribute</option>
         <option value="age-asc"${app.filters.sort==='age-asc'?' selected':''}>Youngest first</option>
         <option value="age-desc"${app.filters.sort==='age-desc'?' selected':''}>Oldest first</option>
         <option value="name"${app.filters.sort==='name'?' selected':''}>Name A–Z</option>
@@ -1148,14 +1150,26 @@ function renderPlayers(){
       <input id="filter-age-max" type="number" min="18" max="54" placeholder="Max age" value="${escapeHtml(app.filters.maxAge)}" inputmode="numeric">
     </div>
     <p class="hint">${directory.total.toLocaleString('en-US')} matching players · page ${directory.page+1} of ${directory.pages}</p>
-    ${directory.rows.length?directory.rows.map(athlete=>`<div class="player">
-      <div class="body">
-        <strong>${escapeHtml(athlete.name)}</strong>
-        <small>${escapeHtml(athlete.archetypeLabel)} · ${athlete.gender} · age ${athlete.age} · ${escapeHtml(athlete.cityLabel)}, ${escapeHtml(athlete.citizenship ?? '')} · ${escapeHtml(athlete.clubName)}</small>
-        <small>Doubles ${formatRating(athlete.formats?.doubles??0)} · Singles ${formatRating(athlete.formats?.singles??0)} · Mixed ${formatRating(athlete.formats?.mixed??0)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
-      </div>
-      <div class="actions"><button type="button" class="secondary" data-action="open-player" data-player="${athlete.id}">PROFILE</button></div>
-    </div>`).join(''):'<p class="muted">No players match those filters.</p>'}
+    ${directory.rows.length?`<div class="player-table-wrap">
+      <table class="player-table">
+        <thead><tr><th>PLAYER</th><th>OVERALL</th><th>DOUBLES</th><th>SINGLES</th><th>MIXED</th><th>AGE</th><th>GENDER</th><th>CITY / CLUB</th><th></th></tr></thead>
+        <tbody>${directory.rows.map(athlete=>{
+          const overall=Math.round(athlete.skillAverage??skillAverage(athlete.ratings??{}));
+          return `<tr>
+            <td><strong>${escapeHtml(athlete.name)}</strong><small>${escapeHtml(athlete.archetypeLabel)}</small></td>
+            <td><b class="overall-value">${overall}</b></td>
+            <td>${formatRating(athlete.formats?.doubles??0)}</td>
+            <td>${formatRating(athlete.formats?.singles??0)}</td>
+            <td>${formatRating(athlete.formats?.mixed??0)}</td>
+            <td>${athlete.age}</td>
+            <td>${escapeHtml(athlete.gender)}</td>
+            <td><strong>${escapeHtml(athlete.cityLabel??'—')}</strong><small>${escapeHtml(athlete.clubName??'—')}</small></td>
+            <td><button type="button" class="secondary" data-action="open-player" data-player="${athlete.id}">PROFILE</button></td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>`:'<p class="muted">No players match those filters.</p>'}
     <div class="actions">
       <button type="button" class="secondary" data-action="players-page" data-page="${directory.page-1}" ${directory.page<=0?'disabled':''}>← PREVIOUS</button>
       <button type="button" class="secondary" data-action="players-page" data-page="${directory.page+1}" ${directory.page>=directory.pages-1?'disabled':''}>NEXT →</button>

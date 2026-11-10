@@ -110,7 +110,15 @@ export function buildClubIndex(seed,regionId,{populationTarget=REGION_POPULATION
     if(remaining<=0)break;
     entry.count++;remaining--;
   }
-  for(const entry of allocations){entry.club.memberCount=entry.count;delete entry.club.memberWeight}
+  let memberStart=0;
+  const nameOffset=region.id==='asia'?REGION_POPULATION_TARGETS['north-america']:0;
+  for(const entry of allocations){
+    entry.club.memberStart=memberStart;
+    entry.club.memberCount=entry.count;
+    entry.club.nameOrdinalStart=nameOffset+memberStart;
+    memberStart+=entry.count;
+    delete entry.club.memberWeight;
+  }
   return clubs;
 }
 
@@ -201,7 +209,7 @@ export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
   const region=regionById(club.regionId);
   const weights=Object.entries(region?.cultureWeights??{white_american:1});
   const culture=weightedPick(weights,random);
-  const identity=generateIdentity({gender,culture,random});
+  const identity=generateIdentity({gender,culture,random,nameOrdinal:club.nameOrdinalStart+index});
   const citizenship=citizenshipFor(club.regionId,{country:club.country},random);
   const handedness=random()<.13?'left':'right';
   const appearance=generatedAppearance(gender,identity,random);

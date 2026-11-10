@@ -102,6 +102,17 @@ test('a player outside the main draw has to qualify',()=>{
   assert.equal(tournamentPoints(loss),0,'a qualifier loss pays nothing');
 });
 
+test('local draws keep every opponent in the career city and preserve their full look',()=>{
+  const event={...eventFor('round-robin-league'),scope:'city',drawSize:8};
+  const started=startTournament({state,event,option});
+  assert.ok(started.ok,started.message);
+  assert.ok(started.tournament.teams.length>=4,'a local draw still needs a playable field');
+  const athletes=started.tournament.teams.flatMap(team=>team.members).filter(member=>!member.isPlayer&&member.id!=='player');
+  assert.ok(athletes.length>0);
+  assert.ok(athletes.every(member=>member.cityId===state.cityId),'a city league must use players from that city');
+  assert.ok(athletes.every(member=>member.appearance&&member.ratings&&member.formats),'the draw must retain complete CPU data');
+});
+
 test('gender doubles and singles field only the player gender',()=>{
   const event=eventFor('tournament-bracket');
   for(const format of ['doubles','singles']){

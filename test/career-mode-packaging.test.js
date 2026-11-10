@@ -167,7 +167,7 @@ test('standings format tabs submit valid format ids',()=>{
 
 test('the career service worker precaches the app shell and the shared engine',()=>{
   const sw=read('career-mode/sw.js');
-  for(const entry of ['./index.html','./career.css','../src/career/main.js','../src/roster.js','../src/pixel-character.js','../src/competition.js','../src/core.js']){
+  for(const entry of ['./index.html','./career.css','../src/career/main.js','../src/roster.js','../src/name-data.js','../src/pixel-character.js','../src/competition.js','../src/core.js']){
     assert.ok(sw.includes(entry),`service worker must precache ${entry}`);
   }
   assert.doesNotThrow(()=>new Function(sw));
@@ -200,6 +200,13 @@ test('generated player profiles expose look, ratings and career history',()=>{
   assert.match(population,/headwearRoll/);
   assert.match(css,/\.athlete-profile-header/);
 });
+test('players search renders a sortable table with overall ability',()=>{
+  const main=read('src/career/main.js'),css=read('career/career.css');
+  assert.match(main,/class="player-table"/);
+  assert.match(main,/Highest overall attribute/);
+  assert.match(main,/skillAverage\(athlete\.ratings/);
+  assert.match(css,/\.player-table-wrap\{overflow-x:auto/);
+});
 test('dashboard fills the ratings column with move, matches and recent',()=>{
   const main=read('src/career/main.js'),css=read('career/career.css');
   assert.match(main,/home-dashboard-main/);
@@ -221,6 +228,7 @@ test('career match handoff preserves route and offers resume or restart',()=>{
   assert.match(careerMain,/location\.pathname\.includes\('\/dev\/'\)\?'\.\.\/'/);
   assert.match(main,/career-return-path/);
   assert.match(main,/savedEngineState\?'RESUME MATCH →':'ENTER MATCH →'/);
+  assert.match(main,/careerMatchInProgress/,'the intro itself must not create a resumable match');
   assert.match(main,/savedEngineState\?'RESTART MATCH':null/);
-  assert.match(main,/const beginFresh=\(\)=>\{clearEngineState\(\)/);
+  assert.match(main,/const beginFresh=\(\)=>\{careerMatchInProgress=true;clearEngineState\(\)/);
 });

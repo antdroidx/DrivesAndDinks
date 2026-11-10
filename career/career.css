@@ -181,6 +181,17 @@ button.secondary:disabled{opacity:.45;cursor:not-allowed}
 }
 .filters select:focus,.filters input:focus{outline:2px solid var(--accent);outline-offset:1px}
 
+.player-table-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.player-table{width:100%;min-width:940px;border-collapse:collapse;font-size:12px}
+.player-table th{padding:10px 11px;text-align:left;color:var(--muted);font-size:9px;letter-spacing:.12em;border-bottom:1px solid var(--line);white-space:nowrap}
+.player-table td{padding:11px;border-bottom:1px solid var(--line);vertical-align:middle;white-space:nowrap}
+.player-table tbody tr:last-child td{border-bottom:0}
+.player-table tbody tr:hover{background:#ffffff08}
+.player-table td strong{display:block;color:var(--text);font-size:12px}
+.player-table td small{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+.player-table .overall-value{color:var(--accent);font-size:16px}
+.player-table button{padding:6px 9px;min-width:72px}
+
 .week{border:1px solid var(--line);border-radius:8px;background:var(--panel-2);padding:11px 12px;margin-bottom:8px}
 .week.current{border-color:var(--accent)}
 .week h3{margin:0 0 6px;display:flex;justify-content:space-between;gap:8px}

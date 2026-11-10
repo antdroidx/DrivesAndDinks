@@ -122,6 +122,11 @@ test('a double-elimination unpaired player is recognized as having a bye',()=>{
   assert.equal(playerHasBye(tournament),true);
 });
 
+test('a fresh match session cannot inherit an older in-progress engine snapshot',()=>{
+  const base={eventId:'club-night',optionId:'doubles:3.5',week:0,tournamentId:'same',round:0};
+  assert.notEqual(pendingMatchId({...base,sessionId:'session-a'}),pendingMatchId({...base,sessionId:'session-b'}));
+});
+
 test('stale match results are consumed and cannot score a later match',()=>{
   const previous=globalThis.localStorage;
   globalThis.localStorage=memoryStorage();

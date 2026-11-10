@@ -532,6 +532,8 @@ export function attendEvent(state,eventId,optionId=null){
   // stronger, and the rating moves on how the result compared with the
   // expectation rather than on the result itself.
   const opponentCount=format==='doubles'?2:1;
+  const cityId=['club','city'].includes(event.scope)?state.cityId:null;
+  const areaId=event.scope==='area'?state.areaId:null;
   const opponents=opponentsInBracket({
     seed:state.seed,
     regionId:state.regionId,
@@ -540,6 +542,8 @@ export function attendEvent(state,eventId,optionId=null){
     divisionId:division,
     format,
     count:opponentCount,
+    cityId,
+    areaId,
     random:seededRandom(mixSeed(state.seed,'opponent:'+state.week+':'+event.eventId+':'+option.id))
   });
   const partner=format==='doubles'
@@ -551,6 +555,8 @@ export function attendEvent(state,eventId,optionId=null){
       divisionId:division,
       format,
       count:1,
+      cityId,
+      areaId,
       random:seededRandom(mixSeed(state.seed,'partner:'+state.week+':'+event.eventId+':'+option.id))
     })[0]??null)
     :null;

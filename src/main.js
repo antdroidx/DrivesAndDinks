@@ -458,7 +458,7 @@ startScreen=setupStartScreen({onPlay:()=>selectionUI.open(),version:'0.1.0',buil
 // and its lineup already built from the career athlete's own attributes.
 const careerQuery=new URLSearchParams(location.search),careerMatch=readPendingMatch()&&careerQuery.has(CAREER_MATCH_PARAM)?readPendingMatch():null;
 const requestedCareerReturnPath=careerQuery.get('career-return-path'),careerReturnPath=requestedCareerReturnPath?.startsWith('/')?requestedCareerReturnPath:(careerQuery.get('career-return')==='career'?(location.pathname.startsWith('/dev/')?'../career/':'./career/'):'./career-mode/');
-let careerResultCommitted=false;
+let careerResultCommitted=false,careerMatchInProgress=false;
 if(careerMatch){
   startScreen?.close();
   const screen=document.querySelector('#game-start');
@@ -488,8 +488,8 @@ if(careerMatch){
     opponentTeamName===opponentPlayers?`Opponent: ${opponentPlayers}`:`Opponent: ${opponentTeamName} — ${opponentPlayers}`,
     scoringLabel
   ];
-  const beginFresh=()=>{clearEngineState();game.setPaused(false);beginConfiguredMatch()};
-  const beginSaved=()=>{if(savedEngineState)game.restore(savedEngineState);game.setPaused(false);beginConfiguredMatch()};
+  const beginFresh=()=>{careerMatchInProgress=true;clearEngineState();game.setPaused(false);beginConfiguredMatch()};
+  const beginSaved=()=>{careerMatchInProgress=true;if(savedEngineState)game.restore(savedEngineState);game.setPaused(false);beginConfiguredMatch()};
   showMatchIntro(game.players,savedEngineState?beginSaved:beginFresh,{kicker:'CAREER MATCH',title:'THE MATCH-UP',action:savedEngineState?'RESUME MATCH →':'ENTER MATCH →',secondaryAction:savedEngineState?'RESTART MATCH':null,onSecondary:savedEngineState?beginFresh:null,entry});
   last=0;acc=0;
 }
@@ -590,8 +590,8 @@ for(const id of ['fullscreen-button','pause-button','setup-button','mode','diffi
  const control=document.getElementById(id);if(control)settingsActions.append(control);
 }
 if(careerMatch){
- const careerExit=document.createElement('button');careerExit.id='career-exit-button';careerExit.type='button';careerExit.textContent='BACK TO CAREER';careerExit.onclick=()=>{writeEngineState(careerMatch.matchId,game.snapshot());game.setPaused(true);location.href=careerReturnPath};
+ const careerExit=document.createElement('button');careerExit.id='career-exit-button';careerExit.type='button';careerExit.textContent='BACK TO CAREER';careerExit.onclick=()=>{if(careerMatchInProgress&&game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot());game.setPaused(true);location.href=careerReturnPath};
  settingsActions.prepend(careerExit);
- setInterval(()=>{if(game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())},10000);
- window.addEventListener('pagehide',()=>{if(game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())});
+ setInterval(()=>{if(careerMatchInProgress&&game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())},10000);
+ window.addEventListener('pagehide',()=>{if(careerMatchInProgress&&game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())});
 }

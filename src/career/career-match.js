@@ -29,6 +29,11 @@ import {seededRandom} from '../competition.js';
 import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
+let matchSessionCounter=0;
+function newMatchSessionId(){
+  const random=globalThis.crypto?.randomUUID?.()??Math.random().toString(36).slice(2);
+  return `match-${Date.now().toString(36)}-${random}-${++matchSessionCounter}`;
+}
 export function matchSimulationPolicy(pending,tournament=null){
   const event=EVENT_BY_ID[pending?.eventId];
   const tier=event?.tier??'local';
@@ -108,6 +113,10 @@ function pendingFor({state,tournament}){
   if(!match)return null;
   const matchup=matchupFor({state,tournament,match});
   if(!matchup)return null;
+  const previous=state.pendingMatch;
+  const sameRound=previous&&previous.eventId===tournament.eventId&&previous.tournamentId===tournament.id&&Number(previous.round)===Number(tournament.round);
+  const sessionId=sameRound&&previous.sessionId?previous.sessionId:newMatchSessionId();
+
   return {
     eventId:tournament.eventId,
     eventLabel:EVENT_BY_ID[tournament.eventId]?.label??tournament.label,
@@ -119,6 +128,7 @@ function pendingFor({state,tournament}){
     energyCost:0,
     week:tournament.week,
     round:tournament.round,
+    sessionId,
     tournamentId:tournament.id,
     rules:matchRules(tournament),
     difficulty:['easy','normal','hard'].includes(state.settings?.difficulty)?state.settings.difficulty:(tournament.difficulty??'normal'),

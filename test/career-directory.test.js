@@ -3,9 +3,9 @@ import assert from 'node:assert/strict';
 import {filterPlayers,directoryPage,DIRECTORY_PAGE_SIZE} from '../src/career/directory.js';
 
 const athletes=[
-  {id:'a',name:'Alice',areaId:'north',cityId:'one',gender:'female',age:21,formats:{doubles:3.5},clubName:'A'},
-  {id:'b',name:'Bob',areaId:'north',cityId:'two',gender:'male',age:42,formats:{doubles:4.5},clubName:'B'},
-  {id:'c',name:'Cara',areaId:'south',cityId:'three',gender:'female',age:34,formats:{doubles:5.1},clubName:'C'}
+  {id:'a',name:'Alice',areaId:'north',cityId:'one',gender:'female',age:21,ratings:{power:40},formats:{doubles:3.5},clubName:'A'},
+  {id:'b',name:'Bob',areaId:'north',cityId:'two',gender:'male',age:42,ratings:{power:90},formats:{doubles:4.5},clubName:'B'},
+  {id:'c',name:'Cara',areaId:'south',cityId:'three',gender:'female',age:34,ratings:{power:70},formats:{doubles:5.1},clubName:'C'}
 ];
 
 test('the player directory works without a name query',()=>{
@@ -25,6 +25,8 @@ test('directory sorting uses doubles rating, age or name',()=>{
   assert.deepEqual(filterPlayers(athletes,{sort:'rating-desc'}).map(a=>a.id),['c','b','a']);
   assert.deepEqual(filterPlayers(athletes,{sort:'rating-asc'}).map(a=>a.id),['a','b','c']);
   assert.deepEqual(filterPlayers(athletes,{sort:'age-asc'}).map(a=>a.id),['a','c','b']);
+  assert.deepEqual(filterPlayers(athletes,{sort:'overall-desc'}).map(a=>a.id),['b','c','a']);
+  assert.deepEqual(filterPlayers(athletes,{sort:'overall-asc'}).map(a=>a.id),['a','c','b']);
 });
 
 test('directory pagination returns bounded pages',()=>{

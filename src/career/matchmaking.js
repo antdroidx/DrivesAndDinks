@@ -106,6 +106,8 @@ export function buildCareerMatchup({state,event,option,opponents,partner}){
 // Pulls the field for a career event out of the rated population.
 export function drawField({state,event,option}){
   const doubles=option.format!=='singles';
+  const cityId=['club','city'].includes(event.scope)?state.cityId:null;
+  const areaId=event.scope==='area'?state.areaId:null;
   const opponents=opponentsInBracket({
     seed:state.seed,
     regionId:state.regionId,
@@ -114,6 +116,8 @@ export function drawField({state,event,option}){
     divisionId:option.divisionId,
     format:option.format,
     count:doubles?2:1,
+    cityId,
+    areaId,
     random:seededRandom(mixSeed(state.seed,`field:${state.week}:${event.eventId}:${option.id}`))
   });
   const partner=doubles
@@ -125,6 +129,8 @@ export function drawField({state,event,option}){
       divisionId:option.divisionId,
       format:option.format,
       count:1,
+      cityId,
+      areaId,
       random:seededRandom(mixSeed(state.seed,`mate:${state.week}:${event.eventId}:${option.id}`))
     })[0]??null)
     :null;

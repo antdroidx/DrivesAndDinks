@@ -1,6 +1,9 @@
 // Career player directory filtering and pagination.
 
 import {divisionFor} from './rating.js';
+import {skillAverage} from '../roster.js';
+
+const overallOf=athlete=>Math.round(athlete.skillAverage??skillAverage(athlete.ratings??{}));
 
 export const DIRECTORY_PAGE_SIZE=40;
 
@@ -21,6 +24,8 @@ export function filterPlayers(athletes,filters={}){
     return true;
   }).sort((a,b)=>{
     if(filters.sort==='name')return a.name.localeCompare(b.name);
+    if(filters.sort==='overall-desc')return overallOf(b)-overallOf(a)||a.name.localeCompare(b.name);
+    if(filters.sort==='overall-asc')return overallOf(a)-overallOf(b)||a.name.localeCompare(b.name);
     if(filters.sort==='age-asc')return a.age-b.age||b.formats.doubles-a.formats.doubles;
     if(filters.sort==='age-desc')return b.age-a.age||b.formats.doubles-a.formats.doubles;
     if(filters.sort==='rating-asc')return a.formats.doubles-b.formats.doubles||a.name.localeCompare(b.name);
