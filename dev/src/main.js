@@ -1,42 +1,42 @@
-import {seededRandom} from './competition.js?v=213';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=213';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=213';
-import {playerFeet,footSole} from './player-feet.js?v=213';
+import {seededRandom} from './competition.js?v=214';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=214';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=214';
+import {playerFeet,footSole} from './player-feet.js?v=214';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=213';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=214';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=213';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=214';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=213';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=214';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=213';
+import {createAnimeGameRenderer} from './anime-game.js?v=214';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=213';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=214';
 
-import {setupCourtDisplay} from './court-display.js?v=213';
+import {setupCourtDisplay} from './court-display.js?v=214';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=213';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=214';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=213';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=213';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=214';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=214';
 
-import {movingStance} from './detailed-character.js?v=213';
+import {movingStance} from './detailed-character.js?v=214';
 
-import {sampleMatchAnimation} from './match-animation.js?v=213';
+import {sampleMatchAnimation} from './match-animation.js?v=214';
 
-import {setupSelection} from './selection.js?v=213';
-import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM,writeEngineState,readEngineState,clearEngineState} from './career/handshake.js?v=213';import {setupStartScreen} from './start-screen.js?v=213';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=213';
+import {setupSelection} from './selection.js?v=214';
+import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM,writeEngineState,readEngineState,clearEngineState} from './career/handshake.js?v=214';import {setupStartScreen} from './start-screen.js?v=214';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=214';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=213';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=214';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=213';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=214';
 
-import {Game} from './game.js?v=213';
-import {C} from './core.js?v=213';
+import {Game} from './game.js?v=214';
+import {C} from './core.js?v=214';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=213';import {playerEmotionState} from './player-emotion.js?v=213';import {PerformanceMonitor} from './performance-monitor.js?v=213';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=214';import {playerEmotionState} from './player-emotion.js?v=214';import {PerformanceMonitor} from './performance-monitor.js?v=214';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=213';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=214';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -458,7 +458,7 @@ startScreen=setupStartScreen({onPlay:()=>selectionUI.open(),version:'0.1.0',buil
 // and its lineup already built from the career athlete's own attributes.
 const careerQuery=new URLSearchParams(location.search),careerMatch=readPendingMatch()&&careerQuery.has(CAREER_MATCH_PARAM)?readPendingMatch():null;
 const requestedCareerReturnPath=careerQuery.get('career-return-path'),careerReturnPath=requestedCareerReturnPath?.startsWith('/')?requestedCareerReturnPath:(careerQuery.get('career-return')==='career'?(location.pathname.startsWith('/dev/')?'../career/':'./career/'):'./career-mode/');
-let careerResultCommitted=false;
+let careerResultCommitted=false,careerMatchInProgress=false;
 if(careerMatch){
   startScreen?.close();
   const screen=document.querySelector('#game-start');
@@ -488,8 +488,8 @@ if(careerMatch){
     opponentTeamName===opponentPlayers?`Opponent: ${opponentPlayers}`:`Opponent: ${opponentTeamName} — ${opponentPlayers}`,
     scoringLabel
   ];
-  const beginFresh=()=>{clearEngineState();game.setPaused(false);beginConfiguredMatch()};
-  const beginSaved=()=>{if(savedEngineState)game.restore(savedEngineState);game.setPaused(false);beginConfiguredMatch()};
+  const beginFresh=()=>{careerMatchInProgress=true;clearEngineState();game.setPaused(false);beginConfiguredMatch()};
+  const beginSaved=()=>{careerMatchInProgress=true;if(savedEngineState)game.restore(savedEngineState);game.setPaused(false);beginConfiguredMatch()};
   showMatchIntro(game.players,savedEngineState?beginSaved:beginFresh,{kicker:'CAREER MATCH',title:'THE MATCH-UP',action:savedEngineState?'RESUME MATCH →':'ENTER MATCH →',secondaryAction:savedEngineState?'RESTART MATCH':null,onSecondary:savedEngineState?beginFresh:null,entry});
   last=0;acc=0;
 }
@@ -590,8 +590,8 @@ for(const id of ['fullscreen-button','pause-button','setup-button','mode','diffi
  const control=document.getElementById(id);if(control)settingsActions.append(control);
 }
 if(careerMatch){
- const careerExit=document.createElement('button');careerExit.id='career-exit-button';careerExit.type='button';careerExit.textContent='BACK TO CAREER';careerExit.onclick=()=>{writeEngineState(careerMatch.matchId,game.snapshot());game.setPaused(true);location.href=careerReturnPath};
+ const careerExit=document.createElement('button');careerExit.id='career-exit-button';careerExit.type='button';careerExit.textContent='BACK TO CAREER';careerExit.onclick=()=>{if(careerMatchInProgress&&game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot());game.setPaused(true);location.href=careerReturnPath};
  settingsActions.prepend(careerExit);
- setInterval(()=>{if(game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())},10000);
- window.addEventListener('pagehide',()=>{if(game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())});
+ setInterval(()=>{if(careerMatchInProgress&&game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())},10000);
+ window.addEventListener('pagehide',()=>{if(careerMatchInProgress&&game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())});
 }

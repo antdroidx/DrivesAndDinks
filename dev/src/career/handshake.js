@@ -17,7 +17,7 @@ function storage(){
 export function pendingMatchId(match){
   if(!match)return null;
   return match.matchId??[
-    match.eventId,match.optionId,match.week,match.tournamentId,match.round
+    match.eventId,match.optionId,match.week,match.tournamentId,match.round,match.sessionId
   ].map(value=>value??'').join(':');
 }
 

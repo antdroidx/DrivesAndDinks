@@ -5,12 +5,12 @@
 // athlete and club id is reproduced exactly on demand. That keeps saves small
 // and guarantees the stable ids a career needs across weeks and seasons.
 
-import {CHARACTERS,COURT_PALETTES,OUTFIT_OPTIONS,PADDLES,PADDLE_SHAPES,generateIdentity,hairStylesFor,sampleAthleteBody,skillAverage} from '../roster.js?v=213';
-import {seededRandom} from '../competition.js?v=213';
-import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=213';
-import {FORMATS,ratingInFormat} from './rating.js?v=213';
-import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=213';
-import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=213';
+import {CHARACTERS,COURT_PALETTES,OUTFIT_OPTIONS,PADDLES,PADDLE_SHAPES,generateIdentity,hairStylesFor,sampleAthleteBody,skillAverage} from '../roster.js?v=214';
+import {seededRandom} from '../competition.js?v=214';
+import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=214';
+import {FORMATS,ratingInFormat} from './rating.js?v=214';
+import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=214';
+import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=214';
 
 // The roadmap starts with a 10,000-player world. Each region receives a
 // stable share based on its playable geography; the exact split remains
@@ -110,7 +110,15 @@ export function buildClubIndex(seed,regionId,{populationTarget=REGION_POPULATION
     if(remaining<=0)break;
     entry.count++;remaining--;
   }
-  for(const entry of allocations){entry.club.memberCount=entry.count;delete entry.club.memberWeight}
+  let memberStart=0;
+  const nameOffset=region.id==='asia'?REGION_POPULATION_TARGETS['north-america']:0;
+  for(const entry of allocations){
+    entry.club.memberStart=memberStart;
+    entry.club.memberCount=entry.count;
+    entry.club.nameOrdinalStart=nameOffset+memberStart;
+    memberStart+=entry.count;
+    delete entry.club.memberWeight;
+  }
   return clubs;
 }
 
@@ -201,7 +209,7 @@ export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
   const region=regionById(club.regionId);
   const weights=Object.entries(region?.cultureWeights??{white_american:1});
   const culture=weightedPick(weights,random);
-  const identity=generateIdentity({gender,culture,random});
+  const identity=generateIdentity({gender,culture,random,nameOrdinal:club.nameOrdinalStart+index});
   const citizenship=citizenshipFor(club.regionId,{country:club.country},random);
   const handedness=random()<.13?'left':'right';
   const appearance=generatedAppearance(gender,identity,random);

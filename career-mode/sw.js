@@ -53,6 +53,7 @@ const PRECACHE=[
   '../src/career/standings.js',
   '../src/career/handshake.js',
   '../src/roster.js',
+  '../src/name-data.js',
   '../src/competition.js',
   '../src/core.js',
   '../src/character-concepts.js',

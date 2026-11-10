@@ -11,9 +11,9 @@
 // athlete who has never played keeps their starting rating and the week it
 // was set, so their current rating is that rating aged forward.
 
-import {buildRegionSkills,buildAthlete,mixSeed} from './population.js?v=213';
-import {seededRandom} from '../competition.js?v=213';
-import {regressRating,simulateOutcome,rateMatch,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js?v=213';
+import {buildRegionSkills,buildAthlete,mixSeed} from './population.js?v=214';
+import {seededRandom} from '../competition.js?v=214';
+import {regressRating,simulateOutcome,rateMatch,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js?v=214';
 
 // Roughly how many matches the region's population plays in a week, split
 // between the two formats.
@@ -156,41 +156,49 @@ export function advanceCircuit(state){
 // This is the field a competition is drawn from. Only the best players are
 // returned, because a tournament is fielded from the top of the rating list,
 // and names are only built for the athletes that come back.
-export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gender=null,limit=80}){
+export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gender=null,cityId=null,areaId=null,limit=80}){
   const skills=buildRegionSkills(seed,regionId,week);
   const current=currentRatings(skills,ratings,week,format);
-  const pool=gender?[...current.values()].filter(athlete=>athlete.gender===gender):[...current.values()];
+  let pool=gender?[...current.values()].filter(athlete=>athlete.gender===gender):[...current.values()];
+  if(cityId)pool=pool.filter(athlete=>athlete.cityId===cityId);
+  if(areaId)pool=pool.filter(athlete=>athlete.areaId===areaId);
   const ranked=pool.sort((a,b)=>b.rating-a.rating).slice(0,limit);
   return ranked.map(athlete=>{
     const full=athlete.club?buildAthlete(seed,athlete.club,athlete.index):null;
-    return {
+    const base={
       id:athlete.id,
       name:full?.name??athlete.id,
       skill:athlete.skill,
       rating:athlete.rating,
       clubId:athlete.clubId,
       cityId:athlete.cityId,
+      areaId:athlete.areaId,
       matches:athlete.matches,
-      // The identity the match engine needs to build a profile.
       archetypeId:full?.archetypeId??'avery',
       archetypeLabel:full?.archetypeLabel??'All-rounder',
-      gender:full?.gender??'male',
+      gender:full?.gender??athlete.gender??'male',
       handedness:full?.handedness??'right',
       citizenship:full?.citizenship??null,
-      age:full?.age??null
+      age:full?.age??athlete.age??null
     };
+    // A draw is shown in the match-up, so keep the complete deterministic
+    // athlete. Dropping appearance, ratings and paddle data here made every
+    // CPU entry fall back to the same engine defaults.
+    return full?{...full,rating:athlete.rating,matches:athlete.matches,skill:athlete.skill}:base;
   });
 }
 
 // The players a player would meet in a bracket, in a given format. Playing
 // up means facing somebody a bracket stronger, which is exactly what makes
 // it a gamble worth taking.
-export function opponentsInBracket({seed,regionId,ratings,week,divisionId,format='doubles',count=1,random}){
+export function opponentsInBracket({seed,regionId,ratings,week,divisionId,format='doubles',count=1,random,cityId=null,areaId=null}){
   const skills=buildRegionSkills(seed,regionId,week);
   const current=currentRatings(skills,ratings,week,format);
   const division=RATING_BRACKETS.find(entry=>entry.id===divisionId);
   if(!division)return [];
-  const all=[...current.values()];
+  let all=[...current.values()];
+  if(cityId)all=all.filter(athlete=>athlete.cityId===cityId);
+  if(areaId)all=all.filter(athlete=>athlete.areaId===areaId);
   const inBracket=all.filter(athlete=>athlete.rating>=division.min&&athlete.rating<=division.max);
   // If nobody is in that bracket yet, take the closest player to it.
   const pool=inBracket.length?inBracket:all;

@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=213';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=214';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -94,7 +94,7 @@ export function solveArm3D(shoulder,wrist,pole,lengths=ARM_LENGTHS){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=213';
+export {courtView,strokeForContact} from './player-facing.js?v=214';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,contact3D=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';
@@ -213,8 +213,8 @@ const PADDLE_OUTLINES={
  'tennis-extended-handle':Object.freeze([[-3.7,-6.6],[-2.8,-7.2],[-1.5,-7.5],[0,-7.55],[1.5,-7.5],[2.8,-7.2],[3.7,-6.6],[4.1,-5.4],[4.15,1.6],[3.5,3.5],[2.35,4.6],[1.45,5.1],[1.3,6.45],[-1.3,6.45],[-1.45,5.1],[-2.35,4.6],[-3.5,3.5],[-4.15,1.6],[-4.1,-5.4]])
 };
 const PADDLE_CUTOUTS=Object.freeze({
- 'widebody-cutout':Object.freeze([[0,1.35],[.72,1.85],[1.35,2.8],[1.82,4.55],[1.82,5.02],[-1.82,5.02],[-1.82,4.55],[-1.35,2.8],[-.72,1.85]]),
- 'elongated-cutout':Object.freeze([[0,1.85],[.7,2.4],[1.25,3.25],[1.62,4.72],[1.52,5.35],[-1.52,5.35],[-1.62,4.72],[-1.25,3.25],[-.7,2.4]])
+ 'widebody-cutout':Object.freeze([[0,3.65],[-.52,3.26],[-1.05,2.65],[-1.42,1.9],[-1.52,1.46],[-.8,1.38],[0,1.35],[.8,1.38],[1.52,1.46],[1.42,1.9],[1.05,2.65],[.52,3.26]]),
+ 'elongated-cutout':Object.freeze([[0,4.25],[-.58,3.85],[-1.15,3.15],[-1.52,2.3],[-1.6,1.85],[-.8,1.72],[0,1.68],[.8,1.72],[1.6,1.85],[1.52,2.3],[1.15,3.15],[.58,3.85]])
 });
 Object.assign(PADDLE_OUTLINES,{wide:PADDLE_OUTLINES.widebody,hybrid:PADDLE_OUTLINES['hybrid-flat'],elongated:PADDLE_OUTLINES['elongated-flat']});
 Object.freeze(PADDLE_OUTLINES);

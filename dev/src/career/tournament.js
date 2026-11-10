@@ -18,14 +18,14 @@
 // next, the rest of the round, how a player result advances the competition,
 // and where the player finished.
 
-import {ratedPopulation} from './world.js?v=213';
-import {RATING_BRACKETS,formatSkill} from './rating.js?v=213';
-import {seededRandom} from '../competition.js?v=213';
-import {mixSeed} from './population.js?v=213';
-import {pointsForFinish} from './tour.js?v=213';
-import {entryStatus} from './calendar.js?v=213';
-import {resolvePartner} from './club-life.js?v=213';
-import {equipmentSelection} from './equipment.js?v=213';
+import {ratedPopulation} from './world.js?v=214';
+import {RATING_BRACKETS,formatSkill} from './rating.js?v=214';
+import {seededRandom} from '../competition.js?v=214';
+import {mixSeed} from './population.js?v=214';
+import {pointsForFinish} from './tour.js?v=214';
+import {entryStatus} from './calendar.js?v=214';
+import {resolvePartner} from './club-life.js?v=214';
+import {equipmentSelection} from './equipment.js?v=214';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -90,16 +90,11 @@ function makeTeam(members,id){
     id,
     name:members.map(member=>member.name).join(' & '),
     members:members.map(member=>({
+      ...member,
       id:member.id,
       name:member.name,
       rating:member.rating,
-      skill:member.skill,
-      archetypeId:member.archetypeId,
-      archetypeLabel:member.archetypeLabel,
-      gender:member.gender,
-      handedness:member.handedness,
-      citizenship:member.citizenship,
-      age:member.age
+      skill:member.skill
     })),
     // The team's rating is the combined rating, which is what a doubles bye
     // and a doubles seed are awarded on.
@@ -115,6 +110,8 @@ function makeTeam(members,id){
 // ratings, but gender never falls back to a different division's pool.
 export function divisionPopulation({state,event,option,gender=null}){
   const division=RATING_BRACKETS.find(entry=>entry.id===option.divisionId);
+  const cityId=['club','city'].includes(event.scope)?state.cityId:null;
+  const areaId=event.scope==='area'?state.areaId:null;
   const all=ratedPopulation({
     seed:state.seed,
     regionId:state.regionId,
@@ -122,12 +119,17 @@ export function divisionPopulation({state,event,option,gender=null}){
     week:state.week,
     format:option.format,
     gender,
+    cityId,
+    areaId,
     limit:2000
   }).filter(athlete=>athlete.id!==(state.athlete.id??'player'));
   const gendered=gender?all.filter(athlete=>athlete.gender===gender):all;
   const pool=gendered.length?gendered:all;
   if(!division)return pool;
   const inBracket=pool.filter(athlete=>athlete.rating>=division.min&&athlete.rating<=division.max);
+  // A local draw can be thinner than a regional one. Keep the rating bracket
+  // intact, then trim the field size when one city does not have enough
+  // competitors. Regional and professional draws still use the full bracket.
   const source=inBracket.length?inBracket:pool;
   const distance=athlete=>athlete.rating<division.min?division.min-athlete.rating:athlete.rating>division.max?athlete.rating-division.max:0;
   return [...source].sort((a,b)=>distance(a)-distance(b));
@@ -152,7 +154,7 @@ export function buildField({state,event,option,drawSize=16}){
   const singles=format==='singles';
   const mixed=format==='mixed';
   const teamLeague=(event?.shapes??[]).includes('mlp-style');
-  const need=Math.max(4,drawSize??event?.drawSize??16);
+  let need=Math.max(4,drawSize??event?.drawSize??16);
   const target=state.athlete.formats[format]??4;
   const playerGender=state.athlete.gender==='female'?'female':'male';
   const oppositeGender=playerGender==='female'?'male':'female';
@@ -168,6 +170,7 @@ export function buildField({state,event,option,drawSize=16}){
 
   if(singles){
     const queue=variedOrder(samePool,target,random);
+    if(['club','city'].includes(event.scope))need=Math.min(need,queue.length+1);
     if(queue.length<need-1)return null;
     teams.push(makeTeam([player],'player'));
     for(const athlete of takePlayers(queue,need-1))teams.push(makeTeam([athlete],'t'+teams.length));
@@ -204,6 +207,10 @@ export function buildField({state,event,option,drawSize=16}){
     if(!partner)return null;
     teams.push(makeTeam([player,partner],'player'));
     const queue=variedOrder(samePool,target,random).filter(athlete=>athlete.id!==partner.id);
+    if(['club','city'].includes(event.scope)){
+      const available=1+Math.floor(queue.length/2);
+      need=Math.min(need,available-available%2);
+    }
     if(queue.length<(need-1)*2)return null;
     while(teams.length<need){
       const members=takePlayers(queue,2);

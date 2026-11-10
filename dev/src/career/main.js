@@ -4,40 +4,40 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js?v=213';
-import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=213';
-import {createAnimeGameRenderer} from '../anime-game.js?v=213';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=213';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=213';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=214';
+import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=214';
+import {createAnimeGameRenderer} from '../anime-game.js?v=214';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=214';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=214';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=213';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=213';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=213';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=213';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=213';
-import {isPlayerDone} from './tournament.js?v=213';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=213';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=213';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=213';
-import {rankingSummary} from './ranking.js?v=213';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=213';
-import {analyticsSummary} from './analytics.js?v=213';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=213';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=213';
-import {opponentHistory} from './opponents.js?v=213';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=213';
-import {directoryPage} from './directory.js?v=213';
-import {financeSummary,COACHING_FEE} from './finance.js?v=213';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=213';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=213';
-import {currentInjury,activeInjuries} from './injuries.js?v=213';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=213';
-import {careerProfile} from './matchmaking.js?v=213';
-import {teamCareerSummary} from './team-league.js?v=213';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=213';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=213';
+} from './state.js?v=214';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=214';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=214';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=214';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=214';
+import {isPlayerDone} from './tournament.js?v=214';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=214';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=214';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=214';
+import {rankingSummary} from './ranking.js?v=214';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=214';
+import {analyticsSummary} from './analytics.js?v=214';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=214';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=214';
+import {opponentHistory} from './opponents.js?v=214';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=214';
+import {directoryPage} from './directory.js?v=214';
+import {financeSummary,COACHING_FEE} from './finance.js?v=214';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=214';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=214';
+import {currentInjury,activeInjuries} from './injuries.js?v=214';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=214';
+import {careerProfile} from './matchmaking.js?v=214';
+import {teamCareerSummary} from './team-league.js?v=214';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=214';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=214';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -1139,7 +1139,9 @@ function renderPlayers(){
       <select id="filter-bracket"><option value="">Any doubles rating</option>${bracketOptions}</select>
       <select id="filter-sort">
         <option value="rating-desc"${app.filters.sort==='rating-desc'?' selected':''}>Highest rating</option>
-        <option value="rating-asc"${app.filters.sort==='rating-asc'?' selected':''}>Lowest rating</option>
+        <option value="rating-asc"${app.filters.sort==='rating-asc'?' selected':''}>Lowest DUPR rating</option>
+        <option value="overall-desc"${app.filters.sort==='overall-desc'?' selected':''}>Highest overall attribute</option>
+        <option value="overall-asc"${app.filters.sort==='overall-asc'?' selected':''}>Lowest overall attribute</option>
         <option value="age-asc"${app.filters.sort==='age-asc'?' selected':''}>Youngest first</option>
         <option value="age-desc"${app.filters.sort==='age-desc'?' selected':''}>Oldest first</option>
         <option value="name"${app.filters.sort==='name'?' selected':''}>Name A–Z</option>
@@ -1148,14 +1150,26 @@ function renderPlayers(){
       <input id="filter-age-max" type="number" min="18" max="54" placeholder="Max age" value="${escapeHtml(app.filters.maxAge)}" inputmode="numeric">
     </div>
     <p class="hint">${directory.total.toLocaleString('en-US')} matching players · page ${directory.page+1} of ${directory.pages}</p>
-    ${directory.rows.length?directory.rows.map(athlete=>`<div class="player">
-      <div class="body">
-        <strong>${escapeHtml(athlete.name)}</strong>
-        <small>${escapeHtml(athlete.archetypeLabel)} · ${athlete.gender} · age ${athlete.age} · ${escapeHtml(athlete.cityLabel)}, ${escapeHtml(athlete.citizenship ?? '')} · ${escapeHtml(athlete.clubName)}</small>
-        <small>Doubles ${formatRating(athlete.formats?.doubles??0)} · Singles ${formatRating(athlete.formats?.singles??0)} · Mixed ${formatRating(athlete.formats?.mixed??0)} · best skill ${escapeHtml(RATING_LABELS[topKey(athlete.ratings)]??topKey(athlete.ratings))} ${athlete.ratings[topKey(athlete.ratings)]}</small>
-      </div>
-      <div class="actions"><button type="button" class="secondary" data-action="open-player" data-player="${athlete.id}">PROFILE</button></div>
-    </div>`).join(''):'<p class="muted">No players match those filters.</p>'}
+    ${directory.rows.length?`<div class="player-table-wrap">
+      <table class="player-table">
+        <thead><tr><th>PLAYER</th><th>OVERALL</th><th>DOUBLES</th><th>SINGLES</th><th>MIXED</th><th>AGE</th><th>GENDER</th><th>CITY / CLUB</th><th></th></tr></thead>
+        <tbody>${directory.rows.map(athlete=>{
+          const overall=Math.round(athlete.skillAverage??skillAverage(athlete.ratings??{}));
+          return `<tr>
+            <td><strong>${escapeHtml(athlete.name)}</strong><small>${escapeHtml(athlete.archetypeLabel)}</small></td>
+            <td><b class="overall-value">${overall}</b></td>
+            <td>${formatRating(athlete.formats?.doubles??0)}</td>
+            <td>${formatRating(athlete.formats?.singles??0)}</td>
+            <td>${formatRating(athlete.formats?.mixed??0)}</td>
+            <td>${athlete.age}</td>
+            <td>${escapeHtml(athlete.gender)}</td>
+            <td><strong>${escapeHtml(athlete.cityLabel??'—')}</strong><small>${escapeHtml(athlete.clubName??'—')}</small></td>
+            <td><button type="button" class="secondary" data-action="open-player" data-player="${athlete.id}">PROFILE</button></td>
+          </tr>`;
+        }).join('')}
+        </tbody>
+      </table>
+    </div>`:'<p class="muted">No players match those filters.</p>'}
     <div class="actions">
       <button type="button" class="secondary" data-action="players-page" data-page="${directory.page-1}" ${directory.page<=0?'disabled':''}>← PREVIOUS</button>
       <button type="button" class="secondary" data-action="players-page" data-page="${directory.page+1}" ${directory.page>=directory.pages-1?'disabled':''}>NEXT →</button>

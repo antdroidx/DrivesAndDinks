@@ -1,7 +1,8 @@
-import {competitionRecord} from './competition.js?v=213';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=213';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=213';
-export {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS};
+import {competitionRecord} from './competition.js?v=214';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=214';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=214';
+import {NAME_BANKS} from './name-data.js?v=214';
+export {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,NAME_BANKS};
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -173,7 +174,28 @@ function weightedPick(entries,random=Math.random){
 }
 function shuffle(items,random=Math.random){const copy=[...items];for(let i=copy.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]]}return copy}
 function compatibleCultures(skinColor){return CULTURE_IDS.map(id=>[id,NAME_CULTURES[id].tones[skinColor]??0]).filter(([,weight])=>weight>0)}
-export function generateIdentity({gender='male',skinColor=null,culture=null,random=Math.random,usedNames=new Set()}={}){
+function bankPick(items,roll){
+  return items[Math.min(items.length-1,Math.floor(roll*items.length))];
+}
+
+function identityFirstName(pool,gender,roll){
+  // One random draw keeps the old identity stream stable while still giving
+  // heritage names a small share. The remaining names use the large bank.
+  if(roll<.12)return bankPick(pool.first,roll/.12);
+  return bankPick(NAME_BANKS[gender==='female'?'female':'male'],(roll-.12)/.88);
+}
+
+function identitySurname(pool,roll,nameOrdinal=null){
+  if(Number.isInteger(nameOrdinal)&&nameOrdinal>=0&&nameOrdinal<NAME_BANKS.last.length){
+    // A full world population gets a collision-free surname ordinal. The
+    // coprime stride spreads neighboring athletes across the ranked bank.
+    return NAME_BANKS.last[(nameOrdinal*7919+104729)%NAME_BANKS.last.length];
+  }
+  if(roll<.12)return bankPick(pool.last,roll/.12);
+  return bankPick(NAME_BANKS.last,(roll-.12)/.88);
+}
+
+export function generateIdentity({gender='male',skinColor=null,culture=null,random=Math.random,usedNames=new Set(),nameOrdinal=null}={}){
   const compatible=compatibleCultures(skinColor),cultureIds=compatible.length?compatible:[[culture??randomItem(CULTURE_IDS,random),1]];
   const selectedCulture=NAME_CULTURES[culture]?culture:weightedPick(cultureIds,random);
   const group=NAME_CULTURES[selectedCulture],toneWeights=Object.entries(group.tones);
@@ -181,10 +203,14 @@ export function generateIdentity({gender='male',skinColor=null,culture=null,rand
   const pool=group.names[gender==='female'?'female':'male'];
   let name='';
   for(let attempt=0;attempt<80;attempt++){
-    const candidate=`${randomItem(pool.first,random)} ${randomItem(pool.last,random)}`;
+    const firstRoll=random(),surnameRoll=random();
+    const candidate=`${identityFirstName(pool,gender,firstRoll)} ${identitySurname(pool,surnameRoll,nameOrdinal)}`;
     if(!usedNames.has(candidate)){name=candidate;break}
   }
-  if(!name)name=`${randomItem(pool.first,random)} ${randomItem(pool.last,random)} ${usedNames.size+1}`;
+  if(!name){
+    const firstRoll=random(),surnameRoll=random();
+    name=`${identityFirstName(pool,gender,firstRoll)} ${identitySurname(pool,surnameRoll,nameOrdinal)} ${usedNames.size+1}`;
+  }
   usedNames.add(name);
   return {name,culture:selectedCulture,skinColor:resolvedSkin,hairColor:randomItem(HAIR_COLORS,random).id,shirtColor:randomItem(CLOTHING_COLORS,random).id,paddleColor:randomItem(PADDLE_COLORS,random).id,highlightColor:randomItem(PADDLE_COLORS,random).id};
 }
