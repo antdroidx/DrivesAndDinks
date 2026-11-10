@@ -1,5 +1,12 @@
 export const STACK_MODES=Object.freeze(['off','cross','stay','adaptive']);
 export const STACK_SIDES=Object.freeze(['auto','left','right']);
+
+export const DEFAULT_STACKING_SELECTION=Object.freeze({
+ teams:Object.freeze([
+  Object.freeze({mode:'adaptive',preferredSide:'auto'}),
+  Object.freeze({mode:'adaptive',preferredSide:'auto'})
+ ])
+});
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const finite=(value,fallback)=>Number.isFinite(Number(value))?Number(value):fallback;
 const normalize01=value=>clamp(finite(value,0),0,1);
@@ -20,7 +27,7 @@ export function normalizeStackTeam(value){
 }
 
 export function normalizeStackingSelection(value){
- const input=value??{};
+ const input=value??DEFAULT_STACKING_SELECTION;
  if(Array.isArray(input))return {teams:[normalizeStackTeam(input[0]),normalizeStackTeam(input[1])]};
  const teams=input.teams;
  return {teams:[normalizeStackTeam(input.team0??input.your??teams?.[0]),normalizeStackTeam(input.team1??input.opponent??teams?.[1])]};
@@ -40,6 +47,7 @@ function preferredLaneFor(player,team){const left=handOf(player)==='left';return
 function netScore(player){return rating(player,'volley')*.38+rating(player,'reach')*.22+rating(player,'power')*.18+rating(player,'courtIQ')*.12+rating(player,'aggression')*.1}
 function teamType(pair,metrics){
  const styles=pair.map(p=>p?.ratingStyle);
+ if(metrics.mixed)return 'mixed';
  if(metrics.netMismatch>.35)return 'asymmetric';
  if(styles.some(style=>style==='net'||style==='banger'))return 'pressure';
  if(styles.every(style=>style==='speed'))return 'coverage';
@@ -64,8 +72,11 @@ function stylePrior(pair){
 
 export function stackMetrics(pair,opponents=[]){
  const a=pair[0],b=pair[1],netA=netScore(a),netB=netScore(b);
+ const mixed=pair.some(player=>player?.gender==='female')&&pair.some(player=>player?.gender==='male');
  return {
   netMismatch:clamp(Math.abs(netA-netB)/45,0,1),
+  level:clamp((netA+netB)/40,2,8),
+  mixed,
   netStrength:clamp((netA+netB)/200,0,1),
   mobility:clamp(average(pair,'agility')/100,0,1),
   courtIQ:clamp(average(pair,'courtIQ')/100,0,1),
@@ -83,7 +94,7 @@ export function stackPressure(score){
 }
 
 export function stackProbability(metrics,score){
- return clamp(.08+.28*metrics.netMismatch+.18*metrics.netStrength+.12*metrics.mobility+.10*stackPressure(score)-.18*metrics.lobRisk+metrics.stylePrior+(metrics.handPair==='same'?.10:-.08),.05,.75);
+ return clamp(.08+.28*metrics.netMismatch+.18*metrics.netStrength+.12*metrics.mobility+.10*stackPressure(score)-.18*metrics.lobRisk+metrics.stylePrior+(metrics.handPair==='same'?.10:-.08)+(metrics.mixed?(metrics.level>=4.0?.12:.02):0),.05,.85);
 }
 
 function strongerPlayer(pair){
@@ -92,11 +103,16 @@ function strongerPlayer(pair){
 }
 
 function laneForHand(hand){return hand==='left'?15:5}
-function resolveTargetLanes(pair,settings,strong,weak){
+function resolveTargetLanes(pair,settings,strong,weak,metrics){
  if(settings.preferredSide==='left'||settings.preferredSide==='right'){
   const lane=settings.preferredSide==='left'?5:15;
   return {[strong.id]:lane,[weak.id]:20-lane};
  }
+ const female=pair.find(player=>player?.gender==='female'),male=pair.find(player=>player?.gender==='male');
+ // Pro mixed pairs commonly protect the right lane with the female player.
+ // Lower-level mixed pairs can choose the same shape, but their traits and
+ // lower level make the adaptive decision less likely.
+ if(metrics?.mixed&&female&&male)return {[male.id]:5,[female.id]:15};
  if(handOf(pair[0])!==handOf(pair[1]))return {[pair[0].id]:laneForHand(handOf(pair[0])),[pair[1].id]:laneForHand(handOf(pair[1]))};
  return {[strong.id]:5,[weak.id]:15};
 }
@@ -108,7 +124,7 @@ export function createStackPlans({players,server,receiver,score,config,random=Ma
   const pair=players.filter(p=>p.team===team),opponents=players.filter(p=>p.team!==team),active=team===score.team?server:receiver,partner=pair.find(p=>p!==active);
   const settings=normalized.teams[team],metrics=stackMetrics(pair,opponents),probability=stackProbability(metrics,score);
   const roll=settings.mode==='adaptive'?(typeof random==='function'?random():finite(random,.5)):1;
-  const strong=strongerPlayer(pair),weak=pair.find(p=>p!==strong),targetLanes=resolveTargetLanes(pair,settings,strong,weak);
+  const strong=strongerPlayer(pair),weak=pair.find(p=>p!==strong),targetLanes=resolveTargetLanes(pair,settings,strong,weak,metrics);
   const activeLane=active.x<10?5:15,partnerLane=20-activeLane,stackRequired=targetLanes[active.id]!==activeLane||targetLanes[partner.id]!==partnerLane;
   const selected=stackRequired&&(settings.mode==='cross'||settings.mode==='stay'||(settings.mode==='adaptive'&&roll<probability));
   const mover=targetLanes[partner.id]!==activeLane?partner:active;

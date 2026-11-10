@@ -4,9 +4,9 @@
 // message has a stable key, so the same match, injury or invitation cannot
 // appear twice after a reload or an overlapping weekly update.
 
-import {activeInjuries} from './injuries.js?v=214';
-import {pendingInvitations} from './invitations.js?v=214';
-import {generateSeasonCatalog} from './equipment.js?v=214';
+import {activeInjuries} from './injuries.js?v=215';
+import {pendingInvitations} from './invitations.js?v=215';
+import {generateSeasonCatalog} from './equipment.js?v=215';
 
 export const INBOX_VERSION=1;
 export const INBOX_LIMIT=160;
@@ -50,10 +50,23 @@ function factsFor(state){
   const facts=[];
   const result=state.lastMatchResult;
   if(result){
+    const playerNames=team=>team?.players?.map(player=>player.name).join(' & ')??team?.label??'';
+    const winner=result.winnerTeam??(result.won?result.yourTeam:result.opponentTeam);
+    const loser=result.loserTeam??(result.won?result.opponentTeam:result.yourTeam);
+    const winnerNames=playerNames(winner)||(result.won?'Your team':'Opponent');
+    const loserNames=playerNames(loser)||(result.won?'Opponent':'Your team');
+    const before=Number(result.ratingBefore??result.rating);
+    const after=Number(result.rating);
+    const reliability=result.reliabilityBefore&&result.reliabilityAfter
+      ?` Reliability ${result.reliabilityBefore.percent}% → ${result.reliabilityAfter.percent}%.`
+      :'';
+    const changes=[...(winner?.players??[]),...(loser?.players??[])]
+      .map(player=>`${player.name} ${Number(player.previousRating).toFixed(3)} → ${Number(player.rating).toFixed(3)}`)
+      .join(' · ');
     facts.push({
-      key:`match:${result.week}:${result.eventId}:${result.bracket}:${result.format}:${result.score}`,
-      category:'match',week:result.week,title:`${result.won?'Win':'Loss'} · ${result.score} in the ${result.bracket} ${result.format}`,
-      body:`${result.label}. Rating ${Number(result.rating).toFixed(3)} (${result.delta>=0?'+':''}${Number(result.delta).toFixed(3)}). ${result.tournamentStatus??''}`,
+      key:`match:${result.matchId??`${result.week}:${result.eventId}:${result.bracket}:${result.format}:${result.score}`}`,
+      category:'match',week:result.week,title:`${result.won?'WIN':'LOSS'} · ${winnerNames} ${result.score} ${loserNames}`,
+      body:`${result.label} · ${result.bracket} ${result.format}. Winner: ${winnerNames}. Loser: ${loserNames}. Your rating ${before.toFixed(3)} → ${after.toFixed(3)} (${result.delta>=0?'+':''}${Number(result.delta).toFixed(3)}).${reliability}${changes?` Ratings: ${changes}.`:''} ${result.tournamentStatus??''}`,
       action:{type:'view',view:'home'}
     });
   }

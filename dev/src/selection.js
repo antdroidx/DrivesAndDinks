@@ -1,6 +1,6 @@
-import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=214';
-import {normalizeStackingSelection} from './stacking.js?v=214';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=214';
+import {CHARACTERS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,COURT_PALETTES,RATING_KEYS,RATING_LABELS,PLAYTEST_BASE_RATING,normalizeSelection,selectionStats,effectiveRatings,skillAverage,buildProfile,createLineup,applyPhysique} from './roster.js?v=215';
+import {normalizeStackingSelection,STACK_MODES,STACK_SIDES} from './stacking.js?v=215';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS} from './character-concepts.js?v=215';
 
 const DIFFICULTY_KEY='drives-dinks.difficulty.v1';
 const STAT_LABELS=RATING_LABELS;
@@ -83,11 +83,19 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({}),op
 
  const footerControls=footer.querySelector('.footer-controls');
  const formatField=form.querySelector('label[for="match-format"]'),difficultyField=form.querySelector('label[for="match-difficulty"]'),matchModeField=form.querySelector('label[for="match-mode"]');
+ const stackModeSelect=select('stackMode',[
+  {id:'off',label:'Off'},{id:'adaptive',label:'Adaptive'},{id:'cross',label:'Always cross'},{id:'stay',label:'Stack and stay'}
+ ],'Your team stacking');
+ const stackSideSelect=select('stackSide',[{id:'auto',label:'Auto'},{id:'left',label:'Left lane'},{id:'right',label:'Right lane'}],'Your preferred stacking side');
+ const cpuStackSelect=select('cpuStackMode',[
+  {id:'adaptive',label:'Adaptive by traits'},{id:'off',label:'Never stack'},{id:'cross',label:'Always cross'},{id:'stay',label:'Stack and stay'}
+ ],'CPU stacking behavior');
+ const stackModeField=field('Your stacking',stackModeSelect),stackSideField=field('Stack side',stackSideSelect),cpuStackField=field('CPU stacking',cpuStackSelect);
  for(const option of venueField.querySelector('select').options)option.textContent=({none:'No venue',random:'Random',outdoor:'Outdoor',indoor:'Indoor',stadium:'Stadium'})[option.value]??option.textContent;
- footerControls.append(formatField,difficultyField,matchModeField,venueField,courtField);
+ footerControls.append(formatField,difficultyField,matchModeField,stackModeField,stackSideField,cpuStackField,venueField,courtField);
 
  let draft=normalizeSelection(),stackingDraft=normalizeStackingSelection(),started=false,previewLineup=[],editingName=false;
- try{const saved=JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null');draft=normalizeSelection(saved);stackingDraft=normalizeStackingSelection()}catch{}
+ try{const saved=JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'null');draft=normalizeSelection(saved);stackingDraft=normalizeStackingSelection(saved?.stacking)}catch{}
  const optionLabel=(items,id)=>items.find(item=>item.id===id)?.name??items.find(item=>item.id===id)?.style??id;
  function hairStyleOptions(body){return [{id:'design',name:'As designed'},...(HAIR_OPTIONS[body]??HAIR_OPTIONS.male)]}
  function appearanceSummary(selectionValue){
@@ -98,6 +106,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({}),op
  function render(){
   setOptions(hairStyleSelect,hairStyleOptions(draft.gender),draft.hairStyle);setOptions(headwearSelect,options(HEADWEAR_OPTIONS),draft.headwear);setOptions(eyewearSelect,options(EYEWEAR_OPTIONS),draft.eyewear);
   for(const [key,value] of Object.entries(draft))selected(key,value);
+  stackModeSelect.value=stackingDraft.teams[0].mode;stackSideSelect.value=stackingDraft.teams[0].preferredSide;cpuStackSelect.value=stackingDraft.teams[1].mode;
   if(!previewLineup.length||previewLineup[0]?.characterId!==draft.character||previewLineup[0]?.gender!==draft.gender)previewLineup=createLineup(draft,{random:game.random});
   else {const appearance=previewLineup[0].appearance;previewLineup[0]=buildProfile(draft,{identity:previewLineup[0]});Object.assign(previewLineup[0].appearance,{height:appearance.height,build:appearance.build})}
   const body={...previewLineup[0].appearance,...getPhysique()};previewLineup[0]=applyPhysique(previewLineup[0],body);const player=previewLineup[0];
@@ -113,7 +122,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({}),op
   drawPreview(draft,previewLineup[0]);
  }
  function syncSessionOptions(){const practice=form.elements.matchMode.value.startsWith('practice-');form.elements.format.disabled=practice;if(practice)form.elements.format.value='singles';form.querySelector('.start-match').textContent=practice?'START PRACTICE →':started?'START NEW MATCH →':'START MATCH →'}
- const updateDraft=event=>{syncSessionOptions();const values=new FormData(form);draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),handedness:values.get('handedness'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),highlightColor:values.get('highlightColor'),paddleColor:values.get('paddleColor'),hairStyle:values.get('hairStyle'),hairColor:values.get('hairColor'),headwear:values.get('headwear'),eyewear:values.get('eyewear'),outfit:values.get('outfit'),showNameTags:game.showNameTags,skinColor:values.get('skinColor'),court:values.get('court')});render();};
+ const updateDraft=event=>{syncSessionOptions();const values=new FormData(form);stackingDraft=normalizeStackingSelection({teams:[{mode:values.get('stackMode'),preferredSide:values.get('stackSide')},{mode:values.get('cpuStackMode'),preferredSide:'auto'}]});draft=normalizeSelection({character:values.get('character'),gender:values.get('gender'),handedness:values.get('handedness'),customName:values.get('customName'),paddle:values.get('paddle'),paddleShape:values.get('paddleShape'),shirtColor:values.get('shirtColor'),highlightColor:values.get('highlightColor'),paddleColor:values.get('paddleColor'),hairStyle:values.get('hairStyle'),hairColor:values.get('hairColor'),headwear:values.get('headwear'),eyewear:values.get('eyewear'),outfit:values.get('outfit'),showNameTags:game.showNameTags,skinColor:values.get('skinColor'),court:values.get('court')});render();};
  nameInput.addEventListener('focus',()=>{editingName=true});
  nameInput.addEventListener('blur',()=>{editingName=false;updateDraft({target:nameInput})});
  form.addEventListener('change',updateDraft);form.addEventListener('input',updateDraft);
@@ -122,7 +131,7 @@ export function setupSelection({game,onStart,drawPreview,getPhysique=()=>({}),op
  const freshMatchLineup=()=>{const lineup=createLineup(draft,{random:game.random});const human=previewLineup[0];if(human){lineup[0]=buildProfile(draft,{identity:human});Object.assign(lineup[0].appearance,human.appearance)}return lineup};
  form.addEventListener('submit',e=>{e.preventDefault();game.configure({...draft,showNameTags:game.showNameTags,stacking:stackingDraft,format:form.elements.format.value},freshMatchLineup());game.mode=form.elements.matchMode.value;game.setDifficulty(form.elements.difficulty.value);if(game.mode.startsWith('practice-'))game.startPractice(game.mode.slice(9));started=true;try{localStorage.setItem('drives-dinks.selection.v1',JSON.stringify({...draft,stacking:stackingDraft}));localStorage.setItem(DIFFICULTY_KEY,game.difficulty)}catch{}dialog.close();onStart()});
  dialog.querySelector('#resume-match').onclick=()=>dialog.close();dialog.addEventListener('cancel',e=>{if(!started)e.preventDefault()});
- function open(){if(started)previewLineup=[];dialog.querySelector('#resume-match').hidden=!started;form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
+ function open(){if(started)previewLineup=[];if(game.stackingConfig)stackingDraft=normalizeStackingSelection(game.stackingConfig);dialog.querySelector('#resume-match').hidden=!started;form.elements.format.value=game.format;form.elements.matchMode.value=game.practice?`practice-${game.practice.id}`:game.mode;syncSessionOptions();form.elements.difficulty.value=game.difficulty;setDesigner(false);render();fitDialog();dialog.showModal()}
  if(openOnStart)open();return {open,isOpen:()=>dialog.open,refreshPreview:render};
 }
 

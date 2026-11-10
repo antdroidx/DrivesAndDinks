@@ -11,9 +11,9 @@
 // athlete who has never played keeps their starting rating and the week it
 // was set, so their current rating is that rating aged forward.
 
-import {buildRegionSkills,buildAthlete,mixSeed} from './population.js?v=214';
-import {seededRandom} from '../competition.js?v=214';
-import {regressRating,simulateOutcome,rateMatch,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js?v=214';
+import {buildRegionSkills,buildAthlete,mixSeed} from './population.js?v=215';
+import {seededRandom} from '../competition.js?v=215';
+import {regressRating,simulateOutcome,rateMatch,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js?v=215';
 
 // Roughly how many matches the region's population plays in a week, split
 // between the two formats.

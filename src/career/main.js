@@ -4,40 +4,40 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=214';
-import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=214';
-import {createAnimeGameRenderer} from '../anime-game.js?v=214';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=214';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=214';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=215';
+import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=215';
+import {createAnimeGameRenderer} from '../anime-game.js?v=215';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=215';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=215';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=214';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=214';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=214';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=214';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=214';
-import {isPlayerDone} from './tournament.js?v=214';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=214';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=214';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=214';
-import {rankingSummary} from './ranking.js?v=214';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=214';
-import {analyticsSummary} from './analytics.js?v=214';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=214';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=214';
-import {opponentHistory} from './opponents.js?v=214';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=214';
-import {directoryPage} from './directory.js?v=214';
-import {financeSummary,COACHING_FEE} from './finance.js?v=214';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=214';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=214';
-import {currentInjury,activeInjuries} from './injuries.js?v=214';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=214';
-import {careerProfile} from './matchmaking.js?v=214';
-import {teamCareerSummary} from './team-league.js?v=214';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=214';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=214';
+} from './state.js?v=215';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=215';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=215';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=215';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=215';
+import {isPlayerDone} from './tournament.js?v=215';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=215';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=215';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=215';
+import {rankingSummary} from './ranking.js?v=215';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=215';
+import {analyticsSummary} from './analytics.js?v=215';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=215';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=215';
+import {opponentHistory} from './opponents.js?v=215';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=215';
+import {directoryPage} from './directory.js?v=215';
+import {financeSummary,COACHING_FEE} from './finance.js?v=215';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=215';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=215';
+import {currentInjury,activeInjuries} from './injuries.js?v=215';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=215';
+import {careerProfile} from './matchmaking.js?v=215';
+import {teamCareerSummary} from './team-league.js?v=215';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=215';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=215';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -287,15 +287,54 @@ function contractLine(career){
   return 'No contract · division ranking decides PPA main-draw entry';
 }
 
+function ratingTransition(player){
+  const before=Number(player?.previousRating);
+  const after=Number(player?.rating);
+  if(!Number.isFinite(before)||!Number.isFinite(after))return '';
+  return `${formatRating(before)} → ${formatRating(after)} (${after-before>=0?'+':''}${(after-before).toFixed(3)})`;
+}
+
+function resultTeamPanel(team,{winner=false}={}){
+  if(!team)return '';
+  const players=(team.players??[]).map(player=>`<li><span>${escapeHtml(player.name)}</span><strong>${ratingTransition(player)}</strong></li>`).join('');
+  return `<section class="result-team ${winner?'winner':'loser'}">
+    <small>${winner?'WINNER':'LOSER'}</small>
+    <h3>${escapeHtml(team.label??'Team')}</h3>
+    <p>Team rating ${ratingTransition(team)}</p>
+    ${players?`<ul>${players}</ul>`:''}
+  </section>`;
+}
+
+function lastMatchTeamReport(result){
+  if(!result?.winnerTeam&&!result?.yourTeam&&!result?.opponentTeam)return '';
+  const winner=result.winnerTeam??(result.won?result.yourTeam:result.opponentTeam);
+  const loser=result.loserTeam??(result.won?result.opponentTeam:result.yourTeam);
+  return `<div class="last-match-teams">${resultTeamPanel(winner,{winner:true})}${resultTeamPanel(loser)}</div>`;
+}
+
+function tournamentHistoryReport(entry){
+  const yours=entry.yourTeam?.players?.map(player=>player.name).join(' & ')??'Your team';
+  const theirs=entry.opponentTeam?.players?.map(player=>player.name).join(' & ')??entry.opponent;
+  const before=entry.ratingBefore;
+  const after=entry.ratingAfter;
+  const change=Number.isFinite(Number(before))&&Number.isFinite(Number(after))
+    ?` · ${formatRating(before)} → ${formatRating(after)}`
+    :'';
+  return `<li class="${entry.won?'won':'lost'}">
+    <span class="tournament-round">R${entry.round+1}</span>
+    <span class="tournament-result">${entry.won?'WIN':'LOSS'}</span>
+    <span class="tournament-opponent"><strong>${escapeHtml(yours)}</strong><small>${entry.won?'beat':'lost to'} ${escapeHtml(theirs)}</small></span>
+    <span class="tournament-score">${escapeHtml(entry.score)}${change}</span>
+  </li>`;
+}
+
 function renderTournament(career){
   const tournament=career.tournament;
   if(!tournament)return '';
   const done=isPlayerDone(tournament);
   const pending=career.pendingMatch;
   const teamPanel=tournament.shape==='mlp'&&tournament.teamLeague?`<p class="hint"><strong>${escapeHtml(tournament.teamLeague.teamName)}</strong> · roster and team management are handled in the background.</p><ul class="history">${[...(tournament.teams??[])].sort((a,b)=>(tournament.records?.[b.id]?.wins??0)-(tournament.records?.[a.id]?.wins??0)).map(team=>`<li><span>${escapeHtml(team.name)}</span><strong>${tournament.records?.[team.id]?.wins??0}W</strong><em>${tournament.records?.[team.id]?.losses??0}L</em></li>`).join('')}</ul>`:'';
-  const history=(tournament.history??[]).map(entry=>
-    `<li class="${entry.won?'won':'lost'}"><span class="tournament-round">R${entry.round+1}</span><span class="tournament-result">${entry.won?'W':'L'}</span><span class="tournament-opponent">${escapeHtml(entry.opponent)}</span><span class="tournament-score">${escapeHtml(entry.score)}</span></li>`
-  ).join('');
+  const history=(tournament.history??[]).map(tournamentHistoryReport).join('');
   const total=tournament.shape==='bracket'?Math.round(Math.log2(tournament.size||16)):(tournament.rounds?.length??1);
   if(done){
     return `<section class="panel">
@@ -467,7 +506,7 @@ function renderHome(){
     </div>
   </section>
 
-  ${career.lastMatchResult?`<section class="panel last-result"><h2>LAST MATCH</h2><div class="board-head"><div><small>RESULT</small><strong>${career.lastMatchResult.won?'WIN':'LOSS'}</strong></div><div><small>SCORE</small><strong>${escapeHtml(career.lastMatchResult.score)}</strong></div><div><small>RATING</small><strong>${formatRating(career.lastMatchResult.rating)}</strong></div><div><small>CHANGE</small><strong class="${career.lastMatchResult.delta>=0?'up':'down'}">${career.lastMatchResult.delta>=0?'+':''}${Number(career.lastMatchResult.delta).toFixed(3)}</strong></div></div><p>${escapeHtml(career.lastMatchResult.label)} · ${escapeHtml(career.lastMatchResult.bracket)} ${escapeHtml(career.lastMatchResult.format)} · ${escapeHtml(career.lastMatchResult.tournamentStatus)}</p>${career.lastMatchResult.nextOpponent?`<p class="hint">Next opponent: ${escapeHtml(career.lastMatchResult.nextOpponent)}</p>`:''}${career.lastMatchResult.injury?`<p class="result-warning">${escapeHtml(career.lastMatchResult.injury.severity)} · ${escapeHtml(career.lastMatchResult.injury.area)}. Available ${escapeHtml(career.lastMatchResult.injury.returnLabel)}.</p>`:''}</section>`:''}
+  ${career.lastMatchResult?`<section class="panel last-result"><h2>LAST MATCH</h2><div class="board-head"><div><small>RESULT</small><strong>${career.lastMatchResult.won?'WIN':'LOSS'}</strong></div><div><small>SCORE</small><strong>${escapeHtml(career.lastMatchResult.score)}</strong></div><div><small>YOUR RATING</small><strong>${formatRating(career.lastMatchResult.ratingBefore??career.lastMatchResult.rating)} → ${formatRating(career.lastMatchResult.rating)}</strong></div><div><small>CHANGE</small><strong class="${career.lastMatchResult.delta>=0?'up':'down'}">${career.lastMatchResult.delta>=0?'+':''}${Number(career.lastMatchResult.delta).toFixed(3)}</strong></div></div>${lastMatchTeamReport(career.lastMatchResult)}<p>${escapeHtml(career.lastMatchResult.label)} · ${escapeHtml(career.lastMatchResult.bracket)} ${escapeHtml(career.lastMatchResult.format)} · ${escapeHtml(career.lastMatchResult.tournamentStatus)}</p>${career.lastMatchResult.reliabilityBefore?`<p class="hint">Reliability ${career.lastMatchResult.reliabilityBefore.percent}% → ${career.lastMatchResult.reliabilityAfter.percent}%.</p>`:''}${career.lastMatchResult.nextOpponent?`<p class="hint">Next opponent: ${escapeHtml(career.lastMatchResult.nextOpponent)}</p>`:''}${career.lastMatchResult.injury?`<p class="result-warning">${escapeHtml(career.lastMatchResult.injury.severity)} · ${escapeHtml(career.lastMatchResult.injury.area)}. Available ${escapeHtml(career.lastMatchResult.injury.returnLabel)}.</p>`:''}</section>`:''}
 
   ${injury?`<section class="panel injury-panel"><h2>RECOVERY</h2><p><strong>${escapeHtml(injury.severityLabel)} · ${escapeHtml(injury.areaLabel)}</strong> from ${escapeHtml(injury.cause)}. You can compete again ${escapeHtml(injury.returnLabel)}. Recovery is reduced to ${Math.round((injury.recoveryFactor??.7)*100)}% while injured.</p></section>`:''}
 
@@ -802,10 +841,20 @@ function renderLeague(){
   const tournament=app.career.tournament;
   if(!tournament||!['round-robin-league','mlp-style'].includes(tournament.kind))return '<section class="panel"><h2>LEAGUE</h2><p class="muted">No active league. Enter a Local League from the Career screen to start a season card.</p></section>';
   const teams=tournament.teams??[],records=tournament.records??{};
-  const table=[...teams].sort((a,b)=>(records[b.id]?.wins??0)-(records[a.id]?.wins??0)||(records[a.id]?.losses??0)-(records[b.id]?.losses??0)||b.rating-a.rating).map((team,index)=>`<li><span>#${index+1} ${escapeHtml(team.name)}${team.id===tournament.playerTeamId?' · YOU':''}</span><strong>${records[team.id]?.wins??0}W ${records[team.id]?.losses??0}L</strong><em>${records[team.id]?.points??0} pts</em></li>`).join('');
+  const currentMemberRating=(member)=>{
+    if(member?.isPlayer||member?.id===app.career.athlete.id||member?.id==='player')return app.career.athlete.formats?.[tournament.format]??member?.rating??0;
+    const tracked=app.career.worldRatings?.[tournament.format]?.[member?.id];
+    return tracked?.[0]??member?.rating??0;
+  };
+  const table=[...teams].sort((a,b)=>(records[b.id]?.wins??0)-(records[a.id]?.wins??0)||(records[a.id]?.losses??0)-(records[b.id]?.losses??0)||b.rating-a.rating).map((team,index)=>{
+    const members=(team.members??[]).map(member=>({name:member.name,rating:currentMemberRating(member)}));
+    const teamRating=members.length?members.reduce((sum,member)=>sum+member.rating,0)/members.length:team.rating;
+    const players=members.map(member=>`${escapeHtml(member.name)} ${formatRating(member.rating)}`).join(' · ');
+    return `<li><span><strong>#${index+1} ${escapeHtml(team.name)}${team.id===tournament.playerTeamId?' · YOU':''}</strong><small>Team ${formatRating(teamRating)} · ${players}</small></span><strong>${records[team.id]?.wins??0}W ${records[team.id]?.losses??0}L</strong><em>${records[team.id]?.points??0} pts</em></li>`;
+  }).join('');
   const fixtures=(tournament.rounds??[]).flatMap((round,roundIndex)=>round.map(match=>`<li><span>Week ${match.week!=null?match.week+1:roundIndex+1}</span><strong>${escapeHtml(match.home?.name??match.homeName??'Home')} vs ${escapeHtml(match.away?.name??match.awayName??'Away')}</strong><em>${match.played?escapeHtml(match.score??'Played'):'Scheduled'}</em></li>`)).join('');
   const next=tournament.currentMatch;
-  return `<section class="panel"><h2>${escapeHtml(tournament.label??'League')} · ${escapeHtml(tournament.bracket??'')}</h2><div class="board-head"><div><small>ROUND</small><strong>${Number(tournament.round??0)+1} / ${tournament.rounds?.length??'—'}</strong></div><div><small>STATUS</small><strong>${tournament.finished?'COMPLETE':tournament.nightComplete?'AWAITING WEEK':'ACTIVE'}</strong></div><div><small>PLACE</small><strong>${tournament.playerPlace?'#'+tournament.playerPlace:'—'}</strong></div></div>${next?`<p>Next match: <strong>${escapeHtml(next.home?.name??'Home')} vs ${escapeHtml(next.away?.name??'Away')}</strong></p>`:''}${app.career.pendingMatch?`<div class="actions"><button type="button" class="secondary" data-action="resume-tournament">PLAY MATCH →</button><button type="button" class="secondary" data-action="quick-sim">QUICK SIM</button><button type="button" class="secondary" data-action="sim-competition">SIM TO NEXT DECISION</button></div>`:''}</section><div class="grid two"><section class="panel"><h2>LEAGUE TABLE</h2><ul class="history">${table}</ul></section><section class="panel"><h2>FIXTURES & RESULTS</h2><ul class="history">${fixtures}</ul></section></div>`;
+  return `<section class="panel"><h2>${escapeHtml(tournament.label??'League')} · ${escapeHtml(tournament.bracket??'')}</h2><div class="board-head"><div><small>ROUND</small><strong>${Number(tournament.round??0)+1} / ${tournament.rounds?.length??'—'}</strong></div><div><small>STATUS</small><strong>${tournament.finished?'COMPLETE':tournament.nightComplete?'AWAITING WEEK':'ACTIVE'}</strong></div><div><small>PLACE</small><strong>${tournament.playerPlace?'#'+tournament.playerPlace:'—'}</strong></div></div>${next?`<p>Next match: <strong>${escapeHtml(next.home?.name??'Home')} vs ${escapeHtml(next.away?.name??'Away')}</strong></p>`:''}${app.career.pendingMatch?`<div class="actions"><button type="button" class="secondary" data-action="resume-tournament">PLAY MATCH →</button><button type="button" class="secondary" data-action="quick-sim">QUICK SIM</button><button type="button" class="secondary" data-action="sim-competition">SIM TO NEXT DECISION</button></div>`:''}</section><div class="grid two"><section class="panel"><h2>LEAGUE TABLE</h2><ul class="history league-table">${table}</ul></section><section class="panel"><h2>FIXTURES & RESULTS</h2><ul class="history">${fixtures}</ul></section></div>`;
 }
 
 function renderTeam(){

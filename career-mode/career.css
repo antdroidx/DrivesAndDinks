@@ -117,6 +117,26 @@ button.secondary:disabled{opacity:.45;cursor:not-allowed}
 .last-result h2{color:var(--accent)}
 .last-result strong.up{color:var(--green)}
 .last-result strong.down,.result-warning{color:var(--coral)}
+
+.last-match-teams{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.result-team{padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2)}
+.result-team.winner{border-color:var(--green);background:#183128}
+.result-team.loser{border-color:#6a454c}
+.result-team small{font-size:9px;letter-spacing:.12em;color:var(--muted)}
+.result-team.winner small{color:var(--green)}
+.result-team.loser small{color:var(--coral)}
+.result-team h3{margin:3px 0;font-size:13px}
+.result-team p{margin:0 0 7px;color:var(--muted);font-size:11px}
+.result-team ul{list-style:none;margin:0;padding:0}
+.result-team li{display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-top:1px solid var(--line);font-size:11px}
+.result-team li span{color:var(--text)}
+.result-team li strong{font-variant-numeric:tabular-nums;font-size:11px}
+.league-table li{align-items:flex-start;flex-wrap:wrap}
+.league-table li>span{flex:1 1 280px}
+.league-table li small{display:block;margin-top:3px;color:var(--muted);font-size:10px;line-height:1.45}
+.tournament-history .tournament-opponent strong,.tournament-history .tournament-opponent small{display:block}
+.tournament-history .tournament-opponent small{font-size:10px;color:var(--muted);margin-top:2px}
+@media(max-width:640px){.last-match-teams{grid-template-columns:1fr}}
 .equipment-row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
 .equipment-row:last-child{border-bottom:0}
 .equipment-row div{min-width:0;flex:1 1 auto}

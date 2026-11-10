@@ -1,42 +1,42 @@
-import {seededRandom} from './competition.js?v=214';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=214';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=214';
-import {playerFeet,footSole} from './player-feet.js?v=214';
+import {seededRandom} from './competition.js?v=215';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=215';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=215';
+import {playerFeet,footSole} from './player-feet.js?v=215';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=214';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=215';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=214';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=215';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=214';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=215';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=214';
+import {createAnimeGameRenderer} from './anime-game.js?v=215';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=214';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=215';
 
-import {setupCourtDisplay} from './court-display.js?v=214';
+import {setupCourtDisplay} from './court-display.js?v=215';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=214';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=215';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=214';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=214';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=215';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=215';
 
-import {movingStance} from './detailed-character.js?v=214';
+import {movingStance} from './detailed-character.js?v=215';
 
-import {sampleMatchAnimation} from './match-animation.js?v=214';
+import {sampleMatchAnimation} from './match-animation.js?v=215';
 
-import {setupSelection} from './selection.js?v=214';
-import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM,writeEngineState,readEngineState,clearEngineState} from './career/handshake.js?v=214';import {setupStartScreen} from './start-screen.js?v=214';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=214';
+import {setupSelection} from './selection.js?v=215';
+import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM,writeEngineState,readEngineState,clearEngineState} from './career/handshake.js?v=215';import {setupStartScreen} from './start-screen.js?v=215';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=215';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=214';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=215';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=214';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=215';
 
-import {Game} from './game.js?v=214';
-import {C} from './core.js?v=214';
+import {Game} from './game.js?v=215';
+import {C} from './core.js?v=215';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=214';import {playerEmotionState} from './player-emotion.js?v=214';import {PerformanceMonitor} from './performance-monitor.js?v=214';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=215';import {playerEmotionState} from './player-emotion.js?v=215';import {PerformanceMonitor} from './performance-monitor.js?v=215';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=214';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=215';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -94,20 +94,26 @@ function drawPlayer(c,options){const custom=options.personalize?{customHeight:ar
 
 const matchIntroDialog=document.querySelector('#match-intro'),matchIntroTeamsRoot=document.querySelector('#match-intro-teams'),beginMatchButton=document.querySelector('#begin-match'),restartMatchButton=document.querySelector('#restart-match');
 const sideSwitchDialog=document.querySelector('#side-switch-dialog'),sideSwitchContinue=document.querySelector('#side-switch-continue');
-function showSideSwitchNotice(){if(sideSwitchDialog.open)return;game.setPaused(true);sideSwitchDialog.showModal()}
+function showSideSwitchNotice(event={}){if(sideSwitchDialog.open)return;const copy=document.querySelector('#side-switch-copy');if(copy)copy.textContent=`Teams switch ends at ${event.at??game.sideSwitchThreshold} points for this ${game.rules.targetScore}-point game. Play continues from the new sides.`;game.setPaused(true);sideSwitchDialog.showModal()}
 sideSwitchContinue.onclick=()=>{sideSwitchDialog.close();game.setPaused(false);syncPauseButton()};sideSwitchDialog.oncancel=event=>event.preventDefault();
 function syncMatchIntroSettings(){
- const difficulty=document.querySelector('#intro-difficulty'),mode=document.querySelector('#intro-mode'),nameTags=document.querySelector('#intro-name-tags'),replays=document.querySelector('#intro-replays'),ballControl=document.querySelector('#intro-ball-control'),sound=document.querySelector('#intro-sound');
- if(difficulty)difficulty.value=game.difficulty;if(mode)mode.value=game.mode==='watch'?'watch':'play';if(nameTags)nameTags.checked=game.showNameTags!==false;if(replays)replays.checked=replayEnabled;if(ballControl)ballControl.checked=ballControlVisible;if(sound)sound.checked=soundEnabled;
+ const difficulty=document.querySelector('#intro-difficulty'),mode=document.querySelector('#intro-mode'),nameTags=document.querySelector('#intro-name-tags'),replays=document.querySelector('#intro-replays'),ballControl=document.querySelector('#intro-ball-control'),sound=document.querySelector('#intro-sound'),stackMode=document.querySelector('#intro-stack-mode'),stackSide=document.querySelector('#intro-stack-side'),cpuStack=document.querySelector('#intro-cpu-stack');
+ if(difficulty)difficulty.value=game.difficulty;if(mode)mode.value=game.mode==='watch'?'watch':'play';if(nameTags)nameTags.checked=game.showNameTags!==false;if(replays)replays.checked=replayEnabled;if(ballControl)ballControl.checked=ballControlVisible;if(sound)sound.checked=soundEnabled;if(stackMode)stackMode.value=game.stackingConfig.teams[0].mode;if(stackSide)stackSide.value=game.stackingConfig.teams[0].preferredSide;if(cpuStack)cpuStack.value=game.stackingConfig.teams[1].mode;
+}
+function setIntroStacking(){
+ const config={teams:[{mode:document.querySelector('#intro-stack-mode')?.value??'adaptive',preferredSide:document.querySelector('#intro-stack-side')?.value??'auto'},{mode:document.querySelector('#intro-cpu-stack')?.value??'adaptive',preferredSide:'auto'}]};
+ game.setStacking(config);syncMatchIntroSettings();
+ try{const saved=JSON.parse(localStorage.getItem('drives-dinks.selection.v1')||'{}');localStorage.setItem('drives-dinks.selection.v1',JSON.stringify({...saved,stacking:config}))}catch{}
 }
 function bindMatchIntroSettings(){
- const difficulty=document.querySelector('#intro-difficulty'),mode=document.querySelector('#intro-mode'),nameTags=document.querySelector('#intro-name-tags'),replays=document.querySelector('#intro-replays'),ballControl=document.querySelector('#intro-ball-control'),sound=document.querySelector('#intro-sound');
+ const difficulty=document.querySelector('#intro-difficulty'),mode=document.querySelector('#intro-mode'),nameTags=document.querySelector('#intro-name-tags'),replays=document.querySelector('#intro-replays'),ballControl=document.querySelector('#intro-ball-control'),sound=document.querySelector('#intro-sound'),stackMode=document.querySelector('#intro-stack-mode'),stackSide=document.querySelector('#intro-stack-side'),cpuStack=document.querySelector('#intro-cpu-stack');
  if(difficulty)difficulty.onchange=event=>setDifficulty(event.target.value);
  if(mode)mode.onchange=event=>{game.mode=event.target.value==='watch'?'watch':'play';document.querySelector('#mode').textContent='MODE: '+game.mode.toUpperCase();syncMatchIntroSettings()};
  if(nameTags)nameTags.onchange=event=>setNameTags(event.target.checked);
  if(replays)replays.onchange=event=>setReplayEnabled(event.target.checked);
  if(ballControl)ballControl.onchange=event=>setBallControlVisible(event.target.checked);
  if(sound)sound.onchange=event=>setSoundEnabled(event.target.checked);
+ for(const control of [stackMode,stackSide,cpuStack])if(control)control.onchange=setIntroStacking;
 }
 function showMatchIntro(players,onBegin,{kicker='MATCH PREVIEW',title='THE MATCH-UP',action='START MATCH →',secondaryAction=null,onSecondary=null,entry=null}={}){
  matchIntroTeamsRoot.replaceChildren();
@@ -422,7 +428,7 @@ const replayProbe=balanceQuery.get('test')==='sideline-replay'&&balanceQuery.get
 window.addEventListener('keydown',event=>{if(replayPlayback){if(event.key==='Tab'||(event.target===pauseButton||event.target.closest?.('.replay-banner button'))&&['Enter',' '].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(event.key==='p'||event.key==='P'){if(!event.repeat)setPaused(!replayClock.paused)}else if(event.code==='Space'||event.key==='Escape')finishReplay();}},true);
 
 let previousStatus='',performancePanel=null,performanceRefresh=0;if(balanceQuery.get('test')==='performance'&&(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))){performancePanel=document.createElement('output');performancePanel.id='performance-panel';performancePanel.setAttribute('aria-live','off');document.querySelector('.game').append(performancePanel)}window.__DRIVES_DINKS_PERFORMANCE__=()=>performanceMonitor.snapshot();
-function frame(t){performanceMonitor.frame(t);performanceMonitor.nextFrameAfterInput(t);if(performancePanel&&performanceRefresh++%120===0){const report=performanceMonitor.snapshot();performancePanel.textContent='PERF '+(report.fps?report.fps.toFixed(0):'--')+' FPS · RENDER '+(report.renderMs.p95?report.renderMs.p95.toFixed(1):'--')+' MS P95 · LONG '+report.longTasks.count}if(playReplay(t)){requestAnimationFrame(frame);return}if(matchIntroDialog.open){last=t;acc=0;render();requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(startScreen?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;for(const event of game.events.splice(0)){if(event.type==='side-switch')showSideSwitchNotice();else playEffect(event)}if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+function frame(t){performanceMonitor.frame(t);performanceMonitor.nextFrameAfterInput(t);if(performancePanel&&performanceRefresh++%120===0){const report=performanceMonitor.snapshot();performancePanel.textContent='PERF '+(report.fps?report.fps.toFixed(0):'--')+' FPS · RENDER '+(report.renderMs.p95?report.renderMs.p95.toFixed(1):'--')+' MS P95 · LONG '+report.longTasks.count}if(playReplay(t)){requestAnimationFrame(frame);return}if(matchIntroDialog.open){last=t;acc=0;render();requestAnimationFrame(frame);return}syncPointActions();syncMatchResult();if(animationTestMode){applySpecialShotAnimation(animationTestPlayer,(t-animationTestStarted)/1000);render();requestAnimationFrame(frame);return}if(startScreen?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}if(selectionUI?.isOpen()){last=t;acc=0;render();requestAnimationFrame(frame);return}const status=game.paused?'MATCH PAUSED':game.phase==='pause'||game.phase==='over'?`${game.result} · ${game.outcome}`:`YOU ${game.score.points[0]} - ${game.score.points[1]} CPU | SERVE ${game.score.team===0?'YOU':'CPU'} ${game.score.call} | TARGET ${game.aim<7?'LEFT':game.aim>13?'RIGHT':'CENTER'} | ${game.difficulty.toUpperCase()} | ${game.feedbackTime>0&&game.humanFeedback?game.humanFeedback:game.canHumanHit()?'HIT NOW':game.message}`;if(status!==previousStatus){document.querySelector('#overlay').textContent=status;previousStatus=status}if(!last)last=t;if(game.paused){last=t;acc=0;syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame);return}acc+=Math.min(.1,(t-last)/1000);last=t;while(acc>=1/120){game.update(1/120*(scenarioType?scenarioSpeed:1));acc-=1/120;for(const event of game.events.splice(0)){if(event.type==='side-switch')showSideSwitchNotice(event);else playEffect(event)}if(game.replayClip){const clip=game.replayClip;game.replayClip=null;if(replayEnabled&&beginReplay(clip,t,true)){acc=0;break;}}}syncPauseButton();syncShotButtonsForPhase();render();requestAnimationFrame(frame)}requestAnimationFrame(frame);
 
 const BALL_CONTROL_KEY='drives-dinks.ball-control.v1';let ballControlVisible=true;
 const aimPad=document.querySelector('#aim-pad'),aimTrack=aimPad.querySelector('.aim-pad-track'),aimThumb=aimPad.querySelector('.aim-pad-thumb'),depthLabel=document.querySelector('#depth-label');
@@ -464,7 +470,7 @@ if(careerMatch){
   const screen=document.querySelector('#game-start');
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
-  game.configure({format:careerMatch.matchup.format,showNameTags:game.showNameTags!==false,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
+  game.configure({format:careerMatch.matchup.format,showNameTags:game.showNameTags!==false,rules:careerMatch.rules,learning:careerMatch.learning,stacking:careerMatch.stacking},careerMatch.matchup.lineup);
   const savedEngineState=readEngineState(careerMatch.matchId);
   game.mode='play';
   game.setDifficulty(careerMatch.difficulty??'normal');syncDifficultyButton();
@@ -527,11 +533,13 @@ function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialo
       careerResultCommitted=true;
       if(writeMatchResult(game.matchReport(),careerMatch.matchId)){clearPendingMatch();clearEngineState()}
     }
+    const namesFor=(team)=>game.players.filter(player=>player.team===team).map(player=>player.name).join(' & ');
+    const winnerTeam=game.score.winner,loserTeam=1-winnerTeam;
     resultDialog.querySelector('h2').textContent='Career match complete';
-    document.querySelector('#match-winner').textContent=game.score.winner===0?'Your team wins!':'Opponents win!';
-    document.querySelector('#match-score').textContent=`Your team ${game.score.points[0]} – ${game.score.points[1]} ${careerMatch.matchup.team??'Opponents'}`;
+    document.querySelector('#match-winner').textContent=`WINNER · ${namesFor(winnerTeam)}`;
+    document.querySelector('#match-score').textContent=`${game.score.points[0]} – ${game.score.points[1]} · ${namesFor(loserTeam)} lost`;
     const contacts=game.stats.teams.reduce((n,t)=>n+t.hits,0),mishits=game.stats.teams.reduce((n,t)=>n+t.mishits,0);
-    document.querySelector('#match-analysis').textContent=`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Return to career to apply the tournament result, rating change and recovery.`;
+    document.querySelector('#match-analysis').textContent=`${game.stats.rallies} rallies · ${contacts} rally contacts · ${mishits} mishits · Return to career to apply ratings, reliability and recovery.`;
     document.querySelector('#rematch').hidden=true;
     document.querySelector('#return-selection').textContent='RETURN TO CAREER →';
     resultDialog.showModal();

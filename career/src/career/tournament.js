@@ -18,14 +18,14 @@
 // next, the rest of the round, how a player result advances the competition,
 // and where the player finished.
 
-import {ratedPopulation} from './world.js?v=214';
-import {RATING_BRACKETS,formatSkill} from './rating.js?v=214';
-import {seededRandom} from '../competition.js?v=214';
-import {mixSeed} from './population.js?v=214';
-import {pointsForFinish} from './tour.js?v=214';
-import {entryStatus} from './calendar.js?v=214';
-import {resolvePartner} from './club-life.js?v=214';
-import {equipmentSelection} from './equipment.js?v=214';
+import {ratedPopulation} from './world.js?v=215';
+import {RATING_BRACKETS,formatSkill} from './rating.js?v=215';
+import {seededRandom} from '../competition.js?v=215';
+import {mixSeed} from './population.js?v=215';
+import {pointsForFinish} from './tour.js?v=215';
+import {entryStatus} from './calendar.js?v=215';
+import {resolvePartner} from './club-life.js?v=215';
+import {equipmentSelection} from './equipment.js?v=215';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -692,14 +692,14 @@ function applyLadderSwap(order,winner,loser){
 }
 
 // Records the player's own result and advances the tournament.
-export function recordPlayerResult(tournament,{won,score}){
+export function recordPlayerResult(tournament,{won,score,resultDetail=null}){
   const match=tournament.currentMatch;
   const bye=!match&&playerHasBye(tournament);
   if(!match&&!bye&&!tournament.playerOut)return {ok:false,message:'The player has no match in this round.'};
   const playerIsHome=match?match.home.id===tournament.playerTeamId:true;
   const opponent=match?(playerIsHome?match.away:match.home):{name:'a bye',rating:0};
   tournament.history=tournament.history??[];
-  tournament.history.push({round:tournament.round,opponent:opponent.name,opponentRating:opponent.rating,won:bye?true:won,score:bye?'bye':score});
+  tournament.history.push({round:tournament.round,opponent:opponent.name,opponentRating:opponent.rating,won:bye?true:won,score:bye?'bye':score,...(resultDetail??{})});
   if(bye)won=true;
   if(!bye&&match){
     const [pointsFor=0,pointsAgainst=0]=String(score??'').split('-').map(value=>Number(value)||0);

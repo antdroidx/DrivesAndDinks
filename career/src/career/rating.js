@@ -265,6 +265,10 @@ export const RATING_SCALE=.35;
 export const RECENCY_HALF_LIFE=26;
 // Early results move a rating more because the history is thin.
 export const VOLUME_SCALE=10;
+// A player's first few results carry extra uncertainty. This boost is a
+// gameplay confidence factor, not a claim about DUPR's proprietary formula.
+export const PROVISIONAL_MATCHES=6;
+export const PROVISIONAL_BOOST=.5;
 
 export function teamStrength(ratings){
   const values=(ratings??[]).filter(value=>Number.isFinite(value));
@@ -317,6 +321,10 @@ export function recencyWeight(weeksAgo=0){
 export function volumeDamping(matchesPlayed=0){
   return 1/Math.sqrt(1+Math.max(0,Number(matchesPlayed)||0)/VOLUME_SCALE);
 }
+export function provisionalMultiplier(matchesPlayed=0){
+  const count=Math.max(0,Number(matchesPlayed)||0);
+  return 1+PROVISIONAL_BOOST*clamp(1-count/PROVISIONAL_MATCHES,0,1);
+}
 
 // The rating change for one player in one match.
 export function updateRating({
@@ -336,7 +344,8 @@ export function updateRating({
   const weight=matchWeight(matchType);
   const recency=recencyWeight(weeksAgo);
   const damping=volumeDamping(matchesPlayed);
-  const delta=RATING_SCALE*performance*weight*recency*damping;
+  const provisional=provisionalMultiplier(matchesPlayed);
+  const delta=RATING_SCALE*performance*weight*recency*damping*provisional;
   return {
     rating:clamp(rating+delta,RATING_MIN,RATING_MAX),
     delta,
@@ -344,14 +353,16 @@ export function updateRating({
     expected,
     weight,
     recency,
-    damping
+    damping,
+    provisional
   };
 }
 
 // Rates a whole match for every player on court. The two teams move in
 // opposite directions, which is what keeps the system balanced. Doubles
-// teammates share the team change in proportion to their own ratings, since
-// individual performance inside a team is not measured.
+// each teammate carries the full team result, since individual performance
+// inside a team is not measured. A second proportional split would halve the
+// movement for every doubles player.
 export function rateMatch({players,actualMyPoints,actualOpponentPoints,matchType='club',weeksAgo=0}={}){
   const list=players??[];
   const mine=list.filter(player=>player.team==='mine');
@@ -363,13 +374,19 @@ export function rateMatch({players,actualMyPoints,actualOpponentPoints,matchType
   const performance=matchPerformance({actualMyPoints,actualOpponentPoints,expectedMyPoints:expected.myPoints,expectedOpponentPoints:expected.opponentPoints});
   const weight=matchWeight(matchType);
   const recency=recencyWeight(weeksAgo);
-  const damping=volumeDamping(Math.min(...mine.map(player=>player.matchesPlayed??0)));
-  const teamDelta=RATING_SCALE*performance*weight*recency*damping;
-  const share=(team,sign)=>{
-    const total=team.reduce((sum,player)=>sum+player.rating,0)||1;
-    return team.map(player=>({...player,rating:clamp(player.rating+sign*teamDelta*(player.rating/total),RATING_MIN,RATING_MAX),delta:sign*teamDelta*(player.rating/total)}));
-  };
-  return {players:[...share(mine,1),...share(theirs,-1)],teamDelta,performance,expected};
+  const matchesPlayed=Math.min(...list.map(player=>player.matchesPlayed??0));
+  const damping=volumeDamping(matchesPlayed);
+  const provisional=provisionalMultiplier(matchesPlayed);
+  const teamDelta=RATING_SCALE*performance*weight*recency*damping*provisional;
+  // Each member of a doubles team carries the full team result. Sharing the
+  // same delta again by rating proportion halved every doubles movement.
+  const move=(team,sign)=>team.map(player=>({
+    ...player,
+    previousRating:player.rating,
+    rating:clamp(player.rating+sign*teamDelta,RATING_MIN,RATING_MAX),
+    delta:sign*teamDelta
+  }));
+  return {players:[...move(mine,1),...move(theirs,-1)],teamDelta,performance,expected,matchesPlayed,damping,provisional};
 }
 
 // Reliability reflects how confidently a match history supports the rating.

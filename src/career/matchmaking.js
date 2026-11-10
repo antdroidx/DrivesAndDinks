@@ -4,11 +4,11 @@
 // athlete and the opponents drawn from the bracket into lineups the engine
 // can play, and records the match so the result can be rated afterwards.
 
-import {buildProfile,applyPhysique} from '../roster.js?v=214';
-import {opponentsInBracket} from './world.js?v=214';
-import {mixSeed} from './population.js?v=214';
-import {seededRandom} from '../competition.js?v=214';
-import {equipmentSelection} from './equipment.js?v=214';
+import {buildProfile,applyPhysique} from '../roster.js?v=215';
+import {opponentsInBracket} from './world.js?v=215';
+import {mixSeed} from './population.js?v=215';
+import {seededRandom} from '../competition.js?v=215';
+import {equipmentSelection} from './equipment.js?v=215';
 
 // The engine caps injected attributes so a profile can never run away with
 // them. The career allows attributes up to 99, and the engine's ability
@@ -99,7 +99,10 @@ export function buildCareerMatchup({state,event,option,opponents,partner}){
     opponentRatings:opponents.map(opponent=>opponent.rating??0),
     opponentIds:opponents.map(opponent=>opponent.id),
     partnerId:partner?.id??null,
-    partnerRating:partner?.rating??null
+    partnerRating:partner?.rating??null,
+    playerMatches:state.athlete.record?.matches??0,
+    partnerMatches:partner?.matches??0,
+    opponentMatches:opponents.map(opponent=>opponent.matches??0)
   };
 }
 
