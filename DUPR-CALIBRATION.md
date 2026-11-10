@@ -1,6 +1,6 @@
 # DUPR Level Calibration
 
-Generated: 2026-11-10T05:32:10.766Z
+Generated: 2026-11-10T05:38:48.771Z
 
 ## What can and cannot be back-calculated
 
@@ -24,24 +24,24 @@ DUPR's production algorithm is proprietary. Public DUPR material confirms that r
 
 This creates the intended nonlinear shape. A quarter point costs the underdog roughly two points, a half point leaves about five, a full point leaves about two, and a larger mismatch leaves only one. Match-level scatter can still produce a hot underdog game or a stronger-side shutout.
 
-## Why the current gameplay levels are too far apart
+## Why the previous gameplay levels were too far apart
 
-The current physics profiles use **35 / 55 / 70 / 85**. Under the game's current skill-to-rating conversion, those values represent **2.362 / 3.812 / 4.899 / 5.986**. The three level steps therefore span **1.45**, **1.09** and **1.09** rating points.
+The previous physics profiles used **35 / 55 / 70 / 85**. Under the game's skill-to-rating conversion, those values represented **2.362 / 3.812 / 4.899 / 5.986**. The three level steps therefore spanned **1.45**, **1.09** and **1.09** rating points.
 
-| Level | Raw skill | Current skill-to-rating mapping |
+| Level | Raw skill | Previous skill-to-rating mapping |
 |---|---:|---:|
 | Beginner | 35 | 2.362 |
 | Intermediate | 55 | 3.812 |
 | Demo | 70 | 4.899 |
 | Advanced | 85 | 5.986 |
 
-Those are full-point or larger mismatches. Under the public DUPR anchors they should be near-certain wins with only a point or two of scatter, which explains why the current real-engine sweep produced 20–0 matches.
+Those are full-point or larger mismatches. Under the public DUPR anchors they should be near-certain wins with only a point or two of scatter, which explains why the original real-engine sweep produced 20–0 matches.
 
-## Proposed physics-level mapping
+## Shipped physics-level mapping
 
-Use the validated **64 / 66 / 68 / 70** curve and assign displayed levels in half-point steps. This decouples the raw physics coordinate from the displayed career rating so the game does not compound every ability and then also claim a full DUPR point between levels.
+The playable level profiles now use the validated **64 / 66 / 68 / 70** curve, with displayed levels assigned in half-point steps. This decouples the raw physics coordinate from the displayed career rating so the game does not compound every ability and then also claim a full DUPR point between levels.
 
-| Level | Raw physics skill | Proposed displayed level |
+| Level | Raw physics skill | Displayed level |
 |---|---:|---:|
 | Beginner | 64 | 3.0 |
 | Intermediate | 66 | 3.5 |

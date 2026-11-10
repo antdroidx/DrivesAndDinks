@@ -247,7 +247,8 @@ export function effectiveRatings(input){
 export function skillAverage(ratings){const keys=RATING_KEYS.filter(key=>key!=='aggression');return Math.round(keys.reduce((sum,key)=>sum+(Number(ratings[key])||0),0)/keys.length)}
 
 // Internal balance profiles: presentation/demo selections remain unchanged.
-export const SKILL_LEVELS=Object.freeze({beginner:35,intermediate:55,demo:70,advanced:85});
+export const SKILL_LEVELS=Object.freeze({beginner:64,intermediate:66,demo:68,advanced:70});
+export const GAMEPLAY_LEVEL_RATINGS=Object.freeze({beginner:3,intermediate:3.5,demo:4,advanced:4.5});
 export function levelLineup(level='demo',random=Math.random){
  const baseline=SKILL_LEVELS[level];if(baseline===undefined)throw new Error('Unknown skill level');
  return ['avery','remy','jordan','selena'].map((character,index)=>{

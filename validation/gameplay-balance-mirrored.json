@@ -1,6 +1,6 @@
 {
   "methodology": "Real engine CPU watch matches; level assignments swapped across court sides and initial service alternated.",
-  "matchesPerPair": 20,
+  "matchesPerPair": 40,
   "results": [
     {
       "format": "singles",
@@ -8,49 +8,49 @@
         "beginner",
         "beginner"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        11,
-        9
+        18,
+        22
       ],
       "sideWins": [
-        11,
-        9
+        18,
+        22
       ],
       "pointsByLevel": [
-        173,
-        158
+        322,
+        339
       ],
       "pointsBySide": [
-        176,
-        155
+        337,
+        324
       ],
-      "rallies": 550,
+      "rallies": 1423,
       "shots": {
-        "drive": 447,
-        "drop": 402,
-        "dink": 185,
-        "lob": 4,
-        "overhead": 10,
-        "tweener": 1
+        "drive": 2784,
+        "drop": 1877,
+        "dink": 3404,
+        "lob": 105,
+        "atp": 64,
+        "overhead": 3
       },
       "faults": {
-        "Unreturned": 222,
-        "Out": 147,
-        "Double bounce": 174,
-        "Net fault": 7
+        "Unreturned": 494,
+        "Double bounce": 638,
+        "Out": 204,
+        "Net fault": 87
       },
-      "maxRally": 8,
+      "maxRally": 21,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 0.45
+      "winRateB": 0.55
     },
     {
       "format": "singles",
@@ -58,50 +58,49 @@
         "beginner",
         "intermediate"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        3,
+        37
       ],
       "sideWins": [
-        10,
-        10
+        19,
+        21
       ],
       "pointsByLevel": [
-        4,
-        220
+        183,
+        434
       ],
       "pointsBySide": [
-        110,
-        114
+        312,
+        305
       ],
-      "rallies": 294,
+      "rallies": 1202,
       "shots": {
-        "drive": 254,
-        "drop": 261,
-        "dink": 105,
-        "lob": 3,
-        "tweener": 2,
-        "atp": 6,
-        "overhead": 6
+        "drive": 2222,
+        "drop": 1706,
+        "dink": 3182,
+        "lob": 85,
+        "atp": 61,
+        "overhead": 3
       },
       "faults": {
-        "Double bounce": 138,
-        "Unreturned": 115,
-        "Out": 40,
-        "Net fault": 1
+        "Out": 170,
+        "Double bounce": 544,
+        "Unreturned": 394,
+        "Net fault": 94
       },
-      "maxRally": 9,
+      "maxRally": 19,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
+      "winRateB": 0.925
     },
     {
       "format": "singles",
@@ -109,47 +108,48 @@
         "beginner",
         "demo"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
         0,
-        20
+        40
       ],
       "sideWins": [
-        10,
-        10
+        20,
+        20
       ],
       "pointsByLevel": [
-        0,
-        220
+        165,
+        441
       ],
       "pointsBySide": [
-        110,
-        110
+        301,
+        305
       ],
-      "rallies": 240,
+      "rallies": 1258,
       "shots": {
-        "drive": 193,
-        "drop": 162,
-        "dink": 27,
-        "lob": 1,
-        "atp": 1,
-        "overhead": 1
+        "drive": 2317,
+        "drop": 1783,
+        "dink": 3414,
+        "lob": 87,
+        "atp": 84,
+        "overhead": 3
       },
       "faults": {
-        "Unreturned": 132,
-        "Double bounce": 93,
-        "Out": 14,
-        "Net fault": 1
+        "Double bounce": 525,
+        "Out": 157,
+        "Unreturned": 463,
+        "Net fault": 112,
+        "Post fault": 1
       },
-      "maxRally": 8,
+      "maxRally": 24,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
       "winRateB": 1
     },
@@ -159,44 +159,49 @@
         "beginner",
         "advanced"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
         0,
-        20
+        40
       ],
       "sideWins": [
-        10,
-        10
+        20,
+        20
       ],
       "pointsByLevel": [
-        0,
-        220
+        84,
+        440
       ],
       "pointsBySide": [
-        110,
-        110
+        256,
+        268
       ],
-      "rallies": 234,
+      "rallies": 942,
       "shots": {
-        "drive": 179,
-        "drop": 166,
-        "dink": 32
+        "drive": 1615,
+        "drop": 1362,
+        "dink": 2677,
+        "lob": 66,
+        "tweener": 3,
+        "atp": 108,
+        "overhead": 3
       },
       "faults": {
-        "Unreturned": 108,
-        "Double bounce": 105,
-        "Out": 17,
-        "Net fault": 4
+        "Double bounce": 357,
+        "Unreturned": 397,
+        "Out": 93,
+        "Net fault": 94,
+        "Post fault": 1
       },
-      "maxRally": 8,
+      "maxRally": 21,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
       "winRateB": 1
     },
@@ -206,50 +211,49 @@
         "intermediate",
         "intermediate"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        12,
-        8
+        20,
+        20
       ],
       "sideWins": [
-        10,
-        10
+        18,
+        22
       ],
       "pointsByLevel": [
-        181,
-        168
+        325,
+        353
       ],
       "pointsBySide": [
-        170,
-        179
+        333,
+        345
       ],
-      "rallies": 647,
+      "rallies": 1396,
       "shots": {
-        "drive": 888,
-        "drop": 932,
-        "dink": 1300,
-        "lob": 29,
-        "overhead": 11,
-        "atp": 37,
-        "tweener": 5
+        "drive": 2545,
+        "dink": 3870,
+        "drop": 2030,
+        "lob": 111,
+        "atp": 63,
+        "overhead": 4
       },
       "faults": {
-        "Double bounce": 273,
-        "Out": 175,
-        "Unreturned": 174,
-        "Net fault": 25
+        "Out": 198,
+        "Double bounce": 667,
+        "Net fault": 105,
+        "Unreturned": 426
       },
-      "maxRally": 16,
+      "maxRally": 21,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 0.4
+      "winRateB": 0.5
     },
     {
       "format": "singles",
@@ -257,50 +261,50 @@
         "intermediate",
         "demo"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        12,
+        28
       ],
       "sideWins": [
-        10,
-        10
+        24,
+        16
       ],
       "pointsByLevel": [
-        12,
-        220
+        250,
+        367
       ],
       "pointsBySide": [
-        113,
-        119
+        339,
+        278
       ],
-      "rallies": 316,
+      "rallies": 1295,
       "shots": {
-        "drive": 464,
-        "drop": 394,
-        "atp": 42,
-        "dink": 714,
-        "lob": 20,
-        "overhead": 3,
-        "tweener": 1
+        "drive": 2351,
+        "drop": 1940,
+        "atp": 75,
+        "dink": 3726,
+        "lob": 103,
+        "overhead": 5,
+        "tweener": 2
       },
       "faults": {
-        "Unreturned": 107,
-        "Out": 68,
-        "Double bounce": 123,
-        "Net fault": 18
+        "Unreturned": 430,
+        "Double bounce": 613,
+        "Out": 152,
+        "Net fault": 100
       },
-      "maxRally": 15,
+      "maxRally": 21,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
+      "winRateB": 0.7
     },
     {
       "format": "singles",
@@ -308,49 +312,49 @@
         "intermediate",
         "advanced"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        1,
+        39
       ],
       "sideWins": [
-        10,
-        10
+        21,
+        19
       ],
       "pointsByLevel": [
-        6,
-        220
+        119,
+        436
       ],
       "pointsBySide": [
-        112,
-        114
+        276,
+        279
       ],
-      "rallies": 292,
+      "rallies": 1050,
       "shots": {
-        "drive": 492,
-        "drop": 362,
-        "dink": 663,
-        "lob": 18,
-        "atp": 20,
+        "drive": 1878,
+        "drop": 1523,
+        "dink": 3115,
+        "atp": 107,
+        "lob": 71,
         "overhead": 1
       },
       "faults": {
-        "Unreturned": 98,
-        "Double bounce": 112,
-        "Out": 50,
-        "Net fault": 32
+        "Double bounce": 439,
+        "Out": 124,
+        "Net fault": 100,
+        "Unreturned": 387
       },
-      "maxRally": 17,
+      "maxRally": 21,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
+      "winRateB": 0.975
     },
     {
       "format": "singles",
@@ -358,47 +362,48 @@
         "demo",
         "demo"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        10,
-        10
+        20,
+        20
       ],
       "sideWins": [
-        14,
-        6
+        20,
+        20
       ],
       "pointsByLevel": [
-        158,
-        161
+        350,
+        366
       ],
       "pointsBySide": [
-        186,
-        133
+        364,
+        352
       ],
-      "rallies": 619,
+      "rallies": 1490,
       "shots": {
-        "drive": 1095,
-        "drop": 876,
-        "atp": 71,
-        "dink": 2048,
-        "lob": 41
+        "drive": 2708,
+        "drop": 2190,
+        "atp": 99,
+        "dink": 4440,
+        "lob": 116,
+        "overhead": 4,
+        "tweener": 1
       },
       "faults": {
-        "Unreturned": 207,
-        "Out": 73,
-        "Double bounce": 281,
-        "Net fault": 57,
-        "Post fault": 1
+        "Double bounce": 649,
+        "Net fault": 114,
+        "Unreturned": 537,
+        "Out": 190
       },
-      "maxRally": 20,
+      "maxRally": 21,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
       "winRateB": 0.5
     },
@@ -408,49 +413,51 @@
         "demo",
         "advanced"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        6,
+        34
       ],
       "sideWins": [
-        10,
-        10
+        22,
+        18
       ],
       "pointsByLevel": [
-        22,
-        220
+        221,
+        429
       ],
       "pointsBySide": [
-        123,
-        119
+        339,
+        311
       ],
-      "rallies": 348,
+      "rallies": 1312,
       "shots": {
-        "drive": 697,
-        "drop": 487,
-        "dink": 1402,
-        "lob": 39,
-        "atp": 25,
-        "overhead": 1
+        "drive": 2347,
+        "drop": 1940,
+        "atp": 106,
+        "dink": 4011,
+        "lob": 112,
+        "overhead": 1,
+        "tweener": 2
       },
       "faults": {
-        "Double bounce": 132,
-        "Net fault": 70,
-        "Out": 25,
-        "Unreturned": 121
+        "Unreturned": 429,
+        "Net fault": 115,
+        "Double bounce": 598,
+        "Out": 169,
+        "Post fault": 1
       },
-      "maxRally": 22,
+      "maxRally": 20,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
+      "winRateB": 0.85
     },
     {
       "format": "singles",
@@ -458,49 +465,49 @@
         "advanced",
         "advanced"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        9,
-        11
+        24,
+        16
       ],
       "sideWins": [
-        7,
-        13
+        22,
+        18
       ],
       "pointsByLevel": [
-        171,
-        174
+        348,
+        299
       ],
       "pointsBySide": [
-        156,
-        189
+        327,
+        320
       ],
-      "rallies": 660,
+      "rallies": 1319,
       "shots": {
-        "drive": 1397,
-        "drop": 884,
-        "dink": 3917,
-        "atp": 19,
-        "lob": 103,
-        "overhead": 2
+        "drive": 2345,
+        "drop": 1857,
+        "atp": 158,
+        "dink": 4207,
+        "lob": 94
       },
       "faults": {
-        "Out": 40,
-        "Unreturned": 201,
-        "Net fault": 203,
-        "Double bounce": 216
+        "Unreturned": 436,
+        "Out": 156,
+        "Double bounce": 598,
+        "Net fault": 128,
+        "Post fault": 1
       },
-      "maxRally": 25,
+      "maxRally": 20,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 0.55
+      "winRateB": 0.4
     },
     {
       "format": "doubles",
@@ -508,50 +515,51 @@
         "beginner",
         "beginner"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        8,
-        12
+        23,
+        17
       ],
       "sideWins": [
-        8,
-        12
+        19,
+        21
       ],
       "pointsByLevel": [
-        160,
-        185
+        372,
+        318
       ],
       "pointsBySide": [
-        162,
-        183
+        338,
+        352
       ],
-      "rallies": 828,
+      "rallies": 1170,
       "shots": {
-        "drive": 740,
-        "drop": 518,
-        "dink": 1126,
-        "atp": 47,
-        "lob": 37,
-        "overhead": 58,
-        "tweener": 5
+        "drive": 5620,
+        "drop": 1579,
+        "dink": 9503,
+        "lob": 579,
+        "atp": 179,
+        "overhead": 35,
+        "erne": 4
       },
       "faults": {
-        "Out": 217,
-        "Double bounce": 229,
-        "Unreturned": 353,
-        "Net fault": 29
+        "Out": 307,
+        "Net fault": 478,
+        "Unreturned": 380,
+        "Post fault": 2,
+        "Double bounce": 3
       },
-      "maxRally": 21,
+      "maxRally": 49,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 0.6
+      "winRateB": 0.425
     },
     {
       "format": "doubles",
@@ -559,150 +567,155 @@
         "beginner",
         "intermediate"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        13,
+        27
       ],
       "sideWins": [
-        10,
-        10
+        21,
+        19
       ],
       "pointsByLevel": [
-        5,
-        220
+        300,
+        387
       ],
       "pointsBySide": [
-        114,
-        111
+        361,
+        326
       ],
-      "rallies": 316,
+      "rallies": 1203,
       "shots": {
-        "drive": 339,
-        "drop": 292,
-        "atp": 26,
-        "dink": 776,
-        "overhead": 44,
-        "lob": 23,
+        "drive": 5644,
+        "drop": 1600,
+        "dink": 10072,
+        "lob": 588,
+        "atp": 207,
+        "overhead": 27,
+        "erne": 2
+      },
+      "faults": {
+        "Unreturned": 396,
+        "Out": 298,
+        "Net fault": 505,
+        "Double bounce": 3,
+        "Post fault": 1
+      },
+      "maxRally": 50,
+      "orientations": {
+        "aTeam0": 20,
+        "aTeam1": 20
+      },
+      "initialServer": {
+        "team0": 20,
+        "team1": 20
+      },
+      "winRateB": 0.675
+    },
+    {
+      "format": "doubles",
+      "levels": [
+        "beginner",
+        "demo"
+      ],
+      "games": 40,
+      "completed": 40,
+      "levelWins": [
+        7,
+        33
+      ],
+      "sideWins": [
+        19,
+        21
+      ],
+      "pointsByLevel": [
+        206,
+        417
+      ],
+      "pointsBySide": [
+        301,
+        322
+      ],
+      "rallies": 1037,
+      "shots": {
+        "drive": 4509,
+        "drop": 1366,
+        "dink": 8607,
+        "lob": 468,
+        "atp": 232,
+        "tweener": 1,
+        "overhead": 12,
+        "erne": 2
+      },
+      "faults": {
+        "Unreturned": 337,
+        "Net fault": 459,
+        "Out": 236,
+        "Post fault": 2,
+        "Double bounce": 3
+      },
+      "maxRally": 51,
+      "orientations": {
+        "aTeam0": 20,
+        "aTeam1": 20
+      },
+      "initialServer": {
+        "team0": 20,
+        "team1": 20
+      },
+      "winRateB": 0.825
+    },
+    {
+      "format": "doubles",
+      "levels": [
+        "beginner",
+        "advanced"
+      ],
+      "games": 40,
+      "completed": 40,
+      "levelWins": [
+        2,
+        38
+      ],
+      "sideWins": [
+        22,
+        18
+      ],
+      "pointsByLevel": [
+        163,
+        435
+      ],
+      "pointsBySide": [
+        315,
+        283
+      ],
+      "rallies": 1008,
+      "shots": {
+        "drive": 3995,
+        "drop": 1294,
+        "dink": 8482,
+        "lob": 453,
+        "atp": 288,
+        "overhead": 5,
         "tweener": 1
       },
       "faults": {
-        "Out": 57,
-        "Double bounce": 68,
-        "Net fault": 33,
-        "Unreturned": 158
+        "Unreturned": 343,
+        "Net fault": 451,
+        "Out": 213,
+        "Double bounce": 1
       },
-      "maxRally": 23,
+      "maxRally": 48,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
-    },
-    {
-      "format": "doubles",
-      "levels": [
-        "beginner",
-        "demo"
-      ],
-      "games": 20,
-      "completed": 20,
-      "levelWins": [
-        0,
-        20
-      ],
-      "sideWins": [
-        10,
-        10
-      ],
-      "pointsByLevel": [
-        0,
-        220
-      ],
-      "pointsBySide": [
-        110,
-        110
-      ],
-      "rallies": 271,
-      "shots": {
-        "drive": 252,
-        "drop": 222,
-        "dink": 826,
-        "overhead": 21,
-        "lob": 23,
-        "atp": 9
-      },
-      "faults": {
-        "Out": 63,
-        "Unreturned": 127,
-        "Double bounce": 48,
-        "Net fault": 33
-      },
-      "maxRally": 21,
-      "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
-      },
-      "initialServer": {
-        "team0": 10,
-        "team1": 10
-      },
-      "winRateB": 1
-    },
-    {
-      "format": "doubles",
-      "levels": [
-        "beginner",
-        "advanced"
-      ],
-      "games": 20,
-      "completed": 20,
-      "levelWins": [
-        0,
-        20
-      ],
-      "sideWins": [
-        10,
-        10
-      ],
-      "pointsByLevel": [
-        0,
-        220
-      ],
-      "pointsBySide": [
-        110,
-        110
-      ],
-      "rallies": 247,
-      "shots": {
-        "drive": 222,
-        "drop": 188,
-        "dink": 870,
-        "atp": 9,
-        "overhead": 14,
-        "lob": 46
-      },
-      "faults": {
-        "Unreturned": 121,
-        "Double bounce": 52,
-        "Out": 53,
-        "Net fault": 21
-      },
-      "maxRally": 21,
-      "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
-      },
-      "initialServer": {
-        "team0": 10,
-        "team1": 10
-      },
-      "winRateB": 1
+      "winRateB": 0.95
     },
     {
       "format": "doubles",
@@ -710,51 +723,51 @@
         "intermediate",
         "intermediate"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        10,
-        10
+        21,
+        19
       ],
       "sideWins": [
-        10,
-        10
+        21,
+        19
       ],
       "pointsByLevel": [
-        186,
-        190
+        334,
+        324
       ],
       "pointsBySide": [
-        176,
-        200
+        329,
+        329
       ],
-      "rallies": 760,
+      "rallies": 1103,
       "shots": {
-        "drive": 2585,
-        "drop": 1553,
-        "dink": 3796,
-        "atp": 249,
-        "lob": 180,
-        "overhead": 166,
-        "erne": 8
+        "drive": 5304,
+        "drop": 1442,
+        "dink": 9510,
+        "atp": 193,
+        "lob": 501,
+        "erne": 3,
+        "overhead": 2
       },
       "faults": {
-        "Out": 392,
-        "Net fault": 160,
-        "Unreturned": 196,
-        "Double bounce": 11,
-        "Kitchen momentum fault": 1
+        "Out": 247,
+        "Net fault": 510,
+        "Unreturned": 341,
+        "Double bounce": 4,
+        "Post fault": 1
       },
-      "maxRally": 41,
+      "maxRally": 48,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 0.5
+      "winRateB": 0.475
     },
     {
       "format": "doubles",
@@ -762,50 +775,52 @@
         "intermediate",
         "demo"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        9,
+        31
       ],
       "sideWins": [
-        10,
-        10
+        21,
+        19
       ],
       "pointsByLevel": [
-        19,
-        220
+        239,
+        385
       ],
       "pointsBySide": [
-        120,
-        119
+        312,
+        312
       ],
-      "rallies": 377,
+      "rallies": 1022,
       "shots": {
-        "drive": 1002,
-        "drop": 606,
-        "dink": 2235,
-        "overhead": 22,
-        "atp": 153,
-        "lob": 113,
-        "erne": 1
+        "drive": 4600,
+        "drop": 1322,
+        "dink": 8849,
+        "lob": 511,
+        "atp": 213,
+        "overhead": 2,
+        "erne": 1,
+        "tweener": 1
       },
       "faults": {
-        "Unreturned": 148,
-        "Net fault": 123,
-        "Out": 103,
-        "Double bounce": 3
+        "Out": 227,
+        "Net fault": 456,
+        "Unreturned": 333,
+        "Double bounce": 4,
+        "Post fault": 2
       },
-      "maxRally": 33,
+      "maxRally": 43,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
+      "winRateB": 0.775
     },
     {
       "format": "doubles",
@@ -813,50 +828,51 @@
         "intermediate",
         "advanced"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        6,
+        34
       ],
       "sideWins": [
-        10,
-        10
+        20,
+        20
       ],
       "pointsByLevel": [
-        32,
-        220
+        208,
+        405
       ],
       "pointsBySide": [
-        136,
-        116
+        304,
+        309
       ],
-      "rallies": 365,
+      "rallies": 1035,
       "shots": {
-        "drive": 778,
-        "drop": 534,
-        "dink": 2336,
-        "atp": 121,
-        "lob": 141,
-        "overhead": 19,
+        "drive": 4662,
+        "drop": 1350,
+        "dink": 9127,
+        "lob": 521,
+        "atp": 255,
+        "tweener": 3,
         "erne": 1
       },
       "faults": {
-        "Unreturned": 157,
-        "Net fault": 133,
-        "Out": 74,
-        "Double bounce": 1
+        "Unreturned": 354,
+        "Net fault": 468,
+        "Out": 207,
+        "Double bounce": 4,
+        "Post fault": 2
       },
-      "maxRally": 36,
+      "maxRally": 48,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
+      "winRateB": 0.85
     },
     {
       "format": "doubles",
@@ -864,51 +880,51 @@
         "demo",
         "demo"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        8,
-        12
+        19,
+        21
       ],
       "sideWins": [
-        12,
-        8
+        17,
+        23
       ],
       "pointsByLevel": [
-        158,
-        197
+        329,
+        336
       ],
       "pointsBySide": [
-        192,
-        163
+        314,
+        351
       ],
-      "rallies": 640,
+      "rallies": 1206,
       "shots": {
-        "drive": 2823,
-        "drop": 814,
-        "dink": 5624,
-        "lob": 348,
-        "atp": 224,
+        "drive": 5746,
+        "drop": 1560,
+        "dink": 10708,
+        "atp": 318,
+        "lob": 599,
         "overhead": 3,
         "erne": 2
       },
       "faults": {
-        "Unreturned": 207,
-        "Out": 134,
-        "Net fault": 295,
-        "Double bounce": 2,
+        "Out": 271,
+        "Net fault": 552,
+        "Unreturned": 374,
+        "Double bounce": 7,
         "Post fault": 2
       },
-      "maxRally": 50,
+      "maxRally": 54,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 0.6
+      "winRateB": 0.525
     },
     {
       "format": "doubles",
@@ -916,47 +932,50 @@
         "demo",
         "advanced"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        0,
-        20
+        10,
+        30
       ],
       "sideWins": [
-        10,
-        10
+        24,
+        16
       ],
       "pointsByLevel": [
-        80,
-        220
+        271,
+        405
       ],
       "pointsBySide": [
-        158,
-        142
+        360,
+        316
       ],
-      "rallies": 506,
+      "rallies": 1223,
       "shots": {
-        "drive": 1727,
-        "drop": 620,
-        "dink": 4784,
-        "lob": 277,
-        "atp": 98
+        "drive": 5433,
+        "drop": 1605,
+        "dink": 10745,
+        "atp": 362,
+        "lob": 656,
+        "overhead": 4
       },
       "faults": {
-        "Unreturned": 158,
-        "Net fault": 303,
-        "Out": 45
+        "Out": 265,
+        "Net fault": 581,
+        "Unreturned": 368,
+        "Double bounce": 5,
+        "Post fault": 4
       },
-      "maxRally": 43,
+      "maxRally": 66,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 1
+      "winRateB": 0.75
     },
     {
       "format": "doubles",
@@ -964,48 +983,51 @@
         "advanced",
         "advanced"
       ],
-      "games": 20,
-      "completed": 20,
+      "games": 40,
+      "completed": 40,
       "levelWins": [
-        8,
-        12
+        18,
+        22
       ],
       "sideWins": [
-        14,
-        6
+        20,
+        20
       ],
       "pointsByLevel": [
-        172,
-        176
+        325,
+        354
       ],
       "pointsBySide": [
-        196,
-        152
+        351,
+        328
       ],
-      "rallies": 615,
+      "rallies": 1200,
       "shots": {
-        "drive": 2844,
-        "drop": 768,
-        "dink": 6417,
-        "lob": 380,
-        "tweener": 1
+        "drive": 5374,
+        "drop": 1540,
+        "dink": 10616,
+        "lob": 637,
+        "atp": 423,
+        "overhead": 5,
+        "erne": 2
       },
       "faults": {
-        "Unreturned": 145,
-        "Net fault": 402,
-        "Out": 67,
-        "Double bounce": 1
+        "Unreturned": 378,
+        "Out": 253,
+        "Net fault": 563,
+        "Double bounce": 2,
+        "Post fault": 4
       },
       "maxRally": 50,
       "orientations": {
-        "aTeam0": 10,
-        "aTeam1": 10
+        "aTeam0": 20,
+        "aTeam1": 20
       },
       "initialServer": {
-        "team0": 10,
-        "team1": 10
+        "team0": 20,
+        "team1": 20
       },
-      "winRateB": 0.6
+      "winRateB": 0.55
     }
   ]
 }

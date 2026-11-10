@@ -1,31 +1,31 @@
 {
-  "generatedAt": "2026-11-10T05:32:25.505Z",
-  "methodology": "Real physics-engine CPU watch matches. The higher level swaps teams across court sides and initial server alternates. Each mirrored pairing uses 20 completed matches in singles and doubles for the main result; broad curve candidates use 10 games per pairing, while the one- and two-point curves use 40-game confirmation runs.",
+  "generatedAt": "2026-11-10T05:38:21.136Z",
+  "methodology": "Real physics-engine CPU watch matches. The higher level swaps teams across court sides and initial server alternates. Each mirrored pairing uses 40 completed matches in singles and doubles for the main result; broad curve candidates use 10 games per pairing, while the one- and two-point curves use 40-game confirmation runs.",
   "equal": [
     {
       "format": "singles",
       "level": "beginner",
-      "winRateB": 0.45,
+      "winRateB": 0.55,
       "sideWins": [
-        11,
-        9
+        18,
+        22
       ],
       "pointsBySide": [
-        176,
-        155
+        337,
+        324
       ]
     },
     {
       "format": "singles",
       "level": "intermediate",
-      "winRateB": 0.4,
+      "winRateB": 0.5,
       "sideWins": [
-        10,
-        10
+        18,
+        22
       ],
       "pointsBySide": [
-        170,
-        179
+        333,
+        345
       ]
     },
     {
@@ -33,77 +33,77 @@
       "level": "demo",
       "winRateB": 0.5,
       "sideWins": [
-        14,
-        6
+        20,
+        20
       ],
       "pointsBySide": [
-        186,
-        133
+        364,
+        352
       ]
     },
     {
       "format": "singles",
       "level": "advanced",
-      "winRateB": 0.55,
+      "winRateB": 0.4,
       "sideWins": [
-        7,
-        13
+        22,
+        18
       ],
       "pointsBySide": [
-        156,
-        189
+        327,
+        320
       ]
     },
     {
       "format": "doubles",
       "level": "beginner",
-      "winRateB": 0.6,
+      "winRateB": 0.425,
       "sideWins": [
-        8,
-        12
+        19,
+        21
       ],
       "pointsBySide": [
-        162,
-        183
+        338,
+        352
       ]
     },
     {
       "format": "doubles",
       "level": "intermediate",
-      "winRateB": 0.5,
+      "winRateB": 0.475,
       "sideWins": [
-        10,
-        10
+        21,
+        19
       ],
       "pointsBySide": [
-        176,
-        200
+        329,
+        329
       ]
     },
     {
       "format": "doubles",
       "level": "demo",
-      "winRateB": 0.6,
+      "winRateB": 0.525,
       "sideWins": [
-        12,
-        8
+        17,
+        23
       ],
       "pointsBySide": [
-        192,
-        163
+        314,
+        351
       ]
     },
     {
       "format": "doubles",
       "level": "advanced",
-      "winRateB": 0.6,
+      "winRateB": 0.55,
       "sideWins": [
-        14,
-        6
+        20,
+        20
       ],
       "pointsBySide": [
-        196,
-        152
+        351,
+        328
       ]
     }
   ],
@@ -112,109 +112,109 @@
       "format": "singles",
       "low": "beginner",
       "high": "intermediate",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 4,
-      "margin": 10.8
+      "higherWinRate": 0.925,
+      "higherPoints": 434,
+      "lowerPoints": 183,
+      "margin": 6.275
     },
     {
       "format": "singles",
       "low": "beginner",
       "high": "demo",
       "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 0,
-      "margin": 11
+      "higherPoints": 441,
+      "lowerPoints": 165,
+      "margin": 6.9
     },
     {
       "format": "singles",
       "low": "beginner",
       "high": "advanced",
       "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 0,
-      "margin": 11
+      "higherPoints": 440,
+      "lowerPoints": 84,
+      "margin": 8.9
     },
     {
       "format": "singles",
       "low": "intermediate",
       "high": "demo",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 12,
-      "margin": 10.4
+      "higherWinRate": 0.7,
+      "higherPoints": 367,
+      "lowerPoints": 250,
+      "margin": 2.925
     },
     {
       "format": "singles",
       "low": "intermediate",
       "high": "advanced",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 6,
-      "margin": 10.7
+      "higherWinRate": 0.975,
+      "higherPoints": 436,
+      "lowerPoints": 119,
+      "margin": 7.925
     },
     {
       "format": "singles",
       "low": "demo",
       "high": "advanced",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 22,
-      "margin": 9.9
+      "higherWinRate": 0.85,
+      "higherPoints": 429,
+      "lowerPoints": 221,
+      "margin": 5.2
     },
     {
       "format": "doubles",
       "low": "beginner",
       "high": "intermediate",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 5,
-      "margin": 10.75
+      "higherWinRate": 0.675,
+      "higherPoints": 387,
+      "lowerPoints": 300,
+      "margin": 2.175
     },
     {
       "format": "doubles",
       "low": "beginner",
       "high": "demo",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 0,
-      "margin": 11
+      "higherWinRate": 0.825,
+      "higherPoints": 417,
+      "lowerPoints": 206,
+      "margin": 5.275
     },
     {
       "format": "doubles",
       "low": "beginner",
       "high": "advanced",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 0,
-      "margin": 11
+      "higherWinRate": 0.95,
+      "higherPoints": 435,
+      "lowerPoints": 163,
+      "margin": 6.8
     },
     {
       "format": "doubles",
       "low": "intermediate",
       "high": "demo",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 19,
-      "margin": 10.05
+      "higherWinRate": 0.775,
+      "higherPoints": 385,
+      "lowerPoints": 239,
+      "margin": 3.65
     },
     {
       "format": "doubles",
       "low": "intermediate",
       "high": "advanced",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 32,
-      "margin": 9.4
+      "higherWinRate": 0.85,
+      "higherPoints": 405,
+      "lowerPoints": 208,
+      "margin": 4.925
     },
     {
       "format": "doubles",
       "low": "demo",
       "high": "advanced",
-      "higherWinRate": 1,
-      "higherPoints": 220,
-      "lowerPoints": 80,
-      "margin": 7
+      "higherWinRate": 0.75,
+      "higherPoints": 405,
+      "lowerPoints": 271,
+      "margin": 3.35
     }
   ],
   "curves": [
