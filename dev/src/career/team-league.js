@@ -4,9 +4,9 @@
 // rosters, while clubs schedule amateur MiLP fixtures. This module keeps those
 // seasons compact and deterministic so they can advance with the career week.
 
-import {seededRandom} from '../competition.js?v=210';
-import {buildClubIndex,buildClubRoster,mixSeed} from './population.js?v=210';
-import {FORMATS} from './rating.js?v=210';
+import {seededRandom} from '../competition.js?v=211';
+import {buildClubIndex,buildClubRoster,mixSeed} from './population.js?v=211';
+import {FORMATS} from './rating.js?v=211';
 
 export const TEAM_LEAGUE_VERSION=1;
 export const MLP_TEAM_LIMIT=8;

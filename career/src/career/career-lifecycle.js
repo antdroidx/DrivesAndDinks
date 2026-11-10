@@ -4,13 +4,13 @@
 // cadence, regional bias, professional invitation gates and retirement
 // pressure. This module deliberately contains rules rather than storage.
 
-import {RATING_KEYS} from '../roster.js?v=210';
-import {RATING_MIN,RATING_MAX} from './rating.js?v=210';
-import {PRO_FLOOR_RATING} from './tour.js?v=210';
+import {RATING_KEYS} from '../roster.js?v=211';
+import {RATING_MIN,RATING_MAX} from './rating.js?v=211';
+import {PRO_FLOOR_RATING} from './tour.js?v=211';
 import {
   attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,
   createDevelopmentProfile,capAttributeForAge
-} from './age.js?v=210';
+} from './age.js?v=211';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const round3=value=>Math.round(value*1000)/1000;
