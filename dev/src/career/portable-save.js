@@ -4,7 +4,7 @@
 // career schema, is gzip-compressed when the platform provides CompressionStream,
 // and always passes through the same migration and validation chain on import.
 
-import {CAREER_SAVE_VERSION,migrateCareer,validateCareer} from './save.js?v=207';
+import {CAREER_SAVE_VERSION,migrateCareer,validateCareer} from './save.js?v=208';
 
 export const PORTABLE_VERSION=1;
 export const PORTABLE_PREFIX='DDC1.';

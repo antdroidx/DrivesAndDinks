@@ -4,22 +4,36 @@
 // keeps cosmetics independent from performance and prevents new products from
 // exceeding the same bounded modifiers as the starter catalog.
 
-import {recordFinance} from './finance.js?v=207';
-import {seededRandom} from '../competition.js?v=207';
-import {mixSeed} from './population.js?v=207';
-import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS} from '../roster.js?v=207';
+import {recordFinance} from './finance.js?v=208';
+import {seededRandom} from '../competition.js?v=208';
+import {mixSeed} from './population.js?v=208';
+import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS,PADDLE_SHAPE_ALIASES} from '../roster.js?v=208';
 
-export const EQUIPMENT_VERSION=3;
+export const EQUIPMENT_VERSION=4;
 export const STARTER_EQUIPMENT_ID='allcourt-hybrid';
 
-export const PADDLE_CATALOG=Object.freeze([
-  {id:'allcourt-hybrid',label:'Allcourt Hybrid',family:'balanced',familyLabel:'Allcourt',shape:'hybrid',shapeLabel:'Hybrid',price:0,description:'Forgiving, balanced starter paddle.',status:'available',signature:false},
-  {id:'ignite-widebody',label:'Ignite Widebody',family:'power',familyLabel:'Ignite',shape:'widebody',shapeLabel:'Widebody',price:120,description:'Broad face with extra power and stability.',status:'available',signature:false},
-  {id:'touch-widebody',label:'Touch Widebody',family:'control',familyLabel:'Touch',shape:'widebody',shapeLabel:'Widebody',price:140,description:'Broad face built for control and spin.',status:'available',signature:false},
-  {id:'allcourt-elongated',label:'Allcourt Elongated',family:'balanced',familyLabel:'Allcourt',shape:'elongated',shapeLabel:'Elongated',price:160,description:'Added reach with a balanced face.',status:'available',signature:false},
-  {id:'ignite-elongated',label:'Ignite Elongated',family:'power',familyLabel:'Ignite',shape:'elongated',shapeLabel:'Elongated',price:190,description:'Long face for leverage and power.',status:'available',signature:false},
-  {id:'touch-elongated',label:'Touch Elongated',family:'control',familyLabel:'Touch',shape:'elongated',shapeLabel:'Elongated',price:210,description:'Long face with control and spin emphasis.',status:'available',signature:false}
+const STATIC_PADDLE_BASES=Object.freeze([
+  {id:'allcourt-hybrid',label:'Allcourt Hybrid Flat',family:'balanced',familyLabel:'Allcourt',shape:'hybrid-flat',price:0,description:'Forgiving flat-top hybrid with predictable response.',status:'available',signature:false,thicknesses:[16],defaultThickness:16},
+  {id:'ignite-widebody',label:'Ignite Widebody',family:'power',familyLabel:'Ignite',shape:'widebody',price:120,description:'Broad power face with extra stability and a forgiving center.',status:'available',signature:false,thicknesses:[16,14],defaultThickness:16},
+  {id:'touch-widebody',label:'Touch Widebody',family:'control',familyLabel:'Touch',shape:'widebody',price:140,description:'Wide control face built for resets, blocks and spin.',status:'available',signature:false,thicknesses:[16,14],defaultThickness:16},
+  {id:'allcourt-elongated',label:'Allcourt Elongated Flat',family:'balanced',familyLabel:'Allcourt',shape:'elongated-flat',price:160,description:'Flat-top elongated face with added reach.',status:'available',signature:false,thicknesses:[16],defaultThickness:16},
+  {id:'ignite-elongated',label:'Ignite Elongated Aero',family:'power',familyLabel:'Ignite',shape:'elongated-aero',price:190,description:'Aerodynamic long face for leverage, reach and drive power.',status:'available',signature:false,thicknesses:[16,14],defaultThickness:16},
+  {id:'touch-elongated-cutout',label:'Touch Elongated Cut-Out',family:'control',familyLabel:'Touch',shape:'elongated-cutout',price:210,description:'Control-first long face with sculpted throat cut-outs.',status:'available',signature:false,thicknesses:[16],defaultThickness:16},
+  {id:'northline-aero',label:'Northline Aero Hybrid',family:'balanced',familyLabel:'Northline',shape:'hybrid-aero',price:175,description:'Rounded aero hybrid balancing hand speed and stability.',status:'available',signature:false,thicknesses:[16,14],defaultThickness:16},
+  {id:'mesa-short-handle',label:'Mesa Short Handle',family:'power',familyLabel:'Mesa',shape:'elongated-short-handle',price:195,description:'Long hitting face with a compact short-handle design.',status:'available',signature:false,thicknesses:[16],defaultThickness:16},
+  {id:'copper-wide-cutout',label:'Copper Wide Cut-Out',family:'control',familyLabel:'Copper',shape:'widebody-cutout',price:185,description:'Broad cut-out control face with unusually quick hands.',status:'available',signature:false,thicknesses:[14],defaultThickness:14},
+  {id:'roundhouse-classic',label:'Roundhouse Classic',family:'control',familyLabel:'Roundhouse',shape:'round',price:135,description:'Round control face with a compact swing and centered sweet spot.',status:'available',signature:false,thicknesses:[14],defaultThickness:14},
+  {id:'baseline-tennis',label:'Baseline Tennis Face',family:'balanced',familyLabel:'Baseline',shape:'tennis',price:165,description:'Oval tennis-inspired face with all-court response.',status:'available',signature:false,thicknesses:[16],defaultThickness:16},
+  {id:'baseline-tennis-extended',label:'Baseline Tennis Extended',family:'power',familyLabel:'Baseline',shape:'tennis-extended-handle',price:205,description:'Extended-handle oval face built for reach and two-handed leverage.',status:'available',signature:false,thicknesses:[16,14],defaultThickness:16}
 ]);
+const expandPaddleVariants=(base)=>base.thicknesses.map(thickness=>({
+  ...base,
+  id:thickness===base.defaultThickness?base.id:`${base.id}-${thickness}`,
+  baseId:base.id,
+  thickness,
+  thicknessLabel:`${thickness} mm`
+}));
+export const PADDLE_CATALOG=Object.freeze(STATIC_PADDLE_BASES.flatMap(expandPaddleVariants));
 
 export const EQUIPMENT_BRANDS=Object.freeze([
   {name:'Northline',series:['Vector','Signal','Northwind','Meridian']},
@@ -33,9 +47,7 @@ export const EQUIPMENT_BRANDS=Object.freeze([
 const FAMILIES=Object.freeze([
   {family:'balanced',familyLabel:'Allcourt'},{family:'power',familyLabel:'Ignite'},{family:'control',familyLabel:'Touch'}
 ]);
-const SHAPES=Object.freeze([
-  {shape:'widebody',shapeLabel:'Widebody'},{shape:'hybrid',shapeLabel:'Hybrid'},{shape:'elongated',shapeLabel:'Elongated'}
-]);
+const SHAPE_IDS=Object.freeze(PADDLE_SHAPES.map(item=>item.id));
 
 export const HEADWEAR_STYLES=Object.freeze([
   {headwear:'cap',label:'Cap',price:40},
@@ -55,15 +67,12 @@ export const HEADWEAR_CATALOG=Object.freeze(HEADWEAR_STYLES.flatMap(style=>PADDL
   status:'available'
 }))));
 const staticById=id=>PADDLE_CATALOG.find(item=>item.id===id)??PADDLE_CATALOG[0];
-const normalizeItem=item=>({
-  ...item,
-  family:['balanced','power','control'].includes(item?.family)?item.family:'balanced',
-  shape:['widebody','hybrid','elongated'].includes(item?.shape)?item.shape:'hybrid',
-  price:Math.max(0,Math.round(Number(item?.price)||0)),
-  status:['announced','available','low-stock','discontinued','legacy'].includes(item?.status)?item.status:'available',
-  color:PADDLE_COLORS.some(color=>color.id===item?.color)?item.color:null,
-  signature:Boolean(item?.signature)
-});
+const normalizeItem=item=>{
+  const shape=PADDLE_SHAPE_ALIASES[item?.shape]??item?.shape,resolvedShape=SHAPE_IDS.includes(shape)?shape:'hybrid-flat';
+  const shapeInfo=PADDLE_SHAPES.find(entry=>entry.id===resolvedShape)??PADDLE_SHAPES[0];
+  const baseId=item?.baseId??String(item?.id??'').replace(/-14$/,''),thickness=[14,16].includes(Number(item?.thickness))?Number(item.thickness):16;
+  return {...item,baseId,family:['balanced','power','control'].includes(item?.family)?item.family:'balanced',shape:resolvedShape,shapeLabel:shapeInfo.name,thickness,thicknessLabel:`${thickness} mm`,price:Math.max(0,Math.round(Number(item?.price)||0)),status:['announced','available','low-stock','discontinued','legacy'].includes(item?.status)?item.status:'available',color:PADDLE_COLORS.some(color=>color.id===item?.color)?item.color:null,signature:Boolean(item?.signature)};
+};
 
 export function emptyEquipment(){
   return {version:EQUIPMENT_VERSION,owned:[STARTER_EQUIPMENT_ID],equipped:STARTER_EQUIPMENT_ID,purchases:[],catalog:[],headwear:{owned:[],equipped:null}};
@@ -71,19 +80,20 @@ export function emptyEquipment(){
 
 export function currentEquipmentYear(week=0){return Math.floor(Math.max(0,Number(week)||0)/52);}
 
-const EQUIPMENT_SHAPE_IDS=Object.freeze({widebody:'wide',hybrid:'hybrid',elongated:'elongated'});
 export function equipmentStats(item){
   const family=PADDLES.find(entry=>entry.id===item?.family)??PADDLES[0];
-  const shape=PADDLE_SHAPES.find(entry=>entry.id===EQUIPMENT_SHAPE_IDS[item?.shape])??PADDLE_SHAPES.find(entry=>entry.id==='hybrid')??PADDLE_SHAPES[0];
+  const shapeId=PADDLE_SHAPE_ALIASES[item?.shape]??item?.shape;
+  const shape=PADDLE_SHAPES.find(entry=>entry.id===shapeId)??PADDLE_SHAPES.find(entry=>entry.id==='hybrid-flat')??PADDLE_SHAPES[0];
   const modifier=(entry,key)=>Number(entry?.ratingModifiers?.[key])||0;
+  const thickness=Number(item?.thickness)===14?14:16,thicknessPower=thickness===14?3:-1,thicknessControl=thickness===14?-2:3;
   const clamp=(value)=>Math.max(35,Math.min(95,Math.round(value)));
   return {
-    power:clamp(70+modifier(family,'power')+modifier(shape,'power')),
-    control:clamp(70+modifier(family,'control')+modifier(shape,'control')),
+    power:clamp(70+modifier(family,'power')+modifier(shape,'power')+thicknessPower),
+    control:clamp(70+modifier(family,'control')+modifier(shape,'control')+thicknessControl),
     spin:clamp(70+(Number(family.spin)-1)*100+(Number(shape.sweetSpotSpinGain)-1)*40),
     reach:clamp(70+modifier(shape,'reach')),
     hands:clamp(70+modifier(shape,'volley')),
-    sweetSpot:clamp(70+(Number(shape.sweetSpot)-1)*40)
+    sweetSpot:clamp(70+(Number(shape.sweetSpot)-1)*40+(thickness===16?1:0))
   };
 }
 
@@ -95,7 +105,9 @@ export function generateSeasonCatalog(seed,week=0,{contract='none'}={}){
   const items=[];
   for(let index=0;index<4;index++){
     const family=FAMILIES[Math.floor(random()*FAMILIES.length)];
-    const shape=SHAPES[Math.floor(random()*SHAPES.length)];
+    const shapeId=SHAPE_IDS[Math.floor(random()*SHAPE_IDS.length)];
+    const shape=PADDLE_SHAPES.find(entry=>entry.id===shapeId)??PADDLE_SHAPES[0];
+    const thickness=random()<.5?14:16;
     const brand=brandOrder[index%brandOrder.length];
     const series=brand.series[(year+index)%brand.series.length];
     const releaseWeek=year*52+4+index*10;
@@ -103,19 +115,21 @@ export function generateSeasonCatalog(seed,week=0,{contract='none'}={}){
     const status=week<releaseWeek?'announced':week>=discontinueWeek?'discontinued':week>=releaseWeek+7?'low-stock':'available';
     items.push(normalizeItem({
       id:`season:${year}:${index}`,label:`${brand.name} ${series} ${year+1}`,
-      brand:brand.name,series,year,family:family.family,familyLabel:family.familyLabel,shape:shape.shape,shapeLabel:shape.shapeLabel,
-      price:120+(family.family==='balanced'?20:40)+(shape.shape==='elongated'?60:0)+index*10,
-      description:`${family.familyLabel} face in a ${shape.shapeLabel.toLowerCase()} shape.`,
+      brand:brand.name,series,year,baseId:`season:${year}:${index}`,family:family.family,familyLabel:family.familyLabel,shape:shape.id,shapeLabel:shape.name,thickness,thicknessLabel:`${thickness} mm`,
+      price:120+(family.family==='balanced'?20:40)+(shape.reach>1.03?60:0)+index*10,
+      description:`${family.familyLabel} face in a ${shape.name.toLowerCase()} shape.`,
       releaseWeek,discontinueWeek,status,cosmetic:{brand:brand.name,series,year}
     }));
   }
   if(contract==='gold'){
     const family=FAMILIES[Math.floor(random()*FAMILIES.length)];
-    const shape=SHAPES[Math.floor(random()*SHAPES.length)];
+    const shapeId=SHAPE_IDS[Math.floor(random()*SHAPE_IDS.length)];
+    const shape=PADDLE_SHAPES.find(entry=>entry.id===shapeId)??PADDLE_SHAPES[0];
+    const thickness=random()<.5?14:16;
     const releaseWeek=year*52+30;
     items.push(normalizeItem({
       id:`signature:player:${year}`,label:'Player Signature Series',brand:'Signature',series:'Career',
-      year,family:family.family,familyLabel:family.familyLabel,shape:shape.shape,shapeLabel:shape.shapeLabel,price:250,
+      year,baseId:`signature:player:${year}`,family:family.family,familyLabel:family.familyLabel,shape:shape.id,shapeLabel:shape.name,thickness,thicknessLabel:`${thickness} mm`,price:250,
       description:'A personal signature release using the same bounded performance rules as the retail catalog.',
       releaseWeek,discontinueWeek:year*52+51,status:week<releaseWeek?'announced':'available',signature:true,athleteId:'player'
     }));
@@ -243,11 +257,11 @@ export function createSignaturePaddle(state,{label='Player Signature Series'}={}
   if(!signatureEligible(state))return {ok:false,state,message:'A Gold contract is required to design a signature paddle.'};
   const year=currentEquipmentYear(state.week);
   const family=FAMILIES[(state.athlete?.ratings?.power??50)>(state.athlete?.ratings?.control??50)?1:2];
-  const shape=SHAPES[(state.athlete?.ratings?.reach??50)>(state.athlete?.ratings?.agility??50)?2:0];
+  const shape=PADDLE_SHAPES.find(entry=>entry.id===((state.athlete?.ratings?.reach??50)>(state.athlete?.ratings?.agility??50)?'elongated-flat':'widebody'))??PADDLE_SHAPES[0];
   const item=normalizeItem({
     id:`signature:player:${year}:designed`,label:String(label).slice(0,48)||'Player Signature Series',
     brand:'Signature',series:'Career',year,family:family.family,familyLabel:family.familyLabel,
-    shape:shape.shape,shapeLabel:shape.shapeLabel,price:0,description:'A player-designed signature paddle within the standard bounded modifiers.',
+    shape:shape.id,shapeLabel:shape.name,thickness:16,thicknessLabel:"16 mm",price:0,description:'A player-designed signature paddle within the standard bounded modifiers.',
     releaseWeek:state.week,discontinueWeek:year*52+120,status:'legacy',signature:true,athleteId:'player'
   });
   const equipment=normalizeEquipment(state.equipment);

@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=207';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=208';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -94,7 +94,7 @@ export function solveArm3D(shoulder,wrist,pole,lengths=ARM_LENGTHS){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=207';
+export {courtView,strokeForContact} from './player-facing.js?v=208';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,contact3D=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';
@@ -199,14 +199,24 @@ function taperedSegment(c,a,b,startWidth,endWidth,color){
  const d=Math.hypot(b.x-a.x,b.y-a.y)||1,nx=-(b.y-a.y)/d,ny=(b.x-a.x)/d;
  polygon(c,[{x:a.x+nx*startWidth/2,y:a.y+ny*startWidth/2},{x:b.x+nx*endWidth/2,y:b.y+ny*endWidth/2},{x:b.x-nx*endWidth/2,y:b.y-ny*endWidth/2},{x:a.x-nx*startWidth/2,y:a.y-ny*startWidth/2}],color);
 }
-const PADDLE_OUTLINES=Object.freeze({
- wide:Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.4,4.1],[1.8,4.8],[1.5,5.7],[-1.5,5.7],[-1.8,4.8],[-3.4,4.1],[-4.8,1.8]]),
- elongated:Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2],[2.4,4.5],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.4,4.5],[-3.8,2],[-3.7,-6.4]]),
- hybrid:Object.freeze([[-4,-5.2],[-3.6,-6],[-2.8,-6.8],[-1.5,-7.3],[0,-7.5],[1.5,-7.3],[2.8,-6.8],[3.6,-6],[4,-5.2],[4.2,1.7],[3,4.2],[1.8,4.8],[1.5,5.6],[-1.5,5.6],[-1.8,4.8],[-3,4.2],[-4.2,1.7]])
-});
-export function paddleOutline(shapeId='hybrid'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES.hybrid}
+const PADDLE_OUTLINES={
+ widebody:Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.4,4.1],[1.8,4.8],[1.5,5.7],[-1.5,5.7],[-1.8,4.8],[-3.4,4.1],[-4.8,1.8]]),
+ 'hybrid-aero':Object.freeze([[-4,-5.2],[-3.6,-6],[-2.8,-6.8],[-1.5,-7.3],[0,-7.5],[1.5,-7.3],[2.8,-6.8],[3.6,-6],[4,-5.2],[4.2,1.7],[3,4.2],[1.8,4.8],[1.5,5.6],[-1.5,5.6],[-1.8,4.8],[-3,4.2],[-4.2,1.7]]),
+ 'hybrid-flat':Object.freeze([[-4.1,-7.1],[-3.7,-7.4],[3.7,-7.4],[4.1,-7.1],[4.1,1.9],[3,4.2],[1.8,4.8],[1.5,5.6],[-1.5,5.6],[-1.8,4.8],[-3,4.2],[-4.1,1.9]]),
+ 'elongated-flat':Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2],[2.4,4.5],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.4,4.5],[-3.8,2],[-3.7,-6.4]]),
+ 'elongated-aero':Object.freeze([[-2.4,-7.2],[-1.5,-7.55],[0,-7.7],[1.5,-7.55],[2.4,-7.2],[3.2,-6.5],[3.7,-5.4],[3.8,2.1],[2.5,4.4],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.5,4.4],[-3.8,2.1],[-3.7,-5.4],[-3.2,-6.5]]),
+ 'elongated-short-handle':Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2.8],[2.5,4.8],[1.6,5.2],[1.45,5.75],[-1.45,5.75],[-1.6,5.2],[-2.5,4.8],[-3.8,2.8],[-3.7,-6.4]]),
+ 'widebody-cutout':Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.4,4.1],[1.9,4.5],[1.6,3.4],[1.1,2.7],[.7,4.8],[0,5.45],[-.7,4.8],[-1.1,2.7],[-1.6,3.4],[-1.9,4.5],[-3.4,4.1],[-4.8,1.8]]),
+ 'elongated-cutout':Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2.1],[2.6,4.4],[1.9,4.9],[1.55,3.75],[1.05,3.1],[.7,5.2],[0,5.75],[-.7,5.2],[-1.05,3.1],[-1.55,3.75],[-1.9,4.9],[-2.6,4.4],[-3.8,2.1],[-3.7,-6.4]]),
+ round:Object.freeze([[-4.25,-6.2],[-2.9,-7.05],[-1.5,-7.35],[0,-7.4],[1.5,-7.35],[2.9,-7.05],[4.25,-6.2],[4.65,-4.6],[4.65,1.3],[4.25,3.1],[2.9,4.7],[1.7,5.3],[1.45,5.9],[-1.45,5.9],[-1.7,5.3],[-2.9,4.7],[-4.25,3.1],[-4.65,1.3],[-4.65,-4.6]]),
+ tennis:Object.freeze([[-3.7,-6.6],[-2.8,-7.2],[-1.5,-7.5],[0,-7.55],[1.5,-7.5],[2.8,-7.2],[3.7,-6.6],[4.1,-5.4],[4.15,1.8],[3.5,3.7],[2.4,4.8],[1.55,5.3],[1.4,6],[-1.4,6],[-1.55,5.3],[-2.4,4.8],[-3.5,3.7],[-4.15,1.8],[-4.1,-5.4]]),
+ 'tennis-extended-handle':Object.freeze([[-3.7,-6.6],[-2.8,-7.2],[-1.5,-7.5],[0,-7.55],[1.5,-7.5],[2.8,-7.2],[3.7,-6.6],[4.1,-5.4],[4.15,1.6],[3.5,3.5],[2.35,4.6],[1.45,5.1],[1.3,6.45],[-1.3,6.45],[-1.45,5.1],[-2.35,4.6],[-3.5,3.5],[-4.15,1.6],[-4.1,-5.4]])
+};
+Object.assign(PADDLE_OUTLINES,{wide:PADDLE_OUTLINES.widebody,hybrid:PADDLE_OUTLINES['hybrid-flat'],elongated:PADDLE_OUTLINES['elongated-flat']});
+Object.freeze(PADDLE_OUTLINES);
+export function paddleOutline(shapeId='hybrid-flat'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES['hybrid-flat']}
 let buffer;
-export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,paddleShape='hybrid',lighting='classic',emotion='focus'}={}){
+export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,paddleShape='hybrid-flat',lighting='classic',emotion='focus'}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
  const c=buffer.getContext('2d'),colors=appearancePalette(appearance),female=appearance.body==='female';
  const identitySeed=[...String(characterId||appearance.hairColor)].reduce((sum,char)=>sum+char.charCodeAt(0),0),identityStyle=identitySeed%4,torsoSpread=(identitySeed%3)*.45;
