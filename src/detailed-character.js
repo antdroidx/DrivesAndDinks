@@ -1,4 +1,4 @@
-import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset,paddleOutline} from './pixel-character.js';
+import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset,paddleCutout,paddleOutline} from './pixel-character.js';
 import {CHARACTER_CONCEPTS,conceptPoint,conceptHair,thighGarment,skirtGarment} from './character-concepts.js';
 
 // Visual identities never alter the player's simulation abilities or hit range.
@@ -124,7 +124,7 @@ c.restore()}
  c.restore();
  if(['bob','waves'].includes(d.hair)){c.save();if(compact){c.translate(n.x,n.y-8);c.scale(style==='toy'?1.8:1.35,style==='toy'?1.55:1.2);c.translate(-n.x,-(n.y-8))}hairBack(c,n.x,n.y-8,d,phase,view==='near');c.restore()}
  function arm(index){const a=pose.arms[index];if(style==='toy'){ellipse(c,a[2].x,a[2].y,3.6,3.6,skin);return}contour(c,a,[w+.5,w*.85,w*.6],skin);if(d.body==='male'){limb(c,a[0],{x:a[0].x+(a[1].x-a[0].x)*.4,y:a[0].y+(a[1].y-a[0].y)*.4},w+1,d.shirt)}ellipse(c,a[2].x,a[2].y,w*.48,w*.55,shade(skin,.08));limb(c,{x:a[2].x-.8,y:a[2].y-1.6},{x:a[2].x+.8,y:a[2].y-1.6},.8,d.trim)}
- function paddle(){const p=pose.paddle,hand=pose.hand;limb(c,p,hand,1.5,'#353239');c.save();c.translate(p.x,p.y);c.rotate(raw.angle);const outline=paddleOutline(options.paddleShape??'hybrid'),scale=.76;for(const [factor,fill] of [[1,'#182633'],[.84,d.paddleColor??d.trim],[.62,'#171b25']]){shape(c,outline.map(([x,y])=>[x*factor*scale,y*factor*scale]),fill)}c.restore()}
+ function paddle(){const p=pose.paddle,hand=pose.hand;limb(c,p,hand,1.5,'#353239');c.save();c.translate(p.x,p.y);c.rotate(raw.angle);const paddleShape=options.paddleShape??'hybrid-flat',outline=paddleOutline(paddleShape),cutout=paddleCutout(paddleShape),scale=.76;for(const [factor,fill] of [[1,'#182633'],[.84,d.paddleColor??d.trim],[.62,'#171b25']])shape(c,outline.map(([x,y])=>[x*factor*scale,y*factor*scale]),fill);if(cutout)shape(c,cutout.map(([x,y])=>[x*.58*scale,y*.58*scale]),'#10232d');c.restore()}
  const behind=pose.arms.map((a,i)=>({i,depth:raw.arms[i][1].depth}));behind.filter(a=>a.depth<raw.neck.depth).forEach(a=>arm(a.i));if(raw.paddle.depth<raw.neck.depth)paddle();
  limb(c,{x:n.x,y:n.y-1},{x:n.x,y:n.y+3},3.8,skin);
  const shoulder=d.shoulder,waist=d.waist,hip=d.hip,top=n.y+1,hem=h.y-1;

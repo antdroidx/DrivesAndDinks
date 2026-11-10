@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {buildProfile,createLineup,effectiveRatings,selectionStats,normalizeSelection} from '../src/roster.js';
 import {Game} from '../src/game.js';
 import {paddleContactResponse,paddleContactTarget,paddleShapeModifiers} from '../src/core.js';
-import {paddleOutline} from '../src/pixel-character.js';
+import {paddleCutout,paddleOutline} from '../src/pixel-character.js';
 import {strokeDuration} from '../src/match-animation.js';
 
 const span=(points,index)=>Math.max(...points.map(point=>point[index]))-Math.min(...points.map(point=>point[index]));
@@ -77,6 +77,16 @@ test('all eleven roadmap silhouettes have distinct shared renderer definitions',
   for(const points of outlines){
     assert.ok(points.length>=11);
     assert.ok(points.every(([x,y])=>Number.isFinite(x)&&Number.isFinite(y)));
+  }
+});
+
+test('cut-out paddles use a smooth outer silhouette with a centered opening',()=>{
+  for(const id of ['widebody-cutout','elongated-cutout']){
+    const outline=paddleOutline(id),cutout=paddleCutout(id);
+    assert.ok(outline.length>=12);
+    assert.ok(cutout&&cutout.length>=7);
+    assert.equal(cutout[0][0],0);
+    assert.ok(Math.max(...cutout.map(point=>point[1]))<Math.max(...outline.map(point=>point[1])));
   }
 });
 

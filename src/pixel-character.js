@@ -206,15 +206,20 @@ const PADDLE_OUTLINES={
  'elongated-flat':Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2],[2.4,4.5],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.4,4.5],[-3.8,2],[-3.7,-6.4]]),
  'elongated-aero':Object.freeze([[-2.4,-7.2],[-1.5,-7.55],[0,-7.7],[1.5,-7.55],[2.4,-7.2],[3.2,-6.5],[3.7,-5.4],[3.8,2.1],[2.5,4.4],[1.5,5.2],[1.4,6],[-1.4,6],[-1.5,5.2],[-2.5,4.4],[-3.8,2.1],[-3.7,-5.4],[-3.2,-6.5]]),
  'elongated-short-handle':Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2.8],[2.5,4.8],[1.6,5.2],[1.45,5.75],[-1.45,5.75],[-1.6,5.2],[-2.5,4.8],[-3.8,2.8],[-3.7,-6.4]]),
- 'widebody-cutout':Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.4,4.1],[1.9,4.5],[1.6,3.4],[1.1,2.7],[.7,4.8],[0,5.45],[-.7,4.8],[-1.1,2.7],[-1.6,3.4],[-1.9,4.5],[-3.4,4.1],[-4.8,1.8]]),
- 'elongated-cutout':Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2.1],[2.6,4.4],[1.9,4.9],[1.55,3.75],[1.05,3.1],[.7,5.2],[0,5.75],[-.7,5.2],[-1.05,3.1],[-1.55,3.75],[-1.9,4.9],[-2.6,4.4],[-3.8,2.1],[-3.7,-6.4]]),
+ 'widebody-cutout':Object.freeze([[-4.6,-4.2],[-3.8,-5.2],[0,-5.8],[3.8,-5.2],[4.6,-4.2],[4.8,1.8],[3.6,3.5],[3.0,4.7],[1.7,5.15],[1.5,5.7],[-1.5,5.7],[-1.7,5.15],[-3.0,4.7],[-3.6,3.5],[-4.8,1.8]]),
+ 'elongated-cutout':Object.freeze([[-3.3,-7.2],[3.3,-7.2],[3.7,-6.4],[3.8,2.1],[2.8,4.0],[2.25,4.85],[1.55,5.25],[1.4,6],[-1.4,6],[-1.55,5.25],[-2.25,4.85],[-2.8,4.0],[-3.8,2.1],[-3.7,-6.4]]),
  round:Object.freeze([[-4.25,-6.2],[-2.9,-7.05],[-1.5,-7.35],[0,-7.4],[1.5,-7.35],[2.9,-7.05],[4.25,-6.2],[4.65,-4.6],[4.65,1.3],[4.25,3.1],[2.9,4.7],[1.7,5.3],[1.45,5.9],[-1.45,5.9],[-1.7,5.3],[-2.9,4.7],[-4.25,3.1],[-4.65,1.3],[-4.65,-4.6]]),
  tennis:Object.freeze([[-3.7,-6.6],[-2.8,-7.2],[-1.5,-7.5],[0,-7.55],[1.5,-7.5],[2.8,-7.2],[3.7,-6.6],[4.1,-5.4],[4.15,1.8],[3.5,3.7],[2.4,4.8],[1.55,5.3],[1.4,6],[-1.4,6],[-1.55,5.3],[-2.4,4.8],[-3.5,3.7],[-4.15,1.8],[-4.1,-5.4]]),
  'tennis-extended-handle':Object.freeze([[-3.7,-6.6],[-2.8,-7.2],[-1.5,-7.5],[0,-7.55],[1.5,-7.5],[2.8,-7.2],[3.7,-6.6],[4.1,-5.4],[4.15,1.6],[3.5,3.5],[2.35,4.6],[1.45,5.1],[1.3,6.45],[-1.3,6.45],[-1.45,5.1],[-2.35,4.6],[-3.5,3.5],[-4.15,1.6],[-4.1,-5.4]])
 };
+const PADDLE_CUTOUTS=Object.freeze({
+ 'widebody-cutout':Object.freeze([[0,1.35],[.72,1.85],[1.35,2.8],[1.82,4.55],[1.82,5.02],[-1.82,5.02],[-1.82,4.55],[-1.35,2.8],[-.72,1.85]]),
+ 'elongated-cutout':Object.freeze([[0,1.85],[.7,2.4],[1.25,3.25],[1.62,4.72],[1.52,5.35],[-1.52,5.35],[-1.62,4.72],[-1.25,3.25],[-.7,2.4]])
+});
 Object.assign(PADDLE_OUTLINES,{wide:PADDLE_OUTLINES.widebody,hybrid:PADDLE_OUTLINES['hybrid-flat'],elongated:PADDLE_OUTLINES['elongated-flat']});
 Object.freeze(PADDLE_OUTLINES);
 export function paddleOutline(shapeId='hybrid-flat'){return PADDLE_OUTLINES[shapeId]??PADDLE_OUTLINES['hybrid-flat']}
+export function paddleCutout(shapeId){return PADDLE_CUTOUTS[shapeId]??null}
 let buffer;
 export function drawPixelCharacter(target,{appearance={},characterId='',mode='idle',frame=0,phase=0,x=0,y=0,width=96,height=128,view='near',side=1,travelSide=side,alignTo=null,alignStrength=0,contactDepth=null,moving=false,paddleShape='hybrid-flat',lighting='classic',emotion='focus'}={}){
  buffer??=typeof OffscreenCanvas!=='undefined'?new OffscreenCanvas(CHARACTER_BUFFER.width,CHARACTER_BUFFER.height):Object.assign(document.createElement('canvas'),CHARACTER_BUFFER);
