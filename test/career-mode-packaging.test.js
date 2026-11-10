@@ -180,7 +180,9 @@ test('the career entry point registers the service worker for offline use',()=>{
 
 test('match-up settings control gameplay before the first serve',()=>{
   const html=read('index.html'),main=read('src/main.js'),css=read('style.css');
-  for(const id of ['intro-difficulty','intro-mode','intro-name-tags','intro-replays','intro-ball-control','intro-sound'])assert.match(html,new RegExp(`id="${id}"`));
+  for(const id of ['intro-difficulty','intro-mode','intro-stack-mode','intro-stack-side','intro-cpu-stack','intro-name-tags','intro-replays','intro-ball-control','intro-sound'])assert.match(html,new RegExp(`id="${id}"`));
+  assert.match(main,/function setIntroStacking\(/);
+  assert.match(main,/game\.setStacking\(config\)/);
   assert.match(main,/function syncMatchIntroSettings\(/);
   assert.match(main,/function bindMatchIntroSettings\(/);
   assert.match(main,/setBallControlVisible\(event\.target\.checked\)/);
@@ -199,6 +201,20 @@ test('generated player profiles expose look, ratings and career history',()=>{
   assert.match(population,/function generatedAppearance\(/);
   assert.match(population,/headwearRoll/);
   assert.match(css,/\.athlete-profile-header/);
+});
+test('match setup exposes player and CPU stacking controls',()=>{
+  const selection=read('src/selection.js'),css=read('style.css');
+  assert.match(selection,/stackModeSelect/);
+  assert.match(selection,/cpuStackSelect/);
+  assert.match(selection,/normalizeStackingSelection\(saved\?\.stacking\)/);
+  assert.match(css,/grid-template-columns:repeat\(4,minmax\(90px,1fr\)\)/);
+});
+test('league standings expose current team and individual ratings',()=>{
+  const main=read('src/career/main.js'),css=read('career/career.css');
+  assert.match(main,/currentMemberRating/);
+  assert.match(main,/Team \$\{formatRating\(teamRating\)\}/);
+  assert.match(main,/history league-table/);
+  assert.match(css,/\.league-table li\{align-items:flex-start/);
 });
 test('players search renders a sortable table with overall ability',()=>{
   const main=read('src/career/main.js'),css=read('career/career.css');

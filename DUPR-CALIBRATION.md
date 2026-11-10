@@ -1,6 +1,6 @@
 # DUPR Level Calibration
 
-Generated: 2026-11-10T06:13:55.875Z
+Generated: 2026-11-10T16:51:30.916Z
 
 ## What can and cannot be back-calculated
 
@@ -23,6 +23,16 @@ DUPR's production algorithm is proprietary. Public DUPR material confirms that r
 | 2.00 | 11.00–1.00 | 0.1% |
 
 This creates the intended nonlinear shape. A quarter point costs the underdog roughly two points, a half point leaves about five, a full point leaves about two, and a larger mismatch leaves only one. Match-level scatter can still produce a hot underdog game or a stronger-side shutout.
+
+## Match movement and provisional confidence
+
+A 15–2 loss between evenly rated 3.800 doubles teams is a severe underperformance. Each teammate receives the team movement directly, with a provisional multiplier for the first six rated matches. DUPR's exact production weighting is not public; these values are the game's transparent calibration.
+
+| Player history | Same-team ratings | 15–2 result | Provisional multiplier |
+|---|---:|---:|---:|
+| First rated match | 3.800 / 3.800 | -0.387 → 3.413 | 1.50× |
+| Six matches played | 3.800 / 3.800 | -0.204 → 3.596 | 1.00× |
+| Twenty matches played | 3.800 / 3.800 | -0.149 → 3.651 | 1.00× |
 
 ## Public overall display
 

@@ -79,7 +79,42 @@ test('a played match moves the rating on the real result',()=>{
   // The energy is paid once when the event is entered, not again per round.
   assert.equal(scored.state.energy,state.energy-event.energyCost);
   assert.equal(scored.state.matches.length,1);
+  assert.equal(scored.record.ratingBefore,pending.matchup.playerRating);
+  assert.equal(scored.record.changes.length,4);
+  assert.ok(scored.state.lastMatchResult.yourTeam.players.length>=1);
+  assert.ok(scored.state.lastMatchResult.opponentTeam.players.length>=1);
+  assert.ok(scored.state.lastMatchResult.winnerTeam&&scored.state.lastMatchResult.loserTeam);
+  assert.ok(scored.state.lastMatchResult.reliabilityAfter.percent>=scored.state.lastMatchResult.reliabilityBefore.percent);
   assert.ok(scored.state.matches[0].report,'the engine report is kept against the event');
+});
+
+test('singles match reports rate the opponent from the opponent rating',()=>{
+ const report={score:{points:[11,7],winner:0},players:[{id:0,team:0,name:'You'},{id:2,team:1,name:'Opponent'}]};
+ const matchup={playerTeam:0,playerId:0,playerRating:3.8,playerMatches:0,opponentIds:['opponent'],opponentRatings:[4.2],opponentMatches:[12],athleteIds:['player','opponent']};
+ const rated=rateMatchReport({report,matchup,matchType:'league',targetScore:11});
+ const opponent=rated.changes.find(change=>change.team==='opponent');
+ assert.equal(opponent.name,'Opponent');assert.equal(opponent.previousRating,4.2);
+});
+
+test('a first-match 15-2 loss applies a substantial provisional rating drop',()=>{
+ const state=withClub(career());
+ const event=currentEvents(state).find(entry=>entry.eventId==='local-league'&&entry.eligible.ok);
+ const started=startCareerMatch(state,event.id,event.defaultOptionId);
+ const pending=started.pending;
+ const matchup=Object.assign({},pending.matchup,{
+  playerRating:3.8,partnerRating:3.8,opponentRatings:[3.7,3.9],
+  playerMatches:0,partnerMatches:0,opponentMatches:[0,0]
+ });
+ const report={
+  score:{points:[2,15],winner:1},
+  players:pending.matchup.lineup.map((profile,index)=>({id:index,team:index<2?0:1,name:profile.name}))
+ };
+ const rated=rateMatchReport({report,matchup,matchType:'league',targetScore:15});
+ assert.equal(rated.ratingBefore,3.8);
+ assert.ok(rated.delta<-.3,`expected a meaningful provisional drop, got ${rated.delta}`);
+ assert.equal(rated.reliabilityBefore.percent,0);
+ assert.ok(rated.reliabilityAfter.percent>0);
+ assert.equal(rated.changes.length,4);
 });
 
 test('a narrow win over a weaker opponent lowers the rating',()=>{

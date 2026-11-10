@@ -113,6 +113,23 @@ test('overperforming is rewarded more than meeting expectations',()=>{
   assert.ok(better.delta>routine.delta);
 });
 
+test('a first-match blowout moves each player meaningfully and reports both ratings',()=>{
+ const rated=rateMatch({
+  players:[
+   {id:'me',team:'mine',rating:3.8,matchesPlayed:0},
+   {id:'partner',team:'mine',rating:3.8,matchesPlayed:0},
+   {id:'them',team:'opponent',rating:3.7,matchesPlayed:0},
+   {id:'them2',team:'opponent',rating:3.9,matchesPlayed:0}
+  ],
+  actualMyPoints:11/15*2,actualOpponentPoints:11,matchType:'league'
+ });
+ const mine=rated.players.find(player=>player.id==='me');
+ assert.ok(mine.delta<-.3,`a 15-2 first-match loss should move more than 0.3, got ${mine.delta}`);
+ assert.equal(mine.previousRating,3.8);
+ assert.ok(Math.abs(mine.rating-3.8-mine.delta)<1e-9);
+ assert.equal(rated.provisional,1.5);
+});
+
 test('the system stays balanced: one side rises and the other falls',()=>{
   const rated=rateMatch({
     players:[

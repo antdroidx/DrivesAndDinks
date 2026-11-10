@@ -692,14 +692,14 @@ function applyLadderSwap(order,winner,loser){
 }
 
 // Records the player's own result and advances the tournament.
-export function recordPlayerResult(tournament,{won,score}){
+export function recordPlayerResult(tournament,{won,score,resultDetail=null}){
   const match=tournament.currentMatch;
   const bye=!match&&playerHasBye(tournament);
   if(!match&&!bye&&!tournament.playerOut)return {ok:false,message:'The player has no match in this round.'};
   const playerIsHome=match?match.home.id===tournament.playerTeamId:true;
   const opponent=match?(playerIsHome?match.away:match.home):{name:'a bye',rating:0};
   tournament.history=tournament.history??[];
-  tournament.history.push({round:tournament.round,opponent:opponent.name,opponentRating:opponent.rating,won:bye?true:won,score:bye?'bye':score});
+  tournament.history.push({round:tournament.round,opponent:opponent.name,opponentRating:opponent.rating,won:bye?true:won,score:bye?'bye':score,...(resultDetail??{})});
   if(bye)won=true;
   if(!bye&&match){
     const [pointsFor=0,pointsAgainst=0]=String(score??'').split('-').map(value=>Number(value)||0);

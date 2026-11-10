@@ -58,6 +58,7 @@ test('browser zoom remains available and dialogs keep their own scrolling',()=>{
  assert.doesNotMatch(main,/downloadReport|export-report|DOWNLOAD REPORT/);
  assert.match(html,/id="side-switch-dialog"/);
  assert.match(html,/id="side-switch-continue"/);
+ assert.match(html,/id="side-switch-copy"/);
  assert.match(main,/showSideSwitchNotice/);
  assert.match(main,/view:'far'/);
  assert.doesNotMatch(main,/view:card\.team===0\?'near':'far'/);
@@ -72,7 +73,7 @@ test('compact setup and matchup portraits stay dense and proportional',()=>{
  assert.ok(css.includes('#match-setup[data-compact="true"] .setup-footer{grid-template-columns:repeat(3,minmax(0,1fr))'));
  assert.ok(css.includes('#match-setup[data-compact="true"] .footer-controls{display:contents}'));
  assert.ok(css.includes('#match-setup[data-compact="true"] .start-match{grid-column:auto;'));
- assert.ok(selection.includes('footerControls.append(formatField,difficultyField,matchModeField,venueField,courtField)'));
+ assert.ok(selection.includes('footerControls.append(formatField,difficultyField,matchModeField,stackModeField,stackSideField,cpuStackField,venueField,courtField)'));
  assert.ok(css.includes('.intro-player canvas{width:132px;height:auto;aspect-ratio:264/316;object-fit:contain;'));
  assert.ok(!css.includes('.intro-player canvas{width:100%;height:170px}'));
  assert.ok(main.includes('introHeading.focus({preventScroll:true});matchIntroDialog.scrollTop=0'));

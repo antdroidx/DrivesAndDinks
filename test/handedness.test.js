@@ -48,3 +48,21 @@ test('hand pair changes adaptive stacking tendency and auto preferred side',()=>
  const samePlan=createStackPlans({players:sameHand,server:sameHand[0],receiver:opponents[0],score:{...score,team:0},config:{teams:[{mode:'cross',preferredSide:'auto'},{mode:'off',preferredSide:'auto'}]},random:()=>0})[0];
  assert.equal(samePlan.targetLanes[samePlan.strongId],5);
 });
+
+
+test('mixed doubles adaptively protects the right lane with the female player',()=>{
+ const female={...athlete(0,0,'right'),gender:'female',ratings:{volley:86,reach:82,power:74,courtIQ:87,aggression:72}};
+ const male={...athlete(1,0,'right'),gender:'male',ratings:{volley:94,reach:91,power:92,courtIQ:91,aggression:90}};
+ const opponents=[{...athlete(2,1,'right'),gender:'male'},{...athlete(3,1,'left'),gender:'female'}];
+ const score={points:[4,3],team:0};
+ const metrics=stackMetrics([female,male],opponents);
+ assert.equal(metrics.mixed,true);
+ assert.ok(metrics.level>=4);
+ const plan=createStackPlans({players:[female,male,...opponents],server:male,receiver:opponents[0],score,config:{teams:[{mode:'adaptive',preferredSide:'auto'},{mode:'adaptive',preferredSide:'auto'}]},random:()=>0})[0];
+ assert.equal(plan.selected,true);
+ assert.equal(plan.targetLanes[female.id],15);
+ assert.equal(plan.targetLanes[male.id],5);
+ const lowFemale={...female,ratings:{volley:64,reach:61,power:58,courtIQ:62,aggression:55}};
+ const lowMale={...male,ratings:{volley:66,reach:64,power:62,courtIQ:64,aggression:60}};
+ assert.ok(stackProbability(metrics,score)>stackProbability(stackMetrics([lowFemale,lowMale],opponents),score));
+});

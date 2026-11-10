@@ -52,7 +52,7 @@ test('target scoring requires the drill shot, counts first landing and accepts a
 });
 
 test('journal keeps records after the transient event queue has been consumed',()=>{
- const g=new Game({seed:3});g.emit('hit',{playerId:0,shot:'drive',quality:.6});g.events.splice(0);
+ const g=new Game({seed:3});g.configure({format:'singles'});g.emit('hit',{playerId:0,shot:'drive',quality:.6});g.events.splice(0);
  assert.equal(g.events.length,0);assert.equal(g.journal.events.length,1);assert.equal(g.matchReport().journal.events[0].shot,'drive');
  const exported=g.matchReport();exported.journal.events[0].shot='changed';exported.players[0].paddle.power=999;assert.equal(g.journal.events[0].shot,'drive');assert.notEqual(g.players[0].paddle.power,999);
 });

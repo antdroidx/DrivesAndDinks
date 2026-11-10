@@ -19,7 +19,10 @@ function stackingGame(modes=['off','off'],sides=['auto','auto'],{lineup=stackLin
  return g;
 }
 
-test('stacking is off by default and preserves normal partner sides',()=>{
+test('a fresh match starts with adaptive stacking for the player and CPU',()=>{
+ const g=new Game({seed:24});
+ assert.deepEqual(g.stackingConfig.teams,[{mode:'adaptive',preferredSide:'auto'},{mode:'adaptive',preferredSide:'auto'}]);
+});test('an explicit off selection preserves normal partner sides',()=>{
  const g=stackingGame();
  for(const team of [0,1]){
   const plan=g.stackPlans[team],pair=g.players.filter(p=>p.team===team);

@@ -183,7 +183,7 @@ export function createCareer(options={}){
     seed,
     regionId,
     week:0,
-    settings:{difficulty:['easy','normal','hard'].includes(options.settings?.difficulty)?options.settings.difficulty:'normal'},
+    settings:{difficulty:['easy','normal','hard'].includes(options.settings?.difficulty)?options.settings.difficulty:'normal',stacking:options.settings?.stacking??null},
     worldRatings:{},
     athlete:{gender:options.gender==='female'?'female':'male',formats:{singles:NEW_PLAYER_RATING,doubles:NEW_PLAYER_RATING,mixed:NEW_PLAYER_RATING}}
   },'doubles');

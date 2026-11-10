@@ -23,7 +23,12 @@ test('matches and injuries deliver deduplicated persistent inbox messages',()=>{
   state=simulated.state;
   const count=state.inbox.items.length;
   assert.ok(count>0,'the match should create at least one message');
-  assert.ok(state.inbox.items.some(item=>item.category==='match'));
+  const matchMessage=state.inbox.items.find(item=>item.category==='match');
+  assert.match(matchMessage.body,/Winner: .+/);
+  assert.match(matchMessage.body,/Loser: .+/);
+  assert.match(matchMessage.body,/Your rating \d\.\d{3} → \d\.\d{3}/);
+  assert.match(matchMessage.body,/Reliability \d+% → \d+%/);
+  assert.match(matchMessage.title,/(WIN|LOSS) · /);
   state=syncInbox(state);
   assert.equal(state.inbox.items.length,count,'syncing the same state must not duplicate messages');
   assert.equal(unreadCount(state),count);

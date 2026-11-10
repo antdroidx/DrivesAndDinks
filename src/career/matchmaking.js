@@ -99,7 +99,10 @@ export function buildCareerMatchup({state,event,option,opponents,partner}){
     opponentRatings:opponents.map(opponent=>opponent.rating??0),
     opponentIds:opponents.map(opponent=>opponent.id),
     partnerId:partner?.id??null,
-    partnerRating:partner?.rating??null
+    partnerRating:partner?.rating??null,
+    playerMatches:state.athlete.record?.matches??0,
+    partnerMatches:partner?.matches??0,
+    opponentMatches:opponents.map(opponent=>opponent.matches??0)
   };
 }
 

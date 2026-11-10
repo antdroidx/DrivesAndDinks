@@ -6,7 +6,7 @@
 // rates it the way every other match is rated: on the difference between
 // what was expected and what actually happened.
 
-import {rateMatch,expectedScore,matchPerformance,teamStrength,MAX_POINTS} from './rating.js';
+import {rateMatch,expectedScore,matchPerformance,teamStrength,MAX_POINTS,reliability} from './rating.js';
 import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints,EVENT_POOL,POOL_TOUR} from './tour.js';
 
 export const CAREER_RECORD_LIMIT=60;
@@ -56,28 +56,41 @@ export function compactMatchReport(report={}){
 // Rates a played match and returns the new rating for every player on court.
 export function rateMatchReport({report,matchup,matchType='league',targetScore=11}){
   // The engine reports teams as numbers, so they are mapped onto the two
-  // sides the rating calculation works with.
+  // sides the rating calculation works with. Keep each athlete's actual
+  // match count so provisional careers move faster than established ones.
   const myTeam=matchup.playerTeam??0;
-  const points=report.score?.points??[0,0];
-  const ratings=new Map();
-  for(const player of report.players??[]){
-    const athleteId=matchup.athleteIds?.[player.id];
-    if(!athleteId||athleteId==='player')ratings.set(player.id,matchup.playerRating);
-    else{
-      const index=matchup.opponentIds?.indexOf(athleteId)??-1;
-      if(index>=0)ratings.set(player.id,matchup.opponentRatings[index]);
-      else if(athleteId===matchup.partnerId)ratings.set(player.id,matchup.partnerRating??matchup.playerRating);
-      else ratings.set(player.id,matchup.playerRating);
+  const reportPlayers=report.players??[];
+  const ratingForPlayer=(player)=>{
+    let athleteId=matchup.athleteIds?.[player.id];
+    // Singles uses engine player ids 0 and 2, while the matchup stores two
+    // lineup entries. Resolve the opponent by team rather than slot.
+    if(!athleteId&&reportPlayers.length===2&&player.team!==myTeam)athleteId=matchup.opponentIds?.[0];
+    if(player.id===matchup.playerId||!athleteId||athleteId==='player'){
+      return {rating:matchup.playerRating,matchesPlayed:matchup.playerMatches??0};
     }
-  }
-  const players=(report.players??[]).map(player=>({
-    id:player.id,
-    rating:ratings.get(player.id)??matchup.playerRating,
-    team:player.team===myTeam?'mine':'opponent',
-    matchesPlayed:0
-  }));
-  const myPoints=points[myTeam]??0;
-  const theirPoints=points[1-myTeam]??0;
+    const opponentIndex=matchup.opponentIds?.indexOf(athleteId)??-1;
+    if(opponentIndex>=0)return {
+      rating:matchup.opponentRatings?.[opponentIndex]??matchup.playerRating,
+      matchesPlayed:matchup.opponentMatches?.[opponentIndex]??0
+    };
+    if(athleteId===matchup.partnerId)return {
+      rating:matchup.partnerRating??matchup.playerRating,
+      matchesPlayed:matchup.partnerMatches??0
+    };
+    return {rating:matchup.playerRating,matchesPlayed:0};
+  };
+  const players=reportPlayers.map(player=>{
+    const source=ratingForPlayer(player);
+    return {
+      id:player.id,
+      name:player.name,
+      rating:source.rating,
+      matchesPlayed:source.matchesPlayed,
+      team:player.team===myTeam?'mine':'opponent'
+    };
+  });
+  const myPoints=report.score?.points?.[myTeam]??0;
+  const theirPoints=report.score?.points?.[1-myTeam]??0;
   const scoreScale=MAX_POINTS/Math.max(MAX_POINTS,Number(targetScore)||MAX_POINTS);
   const ratedMyPoints=myPoints*scoreScale;
   const ratedTheirPoints=theirPoints*scoreScale;
@@ -94,8 +107,18 @@ export function rateMatchReport({report,matchup,matchType='league',targetScore=1
   const expected=expectedScore(teamStrength(myRatings),teamStrength(theirRatings));
   return {
     ratings:rated.players,
+    changes:rated.players.map(entry=>({
+      id:entry.id,name:entry.name??'Player',team:entry.team,
+      previousRating:entry.previousRating??entry.rating,
+      rating:entry.rating,
+      delta:entry.delta??0,
+      matchesPlayed:entry.matchesPlayed??0
+    })),
     playerRating:player?.rating??matchup.playerRating,
+    ratingBefore:matchup.playerRating,
     delta:(player?.rating??matchup.playerRating)-matchup.playerRating,
+    reliabilityBefore:reliability(matchup.playerMatches??0),
+    reliabilityAfter:reliability((matchup.playerMatches??0)+1),
     myPoints,
     theirPoints,
     ratedMyPoints,
@@ -122,10 +145,12 @@ export function buildCareerRecord({report,matchup,event,option,outcome,week}){
     bracket:option.label,
     score:outcome.myPoints+'-'+outcome.theirPoints,
     won:outcome.won,
+    ratingBefore:outcome.ratingBefore,
     rating:outcome.playerRating,
     delta:Number(outcome.delta.toFixed(3)),
     opponent:matchup.opponentNames?.[0]??'a local',
     opponents:matchup.opponentNames??[],
+    changes:outcome.changes??[],
     report:compactMatchReport(report)
   };
 }

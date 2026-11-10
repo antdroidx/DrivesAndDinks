@@ -94,6 +94,12 @@ test('a finished match leaves a durable result summary with next opponent and in
   const result=simulated.state.lastMatchResult;
   assert.equal(result.eventId,'local-league');
   assert.ok(['WIN','LOSS'].includes(result.won?'WIN':'LOSS'));
+  assert.ok(result.yourTeam.players.length>=1);
+  assert.ok(result.opponentTeam.players.length>=1);
+  assert.ok(result.winnerTeam.players.length>=1);
+  assert.ok(result.loserTeam.players.length>=1);
+  assert.ok(Number.isFinite(result.ratingBefore));
+  assert.equal(typeof result.yourTeam.players[0].name,'string');
   assert.ok(result.tournamentStatus.length>0);
 });
 
