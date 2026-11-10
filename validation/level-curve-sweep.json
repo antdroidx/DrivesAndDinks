@@ -1,0 +1,1126 @@
+{
+  "methodology": "Real engine mirrored CPU-vs-CPU matches; higher level swaps court sides and initial service alternates.",
+  "gamesPerPair": 10,
+  "candidates": [
+    {
+      "id": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ]
+    },
+    {
+      "id": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ]
+    },
+    {
+      "id": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ]
+    },
+    {
+      "id": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ]
+    }
+  ],
+  "pairings": [
+    [
+      0,
+      1
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      0,
+      3
+    ]
+  ],
+  "rows": [
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 20,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 4,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 15,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 6,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "singles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 15,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 9,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 35,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 0,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 30,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 5,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 50,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 0,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 20,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 2,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 15,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 12,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "doubles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 15,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 39,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 35,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 0,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 30,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 16,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "current",
+      "values": [
+        35,
+        55,
+        70,
+        85
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 50,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 0,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 8,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 11,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 8,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 24,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "singles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 8,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 14,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 16,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 3,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 16,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 5,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 24,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 2,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 8,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 30,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 8,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 9,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "doubles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 8,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 7,
+      "lowerWins": 3,
+      "higherPoints": 97,
+      "lowerPoints": 54,
+      "higherWinRate": 0.7
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 16,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 3,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 16,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 2,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-8",
+      "values": [
+        50,
+        58,
+        66,
+        74
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 24,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 1,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 10,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 7,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 10,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 9,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "singles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 10,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 8,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 20,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 2,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 20,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 8,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 30,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 0,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 10,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 7,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 10,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 7,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "doubles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 10,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 28,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 20,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 2,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 20,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 9,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-10",
+      "values": [
+        45,
+        55,
+        65,
+        75
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 30,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 3,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 6,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 14,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 6,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 32,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "singles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 6,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 12,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 12,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 7,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "singles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 12,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 7,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "singles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 18,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 5,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        1
+      ],
+      "gap": 6,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 9,
+      "lowerWins": 1,
+      "higherPoints": 108,
+      "lowerPoints": 46,
+      "higherWinRate": 0.9
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        2
+      ],
+      "gap": 6,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 16,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "doubles",
+      "levels": [
+        2,
+        3
+      ],
+      "gap": 6,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 9,
+      "lowerWins": 1,
+      "higherPoints": 107,
+      "lowerPoints": 30,
+      "higherWinRate": 0.9
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        2
+      ],
+      "gap": 12,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 2,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "doubles",
+      "levels": [
+        1,
+        3
+      ],
+      "gap": 12,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 9,
+      "higherWinRate": 1
+    },
+    {
+      "candidate": "compressed-6",
+      "values": [
+        52,
+        58,
+        64,
+        70
+      ],
+      "format": "doubles",
+      "levels": [
+        0,
+        3
+      ],
+      "gap": 18,
+      "games": 10,
+      "completed": 10,
+      "higherWins": 10,
+      "lowerWins": 0,
+      "higherPoints": 110,
+      "lowerPoints": 4,
+      "higherWinRate": 1
+    }
+  ]
+}

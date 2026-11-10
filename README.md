@@ -226,3 +226,7 @@ Career mode now has native Android and Windows WebView shells that bundle the co
 ## Career balance simulation
 
 Run `npm run audit:career-groups` to regenerate the five experience-level, age, schedule, CPU and workload cohorts. The latest findings are in [CAREER-GROUP-REPORT.md](CAREER-GROUP-REPORT.md).
+
+## Gameplay level balance
+
+Run `npm run audit:gameplay-levels` to exercise real CPU-vs-CPU physics-engine matches across mirrored levels in singles and doubles. Findings are in [GAMEPLAY-BALANCE-REPORT.md](GAMEPLAY-BALANCE-REPORT.md).
