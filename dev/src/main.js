@@ -1,42 +1,42 @@
-import {seededRandom} from './competition.js?v=198';
-import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=198';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=198';
-import {playerFeet,footSole} from './player-feet.js?v=198';
+import {seededRandom} from './competition.js?v=199';
+import {createSideReplayRenderer,replayAngleFor} from './side-replay.js?v=199';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=199';
+import {playerFeet,footSole} from './player-feet.js?v=199';
 
-import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=198';
+import {ReplayClock,faultReplaySample,replayRateAt,highlightReplayCamera,drawFaultContact} from './fault-replay.js?v=199';
 
-import {drawCourtNet,drawNetContact} from './court-net.js?v=198';
+import {drawCourtNet,drawNetContact} from './court-net.js?v=199';
 
-import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=198';
+import {createCourtArtRenderer,createCourtSurfaceRenderer,retroCourtPalette} from './court-art.js?v=199';
 
-import {createAnimeGameRenderer} from './anime-game.js?v=198';
+import {createAnimeGameRenderer} from './anime-game.js?v=199';
 
-import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=198';
+import {COURT_VENUES,chooseCourtVenue,drawCourtBackdrop} from './court-venues.js?v=199';
 
-import {setupCourtDisplay} from './court-display.js?v=198';
+import {setupCourtDisplay} from './court-display.js?v=199';
 
-import {CHARACTER_CONCEPTS} from './character-concepts.js?v=198';
+import {CHARACTER_CONCEPTS} from './character-concepts.js?v=199';
 
-import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=198';
-import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=198';
+import {courtCamera,courtAim,padControl,gameProjection,gameLift,gameGroundSpan,setCourtSideSwitched,visibleCourtY,playerFeetForRig,visibleTravelSide} from './court-camera.js?v=199';
+import {NEUTRAL_PLAYER_HEIGHT_CM,ANIME_CANONICAL_BODY_UNITS,ANIME_VISUAL_BODY_UNITS,playerBoxHeight} from './court-scale.js?v=199';
 
-import {movingStance} from './detailed-character.js?v=198';
+import {movingStance} from './detailed-character.js?v=199';
 
-import {sampleMatchAnimation} from './match-animation.js?v=198';
+import {sampleMatchAnimation} from './match-animation.js?v=199';
 
-import {setupSelection} from './selection.js?v=198';
-import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM} from './career/handshake.js?v=198';import {setupStartScreen} from './start-screen.js?v=198';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=198';
+import {setupSelection} from './selection.js?v=199';
+import {readPendingMatch,writeMatchResult,clearPendingMatch,CAREER_MATCH_PARAM,writeEngineState,readEngineState,clearEngineState} from './career/handshake.js?v=199';import {setupStartScreen} from './start-screen.js?v=199';import {matchIntroTeams,INTRO_RATING_KEYS,INTRO_RATING_LABELS} from './match-intro.js?v=199';
 
-import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=198';
+import {COURT_PALETTES,CHARACTERS,levelLineup,SKILL_LEVELS} from './roster.js?v=199';
 
-import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=198';
+import {drawPixelCharacter,onCharacterSpritesReady,courtView} from './pixel-character.js?v=199';
 
-import {Game} from './game.js?v=198';
-import {C} from './core.js?v=198';
+import {Game} from './game.js?v=199';
+import {C} from './core.js?v=199';
 
-import {selectShot,serveAim,shotDepthTarget} from './core.js?v=198';import {playerEmotionState} from './player-emotion.js?v=198';import {PerformanceMonitor} from './performance-monitor.js?v=198';
+import {selectShot,serveAim,shotDepthTarget} from './core.js?v=199';import {playerEmotionState} from './player-emotion.js?v=199';import {PerformanceMonitor} from './performance-monitor.js?v=199';
 
-import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=198';
+import {ANIMATION_TEST_STROKES,SWING_SECONDS,ANIMATION_CYCLE_SECONDS,forceSpecialShot,applySpecialShotAnimation} from './animation-test.js?v=199';
 
 const balanceQuery=new URLSearchParams(location.search),balanceLevel=(location.pathname.includes('/dev/')||['localhost','127.0.0.1'].includes(location.hostname))&&Object.hasOwn(SKILL_LEVELS,balanceQuery.get('level'))?balanceQuery.get('level'):null;
 const scenarioType=balanceQuery.get('scenario'),scenarioSpeed=Math.max(.25,Math.min(1,Number(balanceQuery.get('speed'))||.65));
@@ -423,7 +423,7 @@ const attackButton=document.querySelector('[data-shot="attack"]'),softButton=doc
 
 function syncShotButtonsForPhase(){syncAimPad();const humanServe=game.mode==='play'&&game.phase==='serve'&&game.server.id===0,paused=game.paused;if(humanServe===previousHumanServe&&paused===previousPaused)return;previousHumanServe=humanServe;previousPaused=paused;attackButton.querySelector('small').textContent=humanServe?'HARD SERVE':'DRIVE · HIGH';softButton.querySelector('small').textContent=humanServe?'SOFT SERVE':'DROP / DINK';lobButton.querySelector('small').textContent=humanServe?'NOT ON SERVE':'ANYWHERE';attackButton.disabled=paused;softButton.disabled=paused;lobButton.disabled=humanServe||paused}
 
-function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.reset();setShot('attack');syncPauseButton()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{performanceMonitor.input(e.timeStamp);if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{performanceMonitor.input(e.timeStamp);if(selectionUI?.isOpen()||replayPlayback)return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
+function setShot(s){game.shot=s;document.querySelectorAll('[data-shot]').forEach(b=>{b.classList.toggle('active',b.dataset.shot===s);b.setAttribute('aria-pressed',String(b.dataset.shot===s))})}function triggerShot(s){if(game.paused||replayPlayback)return;setShot(s);game.swing()}setShot('attack');document.querySelectorAll('[data-shot]').forEach(b=>{b.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;e.preventDefault();triggerShot(b.dataset.shot)});b.addEventListener('click',e=>{if(e.detail===0)triggerShot(b.dataset.shot)})});for(const restartButton of document.querySelectorAll('#restart,#restart-top'))restartButton.onclick=()=>{setPaused(false);selectionUI.open()};document.querySelector('#mode').onclick=e=>{game.mode=game.mode==='play'?'watch':'play';e.target.textContent='MODE: '+game.mode.toUpperCase();game.setPaused(false);setShot('attack');syncPauseButton();syncShotButtonsForPhase()};function aim(e){const rect=canvas.getBoundingClientRect();game.aim=courtAim(e.clientX,rect,currentCamera());syncAimPad()}canvas.addEventListener('pointerdown',e=>{performanceMonitor.input(e.timeStamp);if(game.paused||replayPlayback)return;aim(e);if(e.pointerType==='mouse')game.swing();else canvas.setPointerCapture(e.pointerId)});canvas.addEventListener('pointermove',e=>{if(!game.paused&&(e.pointerType==='mouse'||e.buttons))aim(e)});window.addEventListener('keydown',e=>{performanceMonitor.input(e.timeStamp);if(selectionUI?.isOpen()||replayPlayback)return;if(e.key==='p'||e.key==='P'||e.key==='Escape'){e.preventDefault();if(!e.repeat)setPaused(!game.paused);return}if(game.paused)return;if(e.code==='Space'){e.preventDefault();if(!e.repeat)game.swing()}if(e.key==='ArrowLeft'||e.key==='ArrowRight'){e.preventDefault();game.nudgeAim(e.key==='ArrowLeft'?-1:1,e.shiftKey);syncAimPad()}if(e.key==='ArrowUp'||e.key==='ArrowDown'){e.preventDefault();if(game.phase!=='serve')game.nudgeDepth(e.key==='ArrowUp'?1:-1,e.shiftKey);syncAimPad()}const s={1:'attack',2:'soft',3:'lob'}[e.key];
 
  if(s&&!(game.phase==='serve'&&game.server.id===0&&s==='lob')){if(!e.repeat)triggerShot(s)}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'&&!selectionUI?.isOpen())setPaused(true)});
 
@@ -442,10 +442,12 @@ if(careerMatch){
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
   game.configure({format:careerMatch.matchup.format,showNameTags:true,rules:careerMatch.rules,learning:careerMatch.learning},careerMatch.matchup.lineup);
+  const savedEngineState=readEngineState(careerMatch.matchId);if(savedEngineState)game.restore(savedEngineState);
   game.mode='play';
-  game.setDifficulty(careerMatch.difficulty??'normal');
+  game.setDifficulty(careerMatch.difficulty??'normal');syncDifficultyButton();
   game.setPaused(true);
-  for(const id of ['setup-button','difficulty','mode','restart','restart-top']){
+  document.body.classList.add('career-match-mode');
+  for(const id of ['setup-button','restart','restart-top']){
     const control=document.getElementById(id);
     if(control){control.hidden=true;control.disabled=true;}
   }
@@ -498,7 +500,7 @@ function syncMatchResult(){if(game.phase==='over'&&!replayPlayback&&!resultDialo
   if(careerMatch){
     if(!careerResultCommitted){
       careerResultCommitted=true;
-      if(writeMatchResult(game.matchReport(),careerMatch.matchId))clearPendingMatch();
+      if(writeMatchResult(game.matchReport(),careerMatch.matchId)){clearPendingMatch();clearEngineState()}
     }
     resultDialog.querySelector('h2').textContent='Career match complete';
     document.querySelector('#match-winner').textContent=game.score.winner===0?'Your team wins!':'Opponents win!';
@@ -559,5 +561,12 @@ window.addEventListener('keydown',e=>{if(!document.querySelector('dialog[open]')
 // Keep persistent play controls together, followed by setup, gameplay and presentation settings.
 const settingsActions=document.querySelector('.header-actions');
 for(const id of ['fullscreen-button','pause-button','setup-button','mode','difficulty','name-tags-button','replay-toggle','sound']){
+ if(careerMatch&&id==='setup-button')continue;
  const control=document.getElementById(id);if(control)settingsActions.append(control);
+}
+if(careerMatch){
+ const careerExit=document.createElement('button');careerExit.id='career-exit-button';careerExit.type='button';careerExit.textContent='BACK TO CAREER';careerExit.onclick=()=>{writeEngineState(careerMatch.matchId,game.snapshot());game.setPaused(true);location.href=careerReturnPath};
+ settingsActions.prepend(careerExit);
+ setInterval(()=>{if(game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())},10000);
+ window.addEventListener('pagehide',()=>{if(game.phase!=='over')writeEngineState(careerMatch.matchId,game.snapshot())});
 }

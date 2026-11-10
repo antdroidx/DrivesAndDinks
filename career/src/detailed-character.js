@@ -1,10 +1,10 @@
-import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset,paddleOutline} from './pixel-character.js?v=198';
-import {CHARACTER_CONCEPTS,conceptPoint,conceptHair,thighGarment,skirtGarment} from './character-concepts.js?v=198';
+import {sampleCharacterPose,appearancePalette,jointBetween,animationRootOffset,paddleOutline} from './pixel-character.js?v=199';
+import {CHARACTER_CONCEPTS,conceptPoint,conceptHair,thighGarment,skirtGarment} from './character-concepts.js?v=199';
 
 // Visual identities never alter the player's simulation abilities or hit range.
 export function matchDesign(appearance={},characterId='',designId=''){
  const body=appearance.body==='female'?'female':'male',choices=CHARACTER_CONCEPTS.filter(d=>d.body===body),hash=[...characterId].reduce((n,c)=>n+c.charCodeAt(0),0),base=CHARACTER_CONCEPTS.find(d=>d.id===designId)??choices[hash%choices.length],palette=appearancePalette(appearance);
- return {...base,hair:conceptHair(body,appearance.hairStyle,base.hair),headwear:appearance.headwear??'none',eyewear:appearance.eyewear??'none',shirt:palette.shirt,skin:palette.skin,hairColor:palette.hair,trim:palette.highlight,paddleColor:palette.paddle};
+ return {...base,hair:conceptHair(body,appearance.hairStyle,base.hair),headwear:appearance.headwear??'none',headwearColor:palette.headwearColor,eyewear:appearance.eyewear??'none',shirt:palette.shirt,skin:palette.skin,hairColor:palette.hair,trim:palette.highlight,paddleColor:palette.paddle};
 }
 // Limb mass and bone lengths are independent of the arm silhouette.
 export function legDimensions(design){
@@ -104,9 +104,9 @@ if(d.hair==='sidePart'){shape(c,[[x-5.2,y-.3],[x-5.5,y-3.7],[x-4.4,y-5.8],[x-2.3
   for(let i=0;i<6;i++){const sx=x-4.3+i*1.65;c.strokeStyle=shade(d.hairColor,d.faceStyle==='storybook'?(i%2?.09:-.1):(i%2?.13:-.16));c.lineWidth=i%2?.25:.35;c.beginPath();c.moveTo(x+(sx-x)*.55,y-6.1);c.quadraticCurveTo(sx,y-5,sx+.6,y-(near?1.7:3));c.stroke()}
   c.strokeStyle=shade(d.hairColor,.16);c.lineWidth=.4;c.beginPath();c.moveTo(x-3.8,y-4.5);c.quadraticCurveTo(x-1.8,y-6,x+.2,y-5.2);c.stroke();
  }
- if(d.headwear==='cap'){c.fillStyle=gradient(c,d.trim,x,y-4,7);c.beginPath();c.moveTo(x-6,y-2);c.quadraticCurveTo(x-6,y-9,x,y-9);c.quadraticCurveTo(x+6,y-9,x+6,y-2);c.closePath();c.fill();c.strokeStyle=shade(d.trim,-.35);c.lineWidth=.6;c.beginPath();c.moveTo(x,y-8);c.lineTo(x+.5,y-2);c.stroke();if(near){shape(c,[[x-2,y-2],[x+2,y-2],[x+2,y],[x-2,y]],d.hairColor,null)}else{ellipse(c,x+.5,y-1.8,7.2,1.5,shade(d.trim,-.12));ellipse(c,x,y-5,.8,.8,d.shirt)}}
- if(d.headwear==='visor'){limb(c,{x:x-5.7,y:y-2},{x:x+5.7,y:y-2},1.6,d.trim);if(!near){shape(c,[[x-5.7,y-1.5],[x+5.7,y-1.5],[x+8,y+.2],[x+3,y+1],[x-5,y+.2]],gradient(c,d.trim,x,y,6))}}
- if(d.headwear==='headband'){limb(c,{x:x-5.2,y:y-2},{x:x+5.2,y:y-2},2.1,d.trim);if(near){limb(c,{x:x+4,y:y-1},{x:x+6,y:y+3},1.3,d.trim)}}
+ if(d.headwear==='cap'){c.fillStyle=gradient(c,(d.headwearColor??d.trim),x,y-4,7);c.beginPath();c.moveTo(x-6,y-2);c.quadraticCurveTo(x-6,y-9,x,y-9);c.quadraticCurveTo(x+6,y-9,x+6,y-2);c.closePath();c.fill();c.strokeStyle=shade(d.headwearColor??d.trim,-.35);c.lineWidth=.6;c.beginPath();c.moveTo(x,y-8);c.lineTo(x+.5,y-2);c.stroke();if(near){shape(c,[[x-2,y-2],[x+2,y-2],[x+2,y],[x-2,y]],d.hairColor,null)}else{ellipse(c,x+.5,y-1.8,7.2,1.5,shade(d.headwearColor??d.trim,-.12));ellipse(c,x,y-5,.8,.8,d.shirt)}}
+ if(d.headwear==='visor'){limb(c,{x:x-5.7,y:y-2},{x:x+5.7,y:y-2},1.6,(d.headwearColor??d.trim));if(!near){shape(c,[[x-5.7,y-1.5],[x+5.7,y-1.5],[x+8,y+.2],[x+3,y+1],[x-5,y+.2]],gradient(c,(d.headwearColor??d.trim),x,y,6))}}
+ if(d.headwear==='headband'){limb(c,{x:x-5.2,y:y-2},{x:x+5.2,y:y-2},2.1,(d.headwearColor??d.trim));if(near){limb(c,{x:x+4,y:y-1},{x:x+6,y:y+3},1.3,(d.headwearColor??d.trim))}}
 }
 export function drawConceptAthlete(c,design,mode,phase,view,cx,baseline,scale,options={}){const matte=options.material==='matte',wasMatte=matteContexts.has(c);if(matte)matteContexts.add(c);const d={...design,faceStyle:options.faceStyle,illustrated:options.illustrated},raw=sampleCharacterPose({...options,mode,phase,frame:options.frame??phase*4,view}),convert=p=>conceptPoint(p,d),pose={...raw,neck:convert(raw.neck),hips:convert(raw.hips),paddle:convert(raw.paddle),hand:convert(raw.hand)};view=raw.view;
  pose.arms=raw.arms.map(chain=>chain.map((p,i)=>{const q=convert(p),sign=chain[0].x<24?-1:1;return {...q,x:q.x+sign*(d.shoulder-6)*(1-i*.3)*(1-(options.contactWeight||0))}}));pose.paddle.x+=pose.arms[raw.gripSide][2].x-pose.hand.x;pose.paddle.y+=pose.arms[raw.gripSide][2].y-pose.hand.y;pose.hand=pose.arms[raw.gripSide][2];pose.legs=conceptLegs(raw,d);

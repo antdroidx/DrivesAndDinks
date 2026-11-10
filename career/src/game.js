@@ -1,19 +1,40 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=198';
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=198';
-import {MatchJournal} from './match-journal.js?v=198';import {summarizePlaytest} from './playtest-summary.js?v=198';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=198';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=198';
-import {seededRandom} from './competition.js?v=198';
-import {kitchenFootContact,normalizeScoringRules} from './core.js?v=198';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=198';
-import {strokeForContact} from './player-facing.js?v=198';
-import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=198';
-import {createLineup,applyPhysique} from './roster.js?v=198';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=198';
-import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=198';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=198';
+import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=199';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=199';
+import {MatchJournal} from './match-journal.js?v=199';import {summarizePlaytest} from './playtest-summary.js?v=199';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=199';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=199';
+import {seededRandom} from './competition.js?v=199';
+import {kitchenFootContact,normalizeScoringRules} from './core.js?v=199';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=199';
+import {strokeForContact} from './player-facing.js?v=199';
+import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=199';
+import {createLineup,applyPhysique} from './roster.js?v=199';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=199';
+import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=199';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=199';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=true;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.rules=normalizeScoringRules();this.learningSnapshot=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.sideSwitched=false;this.sideSwitchThreshold=6;this.sideSwitchCount=0;this.reset()}
  configure(selection,lineup=null){this.showNameTags=selection?.showNameTags!==false&&selection?.showNameTags!=='false';this.learningSnapshot=selection?.learning??null;if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';if(selection?.rules)this.rules=normalizeScoringRules({...this.rules,...selection.rules});this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
+ snapshot(){
+    const keys=['clock','score','players','aim','depth','humanFeedback','shot','hitBuffer','feedbackTime','message','pause','paused','replayReview','lastPointWinner','lastPointFaultTeam','surfaceKind','conditions','dust','replayContacts','faultFocus','serveToss','poachReservation','stackPlans','lastShot','lastHitter','bounceMark','netMark','lobExchange','contact','phase','shots','bounces','last','server','serveReceiver','serveContact','ball','timer','events','trail','tacticalStats','stats','sideSwitched','sideSwitchCount','observedShot','teamPlan','scenario'];
+    const state={};
+    for(const key of keys)if(this[key]!==undefined)state[key]=structuredClone(this[key]);
+    state.format=this.format;state.mode=this.mode;state.difficulty=this.difficulty;state.rules=structuredClone(this.rules);
+    state.randomState=this.random.state?.()??null;state.visualRandomState=this.visualRandom.state?.()??null;
+    state.opponentMemory=this.opponentMemory.snapshot();state.journal=structuredClone({events:this.journal.events,rallies:this.journal.rallies,dropped:this.journal.dropped,sequence:this.journal.sequence,rallySequence:this.journal.rallySequence,rallyStart:this.journal.rallyStart,rallyStartSequence:this.journal.rallyStartSequence,contacts:this.journal.contacts,mishits:this.journal.mishits});
+    return state;
+  }
+  restore(snapshot){
+    if(!snapshot||typeof snapshot!=='object'||!Array.isArray(snapshot.players)||!snapshot.score)return false;
+    const keys=['clock','score','players','aim','depth','humanFeedback','shot','hitBuffer','feedbackTime','message','pause','paused','replayReview','lastPointWinner','lastPointFaultTeam','surfaceKind','conditions','dust','replayContacts','faultFocus','serveToss','poachReservation','stackPlans','lastShot','lastHitter','bounceMark','netMark','lobExchange','contact','phase','shots','bounces','last','server','serveReceiver','serveContact','ball','timer','events','trail','tacticalStats','stats','sideSwitched','sideSwitchCount','observedShot','teamPlan','scenario'];
+    for(const key of keys)if(snapshot[key]!==undefined)this[key]=structuredClone(snapshot[key]);
+    if(snapshot.format)this.format=snapshot.format;if(snapshot.mode)this.mode=snapshot.mode;if(snapshot.difficulty)this.difficulty=snapshot.difficulty;if(snapshot.rules)this.rules=structuredClone(snapshot.rules);
+    if(snapshot.randomState!=null)this.random=seededRandom(snapshot.randomState);
+    if(snapshot.visualRandomState!=null)this.visualRandom=seededRandom(snapshot.visualRandomState);
+    this.opponentMemory=new OpponentMemory(snapshot.opponentMemory??this.learningSnapshot);
+    this.journal=new MatchJournal();
+    if(snapshot.journal)Object.assign(this.journal,structuredClone(snapshot.journal));
+    return true;
+  }
  matchReport(){return {schemaVersion:1,build:globalThis.DRIVES_DINKS_BUILD??'dev',seed:this.seed,format:this.format,mode:this.practice?'practice':this.mode,difficulty:this.difficulty,showNameTags:this.showNameTags!==false,elapsed:this.phase==='over'?(this.journal.rallies.at(-1)?.time??this.clock):this.clock,complete:this.phase==='over',score:structuredClone(this.score),players:this.players.map(p=>({id:p.id,team:p.team,name:p.name??`Player ${p.id+1}`,handedness:p.handedness??'right',archetype:p.archetype??p.ratingStyle??'balanced',attributes:structuredClone(p.attributes??{}),physique:structuredClone(p.physique??null),paddle:structuredClone(p.paddle)})),stats:structuredClone(this.stats),tactics:structuredClone(this.tacticalStats),journal:this.journal.snapshot(),playtest:summarizePlaytest(this.journal.snapshot(),this.stats,this.tacticalStats),learning:this.opponentMemory.snapshot(),practice:this.practice?.summary()??null,sideSwitched:this.sideSwitched,sideSwitchThreshold:this.sideSwitchThreshold,stacking:{config:structuredClone(this.stackingConfig),plans:structuredClone(this.stackPlans??[]),summary:summarizeStacking(this.journal.snapshot(),this.tacticalStats)}}}
  observeOpponentShot(){const shot=this.observedShot;if(!shot)return;this.observedShot=null;if(!this.practice&&side(this.ball.y)!==shot.team)this.opponentMemory.observe({...shot,x:this.ball.x,y:this.ball.y})}
  setPhysique(appearance){

@@ -4,12 +4,12 @@
 // keeps cosmetics independent from performance and prevents new products from
 // exceeding the same bounded modifiers as the starter catalog.
 
-import {recordFinance} from './finance.js?v=198';
-import {seededRandom} from '../competition.js?v=198';
-import {mixSeed} from './population.js?v=198';
-import {PADDLES,PADDLE_SHAPES} from '../roster.js?v=198';
+import {recordFinance} from './finance.js?v=199';
+import {seededRandom} from '../competition.js?v=199';
+import {mixSeed} from './population.js?v=199';
+import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS} from '../roster.js?v=199';
 
-export const EQUIPMENT_VERSION=2;
+export const EQUIPMENT_VERSION=3;
 export const STARTER_EQUIPMENT_ID='allcourt-hybrid';
 
 export const PADDLE_CATALOG=Object.freeze([
@@ -37,6 +37,23 @@ const SHAPES=Object.freeze([
   {shape:'widebody',shapeLabel:'Widebody'},{shape:'hybrid',shapeLabel:'Hybrid'},{shape:'elongated',shapeLabel:'Elongated'}
 ]);
 
+const HEADWEAR_STYLES=Object.freeze([
+  {headwear:'cap',label:'Cap',price:40},
+  {headwear:'visor',label:'Visor',price:45},
+  {headwear:'headband',label:'Headband',price:30}
+]);
+export const HEADWEAR_CATALOG=Object.freeze(HEADWEAR_STYLES.flatMap(style=>PADDLE_COLORS.map(color=>({
+  id:`${style.headwear}-${color.id}`,
+  label:`${color.name} ${style.label}`,
+  headwear:style.headwear,
+  headwearLabel:style.label,
+  color:color.id,
+  colorLabel:color.name,
+  swatch:color.color,
+  price:style.price,
+  description:`${color.name} ${style.label.toLowerCase()} using the same game-renderer color palette.`,
+  status:'available'
+}))));
 const staticById=id=>PADDLE_CATALOG.find(item=>item.id===id)??PADDLE_CATALOG[0];
 const normalizeItem=item=>({
   ...item,
@@ -44,11 +61,12 @@ const normalizeItem=item=>({
   shape:['widebody','hybrid','elongated'].includes(item?.shape)?item.shape:'hybrid',
   price:Math.max(0,Math.round(Number(item?.price)||0)),
   status:['announced','available','low-stock','discontinued','legacy'].includes(item?.status)?item.status:'available',
+  color:PADDLE_COLORS.some(color=>color.id===item?.color)?item.color:null,
   signature:Boolean(item?.signature)
 });
 
 export function emptyEquipment(){
-  return {version:EQUIPMENT_VERSION,owned:[STARTER_EQUIPMENT_ID],equipped:STARTER_EQUIPMENT_ID,purchases:[],catalog:[]};
+  return {version:EQUIPMENT_VERSION,owned:[STARTER_EQUIPMENT_ID],equipped:STARTER_EQUIPMENT_ID,purchases:[],catalog:[],headwear:{owned:[],equipped:null}};
 }
 
 export function currentEquipmentYear(week=0){return Math.floor(Math.max(0,Number(week)||0)/52);}
@@ -105,6 +123,14 @@ export function generateSeasonCatalog(seed,week=0,{contract='none'}={}){
   return items;
 }
 
+export function headwearById(id){return HEADWEAR_CATALOG.find(item=>item.id===id)??null}
+
+function normalizeHeadwear(value){
+  const validIds=new Set(HEADWEAR_CATALOG.map(item=>item.id));
+  const owned=[...new Set((Array.isArray(value?.owned)?value.owned:[]).filter(id=>validIds.has(id)))];
+  return {owned,equipped:owned.includes(value?.equipped)?value.equipped:null};
+}
+
 export function normalizeEquipment(value){
   const catalog=Array.isArray(value?.catalog)?value.catalog.map(normalizeItem).slice(-96):[];
   const validIds=new Set([...PADDLE_CATALOG,...catalog].map(item=>item.id));
@@ -115,15 +141,17 @@ export function normalizeEquipment(value){
     owned,
     equipped,
     purchases:Array.isArray(value?.purchases)?value.purchases.slice(-16):[],
-    catalog
+    catalog,
+    headwear:normalizeHeadwear(value?.headwear)
   };
 }
 
 export function equipmentCatalog(state){
   const equipment=normalizeEquipment(state?.equipment);
-  const remembered=new Map(equipment.catalog.map(item=>[item.id,item]));
-  for(const item of generateSeasonCatalog(state?.seed??1,state?.week??0,{contract:state?.contract}))remembered.set(item.id,item);
-  return [...PADDLE_CATALOG,...remembered.values()].map(normalizeItem);
+  const catalog=new Map(PADDLE_CATALOG.map(item=>[item.id,item]));
+  for(const item of equipment.catalog)catalog.set(item.id,item);
+  for(const item of generateSeasonCatalog(state?.seed??1,state?.week??0,{contract:state?.contract}))if(!catalog.has(item.id))catalog.set(item.id,item);
+  return [...catalog.values()].map(normalizeItem);
 }
 
 export function equippedPaddle(state){
@@ -133,28 +161,34 @@ export function equippedPaddle(state){
 
 export function equipmentSelection(state){
   const item=equippedPaddle(state);
-  return {paddle:item.family,shape:item.shape,item};
+  const equipment=normalizeEquipment(state?.equipment);
+  return {
+    paddle:item.family,shape:item.shape,color:item.color??state?.athlete?.paddleColor??'mint',item,
+    headwear:headwearById(equipment.headwear.equipped)
+  };
 }
 
-export function purchaseEquipment(state,itemId){
+export function purchaseEquipment(state,itemId,{color=state?.athlete?.paddleColor??'mint'}={}){
   const catalog=equipmentCatalog(state);
-  const item=catalog.find(entry=>entry.id===itemId);
-  if(!item)return {ok:false,state,message:'That paddle is not in the shop.'};
-  if(item.status==='announced'||item.status==='discontinued')return {ok:false,state,message:'That paddle is not currently available.'};
+  const baseItem=catalog.find(entry=>entry.id===itemId);
+  if(!baseItem)return {ok:false,state,message:'That paddle is not in the shop.'};
+  if(baseItem.status==='announced'||baseItem.status==='discontinued')return {ok:false,state,message:'That paddle is not currently available.'};
+  const colorOption=PADDLE_COLORS.find(entry=>entry.id===color)??PADDLE_COLORS[0];
+  const item=normalizeItem({...baseItem,color:colorOption.id});
   const equipment=normalizeEquipment(state?.equipment);
   if(equipment.owned.includes(item.id))return {ok:false,state,message:`You already own the ${item.label}.`};
   if(Number(state?.money??0)<item.price)return {ok:false,state,message:`${item.label} costs $${item.price}. You have $${Number(state?.money??0)}.`};
   const charged=recordFinance(state,{
-    week:state?.week??0,category:'equipment',label:`Paddle · ${item.label}`,amount:-item.price,
-    reference:`equipment:${item.id}`
+    week:state?.week??0,category:'equipment',label:`Paddle · ${item.label} · ${colorOption.name}`,amount:-item.price,
+    reference:`equipment:${item.id}:${colorOption.id}`
   });
   if(!charged.ok)return charged;
   const current=normalizeEquipment(charged.state.equipment);
   const catalogMap=new Map([...current.catalog,item].map(entry=>[entry.id,entry]));
   return {
     ok:true,
-    state:{...charged.state,equipment:{...current,owned:[...current.owned,item.id],purchases:[...current.purchases,{week:state?.week??0,itemId:item.id}].slice(-16),catalog:[...catalogMap.values()].slice(-96)}},
-    item,message:`Purchased the ${item.label} for $${item.price}.`
+    state:{...charged.state,equipment:{...current,owned:[...current.owned,item.id],purchases:[...current.purchases,{week:state?.week??0,itemId:item.id,color:colorOption.id}].slice(-16),catalog:[...catalogMap.values()].slice(-96)}},
+    item,message:`Purchased the ${item.label} in ${colorOption.name} for $${item.price}.`
   };
 }
 
@@ -164,6 +198,41 @@ export function equipPaddle(state,itemId){
   const equipment=normalizeEquipment(state?.equipment);
   if(!equipment.owned.includes(item.id))return {ok:false,state,message:`Buy the ${item.label} before equipping it.`};
   return {ok:true,state:{...state,equipment:{...equipment,equipped:item.id}},item,message:`Equipped the ${item.label}.`};
+}
+
+export function setPaddleColor(state,itemId,color){
+  const equipment=normalizeEquipment(state?.equipment);
+  if(!equipment.owned.includes(itemId))return {ok:false,state,message:'Buy that paddle before changing its color.'};
+  const colorOption=PADDLE_COLORS.find(entry=>entry.id===color)??PADDLE_COLORS[0];
+  const item=(equipment.catalog.find(entry=>entry.id===itemId)??staticById(itemId));
+  const updated=normalizeItem({...item,color:colorOption.id});
+  const catalogMap=new Map([...equipment.catalog.filter(entry=>entry.id!==itemId),updated].map(entry=>[entry.id,entry]));
+  return {ok:true,state:{...state,equipment:{...equipment,catalog:[...catalogMap.values()].slice(-96)}},item:updated,message:`Set ${updated.label} to ${colorOption.name}.`};
+}
+
+export function buyHeadwear(state,itemId){
+  const item=headwearById(itemId);
+  if(!item)return {ok:false,state,message:'That headwear is not in the shop.'};
+  const equipment=normalizeEquipment(state?.equipment);
+  if(equipment.headwear.owned.includes(item.id))return {ok:false,state,message:`You already own the ${item.label}.`};
+  if(Number(state?.money??0)<item.price)return {ok:false,state,message:`${item.label} costs $${item.price}. You have $${Number(state?.money??0)}.`};
+  const charged=recordFinance(state,{week:state?.week??0,category:'equipment',label:`Headwear · ${item.label}`,amount:-item.price,reference:`headwear:${item.id}`});
+  if(!charged.ok)return charged;
+  const current=normalizeEquipment(charged.state.equipment);
+  return {ok:true,state:{...charged.state,equipment:{...current,headwear:{...current.headwear,owned:[...current.headwear.owned,item.id],equipped:item.id}}},item,message:`Purchased and equipped the ${item.label} for $${item.price}.`};
+}
+
+export function equipHeadwear(state,itemId){
+  const item=headwearById(itemId);
+  if(!item)return {ok:false,state,message:'That headwear is unavailable.'};
+  const equipment=normalizeEquipment(state?.equipment);
+  if(!equipment.headwear.owned.includes(item.id))return {ok:false,state,message:`Buy the ${item.label} before equipping it.`};
+  return {ok:true,state:{...state,equipment:{...equipment,headwear:{...equipment.headwear,equipped:item.id}}},item,message:`Equipped the ${item.label}.`};
+}
+
+export function clearHeadwear(state){
+  const equipment=normalizeEquipment(state?.equipment);
+  return {ok:true,state:{...state,equipment:{...equipment,headwear:{...equipment.headwear,equipped:null}}},message:'Removed headwear.'};
 }
 
 export function signatureEligible(state){
@@ -199,5 +268,9 @@ export function validateEquipment(state){
   const validIds=new Set([...PADDLE_CATALOG,...value.catalog].map(item=>item.id));
   if(value.owned.some(id=>!validIds.has(id)))return {ok:false,reason:'Unknown owned equipment'};
   if(!value.owned.includes(value.equipped))return {ok:false,reason:'Equipped paddle is not owned'};
+  if(!value.headwear||typeof value.headwear!=='object'||!Array.isArray(value.headwear.owned))return {ok:false,reason:'Headwear state is invalid'};
+  const headwearIds=new Set(HEADWEAR_CATALOG.map(item=>item.id));
+  if(value.headwear.owned.some(id=>!headwearIds.has(id)))return {ok:false,reason:'Unknown owned headwear'};
+  if(value.headwear.equipped!=null&&!value.headwear.owned.includes(value.headwear.equipped))return {ok:false,reason:'Equipped headwear is not owned'};
   return {ok:true};
 }

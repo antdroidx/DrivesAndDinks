@@ -1,4 +1,4 @@
-import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=198';
+import {CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS} from './roster.js?v=199';
 
 // Original 48 x 64 pixel artwork. Shared joints prevent anatomy/frame drift.
 // Colors belong to materials; no hue matching or sprite-sheet recoloring.
@@ -14,8 +14,8 @@ const point=(a,b,t)=>({x:lerp(a.x,b.x,t),y:lerp(a.y,b.y,t)});
 const resolve=(items,id)=>items.find(item=>item.id===id)??items[0];
 function shade(hex,amount){return '#'+hex.slice(1).match(/../g).map(v=>Math.round(lerp(parseInt(v,16),amount>0?255:0,Math.abs(amount))).toString(16).padStart(2,'0')).join('')}
 export function appearancePalette(a={}){
- const shirt=resolve(CLOTHING_COLORS,a.shirtColor??'green').color,hair=resolve(HAIR_COLORS,a.hairColor??'brown').color,skin=resolve(SKIN_COLORS,a.skinColor??'medium').color,p=resolve(PADDLE_COLORS,a.paddleColor??'mint'),highlight=resolve(PADDLE_COLORS,a.highlightColor??a.paddleColor??'yellow').color;
- return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7',sock:'#dbe3de',highlight,accent:a.highlightColor?highlight:shade(shirt,.55),grip:'#d9dde0'};
+ const shirt=resolve(CLOTHING_COLORS,a.shirtColor??'green').color,hair=resolve(HAIR_COLORS,a.hairColor??'brown').color,skin=resolve(SKIN_COLORS,a.skinColor??'medium').color,p=resolve(PADDLE_COLORS,a.paddleColor??'mint'),highlight=resolve(PADDLE_COLORS,a.highlightColor??a.paddleColor??'yellow').color,headwear=resolve(PADDLE_COLORS,a.headwearColor??a.highlightColor??'yellow').color;
+ return {outline:'#192131',shirt,shirtDark:shade(shirt,-.3),shirtLight:shade(shirt,.3),bottom:shade(shirt,-.5),bottomDark:shade(shirt,-.65),hair,hairLight:shade(hair,.22),skin,skinDark:shade(skin,-.24),skinLight:shade(skin,.15),paddle:p.edgeColor,paddleInterior:'#10151d',shoe:'#f4eee0',shoeDark:'#9ba9b7',sock:'#dbe3de',highlight,headwearColor:headwear,accent:a.highlightColor?highlight:shade(shirt,.55),grip:'#d9dde0'};
 }
 export function characterFrame(mode='idle',phase=0,frame=0){
  const row=Math.max(0,MOTIONS.indexOf(mode==='slide'?'shuffle':mode));
@@ -94,7 +94,7 @@ export function solveArm3D(shoulder,wrist,pole,lengths=ARM_LENGTHS){
  const elbow=vadd(vadd(shoulder,vmul(dir,along)),vmul(bend,Math.sqrt(Math.max(0,upper*upper-along*along))));
  return [shoulder,elbow,end];
 }
-export {courtView,strokeForContact} from './player-facing.js?v=198';
+export {courtView,strokeForContact} from './player-facing.js?v=199';
 export function sampleCharacterPose({mode='idle',phase=0,frame=0,view='far',side=1,travelSide=side,contact=null,contactWeight=0,contactDepth=null,contact3D=null,moving=false}={}){
  // A tweener is struck backward while retreating with the back toward the net.
  if(mode==='tweener')view=view==='near'?'far':'near';

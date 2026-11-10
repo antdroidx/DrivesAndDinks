@@ -1,6 +1,6 @@
-import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=198';
-import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=198';
-import {legDimensions,plantFeet} from './detailed-character.js?v=198';
+import {sampleCharacterPose,solveArm3D,paddleOutline} from './pixel-character.js?v=199';
+import {conceptPoint,thighGarment,skirtGarment} from './character-concepts.js?v=199';
+import {legDimensions,plantFeet} from './detailed-character.js?v=199';
 
 export function tone(hex,f){return '#'+hex.slice(1).match(/../g).map(v=>{const n=parseInt(v,16);return Math.round(f<0?n*(1+f):n+(255-n)*f).toString(16).padStart(2,'0')}).join('')}
 function path(c,points,color,ink='#4c453d',width=.3){c.beginPath();points.forEach((p,i)=>i?c.lineTo(p.x,p.y):c.moveTo(p.x,p.y));c.closePath();c.fillStyle=color;c.fill();if(ink){c.strokeStyle=ink;c.lineWidth=width;c.stroke()}}
@@ -282,8 +282,8 @@ function animeHead(c,d,n,near,warm,phase,ink,rawEmotion){
    line(c,[point(x-2.4,y-1.4),point(x+2.4,y-1.4)],ink,.28);
    for(const hx of [-1.4,-.5,.5,1.4])oval(c,x+hx,y-1.35,.12,.12,ink);
   }
- }else if(d.headwear==='visor'){path(c,[point(x-5.8,y-3.7),point(x+5.7,y-3.7),point(x+7.1,y-1.5),point(x-5.9,y-2)],d.trim,ink)}
- else if(d.headwear==='headband')line(c,[point(x-5,y-3),point(x+.2,y-3.6),point(x+5.2,y-3)],d.trim,1.3);
+ }else if(d.headwear==='visor'){path(c,[point(x-5.8,y-3.7),point(x+5.7,y-3.7),point(x+7.1,y-1.5),point(x-5.9,y-2)],(d.headwearColor??d.trim),ink)}
+ else if(d.headwear==='headband')line(c,[point(x-5,y-3),point(x+.2,y-3.6),point(x+5.2,y-3)],(d.headwearColor??d.trim),1.3);
  if(d.eyewear==='glasses'){
   const rim='#202a38';
   if(!near){
