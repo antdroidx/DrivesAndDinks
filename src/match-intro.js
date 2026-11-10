@@ -1,8 +1,8 @@
 export const INTRO_RATING_KEYS=Object.freeze(['power','control','agility','reach']);
 export const INTRO_RATING_LABELS=Object.freeze({power:'Power',control:'Control',agility:'Speed',reach:'Reach'});
 
-import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS,PADDLE_SHAPE_ALIASES} from './roster.js?v=215';
-import {overallForRating,ratingFromSkill} from './career/rating.js?v=215';
+import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS,PADDLE_SHAPE_ALIASES} from './roster.js?v=216';
+import {overallForRating,ratingFromSkill} from './career/rating.js?v=216';
 
 const finite=(value,fallback=0)=>Number.isFinite(Number(value))?Math.round(Number(value)):fallback;
 const ratingWithModifiers=(value,modifiers,key)=>Math.max(0,Math.min(100,finite(value,70)+(Number(modifiers?.[key])||0)));

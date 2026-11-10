@@ -1,5 +1,5 @@
-import {kitchenContact} from './player-feet.js?v=215';
-import {strokeForContact} from './player-facing.js?v=215';
+import {kitchenContact} from './player-feet.js?v=216';
+import {strokeForContact} from './player-facing.js?v=216';
 export const C={width:20,length:44,net:22,kitchen:7,gravity:32.174,bounce:.72,courtFriction:.91,airDrag:.0024,spinLift:.065,spinDecay:.42,magnus:.05,ballRadius:.125,netCenterHeight:34/12,netPostHeight:3,netRestitution:.12,netPostLeft:-.5,netPostRight:20.5,netPostRadius:.1,dt:1/120,speed:12,accel:45,reach:2.6};
 export function venueConditions(surfaceKind='outdoor',random=Math.random){
  if(surfaceKind==='indoor')return {type:'indoor',label:'INDOOR · CALM',wind:0,humidity:0};

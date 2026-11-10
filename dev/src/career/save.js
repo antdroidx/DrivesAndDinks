@@ -6,18 +6,18 @@
 // never silently resets a career: it falls back to the last good save, and
 // the unreadable payload is kept aside for recovery.
 
-import {NAME_CULTURES,RATING_KEYS,skillAverage} from '../roster.js?v=215';
-import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING,FORMATS} from './rating.js?v=215';
-import {REGIONS} from './geography.js?v=215';
-import {emptyAnalytics} from './analytics.js?v=215';
-import {peakAgeFor,createDevelopmentProfile} from './age.js?v=215';
-import {emptyFinance,validateFinance} from './finance.js?v=215';
-import {emptyCpuWorld,validateCpuWorld} from './cpu-careers.js?v=215';
-import {emptyInjuries,validateInjuries} from './injuries.js?v=215';
-import {emptyEquipment,normalizeEquipment,validateEquipment} from './equipment.js?v=215';
-import {createTeamCareer,validateTeamCareer} from './team-league.js?v=215';
-import {emptyInvitations,validateInvitations} from './invitations.js?v=215';
-import {emptyInbox,validateInbox} from './inbox.js?v=215';
+import {NAME_CULTURES,RATING_KEYS,skillAverage} from '../roster.js?v=216';
+import {RATING_MAX,RATING_MIN,ratingFromSkill,NEW_PLAYER_RATING,FORMATS} from './rating.js?v=216';
+import {REGIONS} from './geography.js?v=216';
+import {emptyAnalytics} from './analytics.js?v=216';
+import {peakAgeFor,createDevelopmentProfile} from './age.js?v=216';
+import {emptyFinance,validateFinance} from './finance.js?v=216';
+import {emptyCpuWorld,validateCpuWorld} from './cpu-careers.js?v=216';
+import {emptyInjuries,validateInjuries} from './injuries.js?v=216';
+import {emptyEquipment,normalizeEquipment,validateEquipment} from './equipment.js?v=216';
+import {createTeamCareer,validateTeamCareer} from './team-league.js?v=216';
+import {emptyInvitations,validateInvitations} from './invitations.js?v=216';
+import {emptyInbox,validateInbox} from './inbox.js?v=216';
 
 export const CAREER_SAVE_VERSION=23;
 export const CAREER_SAVE_KEY='drives-dinks:career';
