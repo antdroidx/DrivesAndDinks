@@ -5,12 +5,12 @@
 // athlete and club id is reproduced exactly on demand. That keeps saves small
 // and guarantees the stable ids a career needs across weeks and seasons.
 
-import {CHARACTERS,generateIdentity,skillAverage} from '../roster.js?v=197';
-import {seededRandom} from '../competition.js?v=197';
-import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=197';
-import {FORMATS,ratingInFormat} from './rating.js?v=197';
-import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=197';
-import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=197';
+import {CHARACTERS,generateIdentity,skillAverage} from '../roster.js?v=198';
+import {seededRandom} from '../competition.js?v=198';
+import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=198';
+import {FORMATS,ratingInFormat} from './rating.js?v=198';
+import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=198';
+import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=198';
 
 // The roadmap starts with a 10,000-player world. Each region receives a
 // stable share based on its playable geography; the exact split remains

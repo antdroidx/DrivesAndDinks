@@ -1,8 +1,8 @@
-import {MOTIONS} from './pixel-character.js?v=197';
-import {CHARACTER_CONCEPTS,HAIR_OPTIONS,conceptDimensions} from './character-concepts.js?v=197';
-import {CLOTHING_COLORS,HAIR_COLORS,PADDLE_COLORS,SKIN_COLORS} from './roster.js?v=197';
-import {appearancePalette} from './pixel-character.js?v=197';
-import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=197';
+import {MOTIONS} from './pixel-character.js?v=198';
+import {CHARACTER_CONCEPTS,HAIR_OPTIONS,conceptDimensions} from './character-concepts.js?v=198';
+import {CLOTHING_COLORS,HAIR_COLORS,PADDLE_COLORS,SKIN_COLORS} from './roster.js?v=198';
+import {appearancePalette} from './pixel-character.js?v=198';
+import {drawAnimeAthlete,animePixelPalette} from './anime-character.js?v=198';
 
 const $=id=>document.getElementById(id);
 const styles=[
