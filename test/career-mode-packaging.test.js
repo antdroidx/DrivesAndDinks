@@ -35,6 +35,18 @@ test('Pages publishes the standalone career folder with the current source',()=>
   assert.match(workflow,/version-build\.js "\$\{\{ github\.run_number \}\}" _site\/career --career/);
 });
 
+test('career setup presents height and weight in American units',()=>{
+  const main=read('src/career/main.js'),css=read('career-mode/career.css');
+  assert.match(main,/HEIGHT · FT \/ IN/);
+  assert.match(main,/WEIGHT · LBS/);
+  assert.match(main,/draft-height-ft/);
+  assert.match(main,/draft-height-in/);
+  assert.match(main,/draft-weight-lb/);
+  assert.doesNotMatch(main,/HEIGHT · CM/);
+  assert.doesNotMatch(main,/WEIGHT · KG/);
+  assert.match(css,/measurement-pair/);
+});
+
 test('the career entry point loads its own stylesheet',()=>{
   const page=read('career-mode/index.html');
   const css=read('career-mode/career.css');

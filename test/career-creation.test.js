@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createCareer} from '../src/career/state.js';
 import {
-  EXPERIENCE_OPTIONS,STARTING_TRAITS,normalizeHeight,normalizeWeight,bodyAttributeModifiers,startingModifiers
+  EXPERIENCE_OPTIONS,STARTING_TRAITS,normalizeHeight,normalizeWeight,bodyAttributeModifiers,startingModifiers,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms
 } from '../src/career/creation.js';
 
 const base=(overrides={})=>createCareer({name:'Creator',gender:'male',archetypeId:'remy',regionId:'north-america',cityId:'seattle',seed:4242,age:25,height:177,weight:80,experience:'athlete',trait:'none',...overrides});
@@ -22,6 +22,15 @@ test('height and weight modify physical attributes relative to body size',()=>{
   assert.equal(normalizeHeight(230),210);
   assert.equal(normalizeWeight(20),40);
   assert.equal(normalizeWeight(200),140);
+});
+
+test('height and weight convert between imperial input and metric simulation values',()=>{
+  assert.deepEqual(centimetersToFeetInches(177),{feet:5,inches:10});
+  assert.equal(feetInchesToCentimeters(5,10,'male'),178);
+  assert.equal(kilogramsToPounds(80),176);
+  assert.equal(poundsToKilograms(176,178,'male'),80);
+  assert.equal(feetInchesToCentimeters(4,0,'male'),145);
+  assert.equal(feetInchesToCentimeters(7,0,'male'),210);
 });
 
 test('one starting trait adds a focused bonus',()=>{

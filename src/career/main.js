@@ -25,7 +25,7 @@ import {analyticsSummary} from './analytics.js';
 import {retire,retirementAdvice,allTimeBoard} from './retirement.js';
 import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js';
 import {opponentHistory} from './opponents.js';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS} from './creation.js';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js';
 import {directoryPage} from './directory.js';
 import {financeSummary,COACHING_FEE} from './finance.js';
 import {weeklyActivityPlan,projectEventLoad} from './planning.js';
@@ -121,6 +121,7 @@ function renderCreate(){
   const cityOptions=cities.map(city=>`<option value="${city.id}"${city.id===cityId?' selected':''}>${escapeHtml(city.label)}, ${escapeHtml(city.country)}</option>`).join('');
   const experienceOptions=EXPERIENCE_OPTIONS.map(option=>`<option value="${option.id}"${option.id===app.draft.experience?' selected':''}>${escapeHtml(option.label)} — ${escapeHtml(option.description)}</option>`).join('');
   const traitOptions=STARTING_TRAITS.map(option=>`<option value="${option.id}"${option.id===app.draft.trait?' selected':''}>${escapeHtml(option.label)} — ${escapeHtml(option.description)}</option>`).join('');
+  const imperialHeight=centimetersToFeetInches(app.draft.height),imperialWeight=kilogramsToPounds(app.draft.weight);
   return `
   <section class="panel">
     <h2>START A CAREER</h2>
@@ -160,12 +161,17 @@ function renderCreate(){
     </div>
     <div class="field-row">
       <div class="field">
-        <label for="draft-height">HEIGHT · CM</label>
-        <input id="draft-height" type="number" min="145" max="210" value="${app.draft.height}" inputmode="numeric">
+        <label>HEIGHT · FT / IN</label>
+        <div class="measurement-pair">
+          <input id="draft-height-ft" type="number" min="4" max="6" value="${imperialHeight.feet}" inputmode="numeric" aria-label="Height feet">
+          <span>ft</span>
+          <input id="draft-height-in" type="number" min="0" max="11" value="${imperialHeight.inches}" inputmode="numeric" aria-label="Height inches">
+          <span>in</span>
+        </div>
       </div>
       <div class="field">
-        <label for="draft-weight">WEIGHT · KG</label>
-        <input id="draft-weight" type="number" min="40" max="140" value="${app.draft.weight}" inputmode="numeric">
+        <label for="draft-weight-lb">WEIGHT · LBS</label>
+        <input id="draft-weight-lb" type="number" min="88" max="309" value="${imperialWeight}" inputmode="numeric">
       </div>
     </div>
     <div class="field-row">
@@ -892,15 +898,21 @@ document.addEventListener('click',event=>{
     if(action==='create'){
       const name=document.getElementById('draft-name')?.value?.trim();
       if(!name){toast('Enter a player name first.',true);return}
+      const gender=document.getElementById('draft-gender')?.value??app.draft.gender;
+      const height=feetInchesToCentimeters(
+        Number(document.getElementById('draft-height-ft')?.value),
+        Number(document.getElementById('draft-height-in')?.value),
+        gender
+      );
       app.career=hydrateCareerWithArchive(createCareer({
         name,
-        gender:document.getElementById('draft-gender')?.value,
+        gender,
         archetypeId:document.getElementById('draft-archetype')?.value,
         regionId:document.getElementById('draft-region')?.value,
         cityId:document.getElementById('draft-city')?.value,
         age:Number(document.getElementById('draft-age')?.value),
-        height:Number(document.getElementById('draft-height')?.value),
-        weight:Number(document.getElementById('draft-weight')?.value),
+        height,
+        weight:poundsToKilograms(Number(document.getElementById('draft-weight-lb')?.value),height,gender),
         experience:document.getElementById('draft-experience')?.value,
         trait:document.getElementById('draft-trait')?.value
       }),app.storage);
@@ -1079,8 +1091,16 @@ document.addEventListener('change',async event=>{
   }
   if(id==='draft-city'){app.draft.cityId=event.target.value}
   if(id==='draft-age'){app.draft.age=Number(event.target.value)||25}
-  if(id==='draft-height'){app.draft.height=Number(event.target.value)||177}
-  if(id==='draft-weight'){app.draft.weight=Number(event.target.value)||80}
+  if(id==='draft-height-ft'||id==='draft-height-in'){
+    const feet=Number(document.getElementById('draft-height-ft')?.value);
+    const inches=Number(document.getElementById('draft-height-in')?.value);
+    app.draft.height=feetInchesToCentimeters(feet,inches,app.draft.gender);
+    render();
+  }
+  if(id==='draft-weight-lb'){
+    app.draft.weight=poundsToKilograms(Number(event.target.value),app.draft.height,app.draft.gender);
+    render();
+  }
   if(id==='draft-experience'){app.draft.experience=event.target.value}
   if(id==='draft-trait'){app.draft.trait=event.target.value}
   if(id==='draft-gender'){app.draft.gender=event.target.value}
