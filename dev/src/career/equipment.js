@@ -4,10 +4,10 @@
 // keeps cosmetics independent from performance and prevents new products from
 // exceeding the same bounded modifiers as the starter catalog.
 
-import {recordFinance} from './finance.js?v=202';
-import {seededRandom} from '../competition.js?v=202';
-import {mixSeed} from './population.js?v=202';
-import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS} from '../roster.js?v=202';
+import {recordFinance} from './finance.js?v=203';
+import {seededRandom} from '../competition.js?v=203';
+import {mixSeed} from './population.js?v=203';
+import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS} from '../roster.js?v=203';
 
 export const EQUIPMENT_VERSION=3;
 export const STARTER_EQUIPMENT_ID='allcourt-hybrid';
@@ -37,7 +37,7 @@ const SHAPES=Object.freeze([
   {shape:'widebody',shapeLabel:'Widebody'},{shape:'hybrid',shapeLabel:'Hybrid'},{shape:'elongated',shapeLabel:'Elongated'}
 ]);
 
-const HEADWEAR_STYLES=Object.freeze([
+export const HEADWEAR_STYLES=Object.freeze([
   {headwear:'cap',label:'Cap',price:40},
   {headwear:'visor',label:'Visor',price:45},
   {headwear:'headband',label:'Headband',price:30}
