@@ -204,11 +204,11 @@ html:has(.court-app),body.court-app{height:100%;overflow:hidden}
 body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavior:none}
 .court-app main{width:100%;max-width:none!important;height:100%;min-height:0;margin:0;padding:max(3px,env(safe-area-inset-top)) max(3px,env(safe-area-inset-right)) max(3px,env(safe-area-inset-bottom)) max(3px,env(safe-area-inset-left));display:grid;grid-template-rows:auto minmax(0,1fr);gap:4px;overflow:hidden;background:#111c2a}
 .court-app header{position:relative;display:flex;flex-wrap:nowrap;min-width:0;gap:6px;min-height:38px;align-items:center}
-.court-app header h1{font-size:clamp(14px,2vw,22px);white-space:nowrap;margin:0;letter-spacing:0}
+.court-app header h1{font-size:15px;white-space:nowrap;margin:0;letter-spacing:.14em}.game-wordmark{font:800 15px/1.2 "Trebuchet MS","Segoe UI",system-ui,sans-serif;letter-spacing:.14em}.game-wordmark span{color:var(--accent)}
 .court-app .brand-meta{position:absolute;left:0;top:0}.court-app .brand-meta small{display:none}.court-app .build-label{font-size:7px;padding:0 3px}.court-app header>div:first-child{padding-top:8px}
 .court-app .header-actions{display:flex;flex-wrap:nowrap;margin-left:auto;width:auto;gap:4px}
 .court-app header button{font-size:10px;min-height:36px;padding:6px;white-space:nowrap}
-.court-app .header-actions>button:not(#fullscreen-button):not(#pause-button){display:none}
+.court-app .header-actions>button:not(#fullscreen-button):not(#pause-button):not(#career-exit-button){display:none}
 .court-app .settings-open .header-actions{position:absolute;left:0;right:0;top:100%;z-index:30;background:#152c35;padding:8px;border:1px solid #80e0b5;display:flex;flex-wrap:wrap;justify-content:flex-end}
 .court-app .settings-open .header-actions>button{display:block!important}
 .court-app .playfield{grid-row:2;grid-column:1;width:100%;height:100%;min-width:0;min-height:0;max-width:none;max-height:none;aspect-ratio:auto;position:relative;display:grid;grid-template-columns:minmax(0,1fr) var(--court-size) minmax(0,1fr);grid-template-rows:var(--court-hud-height,54px) var(--court-height) minmax(0,1fr);gap:0;align-self:start;justify-self:stretch;align-content:start}
@@ -520,3 +520,11 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
  .game-start-actions .start-play{font-size:12px}
  .game-version{font-size:9px}
 }
+
+.match-entry-summary{display:grid;gap:5px;margin:0 auto 16px;padding:12px 14px;max-width:760px;border:1px solid #527777;border-radius:10px;background:#102931}
+.match-entry-summary p{margin:0;font-size:12px;line-height:1.4;color:#d7e8df}
+.match-entry-summary p:nth-child(n+2){color:#a9c8bd}
+@media(max-width:600px){.match-entry-summary{margin-bottom:9px;padding:8px 10px;gap:2px}.match-entry-summary p{font-size:10px}}
+
+.court-app.career-match-mode #setup-button,.court-app.career-match-mode #restart,.court-app.career-match-mode #restart-top,.court-app.career-match-mode footer #restart{display:none!important}
+.court-app #career-exit-button{min-height:36px;padding:6px 10px;white-space:nowrap}

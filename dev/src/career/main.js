@@ -4,39 +4,39 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js?v=199';
-import {onCharacterSpritesReady} from '../pixel-character.js?v=199';
-import {createAnimeGameRenderer} from '../anime-game.js?v=199';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=199';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=199';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js?v=200';
+import {onCharacterSpritesReady} from '../pixel-character.js?v=200';
+import {createAnimeGameRenderer} from '../anime-game.js?v=200';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=200';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js?v=200';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=199';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=199';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=199';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=199';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=199';
-import {isPlayerDone} from './tournament.js?v=199';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=199';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=199';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=199';
-import {rankingSummary} from './ranking.js?v=199';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=199';
-import {analyticsSummary} from './analytics.js?v=199';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=199';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=199';
-import {opponentHistory} from './opponents.js?v=199';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=199';
-import {directoryPage} from './directory.js?v=199';
-import {financeSummary,COACHING_FEE} from './finance.js?v=199';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=199';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=199';
-import {currentInjury,activeInjuries} from './injuries.js?v=199';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG} from './equipment.js?v=199';
-import {teamCareerSummary} from './team-league.js?v=199';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=199';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=199';
+} from './state.js?v=200';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=200';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=200';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=200';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=200';
+import {isPlayerDone} from './tournament.js?v=200';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=200';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=200';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=200';
+import {rankingSummary} from './ranking.js?v=200';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=200';
+import {analyticsSummary} from './analytics.js?v=200';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=200';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=200';
+import {opponentHistory} from './opponents.js?v=200';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=200';
+import {directoryPage} from './directory.js?v=200';
+import {financeSummary,COACHING_FEE} from './finance.js?v=200';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=200';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=200';
+import {currentInjury,activeInjuries} from './injuries.js?v=200';
+import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG} from './equipment.js?v=200';
+import {teamCareerSummary} from './team-league.js?v=200';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=200';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=200';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},

@@ -1,6 +1,7 @@
-import {competitionRecord} from './competition.js?v=194';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=194';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=194';
+import {competitionRecord} from './competition.js?v=200';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=200';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=200';
+export {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS};
 
 // Ratings are the design-facing values. Internal simulation multipliers are
 // derived from them so each shot category can influence play independently.
@@ -247,7 +248,7 @@ export function effectiveRatings(input){
 export function skillAverage(ratings){const keys=RATING_KEYS.filter(key=>key!=='aggression');return Math.round(keys.reduce((sum,key)=>sum+(Number(ratings[key])||0),0)/keys.length)}
 
 // Internal balance profiles: presentation/demo selections remain unchanged.
-export const SKILL_LEVELS=Object.freeze({beginner:35,intermediate:55,demo:70,advanced:85});
+export const SKILL_LEVELS=Object.freeze({beginner:64,intermediate:66,demo:68,advanced:70});
 export function levelLineup(level='demo',random=Math.random){
  const baseline=SKILL_LEVELS[level];if(baseline===undefined)throw new Error('Unknown skill level');
  return ['avery','remy','jordan','selena'].map((character,index)=>{
