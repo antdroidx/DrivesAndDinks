@@ -8,7 +8,7 @@ test('the in-game header uses the dashboard wordmark styling',()=>{
  const html=read('index.html'),css=read('style.css');
  assert.match(html,/class="game-wordmark"/);
  assert.match(css,/\.game-wordmark\{font:800 15px\/1\.2/);
- assert.match(css,/\.game-wordmark span\{color:var\(--accent\)\}/);
+ assert.match(css,/\.game-wordmark span\{color:#4be3c2\}/);
 });
 
 test('deployments expose a sequential build number at the release root and dev mirror',()=>{
