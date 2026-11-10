@@ -4,7 +4,7 @@
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique} from '../roster.js';
 import {onCharacterSpritesReady,paddleOutline} from '../pixel-character.js';
 import {createAnimeGameRenderer} from '../anime-game.js';
 import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js';
@@ -695,7 +695,7 @@ function namedOption(options,id,fallback='—'){
 function renderAthleteProfile(){
   const athlete=profileAthleteById(app.playerProfileId);
   if(!athlete)return '<section class="panel"><h2>PLAYER NOT FOUND</h2><p>That player is no longer in this region.</p><div class="actions"><button type="button" class="secondary" data-view="players">← BACK TO PLAYERS</button></div></section>';
-  const career=app.career,look=athlete.appearance??{},record=career.cpuWorld?.records?.[athlete.id]??null;
+  const career=app.career,look=athlete.appearance??{},record=career.cpuWorld?.records?.[athlete.id]??null,engineProfile=careerProfile(athlete),paddleType=namedOption(PADDLES,engineProfile.paddle?.id,'Allcourt'),paddleShape=namedOption(PADDLE_SHAPES,engineProfile.paddle?.shapeId,'Hybrid - Flat Top');
   const formatRows=FORMATS.map(format=>{
     const rating=athlete.formats?.[format]??0,band=ratingBand(rating);
     return `<div class="format-line"><strong>${formatRating(rating)}</strong><span>${escapeHtml(formatLabel(format,athlete.gender))}</span><small>${escapeHtml(band.label)}</small></div>`;
@@ -730,6 +730,7 @@ function renderAthleteProfile(){
         <div><span>HAIR</span><strong>${escapeHtml(hair)}</strong></div>
         <div><span>HEADWEAR</span><strong>${escapeHtml(headwear)} · ${escapeHtml(namedOption(PADDLE_COLORS,look.headwearColor,'None'))}</strong></div>
         <div><span>EYEWEAR</span><strong>${escapeHtml(eyewear)}</strong></div>
+        <div><span>PADDLE</span><strong>${escapeHtml(paddleType)} · ${escapeHtml(paddleShape)} · ${Number(engineProfile.paddle?.thickness)||16} mm</strong></div>
         <div><span>PADDLE COLOR</span><strong>${escapeHtml(paddleColor)}</strong></div>
         <div><span>BODY</span><strong>${feet} ft ${inches} in · build ${Math.round((Number(look.build)||.5)*100)}</strong></div>
       </div>

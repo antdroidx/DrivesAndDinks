@@ -191,6 +191,8 @@ test('generated player profiles expose look, ratings and career history',()=>{
   assert.match(main,/data-action="open-player"/);
   assert.match(main,/athlete-profile-preview/);
   assert.match(main,/CAREER HISTORY/);
+  assert.match(main,/paddleType=namedOption\(PADDLES/);
+  assert.match(main,/<span>PADDLE<\/span>/);
   assert.match(main,/RATING TRACKING/);
   assert.match(population,/function generatedAppearance\(/);
   assert.match(population,/headwearRoll/);

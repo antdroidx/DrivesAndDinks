@@ -2,6 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {buildClubIndex,buildClubRoster,buildAthlete,buildRegionRoster,findClub,mixSeed,clubsForCity,WORLD_POPULATION_TARGET,REGION_POPULATION_TARGETS} from '../src/career/population.js';
 import {RATING_KEYS} from '../src/roster.js';
+import {careerProfile} from '../src/career/matchmaking.js';
 
 const SEED=20260101;
 
@@ -57,9 +58,19 @@ test('generated athletes vary their outfits, colors, hairstyles and accessories'
   assert.ok(values('headwear').size>=2,'headwear should vary');
   assert.ok(values('eyewear').size>=2,'eyewear should vary');
   assert.ok(values('paddleColor').size>=4,'paddle colors should vary');
+  assert.ok(values('paddleFamily').size>=2,'paddle families should vary');
+  assert.ok(values('paddleShape').size>=4,'paddle silhouettes should vary');
+  assert.ok(values('paddleThickness').size>=2,'paddle thickness should vary');
   assert.ok(Math.max(...roster.map(player=>player.appearance.height))-Math.min(...roster.map(player=>player.appearance.height))>10,'body sizes should vary');
   assert.deepEqual(buildAthlete(SEED,club,0),buildAthlete(SEED,club,0),'appearance remains deterministic');
 });
+test('generated CPU paddle choices carry into their engine profile',()=>{
+  const club=buildClubIndex(SEED,'north-america')[0],athlete=buildAthlete(SEED,club,0),profile=careerProfile(athlete);
+  assert.equal(profile.paddle.id,athlete.appearance.paddleFamily);
+  assert.equal(profile.paddle.shapeId,athlete.appearance.paddleShape);
+  assert.equal(profile.paddle.thickness,athlete.appearance.paddleThickness);
+});
+
 test('generated athletes are stable, fully rated and inside the rating band',()=>{
   const clubs=buildClubIndex(SEED,'north-america');
   const club=clubs[3];

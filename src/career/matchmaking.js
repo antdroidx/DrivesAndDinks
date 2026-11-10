@@ -25,8 +25,8 @@ function selectionFor(athlete,paddle,shape,color,headwear){
     gender:athlete.gender,
     handedness:look.handedness??athlete.handedness,
     customName:athlete.name,
-    paddle,
-    paddleShape:shape,
+    paddle:look.paddleFamily??paddle,
+    paddleShape:look.paddleShape??shape,
     shirtColor:look.shirtColor??athlete.shirtColor??'green',
     paddleColor:color??look.paddleColor??athlete.paddleColor??'mint',
     highlightColor:look.highlightColor??athlete.highlightColor??'yellow',
@@ -67,7 +67,7 @@ export function careerProfile(athlete,{paddle=DEFAULT_PADDLE,shape=DEFAULT_SHAPE
   const rendered=applyPhysique(profile,{...profile.appearance,...athlete.appearance,paddleColor:color??profile.appearance.paddleColor,headwear:headwear?.headwear??profile.appearance.headwear,headwearColor:headwear?.color??profile.appearance.headwearColor,height,build});
   rendered.paddle.equipmentName=item?.label??rendered.paddle.equipmentName??'';
   rendered.paddle.color=color??rendered.appearance.paddleColor;
-  const thickness=Number(item?.thickness)===14?14:16;
+  const thickness=Number(item?.thickness)===14?14:Number(item?.thickness)===16?16:Number(athlete.appearance?.paddleThickness)===14?14:16;
   rendered.paddle.thickness=thickness;
   rendered.paddle.power*=thickness===14?1.03:.985;
   rendered.paddle.control*=thickness===14?.98:1.03;
