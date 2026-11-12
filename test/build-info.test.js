@@ -7,7 +7,8 @@ const read=(path)=>readFileSync(new URL(`../${path}`,import.meta.url),'utf8');
 test('the in-game header uses the dashboard wordmark styling',()=>{
  const html=read('index.html'),css=read('style.css');
  assert.match(html,/class="game-wordmark"/);
- assert.match(css,/\.game-wordmark\{font:800 15px\/1\.2/);
+ assert.match(css,/\.game-wordmark\{font:700 15px\/1\.5/);
+ assert.match(css,/color:#e8eef5;text-shadow:none/);
  assert.match(css,/\.game-wordmark span\{color:#4be3c2\}/);
 });
 
