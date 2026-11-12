@@ -20,7 +20,7 @@ const REPLAY_PLATE={file:'replay-sideline.png',boundary:.5,floor:'#93aac4'};
 
 function replayName(name){return String(name||'').split(/\s+/)[0]}
 function drawReplayName(c,name,x,y,scale){
- const label=replayName(name);if(!label)return;c.save();c.font=`bold ${Math.max(8,Math.min(12,scale*.42))}px monospace`;c.textAlign='center';const width=Math.max(32,c.measureText(label).width+12);c.fillStyle='#10232de8';c.fillRect(x-width/2,y-15,width,14);c.fillStyle='#fff8df';c.fillText(label,x,y-5);c.restore();
+ const label=replayName(name);if(!label)return;c.save();c.font=`bold ${Math.max(8,Math.min(12,scale*.42))}px Arial, Helvetica, sans-serif`;c.textAlign='center';const width=Math.max(32,c.measureText(label).width+12);c.fillStyle='#10232de8';c.fillRect(x-width/2,y-15,width,14);c.fillStyle='#fff8df';c.fillText(label,x,y-5);c.restore();
 }
 const shade=(hex,t)=>'#'+hex.slice(1).match(/../g).map(v=>Math.round(parseInt(v,16)*(1-t)).toString(16).padStart(2,'0')).join(''),
  sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),

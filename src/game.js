@@ -1,4 +1,4 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js';
+import {lineReplayReview,footReplayReview,netReplayReview,AUTOMATIC_REPLAY_DELAY} from './fault-replay.js';
 import {OpponentMemory,anticipateReturn} from './opponent-memory.js';
 import {MatchJournal} from './match-journal.js';import {summarizePlaytest} from './playtest-summary.js';
 import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js';
@@ -115,7 +115,7 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=
   this.result=`${winner===0?'YOUR TEAM':'CPU'} WINS RALLY · ${why.toUpperCase()}`;
   this.outcome=winner===servingTeam?'POINT':this.score.team!==servingTeam?'SIDE OUT':'SECOND SERVER';
   this.message=sideSwitched?'SWITCH SIDES':why.toUpperCase();this.phase=this.score.winner===null?'pause':'over';this.pause=2.5;
-  const highlight=this.faultFocus?{time:this.clock,label:why.toUpperCase()}:this.replayHighlights.at(-1),matchPoint=this.score.winner!==null,longRally=this.shots>=20;
+  const highlight=this.faultFocus?{time:this.clock,label:why.toUpperCase()}:this.replayHighlights.filter(entry=>entry.label!=='AROUND THE POST'||entry.successful===true).at(-1),matchPoint=this.score.winner!==null,longRally=this.shots>=20;
  let focus=this.faultFocus?structuredClone(this.faultFocus):null;
  if(!focus&&highlight?.x!==undefined)focus={x:highlight.x,y:highlight.y,z:highlight.z,time:highlight.time,reason:highlight.label};
  if(!focus&&this.replayContacts.length){const recent=this.replayContacts.filter(c=>c.time>=Math.max(0,this.clock-3)).at(-1);if(recent)focus={x:recent.x,y:recent.y,z:recent.z,time:recent.time,reason:'CONTACT'};}
@@ -132,12 +132,23 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=
     const frames=this.replayFrames.filter(f=>f.clock>=start&&f.clock<=end);
     const review=why.startsWith('Kitchen')?footReplayReview(this.faultFocus):['Out','Unreturned','Double bounce','Service fault','Net fault'].includes(why)?this.replayReview:null;
     this.pointReplay={label:qualifiers.join(' · ')||`${this.shots}-SHOT RALLY`,frames,...(focus?{focus}:{}),...(review?{review}:{})};
-    if(qualifiers.length&&frames.length>15)this.replayClip={...this.pointReplay};
+    if(qualifiers.length&&frames.length>15)this.replayClip={...this.pointReplay,readyAt:this.clock+AUTOMATIC_REPLAY_DELAY};
   }
+ }
+ takeReplayClip(enabled=true){
+  if(!enabled){this.replayClip=null;return null;}
+  if(!this.replayClip||this.paused||this.clock<(this.replayClip.readyAt??this.clock))return null;
+  const clip=this.replayClip;this.replayClip=null;return clip;
+ }
+ confirmAtpReplay(){
+  if(this.ball.shot!=='atp')return;
+  const candidate=this.replayHighlights.findLast(entry=>entry.label==='AROUND THE POST'&&entry.shotNumber===this.shots&&entry.team===this.last);
+  if(candidate)candidate.successful=true;
  }
  hit(player,shot,aim,quality=1,placement=null){
   const err=this.volleyError(player);if(err){this.fault(player.team,err,player);return false}
   if(this.bounces>1){this.fault(player.team,'Double bounce');return false}
+  if(player.team!==this.last)this.confirmAtpReplay();
   this.recordReplay(true);
   this.observeOpponentShot();this.replayReview=null;
   const incomingVelocity={x:this.ball.vx||0,y:this.ball.vy||0,z:this.ball.vz||0},poor=quality<.8,wasPoach=!poor&&this.poachReservation?.shot===this.shots&&this.poachReservation.playerId===player.id;
@@ -178,7 +189,7 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=
   const surpriseShot=['atp','erne','tweener'].includes(shot)||(speedUp&&quality>=.8)||(shot==='lob'&&quality>=.9&&difficulty>.55);for(const p of this.players)if(p.team!==player.team){p.reactionWait=p.abilities.reaction+(1-(p.stamina??1))*.12;p.splitStepTimer=.16;if(surpriseShot)p.surpriseTimer=.65;}
   this.contact={x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z,time:.12,quality,difficulty,sweetSpot:player.contactSweetSpot,playerId:player.id,shot};
   this.replayContacts.push({time:this.clock,x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z});if(this.replayContacts.length>16)this.replayContacts.shift();
-  if(!poor&&(shot==='atp'||shot==='erne'))this.replayHighlights.push({time:this.clock,x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z,label:shot==='atp'?'AROUND THE POST':'ERNE'});
+  if(!poor&&(shot==='atp'||shot==='erne'))this.replayHighlights.push({time:this.clock,x:player.contactPoint.x,y:player.contactPoint.y,z:player.contactPoint.z,label:shot==='atp'?'AROUND THE POST':'ERNE',team:player.team,shotNumber:this.shots+1,successful:shot!=='atp'});
   this.stats.shots[shot]=(this.stats.shots[shot]||0)+1;this.stats.patterns[shotPattern]=(this.stats.patterns[shotPattern]||0)+1;this.stats.teams[player.team].hits++;if(poor)this.stats.teams[player.team].mishits++;
   if(this.practice&&player.id===0)this.practice.returnedShot=shot;
   if(!this.practice)this.observedShot={playerId:player.id,team:player.team,shot};
@@ -245,7 +256,7 @@ updateSurfaceEffects(dt){
   this.replayFrames.push(frame);if(this.replayFrames.length>360)this.replayFrames.shift();
  }
  update(dt){if(this.paused)return;if(this.scenario){this.updateScenario(dt);return}this.recordReplay();this.clock+=dt;for(const p of this.players){p.airborneTimer=Math.max(0,(p.airborneTimer||0)-dt);p.reactionWait=Math.max(0,(p.reactionWait||0)-dt);p.effortTimer=Math.max(0,(p.effortTimer||0)-dt);p.aggressionTimer=Math.max(0,(p.aggressionTimer||0)-dt);p.surpriseTimer=Math.max(0,(p.surpriseTimer||0)-dt);p.celebrateTimer=Math.max(0,(p.celebrateTimer||0)-dt);p.outsideTimer=Math.max(0,(p.outsideTimer||0)-dt);p.baselineTimer=Math.max(0,(p.baselineTimer||0)-dt);p.serveHold=Math.max(0,(p.serveHold||0)-dt);p.splitStepTimer=Math.max(0,(p.splitStepTimer||0)-dt);p.recoveryTimer=Math.max(0,(p.recoveryTimer||0)-dt);p.swing=Math.max(0,p.swing-dt);p.windup=Math.max(0,(p.windup||0)-dt)}if(this.contact)this.contact.time=Math.max(0,this.contact.time-dt);if(this.netMark)this.netMark.time=Math.max(0,this.netMark.time-dt);const pending=this.hitBuffer;this.hitBuffer=Math.max(0,this.hitBuffer-dt);this.feedbackTime=Math.max(0,this.feedbackTime-dt);if(pending>0&&this.hitBuffer===0&&this.phase==='rally'){this.message=Math.hypot(this.players[0].x-this.ball.x,this.players[0].y-this.ball.y)>2.2?'OUT OF REACH':'TOO EARLY';this.humanFeedback=this.message;this.feedbackTime=.9}if(this.practice){updatePractice(this,dt);return}if(this.phase==='over')return;if(this.phase==='pause'){this.pause-=dt;if(this.pause<=0)this.serveSetup();return}if(this.phase==='serve'){this.timer+=dt;if(this.serveToss){const toss=this.serveToss;toss.time+=dt;this.ball.z=toss.startZ+toss.tossSpeed*toss.time-.5*C.gravity*toss.time*toss.time;if(toss.time>=toss.duration)this.releaseServe();return}if((this.mode==='watch'||this.server.id!==0)&&this.timer>1.2)this.serve(true);return}
- const b=this.ball;this.trail.push({x:b.x,y:b.y,z:b.z});if(this.trail.length>8)this.trail.shift();const activeConditions=this.mode==='play'?this.conditions:null;b.wind=activeConditions?.wind??0;b.humidity=activeConditions?.humidity??0;const event=stepBall(b,dt);if(event){this.emit(event,{position:{x:b.x,y:b.y,z:b.z}});if(event==='net'){this.stats.net.contacts++;this.stats.net[this.ball.netCord?'cords':'mesh']++;this.netMark={x:b.x,y:C.net,z:Math.max(netHeightAt(b.x),Math.min(b.z,C.netPostHeight)),time:.55,kind:this.ball.netCord?'cord':'mesh',vx:b.vx,vy:b.vy,vz:b.vz};this.replayReview=netReplayReview(b,this.clock);}if(event==='bounce'){if(this.bounces===0&&this.replayReview?.kind!=='net')this.replayReview=lineReplayReview(b,this.clock,{serve:this.shots===1,receiverTeam:1-this.last,serveX:this.serveX});this.observeOpponentShot();this.bounceMark={x:b.x,y:b.y,time:.35};this.lastBounceAt=this.clock}}if(this.bounceMark)this.bounceMark.time=Math.max(0,this.bounceMark.time-dt);if(event==='post'){this.fault(this.last,'Post fault');return}if(event==='bounce'){const team=side(b.y);if(b.netContact&&team===this.last){this.fault(this.last,'Net fault');return}if(b.netContact){b.netContact=false;b.netCord=false;}if(this.bounces>0){this.fault(1-this.last,'Double bounce');return}if(!inBounds(b.x,b.y)){this.fault(this.last,'Out');return}if(team===this.last){this.fault(this.last,'Wrong side');return}this.bounces++;if(this.shots===1){const legalX=this.serveX<10?b.x>=10-1e-6:b.x<=10+1e-6;const legalY=team===0?b.y>29+1e-6:b.y<15-1e-6;if(!legalX||!legalY){this.fault(this.last,'Service fault');return}}if(this.bounces>=2){this.fault(team,'Double bounce');return}}
+ const b=this.ball;this.trail.push({x:b.x,y:b.y,z:b.z});if(this.trail.length>8)this.trail.shift();const activeConditions=this.mode==='play'?this.conditions:null;b.wind=activeConditions?.wind??0;b.humidity=activeConditions?.humidity??0;const event=stepBall(b,dt);if(event){this.emit(event,{position:{x:b.x,y:b.y,z:b.z}});if(event==='net'){this.stats.net.contacts++;this.stats.net[this.ball.netCord?'cords':'mesh']++;this.netMark={x:b.x,y:C.net,z:Math.max(netHeightAt(b.x),Math.min(b.z,C.netPostHeight)),time:.55,kind:this.ball.netCord?'cord':'mesh',vx:b.vx,vy:b.vy,vz:b.vz};this.replayReview=netReplayReview(b,this.clock);}if(event==='bounce'){if(this.bounces===0&&this.replayReview?.kind!=='net')this.replayReview=lineReplayReview(b,this.clock,{serve:this.shots===1,receiverTeam:1-this.last,serveX:this.serveX});this.observeOpponentShot();this.bounceMark={x:b.x,y:b.y,time:.35};this.lastBounceAt=this.clock}}if(this.bounceMark)this.bounceMark.time=Math.max(0,this.bounceMark.time-dt);if(event==='post'){this.fault(this.last,'Post fault');return}if(event==='bounce'){const team=side(b.y);if(b.netContact&&team===this.last){this.fault(this.last,'Net fault');return}if(b.netContact){b.netContact=false;b.netCord=false;}if(this.bounces>0){this.fault(1-this.last,'Double bounce');return}if(!inBounds(b.x,b.y)){this.fault(this.last,'Out');return}if(team===this.last){this.fault(this.last,'Wrong side');return}this.bounces++;if(this.shots===1){const legalX=this.serveX<10?b.x>=10-1e-6:b.x<=10+1e-6;const legalY=team===0?b.y>29+1e-6:b.y<15-1e-6;if(!legalX||!legalY){this.fault(this.last,'Service fault');return}}if(this.bounces>=2){this.fault(team,'Double bounce');return}this.confirmAtpReplay();}
  if(event)this.recordReplay(true);this.updateStackingSafety();
  const incoming=1-this.last;
  if(!this.teamPlan||this.teamPlan.shot!==this.shots||this.clock>this.teamPlan.expires){
