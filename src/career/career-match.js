@@ -111,6 +111,31 @@ function matchupFor({state,tournament,match}){
   };
 }
 
+// Tournament members retain their entry snapshots for the draw. Rating a
+// later game must use the durable results from earlier games, including
+// within a best-of-three and when resuming an older saved pending match.
+function currentCpuRatings(state,matchup,format){
+  const table=state.worldRatings?.[format]??{};
+  const source=(id,rating,matches)=>{
+    const stored=table[id];
+    return {
+      rating:Number.isFinite(stored?.[0])?stored[0]:rating,
+      matches:Number.isFinite(stored?.[2])?stored[2]:(matches??0)
+    };
+  };
+  const opponents=(matchup.opponentIds??[]).map((id,index)=>source(id,matchup.opponentRatings?.[index],matchup.opponentMatches?.[index]));
+  const partner=source(matchup.partnerId,matchup.partnerRating,matchup.partnerMatches);
+  const opponentRatings=opponents.map(entry=>entry.rating);
+  return {
+    ...matchup,
+    opponentRatings,
+    opponentMatches:opponents.map(entry=>entry.matches),
+    partnerRating:partner.rating,
+    partnerMatches:partner.matches,
+    teamRating:opponentRatings.length?opponentRatings.reduce((sum,value)=>sum+value,0)/opponentRatings.length:matchup.teamRating
+  };
+}
+
 // Builds the pending match for whatever round the tournament is on, or null
 // when the player has nothing to play.
 function pendingFor({state,tournament}){
@@ -140,7 +165,7 @@ function pendingFor({state,tournament}){
     difficulty:['easy','normal','hard'].includes(state.settings?.difficulty)?state.settings.difficulty:(tournament.difficulty??'normal'),
     learning:opponentLearningForMatchup(state,matchup)??state.opponentLearning??null,
     stacking:normalizeStackingSelection(state.settings?.stacking),
-    matchup 
+    matchup:currentCpuRatings(state,matchup,tournament.format)
   };
 }
 
@@ -320,8 +345,9 @@ function simulateAndAdvance(state,tournament){
 
 // Scores a played match back into the career.
 export function finishCareerMatch(state,report){
-  const pending=state.pendingMatch;
-  if(!pending)return {ok:false,state,message:'There is no match waiting to be scored.'};
+  const queued=state.pendingMatch;
+  if(!queued)return {ok:false,state,message:'There is no match waiting to be scored.'};
+  const pending={...queued,matchup:currentCpuRatings(state,queued.matchup,queued.format)};
   const event=EVENT_BY_ID[pending.eventId];
   const option={id:pending.optionId,format:pending.format,divisionId:pending.divisionId,label:pending.bracket};
   const ratedOutcome=rateMatchReport({report,matchup:pending.matchup,matchType:pending.matchType??event?.matchType,targetScore:pending.rules?.targetScore});
@@ -355,10 +381,10 @@ export function finishCareerMatch(state,report){
   const table=worldRatings[pending.format]=worldRatings[pending.format]??{};
   for(const player of outcome.ratings){
     if(player.id===pending.matchup.playerId)continue;
-    const athleteId=pending.matchup.athleteIds?.[player.id];
+    const athleteId=pending.matchup.athleteIds?.[player.id]??(pending.format==='singles'?pending.matchup.opponentIds?.[0]:null);
     if(!athleteId||athleteId==='player')continue;
     const previous=table[athleteId];
-    table[athleteId]=[Math.round(player.rating*1000)/1000,state.week,(previous?.[2]??0)+1];
+    table[athleteId]=[Math.round(player.rating*1000)/1000,state.week,(previous?.[2]??player.matchesPlayed??0)+1];
   }
 
   // One attribute grows for every match played.
