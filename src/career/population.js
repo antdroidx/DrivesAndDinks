@@ -5,12 +5,13 @@
 // athlete and club id is reproduced exactly on demand. That keeps saves small
 // and guarantees the stable ids a career needs across weeks and seasons.
 
-import {CHARACTERS,COURT_PALETTES,OUTFIT_OPTIONS,PADDLES,PADDLE_SHAPES,generateIdentity,hairStylesFor,sampleAthleteBody,skillAverage} from '../roster.js?v=217';
-import {seededRandom} from '../competition.js?v=217';
-import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=217';
-import {FORMATS,ratingInFormat} from './rating.js?v=217';
-import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=217';
-import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=217';
+import {CHARACTERS,COURT_PALETTES,OUTFIT_OPTIONS,PADDLES,PADDLE_SHAPES,generateIdentity,hairStylesFor,sampleAthleteBody,skillAverage} from '../roster.js?v=219';
+import {seededRandom} from '../competition.js?v=219';
+import {REGIONS,regionById,allCities,citiesForArea,citizenshipFor,ratingFromSkill} from './geography.js?v=219';
+import {FORMATS,ratingInFormat} from './rating.js?v=219';
+import {attributeAgeFactor,createDevelopmentProfile} from './age.js?v=219';
+import {trainingResponse,potentialForStartAge} from './career-lifecycle.js?v=219';
+import {createCpuTrajectory,cpuTrajectoryRatings} from './cpu-trajectory.js?v=219';
 
 // The roadmap starts with a 10,000-player world. Each region receives a
 // stable share based on its playable geography; the exact split remains
@@ -175,8 +176,10 @@ export function buildAthleteSkill(seed,club,index,week=0,startAgeOverride=null){
   }
   const age=ageAtWeek(startAge,week);
   const maintenance=Object.fromEntries(Object.keys(baseRatings).map(key=>[key,0]));
-  const ratings=developedRatings({baseRatings,peakRatings,age,development,maintenance});
-  return {archetype,baseRatings,peakRatings,maintenance,development,startAge,age,potential,ratings,average:skillAverage(ratings),formatBias,gender};
+  const trajectory=createCpuTrajectory(mixSeed(seed,`athlete:${club.id}:${index}:trajectory`),startAge);
+  const initialRatings=developedRatings({baseRatings,peakRatings,age:startAge,development,maintenance});
+  const ratings=cpuTrajectoryRatings({initialRatings,peakRatings,startAge,week,development,trajectory});
+  return {archetype,baseRatings,peakRatings,maintenance,development,trajectory,initialRatings,startAge,age,potential,ratings,average:skillAverage(ratings),formatBias,gender};
 }
 
 function generatedAppearance(gender,identity,random){
@@ -205,7 +208,7 @@ function generatedAppearance(gender,identity,random){
 
 export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
   const random=seededRandom(mixSeed(seed,`athlete:${club.id}:${index}:identity`));
-  const {archetype,baseRatings,peakRatings,maintenance,development,startAge,age,potential,ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index,week,startAgeOverride);
+  const {archetype,baseRatings,peakRatings,maintenance,development,trajectory,initialRatings,startAge,age,potential,ratings,average,formatBias,gender}=buildAthleteSkill(seed,club,index,week,startAgeOverride);
   const region=regionById(club.regionId);
   const weights=Object.entries(region?.cultureWeights??{white_american:1});
   const culture=weightedPick(weights,random);
@@ -216,7 +219,7 @@ export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
   const formats={};
   for(const format of FORMATS){
     const bias=format==='doubles'?formatBias:-formatBias;
-    formats[format]=ratingInFormat(ratings,format,bias);
+    formats[format]=ratingInFormat(initialRatings,format,bias);
   }
   return {
     id:`${club.id}-a${index}`,
@@ -232,6 +235,7 @@ export function buildAthlete(seed,club,index,week=0,startAgeOverride=null){
     age,
     startAge,
     development,
+    trajectory,
     peakRatings,
     maintenance,
     potential,
@@ -256,11 +260,11 @@ export function buildRegionSkills(seed,regionId,week=0){
   const athletes=[];
   for(const club of clubs){
     for(let index=0;index<club.memberCount;index++){
-      const {ratings,average,formatBias,gender,startAge,age,development,peakRatings,maintenance,potential}=buildAthleteSkill(seed,club,index,week);
+      const {ratings,average,formatBias,gender,startAge,age,development,trajectory,initialRatings,peakRatings,maintenance,potential}=buildAthleteSkill(seed,club,index,week);
       const formats={};
       for(const format of FORMATS){
         const bias=format==='doubles'?formatBias:-formatBias;
-        formats[format]=ratingInFormat(ratings,format,bias);
+        formats[format]=ratingInFormat(initialRatings,format,bias);
       }
       athletes.push({
         id:`${club.id}-a${index}`,
@@ -270,10 +274,13 @@ export function buildRegionSkills(seed,regionId,week=0){
         index,
         club,
         skill:average,
+        ratings,
+        initialRatings,
         gender,
         startAge,
         age,
         development,
+        trajectory,
         peakRatings,
         maintenance,
         potential,
@@ -290,6 +297,19 @@ export function buildClubRoster(seed,club,week=0){
   const athletes=[];
   for(let index=0;index<club.memberCount;index++)athletes.push(buildAthlete(seed,club,index,week));
   return athletes;
+}
+
+// Use the same live attributes in the directory, partner selection and the
+// physics engine. Stored match ratings remain separate from ability.
+export function applyCpuCareer(athlete,records={},worldRatings={}){
+  const record=records?.[athlete.id];
+  const ratings=record?.ratings&&Object.keys(record.ratings).length?record.ratings:athlete.ratings;
+  const formats={...athlete.formats};
+  for(const format of FORMATS){
+    const value=worldRatings?.[format]?.[athlete.id]?.[0]??record?.formats?.[format];
+    if(Number.isFinite(value))formats[format]=value;
+  }
+  return {...athlete,ratings,skillAverage:skillAverage(ratings),formats,trajectory:record?.trajectory??athlete.trajectory};
 }
 
 // Browsing a whole region is a full roster build. It stays cheap because

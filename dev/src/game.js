@@ -1,16 +1,16 @@
-import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=217';
-import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=217';
-import {MatchJournal} from './match-journal.js?v=217';import {summarizePlaytest} from './playtest-summary.js?v=217';
-import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=217';
-import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=217';
-import {seededRandom} from './competition.js?v=217';
-import {kitchenFootContact,normalizeScoringRules} from './core.js?v=217';
-import {prepareReceiver,strokeDuration} from './match-animation.js?v=217';
-import {strokeForContact} from './player-facing.js?v=217';
-import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=217';
-import {createLineup,applyPhysique} from './roster.js?v=217';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=217';
-import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=217';
-import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=217';
+import {lineReplayReview,footReplayReview,netReplayReview} from './fault-replay.js?v=219';
+import {OpponentMemory,anticipateReturn} from './opponent-memory.js?v=219';
+import {MatchJournal} from './match-journal.js?v=219';import {summarizePlaytest} from './playtest-summary.js?v=219';
+import {PracticeSession,beginPracticeFeed,updatePractice,finishPracticeFeed} from './practice.js?v=219';
+import {kitchenContact,volleyMomentumFault} from './player-feet.js?v=219';
+import {seededRandom} from './competition.js?v=219';
+import {kitchenFootContact,normalizeScoringRules} from './core.js?v=219';
+import {prepareReceiver,strokeDuration} from './match-animation.js?v=219';
+import {strokeForContact} from './player-facing.js?v=219';
+import {planIncoming,commitDoublesCoverage,formationTarget,separateTargets,chooseCpuPlacement,cpuServePlan,serveReturnTarget,volleyBrakeTarget,safeVolleyRecovery,waitForRisingContact} from './tactics.js?v=219';
+import {createLineup,applyPhysique} from './roster.js?v=219';import {postRallyReactionPlan,applyRallyReactions} from './player-emotion.js?v=219';
+import {normalizeStackingSelection,createStackPlans,stackFallbackReason,commitStackingCoverage,summarizeStacking} from './stacking.js?v=219';
+import {C,side,stepBall,launch,inBounds,legalVolley,Score,move,chooseCpuShot,venueConditions,playerProfile,paddleContactAvailable,paddleContactTarget,contactQuality,selectShot,aimStep,serveTarget,shotSkill,gripModifiers,contactDifficulty,resolvePlayerCollisions,paddleContactResponse,paddleShapeModifiers,shotDepthTarget,strokePower,atpTargetX,atpOpportunity,netHeightAt} from './core.js?v=219';
 export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=true;this.random=seed===undefined?()=>Math.random():seededRandom(seed);this.visualRandom=seededRandom((seed??Date.now())^0x51f15e);this.format='doubles';this.mode='play';this.difficulty='normal';this.lineup=null;this.rules=normalizeScoringRules();this.learningSnapshot=null;this.stackingConfig=normalizeStackingSelection();this.lastHumanContactAt=-Infinity;this.sideSwitched=false;this.sideSwitchThreshold=6;this.sideSwitchCount=0;this.reset()}
  configure(selection,lineup=null){this.showNameTags=selection?.showNameTags!==false&&selection?.showNameTags!=='false';this.learningSnapshot=selection?.learning??null;if(selection?.format)this.format=selection.format==='singles'?'singles':'doubles';if(selection?.rules)this.rules=normalizeScoringRules({...this.rules,...selection.rules});this.sideSwitchThreshold=Math.max(1,Math.ceil((Number(this.rules?.targetScore)||11)/2));this.stackingConfig=normalizeStackingSelection(selection?.stacking);this.lineup=(lineup??createLineup(selection,{random:this.random})).map(p=>applyPhysique(p));this.reset()}
  startPractice(id='return',seed=1){this.format='singles';this.mode='play';this.reset();this.practice=new PracticeSession(id,seed);this.depth=this.practice.id==='return'?.5:.15;beginPracticeFeed(this)}
@@ -43,7 +43,8 @@ export class Game{constructor({seed}={}){this.seed=seed??null;this.showNameTags=
  setDifficulty(difficulty){this.difficulty=['easy','normal','hard'].includes(difficulty)?difficulty:'normal';return this.difficulty}
  setStacking(config){this.stackingConfig=normalizeStackingSelection(config);if(this.format==='doubles'&&this.server&&this.serveReceiver)this.serveSetup();return this.stackingConfig}
  maybeSwitchSides(){if(this.practice||this.score.winner!==null||this.sideSwitched||Math.max(...this.score.points)<this.sideSwitchThreshold)return false;this.sideSwitched=true;this.sideSwitchCount++;this.message='SWITCH SIDES';this.emit('side-switch',{score:[...this.score.points],at:this.sideSwitchThreshold});return true}
- timingWindow(){return this.difficulty==='easy'?{early:.6,late:.2}:this.difficulty==='hard'?{early:.15,late:0}:{early:.3,late:.08}}
+ // Shared by root gameplay and career matches; seconds before/after contact.
+ timingWindow(){return this.difficulty==='easy'?{early:.7,late:.24}:this.difficulty==='hard'?{early:.2,late:.03}:{early:.36,late:.11}}
  paddleFor(player,shot='drive'){const paddle=player.paddle??{},abilities=player.abilities??{},shape=paddleShapeModifiers(player);return {...paddle,power:(paddle.power??1)*shape.power*(abilities.power??1),control:(paddle.control??1)*shape.control,spin:(paddle.spin??1)*(abilities.spin??1),skill:shotSkill(player,shot)}}
  reset(){this.sideSwitchThreshold=Math.max(1,Math.ceil((Number(this.rules?.targetScore)||11)/2));this.practice=null;this.opponentMemory=new OpponentMemory(this.learningSnapshot);this.observedShot=null;this.journal=new MatchJournal();this.scenario=null;this.teamPlan=null;this.tacticalStats={poachAttempts:0,poachHits:0,coverSwaps:0,offBallDistance:0,mishitHits:0,patternReads:0,singlesApproaches:0,contactWaits:0,recoverySets:0,stackDecisions:0,stackSelected:0,stackNeeded:0,stackAligned:0,stackCrossPlanned:0,stackCrossings:0,stackStays:0,stackFallbacks:0,stackByTeamType:{},stackByHandPair:{}};this.stats={rallies:0,serves:0,shots:{},faults:{},patterns:{},net:{contacts:0,cords:0,mesh:0},teams:[{hits:0,mishits:0},{hits:0,mishits:0}]};this.events=[];this.trail=[];this.clock=0;this.score=new Score(this.format,this.rules);this.sideSwitched=false;this.sideSwitchCount=0;this.players=(this.format==='singles'?[0,2]:[0,1,2,3]).map((id)=>({...(this.lineup?structuredClone(this.lineup[id]):playerProfile()),id,team:id<2?0:1,x:id%2?15:5,y:id<2?39:5,vx:0,vy:0,swing:0}));this.aim=10;this.depth=.5;this.humanFeedback='';this.shot='attack';this.hitBuffer=0;this.feedbackTime=0;this.message='GET READY';this.pause=1;this.paused=false;this.serveSetup()}
  setVenue(surfaceKind='outdoor'){this.surfaceKind=surfaceKind;this.conditions=venueConditions(surfaceKind,this.random);return this.conditions}

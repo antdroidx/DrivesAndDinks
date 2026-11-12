@@ -36,6 +36,7 @@ const PRECACHE=[
   '../src/career/equipment.js',
   '../src/career/cpu-careers.js',
   '../src/career/career-lifecycle.js',
+  '../src/career/cpu-trajectory.js',
   '../src/career/team-league.js',
   '../src/career/invitations.js',
   '../src/career/inbox.js',

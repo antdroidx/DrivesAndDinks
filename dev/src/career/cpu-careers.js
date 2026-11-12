@@ -6,20 +6,21 @@
 // The result is a world that can age, improve, be invited to the pro tour,
 // change tiers and retire without turning every save into a full database.
 
-import {RATING_KEYS} from '../roster.js?v=217';
-import {seededRandom} from '../competition.js?v=217';
+import {RATING_KEYS,skillAverage} from '../roster.js?v=219';
+import {seededRandom} from '../competition.js?v=219';
 import {
   buildRegionSkills,buildAthlete,buildAthleteSkill,buildClubIndex,mixSeed
-} from './population.js?v=217';
-import {RATING_MIN,RATING_MAX,FORMATS,formatSkill,ratingInFormat,simulateOutcome,updateRating} from './rating.js?v=217';
-import {addPoints,pointsInWindow,PRO_FLOOR_RATING} from './tour.js?v=217';
+} from './population.js?v=219';
+import {RATING_MIN,RATING_MAX,FORMATS,formatSkill,ratingInFormat,simulateOutcome,updateRating} from './rating.js?v=219';
+import {addPoints,pointsInWindow,PRO_FLOOR_RATING} from './tour.js?v=219';
 import {
   CPU_DETAIL_TIERS,REGIONAL_TEMPLATES,regionalTemplate,activityCadence,
   trainingResponse,bestFormatRating,careerStage,proInviteStatus,retirementRisk,
   developmentProfileFor
-} from './career-lifecycle.js?v=217';
-import {capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance,attributeAgeFactor} from './age.js?v=217';
-import {emptyInjuries,normalizeInjuries,activeInjuries,createInjury,healInjuries} from './injuries.js?v=217';
+} from './career-lifecycle.js?v=219';
+import {capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance,attributeAgeFactor} from './age.js?v=219';
+import {emptyInjuries,normalizeInjuries,activeInjuries,createInjury,healInjuries} from './injuries.js?v=219';
+import {createCpuTrajectory,cpuTrajectoryRatings,cpuTrajectoryStatus} from './cpu-trajectory.js?v=219';
 
 export const CPU_WORLD_VERSION=1;
 export const CPU_ACTIVE_LIMIT=160;
@@ -34,15 +35,20 @@ const ENTRANT_NAMES=['Ari Chen','Noah Park','Mina Torres','Luca Reed','Sana Pate
 const SKILL_CACHE=new Map();
 
 function skillsForWeek(seed,regionId,week){
-  const year=Math.max(0,Math.floor(week/52));
-  const key=`${seed}:${regionId}:${year}`;
+  // Cache the stable cohort, then project only its development. Rebuilding
+  // identities, potential and initial assessments every week is unnecessary.
+  const key=`${seed}:${regionId}`;
   let skills=SKILL_CACHE.get(key);
   if(!skills){
-    skills=buildRegionSkills(seed,regionId,year*52);
+    skills=buildRegionSkills(seed,regionId,0);
     SKILL_CACHE.set(key,skills);
     if(SKILL_CACHE.size>8)SKILL_CACHE.delete(SKILL_CACHE.keys().next().value);
   }
-  return skills;
+  if(!week)return skills;
+  return skills.map(skill=>{
+    const ratings=cpuTrajectoryRatings({...skill,week});
+    return {...skill,ratings,skill:skillAverage(ratings),age:skill.startAge+Math.floor(week/52)};
+  });
 }
 
 export function emptyCpuWorld(){
@@ -84,8 +90,13 @@ function compactRecord(record){
     clubId:record.clubId,
     detail:record.detail,
     startAge:record.startAge,
+    createdWeek:record.createdWeek??0,
+    initialRatings:record.initialRatings,
     age:record.age,
     development:record.development,
+    trajectory:record.trajectory,
+    developmentBaseline:record.developmentBaseline,
+    lastDevelopmentWeek:record.lastDevelopmentWeek,
     peakRatings:record.peakRatings,
     maintenance:record.maintenance,
     ratings:record.ratings,
@@ -110,6 +121,8 @@ function compactRecord(record){
     lastActiveWeek:record.lastActiveWeek,
     lastTrainedWeek:record.lastTrainedWeek,
     lastMatchWeek:record.lastMatchWeek,
+    lastScore:record.lastScore??null,
+    lastOpponentIds:record.lastOpponentIds??[],
     lastEventWeek:record.lastEventWeek,
     stage:record.stage
   };
@@ -130,8 +143,13 @@ export function createCpuCareerRecord(skill,week=0,detail='background',regionId=
     clubId:skill.clubId??null,
     detail:CPU_DETAIL_TIERS[detail]?detail:'background',
     startAge:skill.startAge??skill.age??25,
+    createdWeek:skill.createdWeek??0,
+    initialRatings:{...(skill.initialRatings??ratings)},
     age:skill.age??skill.startAge??25,
     development,
+    trajectory:skill.trajectory??createCpuTrajectory(mixSeed(skill.id,'cpu-trajectory'),skill.startAge??skill.age??25),
+    developmentBaseline:{...ratings},
+    lastDevelopmentWeek:week,
     peakRatings,
     maintenance,
     ratings,
@@ -150,13 +168,15 @@ export function createCpuCareerRecord(skill,week=0,detail='background',regionId=
   return compactRecord(record);
 }
 
-function recordSkill(record){
+function recordSkill(record,week=0){
+  const elapsed=Math.max(0,week-(record.createdWeek??0));
+  const trajectory=record.trajectory??createCpuTrajectory(mixSeed(record.id,'cpu-trajectory'),record.startAge);
   return {
     id:record.id,name:record.name,gender:record.gender,
     regionId:record.regionId,cityId:record.cityId,clubId:record.clubId,
-    startAge:record.startAge,age:record.age,development:record.development,
+    startAge:record.startAge,age:record.startAge+Math.floor(elapsed/52),development:record.development,trajectory,
     peakRatings:record.peakRatings,maintenance:record.maintenance,
-    ratings:record.ratings,formats:record.formats,potential:record.potential
+    ratings:cpuTrajectoryRatings({initialRatings:record.initialRatings??record.ratings,peakRatings:record.peakRatings??record.ratings,startAge:record.startAge,week:elapsed,development:record.development,trajectory}),formats:record.formats,potential:record.potential
   };
 }
 
@@ -204,10 +224,12 @@ function currentRecordRating(record,format,stored,week){
 function applyTraining(record,skill,week,cadence,template,random){
   const since=record.lastTrainedWeek??week-cadence.trainingEvery;
   if(week-since<cadence.trainingEvery)return record;
+  const trajectory=cpuTrajectoryStatus(record.trajectory,week-(record.createdWeek??0));
+  if(trajectory&&trajectory.trainingMultiplier===0)return record;
   const age=skill.age??record.age;
   const focus=RATING_KEYS.slice().sort((a,b)=>(record.ratings[a]??0)-(record.ratings[b]??0))[0]??'control';
   const response=trainingResponse(age,record.development);
-  const gain=(age<20?.032:age<25?.025:.018)*response*cadence.trainingBoost*(template.training||1);
+  const gain=(age<20?.032:age<25?.025:.018)*response*cadence.trainingBoost*(template.training||1)*(trajectory?.trainingMultiplier??1);
   const next={...record,ratings:{...record.ratings},maintenance:{...record.maintenance}};
   const factor=attributeAgeFactor(focus,age,record.development,next.maintenance[focus]??0);
   const ceiling=Math.floor((record.peakRatings?.[focus]??99)*factor);
@@ -328,6 +350,22 @@ export function advanceCpuCareer(record,skill,week,random,template=REGIONAL_TEMP
     fatigue:clamp((record.fatigue??0)-Math.max(4,Math.round(6+trainingResponse(skill.age??record.age,record.development)*6)),0,100),
     form:clamp((record.form??0)*.85,-20,20)
   };
+  // Apply only the change since the last development baseline. This keeps
+  // training/injury history intact and lazily upgrades old saves without
+  // replacing their attributes with a newly generated player.
+  next.trajectory=record.trajectory??skill.trajectory??createCpuTrajectory(mixSeed(record.id,'cpu-trajectory'),record.startAge);
+  next.initialRatings=record.initialRatings??skill.initialRatings??{...record.ratings};
+  if(record.lastDevelopmentWeek!==week){
+    const baseline=skill.ratings??{};
+    const injured=activeInjuries(next).length>0;
+    for(const key of RATING_KEYS){
+      if(!Number.isFinite(baseline[key]))continue;
+      const delta=baseline[key]-(record.developmentBaseline?.[key]??baseline[key]);
+      next.ratings[key]=clamp(round3((next.ratings[key]??baseline[key])+(injured?Math.min(0,delta):delta)),25,99);
+    }
+    next.developmentBaseline={...baseline};
+    next.lastDevelopmentWeek=week;
+  }
   if(!activeInjuries(next).length){
     next=applyTraining(next,skill,week,cadence,template,random);
     next=activity
@@ -360,6 +398,7 @@ function makeEntrant(seed,regionId,week,index,template){
     regionId,
     cityId:null,clubId:null,
     startAge,age:startAge,
+    createdWeek:week,
     development:developmentProfileFor(mixSeed(seed,`entrant-development:${week}:${index}`),startAge),
     ratings:Object.fromEntries(RATING_KEYS.map(key=>[key,Math.round(38+random()*18)])),
     peakRatings:Object.fromEntries(RATING_KEYS.map(key=>[key,Math.round(52+random()*28)])),
@@ -451,7 +490,7 @@ export function advanceCpuWorld(cpuWorld,{seed,regionId,week,ratings={},activity
   for(const id of Object.keys(records)){
     const record=records[id];
     const beforeInjured=activeInjuries({...record,week}).length>0;
-    const skill=skillById.get(id)??athleteForRecord(seed,record,week)??recordSkill(record);
+    const skill=skillById.get(id)??athleteForRecord(seed,record,week)??recordSkill(record,week);
     if(!skill){
       record.retired=true;
       record.retiredWeek=record.retiredWeek??week;

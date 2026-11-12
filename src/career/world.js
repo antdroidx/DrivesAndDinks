@@ -11,9 +11,9 @@
 // athlete who has never played keeps their starting rating and the week it
 // was set, so their current rating is that rating aged forward.
 
-import {buildRegionSkills,buildAthlete,mixSeed} from './population.js?v=217';
-import {seededRandom} from '../competition.js?v=217';
-import {regressRating,simulateOutcome,rateMatch,formatSkill,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js?v=217';
+import {buildRegionSkills,buildAthlete,mixSeed,applyCpuCareer} from './population.js?v=219';
+import {seededRandom} from '../competition.js?v=219';
+import {regressRating,simulateOutcome,rateMatch,formatSkill,RATING_BRACKETS,RATING_MIN,RATING_MAX,FORMATS} from './rating.js?v=219';
 
 // Roughly how many matches the region's population plays in a week, split
 // between the two formats.
@@ -35,9 +35,10 @@ export function currentRatings(skills,ratings,week,format){
     // An athlete who has never played in this career keeps their generated
     // starting rating. Once they have a result, inactivity starts the drift.
     const rating=stored?regressRating(base,week-lastPlayed):base;
+    const cpuRatings=Object.keys(athlete.cpuRatings??{}).length?athlete.cpuRatings:athlete.ratings;
     current.set(athlete.id,{
       ...athlete,
-      skill:athlete.cpuRatings?formatSkill(athlete.cpuRatings,format):athlete.skill,
+      skill:cpuRatings?formatSkill(cpuRatings,format):athlete.skill,
       rating:clampRating(rating),
       lastPlayed,
       matches
@@ -67,9 +68,15 @@ function playMatch(home,away,random,matchType='league'){
   return {home:rated.players[0],away:rated.players[1],score:`${outcome.myPoints}-${outcome.opponentPoints}`};
 }
 
+function liveSkills(seed,regionId,week,skillOverrides){
+  return buildRegionSkills(seed,regionId,week)
+    .filter(skill=>!skillOverrides?.[skill.id]?.retired)
+    .map(skill=>({...skill,cpuRatings:skillOverrides?.[skill.id]?.ratings??null}));
+}
+
 // Advances the world by one week.
 export function advanceWorld({seed,regionId,week,ratings,skillOverrides={}}){
-  const skills=buildRegionSkills(seed,regionId,week).map(skill=>({...skill,cpuRatings:skillOverrides?.[skill.id]?.ratings??null}));
+  const skills=liveSkills(seed,regionId,week,skillOverrides);
   const random=seededRandom(mixSeed(seed,`world:${regionId}:${week}`));
   const next={...(ratings??{})};
   for(const format of FORMATS)next[format]={...(next[format]??{})};
@@ -178,15 +185,15 @@ export function advanceCircuit(state){
 // This is the field a competition is drawn from. Only the best players are
 // returned, because a tournament is fielded from the top of the rating list,
 // and names are only built for the athletes that come back.
-export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gender=null,cityId=null,areaId=null,limit=80}){
-  const skills=buildRegionSkills(seed,regionId,week);
+export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gender=null,cityId=null,areaId=null,limit=80,skillOverrides={}}){
+  const skills=liveSkills(seed,regionId,week,skillOverrides);
   const current=currentRatings(skills,ratings,week,format);
   let pool=gender?[...current.values()].filter(athlete=>athlete.gender===gender):[...current.values()];
   if(cityId)pool=pool.filter(athlete=>athlete.cityId===cityId);
   if(areaId)pool=pool.filter(athlete=>athlete.areaId===areaId);
   const ranked=pool.sort((a,b)=>b.rating-a.rating).slice(0,limit);
   return ranked.map(athlete=>{
-    const full=athlete.club?buildAthlete(seed,athlete.club,athlete.index):null;
+    const full=athlete.club?applyCpuCareer(buildAthlete(seed,athlete.club,athlete.index,week),skillOverrides,ratings):null;
     const base={
       id:athlete.id,
       name:full?.name??athlete.id,
@@ -213,8 +220,8 @@ export function ratedPopulation({seed,regionId,ratings,week,format='doubles',gen
 // The players a player would meet in a bracket, in a given format. Playing
 // up means facing somebody a bracket stronger, which is exactly what makes
 // it a gamble worth taking.
-export function opponentsInBracket({seed,regionId,ratings,week,divisionId,format='doubles',count=1,random,cityId=null,areaId=null}){
-  const skills=buildRegionSkills(seed,regionId,week);
+export function opponentsInBracket({seed,regionId,ratings,week,divisionId,format='doubles',count=1,random,cityId=null,areaId=null,skillOverrides={}}){
+  const skills=liveSkills(seed,regionId,week,skillOverrides);
   const current=currentRatings(skills,ratings,week,format);
   const division=RATING_BRACKETS.find(entry=>entry.id===divisionId);
   if(!division)return [];
@@ -234,7 +241,7 @@ export function opponentsInBracket({seed,regionId,ratings,week,divisionId,format
     used.add(index);
     const chosen=pool[index];
     // Rebuild the drawn athlete in full so the player sees who they faced.
-    const full=chosen.club?buildAthlete(seed,chosen.club,chosen.index):null;
+    const full=chosen.club?applyCpuCareer(buildAthlete(seed,chosen.club,chosen.index,week),skillOverrides,ratings):null;
     picked.push(full?{...full,rating:chosen.rating,matches:chosen.matches,skill:chosen.skill}:chosen);
   }
   return picked;

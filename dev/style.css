@@ -201,10 +201,10 @@ dialog h2{font-size:30px;letter-spacing:-1px;margin:6px 0 24px}.setup-heading sm
 
 /* Court-first layout: sizing uses available space, including desktop-mode phones. */
 html:has(.court-app),body.court-app{height:100%;overflow:hidden}
-body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavior:none}
+body.court-app{position:fixed;inset:auto;left:var(--game-viewport-left,0px);top:var(--game-viewport-top,0px);width:var(--game-viewport-width,100%);height:100vh;height:var(--game-viewport-height,100dvh);overscroll-behavior:none}
 .court-app main{width:100%;max-width:none!important;height:100%;min-height:0;margin:0;padding:max(3px,env(safe-area-inset-top)) max(3px,env(safe-area-inset-right)) max(3px,env(safe-area-inset-bottom)) max(3px,env(safe-area-inset-left));display:grid;grid-template-rows:auto minmax(0,1fr);gap:4px;overflow:hidden;background:#111c2a}
-.court-app header{position:relative;display:flex;flex-wrap:nowrap;min-width:0;gap:6px;min-height:38px;align-items:center}
-.court-app header h1{font-size:15px;white-space:nowrap;margin:0;letter-spacing:.14em}.game-wordmark{font:800 15px/1.2 "Trebuchet MS","Segoe UI",system-ui,sans-serif;letter-spacing:.14em}.game-wordmark span{color:#4be3c2}
+.court-app header{position:relative;display:flex;flex-wrap:wrap;min-width:0;gap:6px;min-height:38px;align-items:center}
+.court-app header h1{font-size:15px;white-space:nowrap;margin:0;letter-spacing:.14em}.court-app header .game-wordmark{font:700 15px/1.5 "Trebuchet MS","Segoe UI",system-ui,sans-serif;letter-spacing:.14em;color:#e8eef5;text-shadow:none}.game-wordmark span{color:#4be3c2}
 .court-app .brand-meta{position:absolute;left:0;top:0}.court-app .brand-meta small{display:none}.court-app .build-label{font-size:7px;padding:0 3px}.court-app header>div:first-child{padding-top:8px}
 .court-app .header-actions{display:flex;flex-wrap:nowrap;margin-left:auto;width:auto;gap:4px}
 .court-app header button{font-size:10px;min-height:36px;padding:6px;white-space:nowrap}
@@ -236,7 +236,7 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 .court-app #court-hud .score-meta{grid-column:1/-1;grid-row:2;align-self:center;width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center;color:#f9d46a;font-size:8px;line-height:1.1}
 .court-app main[data-court-layout="stacked"] #court-hud{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);grid-template-rows:auto auto;align-items:center;justify-items:center;gap:1px 8px;font-size:10px;min-height:var(--court-hud-height,54px)}.court-app main[data-court-layout="stacked"] #court-hud .score-core strong{font-size:18px}.court-app main[data-court-layout="stacked"] #court-hud .score-team strong{font-size:10px}
 .court-app #overlay{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);display:block}
-.court-app main:fullscreen{width:100vw;height:100dvh}.court-app main:-webkit-full-screen{width:100vw;height:100vh}
+.court-app main:fullscreen{width:var(--game-viewport-width,100vw);height:var(--game-viewport-height,100dvh)}.court-app main:-webkit-full-screen{width:var(--game-viewport-width,100vw);height:var(--game-viewport-height,100vh)}
 
 /* Touch controls float over the court; the empty layer passes touches through. */
 .court-app .game{container-type:inline-size}
@@ -485,14 +485,15 @@ body.court-app{position:fixed;inset:0;width:100%;height:100dvh;overscroll-behavi
 
 /* Dedicated game start screen and its compact how-to-play popup. */
 .visually-hidden{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
-.game-start{position:fixed;inset:0;z-index:1000;display:grid;grid-template-rows:minmax(0,1fr) auto;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));overflow:hidden;background:#0b4a35;color:#fff;font-family:system-ui,sans-serif}
+.game-start{position:fixed;inset:0;z-index:1000;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) auto;place-items:center;padding:max(18px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));overflow:hidden;background:#0b4a35;color:#fff;font-family:system-ui,sans-serif}
 .game-start[hidden]{display:none!important}
+.court-app .game-start{inset:auto;left:var(--game-viewport-left,0px);top:var(--game-viewport-top,0px);width:var(--game-viewport-width,100%);height:var(--game-viewport-height,100%)}
 .game-start::before{content:'';position:absolute;inset:7% 9%;border:3px solid #f3ca3f9c;box-shadow:0 0 0 1px #fff4cc33 inset;pointer-events:none}
 .game-start::after{content:'';position:absolute;left:50%;top:7%;bottom:7%;width:3px;background:#fff4cc55;transform:translateX(-50%);pointer-events:none}
 .game-start-court{position:absolute;left:9%;right:9%;top:50%;height:26%;border-top:2px solid #f3ca3f80;border-bottom:2px solid #f3ca3f80;transform:translateY(-50%);pointer-events:none}
 .game-start-content{position:relative;z-index:1;width:min(760px,100%);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(18px,3vh,30px)}
-.game-logo{display:block;width:min(720px,88vw);max-height:54dvh;object-fit:contain;filter:drop-shadow(0 8px 0 #063b2b99)}
-.game-start-actions{width:min(390px,88vw);display:grid;gap:10px}
+.game-logo{display:block;width:min(720px,88vw);max-width:100%;max-height:54dvh;object-fit:contain;filter:drop-shadow(0 8px 0 #063b2b99)}
+.game-start-actions{width:min(390px,88vw);max-width:100%;display:grid;gap:10px}
 .game-start-actions button{width:100%;min-height:50px;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border:2px solid #f7e9b7;border-radius:5px;background:#116444;color:#fff;font:800 14px/1 system-ui,sans-serif;letter-spacing:0;cursor:pointer;box-shadow:0 4px 0 #063b2b}
 .game-start-actions button:hover,.game-start-actions button:focus-visible{background:#177653;border-color:#fff;outline:none}
 .game-start-actions button:focus-visible{box-shadow:0 0 0 3px #f3ca3f,0 4px 0 #063b2b}
