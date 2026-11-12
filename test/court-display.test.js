@@ -1,7 +1,17 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {courtFrame,toggleFullscreen,COURT_HUD_HEIGHT} from '../src/court-display.js';
+import {courtFrame,gameViewport,toggleFullscreen,COURT_HUD_HEIGHT} from '../src/court-display.js';
+
+test('game fits a smaller visual viewport and follows its offset',()=>{
+ assert.deepEqual(gameViewport(402,874,{width:350,height:600,offsetLeft:12,offsetTop:20,scale:1}),{width:350,height:600,left:12,top:20});
+ assert.deepEqual(gameViewport(874,402,{width:1000,height:500,scale:1}),{width:874,height:402,left:0,top:0});
+});
+
+test('viewport fallback works without the API and pinch zoom keeps the existing layout',()=>{
+ assert.deepEqual(gameViewport(402,681),{width:402,height:681,left:0,top:0});
+ assert.equal(gameViewport(402,681,{width:201,height:340.5,scale:2}),null);
+});
 test('fullscreen requests browser chrome be hidden and supports exit',async()=>{
  const calls=[],doc={exitFullscreen:async()=>calls.push('exit')},element={requestFullscreen:async options=>calls.push(options)};
  assert.equal(await toggleFullscreen(doc,element),true);assert.deepEqual(calls,[{navigationUI:'hide'}]);doc.fullscreenElement=element;assert.equal(await toggleFullscreen(doc,element),false);assert.equal(calls[1],'exit');
