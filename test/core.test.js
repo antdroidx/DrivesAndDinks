@@ -68,7 +68,7 @@ test('low contact quality weakens the trajectory and marks a mishit',()=>{const 
 
 test('easy difficulty queues swings for longer than normal without changing the rules',()=>{
  const bufferFor=(difficulty)=>{const g=new Game();g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=0;Object.assign(g.ball,{x:19,y:5,z:5,vx:0,vy:0,vz:0});g.swing();return g.hitBuffer};
- assert.equal(bufferFor('normal'),.3);assert.equal(bufferFor('easy'),.6)
+ assert.equal(bufferFor('normal'),.36);assert.equal(bufferFor('easy'),.7);assert.equal(bufferFor('hard'),.2)
  const g=new Game();g.setDifficulty('easy');g.reset();assert.equal(g.difficulty,'easy')
 });
 
@@ -79,9 +79,13 @@ test('easy difficulty is more forgiving at the edge of the hit window',()=>{
  assert.equal(normal.mishit,true);assert.equal(easy.mishit,false);assert.ok(easy.quality>normal.quality)
 });
 test('easy difficulty accepts a slightly late swing while normal does not',()=>{
- const setup=(difficulty)=>{const g=new Game();g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:38.8,z:1,vx:0,vy:-3,vz:0});g.clock=.2;g.lastHumanContactAt=0;g.swing();return g};
- const normal=setup('normal');assert.equal(normal.last,1);assert.equal(normal.hitBuffer,.3)
+ const setup=(difficulty,elapsed=.2)=>{const g=new Game({seed:42});g.setDifficulty(difficulty);g.phase='rally';g.last=1;g.shots=3;g.bounces=1;const p=g.players[0];Object.assign(p,{x:10,y:35,vx:0,vy:0});Object.assign(g.ball,{x:10,y:38.8,z:1,vx:0,vy:-3,vz:0});g.clock=elapsed;g.lastHumanContactAt=0;g.swing();return g};
+ const normal=setup('normal');assert.equal(normal.last,1);assert.equal(normal.hitBuffer,.36)
  const easy=setup('easy');assert.equal(easy.last,0);assert.equal(easy.hitBuffer,0);assert.ok(easy.events.some(event=>event.type==='hit'));assert.ok(Math.hypot(easy.ball.vx,easy.ball.vy)>0)
+ for(const [difficulty,inside,outside] of [['easy',.23,.25],['normal',.10,.12],['hard',.02,.04]]){
+  assert.equal(setup(difficulty,inside).last,0,`${difficulty} accepts the added late grace`);
+  assert.equal(setup(difficulty,outside).last,1,`${difficulty} still rejects swings beyond its grace period`);
+ }
 });
 test('serve skill improves placement and hard and soft serves use distinct trajectories',()=>{
  const weak=playerProfile(),strong=playerProfile();weak.abilities.serve=.7;strong.abilities.serve=1.3;
