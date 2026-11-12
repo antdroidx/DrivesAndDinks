@@ -1,7 +1,7 @@
 // Club life: partners, reputation and coaching.
 
 import {RATING_KEYS,RATING_LABELS} from '../roster.js';
-import {buildClubIndex,buildClubRoster} from './population.js';
+import {buildClubIndex,buildClubRoster,applyCpuCareer} from './population.js';
 import {gateRating,RATING_BRACKETS,divisionFor} from './rating.js';
 
 export const CLUB_REPUTATION_REQUIREMENTS=Object.freeze({recreational:0,competitive:25,elite:60});
@@ -37,6 +37,8 @@ export function partnerSnapshot(member){
     archetypeLabel:member.archetypeLabel,
     citizenship:member.citizenship,
     age:member.age,
+    appearance:member.appearance,
+    trajectory:member.trajectory,
     clubId:member.clubId,
     ratings:{...member.ratings},
     formats:{...member.formats},
@@ -49,13 +51,13 @@ export function partnerSnapshot(member){
 
 export function clubRosterForState(state){
   const club=currentClub(state);
-  return club?buildClubRoster(state.seed,club):[];
+  return club?buildClubRoster(state.seed,club,state.week).filter(member=>!state.cpuWorld?.records?.[member.id]?.retired).map(member=>applyCpuCareer(member,state.cpuWorld?.records,state.worldRatings)):[];
 }
 
 export function partnerCandidates(state,format){
   const club=currentClub(state);
   if(!club)return [];
-  return buildClubRoster(state.seed,club)
+  return clubRosterForState(state)
     .filter(member=>partnerGenderAllowed(state.athlete.gender,member.gender,format))
     .sort((a,b)=>(b.formats[format]??0)-(a.formats[format]??0));
 }
@@ -64,7 +66,9 @@ export function resolvePartner(state,format){
   const stored=state.partners?.[format];
   if(!stored||stored.clubId!==state.clubId)return null;
   if(!partnerGenderAllowed(state.athlete.gender,stored.gender,format))return null;
-  return stored;
+  if(state.cpuWorld?.records?.[stored.id]?.retired)return null;
+  if((stored.snapshotWeek??0)===state.week)return stored;
+  return clubRosterForState(state).find(member=>member.id===stored.id)??stored;
 }
 
 export function choosePartner(state,format,athleteId){
@@ -77,7 +81,7 @@ export function choosePartner(state,format,athleteId){
   }
   return {
     ok:true,
-    state:{...state,partners:{...(state.partners??{}),[format]:partnerSnapshot(member)}},
+    state:{...state,partners:{...(state.partners??{}),[format]:{...partnerSnapshot(member),snapshotWeek:state.week}}},
     message:`${member.name} is now your ${format==='mixed'?'mixed doubles':'gender doubles'} partner.`
   };
 }

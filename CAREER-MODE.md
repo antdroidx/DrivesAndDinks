@@ -69,6 +69,7 @@ That item is implemented in `src/career/save.js` and is covered by `test/career-
 | `src/career/injuries.js` | Sparse injury records, temporary availability, healing and recovery capacity. |
 | `src/career/equipment.js` | Starter and purchasable paddles, ownership, equipping and engine selection. |
 | `src/career/cpu-careers.js` | Persistent CPU deltas, active/circuit/background simulation, dynamic tournaments and bounded query scopes. |
+| `src/career/cpu-trajectory.js` | Individual CPU development styles, productive seasons, plateaus, slumps, breakthroughs and variable physical decline. |
 | `src/career/team-league.js` | CPU-managed MLP seasons, annual drafts, franchise rosters and MiLP fixtures. |
 | `src/career/invitations.js` | Team and partner invitations, expiry, decisions, relationship history and club-mate requests. |
 | `src/career/inbox.js` | Deduplicated career news, unread/archive state, search and actionable messages. |
@@ -100,7 +101,17 @@ Career ratings are the **same 14 values** the match engine simulates with, so a 
 - Adding a club to a region cannot renumber another club's roster.
 - Long histories are bounded independently of the generated population.
 
-The cost is that inactive population data must be regenerated on demand. A full region roster now holds roughly two thousand to three thousand athletes and rebuilds in tens of milliseconds. The CPU world caches generated skill cohorts by career year, bounded query scopes avoid full rebuilds in the UI and the save remains compact as the world ages.
+The cost is that inactive population data must be regenerated on demand. The 10,000-player world contains 5,680 North American and 4,320 Asian athletes. The CPU world caches stable cohorts and projects attributes for the current career week so seasonal development reaches the simulation without waiting for a birthday. Bounded query scopes avoid full rebuilds in the UI.
+
+### Individual CPU trajectories
+
+Every CPU has a reproducible development profile: recreational regular, settled at their level, steady learner, late bloomer, early peak, or uneven development. Learning speed, dedication, specialization, realized potential, maintenance and physical decline vary within each style. A productive season can advance skills; plateau seasons stop growth, slumps temporarily lower performance, and breakthroughs accelerate progress. Growth saturates rather than increasing forever. These are fictional game balance policies, not empirical forecasts.
+
+Background players derive their current attributes from their identity and elapsed career time. Tracked players retain that baseline plus their own training and injury history; injury prevents positive development while preserving aging losses. Existing saves adopt missing trajectory fields on advancement without replacing established attributes, results or ratings. Initial CPU records include all fourteen attributes.
+
+Player profiles, partner selection and new match fields use current CPU attributes. Unplayed CPUs keep their initial assessment rating; development does not directly award a higher rating. Played results continue to update ratings separately. An existing tournament retains its entry snapshots until the next field is created.
+
+Run `npm run audit:cpu-trajectories` for the reproducible report in `validation/cpu-trajectories.json`. It measures the same original 10,000-player cohort at years 0, 1, 3, 5, 10 and 20 in two seeded worlds, controls for starting age, and advances tracked careers weekly. It checks that lower-ability players persist alongside improvement, stagnation and decline. The original-cohort projections include aging players; they do not measure retirement replacements, long-term turnover equilibrium or physics-based match balance.
 
 ### Data flow
 

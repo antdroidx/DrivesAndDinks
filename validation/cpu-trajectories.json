@@ -1,0 +1,940 @@
+{
+  "generatedAt": "2026-11-10T17:52:48.149Z",
+  "methodology": {
+    "scope": "CPU attribute trajectories and training integration; no physics matches or DUPR calibration.",
+    "seeds": [
+      4242,
+      7721
+    ],
+    "years": [
+      0,
+      1,
+      3,
+      5,
+      10,
+      20
+    ],
+    "regions": [
+      "north-america",
+      "asia"
+    ],
+    "attributeMeasure": "Mean of the 14 raw engine attributes (not the displayed overall scale).",
+    "classification": "Improving/declining means a change greater than 0.5 raw attribute points; otherwise stagnating.",
+    "population": "The same original 10,000-player cohort at every snapshot, including aging athletes. Does not claim to measure replacement cohorts or retirement turnover.",
+    "tracked": "48 peers per detail tier starting at 25, advanced weekly for ten years with no matches or injuries; includes training.",
+    "balancePolicy": "Fictional game balance settings, not empirical athletic forecasts."
+  },
+  "checks": {
+    "fullWorld": true,
+    "allStyles": true,
+    "lowerAbilityPersists": true,
+    "sameAgeStagnation": true,
+    "sameAgeImprovement": true,
+    "sameAgeDecline": true
+  },
+  "populations": [
+    {
+      "seed": 4242,
+      "snapshots": [
+        {
+          "year": 0,
+          "population": 10000,
+          "attributes": {
+            "mean": 60.85,
+            "p10": 49.571,
+            "p50": 59.929,
+            "p90": 75,
+            "below60": 5017,
+            "atLeast80": 45
+          },
+          "styles": {
+            "steady": {
+              "count": 2434,
+              "improving": 0,
+              "stagnating": 2434,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "casual": {
+              "count": 2838,
+              "improving": 0,
+              "stagnating": 2838,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "late": {
+              "count": 1047,
+              "improving": 0,
+              "stagnating": 1047,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "plateau": {
+              "count": 2354,
+              "improving": 0,
+              "stagnating": 2354,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "volatile": {
+              "count": 557,
+              "improving": 0,
+              "stagnating": 557,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "early": {
+              "count": 770,
+              "improving": 0,
+              "stagnating": 770,
+              "declining": 0,
+              "meanGain": 0
+            }
+          }
+        },
+        {
+          "year": 1,
+          "population": 10000,
+          "attributes": {
+            "mean": 61.124,
+            "p10": 49.731,
+            "p50": 60.142,
+            "p90": 75.143,
+            "below60": 4962,
+            "atLeast80": 71
+          },
+          "styles": {
+            "steady": {
+              "count": 2434,
+              "improving": 741,
+              "stagnating": 1611,
+              "declining": 82,
+              "meanGain": 0.516
+            },
+            "casual": {
+              "count": 2838,
+              "improving": 263,
+              "stagnating": 2373,
+              "declining": 202,
+              "meanGain": 0.121
+            },
+            "late": {
+              "count": 1047,
+              "improving": 95,
+              "stagnating": 883,
+              "declining": 69,
+              "meanGain": 0.137
+            },
+            "plateau": {
+              "count": 2354,
+              "improving": 192,
+              "stagnating": 1997,
+              "declining": 165,
+              "meanGain": 0.111
+            },
+            "volatile": {
+              "count": 557,
+              "improving": 171,
+              "stagnating": 352,
+              "declining": 34,
+              "meanGain": 0.441
+            },
+            "early": {
+              "count": 770,
+              "improving": 237,
+              "stagnating": 512,
+              "declining": 21,
+              "meanGain": 0.638
+            }
+          }
+        },
+        {
+          "year": 3,
+          "population": 10000,
+          "attributes": {
+            "mean": 61.362,
+            "p10": 49.814,
+            "p50": 60.415,
+            "p90": 75.407,
+            "below60": 4899,
+            "atLeast80": 120
+          },
+          "styles": {
+            "steady": {
+              "count": 2434,
+              "improving": 1293,
+              "stagnating": 813,
+              "declining": 328,
+              "meanGain": 1.178
+            },
+            "casual": {
+              "count": 2838,
+              "improving": 476,
+              "stagnating": 1628,
+              "declining": 734,
+              "meanGain": 0.134
+            },
+            "late": {
+              "count": 1047,
+              "improving": 205,
+              "stagnating": 586,
+              "declining": 256,
+              "meanGain": 0.253
+            },
+            "plateau": {
+              "count": 2354,
+              "improving": 406,
+              "stagnating": 1329,
+              "declining": 619,
+              "meanGain": 0.092
+            },
+            "volatile": {
+              "count": 557,
+              "improving": 276,
+              "stagnating": 189,
+              "declining": 92,
+              "meanGain": 0.911
+            },
+            "early": {
+              "count": 770,
+              "improving": 285,
+              "stagnating": 346,
+              "declining": 139,
+              "meanGain": 1.144
+            }
+          }
+        },
+        {
+          "year": 5,
+          "population": 10000,
+          "attributes": {
+            "mean": 61.306,
+            "p10": 49.455,
+            "p50": 60.351,
+            "p90": 75.492,
+            "below60": 4924,
+            "atLeast80": 175
+          },
+          "styles": {
+            "steady": {
+              "count": 2434,
+              "improving": 1448,
+              "stagnating": 481,
+              "declining": 505,
+              "meanGain": 1.397
+            },
+            "casual": {
+              "count": 2838,
+              "improving": 479,
+              "stagnating": 1416,
+              "declining": 943,
+              "meanGain": -0.105
+            },
+            "late": {
+              "count": 1047,
+              "improving": 356,
+              "stagnating": 402,
+              "declining": 289,
+              "meanGain": 0.541
+            },
+            "plateau": {
+              "count": 2354,
+              "improving": 406,
+              "stagnating": 1166,
+              "declining": 782,
+              "meanGain": -0.155
+            },
+            "volatile": {
+              "count": 557,
+              "improving": 300,
+              "stagnating": 126,
+              "declining": 131,
+              "meanGain": 1.047
+            },
+            "early": {
+              "count": 770,
+              "improving": 237,
+              "stagnating": 227,
+              "declining": 306,
+              "meanGain": 0.875
+            }
+          }
+        },
+        {
+          "year": 10,
+          "population": 10000,
+          "attributes": {
+            "mean": 60.643,
+            "p10": 48.101,
+            "p50": 59.559,
+            "p90": 75.368,
+            "below60": 5138,
+            "atLeast80": 263
+          },
+          "styles": {
+            "steady": {
+              "count": 2434,
+              "improving": 1344,
+              "stagnating": 275,
+              "declining": 815,
+              "meanGain": 1.027
+            },
+            "casual": {
+              "count": 2838,
+              "improving": 486,
+              "stagnating": 830,
+              "declining": 1522,
+              "meanGain": -1.089
+            },
+            "late": {
+              "count": 1047,
+              "improving": 637,
+              "stagnating": 88,
+              "declining": 322,
+              "meanGain": 1.513
+            },
+            "plateau": {
+              "count": 2354,
+              "improving": 406,
+              "stagnating": 641,
+              "declining": 1307,
+              "meanGain": -1.169
+            },
+            "volatile": {
+              "count": 557,
+              "improving": 294,
+              "stagnating": 80,
+              "declining": 183,
+              "meanGain": 0.586
+            },
+            "early": {
+              "count": 770,
+              "improving": 160,
+              "stagnating": 60,
+              "declining": 550,
+              "meanGain": -0.831
+            }
+          }
+        },
+        {
+          "year": 20,
+          "population": 10000,
+          "attributes": {
+            "mean": 57.253,
+            "p10": 41.969,
+            "p50": 56.306,
+            "p90": 73.834,
+            "below60": 6104,
+            "atLeast80": 250
+          },
+          "styles": {
+            "steady": {
+              "count": 2434,
+              "improving": 952,
+              "stagnating": 163,
+              "declining": 1319,
+              "meanGain": -2.09
+            },
+            "casual": {
+              "count": 2838,
+              "improving": 453,
+              "stagnating": 284,
+              "declining": 2101,
+              "meanGain": -4.518
+            },
+            "late": {
+              "count": 1047,
+              "improving": 489,
+              "stagnating": 58,
+              "declining": 500,
+              "meanGain": -0.957
+            },
+            "plateau": {
+              "count": 2354,
+              "improving": 367,
+              "stagnating": 176,
+              "declining": 1811,
+              "meanGain": -4.58
+            },
+            "volatile": {
+              "count": 557,
+              "improving": 214,
+              "stagnating": 32,
+              "declining": 311,
+              "meanGain": -2.56
+            },
+            "early": {
+              "count": 770,
+              "improving": 117,
+              "stagnating": 12,
+              "declining": 641,
+              "meanGain": -6.301
+            }
+          }
+        }
+      ]
+    },
+    {
+      "seed": 7721,
+      "snapshots": [
+        {
+          "year": 0,
+          "population": 10000,
+          "attributes": {
+            "mean": 60.334,
+            "p10": 49.429,
+            "p50": 58.857,
+            "p90": 74.643,
+            "below60": 5291,
+            "atLeast80": 42
+          },
+          "styles": {
+            "plateau": {
+              "count": 2363,
+              "improving": 0,
+              "stagnating": 2363,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "casual": {
+              "count": 2743,
+              "improving": 0,
+              "stagnating": 2743,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "steady": {
+              "count": 2524,
+              "improving": 0,
+              "stagnating": 2524,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "early": {
+              "count": 792,
+              "improving": 0,
+              "stagnating": 792,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "volatile": {
+              "count": 596,
+              "improving": 0,
+              "stagnating": 596,
+              "declining": 0,
+              "meanGain": 0
+            },
+            "late": {
+              "count": 982,
+              "improving": 0,
+              "stagnating": 982,
+              "declining": 0,
+              "meanGain": 0
+            }
+          }
+        },
+        {
+          "year": 1,
+          "population": 10000,
+          "attributes": {
+            "mean": 60.612,
+            "p10": 49.63,
+            "p50": 59.159,
+            "p90": 74.8,
+            "below60": 5228,
+            "atLeast80": 56
+          },
+          "styles": {
+            "plateau": {
+              "count": 2363,
+              "improving": 217,
+              "stagnating": 1998,
+              "declining": 148,
+              "meanGain": 0.149
+            },
+            "casual": {
+              "count": 2743,
+              "improving": 270,
+              "stagnating": 2297,
+              "declining": 176,
+              "meanGain": 0.146
+            },
+            "steady": {
+              "count": 2524,
+              "improving": 725,
+              "stagnating": 1721,
+              "declining": 78,
+              "meanGain": 0.486
+            },
+            "early": {
+              "count": 792,
+              "improving": 227,
+              "stagnating": 539,
+              "declining": 26,
+              "meanGain": 0.551
+            },
+            "volatile": {
+              "count": 596,
+              "improving": 170,
+              "stagnating": 401,
+              "declining": 25,
+              "meanGain": 0.464
+            },
+            "late": {
+              "count": 982,
+              "improving": 71,
+              "stagnating": 847,
+              "declining": 64,
+              "meanGain": 0.095
+            }
+          }
+        },
+        {
+          "year": 3,
+          "population": 10000,
+          "attributes": {
+            "mean": 60.85,
+            "p10": 49.775,
+            "p50": 59.344,
+            "p90": 75.082,
+            "below60": 5149,
+            "atLeast80": 94
+          },
+          "styles": {
+            "plateau": {
+              "count": 2363,
+              "improving": 409,
+              "stagnating": 1366,
+              "declining": 588,
+              "meanGain": 0.149
+            },
+            "casual": {
+              "count": 2743,
+              "improving": 481,
+              "stagnating": 1581,
+              "declining": 681,
+              "meanGain": 0.198
+            },
+            "steady": {
+              "count": 2524,
+              "improving": 1346,
+              "stagnating": 852,
+              "declining": 326,
+              "meanGain": 1.071
+            },
+            "early": {
+              "count": 792,
+              "improving": 287,
+              "stagnating": 330,
+              "declining": 175,
+              "meanGain": 0.949
+            },
+            "volatile": {
+              "count": 596,
+              "improving": 275,
+              "stagnating": 227,
+              "declining": 94,
+              "meanGain": 1.044
+            },
+            "late": {
+              "count": 982,
+              "improving": 185,
+              "stagnating": 555,
+              "declining": 242,
+              "meanGain": 0.194
+            }
+          }
+        },
+        {
+          "year": 5,
+          "population": 10000,
+          "attributes": {
+            "mean": 60.796,
+            "p10": 49.522,
+            "p50": 59.301,
+            "p90": 75.232,
+            "below60": 5190,
+            "atLeast80": 141
+          },
+          "styles": {
+            "plateau": {
+              "count": 2363,
+              "improving": 409,
+              "stagnating": 1196,
+              "declining": 758,
+              "meanGain": -0.08
+            },
+            "casual": {
+              "count": 2743,
+              "improving": 486,
+              "stagnating": 1370,
+              "declining": 887,
+              "meanGain": -0.014
+            },
+            "steady": {
+              "count": 2524,
+              "improving": 1499,
+              "stagnating": 494,
+              "declining": 531,
+              "meanGain": 1.268
+            },
+            "early": {
+              "count": 792,
+              "improving": 234,
+              "stagnating": 231,
+              "declining": 327,
+              "meanGain": 0.599
+            },
+            "volatile": {
+              "count": 596,
+              "improving": 315,
+              "stagnating": 145,
+              "declining": 136,
+              "meanGain": 1.191
+            },
+            "late": {
+              "count": 982,
+              "improving": 334,
+              "stagnating": 373,
+              "declining": 275,
+              "meanGain": 0.473
+            }
+          }
+        },
+        {
+          "year": 10,
+          "population": 10000,
+          "attributes": {
+            "mean": 60.138,
+            "p10": 47.947,
+            "p50": 58.706,
+            "p90": 75.116,
+            "below60": 5388,
+            "atLeast80": 227
+          },
+          "styles": {
+            "plateau": {
+              "count": 2363,
+              "improving": 410,
+              "stagnating": 665,
+              "declining": 1288,
+              "meanGain": -1.039
+            },
+            "casual": {
+              "count": 2743,
+              "improving": 491,
+              "stagnating": 802,
+              "declining": 1450,
+              "meanGain": -0.944
+            },
+            "steady": {
+              "count": 2524,
+              "improving": 1408,
+              "stagnating": 277,
+              "declining": 839,
+              "meanGain": 0.858
+            },
+            "early": {
+              "count": 792,
+              "improving": 174,
+              "stagnating": 54,
+              "declining": 564,
+              "meanGain": -1.227
+            },
+            "volatile": {
+              "count": 596,
+              "improving": 311,
+              "stagnating": 82,
+              "declining": 203,
+              "meanGain": 0.79
+            },
+            "late": {
+              "count": 982,
+              "improving": 593,
+              "stagnating": 94,
+              "declining": 295,
+              "meanGain": 1.453
+            }
+          }
+        },
+        {
+          "year": 20,
+          "population": 10000,
+          "attributes": {
+            "mean": 56.788,
+            "p10": 42.013,
+            "p50": 55.679,
+            "p90": 73.483,
+            "below60": 6286,
+            "atLeast80": 197
+          },
+          "styles": {
+            "plateau": {
+              "count": 2363,
+              "improving": 371,
+              "stagnating": 160,
+              "declining": 1832,
+              "meanGain": -4.37
+            },
+            "casual": {
+              "count": 2743,
+              "improving": 453,
+              "stagnating": 266,
+              "declining": 2024,
+              "meanGain": -4.253
+            },
+            "steady": {
+              "count": 2524,
+              "improving": 972,
+              "stagnating": 189,
+              "declining": 1363,
+              "meanGain": -2.276
+            },
+            "early": {
+              "count": 792,
+              "improving": 109,
+              "stagnating": 16,
+              "declining": 667,
+              "meanGain": -6.787
+            },
+            "volatile": {
+              "count": 596,
+              "improving": 214,
+              "stagnating": 51,
+              "declining": 331,
+              "meanGain": -2.304
+            },
+            "late": {
+              "count": 982,
+              "improving": 457,
+              "stagnating": 51,
+              "declining": 474,
+              "meanGain": -0.99
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "ageCohorts": [
+    {
+      "startAge": 18,
+      "years": 10,
+      "styles": {
+        "steady": {
+          "count": 480,
+          "improving": 480,
+          "stagnating": 0,
+          "declining": 0,
+          "meanGain": 7.057
+        },
+        "casual": {
+          "count": 546,
+          "improving": 546,
+          "stagnating": 0,
+          "declining": 0,
+          "meanGain": 2.78
+        },
+        "late": {
+          "count": 171,
+          "improving": 171,
+          "stagnating": 0,
+          "declining": 0,
+          "meanGain": 7.993
+        },
+        "plateau": {
+          "count": 424,
+          "improving": 424,
+          "stagnating": 0,
+          "declining": 0,
+          "meanGain": 2.658
+        },
+        "volatile": {
+          "count": 96,
+          "improving": 96,
+          "stagnating": 0,
+          "declining": 0,
+          "meanGain": 6.218
+        },
+        "early": {
+          "count": 161,
+          "improving": 161,
+          "stagnating": 0,
+          "declining": 0,
+          "meanGain": 6.658
+        }
+      }
+    },
+    {
+      "startAge": 25,
+      "years": 10,
+      "styles": {
+        "steady": {
+          "count": 480,
+          "improving": 479,
+          "stagnating": 1,
+          "declining": 0,
+          "meanGain": 2.075
+        },
+        "casual": {
+          "count": 546,
+          "improving": 0,
+          "stagnating": 546,
+          "declining": 0,
+          "meanGain": 0.089
+        },
+        "late": {
+          "count": 171,
+          "improving": 171,
+          "stagnating": 0,
+          "declining": 0,
+          "meanGain": 2.684
+        },
+        "plateau": {
+          "count": 424,
+          "improving": 0,
+          "stagnating": 424,
+          "declining": 0,
+          "meanGain": 0.001
+        },
+        "volatile": {
+          "count": 96,
+          "improving": 93,
+          "stagnating": 3,
+          "declining": 0,
+          "meanGain": 1.811
+        },
+        "early": {
+          "count": 161,
+          "improving": 30,
+          "stagnating": 63,
+          "declining": 68,
+          "meanGain": -0.294
+        }
+      }
+    },
+    {
+      "startAge": 40,
+      "years": 10,
+      "styles": {
+        "steady": {
+          "count": 480,
+          "improving": 319,
+          "stagnating": 158,
+          "declining": 3,
+          "meanGain": 0.775
+        },
+        "casual": {
+          "count": 546,
+          "improving": 0,
+          "stagnating": 194,
+          "declining": 352,
+          "meanGain": -0.63
+        },
+        "late": {
+          "count": 171,
+          "improving": 146,
+          "stagnating": 25,
+          "declining": 0,
+          "meanGain": 1.283
+        },
+        "plateau": {
+          "count": 424,
+          "improving": 0,
+          "stagnating": 89,
+          "declining": 335,
+          "meanGain": -0.698
+        },
+        "volatile": {
+          "count": 96,
+          "improving": 53,
+          "stagnating": 38,
+          "declining": 5,
+          "meanGain": 0.568
+        },
+        "early": {
+          "count": 161,
+          "improving": 0,
+          "stagnating": 1,
+          "declining": 160,
+          "meanGain": -1.968
+        }
+      }
+    },
+    {
+      "startAge": 55,
+      "years": 10,
+      "styles": {
+        "steady": {
+          "count": 480,
+          "improving": 0,
+          "stagnating": 0,
+          "declining": 480,
+          "meanGain": -3.384
+        },
+        "casual": {
+          "count": 546,
+          "improving": 0,
+          "stagnating": 0,
+          "declining": 546,
+          "meanGain": -4.719
+        },
+        "late": {
+          "count": 171,
+          "improving": 0,
+          "stagnating": 6,
+          "declining": 165,
+          "meanGain": -2.851
+        },
+        "plateau": {
+          "count": 424,
+          "improving": 0,
+          "stagnating": 0,
+          "declining": 424,
+          "meanGain": -4.852
+        },
+        "volatile": {
+          "count": 96,
+          "improving": 0,
+          "stagnating": 0,
+          "declining": 96,
+          "meanGain": -3.809
+        },
+        "early": {
+          "count": 161,
+          "improving": 0,
+          "stagnating": 0,
+          "declining": 161,
+          "meanGain": -5.895
+        }
+      }
+    }
+  ],
+  "tracked": [
+    {
+      "detail": "active",
+      "count": 48,
+      "meanGain": 0.502,
+      "improving": 13,
+      "stagnating": 33,
+      "declining": 2
+    },
+    {
+      "detail": "circuit",
+      "count": 48,
+      "meanGain": 0.498,
+      "improving": 13,
+      "stagnating": 32,
+      "declining": 3
+    },
+    {
+      "detail": "background",
+      "count": 48,
+      "meanGain": 0.494,
+      "improving": 13,
+      "stagnating": 32,
+      "declining": 3
+    }
+  ],
+  "runtimeMs": 4794
+}

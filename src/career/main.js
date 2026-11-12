@@ -8,7 +8,7 @@ import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLO
 import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js';
 import {createAnimeGameRenderer} from '../anime-game.js';
 import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub} from './population.js';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub,applyCpuCareer} from './population.js';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
@@ -32,6 +32,7 @@ import {directoryPage} from './directory.js';
 import {financeSummary,COACHING_FEE} from './finance.js';
 import {weeklyActivityPlan,projectEventLoad} from './planning.js';
 import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js';
+import {cpuTrajectoryStatus} from './cpu-trajectory.js';
 import {currentInjury,activeInjuries} from './injuries.js';
 import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js';
 import {careerProfile} from './matchmaking.js';
@@ -777,8 +778,10 @@ function renderAthleteProfile(){
   const trackedMatches=tracked.reduce((total,entry)=>total+entry.matches,0);
   const opponents=Object.values(career.opponents??{}),headToHead=opponents.find(entry=>entry.id===athlete.id)??career.opponents?.[athlete.id]??null;
   const losses=record?Math.max(0,(record.matches??0)-(record.wins??0)):null;
+  const trajectory=cpuTrajectoryStatus(athlete.trajectory,career.week-(record?.createdWeek??0));
   const lastOpponents=(record?.lastOpponentIds??[]).map(id=>profileAthleteById(id)?.name??id).join(' & ');
   const historyRows=record?[
+    ...(trajectory?[['Development style',trajectory.label],['Current development',trajectory.phaseLabel]]:[]),
     ['Matches',record.matches??0],['Record',`${record.wins??0}W · ${losses}L`],
     ...(record.lastMatchWeek!=null?[['Last match',`Week ${record.lastMatchWeek+1} · ${record.lastScore??'played'}${lastOpponents?' vs '+lastOpponents:''}`]]:[]),
     ['Events',record.events??0],['Tour points',Math.round(record.tourPoints??0).toLocaleString('en-US')],['Stage',record.stage??record.detail??'background'],['Contract',record.contract??'none'],['Form',record.form??0],['Fatigue',`${Math.round(record.fatigue??0)}%`]
@@ -994,7 +997,7 @@ function renderClubs(){
 function clubRow(club,career){
   const expanded=app.expandedClub===club.id;
   const isMember=career.clubId===club.id;
-  const roster=expanded?buildClubRoster(career.seed,club,career.week):null;
+  const roster=expanded?buildClubRoster(career.seed,club,career.week).map(athlete=>applyCpuCareer(athlete,career.cpuWorld?.records,career.worldRatings)):null;
   const summary=roster?summarizeClub(roster):null;
   const access=clubAccess(career,club);
   return `
@@ -1211,8 +1214,8 @@ function playerDirectory(career){
       lastMatchWeek:background?.lastMatchWeek??null,lastScore:background?.lastScore??null,
       lastOpponentIds:background?.lastOpponentIds??[]
     };
-    const ratings=cpuRecord?.ratings??athlete.ratings;
-    return {...athlete,ratings,skillAverage:skillAverage(ratings),formats,record};
+    const ratings=cpuRecord?.ratings&&Object.keys(cpuRecord.ratings).length?cpuRecord.ratings:athlete.ratings;
+    return {...athlete,ratings,skillAverage:skillAverage(ratings),formats,record,trajectory:cpuRecord?.trajectory??athlete.trajectory};
   });
   app.directoryCache={seed:career.seed,regionId:career.regionId,week:career.week,worldVersion:career.cpuWorld?.lastWeek,athletes};
   return athletes;

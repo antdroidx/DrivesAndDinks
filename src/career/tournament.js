@@ -116,6 +116,7 @@ export function divisionPopulation({state,event,option,gender=null}){
     seed:state.seed,
     regionId:state.regionId,
     ratings:state.worldRatings,
+    skillOverrides:state.cpuWorld?.records,
     week:state.week,
     format:option.format,
     gender,
