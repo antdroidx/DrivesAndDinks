@@ -18,14 +18,14 @@
 // next, the rest of the round, how a player result advances the competition,
 // and where the player finished.
 
-import {ratedPopulation} from './world.js?v=219';
-import {RATING_BRACKETS,formatSkill} from './rating.js?v=219';
-import {seededRandom} from '../competition.js?v=219';
-import {mixSeed} from './population.js?v=219';
-import {pointsForFinish} from './tour.js?v=219';
-import {entryStatus} from './calendar.js?v=219';
-import {resolvePartner} from './club-life.js?v=219';
-import {equipmentSelection} from './equipment.js?v=219';
+import {ratedPopulation} from './world.js?v=220';
+import {RATING_BRACKETS,formatSkill} from './rating.js?v=220';
+import {seededRandom} from '../competition.js?v=220';
+import {mixSeed} from './population.js?v=220';
+import {pointsForFinish} from './tour.js?v=220';
+import {entryStatus} from './calendar.js?v=220';
+import {resolvePartner} from './club-life.js?v=220';
+import {equipmentSelection} from './equipment.js?v=220';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 

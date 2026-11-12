@@ -1,11 +1,11 @@
-import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=219';
-import {createProfileRenderer} from './profile-athlete.js?v=219';
-import {sampleMatchAnimation} from './match-animation.js?v=219';
-import {playerFeet} from './player-feet.js?v=219';
-import {drawContactCue,replayContactAt} from './contact-cues.js?v=219';import {drawNetContact} from './court-net.js?v=219';
-import {paintCourtTexture} from './court-art.js?v=219';import {playerEmotionState} from './player-emotion.js?v=219';
-import {C} from './core.js?v=219';
-import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=219';
+import {resolveAnimeGameDesign,applyAnimeLook} from './anime-game.js?v=220';
+import {createProfileRenderer} from './profile-athlete.js?v=220';
+import {sampleMatchAnimation} from './match-animation.js?v=220';
+import {playerFeet} from './player-feet.js?v=220';
+import {drawContactCue,replayContactAt} from './contact-cues.js?v=220';import {drawNetContact} from './court-net.js?v=220';
+import {paintCourtTexture} from './court-art.js?v=220';import {playerEmotionState} from './player-emotion.js?v=220';
+import {C} from './core.js?v=220';
+import {NEUTRAL_PLAYER_HEIGHT_CM,PROFILE_CANONICAL_BODY_UNITS,PROFILE_VISUAL_BODY_UNITS,playerHeightFeet,netTopHeight} from './court-scale.js?v=220';
 
 // Measured ceiling of the ball in live play is about 7 feet, with the highest
 // overhead contact near 7.4. Eight feet leaves headroom without reserving space
@@ -20,7 +20,7 @@ const REPLAY_PLATE={file:'replay-sideline.png',boundary:.5,floor:'#93aac4'};
 
 function replayName(name){return String(name||'').split(/\s+/)[0]}
 function drawReplayName(c,name,x,y,scale){
- const label=replayName(name);if(!label)return;c.save();c.font=`bold ${Math.max(8,Math.min(12,scale*.42))}px monospace`;c.textAlign='center';const width=Math.max(32,c.measureText(label).width+12);c.fillStyle='#10232de8';c.fillRect(x-width/2,y-15,width,14);c.fillStyle='#fff8df';c.fillText(label,x,y-5);c.restore();
+ const label=replayName(name);if(!label)return;c.save();c.font=`bold ${Math.max(8,Math.min(12,scale*.42))}px Arial, Helvetica, sans-serif`;c.textAlign='center';const width=Math.max(32,c.measureText(label).width+12);c.fillStyle='#10232de8';c.fillRect(x-width/2,y-15,width,14);c.fillStyle='#fff8df';c.fillText(label,x,y-5);c.restore();
 }
 const shade=(hex,t)=>'#'+hex.slice(1).match(/../g).map(v=>Math.round(parseInt(v,16)*(1-t)).toString(16).padStart(2,'0')).join(''),
  sub=(a,b)=>({x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}),

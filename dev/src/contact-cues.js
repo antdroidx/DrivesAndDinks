@@ -15,6 +15,6 @@ export function drawContactCue(c,contact,project,{scale=1,labels=false}={}){
  const p=project(contact.x,contact.y,contact.z),radius=(4+cue.age*8)*scale;
  c.save();c.globalAlpha=(1-cue.age)*.65;c.strokeStyle=cue.color;c.lineWidth=1.25*scale;c.beginPath();c.ellipse(p.x,p.y,radius,radius*.7,0,0,Math.PI*2);c.stroke();
  for(const angle of [-.9,.3,2.1]){c.beginPath();c.moveTo(p.x+Math.cos(angle)*radius,p.y+Math.sin(angle)*radius*.7);c.lineTo(p.x+Math.cos(angle)*(radius+3*scale),p.y+Math.sin(angle)*(radius+3*scale)*.7);c.stroke()}
- if(labels){c.font=`bold ${10*scale}px monospace`;c.fillStyle=cue.color;c.textAlign='center';c.fillText(cue.label,p.x,p.y-14*scale)}
+ if(labels){c.font=`bold ${10*scale}px Arial, Helvetica, sans-serif`;c.fillStyle=cue.color;c.textAlign='center';c.fillText(cue.label,p.x,p.y-14*scale)}
  c.restore();
 }

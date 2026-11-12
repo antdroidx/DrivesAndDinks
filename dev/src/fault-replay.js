@@ -1,4 +1,6 @@
-import {netHeightAt,C} from './core.js?v=219';
+import {netHeightAt,C} from './core.js?v=220';
+
+export const AUTOMATIC_REPLAY_DELAY=1.5;
 
 export class ReplayClock{
  constructor(){this.start(0)}
@@ -86,7 +88,7 @@ export function faultReplayCamera(base,project=null){
 export function drawFaultContact(c,focus,project){
  const foot=project(focus.x,focus.y),a=project(Math.max(0,focus.x-2),focus.boundary),b=project(Math.min(20,focus.x+2),focus.boundary);
  c.save();c.strokeStyle='#ff694e';c.lineWidth=2.5;c.beginPath();c.moveTo(a.x,a.y);c.lineTo(b.x,b.y);c.stroke();c.beginPath();c.ellipse(foot.x,foot.y,8,5,0,0,Math.PI*2);c.stroke();
- const text=focus.reason==='Kitchen momentum fault'?'MOMENTUM · FOOT CONTACT':'KITCHEN · FOOT CONTACT';c.font='bold 9px monospace';c.textAlign='center';c.fillStyle='#112a35ed';c.fillRect(foot.x-86,foot.y+10,172,16);c.fillStyle='#ffe2b5';c.fillText(text,foot.x,foot.y+21);c.restore();
+ const text=focus.reason==='Kitchen momentum fault'?'MOMENTUM · FOOT CONTACT':'KITCHEN · FOOT CONTACT';c.font='bold 9px Arial, Helvetica, sans-serif';c.textAlign='center';c.fillStyle='#112a35ed';c.fillRect(foot.x-86,foot.y+10,172,16);c.fillStyle='#ffe2b5';c.fillText(text,foot.x,foot.y+21);c.restore();
 }
 
 
