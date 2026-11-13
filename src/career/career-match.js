@@ -12,7 +12,7 @@ import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-rec
 import {sponsorsFor,prizeFor} from './standings.js';
 import {entryEligibility,entryStatus} from './calendar.js';
 import {EVENT_BY_ID} from './geography.js';
-import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js';
+import {divisionFor,NEW_PLAYER_RATING,formatRating,reliability,careerReliabilityEvidence,addReliabilityEvidence} from './rating.js';
 import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js';
 import {recordResult,challengerPoints} from './ranking.js';
 import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js';
@@ -350,12 +350,14 @@ export function finishCareerMatch(state,report){
   const pending={...queued,matchup:currentCpuRatings(state,queued.matchup,queued.format)};
   const event=EVENT_BY_ID[pending.eventId];
   const option={id:pending.optionId,format:pending.format,divisionId:pending.divisionId,label:pending.bracket};
+  const reliabilityBeforeEvidence=careerReliabilityEvidence(state);
+  const reliabilityAfterEvidence=addReliabilityEvidence(reliabilityBeforeEvidence,pending.matchup);
   const ratedOutcome=rateMatchReport({report,matchup:pending.matchup,matchType:pending.matchType??event?.matchType,targetScore:pending.rules?.targetScore});
   const ageAdjusted=capRatingForAge(state.athlete,pending.format,ratedOutcome.playerRating);
   const changes=(ratedOutcome.changes??[]).map(change=>change.team==='mine'&&change.id===pending.matchup.playerId
     ?{...change,rating:ageAdjusted.rating,delta:ageAdjusted.rating-change.previousRating}
     :change);
-  const outcome={...ratedOutcome,changes,playerRating:ageAdjusted.rating,delta:ageAdjusted.rating-pending.matchup.playerRating};
+  const outcome={...ratedOutcome,reliabilityBefore:reliability(reliabilityBeforeEvidence.effectiveMatches),reliabilityAfter:reliability(reliabilityAfterEvidence.effectiveMatches),changes,playerRating:ageAdjusted.rating,delta:ageAdjusted.rating-pending.matchup.playerRating};
   const averageRating=players=>players.length?players.reduce((sum,player)=>sum+player.rating,0)/players.length:0;
   const teamSummary=(changes,won,label)=>({
     won,label,
@@ -415,6 +417,7 @@ export function finishCareerMatch(state,report){
     maintenance,
     peakFormats:ageAdjusted.peakFormats,
     record:Object.assign({},state.athlete.record,{
+      reliabilityEvidence:reliabilityAfterEvidence,
       matches:state.athlete.record.matches+1,
       wins:state.athlete.record.wins+(outcome.won?1:0),
       losses:state.athlete.record.losses+(outcome.won?0:1)

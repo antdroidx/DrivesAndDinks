@@ -75,6 +75,9 @@ test('a played match moves the rating on the real result',()=>{
   assert.equal(scored.record.score,'11-4');
   assert.ok(scored.state.athlete.formats[pending.format]!==pending.matchup.playerRating,'the rating moved');
   assert.equal(scored.state.athlete.record.matches,1);
+  assert.equal(scored.state.athlete.record.reliabilityEvidence.matches,1);
+  assert.deepEqual(scored.record.opponentIds,pending.matchup.opponentIds);
+  assert.equal(scored.record.partnerId,pending.matchup.partnerId??null);
   assert.equal(scored.state.athlete.record.wins,1);
   // The energy is paid once when the event is entered, not again per round.
   assert.equal(scored.state.energy,state.energy-event.energyCost);

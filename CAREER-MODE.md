@@ -143,7 +143,7 @@ North American and Asian regions carry different name-culture weightings, so a T
 
 The career rating runs from **2.000 to 8.000**, displayed to three decimals and stored at full precision, so there are no bucketed steps.
 
-The bands are the ones players already meet in published world rankings: **2.000–2.999 Novice**, **3.000–3.999 Intermediate**, **4.000–4.999 Advanced**, **5.000–8.000 Professional**. A **reliability** figure sits beside it, rising with the number of rated matches played: 0 % before the first match, about 63 % after twelve and 96 % after forty, labelled Low, Medium or High.
+The bands are the ones players already meet in published world rankings: **2.000–2.999 Novice**, **3.000–3.999 Intermediate**, **4.000–4.999 Advanced**, **5.000–8.000 Professional**. A **reliability** figure sits beside it, rising with weighted match evidence: 0 % before the first match, labelled Low, Medium or High. Repeated individual opponents, exact opponent pairs (regardless of order), and the same partner contribute diminishing evidence (1/√encounter count). Opponents carry 80 % of doubles evidence, the partner 20 %; opponent evidence blends individual and pair variety equally. Singles uses opponent evidence alone. This is our estimate, not DUPR’s proprietary formula. Cumulative evidence survives save/load and match-archive trimming; older saves rebuild from available history, with half credit for missing history or unknown opponents. Twelve fully varied matches give about 63 %, forty about 96 %.
 
 A rating measures skill, not wins. **It moves on performance measured against an expectation**, which is the defining idea of the system.
 

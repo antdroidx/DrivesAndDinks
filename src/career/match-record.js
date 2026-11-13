@@ -150,6 +150,8 @@ export function buildCareerRecord({report,matchup,event,option,outcome,week}){
     delta:Number(outcome.delta.toFixed(3)),
     opponent:matchup.opponentNames?.[0]??'a local',
     opponents:matchup.opponentNames??[],
+    opponentIds:matchup.opponentIds??[],
+    partnerId:matchup.partnerId??null,
     changes:outcome.changes??[],
     report:compactMatchReport(report)
   };

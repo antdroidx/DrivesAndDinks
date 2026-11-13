@@ -1,3 +1,4 @@
+import {careerReliabilityEvidence} from './rating.js';
 // Career mode user interface.
 //
 // The UI is plain DOM. It reads the career from local storage on load, and
@@ -440,7 +441,7 @@ function renderHome(){
   const proRatingGap=Math.max(0,PRO_FLOOR_RATING-bestCareerRating);
   const proPointsGap=Math.max(0,1600-(career.athlete.tourPoints??0));
   const proReady=isContracted(career)&&proRatingGap===0&&proPointsGap===0;
-  const reliabilityInfo=reliability(career.athlete.record.matches);
+  const reliabilityInfo=reliability(careerReliabilityEvidence(career).effectiveMatches);
   const reliabilityText=career.athlete.record.matches
     ? `Reliability ${reliabilityInfo.percent}% · ${reliabilityInfo.label}`
     : 'Provisional · no rated matches yet';

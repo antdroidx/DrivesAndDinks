@@ -12,7 +12,7 @@ import {pointsForEntry,addPoints,pointsInWindow} from './tour.js';
 import {buildClubIndex,findClub,mixSeed} from './population.js';
 import {generateWeekEvents,weekLabel,weekDate,entryEligibility} from './calendar.js';
 import {findRival} from './standings.js';
-import {NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,skillForRating,FORMATS,divisionFor} from './rating.js';
+import {careerReliabilityEvidence,addReliabilityEvidence,NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,skillForRating,FORMATS,divisionFor} from './rating.js';
 import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js';
 import {evaluateSeason,seasonDue,isContracted} from './contracts.js';
 import {emptyAnalytics} from './analytics.js';
@@ -613,6 +613,7 @@ export function attendEvent(state,eventId,optionId=null){
     formats:Object.assign({},state.athlete.formats,{[format]:newRating}),
     record:{
       ...state.athlete.record,
+      reliabilityEvidence:addReliabilityEvidence(careerReliabilityEvidence(state),{opponentIds:opponents.map(opponent=>opponent.id??opponent.name),partnerId:partner?.id??partner?.name}),
       matches:state.athlete.record.matches+1,
       wins:state.athlete.record.wins+(won?1:0),
       losses:state.athlete.record.losses+(won?0:1)
@@ -634,6 +635,8 @@ export function attendEvent(state,eventId,optionId=null){
     format,
     bracket:option.label,
     score,
+    opponentIds:opponents.map(opponent=>opponent.id??opponent.name),
+    partnerId:partner?.id??partner?.name??null,
     opponent:faced||'a local',
     won,
     rating:newRating,
