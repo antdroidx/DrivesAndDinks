@@ -1,11 +1,37 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createCareer} from '../src/career/state.js';
+import {equipmentSelection,STARTER_EQUIPMENT_ID} from '../src/career/equipment.js';
+import {careerProfile} from '../src/career/matchmaking.js';
+import {saveCareer,loadCareer,memoryStorage} from '../src/career/save.js';
 import {
   EXPERIENCE_OPTIONS,STARTING_TRAITS,normalizeHeight,normalizeWeight,bodyAttributeModifiers,startingModifiers,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms
 } from '../src/career/creation.js';
 
 const base=(overrides={})=>createCareer({name:'Creator',gender:'male',archetypeId:'remy',regionId:'north-america',cityId:'seattle',seed:4242,age:25,height:177,weight:80,experience:'athlete',trait:'none',...overrides});
+
+test('a selected starting paddle is owned, equipped, saved and used on court',()=>{
+  const state=base({startingPaddleId:'ignite-elongated-14',appearance:{paddleColor:'blue'}});
+  assert.ok(state.equipment.owned.includes('ignite-elongated-14'));
+  assert.equal(state.equipment.equipped,'ignite-elongated-14');
+  assert.equal(state.equipment.purchases.length,0);
+  const storage=memoryStorage();
+  assert.ok(saveCareer(state,storage).ok);
+  const loaded=loadCareer(storage).state;
+  const selection=equipmentSelection(loaded);
+  assert.equal(selection.paddle,'power');
+  assert.equal(selection.shape,'elongated-aero');
+  assert.equal(selection.color,'blue');
+  assert.equal(selection.item.thickness,14);
+  const profile=careerProfile(loaded.athlete,selection);
+  assert.equal(profile.paddle.thickness,14);
+  assert.equal(profile.paddle.shapeId,'elongated-aero');
+});
+
+test('missing or invalid starting paddle retains the existing default',()=>{
+  assert.equal(base().equipment.equipped,STARTER_EQUIPMENT_ID);
+  assert.equal(base({startingPaddleId:'not-a-paddle'}).equipment.equipped,STARTER_EQUIPMENT_ID);
+});
 
 test('experience controls the provisional starting level',()=>{
   const ratings=EXPERIENCE_OPTIONS.map(option=>base({experience:option.id}).athlete.formats.doubles);

@@ -74,8 +74,9 @@ const normalizeItem=item=>{
   return {...item,baseId,family:['balanced','power','control'].includes(item?.family)?item.family:'balanced',shape:resolvedShape,shapeLabel:shapeInfo.name,thickness,thicknessLabel:`${thickness} mm`,price:Math.max(0,Math.round(Number(item?.price)||0)),status:['announced','available','low-stock','discontinued','legacy'].includes(item?.status)?item.status:'available',color:PADDLE_COLORS.some(color=>color.id===item?.color)?item.color:null,signature:Boolean(item?.signature)};
 };
 
-export function emptyEquipment(){
-  return {version:EQUIPMENT_VERSION,owned:[STARTER_EQUIPMENT_ID],equipped:STARTER_EQUIPMENT_ID,purchases:[],catalog:[],headwear:{owned:[],equipped:null}};
+export function emptyEquipment(startingPaddleId=STARTER_EQUIPMENT_ID){
+  const selected=PADDLE_CATALOG.some(item=>item.id===startingPaddleId)?startingPaddleId:STARTER_EQUIPMENT_ID;
+  return {version:EQUIPMENT_VERSION,owned:[...new Set([STARTER_EQUIPMENT_ID,selected])],equipped:selected,purchases:[],catalog:[],headwear:{owned:[],equipped:null}};
 }
 
 export function currentEquipmentYear(week=0){return Math.floor(Math.max(0,Number(week)||0)/52);}

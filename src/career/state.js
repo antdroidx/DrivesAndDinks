@@ -204,7 +204,7 @@ export function createCareer(options={}){
     opponents:{},
     coachFeedback:null,
     injuries:emptyInjuries(),
-    equipment:emptyEquipment(),
+    equipment:emptyEquipment(options.startingPaddleId),
     coachingEnabled:false,
     lastCoachingWeek:null,
     coachingHistory:[],
