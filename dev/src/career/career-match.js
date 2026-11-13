@@ -6,28 +6,28 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=221';
-import {careerProfile} from './matchmaking.js?v=221';
-import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=221';
-import {sponsorsFor,prizeFor} from './standings.js?v=221';
-import {entryEligibility,entryStatus} from './calendar.js?v=221';
-import {EVENT_BY_ID} from './geography.js?v=221';
-import {divisionFor,NEW_PLAYER_RATING,formatRating,reliability,careerReliabilityEvidence,addReliabilityEvidence} from './rating.js?v=221';
-import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=221';
-import {recordResult,challengerPoints} from './ranking.js?v=221';
-import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=221';
-import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=221';
-import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=221';
-import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=221';
-import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=221';
-import {equipmentSelection} from './equipment.js?v=221';
-import {normalizeStackingSelection} from '../stacking.js?v=221';
-import {mixSeed} from './population.js?v=221';
-import {chargeEventCosts,creditPrize} from './finance.js?v=221';
-import {rollInjury} from './injuries.js?v=221';
-import {syncInbox} from './inbox.js?v=221';
-import {seededRandom} from '../competition.js?v=221';
-import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=221';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=222';
+import {careerProfile} from './matchmaking.js?v=222';
+import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=222';
+import {sponsorsFor,prizeFor} from './standings.js?v=222';
+import {entryEligibility,entryStatus} from './calendar.js?v=222';
+import {EVENT_BY_ID} from './geography.js?v=222';
+import {divisionFor,NEW_PLAYER_RATING,formatRating,reliability,careerReliabilityEvidence,addReliabilityEvidence} from './rating.js?v=222';
+import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=222';
+import {recordResult,challengerPoints} from './ranking.js?v=222';
+import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=222';
+import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=222';
+import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=222';
+import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=222';
+import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=222';
+import {equipmentSelection} from './equipment.js?v=222';
+import {normalizeStackingSelection} from '../stacking.js?v=222';
+import {mixSeed} from './population.js?v=222';
+import {chargeEventCosts,creditPrize} from './finance.js?v=222';
+import {rollInjury} from './injuries.js?v=222';
+import {syncInbox} from './inbox.js?v=222';
+import {seededRandom} from '../competition.js?v=222';
+import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=222';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 let matchSessionCounter=0;

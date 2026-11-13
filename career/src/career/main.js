@@ -1,45 +1,45 @@
-import {careerReliabilityEvidence} from './rating.js?v=221';
+import {careerReliabilityEvidence} from './rating.js?v=222';
 // Career mode user interface.
 //
 // The UI is plain DOM. It reads the career from local storage on load, and
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=221';
-import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=221';
-import {createAnimeGameRenderer} from '../anime-game.js?v=221';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=221';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub,applyCpuCareer} from './population.js?v=221';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=222';
+import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=222';
+import {createAnimeGameRenderer} from '../anime-game.js?v=222';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=222';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub,applyCpuCareer} from './population.js?v=222';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=221';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=221';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=221';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=221';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=221';
-import {isPlayerDone} from './tournament.js?v=221';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=221';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=221';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=221';
-import {rankingSummary} from './ranking.js?v=221';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=221';
-import {analyticsSummary} from './analytics.js?v=221';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=221';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=221';
-import {opponentHistory} from './opponents.js?v=221';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=221';
-import {directoryPage} from './directory.js?v=221';
-import {financeSummary,COACHING_FEE} from './finance.js?v=221';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=221';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=221';
-import {cpuTrajectoryStatus} from './cpu-trajectory.js?v=221';
-import {currentInjury,activeInjuries} from './injuries.js?v=221';
-import {equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=221';
-import {careerProfile} from './matchmaking.js?v=221';
-import {teamCareerSummary} from './team-league.js?v=221';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=221';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=221';
+} from './state.js?v=222';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=222';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=222';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=222';
+import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=222';
+import {isPlayerDone} from './tournament.js?v=222';
+import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=222';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=222';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=222';
+import {rankingSummary} from './ranking.js?v=222';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=222';
+import {analyticsSummary} from './analytics.js?v=222';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=222';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=222';
+import {opponentHistory} from './opponents.js?v=222';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=222';
+import {directoryPage} from './directory.js?v=222';
+import {financeSummary,COACHING_FEE} from './finance.js?v=222';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=222';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=222';
+import {cpuTrajectoryStatus} from './cpu-trajectory.js?v=222';
+import {currentInjury,activeInjuries} from './injuries.js?v=222';
+import {PADDLE_CATALOG,STARTER_EQUIPMENT_ID,equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=222';
+import {careerProfile} from './matchmaking.js?v=222';
+import {teamCareerSummary} from './team-league.js?v=222';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=222';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=222';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -52,7 +52,7 @@ const RATING_GROUPS=Object.freeze([
 const app={
   career:null,
   view:'home',
-  draft:{name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25,height:164,weight:64,experience:'athlete',trait:'none',
+  draft:{startingPaddleId:STARTER_EQUIPMENT_ID,name:'',gender:'female',archetypeId:'quinn',regionId:'north-america',cityId:'',age:25,height:164,weight:64,experience:'athlete',trait:'none',
     handedness:DEFAULT_SELECTION.handedness,shirtColor:DEFAULT_SELECTION.shirtColor,paddleColor:DEFAULT_SELECTION.paddleColor,highlightColor:DEFAULT_SELECTION.highlightColor,hairStyle:DEFAULT_SELECTION.hairStyle,hairColor:DEFAULT_SELECTION.hairColor,skinColor:DEFAULT_SELECTION.skinColor,headwear:DEFAULT_SELECTION.headwear,headwearColor:DEFAULT_SELECTION.highlightColor,eyewear:DEFAULT_SELECTION.eyewear,outfit:DEFAULT_SELECTION.outfit,court:DEFAULT_SELECTION.court},
   filters:{areaId:'',cityId:'',tier:'',query:'',gender:'',bracket:'',minAge:'',maxAge:'',sort:'rating-desc',page:0},
   move:{regionId:'',cityId:''},
@@ -164,13 +164,15 @@ function optionTags(items,value,labelKey='name'){
 }
 
 function careerSelectionFor(source){
+  const paddle=PADDLE_CATALOG.find(item=>item.id===source.startingPaddleId);
   return normalizeSelection({
     character:source.archetypeId,
     gender:source.gender,
     handedness:source.handedness,
     customName:source.name,
-    paddle:'balanced',
-    paddleShape:'hybrid-flat',
+    paddle:paddle?.family??'balanced',
+    paddleShape:paddle?.shape??'hybrid-flat',
+    paddleThickness:paddle?.thickness??16,
     shirtColor:source.shirtColor,
     paddleColor:source.paddleColor,
     highlightColor:source.highlightColor,
@@ -194,6 +196,17 @@ function drawCareerPreview(canvasId,source){
   ctx.fillStyle='#173039';ctx.fillRect(0,0,150,180);ctx.fillStyle='#355e60';ctx.fillRect(0,142,150,38);ctx.fillStyle='#eff3cf55';ctx.fillRect(0,150,150,2);
   drawCareerCharacter(ctx,{personalize:true,appearance:profile.appearance,characterId:selection.character,handedness:selection.handedness,mode:'idle',frame:0,phase:0,x:8,y:28,width:130,height:130,view:'far',side:selection.handedness==='left'?-1:1,paddleShape:selection.paddleShape,lighting:'depth',style:'anime',look:'storybook',outfit:selection.outfit});
   canvas.setAttribute('aria-label',`${source.name||'Career player'} appearance preview`);
+}
+
+function startingPaddlePreview(){
+  const item={...(PADDLE_CATALOG.find(item=>item.id===app.draft.startingPaddleId)??PADDLE_CATALOG[0]),color:app.draft.paddleColor};
+  return `${paddlePicture(item)}<p>${escapeHtml(item.description)}</p>${equipmentStatRows(item)}`;
+}
+
+function refreshStartingPaddlePreview(){
+  const preview=document.getElementById('draft-paddle-preview');
+  if(preview)preview.innerHTML=startingPaddlePreview();
+  drawCareerDraftPreview();
 }
 
 function drawCareerDraftPreview(){drawCareerPreview('career-player-preview',app.draft)}
@@ -275,7 +288,14 @@ function renderCreate(){
           </div>
         </div>
       </div>
-    </details>    <div class="field-row">
+    </details>
+    <section class="panel">
+      <h2>STARTING PADDLE</h2>
+      <p>Your starting paddle is included and equipped for your first match. Choose its face shape and thickness below; set its color in Character Profile.</p>
+      <div class="field"><label for="draft-starting-paddle">PADDLE SETUP</label><select id="draft-starting-paddle">${PADDLE_CATALOG.map(item=>`<option value="${item.id}"${item.id===app.draft.startingPaddleId?' selected':''}>${escapeHtml(item.label)} · ${item.thickness} mm</option>`).join('')}</select></div>
+      <div id="draft-paddle-preview">${startingPaddlePreview()}</div>
+    </section>
+    <div class="field-row">
       <div class="field">
         <label>HEIGHT · FT / IN</label>
         <div class="measurement-pair">
@@ -1348,6 +1368,7 @@ document.addEventListener('click',event=>{
         weight:poundsToKilograms(Number(document.getElementById('draft-weight-lb')?.value),height,gender),
         experience:document.getElementById('draft-experience')?.value,
         trait:document.getElementById('draft-trait')?.value,
+        startingPaddleId:app.draft.startingPaddleId,
         appearance:{
           handedness:app.draft.handedness,
           shirtColor:app.draft.shirtColor,
@@ -1592,13 +1613,14 @@ document.addEventListener('change',async event=>{
   if(id==='draft-trait'){app.draft.trait=event.target.value}
   if(id==='draft-gender'){app.draft.gender=event.target.value;app.draft.hairStyle='design';render()}
   if(id==='draft-archetype'){app.draft.archetypeId=event.target.value;render()}
+  if(id==='draft-starting-paddle'){app.draft.startingPaddleId=event.target.value;refreshStartingPaddlePreview()}
   if(id==='draft-look-hand'){app.draft.handedness=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-outfit'){app.draft.outfit=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-hair'){app.draft.hairStyle=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-hair-color'){app.draft.hairColor=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-skin'){app.draft.skinColor=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-shirt'){app.draft.shirtColor=event.target.value;drawCareerDraftPreview()}
-  if(id==='draft-look-paddle-color'){app.draft.paddleColor=event.target.value;drawCareerDraftPreview()}
+  if(id==='draft-look-paddle-color'){app.draft.paddleColor=event.target.value;refreshStartingPaddlePreview()}
   if(id==='draft-look-highlight'){app.draft.highlightColor=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-headwear'){app.draft.headwear=event.target.value;drawCareerDraftPreview()}
   if(id==='draft-look-eyewear'){app.draft.eyewear=event.target.value;drawCareerDraftPreview()}

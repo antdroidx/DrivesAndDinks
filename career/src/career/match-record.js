@@ -6,8 +6,8 @@
 // rates it the way every other match is rated: on the difference between
 // what was expected and what actually happened.
 
-import {rateMatch,expectedScore,matchPerformance,teamStrength,MAX_POINTS,reliability} from './rating.js?v=221';
-import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints,EVENT_POOL,POOL_TOUR} from './tour.js?v=221';
+import {rateMatch,expectedScore,matchPerformance,teamStrength,MAX_POINTS,reliability} from './rating.js?v=222';
+import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints,EVENT_POOL,POOL_TOUR} from './tour.js?v=222';
 
 export const CAREER_RECORD_LIMIT=60;
 

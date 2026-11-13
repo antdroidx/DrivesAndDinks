@@ -8,14 +8,14 @@
 // Events are not gated on a rating. They carry the brackets they field, and
 // the player picks the bracket they enter.
 
-import {COMPETITION_EVENTS,EVENT_BY_ID,PRO_LEAGUE_DIVISION,EVENT_SCOPE_LABELS} from './geography.js?v=221';
-import {RATING_BRACKETS,availableDivisions,divisionFor,formatRating} from './rating.js?v=221';
-import {tourFor,tourRank,pointsInWindow} from './tour.js?v=221';
-import {mixSeed} from './population.js?v=221';
-import {finalsQualified,positions} from './ranking.js?v=221';
-import {isContracted,isIneligible} from './contracts.js?v=221';
-import {seededRandom} from '../competition.js?v=221';
-import {projectEventLoad} from './planning.js?v=221';
+import {COMPETITION_EVENTS,EVENT_BY_ID,PRO_LEAGUE_DIVISION,EVENT_SCOPE_LABELS} from './geography.js?v=222';
+import {RATING_BRACKETS,availableDivisions,divisionFor,formatRating} from './rating.js?v=222';
+import {tourFor,tourRank,pointsInWindow} from './tour.js?v=222';
+import {mixSeed} from './population.js?v=222';
+import {finalsQualified,positions} from './ranking.js?v=222';
+import {isContracted,isIneligible} from './contracts.js?v=222';
+import {seededRandom} from '../competition.js?v=222';
+import {projectEventLoad} from './planning.js?v=222';
 
 // Monday, 5 January 2026. Career week 0 starts here.
 export const CAREER_EPOCH_MS=Date.UTC(2026,0,5);

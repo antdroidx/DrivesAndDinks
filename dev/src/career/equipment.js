@@ -4,10 +4,10 @@
 // keeps cosmetics independent from performance and prevents new products from
 // exceeding the same bounded modifiers as the starter catalog.
 
-import {recordFinance} from './finance.js?v=221';
-import {seededRandom} from '../competition.js?v=221';
-import {mixSeed} from './population.js?v=221';
-import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS,PADDLE_SHAPE_ALIASES} from '../roster.js?v=221';
+import {recordFinance} from './finance.js?v=222';
+import {seededRandom} from '../competition.js?v=222';
+import {mixSeed} from './population.js?v=222';
+import {PADDLES,PADDLE_SHAPES,PADDLE_COLORS,PADDLE_SHAPE_ALIASES} from '../roster.js?v=222';
 
 export const EQUIPMENT_VERSION=4;
 export const STARTER_EQUIPMENT_ID='allcourt-hybrid';
@@ -74,8 +74,9 @@ const normalizeItem=item=>{
   return {...item,baseId,family:['balanced','power','control'].includes(item?.family)?item.family:'balanced',shape:resolvedShape,shapeLabel:shapeInfo.name,thickness,thicknessLabel:`${thickness} mm`,price:Math.max(0,Math.round(Number(item?.price)||0)),status:['announced','available','low-stock','discontinued','legacy'].includes(item?.status)?item.status:'available',color:PADDLE_COLORS.some(color=>color.id===item?.color)?item.color:null,signature:Boolean(item?.signature)};
 };
 
-export function emptyEquipment(){
-  return {version:EQUIPMENT_VERSION,owned:[STARTER_EQUIPMENT_ID],equipped:STARTER_EQUIPMENT_ID,purchases:[],catalog:[],headwear:{owned:[],equipped:null}};
+export function emptyEquipment(startingPaddleId=STARTER_EQUIPMENT_ID){
+  const selected=PADDLE_CATALOG.some(item=>item.id===startingPaddleId)?startingPaddleId:STARTER_EQUIPMENT_ID;
+  return {version:EQUIPMENT_VERSION,owned:[...new Set([STARTER_EQUIPMENT_ID,selected])],equipped:selected,purchases:[],catalog:[],headwear:{owned:[],equipped:null}};
 }
 
 export function currentEquipmentYear(week=0){return Math.floor(Math.max(0,Number(week)||0)/52);}
