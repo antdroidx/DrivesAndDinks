@@ -6,8 +6,8 @@
 // rates it the way every other match is rated: on the difference between
 // what was expected and what actually happened.
 
-import {rateMatch,expectedScore,matchPerformance,teamStrength,MAX_POINTS,reliability} from './rating.js?v=220';
-import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints,EVENT_POOL,POOL_TOUR} from './tour.js?v=220';
+import {rateMatch,expectedScore,matchPerformance,teamStrength,MAX_POINTS,reliability} from './rating.js?v=221';
+import {EVENT_POINTS,PLAY_UP_MULTIPLIER,pointsInWindow,addPoints,EVENT_POOL,POOL_TOUR} from './tour.js?v=221';
 
 export const CAREER_RECORD_LIMIT=60;
 
@@ -150,6 +150,8 @@ export function buildCareerRecord({report,matchup,event,option,outcome,week}){
     delta:Number(outcome.delta.toFixed(3)),
     opponent:matchup.opponentNames?.[0]??'a local',
     opponents:matchup.opponentNames??[],
+    opponentIds:matchup.opponentIds??[],
+    partnerId:matchup.partnerId??null,
     changes:outcome.changes??[],
     report:compactMatchReport(report)
   };

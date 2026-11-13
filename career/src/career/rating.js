@@ -397,3 +397,47 @@ export function reliability(matchesPlayed=0){
   const label=percent<40?'Low':percent<70?'Medium':'High';
   return {percent,label,matches:count};
 }
+
+// Our reliability estimate, not DUPR's proprietary formula. A repeat encounter
+// contributes 1/sqrt(encounter number); opponents carry 80%, partners 20%.
+// Opponent evidence blends individual variety and exact team combinations.
+// Keep cumulative evidence outside the bounded, detailed match archive.
+export function addReliabilityEvidence(evidence,match={}){
+  const next={effectiveMatches:evidence?.effectiveMatches??0,matches:(evidence?.matches??0)+1,
+    opponents:{...evidence?.opponents},partners:{...evidence?.partners},teams:{...evidence?.teams}};
+  const contribution=(ids,counts)=>{
+    const unique=[...new Set((ids??[]).filter(id=>id!=null&&id!==''))];
+    if(!unique.length)return 0.5; // Unknown history cannot establish variety.
+    return unique.reduce((sum,id)=>{
+      const key=String(id);
+      const count=(Object.hasOwn(counts,key)?counts[key]:0)+1;
+      Object.defineProperty(counts,key,{value:count,enumerable:true,writable:true,configurable:true});
+      return sum+1/Math.sqrt(count);
+    },0)/unique.length;
+  };
+  const ids=[...new Set((match.opponentIds??[]).filter(id=>id!=null&&id!==''))];
+  const individuals=contribution(ids,next.opponents);
+  const team=contribution(ids.length?[JSON.stringify(ids.map(String).sort())]:[],next.teams);
+  const opponents=(individuals+team)/2;
+  const partner=match.partnerId?contribution([match.partnerId],next.partners):null;
+  next.effectiveMatches+=partner==null?opponents:0.8*opponents+0.2*partner;
+  return next;
+}
+
+export function careerReliabilityEvidence(state){
+  if(state.athlete?.record?.reliabilityEvidence)return state.athlete.record.reliabilityEvidence;
+  const matches=state.matches??[];
+  // Older saves only retain a bounded archive. Give missing results conservative
+  // partial credit rather than inventing opponents or dropping their evidence.
+  const missing=Math.max(0,(state.athlete?.record?.matches??0)-matches.length);
+  let evidence={effectiveMatches:missing*0.5,matches:missing,opponents:{},partners:{}};
+  for(const match of matches){
+    const legacyIds=(match.opponents??(match.opponent?[match.opponent]:[])).map(name=>
+      Object.values(state.opponents??{}).find(player=>player.name===name)?.id??name);
+    evidence=addReliabilityEvidence(evidence,{
+      opponentIds:match.opponentIds??legacyIds,
+      partnerId:match.partnerId
+    });
+  }
+  return evidence;
+}

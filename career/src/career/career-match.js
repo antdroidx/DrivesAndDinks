@@ -6,28 +6,28 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=220';
-import {careerProfile} from './matchmaking.js?v=220';
-import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=220';
-import {sponsorsFor,prizeFor} from './standings.js?v=220';
-import {entryEligibility,entryStatus} from './calendar.js?v=220';
-import {EVENT_BY_ID} from './geography.js?v=220';
-import {divisionFor,NEW_PLAYER_RATING,formatRating} from './rating.js?v=220';
-import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=220';
-import {recordResult,challengerPoints} from './ranking.js?v=220';
-import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=220';
-import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=220';
-import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=220';
-import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=220';
-import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=220';
-import {equipmentSelection} from './equipment.js?v=220';
-import {normalizeStackingSelection} from '../stacking.js?v=220';
-import {mixSeed} from './population.js?v=220';
-import {chargeEventCosts,creditPrize} from './finance.js?v=220';
-import {rollInjury} from './injuries.js?v=220';
-import {syncInbox} from './inbox.js?v=220';
-import {seededRandom} from '../competition.js?v=220';
-import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=220';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=221';
+import {careerProfile} from './matchmaking.js?v=221';
+import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=221';
+import {sponsorsFor,prizeFor} from './standings.js?v=221';
+import {entryEligibility,entryStatus} from './calendar.js?v=221';
+import {EVENT_BY_ID} from './geography.js?v=221';
+import {divisionFor,NEW_PLAYER_RATING,formatRating,reliability,careerReliabilityEvidence,addReliabilityEvidence} from './rating.js?v=221';
+import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=221';
+import {recordResult,challengerPoints} from './ranking.js?v=221';
+import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=221';
+import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=221';
+import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=221';
+import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=221';
+import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=221';
+import {equipmentSelection} from './equipment.js?v=221';
+import {normalizeStackingSelection} from '../stacking.js?v=221';
+import {mixSeed} from './population.js?v=221';
+import {chargeEventCosts,creditPrize} from './finance.js?v=221';
+import {rollInjury} from './injuries.js?v=221';
+import {syncInbox} from './inbox.js?v=221';
+import {seededRandom} from '../competition.js?v=221';
+import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=221';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 let matchSessionCounter=0;
@@ -350,12 +350,14 @@ export function finishCareerMatch(state,report){
   const pending={...queued,matchup:currentCpuRatings(state,queued.matchup,queued.format)};
   const event=EVENT_BY_ID[pending.eventId];
   const option={id:pending.optionId,format:pending.format,divisionId:pending.divisionId,label:pending.bracket};
+  const reliabilityBeforeEvidence=careerReliabilityEvidence(state);
+  const reliabilityAfterEvidence=addReliabilityEvidence(reliabilityBeforeEvidence,pending.matchup);
   const ratedOutcome=rateMatchReport({report,matchup:pending.matchup,matchType:pending.matchType??event?.matchType,targetScore:pending.rules?.targetScore});
   const ageAdjusted=capRatingForAge(state.athlete,pending.format,ratedOutcome.playerRating);
   const changes=(ratedOutcome.changes??[]).map(change=>change.team==='mine'&&change.id===pending.matchup.playerId
     ?{...change,rating:ageAdjusted.rating,delta:ageAdjusted.rating-change.previousRating}
     :change);
-  const outcome={...ratedOutcome,changes,playerRating:ageAdjusted.rating,delta:ageAdjusted.rating-pending.matchup.playerRating};
+  const outcome={...ratedOutcome,reliabilityBefore:reliability(reliabilityBeforeEvidence.effectiveMatches),reliabilityAfter:reliability(reliabilityAfterEvidence.effectiveMatches),changes,playerRating:ageAdjusted.rating,delta:ageAdjusted.rating-pending.matchup.playerRating};
   const averageRating=players=>players.length?players.reduce((sum,player)=>sum+player.rating,0)/players.length:0;
   const teamSummary=(changes,won,label)=>({
     won,label,
@@ -415,6 +417,7 @@ export function finishCareerMatch(state,report){
     maintenance,
     peakFormats:ageAdjusted.peakFormats,
     record:Object.assign({},state.athlete.record,{
+      reliabilityEvidence:reliabilityAfterEvidence,
       matches:state.athlete.record.matches+1,
       wins:state.athlete.record.wins+(outcome.won?1:0),
       losses:state.athlete.record.losses+(outcome.won?0:1)

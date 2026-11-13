@@ -1,8 +1,8 @@
 // Reproducible CPU development, independent of how often a player is viewed.
 // These are game balance policies, not predictions of real athletic careers.
-import {RATING_KEYS} from '../roster.js?v=220';
-import {seededRandom} from '../competition.js?v=220';
-import {attributeAgeFactor} from './age.js?v=220';
+import {RATING_KEYS} from '../roster.js?v=221';
+import {seededRandom} from '../competition.js?v=221';
+import {attributeAgeFactor} from './age.js?v=221';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 const round3=value=>Math.round(value*1000)/1000;
