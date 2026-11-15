@@ -18,14 +18,14 @@
 // next, the rest of the round, how a player result advances the competition,
 // and where the player finished.
 
-import {ratedPopulation} from './world.js?v=222';
-import {RATING_BRACKETS,formatSkill} from './rating.js?v=222';
-import {seededRandom} from '../competition.js?v=222';
-import {mixSeed} from './population.js?v=222';
-import {pointsForFinish} from './tour.js?v=222';
-import {entryStatus} from './calendar.js?v=222';
-import {resolvePartner} from './club-life.js?v=222';
-import {equipmentSelection} from './equipment.js?v=222';
+import {ratedPopulation} from './world.js?v=223';
+import {RATING_BRACKETS,formatSkill} from './rating.js?v=223';
+import {seededRandom} from '../competition.js?v=223';
+import {mixSeed} from './population.js?v=223';
+import {pointsForFinish} from './tour.js?v=223';
+import {entryStatus} from './calendar.js?v=223';
+import {resolvePartner} from './club-life.js?v=223';
+import {equipmentSelection} from './equipment.js?v=223';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -270,7 +270,7 @@ export function buildRoundRobin(teams,random){
     rotation.splice(1,0,rotation.pop());
   }
   const records={};
-  for(const team of teams)records[team.id]={wins:0,losses:0,points:0};
+  for(const team of teams)records[team.id]={wins:0,losses:0,points:0,pointsAgainst:0};
   return {
     shape:'round-robin',
     kind:'round-robin-league',
@@ -515,6 +515,27 @@ export function simulateMatch(home,away,random,points=11,rules={}){
   return {homeMine:mine,homeTheirs:theirs,homeWon:mine>theirs,score:mine+'-'+theirs};
 }
 
+export function leaguePointDifference(record){
+  return (record?.points??0)-(record?.pointsAgainst??0);
+}
+
+export function compareLeagueTeams(records,a,b){
+  const ra=records[a.id]??{},rb=records[b.id]??{};
+  return (rb.wins??0)-(ra.wins??0)||leaguePointDifference(rb)-leaguePointDifference(ra)||(b.rating??0)-(a.rating??0);
+}
+
+export function simulateLeagueSeries(home,away,random,points=11,rules={}){
+  const games=[];
+  let homeWins=0,awayWins=0,homeMine=0,homeTheirs=0;
+  while(homeWins<2&&awayWins<2){
+    const game=simulateMatch(home,away,random,points,rules);
+    games.push(game);
+    if(game.homeWon)homeWins++;else awayWins++;
+    homeMine+=game.homeMine;homeTheirs+=game.homeTheirs;
+  }
+  return {homeWon:homeWins>awayWins,homeMine,homeTheirs,games,score:homeWins+'-'+awayWins};
+}
+
 function teamById(tournament,id){
   return (tournament.teams??[]).find(team=>team.id===id)??null;
 }
@@ -648,11 +669,14 @@ export function simulateRestOfRound(tournament,random){
     const round=tournament.rounds[tournament.round]??[];
     for(const match of round){
       if(match.home.id===tournament.playerTeamId||match.away.id===tournament.playerTeamId)continue;
-      const outcome=simulateMatch(match.home,match.away,random,rules.targetScore,rules);
+      const outcome=simulateLeagueSeries(match.home,match.away,random,rules.targetScore,rules);
       const homeRecord=tournament.records[match.home.id];
       const awayRecord=tournament.records[match.away.id];
       if(outcome.homeWon){homeRecord.wins+=1;awayRecord.losses+=1;}else{awayRecord.wins+=1;homeRecord.losses+=1;}
       homeRecord.points+=outcome.homeMine;awayRecord.points+=outcome.homeTheirs;
+      homeRecord.pointsAgainst=(homeRecord.pointsAgainst??0)+outcome.homeTheirs;
+      awayRecord.pointsAgainst=(awayRecord.pointsAgainst??0)+outcome.homeMine;
+      match.played=true;match.score=outcome.score;match.games=outcome.games;
       results.push({round:tournament.round,home:match.home.id,away:match.away.id,score:outcome.score,winner:outcome.homeWon?match.home.id:match.away.id});
     }
     return results;
@@ -710,6 +734,12 @@ export function recordPlayerResult(tournament,{won,score,resultDetail=null}){
     stats.pointsFor+=pointsFor;
     stats.pointsAgainst+=pointsAgainst;
     tournament.playerStats=stats;
+    if(tournament.shape==='round-robin'||tournament.shape==='mlp'){
+      const opponentId=match.home.id===tournament.playerTeamId?match.away.id:match.home.id;
+      const own=tournament.records?.[tournament.playerTeamId],other=tournament.records?.[opponentId];
+      if(own){own.points=(own.points??0)+pointsFor;own.pointsAgainst=(own.pointsAgainst??0)+pointsAgainst;}
+      if(other){other.points=(other.points??0)+pointsAgainst;other.pointsAgainst=(other.pointsAgainst??0)+pointsFor;}
+    }
   }
   if(tournament.inConsolation){
     tournament.inConsolation=false;
@@ -778,6 +808,11 @@ export function recordPlayerResult(tournament,{won,score,resultDetail=null}){
         return {ok:true,tournament};
       }
       const playerWonSeries=series.playerWins>series.opponentWins;
+      const fixture=(tournament.rounds[tournament.round]??[]).find(entry=>entry.home.id===tournament.playerTeamId||entry.away.id===tournament.playerTeamId);
+      if(fixture){
+        fixture.played=true;
+        fixture.score=fixture.home.id===tournament.playerTeamId?`${series.playerWins}-${series.opponentWins}`:`${series.opponentWins}-${series.playerWins}`;
+      }
       const record=tournament.records[tournament.playerTeamId];
       if(record){
         if(playerWonSeries)record.wins+=1;
@@ -800,10 +835,7 @@ export function recordPlayerResult(tournament,{won,score,resultDetail=null}){
     if(tournament.round>=tournament.rounds.length){
       tournament.finished=true;
       tournament.nightComplete=false;
-      const standings=[...tournament.teams].sort((a,b)=>{
-        const ra=tournament.records[a.id],rb=tournament.records[b.id];
-        return rb.wins-ra.wins||rb.points-ra.points||b.rating-a.rating;
-      });
+      const standings=[...tournament.teams].sort((a,b)=>compareLeagueTeams(tournament.records,a,b));
       tournament.playerPlace=standings.findIndex(team=>team.id===tournament.playerTeamId)+1;
       tournament.champion=standings[0]??null;
     }

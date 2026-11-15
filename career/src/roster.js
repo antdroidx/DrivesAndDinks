@@ -1,7 +1,7 @@
-import {competitionRecord} from './competition.js?v=222';
-import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=222';
-import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=222';
-import {NAME_BANKS} from './name-data.js?v=222';
+import {competitionRecord} from './competition.js?v=223';
+import {DEFAULT_ABILITIES,playerProfile} from './core.js?v=223';
+import {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,conceptHair} from './character-concepts.js?v=223';
+import {NAME_BANKS} from './name-data.js?v=223';
 export {HAIR_OPTIONS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,NAME_BANKS};
 
 // Ratings are the design-facing values. Internal simulation multipliers are

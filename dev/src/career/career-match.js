@@ -6,28 +6,28 @@
 // match into an engine lineup, and it scores the engine's report back into
 // the tournament and the career.
 
-import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=222';
-import {careerProfile} from './matchmaking.js?v=222';
-import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=222';
-import {sponsorsFor,prizeFor} from './standings.js?v=222';
-import {entryEligibility,entryStatus} from './calendar.js?v=222';
-import {EVENT_BY_ID} from './geography.js?v=222';
-import {divisionFor,NEW_PLAYER_RATING,formatRating,reliability,careerReliabilityEvidence,addReliabilityEvidence} from './rating.js?v=222';
-import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=222';
-import {recordResult,challengerPoints} from './ranking.js?v=222';
-import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=222';
-import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=222';
-import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=222';
-import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=222';
-import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=222';
-import {equipmentSelection} from './equipment.js?v=222';
-import {normalizeStackingSelection} from '../stacking.js?v=222';
-import {mixSeed} from './population.js?v=222';
-import {chargeEventCosts,creditPrize} from './finance.js?v=222';
-import {rollInjury} from './injuries.js?v=222';
-import {syncInbox} from './inbox.js?v=222';
-import {seededRandom} from '../competition.js?v=222';
-import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=222';
+import {currentEvents,canEnterEvent,eventBlockReason,isLeagueEvent,isClubEvent,isTravelEvent,attributeGrowth,pushHistory,pushLog,clamp,formatsPlayed,eventEntryCost,advanceWeek} from './state.js?v=223';
+import {careerProfile} from './matchmaking.js?v=223';
+import {rateMatchReport,buildCareerRecord,CAREER_RECORD_LIMIT} from './match-record.js?v=223';
+import {sponsorsFor,prizeFor} from './standings.js?v=223';
+import {entryEligibility,entryStatus} from './calendar.js?v=223';
+import {EVENT_BY_ID} from './geography.js?v=223';
+import {divisionFor,NEW_PLAYER_RATING,formatRating,reliability,careerReliabilityEvidence,addReliabilityEvidence} from './rating.js?v=223';
+import {addPoints,pointsInWindow,EVENT_POOL,POOL_TOUR,POOL_MLP,pointsForFinish} from './tour.js?v=223';
+import {recordResult,challengerPoints} from './ranking.js?v=223';
+import {contractOffer,signed as signContract,isTourEvent,recordTourEvent,recordReentryEvent,markRecommendation,CHALLENGER_CONTRACT_POINTS} from './contracts.js?v=223';
+import {recordGame,recordEventResult,eventTypeFor} from './analytics.js?v=223';
+import {capRatingForAge,capAttributeForAge,noteSkillPeaks,noteTrainingMaintenance} from './age.js?v=223';
+import {partnerGateStatus,awardClubReputation,buildCoachFeedback} from './club-life.js?v=223';
+import {opponentLearningForMatchup,recordOpponentResult} from './opponents.js?v=223';
+import {equipmentSelection} from './equipment.js?v=223';
+import {normalizeStackingSelection} from '../stacking.js?v=223';
+import {mixSeed} from './population.js?v=223';
+import {chargeEventCosts,creditPrize} from './finance.js?v=223';
+import {rollInjury} from './injuries.js?v=223';
+import {syncInbox} from './inbox.js?v=223';
+import {seededRandom} from '../competition.js?v=223';
+import {startTournament,startRound,nextPlayerMatch,simulateRestOfRound,simulateMatch,recordPlayerResult,isPlayerDone,playerHasBye,tournamentPoints,tournamentSummary,matchRules} from './tournament.js?v=223';
 
 const signed=value=>(value>=0?'+':'')+value.toFixed(3);
 let matchSessionCounter=0;
@@ -136,6 +136,23 @@ function currentCpuRatings(state,matchup,format){
   };
 }
 
+// Keep the toss and lineup decisions stable when resuming a career game.
+export function careerGameOpening(state,tournament,matchup){
+  const random=seededRandom(mixSeed(state.seed,`opening:${tournament.id}:${tournament.round}`));
+  const gameIndex=(tournament.series?.playerWins??0)+(tournament.series?.opponentWins??0);
+  const firstTeam=random()<.5?0:1;
+  const firstEnd=random()<.5;
+  const startingPlayers=[0,0];
+  if(matchup.format!=='singles'){
+    for(let team=0;team<2;team++){
+      const pair=matchup.lineup.slice(team*2,team*2+2);
+      const difference=(pair[0]?.attributes?.serve??0)-(pair[1]?.attributes?.serve??0);
+      startingPlayers[team]=difference===0?(random()<.5?0:1):difference>0?0:1;
+    }
+  }
+  return {team:(firstTeam+gameIndex)%2,sideSwitched:gameIndex%2?!firstEnd:firstEnd,startingPlayers};
+}
+
 // Builds the pending match for whatever round the tournament is on, or null
 // when the player has nothing to play.
 function pendingFor({state,tournament}){
@@ -165,6 +182,7 @@ function pendingFor({state,tournament}){
     difficulty:['easy','normal','hard'].includes(state.settings?.difficulty)?state.settings.difficulty:(tournament.difficulty??'normal'),
     learning:opponentLearningForMatchup(state,matchup)??state.opponentLearning??null,
     stacking:normalizeStackingSelection(state.settings?.stacking),
+    opening:careerGameOpening(state,tournament,matchup),
     matchup:currentCpuRatings(state,matchup,tournament.format)
   };
 }
