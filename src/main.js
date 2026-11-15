@@ -471,7 +471,7 @@ if(careerMatch){
   const screen=document.querySelector('#game-start');
   if(screen)screen.hidden=true;
   document.querySelector('#match-setup').close();
-  game.configure({format:careerMatch.matchup.format,showNameTags:game.showNameTags!==false,rules:careerMatch.rules,learning:careerMatch.learning,stacking:careerMatch.stacking},careerMatch.matchup.lineup);
+  game.configure({format:careerMatch.matchup.format,showNameTags:game.showNameTags!==false,rules:careerMatch.rules,opening:careerMatch.opening,learning:careerMatch.learning,stacking:careerMatch.stacking},careerMatch.matchup.lineup);
   const savedEngineState=readEngineState(careerMatch.matchId);
   game.mode='play';
   game.setDifficulty(careerMatch.difficulty??'normal');syncDifficultyButton();

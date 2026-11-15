@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer} from '../src/career/state.js';
 import {
   startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,
-  isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands,divisionPopulation
+  simulateLeagueSeries,compareLeagueTeams,isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands,divisionPopulation
 } from '../src/career/tournament.js';
 import {pointsForFinish} from '../src/career/tour.js';
 import {seededRandom} from '../src/competition.js';
@@ -76,6 +76,12 @@ test('a loss ends a knockout and keeps a league going',()=>{
   recordPlayerResult(league,{won:false,score:'7-11'});
   assert.equal(isPlayerDone(league),false,'a league continues after a loss');
   assert.equal(league.series.opponentWins,1,'the best of three is one game down');
+  assert.equal(league.records[league.playerTeamId].points,7);
+  const opponent=league.series.home.id===league.playerTeamId?league.series.away:league.series.home;
+  assert.equal(league.records[opponent.id].points,11);
+  recordPlayerResult(league,{won:true,score:'11-5'});
+  assert.equal(league.records[league.playerTeamId].points,18);
+  assert.equal(league.records[opponent.id].points,16);
 });
 
 test('a player outside the main draw has to qualify',()=>{
@@ -203,4 +209,30 @@ test('a ladder keeps every team in its ranking',()=>{
   const ids=new Set(tournament.order.map(team=>team.id));
   assert.equal(ids.size,tournament.order.length,'no team is duplicated');
   assert.equal(tournament.order.length,tournament.teams.length,'every team is on the ladder');
+});
+
+
+test('CPU league wins include all games in a best of three to 15',()=>{
+  for(let seed=1;seed<=20;seed++){
+    const result=simulateLeagueSeries({skill:70},{skill:70},seededRandom(seed),15);
+    assert.ok(result.games.length===2||result.games.length===3);
+    assert.ok((result.homeWon?result.homeMine:result.homeTheirs)>=30);
+    assert.equal(result.homeMine,result.games.reduce((sum,game)=>sum+game.homeMine,0));
+  }
+});
+
+test('league standings break tied match wins by differential, not points scored',()=>{
+  const teams=[{id:'a',rating:5},{id:'b',rating:3}];
+  const records={a:{wins:2,points:70,pointsAgainst:69},b:{wins:2,points:60,pointsAgainst:40}};
+  assert.deepEqual(teams.sort((a,b)=>compareLeagueTeams(records,a,b)).map(team=>team.id),['b','a']);
+});
+
+test('league CPU records count full series and balance scored and conceded points',()=>{
+  const tournament=startTournament({state,event:{...eventFor('round-robin-league'),rules:{points:15}},option}).tournament;
+  tournament.rules={...tournament.rules,points:15};
+  startRound(tournament,seededRandom(9));
+  simulateRestOfRound(tournament,seededRandom(9));
+  const records=Object.values(tournament.records);
+  assert.equal(records.reduce((sum,row)=>sum+row.points,0),records.reduce((sum,row)=>sum+row.pointsAgainst,0));
+  for(const row of records.filter(row=>row.wins))assert.ok(row.points>=30);
 });

@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createCareer,joinClub,advanceWeek} from '../src/career/state.js';
-import {startCareerMatch,finishCareerMatch} from '../src/career/career-match.js';
+import {startCareerMatch,finishCareerMatch,careerGameOpening} from '../src/career/career-match.js';
 import {currentEvents} from '../src/career/state.js';
 import {buildClubIndex} from '../src/career/population.js';
 import {formatRating} from '../src/career/rating.js';
@@ -336,3 +336,18 @@ test('the form summary reads the recent results',()=>{
   assert.equal(form.form,'');
 });
 
+
+
+test('career openings alternate teams and ends and select the stronger server',()=>{
+  const state={seed:42},tournament={id:'league-test',round:0,series:{playerWins:0,opponentWins:0}};
+  const matchup={format:'doubles',lineup:[90,40,30,80].map(serve=>({attributes:{serve}}))};
+  const first=careerGameOpening(state,tournament,matchup);
+  assert.deepEqual(first.startingPlayers,[0,1]);
+  assert.deepEqual(careerGameOpening(state,tournament,matchup),first);
+  tournament.series.playerWins++;
+  const second=careerGameOpening(state,tournament,matchup);
+  assert.equal(second.team,1-first.team);
+  assert.equal(second.sideSwitched,!first.sideSwitched);
+  tournament.series.opponentWins++;
+  assert.deepEqual(careerGameOpening(state,tournament,matchup),first);
+});

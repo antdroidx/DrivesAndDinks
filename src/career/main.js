@@ -18,7 +18,7 @@ import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {exportCareerPortable,importCareerPortable} from './portable-save.js';
 import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js';
 import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js';
-import {isPlayerDone} from './tournament.js';
+import {isPlayerDone,compareLeagueTeams,leaguePointDifference} from './tournament.js';
 import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js';
 import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
@@ -903,15 +903,15 @@ function renderLeague(){
     const tracked=app.career.worldRatings?.[tournament.format]?.[member?.id];
     return tracked?.[0]??member?.rating??0;
   };
-  const table=[...teams].sort((a,b)=>(records[b.id]?.wins??0)-(records[a.id]?.wins??0)||(records[a.id]?.losses??0)-(records[b.id]?.losses??0)||b.rating-a.rating).map((team,index)=>{
+  const table=[...teams].sort((a,b)=>compareLeagueTeams(records,a,b)).map((team,index)=>{
     const members=(team.members??[]).map(member=>({name:member.name,rating:currentMemberRating(member)}));
     const teamRating=members.length?members.reduce((sum,member)=>sum+member.rating,0)/members.length:team.rating;
     const players=members.map(member=>`${escapeHtml(member.name)} ${formatRating(member.rating)}`).join(' · ');
-    return `<li><span><strong>#${index+1} ${escapeHtml(team.name)}${team.id===tournament.playerTeamId?' · YOU':''}</strong><small>Team ${formatRating(teamRating)} · ${players}</small></span><strong>${records[team.id]?.wins??0}W ${records[team.id]?.losses??0}L</strong><em>${records[team.id]?.points??0} pts</em></li>`;
+    return `<li><span><strong>#${index+1} ${escapeHtml(team.name)}${team.id===tournament.playerTeamId?' · YOU':''}</strong><small>Team ${formatRating(teamRating)} · ${players}</small></span><strong>${records[team.id]?.wins??0}W ${records[team.id]?.losses??0}L</strong><em>${leaguePointDifference(records[team.id])>0?'+':''}${leaguePointDifference(records[team.id])} diff · ${records[team.id]?.points??0} for / ${records[team.id]?.pointsAgainst??0} against</em></li>`;
   }).join('');
   const fixtures=(tournament.rounds??[]).flatMap((round,roundIndex)=>round.map(match=>`<li><span>Week ${match.week!=null?match.week+1:roundIndex+1}</span><strong>${escapeHtml(match.home?.name??match.homeName??'Home')} vs ${escapeHtml(match.away?.name??match.awayName??'Away')}</strong><em>${match.played?escapeHtml(match.score??'Played'):'Scheduled'}</em></li>`)).join('');
   const next=tournament.currentMatch;
-  return `<section class="panel"><h2>${escapeHtml(tournament.label??'League')} · ${escapeHtml(tournament.bracket??'')}</h2><div class="board-head"><div><small>ROUND</small><strong>${Number(tournament.round??0)+1} / ${tournament.rounds?.length??'—'}</strong></div><div><small>STATUS</small><strong>${tournament.finished?'COMPLETE':tournament.nightComplete?'AWAITING WEEK':'ACTIVE'}</strong></div><div><small>PLACE</small><strong>${tournament.playerPlace?'#'+tournament.playerPlace:'—'}</strong></div></div>${next?`<p>Next match: <strong>${escapeHtml(next.home?.name??'Home')} vs ${escapeHtml(next.away?.name??'Away')}</strong></p>`:''}${app.career.pendingMatch?`<div class="actions"><button type="button" class="secondary" data-action="resume-tournament">PLAY MATCH →</button><button type="button" class="secondary" data-action="quick-sim">QUICK SIM</button><button type="button" class="secondary" data-action="sim-competition">SIM TO NEXT DECISION</button></div>`:''}</section><div class="grid two"><section class="panel"><h2>LEAGUE TABLE</h2><ul class="history league-table">${table}</ul></section><section class="panel"><h2>FIXTURES & RESULTS</h2><ul class="history">${fixtures}</ul></section></div>`;
+  return `<section class="panel"><h2>${escapeHtml(tournament.label??'League')} · ${escapeHtml(tournament.bracket??'')}</h2><div class="board-head"><div><small>ROUND</small><strong>${Number(tournament.round??0)+1} / ${tournament.rounds?.length??'—'}</strong></div><div><small>STATUS</small><strong>${tournament.finished?'COMPLETE':tournament.nightComplete?'AWAITING WEEK':'ACTIVE'}</strong></div><div><small>PLACE</small><strong>${tournament.playerPlace?'#'+tournament.playerPlace:'—'}</strong></div></div>${next?`<p>Next match: <strong>${escapeHtml(next.home?.name??'Home')} vs ${escapeHtml(next.away?.name??'Away')}</strong></p>`:''}${app.career.pendingMatch?`<div class="actions"><button type="button" class="secondary" data-action="resume-tournament">PLAY MATCH →</button><button type="button" class="secondary" data-action="quick-sim">QUICK SIM</button><button type="button" class="secondary" data-action="sim-competition">SIM TO NEXT DECISION</button></div>`:''}</section><div class="grid two"><section class="panel"><h2>LEAGUE TABLE</h2><p class="muted">Ranked by match wins, then point differential (points scored minus points allowed).</p><ul class="history league-table">${table}</ul></section><section class="panel"><h2>FIXTURES & RESULTS</h2><ul class="history">${fixtures}</ul></section></div>`;
 }
 
 function renderTeam(){

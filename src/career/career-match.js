@@ -136,6 +136,23 @@ function currentCpuRatings(state,matchup,format){
   };
 }
 
+// Keep the toss and lineup decisions stable when resuming a career game.
+export function careerGameOpening(state,tournament,matchup){
+  const random=seededRandom(mixSeed(state.seed,`opening:${tournament.id}:${tournament.round}`));
+  const gameIndex=(tournament.series?.playerWins??0)+(tournament.series?.opponentWins??0);
+  const firstTeam=random()<.5?0:1;
+  const firstEnd=random()<.5;
+  const startingPlayers=[0,0];
+  if(matchup.format!=='singles'){
+    for(let team=0;team<2;team++){
+      const pair=matchup.lineup.slice(team*2,team*2+2);
+      const difference=(pair[0]?.attributes?.serve??0)-(pair[1]?.attributes?.serve??0);
+      startingPlayers[team]=difference===0?(random()<.5?0:1):difference>0?0:1;
+    }
+  }
+  return {team:(firstTeam+gameIndex)%2,sideSwitched:gameIndex%2?!firstEnd:firstEnd,startingPlayers};
+}
+
 // Builds the pending match for whatever round the tournament is on, or null
 // when the player has nothing to play.
 function pendingFor({state,tournament}){
@@ -165,6 +182,7 @@ function pendingFor({state,tournament}){
     difficulty:['easy','normal','hard'].includes(state.settings?.difficulty)?state.settings.difficulty:(tournament.difficulty??'normal'),
     learning:opponentLearningForMatchup(state,matchup)??state.opponentLearning??null,
     stacking:normalizeStackingSelection(state.settings?.stacking),
+    opening:careerGameOpening(state,tournament,matchup),
     matchup:currentCpuRatings(state,matchup,tournament.format)
   };
 }
