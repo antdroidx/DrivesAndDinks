@@ -38,3 +38,11 @@ test('overall averages all effective skills, including those outside the four pr
  const skills=Object.entries(attributes).filter(([key])=>key!=='aggression');
  assert.equal(card.overall,Math.round(skills.reduce((sum,[,value])=>sum+value,0)/skills.length*10)/10);
 });
+
+
+test('paddle family and shape adjustments add together for the same skill',()=>{
+ const card=matchIntroCards([{ratings,paddle:{ratingModifiers:{power:10,control:-5},shapeRatingModifiers:{power:6,control:2}}}])[0];
+ assert.equal(card.ratings.power,86);
+ assert.equal(card.ratings.control,67);
+ assert.equal(card.overall,71);
+});
