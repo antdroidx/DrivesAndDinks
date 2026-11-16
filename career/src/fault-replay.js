@@ -1,4 +1,4 @@
-import {netHeightAt,C} from './core.js?v=224';
+import {netHeightAt,C} from './core.js?v=226';
 
 export const AUTOMATIC_REPLAY_DELAY=1.5;
 
