@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer} from '../src/career/state.js';
 import {
   startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,
-  simulateLeagueSeries,compareLeagueTeams,isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands,divisionPopulation
+  leagueRecords,simulateLeagueSeries,compareLeagueTeams,isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands,divisionPopulation
 } from '../src/career/tournament.js';
 import {pointsForFinish} from '../src/career/tour.js';
 import {seededRandom} from '../src/competition.js';
@@ -235,4 +235,23 @@ test('league CPU records count full series and balance scored and conceded point
   const records=Object.values(tournament.records);
   assert.equal(records.reduce((sum,row)=>sum+row.points,0),records.reduce((sum,row)=>sum+row.pointsAgainst,0));
   for(const row of records.filter(row=>row.wins))assert.ok(row.points>=30);
+});
+
+
+test('legacy player league totals recover the full season and continue accumulating',()=>{
+  const tournament=startTournament({state,event:eventFor('round-robin-league'),option}).tournament;
+  startRound(tournament,seededRandom(12));
+  tournament.playerStats={games:4,wins:4,losses:0,pointsFor:60,pointsAgainst:22};
+  tournament.records[tournament.playerTeamId]={wins:2,losses:0,points:2,pointsAgainst:15};
+  const restored=leagueRecords(tournament)[tournament.playerTeamId];
+  assert.equal(restored.points,60);
+  assert.equal(restored.pointsAgainst,22);
+  assert.equal(restored.wins,2);
+  recordPlayerResult(tournament,{won:true,score:'15-8'});
+  assert.equal(tournament.records[tournament.playerTeamId].points,75);
+  assert.equal(tournament.records[tournament.playerTeamId].pointsAgainst,30);
+  assert.deepEqual(leagueRecords(tournament),tournament.records);
+  recordPlayerResult(tournament,{won:false,score:'12-15'});
+  assert.equal(tournament.records[tournament.playerTeamId].points,87);
+  assert.equal(tournament.records[tournament.playerTeamId].pointsAgainst,45);
 });

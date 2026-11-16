@@ -18,7 +18,7 @@ import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {exportCareerPortable,importCareerPortable} from './portable-save.js';
 import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js';
 import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js';
-import {isPlayerDone,compareLeagueTeams,leaguePointDifference} from './tournament.js';
+import {isPlayerDone,compareLeagueTeams,leaguePointDifference,leagueRecords} from './tournament.js';
 import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js';
 import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
@@ -540,6 +540,12 @@ function renderHome(){
     <div class="hint">Training develops an attribute: +${trainingGain(career,career.trainingFocus)} to the focused rating and +1 control. Coached training adds another point and costs $${COACHING_FEE}. Training capacity is ${sessionLimit} sessions at age ${career.athlete.age}.</div>
   </section>
 
+  <section class="panel player-attributes-panel">
+    <h2>PLAYER ATTRIBUTES</h2>
+    <p class="muted">Your skills, developed through training and matches.</p>
+    ${groups}
+  </section>
+
   <section class="panel match-loadout-panel">
     <h2>MATCH LOADOUT</h2>
     <div class="loadout-panel-grid">
@@ -547,6 +553,8 @@ function renderHome(){
         <small class="muted">CURRENT PADDLE</small>
         <strong>${escapeHtml(paddle.label)}</strong>
         <p>${escapeHtml(PADDLE_COLORS.find(color=>color.id===paddle.color)?.name??'Mint')} · ${Number(paddle.thickness)||16} mm · ${escapeHtml(paddle.familyLabel)} face · ${escapeHtml(paddle.shapeLabel)} shape · ${escapeHtml(paddle.description)}</p>
+        <h3>PADDLE ATTRIBUTES</h3>
+        <p class="muted">Equipment characteristics of your selected paddle.</p>
         ${equipmentStatRows(paddle)}
       </div>
       <div>
@@ -618,10 +626,6 @@ function renderHome(){
   </div>
 
   <div class="grid wide home-dashboard-main">
-    <section class="panel">
-      <h2>RATINGS</h2>
-      ${groups}
-    </section>
     <div class="home-side-stack">
     <section class="panel">
       <h2>MOVE</h2>
@@ -897,7 +901,7 @@ function renderEquipment(){
 function renderLeague(){
   const tournament=app.career.tournament;
   if(!tournament||!['round-robin-league','mlp-style'].includes(tournament.kind))return '<section class="panel"><h2>LEAGUE</h2><p class="muted">No active league. Enter a Local League from the Career screen to start a season card.</p></section>';
-  const teams=tournament.teams??[],records=tournament.records??{};
+  const teams=tournament.teams??[],records=leagueRecords(tournament);
   const currentMemberRating=(member)=>{
     if(member?.isPlayer||member?.id===app.career.athlete.id||member?.id==='player')return app.career.athlete.formats?.[tournament.format]??member?.rating??0;
     const tracked=app.career.worldRatings?.[tournament.format]?.[member?.id];

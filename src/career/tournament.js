@@ -515,6 +515,18 @@ export function simulateMatch(home,away,random,points=11,rules={}){
   return {homeMine:mine,homeTheirs:theirs,homeWon:mine>theirs,score:mine+'-'+theirs};
 }
 
+// Older saves counted player games in season statistics but omitted them
+// from the standings. Use that durable season total for the player's row.
+export function leagueRecords(tournament){
+  const records={...(tournament.records??{})};
+  const stats=tournament.playerStats;
+  const own=records[tournament.playerTeamId];
+  if(own&&stats&&Number.isFinite(stats.pointsFor)&&Number.isFinite(stats.pointsAgainst)){
+    records[tournament.playerTeamId]={...own,points:stats.pointsFor,pointsAgainst:stats.pointsAgainst};
+  }
+  return records;
+}
+
 export function leaguePointDifference(record){
   return (record?.points??0)-(record?.pointsAgainst??0);
 }
@@ -718,6 +730,7 @@ function applyLadderSwap(order,winner,loser){
 
 // Records the player's own result and advances the tournament.
 export function recordPlayerResult(tournament,{won,score,resultDetail=null}){
+  if(tournament.shape==='round-robin'||tournament.shape==='mlp')tournament.records=leagueRecords(tournament);
   const match=tournament.currentMatch;
   const bye=!match&&playerHasBye(tournament);
   if(!match&&!bye&&!tournament.playerOut)return {ok:false,message:'The player has no match in this round.'};
