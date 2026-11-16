@@ -18,14 +18,14 @@
 // next, the rest of the round, how a player result advances the competition,
 // and where the player finished.
 
-import {ratedPopulation} from './world.js?v=226';
-import {RATING_BRACKETS,formatSkill} from './rating.js?v=226';
-import {seededRandom} from '../competition.js?v=226';
-import {mixSeed} from './population.js?v=226';
-import {pointsForFinish} from './tour.js?v=226';
-import {entryStatus} from './calendar.js?v=226';
-import {resolvePartner} from './club-life.js?v=226';
-import {equipmentSelection} from './equipment.js?v=226';
+import {ratedPopulation} from './world.js?v=227';
+import {RATING_BRACKETS,formatSkill} from './rating.js?v=227';
+import {seededRandom} from '../competition.js?v=227';
+import {mixSeed} from './population.js?v=227';
+import {pointsForFinish} from './tour.js?v=227';
+import {entryStatus} from './calendar.js?v=227';
+import {resolvePartner} from './club-life.js?v=227';
+import {equipmentSelection} from './equipment.js?v=227';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -470,7 +470,7 @@ export function startTournament({state,event,option}){
 // to the playoff score rather than the league score.
 export function matchRules(tournament){
   const rules=tournament?.rules??{};
-  const base=rules.points??11;
+  const base=tournament?.eventId==='local-league'?11:rules.points??11;
   const playoff=rules.playoffPoints??15;
   const late=tournament?.shape==='bracket'&&tournament.size/Math.pow(2,tournament.round??0)<=4;
   return {targetScore:late?playoff:base,scoring:rules.scoring??'side-out',winBy:rules.winBy??2};

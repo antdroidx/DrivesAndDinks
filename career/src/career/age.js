@@ -5,8 +5,8 @@
 // and training capacity falls independently. Format ratings remain
 // results-driven and are not hard-capped by age.
 
-import {FORMATS} from './rating.js?v=226';
-import {RATING_KEYS} from '../roster.js?v=226';
+import {FORMATS} from './rating.js?v=227';
+import {RATING_KEYS} from '../roster.js?v=227';
 
 export const MIN_START_AGE=10;
 export const MAX_START_AGE=80;

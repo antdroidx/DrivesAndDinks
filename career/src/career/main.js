@@ -1,45 +1,46 @@
-import {careerReliabilityEvidence} from './rating.js?v=226';
+import {careerReliabilityEvidence} from './rating.js?v=227';
 // Career mode user interface.
 //
 // The UI is plain DOM. It reads the career from local storage on load, and
 // every action writes the career back immediately so a closed tab never
 // costs progress.
 
-import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=226';
-import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=226';
-import {createAnimeGameRenderer} from '../anime-game.js?v=226';
-import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=226';
-import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub,applyCpuCareer} from './population.js?v=226';
+import {CHARACTERS,RATING_KEYS,RATING_LABELS,PADDLES,PADDLE_SHAPES,CLOTHING_COLORS,PADDLE_COLORS,HAIR_COLORS,SKIN_COLORS,HEADWEAR_OPTIONS,EYEWEAR_OPTIONS,OUTFIT_OPTIONS,DEFAULT_SELECTION,normalizeSelection,buildProfile,hairStylesFor,applyPhysique,skillAverage} from '../roster.js?v=227';
+import {onCharacterSpritesReady,paddleCutout,paddleOutline} from '../pixel-character.js?v=227';
+import {createAnimeGameRenderer} from '../anime-game.js?v=227';
+import {REGIONS,allCities,cityById,COMPETITION_EVENTS,ratingBand,formatRating,reliability,divisionFor,tourFor,tourRank,formatLabel,FORMATS,RATING_BRACKETS,PRO_FLOOR_RATING} from './geography.js?v=227';
+import {buildClubIndex,buildClubRoster,buildRegionRoster,summarizeClub,applyCpuCareer} from './population.js?v=227';
 import {
   createCareer,train,attendEvent,joinClub,leaveClub,moveToCity,advanceWeek,
   currentEvents,canAct,canTrain,canEnterEvent,eventBlockReason,trainingCost,trainingGain,trainingSessionsThisWeek,weeklyRecovery,MAX_TRAINING_SESSIONS,INTERNATIONAL_TRAVEL_COST,advanceToNextEvent,formatsPlayed,eventEntryCost,trainingSessionsLimit,AMATEUR_TOURNAMENTS_PER_MONTH,amateurTournamentSlotsUsed
-} from './state.js?v=226';
-import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=226';
-import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=226';
-import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=226';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=226';
-import {isPlayerDone,compareLeagueTeams,leaguePointDifference,leagueRecords} from './tournament.js?v=226';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js?v=226';
-import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=226';
-import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=226';
-import {rankingSummary} from './ranking.js?v=226';
-import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=226';
-import {analyticsSummary} from './analytics.js?v=226';
-import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=226';
-import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=226';
-import {opponentHistory} from './opponents.js?v=226';
-import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=226';
-import {directoryPage} from './directory.js?v=226';
-import {financeSummary,COACHING_FEE} from './finance.js?v=226';
-import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=226';
-import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=226';
-import {cpuTrajectoryStatus} from './cpu-trajectory.js?v=226';
-import {currentInjury,activeInjuries} from './injuries.js?v=226';
-import {PADDLE_CATALOG,STARTER_EQUIPMENT_ID,equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=226';
-import {careerProfile} from './matchmaking.js?v=226';
-import {teamCareerSummary} from './team-league.js?v=226';
-import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=226';
-import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=226';
+} from './state.js?v=227';
+import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js?v=227';
+import {exportCareerPortable,importCareerPortable} from './portable-save.js?v=227';
+import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js?v=227';
+import {startCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js?v=227';
+import {isPlayerDone,compareLeagueTeams,leaguePointDifference,leagueRecords} from './tournament.js?v=227';
+import {writePendingMatch} from './handshake.js?v=227';
+import {commitReturnedMatch} from './match-return.js?v=227';
+import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js?v=227';
+import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js?v=227';
+import {rankingSummary} from './ranking.js?v=227';
+import {isContracted,isIneligible,obligationProgress,contractLevel,SEASON_WEEKS} from './contracts.js?v=227';
+import {analyticsSummary} from './analytics.js?v=227';
+import {retire,retirementAdvice,allTimeBoard} from './retirement.js?v=227';
+import {choosePartner,resolvePartner,clubAccess,partnerGenderAllowed,currentCoachFeedback,partnerCandidates} from './club-life.js?v=227';
+import {opponentHistory} from './opponents.js?v=227';
+import {EXPERIENCE_OPTIONS,STARTING_TRAITS,centimetersToFeetInches,feetInchesToCentimeters,kilogramsToPounds,poundsToKilograms} from './creation.js?v=227';
+import {directoryPage} from './directory.js?v=227';
+import {financeSummary,COACHING_FEE} from './finance.js?v=227';
+import {weeklyActivityPlan,projectEventLoad} from './planning.js?v=227';
+import {cpuWorldSummary,createCpuWorld} from './cpu-careers.js?v=227';
+import {cpuTrajectoryStatus} from './cpu-trajectory.js?v=227';
+import {currentInjury,activeInjuries} from './injuries.js?v=227';
+import {PADDLE_CATALOG,STARTER_EQUIPMENT_ID,equipmentCatalog,signatureEligible,purchaseEquipment,equipPaddle,equippedPaddle,createSignaturePaddle,equipmentStats,setPaddleColor,buyHeadwear,equipHeadwear,clearHeadwear,HEADWEAR_CATALOG,HEADWEAR_STYLES} from './equipment.js?v=227';
+import {careerProfile} from './matchmaking.js?v=227';
+import {teamCareerSummary} from './team-league.js?v=227';
+import {pendingInvitations,acceptInvitation,declineInvitation,withdrawInvitation,inviteClubMate} from './invitations.js?v=227';
+import {inboxMessages,unreadCount,markMessageRead,archiveMessage,INBOX_CATEGORIES} from './inbox.js?v=227';
 
 const RATING_GROUPS=Object.freeze([
   {label:'Attack',keys:['serve','drive','smash','power','aggression']},
@@ -120,9 +121,10 @@ function toast(message,warn=false){
 }
 
 function persist(){
-  if(!app.career)return;
+  if(!app.career)return {ok:false};
   const result=saveCareer(app.career,app.storage);
   if(!result.ok)toast(result.reason,true);
+  return result;
 }
 
 // ---- views ----------------------------------------------------------------
@@ -1512,8 +1514,8 @@ document.addEventListener('click',event=>{
       const started=startCareerMatch(app.career,trigger.dataset.event,picker?.value??null);
       if(!started.ok){toast(started.message,true);return}
       app.career=started.state;
-      persist();
-      writePendingMatch(started.pending);
+      if(!persist().ok)return;
+      if(!writePendingMatch(started.pending)){toast('Could not save the match handoff. Please retry.',true);return}
       // The match is played on the engine page and the result comes back.
       location.href=careerMatchUrl();
       return;
@@ -1542,9 +1544,9 @@ document.addEventListener('click',event=>{
       const started=startCareerMatch(app.career,tournament.eventId,tournament.optionId);
       if(!started.ok){toast(started.message,true);return}
       app.career=started.state;
-      persist();
+      if(!persist().ok)return;
       if(!started.pending){render();toast(started.message);return}
-      writePendingMatch(started.pending);
+      if(!writePendingMatch(started.pending)){toast('Could not save the match handoff. Please retry.',true);return}
       location.href=careerMatchUrl();
       return;
     }
@@ -1703,21 +1705,20 @@ const build=globalThis.DRIVES_DINKS_BUILD;
 const buildLabel=document.getElementById('career-build');
 if(buildLabel&&build)buildLabel.textContent=`BUILD ${build}`;
 
-const loaded=loadCareer(app.storage);
-if(loaded.state){app.career=hydrateCareerWithArchive(loaded.state,app.storage)}
-if(loaded.reason)toast(loaded.reason,true);
+function restoreCareerDashboard(){
+  const loaded=loadCareer(app.storage);
+  if(loaded.state)app.career=hydrateCareerWithArchive(loaded.state,app.storage);
+  if(loaded.reason)toast(loaded.reason,true);
 
-// A match played on the engine page comes back here to be scored.
-const playedResult=takeMatchResult(pendingMatchId(app.career?.pendingMatch));
-if(playedResult&&app.career?.pendingMatch){
-  const scored=finishCareerMatch(app.career,playedResult);
-  if(scored.ok){
-    app.career=scored.state;
-    persist();
-    toast(scored.message);
-  }else toast(scored.message,true);
+  // Keep the result until the updated career is safely written. Browser Back
+  // can restore this document from memory without running its boot code again.
+  const returned=commitReturnedMatch(app.career,app.storage);
+  if(returned.applied)app.career=returned.state;
+  if(returned.message)toast(returned.message,!returned.ok);
+  render();
 }
-render();
+restoreCareerDashboard();
+window.addEventListener('pageshow',event=>{if(event.persisted)restoreCareerDashboard()});
 
 if('serviceWorker' in navigator&&location.protocol!=='file:'){
   window.addEventListener('load',()=>{
