@@ -18,14 +18,14 @@
 // next, the rest of the round, how a player result advances the competition,
 // and where the player finished.
 
-import {ratedPopulation} from './world.js?v=223';
-import {RATING_BRACKETS,formatSkill} from './rating.js?v=223';
-import {seededRandom} from '../competition.js?v=223';
-import {mixSeed} from './population.js?v=223';
-import {pointsForFinish} from './tour.js?v=223';
-import {entryStatus} from './calendar.js?v=223';
-import {resolvePartner} from './club-life.js?v=223';
-import {equipmentSelection} from './equipment.js?v=223';
+import {ratedPopulation} from './world.js?v=224';
+import {RATING_BRACKETS,formatSkill} from './rating.js?v=224';
+import {seededRandom} from '../competition.js?v=224';
+import {mixSeed} from './population.js?v=224';
+import {pointsForFinish} from './tour.js?v=224';
+import {entryStatus} from './calendar.js?v=224';
+import {resolvePartner} from './club-life.js?v=224';
+import {equipmentSelection} from './equipment.js?v=224';
 
 const clamp=(value,min,max)=>Math.max(min,Math.min(max,value));
 
@@ -515,6 +515,18 @@ export function simulateMatch(home,away,random,points=11,rules={}){
   return {homeMine:mine,homeTheirs:theirs,homeWon:mine>theirs,score:mine+'-'+theirs};
 }
 
+// Older saves counted player games in season statistics but omitted them
+// from the standings. Use that durable season total for the player's row.
+export function leagueRecords(tournament){
+  const records={...(tournament.records??{})};
+  const stats=tournament.playerStats;
+  const own=records[tournament.playerTeamId];
+  if(own&&stats&&Number.isFinite(stats.pointsFor)&&Number.isFinite(stats.pointsAgainst)){
+    records[tournament.playerTeamId]={...own,points:stats.pointsFor,pointsAgainst:stats.pointsAgainst};
+  }
+  return records;
+}
+
 export function leaguePointDifference(record){
   return (record?.points??0)-(record?.pointsAgainst??0);
 }
@@ -718,6 +730,7 @@ function applyLadderSwap(order,winner,loser){
 
 // Records the player's own result and advances the tournament.
 export function recordPlayerResult(tournament,{won,score,resultDetail=null}){
+  if(tournament.shape==='round-robin'||tournament.shape==='mlp')tournament.records=leagueRecords(tournament);
   const match=tournament.currentMatch;
   const bye=!match&&playerHasBye(tournament);
   if(!match&&!bye&&!tournament.playerOut)return {ok:false,message:'The player has no match in this round.'};

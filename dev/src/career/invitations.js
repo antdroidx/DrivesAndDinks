@@ -1,9 +1,9 @@
 // Persistent team and partner invitations.
 
-import {seededRandom} from '../competition.js?v=223';
-import {mixSeed} from './population.js?v=223';
-import {partnerCandidates,partnerSnapshot,resolvePartner} from './club-life.js?v=223';
-import {joinFranchise} from './team-league.js?v=223';
+import {seededRandom} from '../competition.js?v=224';
+import {mixSeed} from './population.js?v=224';
+import {partnerCandidates,partnerSnapshot,resolvePartner} from './club-life.js?v=224';
+import {joinFranchise} from './team-league.js?v=224';
 
 export const INVITATIONS_VERSION=1;
 export const INVITATION_LIMIT=24;

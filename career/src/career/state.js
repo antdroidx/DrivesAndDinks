@@ -5,29 +5,29 @@
 // a running history. Every club and every other athlete is reproduced from
 // the seed, so ids stay stable without storing the population.
 
-import {CHARACTERS,RATING_KEYS,generateIdentity,skillAverage} from '../roster.js?v=223';
-import {seededRandom} from '../competition.js?v=223';
-import {REGIONS,regionById,allCities,cityById,cityByIdAnywhere,citizenshipFor,EVENT_BY_ID} from './geography.js?v=223';
-import {pointsForEntry,addPoints,pointsInWindow} from './tour.js?v=223';
-import {buildClubIndex,findClub,mixSeed} from './population.js?v=223';
-import {generateWeekEvents,weekLabel,weekDate,entryEligibility} from './calendar.js?v=223';
-import {findRival} from './standings.js?v=223';
-import {careerReliabilityEvidence,addReliabilityEvidence,NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,skillForRating,FORMATS,divisionFor} from './rating.js?v=223';
-import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js?v=223';
-import {evaluateSeason,seasonDue,isContracted} from './contracts.js?v=223';
-import {emptyAnalytics} from './analytics.js?v=223';
-import {clubAccess,clearPartners} from './club-life.js?v=223';
-import {normalizeHeight,normalizeWeight,experienceById,traitById,startingModifiers} from './creation.js?v=223';
-import {normalizeStartAge,createDevelopmentProfile,developmentAgeFactor,attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,noteSkillPeaks,noteTrainingMaintenance,advanceAgeYear,capRatingForAge,capAttributeForAge} from './age.js?v=223';
-import {emptyFinance,eventFinancialCost,chargeEventCosts,chargeMove,paySalary,chargeCoaching} from './finance.js?v=223';
-import {emptyInjuries,currentInjury,injuryBlockReason,injuryRecoveryFactor,healInjuries,rollInjury} from './injuries.js?v=223';
-import {emptyEquipment} from './equipment.js?v=223';
-import {potentialForStartAge} from './career-lifecycle.js?v=223';
-import {emptyCpuWorld,createCpuWorld,advanceCpuWorld} from './cpu-careers.js?v=223';
-import {createTeamCareer,advanceTeamCareer} from './team-league.js?v=223';
-import {emptyInvitations,advanceInvitations} from './invitations.js?v=223';
-import {emptyInbox,syncInbox} from './inbox.js?v=223';
-import {eventEntryCost} from './planning.js?v=223';
+import {CHARACTERS,RATING_KEYS,generateIdentity,skillAverage} from '../roster.js?v=224';
+import {seededRandom} from '../competition.js?v=224';
+import {REGIONS,regionById,allCities,cityById,cityByIdAnywhere,citizenshipFor,EVENT_BY_ID} from './geography.js?v=224';
+import {pointsForEntry,addPoints,pointsInWindow} from './tour.js?v=224';
+import {buildClubIndex,findClub,mixSeed} from './population.js?v=224';
+import {generateWeekEvents,weekLabel,weekDate,entryEligibility} from './calendar.js?v=224';
+import {findRival} from './standings.js?v=224';
+import {careerReliabilityEvidence,addReliabilityEvidence,NEW_PLAYER_RATING,simulateOutcome,rateMatch,formatSkill,skillForRating,FORMATS,divisionFor} from './rating.js?v=224';
+import {opponentsInBracket,advanceWorld,advanceCircuit} from './world.js?v=224';
+import {evaluateSeason,seasonDue,isContracted} from './contracts.js?v=224';
+import {emptyAnalytics} from './analytics.js?v=224';
+import {clubAccess,clearPartners} from './club-life.js?v=224';
+import {normalizeHeight,normalizeWeight,experienceById,traitById,startingModifiers} from './creation.js?v=224';
+import {normalizeStartAge,createDevelopmentProfile,developmentAgeFactor,attributeAgeFactor,recoveryAgeFactor,trainingSessionsForAge,noteSkillPeaks,noteTrainingMaintenance,advanceAgeYear,capRatingForAge,capAttributeForAge} from './age.js?v=224';
+import {emptyFinance,eventFinancialCost,chargeEventCosts,chargeMove,paySalary,chargeCoaching} from './finance.js?v=224';
+import {emptyInjuries,currentInjury,injuryBlockReason,injuryRecoveryFactor,healInjuries,rollInjury} from './injuries.js?v=224';
+import {emptyEquipment} from './equipment.js?v=224';
+import {potentialForStartAge} from './career-lifecycle.js?v=224';
+import {emptyCpuWorld,createCpuWorld,advanceCpuWorld} from './cpu-careers.js?v=224';
+import {createTeamCareer,advanceTeamCareer} from './team-league.js?v=224';
+import {emptyInvitations,advanceInvitations} from './invitations.js?v=224';
+import {emptyInbox,syncInbox} from './inbox.js?v=224';
+import {eventEntryCost} from './planning.js?v=224';
 
 // The neutral adult creation baseline is 3.500. Experience can move this
 // to 2.500-4.500 before youth development is applied.

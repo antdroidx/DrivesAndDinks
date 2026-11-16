@@ -1,8 +1,8 @@
 // Club life: partners, reputation and coaching.
 
-import {RATING_KEYS,RATING_LABELS} from '../roster.js?v=223';
-import {buildClubIndex,buildClubRoster,applyCpuCareer} from './population.js?v=223';
-import {gateRating,RATING_BRACKETS,divisionFor} from './rating.js?v=223';
+import {RATING_KEYS,RATING_LABELS} from '../roster.js?v=224';
+import {buildClubIndex,buildClubRoster,applyCpuCareer} from './population.js?v=224';
+import {gateRating,RATING_BRACKETS,divisionFor} from './rating.js?v=224';
 
 export const CLUB_REPUTATION_REQUIREMENTS=Object.freeze({recreational:0,competitive:25,elite:60});
 
