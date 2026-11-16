@@ -17,9 +17,10 @@ import {
 import {loadCareer,saveCareer,clearCareer,careerStorage} from './save.js';
 import {exportCareerPortable,importCareerPortable} from './portable-save.js';
 import {archiveCareer,hydrateCareerWithArchive} from './career-archive.js';
-import {startCareerMatch,finishCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js';
+import {startCareerMatch,quickSimCareerMatch,simulateCompetitionToEnd,matchSimulationPolicy} from './career-match.js';
 import {isPlayerDone,compareLeagueTeams,leaguePointDifference,leagueRecords} from './tournament.js';
-import {writePendingMatch,takeMatchResult,pendingMatchId} from './handshake.js';
+import {writePendingMatch} from './handshake.js';
+import {commitReturnedMatch} from './match-return.js';
 import {boardPosition,nearbyRivals,findRival,topPlayers,qualificationStatus,sponsorsFor,careerForm,QUALIFICATION_POINTS} from './standings.js';
 import {weekLabel,upcomingWeeks,generateWeekEvents,weekShortLabel} from './calendar.js';
 import {rankingSummary} from './ranking.js';
@@ -120,9 +121,10 @@ function toast(message,warn=false){
 }
 
 function persist(){
-  if(!app.career)return;
+  if(!app.career)return {ok:false};
   const result=saveCareer(app.career,app.storage);
   if(!result.ok)toast(result.reason,true);
+  return result;
 }
 
 // ---- views ----------------------------------------------------------------
@@ -1512,8 +1514,8 @@ document.addEventListener('click',event=>{
       const started=startCareerMatch(app.career,trigger.dataset.event,picker?.value??null);
       if(!started.ok){toast(started.message,true);return}
       app.career=started.state;
-      persist();
-      writePendingMatch(started.pending);
+      if(!persist().ok)return;
+      if(!writePendingMatch(started.pending)){toast('Could not save the match handoff. Please retry.',true);return}
       // The match is played on the engine page and the result comes back.
       location.href=careerMatchUrl();
       return;
@@ -1542,9 +1544,9 @@ document.addEventListener('click',event=>{
       const started=startCareerMatch(app.career,tournament.eventId,tournament.optionId);
       if(!started.ok){toast(started.message,true);return}
       app.career=started.state;
-      persist();
+      if(!persist().ok)return;
       if(!started.pending){render();toast(started.message);return}
-      writePendingMatch(started.pending);
+      if(!writePendingMatch(started.pending)){toast('Could not save the match handoff. Please retry.',true);return}
       location.href=careerMatchUrl();
       return;
     }
@@ -1703,21 +1705,20 @@ const build=globalThis.DRIVES_DINKS_BUILD;
 const buildLabel=document.getElementById('career-build');
 if(buildLabel&&build)buildLabel.textContent=`BUILD ${build}`;
 
-const loaded=loadCareer(app.storage);
-if(loaded.state){app.career=hydrateCareerWithArchive(loaded.state,app.storage)}
-if(loaded.reason)toast(loaded.reason,true);
+function restoreCareerDashboard(){
+  const loaded=loadCareer(app.storage);
+  if(loaded.state)app.career=hydrateCareerWithArchive(loaded.state,app.storage);
+  if(loaded.reason)toast(loaded.reason,true);
 
-// A match played on the engine page comes back here to be scored.
-const playedResult=takeMatchResult(pendingMatchId(app.career?.pendingMatch));
-if(playedResult&&app.career?.pendingMatch){
-  const scored=finishCareerMatch(app.career,playedResult);
-  if(scored.ok){
-    app.career=scored.state;
-    persist();
-    toast(scored.message);
-  }else toast(scored.message,true);
+  // Keep the result until the updated career is safely written. Browser Back
+  // can restore this document from memory without running its boot code again.
+  const returned=commitReturnedMatch(app.career,app.storage);
+  if(returned.applied)app.career=returned.state;
+  if(returned.message)toast(returned.message,!returned.ok);
+  render();
 }
-render();
+restoreCareerDashboard();
+window.addEventListener('pageshow',event=>{if(event.persisted)restoreCareerDashboard()});
 
 if('serviceWorker' in navigator&&location.protocol!=='file:'){
   window.addEventListener('load',()=>{

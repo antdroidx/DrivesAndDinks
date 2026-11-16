@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {createCareer} from '../src/career/state.js';
 import {
   startTournament,startRound,nextPlayerMatch,simulateRestOfRound,recordPlayerResult,
-  leagueRecords,simulateLeagueSeries,compareLeagueTeams,isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands,divisionPopulation
+  matchRules,leagueRecords,simulateLeagueSeries,compareLeagueTeams,isPlayerDone,playerHasBye,tournamentPoints,bracketSize,seedOrder,placeForLoss,seedBands,divisionPopulation
 } from '../src/career/tournament.js';
 import {pointsForFinish} from '../src/career/tour.js';
 import {seededRandom} from '../src/competition.js';
@@ -254,4 +254,10 @@ test('legacy player league totals recover the full season and continue accumulat
   recordPlayerResult(tournament,{won:false,score:'12-15'});
   assert.equal(tournament.records[tournament.playerTeamId].points,87);
   assert.equal(tournament.records[tournament.playerTeamId].pointsAgainst,45);
+});
+
+
+test('existing local league seasons use games to 11 while MLP keeps rally scoring to 21',()=>{
+ assert.deepEqual(matchRules({eventId:'local-league',rules:{points:15,scoring:'side-out',winBy:2}}),{targetScore:11,scoring:'side-out',winBy:2});
+ assert.equal(matchRules({eventId:'mlp-amateur',rules:{points:21,scoring:'rally'}}).targetScore,21);
 });

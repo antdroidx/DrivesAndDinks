@@ -470,7 +470,7 @@ export function startTournament({state,event,option}){
 // to the playoff score rather than the league score.
 export function matchRules(tournament){
   const rules=tournament?.rules??{};
-  const base=rules.points??11;
+  const base=tournament?.eventId==='local-league'?11:rules.points??11;
   const playoff=rules.playoffPoints??15;
   const late=tournament?.shape==='bracket'&&tournament.size/Math.pow(2,tournament.round??0)<=4;
   return {targetScore:late?playoff:base,scoring:rules.scoring??'side-out',winBy:rules.winBy??2};

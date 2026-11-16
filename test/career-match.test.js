@@ -351,3 +351,34 @@ test('career openings alternate teams and ends and select the stronger server',(
   tournament.series.opponentWins++;
   assert.deepEqual(careerGameOpening(state,tournament,matchup),first);
 });
+
+
+test('an amateur MLP loss survives returning, save failure, retry and reload',async()=>{
+  const {commitReturnedMatch}=await import('../src/career/match-return.js');
+  const {saveCareer,loadCareer,memoryStorage}=await import('../src/career/save.js');
+  const {writeMatchResult,pendingMatchId,readMatchResult}=await import('../src/career/handshake.js');
+  const store=memoryStorage(),previous=globalThis.localStorage;
+  globalThis.localStorage=store;
+  try{
+    const state=withClub(career());state.week=3;state.clubReputation=100;
+    state.athlete.formats={doubles:4,mixed:4,singles:4};
+    const event=currentEvents(state).find(entry=>entry.eventId==='mlp-amateur');
+    const started=startCareerMatch(state,event.id,event.defaultOptionId);
+    assert.ok(started.ok,started.message);
+    assert.ok(saveCareer(started.state,store).ok);
+    const match=started.pending,id=pendingMatchId(match);
+    writeMatchResult({score:{points:[8,21],winner:1},players:match.matchup.lineup.map((p,id)=>({id,team:id<2?0:1,name:p.name}))},id);
+    const failed=commitReturnedMatch(started.state,{getItem:store.getItem,setItem(){throw Error('disk full')}});
+    assert.equal(failed.ok,false);
+    assert.ok(readMatchResult(id));
+    assert.equal(started.state.athlete.record.matches,0);
+    const returned=commitReturnedMatch(loadCareer(store).state,store);
+    assert.ok(returned.applied,returned.message);
+    assert.equal(readMatchResult(id),null);
+    const restored=loadCareer(store).state;
+    assert.equal(restored.athlete.record.losses,1);
+    assert.equal(restored.tournament.eventId,'mlp-amateur');
+    assert.equal(restored.tournament.history.at(-1).score,'8-21');
+    assert.equal(commitReturnedMatch(restored,store).applied,false);
+  }finally{globalThis.localStorage=previous}
+});
